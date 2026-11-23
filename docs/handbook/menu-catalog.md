@@ -99,9 +99,9 @@ None. Slice N85 (gap G71) corrected the register to this catalog; `pnpm register
 - **Does:** Defines voucher series: 3-digit book code, MAIN_BOOK family, in/out direction and the posting-account slots in BOOK_DETL.
 - **Looks:** Search grid; code, name, short name, family, in-use and series fields with an account-slot grid.
 - **Writes:** BOOK_DATA, BOOK_DETL.
-- **Web:** `/masters/books`; `GET /masters/:name`, `POST /masters/:name`, `PUT /masters/:name`, `DELETE /masters/:name`. Can: create, reopen, edit, delete, list.
-- **Remaining:** Slot semantics, desktop 3-digit codes, branch cloning, reference guards, Print and family-filtered behaviour remain.
-- **Owners:** G38, N58, G40, N59, N62, X10.
+- **Web:** `/masters/books`; `GET /masters/books-master`, `GET /masters/books-master/template`, `GET /masters/books-master/accounts`, `GET /masters/books-master/:code`, `POST /masters/books-master`, `PUT /masters/books-master/:code`, `DELETE /masters/books-master/:code`, `GET /masters/books-master/print`. Can: create, reopen, edit, delete, list.
+- **Remaining:** The MS_BOOK screen, its slot grid and a one-transaction header-and-slots writer are built (N240): the save checks and texts, family templates from the MS_UPDATE.cs BOOK_IDTL inserts, slots by SR_NO, the delete guards, a family lock on a book with vouchers (D4, web message) and provisioning of the template slots OTH INC/OTH EXP 2-3, TAG SPLIT 1-9, PURCHASE/TAG PURCHASE 5 and LABOUR WORK 8-11. Open: the baseline BOOK_IDTL of the older families (SALES, PURCHASE 1-4, CASH/BANK REC/PAY, CONTRA, JOURNAL ...) is not in the source, so those grids come from the company's own books; branch cloning on Location add (G6) and the fine families' provisioned slots are not done; companies provisioned before N240 keep their old slots; voucher book help still treats a blank Cur In Use as active; desktop-runtime comparison is 0%.
+- **Owners:** G38, N58, G40, N59, N62, X10, N240, G252.
 - **Evidence:** [KB_transaction.md:176-191](../../project-memory/video-research/_kb/KB_transaction.md#L176-L191).
 
 ### Company
@@ -1603,7 +1603,7 @@ None. Slice N85 (gap G71) corrected the register to this catalog; `pnpm register
 | Rojmel | `RP_ROJMEL` | `/reports/rojmel` | `- - - - P L` | REPORT | P1-core |
 | Sale Zoom | `RP_SLPR_ZOOM` | `/reports/sales-register` | `- - - - P L` | REPORT | P1-core |
 | Sales Report | `RP_ALL` | `/reports/sales-register` | `- - - - P L` | REPORT | P1-core |
-| Stock Report | `RP_STOCK` | `/reports/tag-stock` | `- - - - P L` | REPORT | P1-core |
+| Stock Report | `RP_STOCK` | `/reports/stock-report` | `- - - - P L` | REPORT | P1-core |
 | Stock With Fine | `RP_STOCK_FINE` | `/reports/stock-valuation` | `- - - - P L` | REPORT | P1-core |
 | Tag Estmate | `RP_TAG_ESTMATE` | `/reports/tag-estimate` | `- - - - P L` | REPORT | P1-core |
 | Tag Image | `RP_TAG_IMAGE` | `/reports/tag-stock` | `C - - D - L` | REPORT | P1-core |
@@ -1684,8 +1684,8 @@ None. Slice N85 (gap G71) corrected the register to this catalog; `pnpm register
 - **Looks:** Date/book/account/location/section filters with return, zoom, summary and CSV buttons.
 - **Reads:** TAX_DATA, TAX_MAST, BOOK_DATA, AC_MAST, LOCT_MAST.
 - **Web:** `/reports/gst-report`; `GET /reports/gst-report`, `GET /reports/gstr1`, `GET /reports/gstr2`, `GET /reports/gstr3b`, `GET /reports/hsn-summary`. Can: print, list.
-- **Remaining:** The RP_GST screen exists: GSTR-1 B2B, B2CL, B2CS, CDNR, CDNUR, AT, ATADJ and HSN, GSTR-2 equivalents and the three settled GSTR-3B rows, with CSV, XLSX and PDF exports. EXP, EXEMP, DOCS and TCS are blocked, and the UAE variant is out of scope (the page is the non-UAE RP_GST screen). A sale made on the Sales screen reconciles with the hand-computed tax in B2CS and GSTR-3B. The HSN local CGST/SGST halves round half away from zero and print 0.00 for a tiny negative, as the desktop's .NET Framework 4.8 does (measured on a windows-latest runner by web/scripts/dotnet-fx-probe: 2.5 M positive and 2 M negative midpoints, 0 differences), so a bill with an odd-paise tax such as 1,908.29 gives 954.15 and 954.15 instead of the earlier 422 refusal. Open: HSN is empty for a web-provisioned company because no book sets BOOK_TYPE 'T' (MS_BOOK.cs:2109-2111) and the Books screen has no Invoice Type control; labour HSN rows carry no discount because LBR_ISU_DETL has no discount column (RP_GST.cs:2719); most gst-report browser cases only open the screen and do not compare numbers; the desktop CSV and Crystal outputs were never compared at runtime.
-- **Owners:** N24, X26, P10-03, N36, G48, N57, N75, G225, N212.
+- **Remaining:** The RP_GST screen exists: GSTR-1 B2B, B2CL, B2CS, CDNR, CDNUR, AT, ATADJ and HSN, GSTR-2 equivalents, EXP, EXEMP and DOCS as the desktop's caption-only grids (no query, no rows, no message), and the whole desktop GSTR-3B grid with figures for 3.1(a), 3.1(d), the 3.1 total, 3.2(1), 4(A)(5) and 6.1 under the owner decisions of WP-19 (From..To, All Other ITC purchases only, 6.1 State/Ut Tax = SGST total; 3.1(a) and 3.2(1) count every '+' row, purchase returns included, as the desktop does). The date boxes run DC_Main.SetDate ("Date Not Valid...", "Month Not Valid...", focus kept); Csv Fil writes nothing for EXEMP and DOCS; Gsrt1 Csv is one XLSX with the sheets B2B..HSN (accepted adaptation); CSV quoting is RFC 4180 with formula neutralisation (accepted adaptation); TCS never enters a GST figure (a TCS sale's Invoice Value excludes it, 6.2 is blank). Labour HSN rows sum the desktop per-line GST shares, which the labour writer now stores (migration 20261122090000). The HSN local CGST/SGST halves round half away from zero, as the .NET Framework 4.8 desktop does (web/scripts/dotnet-fx-probe). The UAE variant is out of scope. Open: EXP.csv bytes wait for a Windows run (WP-19 Q9); the T14 read/export fault cases wait for a harness injector; the web labour invoice takes no labour discount; HSN is empty for a web-provisioned company until a book sets BOOK_TYPE 'T' (MS_BOOK.cs:2109-2111); several older gst-report cases only open the screen; desktop CSV and Crystal outputs were never compared at runtime.
+- **Owners:** N24, X26, P10-03, N36, G48, N57, N75, G225, N212, N239, G251.
 - **Evidence:** [gst-engine.md:8-45](../../web-implementation-spec/04_Cross_Cutting_Engines/gst-engine.md#L8-L45).
 
 ### HuId Report
@@ -1824,11 +1824,11 @@ None. Slice N85 (gap G71) corrected the register to this catalog; `pnpm register
 
 - **Desktop:** `RP_STOCK` — constructor caption 'Stock Report' ([MDI_FORM.cs:8881-8890](../../unified/src/csharp/DataCareNext/MDI_FORM.cs#L8881-L8890)).
 - **Does:** Summarises stock by group, product, item, design, safe, table or trading dimension.
-- **Looks:** Date/item/group/product/location selectors, seven dimension buttons, a summary grid and voucher detail.
+- **Looks:** Date/item/group/product/location selectors, eight dimension buttons, a summary grid and voucher detail.
 - **Reads:** MAIN_STOCK, ITEM_MAST, GROUP_MAST, PRODUCT_MAST, LOCT_MAST, TABLE_MAST, BOOK_DATA.
-- **Web:** `/reports/tag-stock`; `GET /reports/tag-stock`. Can: print, list.
-- **Remaining:** Tag Stock is not RP_STOCK: group/product/item/design/safe/table/trading summaries, gross-weight options and drill-down are missing.
-- **Owners:** N24, X26, P10-04, N57, N75, G71, N85.
+- **Web:** `/reports/stock-report`; `GET /reports/stock-report`, `GET /reports/stock-report/movements`, `GET /reports/stock-report/export.csv`, `GET /reports/stock-report/export.xlsx`. Can: print, list.
+- **Remaining:** RP_STOCK is on its own route: eight dimensions, date-range columns with hidden transfer columns, gross-weight check box, filters, drill-down with KR_FINE/ITM_FINE, Total row, name search, G/I/P keys and Print/Excel behind the Print right (N241, G253). Remaining: voucher zoom, the InOut item-ledger print, Crystal template layouts, EMP ISU adjustment, Item Lot dimension and the LC box.
+- **Owners:** N24, X26, P10-04, N57, N75, G71, N85, N241, G253.
 - **Evidence:** [RP_STOCK.cs:4277-5160](../../unified/src/csharp/DataCareNext/RP_STOCK.cs#L4277-L5160).
 
 ### Stock With Fine
@@ -1868,11 +1868,11 @@ None. Slice N85 (gap G71) corrected the register to this catalog; `pnpm register
 
 - **Desktop:** `RP_TAG` — constructor caption 'Tag Stock' ([MDI_FORM.cs:8891-8900](../../unified/src/csharp/DataCareNext/MDI_FORM.cs#L8891-L8900)).
 - **Does:** Lists inward, outward, in-stock, MRP, approval-pending and all tags with totals.
-- **Looks:** Six mode tabs, date/tag/item/product/group/counter filters, a tag grid, totals and an image preview.
+- **Looks:** From/To, Search, It Type, Item, Product, Group, TagNo, Size, Location and Book selectors, RptType Tag Wise / Tag Summ, six mode buttons, the RP_TAG tag grid with n3/n0 footer, Excel and CSV; nothing runs on open.
 - **Reads:** MAIN_STOCK, BAR_DETL, BAR_IDTL, APR_DETL, TAG_IMAGE_DATA, TAG_STOCK_PRINT.
-- **Web:** `/reports/tag-stock`; `GET /reports/tag-stock`, `GET /reports/tag-stock.csv`. Can: print, list.
-- **Remaining:** Tabs and totals exist; date/tag/product/group filters, full columns and sub-details, Excel/PDF and Crystal layouts are incomplete.
-- **Owners:** N24, X26, P10-04, N57, N75, G225, N212.
+- **Web:** `/reports/tag-stock`; `GET /reports/tag-stock`, `GET /reports/tag-stock.csv`, `GET /reports/tag-stock.xlsx`, `GET /reports/tag-stock/sizes`. Can: print, list.
+- **Remaining:** Implemented from source (N238, G250): per-mode selections, signed-movement stock rule, sentinel N, no row cap, columns, sort orders, keys, CSV/Excel behind the Print right. Open: voucher zoom, Print window and Crystal layouts (TagStkRpt), approval other-item columns, edition-E Emp Isu Less, summary Mrp/Size, year rollover, desktop-runtime comparison; the browser module was written but not run locally.
+- **Owners:** N24, X26, P10-04, N57, N75, G225, N212, G250, N238.
 - **Evidence:** [RP_TAG.cs:3977-4325](../../unified/src/csharp/DataCareNext/RP_TAG.cs#L3977-L4325).
 
 ### Trading Report

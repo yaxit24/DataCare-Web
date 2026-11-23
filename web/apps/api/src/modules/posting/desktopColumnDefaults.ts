@@ -761,6 +761,10 @@ export const DESKTOP_COLUMN_DEFAULTS: Record<string, Record<string, number | str
     ORD_NO: '',
     ORD_SRNO: 0,
     ORD_TAG_STK_ADD: '',
+    IT_NET_AMT: 0,
+    IT_DISC_AMT: 0,
+    IT_LBR_AMT: 0,
+    IT_LBR_DISC: 0,
   },
   LEDR_AC_DATA: {
     CR_AMT: 0,

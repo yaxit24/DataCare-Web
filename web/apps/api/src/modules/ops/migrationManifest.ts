@@ -195,4 +195,14 @@ export const EXPECTED_MIGRATIONS: ReadonlyArray<{
     name: '20261122100000_legacy_year_end_openings_carried',
     checksum: '705c320177c899478749ca679fb5233e6dd265f26c46a53cc65bfc3f045b5b80',
   },
+  {
+    // WP-19: LBR_ISU_DETL per-line GST shares (TR_SALE_LBR.cs:9748-9830) the Gst Report HSN section sums.
+    name: '20261122110000_labour_detail_gst_shares',
+    checksum: '0ae86f271fca6186af52f18eed2d877969838c2f53452d1d905e90218a4a0984',
+  },
+  {
+    // N240/G252: existing companies' web-seeded books get the desktop template slots (TAG SPLIT 6-9 sale/purchase).
+    name: '20261122120000_book_template_slots',
+    checksum: '5d31ad3136d6d02a24da51d789e3ad3ef30724303756b3921b549df2bfb735ca',
+  },
 ];

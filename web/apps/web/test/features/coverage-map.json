@@ -25,6 +25,13 @@
         "web/apps/api/src/routes/rpAllReport.ts"
       ]
     },
+    "stockReport": {
+      "covers": [
+        "web/apps/web/app/(app)/reports/stock-report/",
+        "web/apps/api/src/modules/reports/stockReport/",
+        "web/apps/api/src/routes/stockReport.ts"
+      ]
+    },
     "orderReportRp": {
       "covers": [
         "web/apps/web/app/(app)/reports/order-report/",
@@ -175,6 +182,17 @@
         "web/apps/api/src/routes/partyOpening.ts"
       ]
     },
+    "tagStock": {
+      "covers": [
+        "web/apps/web/app/(app)/reports/tag-stock/page.tsx",
+        "web/apps/web/app/(app)/reports/tag-stock/TagStockGrid.tsx",
+        "web/apps/web/app/(app)/reports/tag-stock/useTagStock.ts",
+        "web/apps/web/app/(app)/reports/tag-stock/dateText.ts",
+        "web/apps/api/src/modules/reports/tagStock.ts",
+        "web/apps/api/src/modules/reports/tagStockColumns.ts",
+        "web/apps/api/src/routes/tagStock.ts"
+      ]
+    },
     "tagOpening": {
       "covers": [
         "web/apps/web/app/(app)/txn/tag-opening/page.tsx",
@@ -228,6 +246,17 @@
         "web/apps/web/app/(app)/masters/groups/page.tsx",
         "web/apps/api/src/modules/masters/groupMaster.ts",
         "web/apps/api/src/routes/groupMaster.ts"
+      ]
+    },
+    "books": {
+      "covers": [
+        "web/apps/web/app/(app)/masters/books/page.tsx",
+        "web/apps/web/app/(app)/masters/books/bookScreen.ts",
+        "web/apps/web/components/BookSlotGrid.tsx",
+        "web/apps/api/src/modules/masters/booksMaster.ts",
+        "web/apps/api/src/modules/masters/bookTemplates.ts",
+        "web/apps/api/src/routes/booksMaster.ts",
+        "web/apps/api/src/modules/ops/seedCompany.ts"
       ]
     },
     "productMaster": {
@@ -356,7 +385,9 @@
         "web/apps/api/src/modules/reports/statementDocs.ts",
         "web/apps/api/src/modules/rbac/routePolicy.ts",
         "web/apps/api/src/routes/gstReport.ts",
-        "web/apps/api/src/routes/txn.ts"
+        "web/apps/api/src/routes/txn.ts",
+        "web/apps/web/components/DesktopDateInput.tsx",
+        "web/apps/api/src/modules/sales/labourGstAllocation.ts"
       ]
     },
     "approvalIssue": {
