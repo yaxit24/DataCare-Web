@@ -776,13 +776,6 @@
       "kind": "setup guide",
       "status": "reference",
       "purpose": "Desktop installation guide (three identical copies) and runtime DLL instructions."
-    },
-    {
-      "match": "orchestration/work/*/*.md",
-      "area": "Orchestration",
-      "kind": "work-package study and decisions",
-      "status": "reference",
-      "purpose": "Per work package: the desktop study (cited source facts behind each case) and the owner and architect decisions it rests on."
     }
   ]
 }
