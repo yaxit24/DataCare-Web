@@ -408,6 +408,9 @@ export async function buildApp(opts: BuildOpts): Promise<FastifyInstance> {
     // employ, product and group are its own selectors (RP_ALL.cs:7629-7631 `{SL_DATA.AC_CODE}`), and the engine
     // refuses one its template lacks with `filter-not-in-template` (rpAll/index.ts), so this guard must not.
     if (url.startsWith('/reports/sales-report')) return;
+    // WP-14: the Order Report (RP_ALL) shares that parser; its handlers append party, city, area and name
+    // (RP_ALL.cs:8391-8403, :12620-12631).
+    if (url.startsWith('/reports/order-report')) return;
     const q = (req.query ?? {}) as Record<string, string | undefined>;
     const asked = REPORT_FILTER_KEYS.filter((k) => String(q[k] ?? '').trim());
     if (!asked.length) return;

@@ -1,685 +1,238 @@
 import { describe, expect, it } from 'vitest';
-import { formatDate, reportTitle, runLayout } from '../src/modules/reports/rpAll/engine.js';
+import { reportTitle } from '../src/modules/reports/rpAll/engine.js';
 import { parseRpAllFilters } from '../src/modules/reports/rpAll/filters.js';
 import { exportTable } from '../src/modules/reports/rpAll/exportRows.js';
-import type { RpAllLayout, RpAllRecord, RpAllValue } from '../src/modules/reports/rpAll/types.js';
-import type { RpAllResult } from '../src/modules/reports/rpAll/index.js';
+import {
+  parseRpAllRequest,
+  shapeOrderResult,
+  type RpAllRequest,
+} from '../src/modules/reports/rpAll/index.js';
+import { ORDER_SPECS, type OrderMode } from '../src/modules/reports/rpAll/orderLayouts.js';
+import { buildOrderQuery } from '../src/modules/reports/rpAll/orderQuery.js';
+import type { RpAllRecord } from '../src/modules/reports/rpAll/types.js';
 
 /**
- * WP-14: the Order Report branch of RP_ALL as pure logic. The web adapter does not exist yet, so these
- * tests exercise the shared engine and filters with the record shapes the desktop templates read.
+ * WP-14: the Order branch of RP_ALL as pure logic, run through the REAL mode table (ORDER_SPECS), the real
+ * shaping (shapeOrderResult) and the real SQL builder (buildOrderQuery). Records are given in the shape the
+ * adapter returns for each template's record set; every expected value is computed here from the fixture
+ * with the template formula, never read back from the implementation.
  *
- * Every expected value is computed from the fixture orders and adjustments with the desktop formula
- * (OrdDetlRpt.xml, OrdAdvRpt.xml, OrdAdvAdj.xml, OrdAdjBillWise.xml, OrdDetlPanding.xml,
- * OrdDesignSumm.xml, BillWiseOrderAdjust.xml), never read back from a web implementation.
+ * Fixture (cases.md "Test data"): an SL_ORD_ADJ row's own keys are the voucher that wrote it — the order
+ * for its `+` advance row, the sale bill for a `-` adjustment — and ORD_* point at the order
+ * (Ac_Tax.cs:71-73; OrdAdvAdj.xml / OrdAdjBillWise.xml TableLinks on ORD_NO/ORD_YRCD/ORD_DBCD).
  */
 
 const SESSION = { tenantId: 't', coCode: '01', lcCode: '01', coYear: '2025-2026' };
 const FROM_DATE = '2026-01-01';
 const TO_DATE = '2026-01-31';
 const Q = { fromDate: FROM_DATE, toDate: TO_DATE };
+const YEAR = '2025-2026';
 
-const ord = (over: Partial<RpAllRecord> = {}): RpAllRecord => ({
-  tenantId: 't',
-  coCode: '01',
-  lcCode: '01',
-  coYear: '2025-2026',
-  coBook: 'B1',
-  vchNo: 'O1',
-  vchDate: '2026-01-05',
-  acCode: 'P1',
-  acName: 'ALPHA JEWELS',
-  totAmt: 20000,
-  advAmt: 5000,
-  cashAmt: 5000,
-  cardAmt: 0,
-  chqAmt: 0,
-  oldGlAmt: 0,
-  oldSlAmt: 0,
-  itCode: 'I1',
-  itName: 'Gold Ring',
-  designNo: 'D1',
-  tagNo: 'T1',
-  pcs: 1,
-  nwt: 10.5,
-  designIsu: 'N',
-  ...over,
+interface Order {
+  book: string;
+  vch: string;
+  date: string;
+  acCode: string;
+  acName: string;
+  advAmt: number;
+  lines: { sr: number; designNo: string; tagNo: string; pcs: number; nwt: number; isu: string }[];
+}
+const ORDERS: Order[] = [
+  { book: 'B1', vch: 'O1', date: '2026-01-05', acCode: 'P1', acName: 'ALPHA JEWELS', advAmt: 5000,
+    lines: [
+      { sr: 1, designNo: 'D1', tagNo: 'T1', pcs: 1, nwt: 10.5, isu: 'N' },
+      { sr: 2, designNo: '', tagNo: 'T2', pcs: 2, nwt: 5.25, isu: 'N' },
+    ] },
+  { book: 'B2', vch: 'O2', date: '2026-01-10', acCode: 'P2', acName: 'BETA TRADERS', advAmt: 0,
+    lines: [{ sr: 1, designNo: 'D1', tagNo: 'T1', pcs: 3, nwt: 7.125, isu: 'N' }] },
+  { book: 'B1', vch: 'O3', date: '2026-01-15', acCode: 'P1', acName: 'ALPHA JEWELS', advAmt: 3000,
+    lines: [{ sr: 1, designNo: 'D3', tagNo: 'T4', pcs: 1, nwt: 4, isu: 'N' }] },
+  { book: 'B1', vch: 'O8', date: '2026-01-20', acCode: 'P2', acName: 'BETA TRADERS', advAmt: 0,
+    lines: [{ sr: 1, designNo: 'D8', tagNo: 'T9', pcs: 1, nwt: 3, isu: 'Y' }] },
+];
+interface Adj { book: string; vch: string; sr: number; date: string; sign: string; amt: number; ord: string; bill?: { tot: number; adv: number; acName: string; party: string } }
+const ADJ: Adj[] = [
+  { book: 'B1', vch: 'O1', sr: 1, date: '2026-01-05', sign: '+', amt: 5000, ord: 'O1' },
+  { book: 'SB', vch: 'S1', sr: 1, date: '2026-01-18', sign: '-', amt: 1500, ord: 'O1', bill: { tot: 12000, adv: 2000, acName: 'ALPHA JEWELS', party: 'ALPHA JEWELS' } },
+  { book: 'SB', vch: 'S1', sr: 2, date: '2026-01-18', sign: '-', amt: 500, ord: 'O1', bill: { tot: 12000, adv: 2000, acName: 'ALPHA JEWELS', party: 'ALPHA JEWELS' } },
+  { book: 'B1', vch: 'O3', sr: 1, date: '2026-01-15', sign: '+', amt: 3000, ord: 'O3' },
+  // SR_NO 1 again on another voucher: the adjustment key is the row's own voucher + SR_NO, not SR_NO alone.
+  { book: 'SB', vch: 'S2', sr: 1, date: '2026-01-22', sign: '-', amt: 1500, ord: 'O3', bill: { tot: 9000, adv: 3000, acName: 'ALPHA JEWELS', party: 'ALPHA JEWELS' } },
+  { book: '081', vch: 'C1', sr: 1, date: '2026-01-25', sign: '-', amt: 1500, ord: 'O3' },
+];
+const orderOf = (vch: string) => ORDERS.find((o) => o.vch === vch)!;
+
+const header = (o: Order): Record<string, RpAllValueLike> => ({
+  coCode: '01', lcCode: '01', coYear: YEAR, coBook: o.book, vchNo: o.vch, vchDate: o.date,
+  acCode: o.acCode, acName: o.acName, advAmt: o.advAmt, bookSName: `S${o.book}`,
 });
-
-const lineKey = (r: RpAllRecord) => `${r.coBook}|${r.vchNo}|${r.srNo}`;
-
-const ORDER_LINES: RpAllRecord[] = [
-  ord({
-    srNo: 1,
-    pcs: 1,
-    nwt: 10.5,
-    itCode: 'I1',
-    itName: 'Gold Ring',
-    designNo: 'D1',
-    tagNo: 'T1',
-  }),
-  ord({
-    srNo: 2,
-    pcs: 2,
-    nwt: 5.25,
-    itCode: 'I2',
-    itName: 'Gold Chain',
-    designNo: 'D2',
-    tagNo: 'T2',
-  }),
-  ord({
-    coBook: 'B2',
-    vchNo: 'O2',
-    vchDate: '2026-01-10',
-    acCode: 'P2',
-    acName: 'BETA TRADERS',
-    totAmt: 9000,
-    advAmt: 0,
-    cashAmt: 0,
-    srNo: 1,
-    pcs: 3,
-    nwt: 7.125,
-    itCode: 'I1',
-    itName: 'Gold Ring',
-    designNo: 'D1',
-    tagNo: 'T3',
-  }),
-  ord({
-    coBook: 'B1',
-    vchNo: 'O3',
-    vchDate: '2026-01-15',
-    acCode: 'P1',
-    acName: 'ALPHA JEWELS',
-    totAmt: 9000,
-    advAmt: 3000,
-    cashAmt: 0,
-    srNo: 1,
-    pcs: 1,
-    nwt: 4.0,
-    itCode: 'I2',
-    itName: 'Gold Chain',
-    designNo: 'D3',
-    tagNo: 'T4',
-  }),
-  ord({
-    coBook: 'B1',
-    vchNo: 'O4',
-    vchDate: '2026-01-12',
-    acCode: '',
-    acName: 'WALK IN CUSTOMER',
-    totAmt: 0,
-    advAmt: 0,
-    cashAmt: 0,
-    srNo: 1,
-    pcs: 1,
-    nwt: 2.0,
-    itCode: 'I1',
-    itName: 'Gold Ring',
-    designNo: 'D4',
-    tagNo: 'T5',
-  }),
-  ord({
-    coBook: 'B1',
-    vchNo: 'O8',
-    vchDate: '2026-01-20',
-    acCode: 'P2',
-    acName: 'BETA TRADERS',
-    totAmt: 0,
-    advAmt: 0,
-    cashAmt: 0,
-    srNo: 1,
-    pcs: 1,
-    nwt: 3.0,
-    itCode: 'I2',
-    itName: 'Gold Chain',
-    designNo: 'D5',
-    tagNo: 'T6',
-    designIsu: 'Y',
-  }),
-];
-
-const ORDER_HEADERS: RpAllRecord[] = [
-  {
-    coBook: 'B1',
-    vchNo: 'O1',
-    vchDate: '2026-01-05',
-    acCode: 'P1',
-    acName: 'ALPHA JEWELS',
-    totAmt: 20000,
-    cashAmt: 5000,
-    cardAmt: 0,
-    chqAmt: 0,
-    oldGlAmt: 0,
-    oldSlAmt: 0,
-    advAmt: 5000,
-  },
-  {
-    coBook: 'B2',
-    vchNo: 'O2',
-    vchDate: '2026-01-10',
-    acCode: 'P2',
-    acName: 'BETA TRADERS',
-    totAmt: 9000,
-    cashAmt: 0,
-    cardAmt: 0,
-    chqAmt: 0,
-    oldGlAmt: 0,
-    oldSlAmt: 0,
-    advAmt: 0,
-  },
-  {
-    coBook: 'B1',
-    vchNo: 'O3',
-    vchDate: '2026-01-15',
-    acCode: 'P1',
-    acName: 'ALPHA JEWELS',
-    totAmt: 9000,
-    cashAmt: 0,
-    cardAmt: 0,
-    chqAmt: 0,
-    oldGlAmt: 0,
-    oldSlAmt: 0,
-    advAmt: 3000,
-  },
-  {
-    coBook: 'B1',
-    vchNo: 'O4',
-    vchDate: '2026-01-12',
-    acCode: '',
-    acName: 'WALK IN CUSTOMER',
-    totAmt: 0,
-    cashAmt: 0,
-    cardAmt: 0,
-    chqAmt: 0,
-    oldGlAmt: 0,
-    oldSlAmt: 0,
-    advAmt: 0,
-  },
-  {
-    coBook: 'B1',
-    vchNo: 'O8',
-    vchDate: '2026-01-20',
-    acCode: 'P2',
-    acName: 'BETA TRADERS',
-    totAmt: 0,
-    cashAmt: 0,
-    cardAmt: 0,
-    chqAmt: 0,
-    oldGlAmt: 0,
-    oldSlAmt: 0,
-    advAmt: 0,
-  },
-];
-
-const adjustments: RpAllRecord[] = [
-  {
-    coBook: 'B1',
-    vchNo: 'O1',
-    adjSr: 1,
-    ordSign: '+',
-    ordAmt: 5000,
-    ordLc: '01',
-    ordYrcd: '2025-2026',
-    ordDbcd: 'B1',
-    ordNo: 'O1',
-    acName: 'ALPHA JEWELS',
-    vchDate: '2026-01-05',
-  },
-  {
-    coBook: 'B1',
-    vchNo: 'O1',
-    adjSr: 2,
-    ordSign: '-',
-    ordAmt: 1500,
-    ordLc: '01',
-    ordYrcd: '2025-2026',
-    ordDbcd: 'B1',
-    ordNo: 'O1',
-    acName: 'ALPHA JEWELS',
-    vchDate: '2026-01-18',
-    billBook: 'SB',
-    billNo: 'S1',
-    billTotAmt: 12000,
-    billAcName: 'ALPHA JEWELS',
-  },
-  {
-    coBook: 'B1',
-    vchNo: 'O1',
-    adjSr: 3,
-    ordSign: '-',
-    ordAmt: 500,
-    ordLc: '01',
-    ordYrcd: '2025-2026',
-    ordDbcd: 'B1',
-    ordNo: 'O1',
-    acName: 'ALPHA JEWELS',
-    vchDate: '2026-01-18',
-    billBook: 'SB',
-    billNo: 'S1',
-    billTotAmt: 12000,
-    billAcName: 'ALPHA JEWELS',
-  },
-  {
-    coBook: 'B1',
-    vchNo: 'O3',
-    adjSr: 1,
-    ordSign: '+',
-    ordAmt: 3000,
-    ordLc: '01',
-    ordYrcd: '2025-2026',
-    ordDbcd: 'B1',
-    ordNo: 'O3',
-    acName: 'ALPHA JEWELS',
-    vchDate: '2026-01-15',
-  },
-  {
-    coBook: 'B1',
-    vchNo: 'O3',
-    adjSr: 2,
-    ordSign: '-',
-    ordAmt: 1500,
-    ordLc: '01',
-    ordYrcd: '2025-2026',
-    ordDbcd: 'B1',
-    ordNo: 'O3',
-    acName: 'ALPHA JEWELS',
-    vchDate: '2026-01-22',
-    billBook: 'SB',
-    billNo: 'S2',
-    billTotAmt: 9000,
-    billAcName: 'ALPHA JEWELS',
-  },
-  {
-    coBook: 'B1',
-    vchNo: 'O3',
-    adjSr: 3,
-    ordSign: '-',
-    ordAmt: 1500,
-    ordLc: '01',
-    ordYrcd: '2025-2026',
-    ordDbcd: 'B1',
-    ordNo: 'O3',
-    acName: 'ALPHA JEWELS',
-    vchDate: '2026-01-22',
-    billBook: 'SB',
-    billNo: 'S2',
-    billTotAmt: 9000,
-    billAcName: 'ALPHA JEWELS',
-  },
-];
-
-const sum = (xs: RpAllRecord[], f: (x: RpAllRecord) => number, dp = 3) =>
-  Number(xs.reduce((s, x) => s + f(x), 0).toFixed(dp));
-
-const col = (key: string, caption: string, kind: any, level: any, total = false) => ({
-  key,
-  caption,
-  kind,
-  level,
-  total,
+type RpAllValueLike = string | number | null;
+/** SL_ORD_DATA ⟕ SL_ORD_DETL. */
+const lineRecords = (): RpAllRecord[] =>
+  ORDERS.flatMap((o) => o.lines.map((l) => ({ ...header(o), srNo: l.sr, designNo: l.designNo, tagNo: l.tagNo, pcs: l.pcs, nwt: l.nwt, designIsu: l.isu })));
+const adjCols = (a: Adj) => ({
+  adjLc: '01', adjYear: YEAR, adjBook: a.book, adjVchNo: a.vch, adjSr: a.sr, adjVchDate: a.date,
+  adjAcName: null, ordSign: a.sign, ordAmt: a.amt, ordLc: '01', ordYrcd: YEAR, ordDbcd: orderOf(a.ord).book, ordNo: a.ord,
 });
+/** SL_ORD_DATA ⟕ SL_ORD_ADJ on ORD_* (an order without adjustments keeps one NULL record). */
+const adjustRecords = (withBill: boolean): RpAllRecord[] =>
+  ORDERS.flatMap((o): RpAllRecord[] => {
+    const mine = ADJ.filter((a) => a.ord === o.vch);
+    if (!mine.length) return [{ ...header(o), adjSr: null, ordSign: null, ordAmt: null }];
+    return mine.map((a) => ({
+      ...header(o),
+      ...adjCols(a),
+      ...(withBill ? { billTotAmt: a.bill?.tot ?? 0, billPartyName: a.bill?.party ?? null } : {}),
+    }));
+  });
+
+const request = (mode: OrderMode, extra: Record<string, unknown> = {}): RpAllRequest =>
+  parseRpAllRequest('order', { ...Q, mode, ...extra }, SESSION);
+const run = (mode: OrderMode, records: RpAllRecord[], extra: Record<string, unknown> = {}) =>
+  shapeOrderResult(request(mode, extra), records);
+const round = (x: number, dp: number) => Number(x.toFixed(dp));
 
 describe('Order Report (BtnOrdRpt → OrdDetlRpt)', () => {
-  const layout: RpAllLayout = {
-    template: 'OrdDetlRpt',
-    titlePrefix: 'Order Report',
-    columns: [
-      col('acName', 'Customer', 'text', 'voucher'),
-      col('vchNo', 'Vch No', 'text', 'voucher'),
-      col('vchDate', 'Date', 'date', 'voucher'),
-      col('srNo', 'Sr', 'text', 'line'),
-      col('itName', 'Item', 'text', 'line'),
-      col('designNo', 'Design', 'text', 'line'),
-      col('pcs', 'Pcs', 'pcs', 'line', true),
-      col('nwt', 'Net Wt', 'weight', 'line', true),
-    ],
-    groups: [{ key: 'vchNo', labelKeys: ['vchNo'], subtotal: 'none' }],
-    sort: [{ key: 'acName' }],
-    keys: { voucher: ['coBook', 'vchNo'], line: ['srNo'] },
-    rowLevels: ['line'],
-    grandTotal: true,
-  };
-  const result = runLayout(layout, ORDER_LINES);
-
-  it('lists every order line in the date range with no status filter (D3)', () => {
-    expect(result.rows).toHaveLength(ORDER_LINES.length);
-    expect(result.rows.map((r) => `${r.voucherKey}|${r.cells.srNo}`)).toEqual(
-      ORDER_LINES.map(lineKey),
-    );
+  const r = run('report', lineRecords());
+  const lines = ORDERS.flatMap((o) => o.lines);
+  it('prints one header row per order and one row per line, every line (no status filter, D3)', () => {
+    expect(r.rows.filter((x) => x.level === 'voucher').map((x) => x.cells.vchNo)).toEqual(['O1', 'O2', 'O3', 'O8']);
+    expect(r.rows.filter((x) => x.level === 'line')).toHaveLength(lines.length);
+    const o1 = r.rows.find((x) => x.level === 'voucher' && x.cells.vchNo === 'O1')!;
+    expect(o1.cells).toMatchObject({ vchDate: '2026-01-05', acName: 'ALPHA JEWELS', advAmt: 5000 });
   });
-
-  it('totals pieces and net weight from the vouchers (OrdDetlRpt.xml:309-310)', () => {
-    // RP_ALL.cs:10927 {{HAVING SUM(CASE WHEN B.ORD_SIGN = '+' THEN B.ORD_AMT ELSE - B.ORD_AMT END)  = 0}}
-    // is the pending-set rule, not this mode; mode 1 simply sums every line.
-    expect(result.totals.pcs).toBe(sum(ORDER_LINES, (r) => Number(r.pcs), 0));
-    expect(result.totals.nwt).toBe(sum(ORDER_LINES, (r) => Number(r.nwt)));
-    expect(result.totals.pcs).toBe(9);
-    expect(result.totals.nwt).toBe(31.875);
-  });
-});
-
-describe('Order Advance (BtnOrdAdvance → OrdAdvRpt)', () => {
-  const layout: RpAllLayout = {
-    template: 'OrdAdvRpt',
-    titlePrefix: 'Order Advance Report',
-    columns: [
-      col('acName', 'Customer', 'text', 'voucher'),
-      col('vchNo', 'Vch No', 'text', 'voucher'),
-      col('vchDate', 'Date', 'date', 'voucher'),
-      col('totAmt', 'Order Total', 'money', 'voucher'),
-      col('cashAmt', 'Cash', 'money', 'voucher'),
-      col('cardAmt', 'Card', 'money', 'voucher'),
-      col('chqAmt', 'Cheque', 'money', 'voucher'),
-      col('oldGlAmt', 'Old Gold', 'money', 'voucher'),
-      col('oldSlAmt', 'Old Silver', 'money', 'voucher'),
-      col('advAmt', 'Advance', 'money', 'voucher'),
-    ],
-    groups: [{ key: 'acName', labelKeys: ['acName'], subtotal: 'none' }],
-    sort: [{ key: 'acName' }],
-    keys: { voucher: ['coBook', 'vchNo'] },
-    rowLevels: ['voucher'],
-    grandTotal: false,
-  };
-  const result = runLayout(layout, ORDER_HEADERS);
-
-  it('prints one row per order header, grouped by customer name ascending', () => {
-    expect(result.rows).toHaveLength(ORDER_HEADERS.length);
-    expect(result.rows.map((r) => r.cells.vchNo)).toEqual(['O1', 'O3', 'O2', 'O8', 'O4']);
-  });
-
-  it('keeps every tender column from SL_ORD_DATA and prints no grand total (OrdAdvRpt.xml has no SummaryFieldDefinition)', () => {
-    const o1 = result.rows.find((r) => r.cells.vchNo === 'O1')!;
-    expect(o1.cells.totAmt).toBe(20000);
-    expect(o1.cells.cashAmt).toBe(5000);
-    expect(o1.cells.advAmt).toBe(5000);
-    expect(Object.keys(result.totals)).toHaveLength(0);
-    expect(layout.grandTotal).toBe(false);
+  it('report footer "Total :" sums ITM_PCS and ITM_NWT once per line (OrdDetlRpt.xml Sum fields)', () => {
+    expect(r.totals.pcs).toBe(lines.reduce((s, l) => s + l.pcs, 0));
+    expect(r.totals.nwt).toBe(round(lines.reduce((s, l) => s + l.nwt, 0), 3));
+    expect(r.grandTotalCaption).toBe('Total :');
+    expect(r.title).toBe('Order Report From 01/01/2026 To 31/01/2026');
   });
 });
 
 describe('Order Adjust (BtnOrdAdj → OrdAdvAdj)', () => {
-  const withDerived = adjustments.map((r) => {
-    const ordAmt = Number(r.ordAmt);
-    const isPlus = r.ordSign === '+';
-    return {
-      ...r,
-      ordGroup: `${r.ordLc}${r.ordYrcd}${r.ordDbcd}${r.ordNo}`,
-      ordAmtVal: ordAmt,
-      plusAmt: isPlus ? ordAmt : 0,
-      minusAmt: isPlus ? 0 : ordAmt,
-      balAmt: isPlus ? ordAmt : -ordAmt,
-    };
+  const r = run('adjust', adjustRecords(false));
+  const net = (vch: string, sign: string) => ADJ.filter((a) => a.ord === vch && a.sign === sign).reduce((s, a) => s + a.amt, 0);
+  it('prints each order as its @OrdGroup header band with the three sums; the detail band is suppressed', () => {
+    expect(r.rows).toHaveLength(0);
+    for (const vch of ['O1', 'O3']) {
+      const o = orderOf(vch);
+      const g = r.groups.find((x) => x.key === `01${YEAR}${o.book}${vch}`)!;
+      expect(g.label).toBe(`${vch} ${o.date.split('-').reverse().join('/')} ${o.acName}`);
+      expect(g.totals).toEqual({ plusAmt: net(vch, '+'), minusAmt: net(vch, '-'), balAmt: net(vch, '+') - net(vch, '-') });
+    }
   });
-  const layout: RpAllLayout = {
-    template: 'OrdAdvAdj',
-    titlePrefix: 'Order Adjust Report',
-    columns: [
-      col('vchNo', 'Vch No', 'text', 'line'),
-      col('vchDate', 'Date', 'date', 'line'),
-      col('acName', 'Customer', 'text', 'line'),
-      col('ordSign', 'Sign', 'text', 'line'),
-      col('ordAmt', 'Amount', 'money', 'line'),
-      col('plusAmt', 'Ord Amt', 'money', 'line', true),
-      col('minusAmt', 'Ord Adj Amt', 'money', 'line', true),
-      col('balAmt', 'Bal Amt', 'money', 'line', true),
-    ],
-    groups: [
-      { key: 'ordGroup', labelKeys: ['ordGroup'], subtotal: 'footer', subtotalCaption: 'Total' },
-    ],
-    sort: [{ key: 'coYear' }, { key: 'vchDate' }, { key: 'vchNo' }],
-    keys: { voucher: ['coBook', 'vchNo'], line: ['adjSr'] },
-    rowLevels: ['line'],
-    grandTotal: true,
-  };
-  const result = runLayout(layout, withDerived);
-
-  it('groups by @OrdGroup = ORD_LC+ORD_YRCD+ORD_DBCD+ORD_NO (OrdAdvAdj.xml:252-253)', () => {
-    const groups = result.groups.filter((g) => g.depth === 0);
-    expect(groups.map((g) => g.key).sort()).toEqual(['012025-2026B1O1', '012025-2026B1O3']);
-  });
-
-  it('computes signed amounts as the desktop balance rule does (RP_ALL.cs:10927)', () => {
-    const o1 = result.groups.find((g) => g.key === '012025-2026B1O1')!;
-    const o3 = result.groups.find((g) => g.key === '012025-2026B1O3')!;
-    expect(o1.totals.plusAmt).toBe(5000);
-    expect(o1.totals.minusAmt).toBe(2000);
-    expect(o1.totals.balAmt).toBe(3000);
-    expect(o3.totals.plusAmt).toBe(3000);
-    expect(o3.totals.minusAmt).toBe(3000);
-    expect(o3.totals.balAmt).toBe(0);
-    expect(result.totals.plusAmt).toBe(8000);
-    expect(result.totals.minusAmt).toBe(5000);
-    expect(result.totals.balAmt).toBe(3000);
+  it('"TOTAL :" grand sums count every adjustment row once, even when SR_NO repeats across vouchers', () => {
+    const plus = ADJ.filter((a) => a.sign === '+').reduce((s, a) => s + a.amt, 0);
+    const minus = ADJ.filter((a) => a.sign === '-').reduce((s, a) => s + a.amt, 0);
+    expect(r.totals).toEqual({ plusAmt: plus, minusAmt: minus, balAmt: plus - minus });
+    expect(r.grandTotalCaption).toBe('TOTAL :');
   });
 });
 
 describe('Order Wise Bill (BtnOrdWithBill → OrdAdjBillWise)', () => {
-  const withDerived = adjustments.map((r) => ({
-    ...r,
-    adjAmt: r.ordSign === '-' ? Number(r.ordAmt) : 0,
-  }));
-  const layout: RpAllLayout = {
-    template: 'OrdAdjBillWise',
-    titlePrefix: 'Bill Wise Order Adjust Report',
-    columns: [
-      col('acName', 'Customer', 'text', 'line'),
-      col('vchNo', 'Order Vch', 'text', 'line'),
-      col('ordSign', 'Sign', 'text', 'line'),
-      col('ordAmt', 'Ord Amt', 'money', 'line'),
-      col('billNo', 'Bill No', 'text', 'line'),
-      col('billTotAmt', 'Bill Total', 'money', 'line'),
-      col('adjAmt', 'Adj Amt', 'money', 'line', true),
-    ],
-    groups: [
-      { key: 'acName', labelKeys: ['acName'], subtotal: 'none' },
-      { key: 'vchNo', labelKeys: ['vchNo'], subtotal: 'footer', subtotalCaption: 'Total' },
-    ],
-    sort: [{ key: 'acCode' }],
-    keys: { voucher: ['coBook', 'vchNo'], line: ['adjSr'] },
-    rowLevels: ['line'],
-    grandTotal: false,
-  };
-  // Pad O2/O4/O8 with one empty adjustment row each, as the left join would.
-  const padded: RpAllRecord[] = [
-    ...withDerived,
-    {
-      coBook: 'B2',
-      vchNo: 'O2',
-      adjSr: 1,
-      ordSign: '',
-      ordAmt: 0,
-      adjAmt: 0,
-      billNo: '',
-      billTotAmt: 0,
-      acName: 'BETA TRADERS',
-    },
-    {
-      coBook: 'B1',
-      vchNo: 'O4',
-      adjSr: 1,
-      ordSign: '',
-      ordAmt: 0,
-      adjAmt: 0,
-      billNo: '',
-      billTotAmt: 0,
-      acName: 'WALK IN CUSTOMER',
-    },
-    {
-      coBook: 'B1',
-      vchNo: 'O8',
-      adjSr: 1,
-      ordSign: '',
-      ordAmt: 0,
-      adjAmt: 0,
-      billNo: '',
-      billTotAmt: 0,
-      acName: 'BETA TRADERS',
-    },
-  ];
-  const result = runLayout(layout, padded);
-
-  it('totals only the minus rows per order (OrdAdjBillWise.xml:419)', () => {
-    const totals = new Map(
-      result.groups.filter((g) => g.depth === 1).map((g) => [g.key, g.totals.adjAmt]),
-    );
-    expect(totals.get('O1')).toBe(2000);
-    expect(totals.get('O3')).toBe(3000);
-    expect(totals.get('O2')).toBe(0);
-    expect(totals.get('O4')).toBe(0);
-    expect(totals.get('O8')).toBe(0);
-  });
-
-  it('prints no grand total across orders', () => {
-    expect(layout.grandTotal).toBe(false);
-  });
-});
-
-describe('Making Panding (BtnOrdMakePan → OrdDetlPanding)', () => {
-  // The desktop pending set is derived, never written here (D2):
-  //   DESIGN_ISU = 'N' AND the order is NOT in the fully-adjusted set
-  //   (RP_ALL.cs:10940 {{AND {SL_ORD_DETL.DESIGN_ISU} = 'N'}};
-  //    RP_ALL.cs:10927 {{HAVING SUM(CASE WHEN B.ORD_SIGN = '+' THEN B.ORD_AMT ELSE - B.ORD_AMT END)  = 0}}).
-  const fullyAdjusted = new Set(['O3', 'O5']);
-  const pending = ORDER_LINES.filter(
-    (r) => r.designIsu === 'N' && !fullyAdjusted.has(String(r.vchNo)),
-  );
-  const layout: RpAllLayout = {
-    template: 'OrdDetlPanding',
-    titlePrefix: 'Order Design Issue Panding Report',
-    columns: [
-      col('vchNo', 'Vch No', 'text', 'line'),
-      col('acName', 'Customer', 'text', 'line'),
-      col('pcs', 'Pcs', 'pcs', 'line', true),
-      col('nwt', 'Net Wt', 'weight', 'line', true),
-    ],
-    groups: [{ key: 'vchGroup', labelKeys: ['vchGroup'], subtotal: 'none' }],
-    sort: [{ key: 'acName' }],
-    keys: { voucher: ['coBook', 'vchNo'], line: ['srNo'] },
-    rowLevels: ['line'],
-    grandTotal: true,
-  };
-  const records: RpAllRecord[] = pending.map((r) => ({
-    ...r,
-    vchGroup: `${r.coYear}${r.coBook}${r.vchNo}` as RpAllValue,
-  }));
-  const result = runLayout(layout, records);
-
-  it('excludes fully-adjusted orders and lines already flagged Y', () => {
-    expect(result.rows.map((r) => r.cells.vchNo)).toEqual(['O1', 'O1', 'O4', 'O2']);
-  });
-
-  it('grand-totals the same pcs and nwt as the detail band (OrdDetlPanding.xml:403-404)', () => {
-    expect(result.totals.pcs).toBe(7);
-    expect(result.totals.nwt).toBe(24.875);
-  });
-});
-
-describe('Making Summ (BtnDesignSumm → OrdDesignSumm)', () => {
-  const fullyAdjusted = new Set(['O3', 'O5']);
-  const pending = ORDER_LINES.filter(
-    (r) => r.designIsu === 'N' && !fullyAdjusted.has(String(r.vchNo)),
-  );
-  const layout = (onlySumm: boolean): RpAllLayout => ({
-    template: 'OrdDesignSumm',
-    titlePrefix: 'Order Design Issue Panding Report',
-    columns: [
-      col('design', 'Design', 'text', 'line'),
-      col('vchNo', 'Vch No', 'text', 'line'),
-      col('pcs', 'Pcs', 'pcs', 'line', true),
-      col('nwt', 'Net Wt', 'weight', 'line', true),
-    ],
-    groups: [{ key: 'vchGroup', labelKeys: ['vchGroup'], subtotal: 'none' }],
-    sort: [{ key: 'acName' }],
-    keys: { voucher: ['coBook', 'vchNo'], line: ['srNo'] },
-    rowLevels: ['line'],
-    grandTotal: true,
-    suppress: { line: (r: RpAllRecord) => onlySumm },
-  });
-  const designOf = (r: RpAllRecord): RpAllValue =>
-    (r.designNo === '' ? r.tagNo : r.designNo) as RpAllValue;
-  const records: RpAllRecord[] = pending.map((r) => ({
-    ...r,
-    design: designOf(r),
-    vchGroup: `${r.tagNo}${r.designNo}` as RpAllValue,
-  }));
-
-  it('groups by tag+design and keeps totals unchanged when OnlySumm=Y (OrdDesignSumm.xml:685)', () => {
-    const no = runLayout(layout(false), records);
-    const yes = runLayout(layout(true), records);
-    expect(no.rows.length).toBeGreaterThan(0);
-    expect(yes.rows).toHaveLength(0);
-    expect(yes.totals.pcs).toBe(no.totals.pcs);
-    expect(yes.totals.nwt).toBe(no.totals.nwt);
-  });
-});
-
-describe('Bill Wise Adjust (BtnBillWiseOrdAdj → BillWiseOrderAdjust)', () => {
-  const bills: RpAllRecord[] = [
-    {
-      coBook: 'SB',
-      vchNo: 'S1',
-      vchDate: '2026-01-18',
-      billAcCode: 'P1',
-      billAcName: 'ALPHA JEWELS',
-      billTotAmt: 12000,
-    },
-    {
-      coBook: 'SB',
-      vchNo: 'S2',
-      vchDate: '2026-01-22',
-      billAcCode: 'P1',
-      billAcName: 'ALPHA JEWELS',
-      billTotAmt: 9000,
-    },
-  ];
-  const billRows: RpAllRecord[] = [];
-  for (const bill of bills) {
-    const children = adjustments.filter((a) => a.billNo === bill.vchNo);
-    for (const a of children) {
-      billRows.push({
-        ...a,
-        coBook: bill.coBook as RpAllValue,
-        vchNo: bill.vchNo as RpAllValue,
-        vchDate: bill.vchDate as RpAllValue,
-        billAcCode: bill.billAcCode as RpAllValue,
-        billAcName: bill.billAcName as RpAllValue,
-        billTotAmt: bill.billTotAmt as RpAllValue,
-        billVchGroup: `${a.coCode}${a.lcCode}${a.coYear}${bill.coBook}${bill.vchNo}` as RpAllValue,
-        adjAmt: Number(a.ordAmt),
-      });
+  const r = run('with-bill', adjustRecords(true));
+  it('order band: ADV_AMT, Sum(@AdjAmt) of the minus rows and @PandingTot = ADV_AMT - Sum', () => {
+    for (const vch of ['O1', 'O3']) {
+      const adj = ADJ.filter((a) => a.ord === vch && a.sign === '-').reduce((s, a) => s + a.amt, 0);
+      const g = r.groups.find((x) => x.depth === 1 && x.key === vch)!;
+      expect(g.totals).toEqual({ advAmt: orderOf(vch).advAmt, adjAmt: adj, pendingAmt: orderOf(vch).advAmt - adj });
     }
-  }
-  const layout: RpAllLayout = {
-    template: 'BillWiseOrderAdjust',
-    titlePrefix: 'Bill Wise Order Adjust Report',
-    columns: [
-      col('billAcName', 'Party', 'text', 'line'),
-      col('coBook', 'Book', 'text', 'line'),
-      col('vchNo', 'Bill No', 'text', 'line'),
-      col('vchDate', 'Date', 'date', 'line'),
-      col('billTotAmt', 'Bill Total', 'money', 'line'),
-      col('ordNo', 'Order No', 'text', 'line'),
-      col('adjAmt', 'Adjusted Amt', 'money', 'line'),
-    ],
-    groups: [
-      { key: 'billAcCode', labelKeys: ['billAcName'], subtotal: 'none' },
-      { key: 'billVchGroup', labelKeys: ['vchNo'], subtotal: 'none' },
-    ],
-    sort: [{ key: 'vchNo' }],
-    keys: { voucher: ['coBook', 'vchNo'], line: ['adjSr'] },
-    rowLevels: ['line'],
-    grandTotal: false,
-  };
-  const result = runLayout(layout, billRows);
-
-  it('bases rows on the sale bill and prints the raw adjustment amount (BillWiseOrderAdjust.xml:378-379)', () => {
-    expect(result.rows).toHaveLength(4);
-    const s1 = result.rows.filter((r) => r.cells.vchNo === 'S1');
-    expect(s1.map((r) => r.cells.adjAmt)).toEqual([1500, 500]);
   });
+  it('detail rows carry the adjusting voucher, @AcName and the bill amount', () => {
+    const o3 = r.rows.filter((x) => x.voucherKey.endsWith('|O3')).map((x) => x.cells);
+    expect(o3).toEqual([
+      { adjBook: 'B1', adjVchNo: 'O3', adjVchDate: '2026-01-15', billParty: null, billTotAmt: 0, adjAmt: 0 },
+      { adjBook: 'SB', adjVchNo: 'S2', adjVchDate: '2026-01-22', billParty: 'ALPHA JEWELS', billTotAmt: 9000, adjAmt: 1500 },
+      // @AcName: book 081 prints the fixed text "ORDER CANCEL".
+      { adjBook: '081', adjVchNo: 'C1', adjVchDate: '2026-01-25', billParty: 'ORDER CANCEL', billTotAmt: 0, adjAmt: 1500 },
+    ]);
+    expect(r.grandTotal).toBe(false);
+  });
+});
 
-  it('has no summary band (BillWiseOrderAdjust.xml:398)', () => {
-    expect(layout.grandTotal).toBe(false);
+describe('Making Panding / Making Summ (OrdDetlPanding / OrdDesignSumm)', () => {
+  const pendingLines = ORDERS.flatMap((o) => o.lines.filter((l) => l.isu === 'N').map((l) => ({ o, l })));
+  // The adapter returns only DESIGN_ISU = 'N' lines (RP_ALL.cs:10940); feed exactly that set.
+  const recs = lineRecords().filter((x) => x.designIsu === 'N');
+  it('Making Panding groups per order and prints @Design = DESIGN_NO, or TAG_NO when it is empty', () => {
+    const r = run('pending', recs);
+    expect(r.groups.map((g) => g.key)).toEqual(pendingLines.filter((x, i, a) => a.findIndex((y) => y.o === x.o) === i).map((x) => `${YEAR}${x.o.book}${x.o.vch}`).sort());
+    expect(r.rows.filter((x) => x.level === 'line').map((x) => x.cells.design)).toEqual(['D1', 'T2', 'D3', 'D1']);
+    expect(r.totals.pcs).toBe(pendingLines.reduce((s, x) => s + x.l.pcs, 0));
+    expect(r.totals.nwt).toBe(round(pendingLines.reduce((s, x) => s + x.l.nwt, 0), 3));
+  });
+  it('Making Summ groups on @VchGroup = TAG_NO&DESIGN_NO with header sums; OnlySumm=Y hides only the detail', () => {
+    const no = run('summary', recs);
+    const yes = run('summary', recs, { onlySummary: 'yes' });
+    const t1d1 = pendingLines.filter((x) => x.l.tagNo === 'T1' && x.l.designNo === 'D1');
+    const g = no.groups.find((x) => x.key === 'T1D1')!;
+    expect(g.label).toBe('T1D1');
+    expect(g.totals).toEqual({ pcs: t1d1.reduce((s, x) => s + x.l.pcs, 0), nwt: round(t1d1.reduce((s, x) => s + x.l.nwt, 0), 3) });
+    expect(no.rows).toHaveLength(pendingLines.length);
+    expect(yes.rows).toHaveLength(0);
+    expect(yes.totals).toEqual(no.totals);
+    expect(yes.groups.map((x) => x.totals)).toEqual(no.groups.map((x) => x.totals));
+  });
+});
+
+describe('Bill Wise Adjust (btnbillwiseordadj → BillWiseOrderAdjust)', () => {
+  const recs: RpAllRecord[] = ADJ.filter((a) => a.bill).map((a) => ({
+    coCode: '01', lcCode: '01', coYear: YEAR, coBook: a.book, vchNo: a.vch, vchDate: a.date,
+    billAcCode: 'P1', billAcName: a.bill!.acName, billTotAmt: a.bill!.tot, billAdvAmt: a.bill!.adv, bookName: 'Sales Bill',
+    ...adjCols(a), orderPartyName: orderOf(a.ord).acName,
+  }));
+  const r = run('bill-wise', recs);
+  it('one band per bill with its amounts, then one row per adjustment with the raw ORD_AMT; no totals (D13)', () => {
+    expect(r.rows.map((x) => [x.level, x.level === 'voucher' ? x.cells.vchNo : x.cells.ordNo, x.level === 'voucher' ? x.cells.billTotAmt : x.cells.ordAmt])).toEqual([
+      ['voucher', 'S1', 12000], ['line', 'O1', 1500], ['line', 'O1', 500],
+      ['voucher', 'S2', 9000], ['line', 'O3', 1500],
+    ]);
+    expect(r.rows[0]!.cells.billAdvAmt).toBe(2000);
+    expect(r.rows[1]!.cells.orderPartyName).toBe('ALPHA JEWELS');
+    expect(r.grandTotal).toBe(false);
+  });
+});
+
+describe('Order SQL follows the template record sets and binds every value', () => {
+  const sql = (mode: OrderMode, extra: Record<string, unknown> = {}) => {
+    const req = request(mode, extra);
+    const spec = ORDER_SPECS[mode];
+    return buildOrderQuery({ shape: spec.variant.query, scope: SESSION, filters: req.filters, applied: new Set(spec.filters) });
+  };
+  const flat = (s: string) => s.replace(/\s+/g, ' ');
+  it('Order Adjust reaches adjustments through ORD_NO/ORD_LC/ORD_YRCD/ORD_DBCD (OrdAdvAdj.xml TableLink)', () => {
+    expect(flat(sql('adjust').text)).toContain('a."ORD_NO" = d."VCH_NO" AND a."ORD_LC" = d."LC_CODE" AND a."ORD_YRCD" = d."CO_YEAR" AND a."ORD_DBCD" = d."CO_BOOK"');
+  });
+  it('Order Wise Bill links ORD_* without the location and the bill through the adjustment\'s own keys', () => {
+    const t = flat(sql('with-bill').text);
+    expect(t).toContain('a."ORD_NO" = d."VCH_NO" AND a."ORD_YRCD" = d."CO_YEAR" AND a."ORD_DBCD" = d."CO_BOOK"');
+    expect(t).not.toContain('a."ORD_LC" = d."LC_CODE"');
+    expect(t).toContain('s."CO_CODE" = a."CO_CODE" AND s."LC_CODE" = a."LC_CODE" AND s."CO_YEAR" = a."CO_YEAR" AND s."CO_BOOK" = a."CO_BOOK" AND s."VCH_NO" = a."VCH_NO"');
+  });
+  it('Bill Wise Adjust inner-joins SL_DATA to SL_ORD_ADJ and applies all six selectors (RP_ALL.cs:12609-12632)', () => {
+    const q = sql('bill-wise', { coBook: 'SB', acCode: 'P1', city: 'SURAT', area: 'ADAJAN', custName: "O'NEIL" });
+    const t = flat(q.text);
+    expect(t).toMatch(/FROM "SL_DATA" d JOIN "SL_ORD_ADJ" a/);
+    expect(t).toContain('m."AC_CODE" = a."ORD_AC_CODE"');
+    for (const c of ['d."LC_CODE" = $', 'd."CO_BOOK" = $', 'd."AC_CODE" = $', 'ac."AC_CITY" = $', 'ac."AC_AREA" = $', 'd."AC_NAME" = $']) expect(t).toContain(c);
+    expect(q.values).toEqual(['01', FROM_DATE, TO_DATE, '01', 'SB', 'P1', 'SURAT', 'ADAJAN', "O'NEIL"]);
+    expect(q.text).not.toContain("O'NEIL");
+  });
+  it('Making Panding filters DESIGN_ISU = N only (the fully-adjusted flagging is one registration\'s branch, RP_ALL.cs:10925)', () => {
+    const t = flat(sql('pending').text);
+    expect(t).toContain(`l."DESIGN_ISU" = 'N'`);
+    expect(t).not.toContain('HAVING');
+    expect(flat(sql('report').text)).not.toContain('DESIGN_ISU" =');
+  });
+});
+
+describe('Export rows are built from the same result as the grid', () => {
+  it('Order Report export: every header and line row, then the "Total :" line', () => {
+    const r = run('report', lineRecords());
+    const table = exportTable(r);
+    const body = table.lines.filter((l) => l._band === 'voucher' || l._band === 'line');
+    expect(body).toHaveLength(r.rows.length);
+    expect(table.lines[table.lines.length - 1]).toMatchObject({ _band: 'Total :', pcs: String(r.totals.pcs) });
   });
 });
 
@@ -737,44 +290,5 @@ describe('Shared selectors for the Order branch', () => {
     expect(f.grCode).toBe('G1');
     expect(f.itemType).toBe('G');
     // These selectors exist in the shared parser but an Order adapter must not apply them.
-  });
-});
-
-describe('Export rows are built from the same result as the grid', () => {
-  const layout: RpAllLayout = {
-    template: 'OrdDetlRpt',
-    titlePrefix: 'Order Report',
-    columns: [col('vchNo', 'Vch No', 'text', 'line'), col('pcs', 'Pcs', 'pcs', 'line', true)],
-    groups: [],
-    sort: [{ key: 'vchNo' }],
-    keys: { voucher: ['coBook', 'vchNo'], line: ['srNo'] },
-    rowLevels: ['line'],
-    grandTotal: true,
-  };
-  const engineResult = runLayout(layout, ORDER_LINES);
-  const result: RpAllResult = {
-    branch: 'order' as any,
-    mode: 'report' as any,
-    caption: 'Order Report',
-    variant: 'sale',
-    template: layout.template,
-    title: reportTitle(layout.titlePrefix, FROM_DATE, TO_DATE),
-    columns: [...layout.columns],
-    groups: engineResult.groups,
-    groupLevels: [],
-    rows: engineResult.rows,
-    totals: engineResult.totals,
-    grandTotal: layout.grandTotal,
-    grandTotalCaption: 'Total',
-    voucherCount: engineResult.voucherCount,
-    filters: { fromDate: FROM_DATE, toDate: TO_DATE, lcCode: '01' },
-    ignoredFilters: [],
-    cite: '',
-  };
-  const table = exportTable(result);
-
-  it('includes every detail row and a grand total line', () => {
-    expect(table.lines).toHaveLength(ORDER_LINES.length + 1);
-    expect(table.lines[table.lines.length - 1]!._band).toBe('Total');
   });
 });

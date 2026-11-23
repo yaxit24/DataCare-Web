@@ -377,6 +377,7 @@ export const FORM_EDITION: Readonly<Record<string, EditionTier>> = Object.freeze
   'Reports/Account Ledger': 'L',
   'Reports/Address Print': 'B',
   'Reports/Approval Report': 'L',
+  'Reports/Order Report': 'L',
   'Reports/Area-wise Outstanding': 'B',
   'Reports/Area-wise Sales': 'L',
   'Reports/Balance Sheet': 'S',

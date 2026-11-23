@@ -44,13 +44,6 @@ const SYSTEM = new Set([
   'GET /vouchers/neighbour',
   'GET /integrations/barcode',
   'GET /integrations/qr',
-  // WP-14: the RP_ALL Order Report screen and its exports (routes/rpAllReport.ts). Its "Order Report"
-  // caption has no form-catalog entry and formCatalog.ts is outside this packet's scope, so a form policy
-  // would throw at boot. The handlers enforce the caption's USER_SET FRM_VIEW/FRM_PRINT rights themselves;
-  // these entries exist so the fail-closed onRoute hook accepts the registered paths.
-  'GET /reports/order-report',
-  'GET /reports/order-report/export.csv',
-  'GET /reports/order-report/export.xlsx',
 ]);
 
 export const MASTER_FORM_BY_NAME: Readonly<Record<string, string>> = {
@@ -949,6 +942,13 @@ route('Reports/Sales Register', [
   'GET /reports/sales-report/export.csv',
   'GET /reports/sales-report/export.xlsx',
 ]);
+// WP-14: the RP_ALL Order Report screen and its exports, keyed on the "Order Report" caption's own USER_SET
+// row (MDI_FORM.cs:7034 {{DC_Main.MsUserRightForm = MsSideBtn;}}), never on Sales Order (D6).
+route('Reports/Order Report', [
+  'GET /reports/order-report',
+  'GET /reports/order-report/export.csv',
+  'GET /reports/order-report/export.xlsx',
+]);
 route('Reports/Purchase Register', ['GET /reports/purchase-register']);
 route('Reports/Day Book', ['GET /reports/day-book']);
 route('Reports/Rojmel', ['GET /reports/rojmel']);
@@ -1112,6 +1112,8 @@ const PRINT_ROUTES = new Set([
   'GET /reports/gst-report/export.pdf',
   'GET /reports/sales-report/export.csv',
   'GET /reports/sales-report/export.xlsx',
+  'GET /reports/order-report/export.csv',
+  'GET /reports/order-report/export.xlsx',
   'GET /reports/gstr2-doc',
   'GET /reports/gstr1-doc',
   'GET /reports/gstr3b-doc',

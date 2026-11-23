@@ -1,3 +1,4 @@
+import { round } from '@datacare/core';
 import { withTxBudget } from '../../shared/txBudget.js';
 import { reportTitle, runLayout } from './engine.js';
 import {
@@ -289,6 +290,28 @@ export function shapeOrderResult(
       : record,
   );
   const result = runLayout(layout, derived);
+  if (variant.bandFormulas) {
+    // Non-sum header formulas (OrdAdjBillWise @PandingTot) from the band's own sums, money precision.
+    const apply = (totals: Record<string, number>) => {
+      for (const [key, value] of Object.entries(variant.bandFormulas!(totals)))
+        totals[key] = round(value, 2);
+    };
+    result.groups.forEach((group) => {
+      if (layout.groups[group.depth]?.subtotal !== 'none') apply(group.totals);
+    });
+    apply(result.totals);
+  }
+  if (variant.bandFormulas) {
+    // Non-sum header formulas (OrdAdjBillWise @PandingTot) from the band's own sums, money precision.
+    const apply = (totals: Record<string, number>) => {
+      for (const [key, value] of Object.entries(variant.bandFormulas!(totals)))
+        totals[key] = round(value, 2);
+    };
+    result.groups.forEach((group) => {
+      if (layout.groups[group.depth]?.subtotal !== 'none') apply(group.totals);
+    });
+    apply(result.totals);
+  }
   return {
     branch: request.branch,
     mode: request.mode,
