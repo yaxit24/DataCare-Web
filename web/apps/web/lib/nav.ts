@@ -335,6 +335,7 @@ export const NAV: NavGroup[] = [
       { label: 'Address Print', href: '/reports/address-print', ready: true },
       { label: 'Entry Check', href: '/reports/entry-check', ready: true },
       { label: 'User Report', href: '/reports/user-report', ready: true },
+      { label: 'Stock Report', href: '/reports/stock-report', ready: true },
       { label: 'Tag-Stock Report', href: '/reports/tag-stock', ready: true },
       { label: 'Karigar Ledger', href: '/reports/karigar-ledger', ready: true },
       { label: 'Old Gold / Exchange', href: '/reports/old-gold-register', ready: true },

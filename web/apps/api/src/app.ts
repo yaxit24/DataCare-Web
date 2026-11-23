@@ -411,6 +411,10 @@ export async function buildApp(opts: BuildOpts): Promise<FastifyInstance> {
     // Tag Stock (RP_TAG) likewise owns a typed parser (tagStock.ts parseTagStockQuery) with its own location and
     // item selectors (lcCode, itType, tblCode); it validates, refuses unknown keys and fails closed itself.
     if (url.startsWith('/reports/tag-stock')) return;
+    // The Stock Report (RP_STOCK) owns a typed parser (modules/reports/stockReport/parse.ts): group, product, item,
+    // design, safe, counter, tag and account are its own selectors (RP_STOCK.cs:4287-4327), and it refuses any
+    // other key itself (400 unknown-filter), so this guard, which only knows the shared RP_ALL panel, must not.
+    if (url.startsWith('/reports/stock-report')) return;
     const q = (req.query ?? {}) as Record<string, string | undefined>;
     const asked = REPORT_FILTER_KEYS.filter((k) => String(q[k] ?? '').trim());
     if (!asked.length) return;

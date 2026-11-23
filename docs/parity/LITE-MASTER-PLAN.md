@@ -408,7 +408,7 @@ browser case per screen first (red), then the hook (green).
 | WP-13 | Approval Rpt | `RP_ALL` approval branch | P2 | M | WP-11, WP-01 | 03 | partial |
 | WP-14 | Order Report | `RP_ALL` order branch | P2 | M | WP-11, WP-03 | — (use 01's pattern) | no longer BROKEN once WP-03 (#232) merges |
 | WP-15 | Tag Stock | `RP_TAG.cs` (10,813) | P1 | L | — | 04 | N238/G250: selections, stock rule, totals and keys implemented (DB tests pass); zoom, Print window, other-item columns open; browser module not yet run |
-| WP-16 | Stock Report (new route) | `RP_STOCK.cs` (6,407) | P1 | L | WP-15 | 05 | not started |
+| WP-16 | Stock Report (new route) | `RP_STOCK.cs` (6,407) | P1 | L | WP-15 | 05 | PR open (N241, G253) |
 | WP-17 | Cash Bank | `RP_CASH_BANK.cs` (4,813) | P1 | L | — | 06 | not started |
 | WP-18 | HuId Report | `RP_HUID.cs` (2,731) | P2 | M | — | 08 | filters only |
 | WP-19 | Gst Report: the 12 blocked cases | `RP_GST.cs` (3,944) | P1 | M | — | 07 | PR (N239/G251): 9 of 12 executable; 3 blocked (EXP.csv Q9, T14 injector x2) |
@@ -432,7 +432,7 @@ sections are part of this WP; the UAE variant is out of scope (Lite India).
 
 | WP | Menu | Desktop form | Pri | Size | Depends | Prompt | State |
 |---|---|---|---|---|---|---|---|
-| WP-21 | Books | `MS_BOOK.cs` (3,122) | P1 | L | — | 13 | not started |
+| WP-21 | Books | `MS_BOOK.cs` (3,122) | P1 | L | — | 13 | PR open (N240/G252) |
 | WP-22 | Year Create (corrected scope) | `MS_YEAR.cs` (1,596) | P2 | S | — | 14 + GB-07 | not started |
 | WP-23 | Balance TrFr | `BtmSchm.cs` (5,638) | P0 | L | WP-22 | 15 | PR #243 (N236/G248): Ac Balance and Item Stock carried; Tag Stock, Sales Order, Approval implicit (one database) |
 | WP-24 | Data Refresh PR-2 | `MS_UPDATE.cs` (6 visible buttons) | P1 | L | — | 17 | 12/20 |

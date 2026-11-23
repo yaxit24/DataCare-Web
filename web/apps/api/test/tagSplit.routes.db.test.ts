@@ -385,10 +385,11 @@ const SRNO = 100319000001;
       `SELECT "AC_CODE" ac,"SIGN" sign FROM "AC_DATA" WHERE tenant_id=$1 AND "CO_BOOK"='TSP' ORDER BY "LEDR_KEY"`,
       tenantId,
     );
-    // Legs 03/04: SPLITAC Dr and slot-6 (PURCHASE) Cr mirror.
+    // Legs 03/04: SPLITAC Dr and the slot-6 Cr mirror; slot 6 is the TAG SPLIT template's sales gold account
+    // (MS_UPDATE.cs:32098), provisioned as SALES since N240 (G252).
     expect(legs).toEqual([
       { ac: 'SPLITAC', sign: '-' },
-      { ac: 'PURCHASE', sign: '+' },
+      { ac: 'SALES', sign: '+' },
     ]);
     // Clean up so the deadlock test starts from a single live parent.
     const removed = await request('splitter', 'DELETE', '/stock/tag-split/00001?coBook=TSP');
