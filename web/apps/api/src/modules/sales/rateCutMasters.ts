@@ -45,3 +45,47 @@ export async function readPartyTx(
   const text = (value: unknown): string | undefined => String(value ?? '').trim() || undefined;
   return { name: text(row.AC_NAME), mobile: text(row.AC_MOBILE) };
 }
+
+export interface ItemInfo {
+  name: string;
+  prCode: string;
+  rateType: string;
+}
+
+/** The item master fields a grid row takes when the item is entered (TR_WH_SALE.cs:11109-11116). */
+export async function readItemsTx(
+  tx: any,
+  tenantId: string,
+  coCode: string,
+  codes: string[],
+): Promise<Map<string, ItemInfo>> {
+  const wanted = [...new Set(codes.map((code) => code.trim()).filter(Boolean))];
+  const out = new Map<string, ItemInfo>();
+  if (!wanted.length) return out;
+  const rows: Array<Record<string, unknown>> = await tx.$queryRawUnsafe(
+    `SELECT "IT_CODE","IT_NAME","PR_CODE","RATE_TYPE" FROM "ITEM_MAST"
+      WHERE tenant_id=$1 AND "CO_CODE"=$2 AND "IT_CODE" = ANY($3::text[])`,
+    tenantId,
+    coCode,
+    wanted,
+  );
+  const trim = (value: unknown): string => String(value ?? '').trim();
+  for (const row of rows) {
+    out.set(trim(row.IT_CODE), {
+      name: trim(row.IT_NAME),
+      prCode: trim(row.PR_CODE),
+      rateType: trim(row.RATE_TYPE).toUpperCase(),
+    });
+  }
+  return out;
+}
+
+/** `MsLbrType` = `CO_SET.LBR_TYPE`, blank read as 'G' (MS_OPNCOMP.cs:664, :733-735). */
+export function companyLabourType(value: unknown): string {
+  return (
+    String(value ?? '')
+      .trim()
+      .toUpperCase()
+      .slice(0, 1) || 'G'
+  );
+}

@@ -117,20 +117,37 @@ export function buildWholesaleRojmel(ctx: RojmelContext, input: WholesaleRojmelI
 
   if (purchase !== undefined && (input.drFine !== 0 || input.purchaseBillOs > 0))
     rows.push({
-      ...base('01'), AC_CODE: party, LD_CODE: purchase, CR_AMT: input.purchaseBillOs > 0 ? input.purchaseBillOs : 0,
-      IT_TYPE: 'G', SIGN: '-', ITM_FINE: input.drFine, ITM_RATE: input.fineRate,
+      ...base('01'),
+      AC_CODE: party,
+      LD_CODE: purchase,
+      CR_AMT: input.purchaseBillOs > 0 ? input.purchaseBillOs : 0,
+      IT_TYPE: 'G',
+      SIGN: '-',
+      ITM_FINE: input.drFine,
+      ITM_RATE: input.fineRate,
     });
   if (purchase !== undefined && input.purchaseAmount !== 0)
     rows.push({ ...base('02'), AC_CODE: purchase, LD_CODE: party, DR_AMT: input.purchaseAmount });
   if (sale !== undefined && (input.crFine !== 0 || input.saleBillOs > 0))
     rows.push({
-      ...base('03'), AC_CODE: party, LD_CODE: sale, DR_AMT: input.saleBillOs > 0 ? input.saleBillOs : 0,
-      IT_TYPE: 'G', SIGN: '+', ITM_FINE: input.crFine, ITM_RATE: input.fineRate,
+      ...base('03'),
+      AC_CODE: party,
+      LD_CODE: sale,
+      DR_AMT: input.saleBillOs > 0 ? input.saleBillOs : 0,
+      IT_TYPE: 'G',
+      SIGN: '+',
+      ITM_FINE: input.crFine,
+      ITM_RATE: input.fineRate,
     });
   if (sale !== undefined && input.saleAmount !== 0)
     rows.push({ ...base('04'), AC_CODE: sale, LD_CODE: party, CR_AMT: input.saleAmount });
 
-  const lineRow = (type: string, line: WholesaleRojmelLine, ld: string, sign: '-' | '+'): RojmelRow => ({
+  const lineRow = (
+    type: string,
+    line: WholesaleRojmelLine,
+    ld: string,
+    sign: '-' | '+',
+  ): RojmelRow => ({
     ...base(type, line.srNo),
     AC_CODE: party,
     LD_CODE: ld,
@@ -148,55 +165,112 @@ export function buildWholesaleRojmel(ctx: RojmelContext, input: WholesaleRojmelI
   });
   const qualifies = (line: WholesaleRojmelLine): boolean =>
     line.fine !== 0 && line.itemAmount === 0 && line.itType === 'G';
-  if (sale !== undefined) for (const line of input.issued) if (qualifies(line)) rows.push(lineRow('05', line, sale, '-'));
-  if (purchase !== undefined) for (const line of input.received) if (qualifies(line)) rows.push(lineRow('06', line, purchase, '+'));
+  if (sale !== undefined)
+    for (const line of input.issued) if (qualifies(line)) rows.push(lineRow('05', line, sale, '-'));
+  if (purchase !== undefined)
+    for (const line of input.received)
+      if (qualifies(line)) rows.push(lineRow('06', line, purchase, '+'));
 
   if (has(12) && input.ksrFineDr !== 0)
     rows.push({
-      ...base('07'), AC_CODE: party, LD_CODE: at(12), AC_NAME: `KSR - ${input.masterName}`,
-      IT_TYPE: 'G', SIGN: '-', ITM_FINE: input.ksrFineDr,
+      ...base('07'),
+      AC_CODE: party,
+      LD_CODE: at(12),
+      AC_NAME: `KSR - ${input.masterName}`,
+      IT_TYPE: 'G',
+      SIGN: '-',
+      ITM_FINE: input.ksrFineDr,
     });
   if (has(12) && input.ksrFineCr !== 0)
     rows.push({
-      ...base('08'), AC_CODE: party, LD_CODE: at(12), AC_NAME: `KSR - ${input.masterName}`,
-      IT_TYPE: 'G', SIGN: '+', ITM_FINE: input.ksrFineCr,
+      ...base('08'),
+      AC_CODE: party,
+      LD_CODE: at(12),
+      AC_NAME: `KSR - ${input.masterName}`,
+      IT_TYPE: 'G',
+      SIGN: '+',
+      ITM_FINE: input.ksrFineCr,
     });
 
   if (purchase !== undefined && input.purchaseBillOs < 0)
-    rows.push({ ...base('13'), AC_CODE: party, LD_CODE: purchase, DR_AMT: Math.abs(input.purchaseBillOs) });
+    rows.push({
+      ...base('13'),
+      AC_CODE: party,
+      LD_CODE: purchase,
+      DR_AMT: Math.abs(input.purchaseBillOs),
+    });
   // The source joins slot 8 (the silver sale account) for type 14 and filters no metal; kept as written.
   if (has(8) && input.saleBillOs < 0)
     rows.push({
-      ...base('14'), AC_CODE: party, LD_CODE: at(8), CR_AMT: Math.abs(input.saleBillOs),
+      ...base('14'),
+      AC_CODE: party,
+      LD_CODE: at(8),
+      CR_AMT: Math.abs(input.saleBillOs),
     });
 
   // Sale-side tender and purchase labour (Ac_Rojmel.cs:263-277); the cheque and card rows join slot 1, kasar 4, labour 7.
   if (has(1) && input.saleChequeAmount !== 0)
-    rows.push({ ...base('21'), AC_CODE: input.bankAc, LD_CODE: party, AC_NAME: '', DR_AMT: input.saleChequeAmount });
+    rows.push({
+      ...base('21'),
+      AC_CODE: input.bankAc,
+      LD_CODE: party,
+      AC_NAME: '',
+      DR_AMT: input.saleChequeAmount,
+    });
   if (has(1) && input.saleCardAmount !== 0)
-    rows.push({ ...base('23'), AC_CODE: input.cardAc, LD_CODE: party, AC_NAME: '', DR_AMT: input.saleCardAmount });
+    rows.push({
+      ...base('23'),
+      AC_CODE: input.cardAc,
+      LD_CODE: party,
+      AC_NAME: '',
+      DR_AMT: input.saleCardAmount,
+    });
   if (has(1) && input.purchaseCardAmount !== 0)
-    rows.push({ ...base('24'), AC_CODE: input.cardAc, LD_CODE: party, AC_NAME: '', CR_AMT: input.purchaseCardAmount });
+    rows.push({
+      ...base('24'),
+      AC_CODE: input.cardAc,
+      LD_CODE: party,
+      AC_NAME: '',
+      CR_AMT: input.purchaseCardAmount,
+    });
   if (has(4) && input.saleKasarAmount !== 0)
     rows.push({
-      ...base('25'), AC_CODE: at(4), LD_CODE: party, AC_NAME: `KSR - ${input.headerName}`, DR_AMT: input.saleKasarAmount,
+      ...base('25'),
+      AC_CODE: at(4),
+      LD_CODE: party,
+      AC_NAME: `KSR - ${input.headerName}`,
+      DR_AMT: input.saleKasarAmount,
     });
   if (has(7) && input.purchaseLabourAmount !== 0)
     rows.push({
-      ...base('28'), AC_CODE: at(7), LD_CODE: party, AC_NAME: `LBR - ${input.headerName}`, DR_AMT: input.purchaseLabourAmount,
+      ...base('28'),
+      AC_CODE: at(7),
+      LD_CODE: party,
+      AC_NAME: `LBR - ${input.headerName}`,
+      DR_AMT: input.purchaseLabourAmount,
     });
   if (input.purchaseChequeAmount !== 0)
     rows.push({
-      ...base('22'), AC_CODE: input.bankAc, LD_CODE: party, AC_NAME: '', CR_AMT: input.purchaseChequeAmount,
+      ...base('22'),
+      AC_CODE: input.bankAc,
+      LD_CODE: party,
+      AC_NAME: '',
+      CR_AMT: input.purchaseChequeAmount,
     });
   if (has(5) && input.purchaseKasarAmount !== 0)
     rows.push({
-      ...base('26'), AC_CODE: at(5), LD_CODE: party, AC_NAME: `KSR - ${input.headerName}`,
+      ...base('26'),
+      AC_CODE: at(5),
+      LD_CODE: party,
+      AC_NAME: `KSR - ${input.headerName}`,
       CR_AMT: input.purchaseKasarAmount,
     });
   if (has(6) && input.labourAmount !== 0)
     rows.push({
-      ...base('27'), AC_CODE: at(6), LD_CODE: party, AC_NAME: `LBR - ${input.headerName}`,
+      ...base('27'),
+      AC_CODE: at(6),
+      LD_CODE: party,
+      AC_NAME: `LBR - ${input.headerName}`,
       CR_AMT: input.labourAmount,
     });
   return rows;

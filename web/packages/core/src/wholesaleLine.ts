@@ -373,7 +373,9 @@ export function wholesaleBand(input: WholesaleBandInput): WholesaleBand {
     paymentNet - payment.cash - payment.cheque - payment.card - payment.kasar,
   );
   const totFineDr = format3(n(input.issued.fine) + n(input.settlement.drFine) + n(input.ksrFineDr));
-  const totFineCr = format3(n(input.received.fine) + n(input.settlement.crFine) + n(input.ksrFineCr));
+  const totFineCr = format3(
+    n(input.received.fine) + n(input.settlement.crFine) + n(input.ksrFineCr),
+  );
   const diffSide: WholesaleBand['diffSide'] =
     paymentOs > receivedOs ? 'Pay' : paymentOs < receivedOs ? 'Rec' : '';
   return {

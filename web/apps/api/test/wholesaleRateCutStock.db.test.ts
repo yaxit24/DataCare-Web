@@ -757,7 +757,11 @@ d('wholesale sale / rate cut: stock movement and desktop ledger legs (X16)', () 
          FROM "RATE_CUT_ISU" WHERE tenant_id=$1`,
     );
     expect(line).toEqual({ id: 7, DESIGN_NO: 'D-7', ITM_SIZE: '5', PR_CODE: 'LR', gwt: 8 });
-    await deleteWholesaleSale(runtime, { scope: WH, vchNo: 1, expectedVersion: await versionOf(1) });
+    await deleteWholesaleSale(runtime, {
+      scope: WH,
+      vchNo: 1,
+      expectedVersion: await versionOf(1),
+    });
     expect(
       await rows(
         `SELECT "TAG_NO","VCH_SRNO"::float8 AS id,"ITM_GWT"::float8 AS gwt,"ITM_NWT"::float8 AS nwt,

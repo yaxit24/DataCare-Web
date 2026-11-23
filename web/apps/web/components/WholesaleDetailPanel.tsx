@@ -120,15 +120,16 @@ export function WholesaleDetailPanel({
       }
       return;
     }
-    if (!focusNext(event.currentTarget, table.current ?? undefined))
-      event.currentTarget.blur();
+    if (!focusNext(event.currentTarget, table.current ?? undefined)) event.currentTarget.blur();
   };
 
   const pickItem = (index: number, row: LookupRow) =>
     set(index, {
       itCode: String(row.code ?? ''),
       itemName: String(row.name ?? ''),
-      itType: String(row.IT_TYPE ?? '').trim().toUpperCase(),
+      itType: String(row.IT_TYPE ?? '')
+        .trim()
+        .toUpperCase(),
     });
   const pickDiamond = (index: number, row: LookupRow) => {
     const current = visible[index]!;
@@ -141,7 +142,12 @@ export function WholesaleDetailPanel({
   };
 
   return (
-    <div className="panel" role="region" aria-label={`Item detail Issue line ${lineNo}`} data-testid="wholesale-detail-panel">
+    <div
+      className="panel"
+      role="region"
+      aria-label={`Item detail Issue line ${lineNo}`}
+      data-testid="wholesale-detail-panel"
+    >
       <div className="toolbar" style={{ justifyContent: 'space-between' }}>
         <h3 style={{ margin: 0 }}>Item detail — issue line {lineNo}</h3>
         <button type="button" className="ghost" onClick={onClose} aria-label="Close item detail">
@@ -158,10 +164,18 @@ export function WholesaleDetailPanel({
                   {c.label}
                 </th>
               ))}
-              <th scope="col" className="num">ConWt</th>
-              <th scope="col" className="num">ItAmt</th>
-              <th scope="col" className="num">DiscAmt</th>
-              <th scope="col" className="num">LbrAmt</th>
+              <th scope="col" className="num">
+                ConWt
+              </th>
+              <th scope="col" className="num">
+                ItAmt
+              </th>
+              <th scope="col" className="num">
+                DiscAmt
+              </th>
+              <th scope="col" className="num">
+                LbrAmt
+              </th>
             </tr>
           </thead>
           <tbody>
@@ -207,10 +221,18 @@ export function WholesaleDetailPanel({
                       )}
                     </td>
                   ))}
-                  <td className="num" data-testid={`detail-con-wt-${index}`}>{weight(result.conWt)}</td>
-                  <td className="num" data-testid={`detail-it-amt-${index}`}>{money(result.itAmt)}</td>
-                  <td className="num" data-testid={`detail-disc-amt-${index}`}>{money(result.discAmt)}</td>
-                  <td className="num" data-testid={`detail-lbr-amt-${index}`}>{money(result.lbrAmt)}</td>
+                  <td className="num" data-testid={`detail-con-wt-${index}`}>
+                    {weight(result.conWt)}
+                  </td>
+                  <td className="num" data-testid={`detail-it-amt-${index}`}>
+                    {money(result.itAmt)}
+                  </td>
+                  <td className="num" data-testid={`detail-disc-amt-${index}`}>
+                    {money(result.discAmt)}
+                  </td>
+                  <td className="num" data-testid={`detail-lbr-amt-${index}`}>
+                    {money(result.lbrAmt)}
+                  </td>
                 </tr>
               );
             })}
@@ -218,8 +240,11 @@ export function WholesaleDetailPanel({
         </table>
       </div>
       <p className="muted" style={{ marginTop: 6 }}>
-        Enter next cell · Ctrl+D delete row · Esc back to the issue line. Net amount shown in each row is stored as
-        computed: <b data-testid="detail-net-total">{money(visible.reduce((t, r) => t + computeDetail(r).netAmt, 0))}</b>
+        Enter next cell · Ctrl+D delete row · Esc back to the issue line. Net amount shown in each
+        row is stored as computed:{' '}
+        <b data-testid="detail-net-total">
+          {money(visible.reduce((t, r) => t + computeDetail(r).netAmt, 0))}
+        </b>
       </p>
     </div>
   );

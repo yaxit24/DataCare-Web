@@ -646,8 +646,8 @@ export function WholesaleVoucherForm({ workflow }: { workflow: WholesaleWorkflow
                   : column.kind === 'detail'
                     ? 'Detail'
                     : column.kind === 'remove'
-                    ? ''
-                    : column.label;
+                      ? ''
+                      : column.label;
     const numeric = column.kind === 'input' ? !column.text : column.kind !== 'index';
     return (
       <th key={position} scope="col" className={numeric ? 'num' : undefined}>
@@ -999,7 +999,9 @@ export function WholesaleVoucherForm({ workflow }: { workflow: WholesaleWorkflow
           <WholesaleDetailPanel
             lineNo={detailLine + 1}
             rows={voucher.issued[detailLine]!.details}
-            onChange={(rows) => updateLine('issue', detailLine, (line) => withRollup({ ...line, details: rows }))}
+            onChange={(rows) =>
+              updateLine('issue', detailLine, (line) => withRollup({ ...line, details: rows }))
+            }
             onClose={() => setDetailLine(null)}
           />
         ) : null}

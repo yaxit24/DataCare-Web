@@ -108,8 +108,18 @@ describe('WhSalesBill print', () => {
   });
 
   it('prints the SL_IDTL rows under their own line in ISR_NO order: 0, 1 and 2 rows, none under the wrong line', () => {
-    const detail = (itemName: string, pcs: number, grossWt: number, rate: number, netAmt: number) => ({
-      itemName, pcs, grossWt, rate, netAmt,
+    const detail = (
+      itemName: string,
+      pcs: number,
+      grossWt: number,
+      rate: number,
+      netAmt: number,
+    ) => ({
+      itemName,
+      pcs,
+      grossWt,
+      rate,
+      netAmt,
     });
     const withRows = {
       ...voucher,
@@ -124,12 +134,16 @@ describe('WhSalesBill print', () => {
     };
     const flat = text(wholesaleSaleBillHtml(withRows, band, { bookName: 'WH SALES' }));
     // Line 1 has no rows, so its row is followed directly by line 2; line 2 is followed by its two rows in order.
-    expect(flat).toMatch(/Gold Chain[^]*?\|2\|Gold Ring[^]*?\|Diamond\|2\|3\.000\|Rate 101\.00\|763\.00\|Zircon\|4\|0\.500\|Rate 20\.00\|80\.00\|/);
+    expect(flat).toMatch(
+      /Gold Chain[^]*?\|2\|Gold Ring[^]*?\|Diamond\|2\|3\.000\|Rate 101\.00\|763\.00\|Zircon\|4\|0\.500\|Rate 20\.00\|80\.00\|/,
+    );
     expect(flat.indexOf('Gold Chain')).toBeLessThan(flat.indexOf('Gold Ring'));
     expect(flat.indexOf('Gold Ring')).toBeLessThan(flat.indexOf('Diamond'));
     expect(flat.indexOf('Diamond')).toBeLessThan(flat.indexOf('Zircon'));
     expect(flat.indexOf('Zircon')).toBeLessThan(flat.indexOf('Received Item'));
-    expect(flat.slice(flat.indexOf('Gold Chain'), flat.indexOf('Gold Ring'))).not.toContain('Diamond');
+    expect(flat.slice(flat.indexOf('Gold Chain'), flat.indexOf('Gold Ring'))).not.toContain(
+      'Diamond',
+    );
     // The received group prints its own rows after its line.
     expect(flat.indexOf('Old Gold')).toBeLessThan(flat.indexOf('Never'));
   });

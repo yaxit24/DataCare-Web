@@ -14,11 +14,26 @@ import { settleMoneyMetal, type SettlementResult } from './settlement.js';
 import { wholesaleChecksBeforeWrite, wholesaleChecksOnBand } from './wholesaleSaveChecks.js';
 import { releaseRateCutTagsTx } from './rateCutTags.js';
 import { buildWholesaleStoneRows } from './wholesaleTagStones.js';
-import { readPartyTx, readWholesaleSettingsTx } from './rateCutMasters.js';
+import {
+  companyLabourType,
+  readItemsTx,
+  readPartyTx,
+  readWholesaleSettingsTx,
+  type ItemInfo,
+} from './rateCutMasters.js';
 import { applyBookingDrawDownTx } from './rateCutBookingDrawDown.js';
 import { resolveSettingsBehaviorTx } from '../shared/settingsBehavior.js';
-import { rateCutRojmelRows, readWholesaleExtras, wholesaleVersionKey } from './wholesaleResiduals.js';
-import { assertDetailsSent, kasarFine, planWholesaleDetails, WholesaleDetailValidationError } from './wholesaleDetailRows.js';
+import {
+  rateCutRojmelRows,
+  readWholesaleExtras,
+  wholesaleVersionKey,
+} from './wholesaleResiduals.js';
+import {
+  assertDetailsSent,
+  kasarFine,
+  planWholesaleDetails,
+  WholesaleDetailValidationError,
+} from './wholesaleDetailRows.js';
 import { assertVoucherVersionTx, requiredVersion } from '../vouchers/version.js';
 import { formatVoucherNo, nextVoucherNoTx, type VoucherScope } from '../vouchers/numbering.js';
 import { nextHiddenVoucherNoTx, voucherTimestamp } from '../vouchers/lifecycle.js';
@@ -1011,8 +1026,20 @@ export function buildRateCutLedger(key: VoucherKey, ctx: LedgerCtx): LedgerLine[
   const ksr = (partyLeg: number, contraLeg: number, fine: number, partySign: '+' | '-'): void => {
     if (!fine) return;
     const account = slot('fineKasarAc');
-    leg(partyLeg, { AC_CODE: P, LD_CODE: account, IT_TYPE: f.itType, SIGN: partySign, FINE_WT: round3(fine) });
-    leg(contraLeg, { AC_CODE: account, LD_CODE: P, IT_TYPE: f.itType, SIGN: partySign === '+' ? '-' : '+', FINE_WT: round3(fine) });
+    leg(partyLeg, {
+      AC_CODE: P,
+      LD_CODE: account,
+      IT_TYPE: f.itType,
+      SIGN: partySign,
+      FINE_WT: round3(fine),
+    });
+    leg(contraLeg, {
+      AC_CODE: account,
+      LD_CODE: P,
+      IT_TYPE: f.itType,
+      SIGN: partySign === '+' ? '-' : '+',
+      FINE_WT: round3(fine),
+    });
   };
   ksr(27, 28, num(f.ksrFineCr), '+');
   ksr(33, 34, num(f.ksrFineDr), '-');
@@ -1734,7 +1761,13 @@ export async function readRateCut(
     );
 
     const extra = ['wholesale-sale', 'wholesale-quotation'].includes(options.bookGuard ?? '')
-      ? await readWholesaleExtras(tx, scope.tenantId, key, RATE_CUT_WRITE_TABLES, options.bookGuard === 'wholesale-sale')
+      ? await readWholesaleExtras(
+          tx,
+          scope.tenantId,
+          key,
+          RATE_CUT_WRITE_TABLES,
+          options.bookGuard === 'wholesale-sale',
+        )
       : null;
     return {
       ...(extra ? { ...extra.ksr, ...(extra.version ? { version: extra.version } : {}) } : {}),
@@ -1958,9 +1991,13 @@ export async function writeRateCut(
   const p = input.pay ?? {};
   const rp = input.receivedPay ?? {};
   // WP-30: item-detail rows, fine kasar and the version token belong to Wh Sales (and its quotation document).
-  const residual = options.bookGuard === 'wholesale-sale' || options.bookGuard === 'wholesale-quotation';
+  const residual =
+    options.bookGuard === 'wholesale-sale' || options.bookGuard === 'wholesale-quotation';
   const versioned = options.bookGuard === 'wholesale-sale' && options.vchNo != null;
-  if (!residual && (num(input.ksrFineDr) || num(input.ksrFineCr) || issuedInput.some((l) => l.details?.length)))
+  if (
+    !residual &&
+    (num(input.ksrFineDr) || num(input.ksrFineCr) || issuedInput.some((l) => l.details?.length))
+  )
     throw new WholesaleDetailValidationError('fine kasar and item-detail rows are Wh Sales fields');
   let ksrFineDr = kasarFine(input.ksrFineDr, 'ksrFineDr');
   let ksrFineCr = kasarFine(input.ksrFineCr, 'ksrFineCr');
@@ -2016,7 +2053,12 @@ export async function writeRateCut(
       hiddenVoucherNo = String(prior?.HD_VCH_NO ?? '').trim();
       if (versioned) {
         const wk = wholesaleVersionKey(tenantId, key);
-        await assertVoucherVersionTx(tx, RATE_CUT_WRITE_TABLES, wk, requiredVersion(input.expectedVersion));
+        await assertVoucherVersionTx(
+          tx,
+          RATE_CUT_WRITE_TABLES,
+          wk,
+          requiredVersion(input.expectedVersion),
+        );
       }
       // An unchanged reopen+save keeps what the body leaves out: the stored date, bill no, employee and kasar.
       if (!input.vchDate && prior?.VCH_DATE) vchDate = new Date(prior.VCH_DATE as any);
@@ -2092,7 +2134,9 @@ export async function writeRateCut(
       workflow === 'wholesale' && line.lbrType == null
         ? { ...line, lbrType: companyLabourType(behavior.labourType) as RateCutLine['lbrType'] }
         : line;
-    const detailPlan = residual ? await planWholesaleDetails(tx, tenantId, key.CO_CODE, issuedInput) : null;
+    const detailPlan = residual
+      ? await planWholesaleDetails(tx, tenantId, key.CO_CODE, issuedInput)
+      : null;
     const effective: EffectiveLine[] = issuedInput.map((rawLine, index) => {
       const line = detailPlan ? detailPlan.patch(rawLine, index) : rawLine;
       const tag = tags[index];
@@ -2234,15 +2278,35 @@ export async function writeRateCut(
     const rojmelRows = quotation
       ? []
       : rateCutRojmelRows({
-          scope: { coCode: input.scope.coCode, lcCode: input.scope.lcCode, coYear: input.scope.coYear! },
-          key, coBook: key.CO_BOOK, vchNo: key.VCH_NO, vchDate, vchType: classification.vchType,
-          bookName: classification.bookName, dataType: classification.dataType, customer,
-          headerName: voucherInput.acName ?? '', masterName: party?.name ?? voucherInput.acName ?? '',
-          vchDesc: String(voucherInput.vchDesc ?? ''), itType, desktopShape: options.bookGuard === 'wholesale-sale',
-          accounts: accounts as Record<string, string | undefined>, figures: figures as any, headerTotals,
-          bankAc: String(p.bankAc ?? rp.bankAc ?? '').trim(), cardAc: String(p.cardAc ?? rp.cardAc ?? '').trim(),
+          scope: {
+            coCode: input.scope.coCode,
+            lcCode: input.scope.lcCode,
+            coYear: input.scope.coYear!,
+          },
+          key,
+          coBook: key.CO_BOOK,
+          vchNo: key.VCH_NO,
+          vchDate,
+          vchType: classification.vchType,
+          bookName: classification.bookName,
+          dataType: classification.dataType,
+          customer,
+          headerName: voucherInput.acName ?? '',
+          masterName: party?.name ?? voucherInput.acName ?? '',
+          vchDesc: String(voucherInput.vchDesc ?? ''),
+          itType,
+          desktopShape: options.bookGuard === 'wholesale-sale',
+          accounts: accounts as Record<string, string | undefined>,
+          figures: figures as any,
+          headerTotals,
+          bankAc: String(p.bankAc ?? rp.bankAc ?? '').trim(),
+          cardAc: String(p.cardAc ?? rp.cardAc ?? '').trim(),
           slots: accounts.slotRows ?? {},
-          labourAmount: money2(figures.slLbrAmt + figures.slOthAmt), ksrFineDr, ksrFineCr, issuedRows, receivedRows,
+          labourAmount: money2(figures.slLbrAmt + figures.slOthAmt),
+          ksrFineDr,
+          ksrFineCr,
+          issuedRows,
+          receivedRows,
         });
     // The issued tags' stones: SL_IDTL, then DM_DATA (Dm_Wh_Tour_Sale_Detl); wholesaleTagStones.ts.
     const stones = await buildWholesaleStoneRows(
@@ -2328,52 +2392,8 @@ const RATE_CUT_WRITE_TABLES = [
   'DM_DATA',
 ];
 
-interface ItemInfo {
-  name: string;
-  prCode: string;
-  rateType: string;
-}
-
-/** The item master fields a grid row takes when the item is entered (TR_WH_SALE.cs:11109-11116). */
-async function readItemsTx(
-  tx: any,
-  tenantId: string,
-  coCode: string,
-  codes: string[],
-): Promise<Map<string, ItemInfo>> {
-  const wanted = [...new Set(codes.map((code) => code.trim()).filter(Boolean))];
-  const out = new Map<string, ItemInfo>();
-  if (!wanted.length) return out;
-  const rows: Array<Record<string, unknown>> = await tx.$queryRawUnsafe(
-    `SELECT "IT_CODE","IT_NAME","PR_CODE","RATE_TYPE" FROM "ITEM_MAST"
-      WHERE tenant_id=$1 AND "CO_CODE"=$2 AND "IT_CODE" = ANY($3::text[])`,
-    tenantId,
-    coCode,
-    wanted,
-  );
-  const trim = (value: unknown): string => String(value ?? '').trim();
-  for (const row of rows) {
-    out.set(trim(row.IT_CODE), {
-      name: trim(row.IT_NAME),
-      prCode: trim(row.PR_CODE),
-      rateType: trim(row.RATE_TYPE).toUpperCase(),
-    });
-  }
-  return out;
-}
-
 const LABOUR_TYPES = new Set(['G', 'N', 'K', 'P']);
 const RATE_TYPES = new Set(['G', '1', 'K', 'P']);
-
-/** `MsLbrType` = `CO_SET.LBR_TYPE`, blank read as 'G' (MS_OPNCOMP.cs:664, :733-735). */
-function companyLabourType(value: unknown): string {
-  return (
-    String(value ?? '')
-      .trim()
-      .toUpperCase()
-      .slice(0, 1) || 'G'
-  );
-}
 
 /**
  * Fill what the desktop grid fills when a tag or item is entered, leaving everything the caller supplied alone.
@@ -2619,7 +2639,12 @@ export async function reverseRateCut(
     assertRateCutBookGuard(classification, key.CO_BOOK, options.bookGuard);
     const header = await persistedHeaderTx(tx, tenantId, key);
     if (options.bookGuard === 'wholesale-sale')
-      await assertVoucherVersionTx(tx, RATE_CUT_WRITE_TABLES, wholesaleVersionKey(tenantId, key), requiredVersion(input.expectedVersion));
+      await assertVoucherVersionTx(
+        tx,
+        RATE_CUT_WRITE_TABLES,
+        wholesaleVersionKey(tenantId, key),
+        requiredVersion(input.expectedVersion),
+      );
     // Give the voucher's tags back before its stock rows go (see `releaseRateCutTagsTx`).
     const restores = quotation ? [] : await releaseRateCutTagsTx(tx, tenantId, key);
     // Release the booked weight BEFORE the reversal runs: the draw-down joins against

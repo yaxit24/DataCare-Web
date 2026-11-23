@@ -71,7 +71,9 @@ const grid = (lines: any[], receivedLines: any[]): string => {
   const detailRows = (line: any): string =>
     (Array.isArray(line.details) ? line.details : [])
       .map(
-        (d: any) => `<tr class="idtl"><td></td><td style="padding-left:16px">${esc(d.itemName || d.itCode)}</td>
+        (
+          d: any,
+        ) => `<tr class="idtl"><td></td><td style="padding-left:16px">${esc(d.itemName || d.itCode)}</td>
       <td class="r">${n(d.pcs) || ''}</td><td class="r">${wt(d.grossWt)}</td>
       <td class="r" colspan="2">Rate ${money(d.rate)}</td><td colspan="3"></td>
       <td class="r">${money(d.netAmt)}</td></tr>`,

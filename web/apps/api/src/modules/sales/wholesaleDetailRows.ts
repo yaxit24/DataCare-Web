@@ -48,8 +48,20 @@ const TEXT_LIMITS = {
   dmSfNo: 20,
 } as const;
 const NUMERIC = [
-  'pcs', 'pcsWt', 'krLessPrc', 'grossWt', 'tagWt', 'conPct', 'krConPct', 'rate', 'itAmt', 'discPct', 'discAmt',
-  'lbrRate', 'lbrAmt', 'netAmt',
+  'pcs',
+  'pcsWt',
+  'krLessPrc',
+  'grossWt',
+  'tagWt',
+  'conPct',
+  'krConPct',
+  'rate',
+  'itAmt',
+  'discPct',
+  'discAmt',
+  'lbrRate',
+  'lbrAmt',
+  'netAmt',
 ] as const;
 
 const isTagged = (tagNo: unknown): boolean => {
@@ -75,11 +87,19 @@ function validateDetail(raw: unknown, line: number, index: number): Row {
   for (const [field, limit] of Object.entries(TEXT_LIMITS)) {
     const text = String(source[field] ?? '').trim();
     if (text.length > limit)
-      throw new WholesaleDetailValidationError(`${where}: ${field} is longer than ${limit} characters`);
+      throw new WholesaleDetailValidationError(
+        `${where}: ${field} is longer than ${limit} characters`,
+      );
     out[field] = text;
   }
-  out.rateType = String(source.rateType ?? '').trim().toUpperCase().slice(0, 1);
-  out.itType = String(source.itType ?? '').trim().toUpperCase().slice(0, 1);
+  out.rateType = String(source.rateType ?? '')
+    .trim()
+    .toUpperCase()
+    .slice(0, 1);
+  out.itType = String(source.itType ?? '')
+    .trim()
+    .toUpperCase()
+    .slice(0, 1);
   return out;
 }
 
@@ -108,7 +128,12 @@ export async function planWholesaleDetails(
         coCode,
         itCode,
       );
-      types.set(itCode, String(found[0]?.t ?? '').trim().toUpperCase());
+      types.set(
+        itCode,
+        String(found[0]?.t ?? '')
+          .trim()
+          .toUpperCase(),
+      );
     }
     return types.get(itCode)!;
   };
@@ -186,7 +211,14 @@ export function writtenDetails(rows: ComputedDetail[]): ComputedDetail[] {
  */
 export async function assertDetailsSent(
   tx: any,
-  key: { tenantId: string; CO_CODE: string; LC_CODE: string; CO_YEAR: string; CO_BOOK: string; VCH_NO: string },
+  key: {
+    tenantId: string;
+    CO_CODE: string;
+    LC_CODE: string;
+    CO_YEAR: string;
+    CO_BOOK: string;
+    VCH_NO: string;
+  },
   lines: any[],
 ): Promise<void> {
   const stored: Array<{ sr: number }> = await tx.$queryRawUnsafe(
@@ -221,7 +253,14 @@ export function kasarFine(raw: unknown, label: string): number {
 /** The stored rows of a voucher by line serial, as the reopen returns them and as the print draws them. */
 export async function readStoredDetails(
   tx: any,
-  key: { tenantId: string; CO_CODE: string; LC_CODE: string; CO_YEAR: string; CO_BOOK: string; VCH_NO: string },
+  key: {
+    tenantId: string;
+    CO_CODE: string;
+    LC_CODE: string;
+    CO_YEAR: string;
+    CO_BOOK: string;
+    VCH_NO: string;
+  },
 ): Promise<Map<number, Row[]>> {
   const found: Row[] = await tx.$queryRawUnsafe(
     `SELECT A.*, B."IT_NAME" AS item_name FROM "SL_IDTL" A

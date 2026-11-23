@@ -145,7 +145,11 @@ export async function readWholesaleExtras(
   key: { CO_CODE: string; LC_CODE: string; CO_YEAR: string; CO_BOOK: string; VCH_NO: string },
   tables: readonly string[],
   withVersion: boolean,
-): Promise<{ ksr: { ksrFineDr: number; ksrFineCr: number }; version?: string; details: Map<number, Row[]> }> {
+): Promise<{
+  ksr: { ksrFineDr: number; ksrFineCr: number };
+  version?: string;
+  details: Map<number, Row[]>;
+}> {
   const [kasar]: Array<{ dr: number; cr: number }> = await tx.$queryRawUnsafe(
     `SELECT coalesce("KSR_FINE_DR",0)::float8 AS dr, coalesce("KSR_FINE_CR",0)::float8 AS cr FROM "RATE_CUT_DATA"
       WHERE tenant_id=$1 AND "CO_CODE"=$2 AND "LC_CODE"=$3 AND "CO_YEAR"=$4 AND "CO_BOOK"=$5 AND "VCH_NO"=$6 LIMIT 1`,

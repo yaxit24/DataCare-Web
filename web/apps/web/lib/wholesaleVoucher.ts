@@ -179,15 +179,35 @@ export interface DetailRow {
 export type DetailField = Exclude<keyof DetailRow, 'itemName'>;
 
 export const blankDetail = (): DetailRow => ({
-  itCode: '', itemName: '', dmCode: '', dmName: '', dmColor: '', dmSize: '', dmOrigin: '', dmRemark: '', dmSfNo: '',
-  pcs: '', pcsWt: '', krWt: '', krLessPrc: '', grossWt: '', tagWt: '', conPct: '', krConPct: '', rateType: '',
-  rate: '', itAmt: '', discPct: '', discAmt: '', lbrRate: '', lbrAmt: '', netAmt: '', itType: '',
+  itCode: '',
+  itemName: '',
+  dmCode: '',
+  dmName: '',
+  dmColor: '',
+  dmSize: '',
+  dmOrigin: '',
+  dmRemark: '',
+  dmSfNo: '',
+  pcs: '',
+  pcsWt: '',
+  krWt: '',
+  krLessPrc: '',
+  grossWt: '',
+  tagWt: '',
+  conPct: '',
+  krConPct: '',
+  rateType: '',
+  rate: '',
+  itAmt: '',
+  discPct: '',
+  discAmt: '',
+  lbrRate: '',
+  lbrAmt: '',
+  netAmt: '',
+  itType: '',
 });
 
-export type LineField = Exclude<
-  keyof VoucherLine,
-  'lbrTypeFromCompany' | 'explicit' | 'details'
->;
+export type LineField = Exclude<keyof VoucherLine, 'lbrTypeFromCompany' | 'explicit' | 'details'>;
 
 export const blankLine = (): VoucherLine => ({
   tagNo: '',
@@ -646,10 +666,21 @@ export const formatKasar = (text: string): string => {
 /** A detail row through the desktop arithmetic, as the panel shows it and the server will store it. */
 export function computeDetail(row: DetailRow) {
   return commPassTotalIdtl({
-    pcs: n(row.pcs), pcsWt: n(row.pcsWt), weight: n(row.grossWt), tagWt: n(row.tagWt), conPct: n(row.conPct),
-    krConPct: n(row.krConPct), rateType: row.rateType, rate: n(row.rate), itAmt: n(row.itAmt),
-    discPct: n(row.discPct), discAmt: n(row.discAmt), lbrRate: n(row.lbrRate), lbrAmt: n(row.lbrAmt),
-    netAmt: n(row.netAmt), itType: row.itType,
+    pcs: n(row.pcs),
+    pcsWt: n(row.pcsWt),
+    weight: n(row.grossWt),
+    tagWt: n(row.tagWt),
+    conPct: n(row.conPct),
+    krConPct: n(row.krConPct),
+    rateType: row.rateType,
+    rate: n(row.rate),
+    itAmt: n(row.itAmt),
+    discPct: n(row.discPct),
+    discAmt: n(row.discAmt),
+    lbrRate: n(row.lbrRate),
+    lbrAmt: n(row.lbrAmt),
+    netAmt: n(row.netAmt),
+    itType: row.itType,
   });
 }
 
@@ -675,9 +706,35 @@ export function withRollup(line: VoucherLine): VoucherLine {
 /** The request form of a detail row (the server recomputes with the same kernel). */
 export function detailPayload(row: DetailRow): Record<string, unknown> {
   const out: Record<string, unknown> = {};
-  for (const field of ['itCode', 'dmCode', 'dmName', 'dmColor', 'dmSize', 'dmOrigin', 'dmRemark', 'dmSfNo', 'rateType', 'itType'] as const)
+  for (const field of [
+    'itCode',
+    'dmCode',
+    'dmName',
+    'dmColor',
+    'dmSize',
+    'dmOrigin',
+    'dmRemark',
+    'dmSfNo',
+    'rateType',
+    'itType',
+  ] as const)
     out[field] = row[field].trim();
-  for (const field of ['pcs', 'pcsWt', 'krLessPrc', 'grossWt', 'tagWt', 'conPct', 'krConPct', 'rate', 'itAmt', 'discPct', 'discAmt', 'lbrRate', 'lbrAmt', 'netAmt'] as const)
+  for (const field of [
+    'pcs',
+    'pcsWt',
+    'krLessPrc',
+    'grossWt',
+    'tagWt',
+    'conPct',
+    'krConPct',
+    'rate',
+    'itAmt',
+    'discPct',
+    'discAmt',
+    'lbrRate',
+    'lbrAmt',
+    'netAmt',
+  ] as const)
     out[field] = n(row[field]);
   return out;
 }
@@ -882,13 +939,32 @@ export interface SavedVoucher {
 export function detailFromSaved(row: Row): DetailRow {
   return {
     ...blankDetail(),
-    itCode: cell(row.itCode), itemName: cell(row.itemName), dmCode: cell(row.dmCode), dmName: cell(row.dmName),
-    dmColor: cell(row.dmColor), dmSize: cell(row.dmSize), dmOrigin: cell(row.dmOrigin), dmRemark: cell(row.dmRemark),
-    dmSfNo: cell(row.dmSfNo), pcs: cell(row.pcs), pcsWt: cell(row.pcsWt), krLessPrc: cell(row.krLessPrc),
-    grossWt: cell(row.grossWt), tagWt: cell(row.tagWt), krWt: cell(row.tagWt), conPct: cell(row.conPct),
-    krConPct: cell(row.krConPct), rateType: cell(row.rateType), rate: cell(row.rate), itAmt: cell(row.itAmt),
-    discPct: cell(row.discPct), discAmt: cell(row.discAmt), lbrRate: cell(row.lbrRate), lbrAmt: cell(row.lbrAmt),
-    netAmt: cell(row.netAmt), itType: cell(row.itType),
+    itCode: cell(row.itCode),
+    itemName: cell(row.itemName),
+    dmCode: cell(row.dmCode),
+    dmName: cell(row.dmName),
+    dmColor: cell(row.dmColor),
+    dmSize: cell(row.dmSize),
+    dmOrigin: cell(row.dmOrigin),
+    dmRemark: cell(row.dmRemark),
+    dmSfNo: cell(row.dmSfNo),
+    pcs: cell(row.pcs),
+    pcsWt: cell(row.pcsWt),
+    krLessPrc: cell(row.krLessPrc),
+    grossWt: cell(row.grossWt),
+    tagWt: cell(row.tagWt),
+    krWt: cell(row.tagWt),
+    conPct: cell(row.conPct),
+    krConPct: cell(row.krConPct),
+    rateType: cell(row.rateType),
+    rate: cell(row.rate),
+    itAmt: cell(row.itAmt),
+    discPct: cell(row.discPct),
+    discAmt: cell(row.discAmt),
+    lbrRate: cell(row.lbrRate),
+    lbrAmt: cell(row.lbrAmt),
+    netAmt: cell(row.netAmt),
+    itType: cell(row.itType),
   };
 }
 
