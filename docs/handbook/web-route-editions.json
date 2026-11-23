@@ -421,11 +421,6 @@
    "edition": "L",
    "menu": "Company/Balance TrFr",
    "reason": "Year-end close of Balance TrFr."
-  },
-  "/reports/order-report": {
-   "edition": "L",
-   "menu": "Report/Order Report",
-   "reason": "Dedicated RP_ALL Order Report screen (MDI_FORM.cs:8931 {{case \"Order Report\":}}); the Lite menu row is visible."
   }
  },
  "forms": {
