@@ -59,7 +59,7 @@ export function candidateProblem(candidate, runners, providers, env) {
 }
 
 /** Usage limits: a worker whose plan or credits refuse requests is skipped until its window resets. */
-const LIMIT_RE = /usage limit|rate[- ]?limit|too many requests|\b429\b|\b402\b|exceed your available credits|insufficient (credits|balance|quota)|EntitlementError|quota exceeded/i;
+const LIMIT_RE = /usage limit|rate[- ]?limit|too many requests|\b429\b|\b402\b|exceed your available credits|insufficient (credits|balance|quota)|EntitlementError|quota exceeded|hosted outside Europe and the United States/i;
 const candidateKey = (c) => `${c.runner}/${c.provider || ''}:${c.model || ''}`;
 function limitsFile(stateRoot) {
   return path.join(stateRoot, 'limits.json');

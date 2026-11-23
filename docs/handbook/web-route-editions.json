@@ -372,6 +372,11 @@
    "menu": "Mfg/Mfg Mast",
    "reason": "TR_MFG_ORD_REC receipt; reported by the Standard Mfg InOut and Mfg Ledger."
   },
+  "/txn/purchase-hm": {
+   "edition": "L",
+   "menu": "Transaction/Purchase",
+   "reason": "Old address of the hallmark purchase layout; it forwards to /txn/purchase, which opens TR_PURC_HM when PURC_WITH_HMTAX is Y (MDI_FORM.cs:7865-7892). Tag Wise Purc is /txn/tag-wise-purc."
+  },
   "/txn/reminders": {
    "edition": "B",
    "menu": "Other/Reminder Entry",
