@@ -1692,8 +1692,10 @@ export const salesOrder = {
           `SELECT "TOT_AMT"::float tot,"BILL_OS"::float os,"ADV_AMT"::float adv FROM "SL_DATA" WHERE tenant_id=$1 AND "CO_BOOK"='SL' AND "VCH_NO"=$2`,
           sale,
         );
+        // The sale's adjustment row in the desktop shape (TR_SALE.cs:15715-15718): ORD_SIGN '-', ORD_AMT = the
+        // amount adjusted, PAID_AMT 0.
         const adj = await ctx.rows(
-          `SELECT "ORD_SIGN" sign,"ORD_AMT"::float paid FROM "SL_ORD_ADJ" WHERE tenant_id=$1 AND "ORD_NO"=$2 ORDER BY "ORD_SIGN"`,
+          `SELECT "ORD_SIGN" sign,"ORD_AMT"::float amt,"PAID_AMT"::float paid FROM "SL_ORD_ADJ" WHERE tenant_id=$1 AND "ORD_NO"=$2 ORDER BY "ORD_SIGN"='-'`,
           order,
         );
         const party1 = await balance(ctx, PARTIES.local.code);
@@ -1705,10 +1707,10 @@ export const salesOrder = {
         );
         // The order's '+' advance row (TR_SALE_ORD.cs:9503) and the sale's '-' use of it (TR_SALE.cs:15712-15725).
         assert.deepEqual(
-          adj.map((a) => [a.sign, a.paid]),
+          adj.map((a) => [a.sign, a.amt, a.paid]),
           [
-            ['+', ADVANCE],
-            ['-', ADVANCE],
+            ['+', ADVANCE, 0],
+            ['-', ADVANCE, 0],
           ],
         );
         return {
@@ -1733,7 +1735,7 @@ export const salesOrder = {
             `SELECT "VCH_NO","TOT_AMT"::float tot,"BILL_OS"::float os,"ADV_AMT"::float adv FROM "SL_DATA" WHERE tenant_id=$1 AND "CO_BOOK"='SL' ORDER BY "VCH_NO" DESC LIMIT 1`,
           ),
           adjustments: await ctx.rows(
-            `SELECT "ORD_NO","ORD_SIGN","ORD_AMT"::float amt FROM "SL_ORD_ADJ" WHERE tenant_id=$1 ORDER BY row_id DESC LIMIT 2`,
+            `SELECT "ORD_NO","ORD_SIGN","ORD_AMT"::float amt,"PAID_AMT"::float paid FROM "SL_ORD_ADJ" WHERE tenant_id=$1 ORDER BY row_id DESC LIMIT 2`,
           ),
         }),
       },

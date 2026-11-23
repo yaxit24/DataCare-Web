@@ -199,6 +199,9 @@ route('Sales/Sales Invoice', [
   'GET /sales/:vchNo',
   'GET /sales/:vchNo/print',
   'PUT /sales/:vchNo',
+  // WP-26 (D6): the sale book's PRINT_MAST file list and its "Set" default.
+  'GET /sales/print-files',
+  'POST /sales/print-files/default',
   'DELETE /sales/:vchNo',
   'GET /sales/invoice',
   // Contained pending an atomic Sales Invoice import + approval closure transaction.
@@ -230,6 +233,7 @@ route('Sales/Sales Return', [
   'POST /sales-returns',
   'GET /sales-returns/import',
   'GET /sales-returns/:vchNo',
+  'PUT /sales-returns/:vchNo',
   'GET /sales-returns/:vchNo/print',
   'DELETE /sales-returns/:vchNo',
   'GET /sales/credit-note',
@@ -1158,6 +1162,7 @@ const PRINT_ROUTES = new Set([
 ]);
 
 const UPDATE_POST_ROUTES = new Set([
+  'POST /sales/print-files/default',
   'POST /stock/tag-print-screen/hm-update',
   'POST /stock/tag-print-screen/default-file',
   'POST /masters/item-master/:code/tag-values',

@@ -122,7 +122,7 @@ async function seed(owner, hashPassword, fixture) {
   await owner.$executeRawUnsafe(
     `INSERT INTO "TAX_MAST" (
        tenant_id,"CO_CODE","TAX_CODE","SR_NO","TAX_GROUP","TAX_NAME","TAX_PRC","TAX_AC"
-     ) VALUES ($1,$2,'10',1,'GST','GST 3%',3,'GSTLED')`,
+     ) VALUES ($1,$2,'10',0,'GST','GST 3%',3,'GSTLED')`,
     fixture.tenantId,
     fixture.coCode,
   );
@@ -158,6 +158,28 @@ async function seed(owner, hashPassword, fixture) {
     fixture.coCode,
     fixture.lcCode,
     fixture.coBook,
+  );
+  // WP-27 (N242): a Sales Return book, so the profile measures a return create against the 5 s p95 target.
+  await owner.$executeRawUnsafe(
+    `INSERT INTO "BOOK_DATA" (
+       tenant_id,"CO_CODE","LC_CODE","CO_BOOK","BOOK_NAME","BOOK_SNAME","MAIN_BOOK",
+       "BOOK_INOUT","CUR_USE","BOOK_TBL_NAME"
+     ) VALUES ($1,$2,$3,$4,'Load Sales Return','LSRT','SALES RETURNE','I','Y','SL_DATA')`,
+    fixture.tenantId,
+    fixture.coCode,
+    fixture.lcCode,
+    fixture.returnBook,
+  );
+  await owner.$executeRawUnsafe(
+    `INSERT INTO "BOOK_DETL" (
+       tenant_id,"CO_CODE","LC_CODE","CO_BOOK","SR_NO","AC_CODE","MAIN_BOOK","BOOK_INOUT"
+     ) VALUES ($1,$2,$3,$4,1,'CTRL','SALES RETURNE','I'),
+              ($1,$2,$3,$4,2,'CASH','SALES RETURNE','I'),
+              ($1,$2,$3,$4,3,'ROUND','SALES RETURNE','I')`,
+    fixture.tenantId,
+    fixture.coCode,
+    fixture.lcCode,
+    fixture.returnBook,
   );
 }
 
@@ -238,6 +260,7 @@ export async function runLoadProfile() {
     lcCode: '01',
     coYear: '2025-2026',
     coBook: 'SAL',
+    returnBook: 'SRT',
     fromDate: '2025-04-01',
     toDate: '2026-03-31',
     loginName: process.env.LOAD_PROFILE_LOGIN?.trim() || 'load-admin',
@@ -256,6 +279,10 @@ export async function runLoadProfile() {
     reportRender: {
       requests: positiveInt('LOAD_REPORT_REQUESTS', 30),
       concurrency: positiveInt('LOAD_REPORT_CONCURRENCY', 6),
+    },
+    returnCreate: {
+      requests: positiveInt('LOAD_RETURN_REQUESTS', 12),
+      concurrency: positiveInt('LOAD_RETURN_CONCURRENCY', 2),
     },
   };
 
@@ -312,6 +339,12 @@ export async function runLoadProfile() {
         },
       ],
     };
+    // A free-standing return of one loose line (no original bill, so no tag provenance to resolve).
+    const returnBody = {
+      ...saleBody,
+      coBook: fixture.returnBook,
+      taxCode: undefined,
+    };
     const warm = await request(address, cookie, 'warmup', '/sales', {
       method: 'POST',
       body: JSON.stringify(saleBody),
@@ -325,7 +358,7 @@ export async function runLoadProfile() {
       void appUserConnections(owner).then((sample) => samples.push(sample));
     }, 10);
     const started = performance.now();
-    const [creates, reads, reports] = await Promise.all([
+    const [creates, reads, reports, returns] = await Promise.all([
       runPool(profile.voucherCreate.requests, profile.voucherCreate.concurrency, () =>
         request(address, cookie, 'voucher_create', '/sales', {
           method: 'POST',
@@ -343,6 +376,12 @@ export async function runLoadProfile() {
           `/reports/sales-register?fromDate=${fixture.fromDate}&toDate=${fixture.toDate}`,
         ),
       ),
+      runPool(profile.returnCreate.requests, profile.returnCreate.concurrency, () =>
+        request(address, cookie, 'return_create', '/sales-returns', {
+          method: 'POST',
+          body: JSON.stringify(returnBody),
+        }),
+      ),
     ]);
     const elapsedMs = performance.now() - started;
     clearInterval(sampleTimer);
@@ -350,7 +389,7 @@ export async function runLoadProfile() {
     const finalConnections = await appUserConnections(owner);
     samples.push(finalConnections);
 
-    const results = [...creates, ...reads, ...reports];
+    const results = [...creates, ...reads, ...reports, ...returns];
     const operations = summarizeResults(results);
     const errors = results.filter((result) => !result.ok);
     const metricsResponse = await request(address, cookie, 'metrics', '/ops/metrics');

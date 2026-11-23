@@ -51,7 +51,17 @@ import {
 import { resolveTaxPolicyTx } from '../shared/taxPolicy.js';
 import { postedSaleLine, withSaleGhat } from './saleLinePosting.js';
 import { gstTaxRows } from '../shared/taxDataRows.js';
-import { orderAdvanceAvailableTx, adjustOrderIntoSaleTx } from './salesOrder.js';
+import { oldMetalHeaderTotals } from '@datacare/core';
+import {
+  checkSaleOrdersTx,
+  resolveSaleTenders,
+  saleTenderWrites,
+  settleEditedHeader,
+  stoneRowsFor,
+  type SaleResidualInput,
+} from './saleResiduals.js';
+import { getSale } from './saleRead.js';
+export { getSale };
 import { fineWt } from '../shared/fine.js';
 import { resolveBookAccountTx, resolveBookPolicyTx } from '../shared/bookPolicy.js';
 import {
@@ -110,6 +120,8 @@ const SALE_LABOUR_TYPES: ReadonlySet<string> = new Set<LabourType>([
 ]);
 
 export interface SaleLineInput {
+  /** WP-26: the line's stone rows (SL_IDTL) as `getSale` returned them; written back unchanged. */
+  stones?: Record<string, unknown>[];
   // ---- Return-line costing (SL_DETL_RTN) --------------------------------------------------------
   // TR_SALE_RTN.cs carries the item's full costing basis onto the return row so a re-issue of the same
   // tag can be priced from something. Declared on the shared line input because the return path reuses it.
@@ -187,7 +199,7 @@ export interface SaleLineInput {
   hallmarkId4Wt?: number;
 }
 
-export interface SaleInput {
+export interface SaleInput extends SaleResidualInput {
   scope: VoucherScope; // tenantId, coCode, lcCode, coYear, coBook
   mainUser?: string; // authenticated user; persisted and preserved by edit
   acCode: string; // customer account (required)
@@ -262,6 +274,10 @@ export interface SaleInput {
     rate?: number;
     rateType?: string;
     amount: number;
+    /** SL_PR_DETL.IT_TYPE as stored (G, S, P, ...); defaults to `metal` (WP-26). */
+    itType?: string;
+    /** SL_PR_DETL.PR_COST, carried unchanged (TR_SALE.cs:15665). */
+    prCost?: number;
   }[];
 }
 
@@ -651,7 +667,7 @@ interface WriteSaleContext {
   editingUser?: string | null;
 }
 
-function completeSaleScope(
+export function completeSaleScope(
   scope: VoucherScope,
 ): asserts scope is VoucherScope & { coYear: string; coBook: string } {
   if (!scope.tenantId || !scope.coCode || !scope.lcCode || !scope.coYear || !scope.coBook) {
@@ -727,6 +743,7 @@ async function writeSaleTx(
   if (!lines || lines.length === 0)
     throw new SaleValidationError('at least one line item is required');
   assertSaleTaxRate(input.taxRatePct);
+  input = resolveSaleTenders(input, (msg) => new SaleValidationError(msg)); // WP-26 D1, D2, G8a
   completeSaleScope(input.scope);
 
   // N59/G165: the income account is the book's slot-1 sale-income account (resolved below, once the
@@ -1329,7 +1346,7 @@ async function writeSaleTx(
     };
   };
   const idtl = computed
-    .filter((c) => c.in.tagNo)
+    .filter((c) => c.in.tagNo && !c.in.stones?.length)
     .map((c, idx) => ({
       ...key,
       VCH_TYPE: bookPolicy.vchType,
@@ -1349,6 +1366,20 @@ async function writeSaleTx(
       IT_LBR_AMT: c.calc.labour,
       IT_NET_AMT: c.calc.net,
     }));
+  // WP-26 (study gap 2): stone rows reopened from SL_IDTL go back as they were (TR_SALE.cs:15546-15620).
+  computed.forEach((c, li) => {
+    if (!c.in.stones?.length) return;
+    const line = { ...key, VCH_DATE: voucherDate, HD_VCH_NO: ctx.hdVchNo, AC_CODE: input.acCode };
+    const at = { VCH_TYPE: bookPolicy.vchType, INOUT_TYPE: bookPolicy.inout, ENTRY_TYPE: 'S' };
+    const row = {
+      ...line,
+      ...at,
+      BOOK_NAME: bookPolicy.bookName,
+      SR_NO: li + 1,
+      TAG_NO: c.in.tagNo ?? '',
+    };
+    idtl.push(...(stoneRowsFor(c.in.stones, row) as any[]));
+  });
 
   // Every sale line moves stock: tagged rows carry their persisted identity; loose rows use N/0.
   const mainStock = computed.map((c, idx) => {
@@ -1390,7 +1421,10 @@ async function writeSaleTx(
     };
   });
 
-  const oldMetalRows = input.oldGold ?? [];
+  // TR_SALE.cs:15636: a row is written only with a non-zero net or amount.
+  const oldMetalRows = (input.oldGold ?? []).filter(
+    (g) => num(g.netWt) !== 0 || num(g.amount) !== 0,
+  );
   // G83: value each old-metal (exchange) row ONCE, the way TR_SALE.cs's mSG_OLD grid does, and use that one
   // figure everywhere. The desktop stores the grid's recomputed amount (column 13) in BOTH SL_PR_DETL.NET_AMT
   // and SL_DATA.OLD_GL_AMT, so the detail, the header, the settlement, the ledger and BILL_OS must all carry
@@ -1398,7 +1432,8 @@ async function writeSaleTx(
   // preview, so the screen shows the figure the writer saves. It derives the fine the desktop way: three
   // decimals, half-up, and the net weight when there is no touch (TR_SALE.cs:7903-7910).
   const valuedOldMetal = oldMetalRows.map((g) => ({
-    metal: (g.metal ?? 'G') as string,
+    itType: String(g.itType ?? g.metal ?? 'G'),
+    netWt: num(g.netWt),
     ...valueOldGoldLine({
       netWt: num(g.netWt),
       touch: num(g.touch),
@@ -1409,18 +1444,12 @@ async function writeSaleTx(
       rateType: g.rateType,
     }),
   }));
-  const oldGoldAmount = round2s(
-    valuedOldMetal.filter((g) => g.metal === 'G').reduce((sum, g) => sum + g.amount, 0),
-  );
-  const oldSilverAmount = round2s(
-    valuedOldMetal.filter((g) => g.metal === 'S').reduce((sum, g) => sum + g.amount, 0),
-  );
-  const oldGoldWeight = round3s(
-    oldMetalRows.filter((g) => (g.metal ?? 'G') === 'G').reduce((sum, g) => sum + num(g.netWt), 0),
-  );
-  const oldSilverWeight = round3s(
-    oldMetalRows.filter((g) => g.metal === 'S').reduce((sum, g) => sum + num(g.netWt), 0),
-  );
+  // TR_SALE.cs:19343-19351: type G is gold, every other type is silver; weights are net weights.
+  const oldMetalTotals = oldMetalHeaderTotals(valuedOldMetal);
+  const oldGoldAmount = oldMetalTotals.goldAmt;
+  const oldSilverAmount = oldMetalTotals.silverAmt;
+  const oldGoldWeight = oldMetalTotals.goldWt;
+  const oldSilverWeight = oldMetalTotals.silverWt;
 
   const header = {
     ...key,
@@ -1460,7 +1489,7 @@ async function writeSaleTx(
     TOT_AMT: totals.total,
     CARD_COM_AMT: round2s(num(input.cardCommissionAmount)),
     CASH_PAID: round2s(num(input.cashPaid)),
-    CRNT_ADJ_AMT: round2s(num(input.currentAdjustmentAmount)),
+    CRNT_ADJ_AMT: round2s(num(input.currentAdjustmentAmount)), // the credit-note row sum (D1)
     OLD_GL: oldGoldWeight,
     OLD_SL: oldSilverWeight,
     SCHM_AC: input.schemeAc ?? '',
@@ -1499,6 +1528,12 @@ async function writeSaleTx(
     USER_DELETE: 'N',
     MOB_ENTRY_SAVE: 'Y',
     RATE_UNFIX: input.rateUnfix ? 'Y' : 'N',
+    // TR_SALE.cs:15264-15267, :15333-15339 (RE_TRFR is settled on an edit by settleEditedHeader).
+    MEMB_COM_AC_CODE: input.memberCommissionAc ?? '',
+    AC_MEMB_COM_PRC: 0,
+    AC_MEMB_COM_VAL: 0,
+    WHOUT_COMM_BILL: input.withoutCommissionBill ? 'Y' : 'N',
+    RE_TRFR: 'N',
     OZ_RATE: 0,
     OZ_CONV: 0,
     FX_RATE: 0,
@@ -1641,26 +1676,20 @@ async function writeSaleTx(
   const chequeAmt = round2s(num(input.chequeAmt));
   const oldGoldAmt = round2s(oldGoldAmount + oldSilverAmount);
   const paidNow = round2s(cashAmt + cardAmt + upiAmt + chequeAmt + oldGoldAmt);
-  // Sales-Order advance consumed into this bill (P0-3): the order's advance (already Cr customer)
-  // settles part of this receivable → reduces BILL_OS. Clamped to the available advance + bill balance.
-  let orderAdjust = 0;
-  let adjustedOrder: Awaited<ReturnType<typeof orderAdvanceAvailableTx>> | undefined;
-  if (!isSalesQuotation && input.orderRef?.ordNo != null) {
-    const av = await orderAdvanceAvailableTx(
-      tx,
-      input.scope,
-      input.orderRef.ordNo,
-      input.orderRef.ordBook ?? 'SOR',
-    );
-    const want =
-      input.orderRef.adjustAmt != null ? round2s(Number(input.orderRef.adjustAmt)) : av.available;
-    orderAdjust = Math.max(
-      0,
-      Math.min(want, av.available, round2s(grandWithTcs - paidNow - kasar)),
-    );
-    adjustedOrder = av;
-  }
-  const billOS = round2s(grandWithTcs - paidNow - kasar - orderAdjust);
+  // Order advances (MSG_ORD) and credit notes (MSG_CRNT) settle the bill without a ledger leg here: the advance
+  // and the note already credited the customer. TR_SALE.cs:19390 subtracts both from the bill outstanding.
+  const creditNoteAdjust = round2s(num(input.currentAdjustmentAmount));
+  const orderRows = isSalesQuotation
+    ? []
+    : await checkSaleOrdersTx(
+        tx,
+        input.scope,
+        input.orders ?? [],
+        round2s(grandWithTcs - paidNow - kasar - creditNoteAdjust),
+        (msg) => new SaleValidationError(msg),
+      );
+  const orderAdjust = round2s(orderRows.reduce((sum, r) => sum + r.amount, 0));
+  const billOS = round2s(grandWithTcs - paidNow - kasar - orderAdjust - creditNoteAdjust);
   // TR_SALE.cs: MsDefaulterAc = 'Y' AND outstanding > 0 -> credit to a flagged party is blocked.
   // The flag is read from the persisted account (AC_MAST.DEFAULTER_AC), never from the request.
   if (!isSalesQuotation && round2s(billOS) > 0) {
@@ -1698,6 +1727,9 @@ async function writeSaleTx(
     CR_DAYS: input.crDays ?? null,
     EMP_CODE: input.empCode ?? null,
   });
+  // WP-26 lossless reopen (D8): an unchanged edit writes the stored header back as it was.
+  if (ctx.isEdit && ctx.persistedHeader)
+    settleEditedHeader(header as Record<string, unknown>, ctx.persistedHeader);
 
   // Old-gold received from the customer: detail (SL_PR_DETL) + stock in-movement (MAIN_STOCK '+').
   const oldGoldDetl = oldMetalRows.map((g, i) => {
@@ -1714,7 +1746,8 @@ async function writeSaleTx(
       BOOK_NAME: bookPolicy.bookName,
       AC_CODE: input.acCode,
       IT_CODE: g.itCode ?? ((g.metal ?? 'G') === 'S' ? 'OS' : 'OG'),
-      IT_TYPE: g.metal ?? 'G',
+      IT_TYPE: valuedOldMetal[i]!.itType,
+      PR_COST: num(g.prCost),
       IT_DESC: g.description ?? 'OLD GOLD',
       ITM_PCS: num(g.pcs),
       ITM_GWT: num(g.grossWt),
@@ -2009,25 +2042,28 @@ async function writeSaleTx(
       { table: 'TAX_DATA', rows: taxRows },
       { table: 'BILL_OS_DATA', rows: [osRow] },
       ...(rojmelRows.length ? [{ table: 'ROJ_MEL_DATA', rows: rojmelRows }] : []),
+      ...saleTenderWrites(
+        {
+          key,
+          vchDate: voucherDate,
+          vchTime: sharedVoucherTime,
+          hdVchNo: ctx.hdVchNo,
+          acCode: input.acCode,
+          acName: input.acName ?? '',
+          vchType: bookPolicy.vchType,
+          inout: bookPolicy.inout,
+          bookName: bookPolicy.bookName,
+          empCode: input.empCode ?? '',
+          mainUser: ctx.mainUser,
+        },
+        input.upiRows ?? [],
+        input.creditNotes ?? [],
+        orderRows,
+      ),
     ],
   });
 
   await consumeSaleReferencesTx(tx, input.scope, key.VCH_NO, approvalSources, SaleValidationError);
-
-  // Consume the order advance into this sale (P0-3): record SL_ORD_ADJ linking order → this bill.
-  if (orderAdjust > 0 && input.orderRef?.ordNo != null && adjustedOrder) {
-    await adjustOrderIntoSaleTx(tx, tenantId, input.scope, {
-      saleVchNo: formatVoucherNo(vchNo),
-      ordNo: input.orderRef.ordNo,
-      ordYear: adjustedOrder.ordYear,
-      ordBook: adjustedOrder.ordBook,
-      ordHiddenVchNo: adjustedOrder.hdVchNo || null,
-      custAc: input.acCode,
-      custName: input.acName,
-      adjustAmt: orderAdjust,
-      vchDate,
-    });
-  }
 
   if (behavior.touchAutoSave) {
     // TR_BUL_SALE.cs:7684-7735: save party/item touch and labour defaults atomically.
@@ -2171,7 +2207,7 @@ export interface DeleteSaleInput {
 
 const SALES_QUOTATION_WRITE_TABLES = ['SL_DATA', 'SL_DETL', 'SL_IDTL', 'SL_PR_DETL'] as const;
 
-const SALE_WRITE_TABLES = [
+export const SALE_WRITE_TABLES = [
   'SL_DATA',
   'SL_DETL',
   'SL_IDTL',
@@ -2189,7 +2225,12 @@ const SALE_WRITE_TABLES = [
   'LOT_DETL',
   'REMARK_DATA',
   'AD_ADJ',
+  'SL_ORD_ADJ',
 ] as const;
+/** WP-26 (study gap 2): an edit deletes only what the writer rewrites; POINT_DATA, CARD_DATA, DM_DATA, ... survive. */
+const SALE_REWRITE_TABLES = SALE_WRITE_TABLES.filter(
+  (t) => !['POINT_DATA', 'CARD_DATA', 'DM_DATA', 'LOT_DETL', 'REMARK_DATA', 'AD_ADJ'].includes(t),
+);
 /** N51 (D17): refuse a stale copy; call it after the header lock. A missing token never matches. */
 const assertSaleVersionTx = (tx: any, scope: VoucherScope, vchNo: string, expected?: string) =>
   assertVoucherVersionTx(tx, SALE_WRITE_TABLES, versionKeyOf(scope, vchNo), expected ?? '');
@@ -2202,7 +2243,7 @@ type LegacyRestore = Record<string, unknown> & {
 };
 
 const text = (value: unknown): string => String(value ?? '').trim();
-const saleParams = (scope: CompleteSaleScope, voucherNo: string): unknown[] => [
+export const saleParams = (scope: CompleteSaleScope, voucherNo: string): unknown[] => [
   scope.tenantId,
   scope.coCode,
   scope.lcCode,
@@ -2329,224 +2370,6 @@ async function releaseSaleReferencesTx(
   return legacyRestores;
 }
 
-/** Open a persisted sale by voucher number using server-derived tenant scope only. */
-export async function getSale(
-  prisma: any,
-  scope: VoucherScope,
-  requestedVoucherNo: number | string,
-): Promise<Record<string, unknown>> {
-  completeSaleScope(scope);
-  const voucherNo = formatVoucherNo(requestedVoucherNo);
-  return withTxBudget(prisma, scope.tenantId, 'read', async (tx: any) => {
-    const params = saleParams(scope, voucherNo);
-    const headers: Array<Record<string, unknown>> = await tx.$queryRawUnsafe(
-      `SELECT "VCH_NO","VCH_DATE"::text,"VCH_TIME","BILL_NO","HD_VCH_NO","MAIN_USER",
-              "AC_CODE","AC_NAME","NET_AMT","DISC_AMT","TAX_CODE","TAX_PRC","TAX_AMT",
-              "AC_GST_TYPE","CGST_TAX","SGST_TAX","IGST_TAX","ROF_AMT","TOT_AMT",
-              "RATE_UNFIX","CASH_AMT","CARD_AMT","UPI_AMT","CHQ_AMT","OLD_GL_AMT",
-              "BILL_OS","HM_AMT","HM_TAX_AMT","TCS_PRC","TCS_AMT","KASAR_AMT",
-              "CR_DAYS","EMP_CODE","VCH_DESC","DISC_PRC","TCS_CODE","TDS_CODE","TDS_PRC","TDS_AMT",
-              "ADD1","ADD2","ADD3","CITY","MOBILE","BANK_AC","CARD_AC","CHQ_NO","BANK_NAME",
-              "CARD_COM_AMT","CASH_PAID","CRNT_ADJ_AMT","SCHM_AC","SCHM_AMT","POINT_VAL",
-              "ISU_NO","ISU_YRCD","ISU_DBCD","ORNA_ISU"
-         FROM "SL_DATA"
-        WHERE tenant_id=$1 AND "CO_CODE"=$2 AND "LC_CODE"=$3 AND "CO_YEAR"=$4
-          AND "CO_BOOK"=$5 AND "VCH_NO"=$6`,
-      ...params,
-    );
-    if (headers.length !== 1) {
-      throw new SaleValidationError(
-        headers.length
-          ? `sale voucher is ambiguous: ${voucherNo}`
-          : `sale voucher not found: ${voucherNo}`,
-      );
-    }
-    const details: Array<Record<string, unknown>> = await tx.$queryRawUnsafe(
-      `SELECT "SR_NO","IT_CODE","IT_TYPE","TAG_NO","VCH_SRNO","ITM_PCS","ITM_GWT",
-              "ITM_NWT","ITM_TOUCH","ITM_GHT_WT","ITM_WEST_PRC","ITM_FINE","ITM_RATE",
-              "ITM_AMT","LBR_TYPE","LBR_PRC","LBR_RATE","LBR_AMT","OTH_AMT","NET_AMT",
-              "DESIGN_NO","ITM_SIZE","ITM_OTH_WT","TBL_CODE","ITM_MRP","HM_ID",
-              "ORD_NO","ORD_YRCD","ORD_DBCD","ORD_SRNO","ISU_NO","ISU_YRCD","ISU_DBCD","ISU_SRNO",
-              "BAG_WT","TAG_GWT","TAG_NWT","ITM_GHT_PRC","ITM_STYLE","ITM_LOT","ITM_REMARK",
-              "DISC_PRC","DISC_AMT","GHT_AMT","RATE_WITH","RATE_TYPE","TAG_COST","KR_NET_WT",
-              "KR_TOUCH","KR_WEST_PRC","KR_FINE","KR_NAME","EMP_CODE","PR_CODE","ORD_TAG_STK_ADD",
-              "DESIGN_IMG_ID","HM_ID2","HM_ID3","HM_ID4","HM_ID_WT","HM_ID2_WT","HM_ID3_WT","HM_ID4_WT"
-         FROM "SL_DETL"
-        WHERE tenant_id=$1 AND "CO_CODE"=$2 AND "LC_CODE"=$3 AND "CO_YEAR"=$4
-          AND "CO_BOOK"=$5 AND "VCH_NO"=$6 ORDER BY "SR_NO"`,
-      ...params,
-    );
-    const oldGold: Array<Record<string, unknown>> = await tx.$queryRawUnsafe(
-      `SELECT "SR_NO","IT_CODE","IT_TYPE","IT_DESC","ITM_PCS","ITM_GWT","ITM_OTH_WT","ITM_NWT","ITM_TOUCH",
-              "ITM_FINE","CON_PRC","CON_WT","ITM_RATE","ITM_RATE_TYPE","NET_AMT"
-         FROM "SL_PR_DETL"
-        WHERE tenant_id=$1 AND "CO_CODE"=$2 AND "LC_CODE"=$3 AND "CO_YEAR"=$4
-          AND "CO_BOOK"=$5 AND "VCH_NO"=$6 ORDER BY "SR_NO"`,
-      ...params,
-    );
-    const adjustments: Array<Record<string, unknown>> = await tx.$queryRawUnsafe(
-      `SELECT "ORD_NO",CASE WHEN "ORD_SIGN"='-' THEN "ORD_AMT" ELSE "PAID_AMT" END AS "PAID_AMT" FROM "SL_ORD_ADJ"
-        WHERE tenant_id=$1 AND "CO_CODE"=$2 AND "LC_CODE"=$3 AND "CO_YEAR"=$4
-          AND "NEW_VCH_NO"::text=$6 AND "OLD_VCH_NO"::text=$5 ORDER BY "SR_NO" LIMIT 1`,
-      ...params,
-    );
-    const h = headers[0]!;
-    // Must agree with `desktopLabourTypeFor`. Reading 'N' as 'fixed' would corrupt the round trip now that
-    // per-gram is correctly written as 'N'; 'G' and 'K' have no legacy mode and yield undefined rather than a
-    // wrong one. `labourBasis` below carries the raw code so nothing is lost.
-    const labourType = (value: unknown): LabourType | undefined =>
-      legacyLabourModeFor(value) as LabourType | undefined;
-    return {
-      voucherNo: text(h.VCH_NO),
-      hiddenVoucherNo: text(h.HD_VCH_NO),
-      mainUser: text(h.MAIN_USER),
-      vchDate: toIsoDate(h.VCH_DATE),
-      billNo: text(h.BILL_NO),
-      acCode: text(h.AC_CODE),
-      acName: text(h.AC_NAME),
-      taxCode: text(h.TAX_CODE),
-      taxRatePct: num(h.TAX_PRC),
-      interState: num(h.IGST_TAX) !== 0 || text(h.AC_GST_TYPE).toUpperCase() !== 'L',
-      discountAmount: num(h.DISC_AMT),
-      discountPct: num(h.DISC_PRC),
-      rateUnfix: text(h.RATE_UNFIX).toUpperCase() === 'Y',
-      cashAmt: num(h.CASH_AMT),
-      cardAmt: num(h.CARD_AMT),
-      upiAmt: num(h.UPI_AMT),
-      chequeAmt: num(h.CHQ_AMT),
-      hallmarkAmount: num(h.HM_AMT),
-      hallmarkTaxAmount: num(h.HM_TAX_AMT),
-      tcsPct: num(h.TCS_PRC),
-      tcsAmount: num(h.TCS_AMT),
-      tcsCode: text(h.TCS_CODE),
-      tdsCode: text(h.TDS_CODE),
-      tdsPct: num(h.TDS_PRC),
-      tdsAmount: num(h.TDS_AMT),
-      kasarAmount: num(h.KASAR_AMT),
-      oldGoldAmount: num(h.OLD_GL_AMT),
-      billOutstanding: num(h.BILL_OS),
-      crDays: num(h.CR_DAYS),
-      empCode: text(h.EMP_CODE),
-      description: text(h.VCH_DESC),
-      address1: text(h.ADD1),
-      address2: text(h.ADD2),
-      address3: text(h.ADD3),
-      city: text(h.CITY),
-      mobile: text(h.MOBILE),
-      bankAc: text(h.BANK_AC),
-      cardAc: text(h.CARD_AC),
-      chequeNo: text(h.CHQ_NO),
-      bankName: text(h.BANK_NAME),
-      cardCommissionAmount: num(h.CARD_COM_AMT),
-      cashPaid: num(h.CASH_PAID),
-      currentAdjustmentAmount: num(h.CRNT_ADJ_AMT),
-      schemeAc: text(h.SCHM_AC),
-      schemeAmount: num(h.SCHM_AMT),
-      pointValue: num(h.POINT_VAL),
-      issueNo: text(h.ISU_NO),
-      issueYear: text(h.ISU_YRCD),
-      issueBook: text(h.ISU_DBCD),
-      ornamentIssued: text(h.ORNA_ISU) !== 'N',
-      orderRef: adjustments[0]
-        ? { ordNo: text(adjustments[0].ORD_NO), adjustAmt: num(adjustments[0].PAID_AMT) }
-        : null,
-      totals: {
-        net: num(h.NET_AMT),
-        discount: num(h.DISC_AMT),
-        taxable: round2s(num(h.NET_AMT) - num(h.DISC_AMT)),
-        tax: num(h.TAX_AMT),
-        cgst: num(h.CGST_TAX),
-        sgst: num(h.SGST_TAX),
-        igst: num(h.IGST_TAX),
-        roundOff: num(h.ROF_AMT),
-        total: num(h.TOT_AMT),
-      },
-      lines: details.map((row) => ({
-        srNo: num(row.SR_NO),
-        itCode: text(row.IT_CODE),
-        metal: text(row.IT_TYPE) === 'S' ? 'S' : 'G',
-        tagNo: text(row.TAG_NO) === 'N' ? '' : text(row.TAG_NO),
-        vchSrno: num(row.VCH_SRNO),
-        pcs: num(row.ITM_PCS),
-        grossWt: num(row.ITM_GWT),
-        netWt: num(row.ITM_NWT),
-        touch: num(row.ITM_TOUCH),
-        ghtWt: num(row.ITM_GHT_WT),
-        westPct: num(row.ITM_WEST_PRC),
-        fineWt: num(row.ITM_FINE),
-        rate: num(row.ITM_RATE),
-        metalAmount: num(row.ITM_AMT),
-        labourType: labourType(row.LBR_TYPE),
-        labourPct: num(row.LBR_PRC),
-        labourRate: num(row.LBR_RATE),
-        labourFixed: text(row.LBR_TYPE) === 'N' ? num(row.LBR_AMT) : undefined,
-        otherAmount: num(row.OTH_AMT),
-        netAmount: num(row.NET_AMT),
-        designNo: text(row.DESIGN_NO),
-        itmSize: text(row.ITM_SIZE),
-        lessWt: num(row.ITM_OTH_WT),
-        tblCode: text(row.TBL_CODE),
-        mrp: num(row.ITM_MRP),
-        huid: text(row.HM_ID),
-        ordNo: text(row.ORD_NO),
-        ordYrcd: text(row.ORD_YRCD),
-        ordDbcd: text(row.ORD_DBCD),
-        ordSrno: num(row.ORD_SRNO),
-        isuNo: text(row.ISU_NO),
-        isuYrcd: text(row.ISU_YRCD),
-        isuDbcd: text(row.ISU_DBCD),
-        isuSrno: num(row.ISU_SRNO),
-        bagWt: num(row.BAG_WT),
-        tagGrossWt: num(row.TAG_GWT),
-        tagNetWt: num(row.TAG_NWT),
-        ghtPct: num(row.ITM_GHT_PRC),
-        style: text(row.ITM_STYLE),
-        itemLot: text(row.ITM_LOT),
-        remark: text(row.ITM_REMARK),
-        discountPct: num(row.DISC_PRC),
-        discountAmount: num(row.DISC_AMT),
-        ghatAmount: num(row.GHT_AMT),
-        rateWith: text(row.RATE_WITH),
-        rateType: text(row.RATE_TYPE),
-        tagCost: num(row.TAG_COST),
-        karigarNetWt: num(row.KR_NET_WT),
-        karigarTouch: num(row.KR_TOUCH),
-        karigarWestPct: num(row.KR_WEST_PRC),
-        karigarFine: num(row.KR_FINE),
-        karigarName: text(row.KR_NAME),
-        employeeCode: text(row.EMP_CODE),
-        prCode: text(row.PR_CODE),
-        orderTagStockAdd: text(row.ORD_TAG_STK_ADD),
-        designImageId: text(row.DESIGN_IMG_ID),
-        hallmarkId2: text(row.HM_ID2),
-        hallmarkId3: text(row.HM_ID3),
-        hallmarkId4: text(row.HM_ID4),
-        hallmarkIdWt: num(row.HM_ID_WT),
-        hallmarkId2Wt: num(row.HM_ID2_WT),
-        hallmarkId3Wt: num(row.HM_ID3_WT),
-        hallmarkId4Wt: num(row.HM_ID4_WT),
-      })),
-      oldGold: oldGold.map((row) => ({
-        metal: text(row.IT_TYPE) === 'S' ? 'S' : 'G',
-        itCode: text(row.IT_CODE),
-        description: text(row.IT_DESC),
-        pcs: num(row.ITM_PCS),
-        grossWt: num(row.ITM_GWT),
-        otherWt: num(row.ITM_OTH_WT),
-        netWt: num(row.ITM_NWT),
-        touch: num(row.ITM_TOUCH),
-        fineWt: num(row.ITM_FINE),
-        conversionPct: num(row.CON_PRC),
-        conversionWt: num(row.CON_WT),
-        rate: num(row.ITM_RATE),
-        rateType: text(row.ITM_RATE_TYPE),
-        amount: num(row.NET_AMT),
-      })),
-      version: await voucherVersionTx(tx, SALE_WRITE_TABLES, versionKeyOf(scope, voucherNo)),
-    };
-  });
-}
-
 /** Replace a sales quotation in-place, preserving the desktop hidden voucher identity. */
 export async function editSalesQuotation(
   prisma: any,
@@ -2640,7 +2463,7 @@ export async function editSale(
     const legacyRestores = await releaseSaleReferencesTx(tx, scope, voucherNo);
     // TR_SALE.cs:15167-15172 replaces the write set and TEMP_BOOK_DATA without DELETE_DATA.
     await deleteVoucherWriteSetTx(tx, {
-      tables: SALE_WRITE_TABLES,
+      tables: SALE_REWRITE_TABLES,
       key: { scope, voucherNo },
       tempBook: { voucherNo: hiddenVoucherNo },
     });

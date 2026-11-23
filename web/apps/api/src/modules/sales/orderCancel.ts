@@ -256,7 +256,8 @@ export async function openAdvanceOfOrderTx(
 ): Promise<PendingOrder | null> {
   const no = formatVoucherNo(ordNo);
   const orders = await ordersWithAdvanceTx(tx, scope, [no]);
-  return orders.find((o) => o.ordBook === ordBook) ?? orders[0] ?? null;
+  // The named book only: another book's order of the same number is a different order (review of #250).
+  return orders.find((o) => o.ordBook === ordBook) ?? null;
 }
 
 interface CheckedRow {
