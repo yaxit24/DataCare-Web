@@ -120,12 +120,20 @@ const FLAG_FIELDS = [
   ['othItmWtRemove', 'OTH_ITM_WT_REMOVE'],
   ['lotStock', 'ITM_WITH_LOT_STK'],
 ] as const;
-/** The stored boxes Lite does not show; a new item writes them as the desktop's cleared, hidden boxes do. */
+/**
+ * The stored boxes Lite does not show; a new item writes them as the desktop's cleared, hidden boxes do. The UAE tax-free
+ * box and the scheme box stay unchecked and the employee commission stays 0 (CLEAR_DATA, MS_ITEM.cs:2866
+ * {{EmpComPrc = 0.0;}}; written at :3261-3263 {{dataRow["EMP_COM_PRC"] = EmpComPrc;}}). An opened item keeps the stored
+ * values, as DISPLAY_DATA reloads them before the save (:2989, :3024, :3032).
+ */
 const HIDDEN_DEFAULTS = {
   UNICODE_NAME: '',
   TAG_IDTL_COL: 'N',
   AC_ITEM: '',
   OTH_DETL_POSTING: 'N',
+  TAX_FREE_ITEM: 'N',
+  APP_ITEM: 'N',
+  EMP_COM_PRC: 0,
 } as const;
 /** The columns the screen shows; the version token covers these only (postings maintain the averages). */
 const SHOWN_COLUMNS = [

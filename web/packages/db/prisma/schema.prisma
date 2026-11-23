@@ -2960,6 +2960,11 @@ model ITEM_MAST {
   TOT_PCS           Float?
   PCS_RATE          Float?
   ITM_WITH_LOT_STK  String?  @db.VarChar(1)
+  /// WP-36: desktop columns no Lite box shows; MS_ITEM writes them on every save (MS_ITEM.cs:3261-3263).
+  TAX_FREE_ITEM     String   @default("N") @db.VarChar(1)
+  APP_ITEM          String   @default("N") @db.VarChar(1)
+  EMP_COM_PRC       Float    @default(0)
+  AC_MEMB_COM_PRC   Float    @default(0)
 
   @@id([tenantId, CO_CODE, IT_CODE])
   @@map("ITEM_MAST")

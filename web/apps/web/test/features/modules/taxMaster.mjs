@@ -590,6 +590,37 @@ export const taxMaster = {
         }),
     ),
     C(
+      'lookup.provisioned-tax-ledgers',
+      'T04',
+      'read-only',
+      "WP-36: on a company exactly as seedCompany leaves it, the header Ac Code help opened on a blank box lists the provisioned tax ledgers GST, GSTINPUT and TCS by name (AC_GR = '12' OR AC_CODE = '00013', :2039)",
+      async (ctx) => {
+        const { page } = await ctx.session();
+        await openScreen(page);
+        const box = label(page, 'Ac Code');
+        await box.focus();
+        await Promise.all([
+          page.waitForResponse((r) => path(r) === `/api${API}/accounts`),
+          box.press('F1'),
+        ]);
+        await page.waitForFunction(
+          () => document.querySelectorAll('[data-lookup-open="true"] b').length > 0,
+        );
+        const codes = (await page.locator('[data-lookup-open="true"] b').allInnerTexts()).map((t) =>
+          t.trim(),
+        );
+        // By AC_NAME: GST INPUT CREDIT, GST OUTPUT (PAYABLE), TCS PAYABLE.
+        const provisioned = codes.filter((c) => ['GST', 'GSTINPUT', 'TCS'].includes(c));
+        assert.deepEqual(provisioned, ['GSTINPUT', 'GST', 'TCS']);
+        for (const other of ['SALES', 'PURCHASE', 'CASH'])
+          assert.ok(!codes.includes(other), `${other} is not a tax ledger`);
+        return {
+          observation: `header help on a blank box ${codes.join(', ')}`,
+          expected: { provisioned: ['GSTINPUT', 'GST', 'TCS'] },
+        };
+      },
+    ),
+    C(
       'children.components',
       'T05',
       'mutation',

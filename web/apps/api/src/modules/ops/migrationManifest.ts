@@ -210,4 +210,14 @@ export const EXPECTED_MIGRATIONS: ReadonlyArray<{
     name: '20261122200000_sale_desktop_residual_columns',
     checksum: '77b3225983a5fd8f9b41b682896a8154090960796d5af6b66aba915e6f80343c',
   },
+  {
+    // WP-36: ITEM_MAST TAX_FREE_ITEM / APP_ITEM / EMP_COM_PRC / AC_MEMB_COM_PRC with the desktop defaults.
+    name: '20261123100000_item_mast_desktop_flags',
+    checksum: '71a4dcc133ca035479477651c22a8a3c7769990a295150256c005b45e5b99c15',
+  },
+  {
+    // WP-36: web-seeded sale/purchase/tax ledgers move to desktop groups 25/30/12 (MS_GROUP / MS_TAX helps).
+    name: '20261123110000_seeded_ledger_groups',
+    checksum: '6cd6616573b270a1ab2dc87b8f3c3b5a8b5dcc2cafa31dca5827b6f420edb52b',
+  },
 ];
