@@ -19,7 +19,7 @@ import { type BookWorkflow, workflowPolicy } from '../shared/bookPolicy.js';
  * AC_CODE = '" + tSalesAc.Text}}, :2242; MS_TRADE.cs:1190 {{DC_Main.MsGrCode = "25";}}, :1234 "30"), and the Tax header
  * help lists group 12 (MS_TAX.cs:2039 {{AND (AC_GR = '12' OR  AC_CODE = '00013') ORDER BY AC_NAME}}). Group 20 is a
  * customer group on the desktop (RP_CUST.cs:996 {{AC_GR IN ('04','05','10','15','20','45','19')}}), so a sales ledger
- * there was listed as a customer. A web company provisioned earlier is moved by migration 20261123100000.
+ * there was listed as a customer. A web company provisioned earlier is moved by migration 20261123110000.
  */
 const SYSTEM_ACCOUNTS: { code: string; name: string; gr: string; gstType?: string }[] = [
   // G124 / G100: the sales/hallmark-sale/sales-quotation screens default the party to WALKIN. The
