@@ -442,6 +442,10 @@ export const purchaseReport = {
         }
         await runMode(page, 'group');
         assert.equal(await reportRows(page).filter({ hasText: vchNo }).count(), 0);
+        assert.equal(
+          await reportGrid(page).locator('tbody tr.lvl-line, tbody tr.lvl-voucher').count(),
+          0,
+        );
         assert.ok((await reportRows(page).count()) > 0, 'group bands print');
         downstream.group = await reportText(page);
         return {
