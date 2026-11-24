@@ -709,6 +709,12 @@ export const approvalReportRp = {
           const branch = await runMode(page00, 'issue', { Book: BOOK });
           assert.equal(branch.query.get('reportLcCode'), '01');
           assertCodes(await readGrid(page00), ['AV1', 'AV2'], ['AV3']);
+          // One box holds one location: a repeated reportLcCode is refused, never read as every location.
+          const twice = new URLSearchParams(branch.query);
+          twice.append('reportLcCode', '00');
+          const refused = await page00.request.get(`${API_PATH}?${twice.toString()}`);
+          assert.equal(refused.status(), 400);
+          assert.equal((await refused.json()).error, 'invalid-location');
         });
       },
     ),

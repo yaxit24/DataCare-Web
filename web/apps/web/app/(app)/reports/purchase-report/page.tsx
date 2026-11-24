@@ -79,18 +79,23 @@ export default function PurchaseReportPage() {
   const lookup = (spec: (typeof LOOKUPS)[number]) => (
     <div className="field" key={spec.id}>
       <label htmlFor={fieldId(spec.id)}>{spec.label}</label>
-      <LookupPicker
-        id={fieldId(spec.id)}
-        entity={spec.entity}
-        ariaLabel={spec.label}
-        value={filters[spec.key]}
-        placeholder="F1"
-        resolveTypedCode
-        advanceOnPick={false}
-        openOnFocus={false}
-        onChange={(v) => setFilters({ [spec.key]: v.toUpperCase() } as Partial<PurchaseFilters>)}
-        onPick={(row) => setFilters({ [spec.key]: String(row.code) } as Partial<PurchaseFilters>)}
-      />
+      {/* RP_ALL.cs:6660-6665: the location box is locked to the session's location outside head office (00). */}
+      {spec.key === 'lcCode' && scope.lcCode !== '00' ? (
+        <input id={fieldId(spec.id)} aria-label={spec.label} value={scope.lcCode} disabled />
+      ) : (
+        <LookupPicker
+          id={fieldId(spec.id)}
+          entity={spec.entity}
+          ariaLabel={spec.label}
+          value={filters[spec.key]}
+          placeholder="F1"
+          resolveTypedCode
+          advanceOnPick={false}
+          openOnFocus={false}
+          onChange={(v) => setFilters({ [spec.key]: v.toUpperCase() } as Partial<PurchaseFilters>)}
+          onPick={(row) => setFilters({ [spec.key]: String(row.code) } as Partial<PurchaseFilters>)}
+        />
+      )}
     </div>
   );
   const lookupOf = (id: string) => LOOKUPS.find((l) => l.id === id)!;
