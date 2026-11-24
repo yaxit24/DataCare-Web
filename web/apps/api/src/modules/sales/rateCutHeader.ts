@@ -43,7 +43,7 @@ export async function persistedHeaderTx(
     `SELECT "VCH_DATE","VCH_TIME",to_char("VCH_TIME",'HH24:MI:SS.MS') AS "VCH_CLOCK","MAIN_USER",
             "AC_CODE","AC_NAME","SL_NET_AMT"::float8 AS sl_net,"PR_NET_AMT"::float8 AS pr_net,
             "IT_TYPE","TOT_FINE_DR"::float8 AS tot_fine_dr,"TOT_FINE_CR"::float8 AS tot_fine_cr,
-            "HD_VCH_NO","VCH_DESC"
+            "HD_VCH_NO","VCH_DESC","BILL_NO","EMP_CODE","KSR_FINE_DR"::float8 AS "KSR_FINE_DR","KSR_FINE_CR"::float8 AS "KSR_FINE_CR"
        FROM "RATE_CUT_DATA" WHERE tenant_id=$1 AND "CO_CODE"=$2 AND "LC_CODE"=$3
         AND "CO_YEAR"=$4 AND "CO_BOOK"=$5 AND "VCH_NO"=$6
       ORDER BY row_id LIMIT 1 FOR UPDATE`,

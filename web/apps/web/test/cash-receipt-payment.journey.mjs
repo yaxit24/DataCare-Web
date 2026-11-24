@@ -172,7 +172,8 @@ export async function exerciseCashReceiptPayment(page, { checkpoint, owner, tena
   await page.getByLabel('Dr/Cr row 1', { exact: true }).selectOption('DR');
   await pickAccount(page, 'Account row 1', 'BANKB');
   await page.getByLabel('Amount row 1', { exact: true }).fill('500');
-  await page.getByLabel('Dr/Cr row 2', { exact: true }).selectOption('CR');
+  // A later row always takes the side opposite row 1 and is not editable (TR_CONTRA.cs:1538, :1630).
+  assert.equal(await page.getByLabel('Dr/Cr row 2', { exact: true }).inputValue(), 'CR');
   await pickAccount(page, 'Account row 2', 'CASH');
   await page.getByLabel('Amount row 2', { exact: true }).fill('500');
   await page.getByRole('button', { name: 'Save Contra', exact: true }).click();

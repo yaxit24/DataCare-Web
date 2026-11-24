@@ -38,6 +38,8 @@ const SYSTEM = new Set([
   'POST /context/select',
   'GET /lookup/:entity',
   'GET /rate',
+  // MDI_FORM.cs:11421: the main-window rate labels show on every sign-in; no form right gates them.
+  'GET /daily-rate/labels',
   'GET /rate-groups',
   'GET /party/:acCode/balance',
   'GET /vouchers/recent',
@@ -461,6 +463,7 @@ route('Cash / Bank/Payment', [
 ]);
 route('Cash / Bank/Contra', [
   'POST /contra',
+  'GET /contra/list',
   'GET /contra/:vchNo',
   'GET /contra/:vchNo/print',
   'PUT /contra/:vchNo',
@@ -957,7 +960,23 @@ route('Reports/Sales Register', [
   'GET /reports/sales-report/export.csv',
   'GET /reports/sales-report/export.xlsx',
 ]);
+// WP-14: the RP_ALL Order Report screen and its exports, keyed on the "Order Report" caption's own USER_SET
+// row (MDI_FORM.cs:7034 {{DC_Main.MsUserRightForm = MsSideBtn;}}), never on Sales Order (D6).
+route('Reports/Order Report', [
+  'GET /reports/order-report',
+  'GET /reports/order-report/export.csv',
+  'GET /reports/order-report/export.xlsx',
+]);
 route('Reports/Purchase Register', ['GET /reports/purchase-register']);
+// WP-12: the RP_ALL Purchase Rpt screen, its City/Area options and its exports (routes/purchaseReport.ts), the
+// "Purchase Rpt" caption.
+route('Reports/Purchase Rpt', [
+  'GET /reports/purchase-report',
+  'GET /reports/purchase-report/options',
+  'GET /reports/purchase-report/export.csv',
+  'GET /reports/purchase-report/export.xlsx',
+  'GET /reports/purchase-report/export.pdf',
+]);
 route('Reports/Day Book', ['GET /reports/day-book']);
 route('Reports/Rojmel', ['GET /reports/rojmel']);
 route('Reports/Final Reports', ['GET /reports/final-reports', 'GET /reports/profit-loss']);
@@ -1139,6 +1158,11 @@ const PRINT_ROUTES = new Set([
   'GET /reports/gst-report/workbook.xlsx',
   'GET /reports/stock-report/export.csv',
   'GET /reports/stock-report/export.xlsx',
+  'GET /reports/purchase-report/export.csv',
+  'GET /reports/purchase-report/export.xlsx',
+  'GET /reports/purchase-report/export.pdf',
+  'GET /reports/order-report/export.csv',
+  'GET /reports/order-report/export.xlsx',
   'GET /reports/gstr2-doc',
   'GET /reports/gstr1-doc',
   'GET /reports/gstr3b-doc',
@@ -1146,6 +1170,8 @@ const PRINT_ROUTES = new Set([
   'GET /reports/balance-sheet-doc',
   'GET /reports/render',
   'GET /fine-jv/:vchNo/print',
+  // Purchase Rtn prints on FRM_PRINT (TR_KR_ISU.cs:5434 {{UserPrint}}), not on view (N245, G257).
+  'GET /purchase-returns/:vchNo/print',
   // TR_SL_ORD_ADJ.cs:3796-3800: OrderCancelVch needs the print right.
   'GET /order-cancel/:vchNo/print',
   // TR_CONTRA.cs:3000-3004: Contra and Journal documents are printed from the same form as Fine JV.

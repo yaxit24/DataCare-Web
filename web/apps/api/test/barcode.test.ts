@@ -81,7 +81,7 @@ describe('Code39 tag barcode (scannable)', () => {
     expect((code39Svg('RG1').match(/<rect/g) || []).length).toBe(5 * 5); // *RG1* = 5 chars
     expect(code39Svg('X').startsWith('<svg')).toBe(true);
   });
-  it('label sheet embeds real barcode + HUID + weights', () => {
+  it('label sheet embeds real barcode + weights (no HUID line, N249)', () => {
     const html = renderTagLabels([
       {
         tagNo: 'RG1',
@@ -98,7 +98,7 @@ describe('Code39 tag barcode (scannable)', () => {
       },
     ]);
     expect(html).toContain('<svg');
-    expect(html).toContain('HUID123456');
+    expect(html).not.toContain('HUID123456');
     expect(html).toContain('RG1');
     expect(html).toContain('MRP');
   });
