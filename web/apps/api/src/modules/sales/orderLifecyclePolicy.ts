@@ -1,3 +1,4 @@
+import { isRebuiltOrderStockRow } from './salesOrderStock.js';
 import type { VoucherScope } from '../vouchers/numbering.js';
 import { SaleValidationError } from './sales.js';
 import { Prisma } from '@datacare/db';
@@ -334,7 +335,12 @@ export function unsupportedOrderEdit(
       ? (state[table] ?? []).filter(
           (row) => String((row as Record<string, unknown>).ORD_SIGN ?? '').trim() !== '+',
         )
-      : (state[table] ?? []);
+      : table === 'MAIN_STOCK'
+        ? // The old metal '+' rows of an 'I' book are rebuilt by the save (Order_Stk, salesOrderStock.ts).
+          (state[table] ?? []).filter(
+            (row) => !isRebuiltOrderStockRow(row as Record<string, unknown>),
+          )
+        : (state[table] ?? []);
   if (blocking.some((table) => rowsOf(table).length)) return blocked;
   // Old metal amounts without grid rows (the desktop's 'T' book types them and opens an URD purchase) cannot be
   // rebuilt from the grid, so an edit would zero them. The typed rate-cut fine is echoed by an edit, and the

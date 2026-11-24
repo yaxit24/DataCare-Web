@@ -125,8 +125,8 @@ export function orderHeaderFields(
 const num = (value: unknown): number => (value == null || value === '' ? 0 : Number(value));
 
 /**
- * The reopened order's tenders. The cash leg is leg type 02; an order saved before N197 (and every Tour Order) has
- * one debit leg, and its ADV_AMT holds the cash advance.
+ * The reopened order's tenders. The cash leg is leg type 02; an order saved before N197 (and every Tour Order
+ * posted by the earlier web writer) has the one cash-pair debit leg, and its ADV_AMT holds the cash advance.
  */
 export function orderTenderView(
   header: Record<string, any>,
@@ -151,9 +151,16 @@ export function orderTenderView(
       saved.SL_PR_DETL?.length
     );
   // A tendered order names its cash account on leg 02 only; a cheque or card leg is never the cash account.
-  const cashLeg = tendered
-    ? ledger.find((row) => /^.{21}02$/.test(String(row.LEDR_KEY ?? '')) && num(row.DR_AMT) > 0)
-    : ledger.find((row) => num(row.DR_AMT) > 0);
+  // The cash account is leg 02's (Ac_Ledr.cs:32). A Tour Order posted by the earlier web writer has one debit leg
+  // (key 51 of its cash pair 51/52, salesOrderTender.ts orderTenderLedger) and no leg 02, so an untendered order
+  // takes that pair's debit leg. A desktop Tour Order's bank or card debit (legs 04/06, Ac_Ledr.cs:34-40) is never
+  // the cash account: without leg 02 or the legacy pair no account is returned, and the save resolves the book's
+  // slot 1 itself (Ac_Rojmel.cs:11 always takes row 01's contra from BOOK_DETL).
+  const cashLeg =
+    ledger.find((row) => /^.{21}02$/.test(String(row.LEDR_KEY ?? '')) && num(row.DR_AMT) > 0) ??
+    (tendered
+      ? undefined
+      : ledger.find((row) => /^.{21}51$/.test(String(row.LEDR_KEY ?? '')) && num(row.DR_AMT) > 0));
   const advanceColumn = advanceColumnOf(header, ledger);
   return {
     tendered,
@@ -333,8 +340,11 @@ export function tourCashColumn(
   tender: OrderTender,
   previous: Record<string, unknown> | undefined,
   previousAdvance: number | undefined,
+  /** The saved ledger is the earlier web writer's cash pair (keys 51/52), which posted the whole advance as cash. */
+  earlierWebCashPair = false,
 ): { CASH_AMT?: number } {
-  if (!previous || previousAdvance === undefined) return { CASH_AMT: tender.cash };
+  if (!previous || previousAdvance === undefined || earlierWebCashPair)
+    return { CASH_AMT: tender.cash };
   const change = round(tender.cash - previousAdvance, 2);
   if (!change) return {};
   const cash = round(num(previous.CASH_AMT) + change, 2);

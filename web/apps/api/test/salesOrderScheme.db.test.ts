@@ -175,8 +175,7 @@ run('Sales Order scheme tender', () => {
       ['01', 'PARTY', 'CASH', 0, 3000],
       ['02', 'CASH', 'PARTY', 3000, 0],
     ]);
-    // Type 05 copies the advance row's columns. Neither carries VCH_DESC yet: the shared builder leaves IT_DESC blank
-    // where the desktop selects A.VCH_DESC (Ac_Rojmel.cs:11, :19), an open item outside this slice.
+    // Types 01 and 05 both carry the order's VCH_DESC as IT_DESC (A.VCH_DESC, Ac_Rojmel.cs:11, :19).
     expect(await keyed('ROJ_MEL_DATA')).toEqual([
       {
         leg: '01',
@@ -188,7 +187,7 @@ run('Sales Order scheme tender', () => {
         name: 'Saved customer',
         typ: 'A',
         sign: '',
-        descr: '',
+        descr: 'Ring order',
         vtype: 'SORD',
         book: 'SALES ORDER',
       },
@@ -202,7 +201,7 @@ run('Sales Order scheme tender', () => {
         name: 'MADJ - Saved customer',
         typ: 'A',
         sign: '',
-        descr: '',
+        descr: 'Ring order',
         vtype: 'SORD',
         book: 'SALES ORDER',
       },
