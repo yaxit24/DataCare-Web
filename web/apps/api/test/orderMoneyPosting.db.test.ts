@@ -221,11 +221,12 @@ run('Order money ledger and day book follow Ac_Ledr.cs:30-40 and Ac_Rojmel.cs:11
            '0.00' AS "OTH_AMT",'0.00' AS "NET_AMT",A."VCH_DESC" AS "IT_DESC",'' AS "IT_CODE",'' AS "MEMB_CODE",
            '' AS "SCHM_CODE",'' AS "REF_NO",B."DATA_TYPE"
       ${from} AND ${where}`;
-  // Ac_Rojmel.cs:11-16 types 01, 02, 03 and :25 type 08.
+  // Ac_Rojmel.cs:11-16 types 01, 02, 03, :19 type 05 and :25 type 08.
   const DESKTOP_DAYBOOK = `
     ${roj("'01'", 'A."AC_CODE"', 'A."ADV_AMT"', '0', 'A."AC_NAME"', 'A."ADV_AMT"<>0')}
     UNION ALL ${roj("'02'", 'A."BANK_AC"', '0', 'A."CHQ_AMT"', "''", 'A."CHQ_AMT"<>0')}
     UNION ALL ${roj("'03'", 'A."CARD_AC"', '0', 'A."CARD_AMT"', "''", `A."CARD_AMT"<>0 AND A."CARD_ADJ"<>'Y'`)}
+    UNION ALL ${roj("'05'", "'00079'", '0', 'A."SCHM_AMT"', `'MADJ - '||A."AC_NAME"`, 'A."SCHM_AMT"<>0')}
     UNION ALL ${roj(
       `'08'||lpad(C."SR_NO"::text,10)`,
       'C."UPI_AC_CODE"',
@@ -426,5 +427,111 @@ run('Order money ledger and day book follow Ac_Ledr.cs:30-40 and Ac_Rojmel.cs:11
       ['01', 'PARTY', '0.00', '25.00'],
       ['02', 'CASH', '25.00', '0.00'],
     ]);
+  });
+
+  it('a desktop cheque-only Tour Order reopens without a cash account and keeps the book slot 1 on save', async () => {
+    await createTourOrder(runtime, tourInput({ advanceAmount: 0 }) as any);
+    // The imported order (TR_TOUR_ORD.cs:7309-7312): no cash tender, a 100 cheque to BANK1, advance 100;
+    // the desktop's ledger holds only the cheque pair 03/04 (Ac_Ledr.cs:34-36), never a leg 02.
+    await exec(`DELETE FROM "AC_DATA" WHERE tenant_id=$1`, tenantId);
+    await exec(`DELETE FROM "ROJ_MEL_DATA" WHERE tenant_id=$1`, tenantId);
+    await exec(
+      `UPDATE "SL_ORD_DATA" SET "CASH_AMT"=0,"CHQ_AMT"=100,"BANK_AC"='BANK1',"CHQ_NO"='000777',"ADV_AMT"=100 WHERE tenant_id=$1`,
+      tenantId,
+    );
+    await exec(
+      `INSERT INTO "AC_DATA"(tenant_id,"CO_CODE","LC_CODE","CO_YEAR","CO_BOOK","VCH_NO","VCH_TYPE","VCH_DATE","LEDR_KEY","AC_CODE","LD_CODE","CR_AMT","DR_AMT")
+       VALUES($1,'01','01',$2,'510','00001','TUROD','2024-07-10','01012024-20255100000103','PARTY','CASH',100,0),
+             ($1,'01','01',$2,'510','00001','TUROD','2024-07-10','01012024-20255100000104','BANK1','PARTY',0,100)`,
+      tenantId,
+      YEAR,
+    );
+    const doc = (await getTourOrder(runtime, scope('510'), '00001')) as any;
+    // Reopen must not take the bank's debit leg as the cash account: only legs 01/02 name it
+    // (Ac_Ledr.cs:30-36), and day-book 01 always takes the slot-1 account (Ac_Rojmel.cs:11).
+    expect(doc.cashAc).toBeUndefined();
+    // An unchanged re-save keeps the cheque pair and credits the advance to the book's slot-1 account.
+    await editTourOrder(
+      runtime,
+      { ...doc, scope: scope('510'), expectedVersion: doc.version } as any,
+      '00001',
+    );
+    let desktop = await expectDesktop();
+    expect(legs(desktop.ledger)).toEqual([
+      ['03', 'PARTY', '0.00', '100.00'],
+      ['04', 'BANK1', '100.00', '0.00'],
+    ]);
+    expect(legs(desktop.dayBook)).toEqual([
+      ['01', 'PARTY', '0.00', '100.00'],
+      ['02', 'BANK1', '100.00', '0.00'],
+    ]);
+    // Raising the advance to 150 moves only the cash difference (tourCashColumn), and the new cash
+    // leg 02 debits the book's slot-1 account, not the bank (Ac_Ledr.cs:32).
+    const raised = (await getTourOrder(runtime, scope('510'), '00001')) as any;
+    await editTourOrder(
+      runtime,
+      {
+        ...raised,
+        scope: scope('510'),
+        expectedVersion: raised.version,
+        advanceAmount: 150,
+      } as any,
+      '00001',
+    );
+    desktop = await expectDesktop();
+    expect(legs(desktop.ledger)).toEqual([
+      ['01', 'PARTY', '0.00', '50.00'],
+      ['02', 'CASH', '50.00', '0.00'],
+      ['03', 'PARTY', '0.00', '100.00'],
+      ['04', 'BANK1', '100.00', '0.00'],
+    ]);
+    expect(legs(desktop.dayBook)).toEqual([
+      ['01', 'PARTY', '0.00', '150.00'],
+      ['02', 'BANK1', '100.00', '0.00'],
+    ]);
+  });
+
+  it('a Tour Order with a saved scheme keeps day-book row 05 through an unchanged re-save (Ac_Rojmel.cs:19)', async () => {
+    // The scheme account is the MEMB ADJUST book's slot 1, the desktop's 00079 (MS_UPDATE.cs:27378).
+    await exec(
+      `INSERT INTO "BOOK_DATA"(tenant_id,"CO_CODE","LC_CODE","CO_BOOK","BOOK_NAME","BOOK_SNAME","MAIN_BOOK","BOOK_INOUT","CUR_USE","BOOK_TBL_NAME","DATA_TYPE")
+       VALUES($1,'01','01','076','Member Adjust','MADJ','MEMB ADJUST','O','Y','AD_ADJ','A')`,
+      tenantId,
+    );
+    await exec(
+      `INSERT INTO "BOOK_DETL"(tenant_id,"CO_CODE","LC_CODE","CO_BOOK","SR_NO","AC_CODE","BOOK_SNAME","MAIN_BOOK","BOOK_INOUT","DATA_TYPE")
+       VALUES($1,'01','01','076',1,'00079','MADJ','MEMB ADJUST','O','A')`,
+      tenantId,
+    );
+    await createTourOrder(runtime, tourInput({ advanceAmount: 150 }) as any);
+    // The desktop's tenders (TR_TOUR_ORD.cs:7309-7312): cash 100, scheme 50, advance 150.
+    await exec(
+      `UPDATE "SL_ORD_DATA" SET "CASH_AMT"=100,"SCHM_AMT"=50 WHERE tenant_id=$1`,
+      tenantId,
+    );
+    const doc = (await getTourOrder(runtime, scope('510'), '00001')) as any;
+    expect([doc.advanceAmount, doc.schemeAmount]).toEqual([150, 50]);
+    await editTourOrder(
+      runtime,
+      { ...doc, scope: scope('510'), expectedVersion: doc.version } as any,
+      '00001',
+    );
+    // Order_Ledr has no scheme leg (Ac_Ledr.cs:28-61); the day book rebuilds rows 01 and 05, exactly
+    // as the desktop's own statement over the saved header (SCHM_AMT <> 0 for both forms, :19).
+    const desktop = await expectDesktop();
+    expect(legs(desktop.ledger)).toEqual([
+      ['01', 'PARTY', '0.00', '100.00'],
+      ['02', 'CASH', '100.00', '0.00'],
+    ]);
+    expect(legs(desktop.dayBook)).toEqual([
+      ['01', 'PARTY', '0.00', '150.00'],
+      ['05', '00079', '50.00', '0.00'],
+    ]);
+    expect(desktop.dayBook[1]).toMatchObject({
+      AC_NAME: 'MADJ - Mixed customer',
+      LD_CODE: 'PARTY',
+      VCH_TYPE: 'TUROD',
+      BOOK_NAME: 'TOUR ORDER',
+    });
   });
 });

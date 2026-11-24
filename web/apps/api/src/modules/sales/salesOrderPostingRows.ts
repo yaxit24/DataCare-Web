@@ -5,7 +5,10 @@ import type { VoucherScope } from '../vouchers/numbering.js';
 import * as oldMetal from './salesOrderOldMetal.js';
 import { orderHeaderRojmel, orderMoneyLedger } from './salesOrderMoneyPosting.js';
 import * as rateCut from './salesOrderRateCutPosting.js';
+import { resolveSchemeAccountTx } from './salesOrderScheme.js';
 import type { OrderTender } from './salesOrderTender.js';
+
+const num = (value: unknown): number => (value == null || value === '' ? 0 : Number(value));
 
 /**
  * Every AC_DATA and ROJ_MEL_DATA row an order save writes: Ac_Ledr.Order_Ledr and Ac_Rojmel.Order_Rojmel, which both
@@ -44,12 +47,34 @@ export async function orderPostingRowsTx(
     mainBook: slot1?.mainBook || book.mainBook,
     dataType: slot1?.dataType || book.dataType,
   };
+  // Ac_Ledr.cs:48-50 gates the old-metal fine mirror leg 10 on the company's trading-fine setting
+  // (CO_SET.TRAD_FINE, blank 'N', MS_OPNCOMP.cs:690, :813-816); read it only when those legs can post.
+  const tradeFine =
+    book.inoutType === 'I' && tender.oldMetal.length
+      ? String(
+          (
+            (await tx.$queryRawUnsafe(
+              `SELECT upper(btrim(coalesce("TRAD_FINE"::text,''))) AS trad_fine FROM "CO_SET"
+                WHERE tenant_id=$1 AND "CO_CODE"::text=$2::text ORDER BY row_id LIMIT 1`,
+              order.scope.tenantId,
+              String(order.scope.coCode),
+            )) as Array<{ trad_fine: string | null }>
+          )[0]?.trad_fine ?? '',
+        ) === 'Y'
+      : false;
   const ledger: LedgerLine[] = [
     // Order_Ledr 01-06 and 12/13 from the saved header, for both forms.
     ...orderMoneyLedger(key, header, slot, book, tender.upiRows),
     // Legs 07-10 (Ac_Ledr.cs:42-50) carry the line's VCH_TIME, HD_VCH_NO and MAIN_USER and BOOK_DATA's columns.
     ...oldMetal
-      .orderOldMetalLedger(key, book.vchType, order.party.code, tender.oldMetal, book.inoutType)
+      .orderOldMetalLedger(
+        key,
+        book.vchType,
+        order.party.code,
+        tender.oldMetal,
+        book.inoutType,
+        tradeFine,
+      )
       .map((leg) => ({
         ...leg,
         VCH_DATE: header.VCH_DATE,
@@ -73,10 +98,16 @@ export async function orderPostingRowsTx(
     vchNo: key.VCH_NO,
   };
   // Ac_Rojmel.cs:11 and :23: type 01 only when ADV_AMT is not 0, type 07 when RCUT_FINE is not 0.
+  // Type 05 (Ac_Rojmel.cs:19) is written for EITHER form whenever the saved SCHM_AMT is not 0: a Tour
+  // Order's request never carries the scheme (orderTenderOf ignores it), so resolve the account from
+  // the final header rather than silently dropping the row when the tender never did (salesOrderScheme.ts).
+  const schemeAc =
+    tender.schemeAc ||
+    (num(header.SCHM_AMT) !== 0 ? await resolveSchemeAccountTx(tx, order.scope) : '');
   const rojmelRows = rateCut.withOrderRateCutRojmel(
     [
       // Types 01, 02, 03, 05 and 08 from the saved header.
-      ...orderHeaderRojmel(context, header, slot, book, tender.upiRows, tender.schemeAc),
+      ...orderHeaderRojmel(context, header, slot, book, tender.upiRows, schemeAc),
       // Types 04 and 06, old metal, from the grid (Ac_Rojmel.cs:17-21; BOOK_DETL slot 1's columns).
       ...buildOrderRojmel(
         {

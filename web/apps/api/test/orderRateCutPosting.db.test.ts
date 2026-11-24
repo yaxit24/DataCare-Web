@@ -98,6 +98,18 @@ run('Order rate-cut ledger and day-book rows follow Ac_Ledr.cs:53 and Ac_Rojmel.
              ($1,'01','01','BANK1','Bank'),($1,'01','01','CARD1','Card')`,
       tenantId,
     );
+    // The tour fixture types a scheme tender (TR_TOUR_ORD.cs:7312), whose day-book row 05 (Ac_Rojmel.cs:19)
+    // debits the MEMB ADJUST book's slot 1 — the desktop's 00079 (MS_UPDATE.cs:27378).
+    await exec(
+      `INSERT INTO "BOOK_DATA"(tenant_id,"CO_CODE","LC_CODE","CO_BOOK","BOOK_NAME","BOOK_SNAME","MAIN_BOOK","BOOK_INOUT","CUR_USE","BOOK_TBL_NAME","DATA_TYPE")
+       VALUES($1,'01','01','076','Member Adjust','MADJ','MEMB ADJUST','O','Y','AD_ADJ','A')`,
+      tenantId,
+    );
+    await exec(
+      `INSERT INTO "BOOK_DETL"(tenant_id,"CO_CODE","LC_CODE","CO_BOOK","SR_NO","AC_CODE","MAIN_BOOK","BOOK_INOUT","DATA_TYPE")
+       VALUES($1,'01','01','076',1,'00079','MEMB ADJUST','O','A')`,
+      tenantId,
+    );
     await exec(
       `INSERT INTO "ITEM_MAST"(tenant_id,"CO_CODE","IT_CODE","IT_NAME","IT_TYPE","GR_CODE","PR_CODE") VALUES($1,'01','GL','Gold','G','E1','01')`,
       tenantId,
@@ -259,8 +271,9 @@ run('Order rate-cut ledger and day-book rows follow Ac_Ledr.cs:53 and Ac_Rojmel.
       AC_NAME: 'Rate customer',
       IT_DESC: 'Rate-cut order',
     });
-    // Type 01 reads ADV_AMT, which a rate-cut order saves as 0 (Ac_Rojmel.cs:11).
-    expect(await dayBookKeys()).toEqual(['07:0/2670']);
+    // Type 01 reads ADV_AMT, which a rate-cut order saves as 0 (Ac_Rojmel.cs:11); the scheme tender
+    // keeps its row 05 (Ac_Rojmel.cs:19).
+    expect(await dayBookKeys()).toEqual(['05:0/20', '07:0/2670']);
     // The cash pair still balances; the ledger is out by exactly the one-sided debit.
     expect(await voucherBalance()).toEqual({ dr: 2500 + 2670, cr: 2500 });
     // The rate-cut leg is not read back as the cash account or the advance.
@@ -310,7 +323,7 @@ run('Order rate-cut ledger and day-book rows follow Ac_Ledr.cs:53 and Ac_Rojmel.
     expect(desktopLedger[0]).toMatchObject({ DR_AMT: '3170.00', FINE_WT: '0.500' });
     expect(await ledgerRows()).toEqual(desktopLedger);
     expect(await dayBookRows()).toEqual(await query(DESKTOP_DAYBOOK, tenantId));
-    expect(await dayBookKeys()).toEqual(['07:0/3170']);
+    expect(await dayBookKeys()).toEqual(['05:0/20', '07:0/3170']);
 
     doc = (await getTourOrder(runtime, scope('510'), '00001')) as any;
     await editTourOrder(
@@ -327,7 +340,7 @@ run('Order rate-cut ledger and day-book rows follow Ac_Ledr.cs:53 and Ac_Rojmel.
     );
     expect(await ledgerRows()).toEqual([]);
     expect(await dayBookRows()).toEqual([]);
-    expect(await dayBookKeys()).toEqual(['01:3000/0']);
+    expect(await dayBookKeys()).toEqual(['01:3000/0', '05:0/20']);
     expect(await voucherBalance()).toEqual({ dr: 3000, cr: 3000 });
   });
 
@@ -437,6 +450,12 @@ run('Order rate-cut ledger and day-book rows follow Ac_Ledr.cs:53 and Ac_Rojmel.
     await createSalesOrder(runtime, salesInput({ rateCutRate: 0, rateCutFine: 0 }) as any);
     expect(await ledgerRows()).toEqual([]);
     expect(await dayBookRows()).toEqual([]);
-    expect(await dayBookKeys()).toEqual(['01:2500/0', '01:1800/0', '02:0/500', '03:0/300']);
+    expect(await dayBookKeys()).toEqual([
+      '01:2500/0',
+      '05:0/20',
+      '01:1800/0',
+      '02:0/500',
+      '03:0/300',
+    ]);
   });
 });

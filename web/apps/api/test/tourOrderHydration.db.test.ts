@@ -64,6 +64,17 @@ dbDescribe('Tour Order configured-book and complete editor round trip', () => {
       `INSERT INTO "BOOK_DATA"(tenant_id,"CO_CODE","LC_CODE","CO_BOOK","BOOK_NAME","BOOK_SNAME","MAIN_BOOK","BOOK_INOUT","CUR_USE","BOOK_TBL_NAME") VALUES ($1,'01','01','510','Tour A','TUROD','TOUR ORDER','I','Y','SL_ORD_DATA'),($1,'01','01','511','Tour B','TUROD','TOUR ORDER','I','Y','SL_ORD_DATA'),($1,'01','01','Z09','Custom Tour','TUROD','TOUR ORDER','I','Y','SL_ORD_DATA'),($1,'01','02','511','Branch Tour','TUROD','TOUR ORDER','I','Y','SL_ORD_DATA'),($1,'01','01','SOR','Sales Order','SORD','SALES ORDER','O','Y','SL_ORD_DATA')`,
       tenantId,
     );
+    // The input types a scheme tender (TR_TOUR_ORD.cs:7312); its day-book row 05 (Ac_Rojmel.cs:19) debits the
+    // MEMB ADJUST book's slot 1, the desktop's 00079.
+    await exec(
+      `INSERT INTO "BOOK_DATA"(tenant_id,"CO_CODE","LC_CODE","CO_BOOK","BOOK_NAME","BOOK_SNAME","MAIN_BOOK","BOOK_INOUT","CUR_USE","BOOK_TBL_NAME","DATA_TYPE") VALUES ($1,'01','01','076','Member Adjust','MADJ','MEMB ADJUST','O','Y','AD_ADJ','A'),($1,'01','02','076','Member Adjust','MADJ','MEMB ADJUST','O','Y','AD_ADJ','A')`,
+      tenantId,
+    );
+    await exec(`DELETE FROM "BOOK_DETL" WHERE tenant_id=$1`, tenantId);
+    await exec(
+      `INSERT INTO "BOOK_DETL"(tenant_id,"CO_CODE","LC_CODE","CO_BOOK","SR_NO","AC_CODE","MAIN_BOOK","BOOK_INOUT","DATA_TYPE") VALUES ($1,'01','01','076',1,'00079','MEMB ADJUST','O','A'),($1,'01','02','076',1,'00079','MEMB ADJUST','O','A')`,
+      tenantId,
+    );
     await exec(
       `INSERT INTO "AC_MAST"(tenant_id,"CO_CODE","LC_CODE","AC_CODE","AC_NAME") VALUES ($1,'01','01','PARTY','Customer'),($1,'01','01','CASH','Cash'),($1,'01','01','CASH2','Second till')`,
       tenantId,

@@ -177,6 +177,15 @@ run('Sales Order on an I book follows the desktop', () => {
     )
       .map((row) => row.leg)
       .sort();
+  const dayBook = async () =>
+    (
+      await query(
+        `SELECT btrim(substr("LEDR_KEY",22)) leg FROM "ROJ_MEL_DATA" WHERE tenant_id=$1 ORDER BY "LEDR_KEY"`,
+        tenantId,
+      )
+    )
+      .map((row) => row.leg.replace(/\s+/g, ' '))
+      .sort();
   const inoutTypes = async () =>
     query(
       `SELECT DISTINCT "INOUT_TYPE" t FROM (SELECT "INOUT_TYPE" FROM "SL_ORD_DETL" WHERE tenant_id=$1
@@ -187,11 +196,46 @@ run('Sales Order on an I book follows the desktop', () => {
   it("accepts the 'I' book, stamps INOUT_TYPE I and posts legs 07-11 and Order_Stk statement 1", async () => {
     await createSalesOrder(runtime, input({ rateCutRate: 6000, rateCutFine: 0.5 }) as any);
     expect(await inoutTypes()).toEqual([{ t: 'I' }]);
-    // 01/02 cash, line 1 valued 07/08, line 2 fine 09/10, rate cut 11 (Ac_Ledr.cs:30-53).
-    expect(await legs()).toEqual(['01', '02', '107', '108', '11', '209', '210']);
+    // 01/02 cash, line 1 valued 07/08, line 2 fine 09, rate cut 11 (Ac_Ledr.cs:30-53; leg 10 needs TRAD_FINE 'Y').
+    expect(await legs()).toEqual(['01', '02', '107', '108', '11', '209']);
     const desktop = await query(DESKTOP_STOCK_IN, tenantId);
     expect(desktop).toHaveLength(2);
     expect(await query(WEB_STOCK_IN, tenantId)).toEqual(desktop);
+  });
+
+  it('old-metal fine leg 10 follows CO_SET.TRAD_FINE (Ac_Ledr.cs:48-50): 09 alone on N, mirrored on Y', async () => {
+    await createSalesOrder(runtime, input() as any);
+    // Blank TRAD_FINE is 'N' (MS_OPNCOMP.cs:813-816): the party's +fine leg 09 posts without a mirror,
+    // and the purchase account's fine balance stays untouched. Both money amounts are zero, so only the
+    // leg set — not assertBalanced — can see the difference.
+    expect(await legs()).toEqual(['01', '02', '107', '108', '209']);
+    // The fine day-book row 06 is unconditional (Ac_Rojmel.cs:21): the gate is on the ledger only.
+    expect(await dayBook()).toEqual(['01', '04 1', '06 2']);
+    // TRAD_FINE 'Y' adds the purchase account's -fine mirror on the same saved line.
+    await exec(`UPDATE "CO_SET" SET "TRAD_FINE"='Y' WHERE tenant_id=$1`, tenantId);
+    const doc = (await getSalesOrder(runtime, scope, 1)) as any;
+    await editSalesOrder(
+      runtime,
+      { ...doc, scope, expectedVersion: doc.version, mainUser: 'clerk' } as any,
+      1,
+    );
+    expect(await legs()).toEqual(['01', '02', '107', '108', '209', '210']);
+    expect(await dayBook()).toEqual(['01', '04 1', '06 2']);
+    const [leg10] = await query(
+      `SELECT btrim("AC_CODE") ac,btrim("LD_CODE") ld,"DR_AMT"::float dr,"CR_AMT"::float cr,
+              btrim("IT_TYPE") typ,btrim(coalesce("SIGN",'')) sign,"FINE_WT"::float fine
+         FROM "AC_DATA" WHERE tenant_id=$1 AND btrim(substr("LEDR_KEY",22))='210'`,
+      tenantId,
+    );
+    expect(leg10).toEqual({
+      ac: 'PURCHASE',
+      ld: 'PARTY',
+      dr: 0,
+      cr: 0,
+      typ: 'G',
+      sign: '-',
+      fine: 3,
+    });
   });
 
   it('an edit rebuilds the old metal stock rows and delete removes them', async () => {
