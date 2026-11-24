@@ -213,6 +213,9 @@ export async function saveAutoItems(
         TAG_IDTL_COL: 'N',
         OTH_DETL_POSTING: 'N',
         OTH_ITM_WT_REMOVE: 'N',
+        // MS_AUTO_ITEM.cs:2904 {{dataRow2["EMP_COM_PRC"] = 0;}}, :2912 {{dataRow2["TAX_FREE_ITEM"] = "N";}}.
+        EMP_COM_PRC: 0,
+        TAX_FREE_ITEM: 'N',
       });
       created.push(code);
     }

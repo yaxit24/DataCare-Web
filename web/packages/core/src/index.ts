@@ -56,6 +56,13 @@ export {
   valueOldGoldLine,
 } from './oldGold.js';
 export type { OldGoldLineInput, OldGoldRateType, OldGoldValuationInput } from './oldGold.js';
+export {
+  OLD_METAL_RATE_TYPE_MESSAGE,
+  oldMetalHeaderTotals,
+  oldMetalRateTypeError,
+  oldMetalTodayRates,
+  oldMetalTouchFromAmount,
+} from './oldMetalGrid.js';
 export { orderLabourAmount, orderLabourTransition, orderLabourReplay } from './orderLabour.js';
 export type {
   OrderLabourState,
@@ -270,6 +277,18 @@ export {
   wholesaleGridTotals,
   wholesaleBand,
 } from './wholesaleLine.js';
+export {
+  commPassTotalIdtl,
+  detailRowIsWritten,
+  detailWeightFromKr,
+  detailWeightFromPieces,
+  rollupWholesaleDetails,
+} from './wholesaleDetail.js';
+export type {
+  WholesaleDetailInput,
+  WholesaleDetailResult,
+  WholesaleDetailRollup,
+} from './wholesaleDetail.js';
 export type {
   WholesaleLineSettings,
   WholesaleLineInput,
@@ -340,6 +359,13 @@ export {
   itemOpeningTotals,
 } from './itemOpening.js';
 export type { ItemOpeningRow, ItemOpeningRowInput, ItemOpeningTypeCode } from './itemOpening.js';
+export {
+  DESKTOP_DATE_MASK,
+  desktopDateMaskText,
+  desktopSetDate,
+  type SetDateMessage,
+  type SetDateResult,
+} from './setDate.js';
 export {
   computeSaleLine,
   derivedLabourRate,

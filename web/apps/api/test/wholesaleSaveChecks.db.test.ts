@@ -181,9 +181,15 @@ describe('assertWholesaleItemCodes', () => {
     await refuses(sale({ pay: { cash: 50000 } }), DESKTOP_MESSAGES.PARTY_IN_DEFAULTER_LIST);
     const paid = await post(sale());
     expect(paid.statusCode, paid.body).toBe(201);
+    const paidNo = String(paid.json().vchNo).padStart(5, '0');
+    const paidView = await app.inject({
+      method: 'GET',
+      url: `/wholesale-sales/${paidNo}?coBook=WHS`,
+      headers: { cookie },
+    });
     const deleted = await app.inject({
       method: 'DELETE',
-      url: `/wholesale-sales/${paid.json().vchNo}`,
+      url: `/wholesale-sales/${paidNo}?expectedVersion=${paidView.json().version}`,
       headers: { cookie },
       payload: { book: 'WHS' } as any,
     });
@@ -234,9 +240,14 @@ describe('assertWholesaleItemCodes', () => {
     // The party owes 9,500 after the voucher and nothing before it in this fresh company.
     expect(html).toMatch(/Oppning Bal :<\/td><td class="r">0\.00<\/td><td>Dr/);
     expect(html).toMatch(/Closing Bal :<\/td><td class="r">9,500\.00<\/td><td>Dr/);
+    const view = await app.inject({
+      method: 'GET',
+      url: `/wholesale-sales/${vchNo}?coBook=WHS`,
+      headers: { cookie },
+    });
     const deleted = await app.inject({
       method: 'DELETE',
-      url: `/wholesale-sales/${vchNo}`,
+      url: `/wholesale-sales/${vchNo}?expectedVersion=${view.json().version}`,
       headers: { cookie },
       payload: { book: 'WHS' } as any,
     });

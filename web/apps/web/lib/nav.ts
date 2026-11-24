@@ -113,7 +113,10 @@ export const NAV: NavGroup[] = [
       { label: 'Purchase Invoice', href: '/txn/purchase', ready: true },
       { label: 'Purchase Quotation', href: '/txn/purchase-quotation', ready: true },
       { label: 'Purchase Return', href: '/txn/purchase-return', ready: true },
-      { label: 'Hallmark Purchase', href: '/txn/purchase-hm', ready: true },
+      // WP-28 (D1, D3): the desktop's "Tag Wise Purc" (TR_PURC_HM on TAG PURCHASE books, Enterprise). The hallmark
+      // layout on PURCHASE books opens from "Purchase Invoice" when PURC_WITH_HMTAX is Y. The caption stays, because
+      // rights and editions are keyed by it (formCatalog.ts, editionTable.ts).
+      { label: 'Hallmark Purchase', href: '/txn/tag-wise-purc', ready: true },
       { label: 'Consignment Purchase', href: '/txn/consi-purchase', ready: true },
       { label: 'Other Expenses', href: '/txn/other-purchase', ready: true },
       { label: 'Other Income', href: '/txn/other-income', ready: true },
@@ -257,6 +260,8 @@ export const NAV: NavGroup[] = [
     items: [
       { label: 'Sales Register', href: '/reports/sales-register', ready: true },
       { label: 'Purchase Register', href: '/reports/purchase-register', ready: true },
+      // The desktop Purchase Rpt menu (RP_ALL): seven purchase reports on one selector panel.
+      { label: 'Purchase Rpt', href: '/reports/purchase-report', ready: true },
       { label: 'Day Book', href: '/reports/day-book', ready: true },
       // The desktop's F11 report: metal weights beside money, which the AC_DATA day book omits.
       { label: 'Rojmel (Day Book)', href: '/reports/rojmel', ready: true },
@@ -335,6 +340,7 @@ export const NAV: NavGroup[] = [
       { label: 'Address Print', href: '/reports/address-print', ready: true },
       { label: 'Entry Check', href: '/reports/entry-check', ready: true },
       { label: 'User Report', href: '/reports/user-report', ready: true },
+      { label: 'Stock Report', href: '/reports/stock-report', ready: true },
       { label: 'Tag-Stock Report', href: '/reports/tag-stock', ready: true },
       { label: 'Karigar Ledger', href: '/reports/karigar-ledger', ready: true },
       { label: 'Old Gold / Exchange', href: '/reports/old-gold-register', ready: true },

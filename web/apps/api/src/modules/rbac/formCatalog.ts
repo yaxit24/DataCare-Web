@@ -190,6 +190,7 @@ const groups: Record<string, readonly string[]> = {
     'Bill Aging',
     'Stock by Location',
     'Purchase by Item',
+    'Purchase Rpt',
     'Voucher Register',
     'Trial Balance (Full)',
     'Sales by Group',
@@ -212,6 +213,7 @@ const groups: Record<string, readonly string[]> = {
     'Karigar Balances',
     'Stock Valuation',
     'Tag-Stock Report',
+    'Stock Report',
     'Tag Estimate',
     'Order Zoom',
     'Karigar Ledger',
@@ -296,6 +298,7 @@ const aliases: Record<string, readonly string[]> = {
   'Reports/Sales by Item': ['Sales Report'],
   'Reports/Sales by Group': ['Sales Report'],
   'Reports/Purchase Register': ['Purchase Rpt'],
+  'Reports/Purchase Rpt': ['Purchase Rpt'],
   'Reports/Purchase by Party': ['Purchase Rpt'],
   'Reports/Purchase by Item': ['Purchase Rpt'],
   'Reports/Cash / Bank Book': ['Cash Bank'],
@@ -380,7 +383,8 @@ const aliases: Record<string, readonly string[]> = {
   'Membership/Gold Adjust': ['Gold Adjust', 'MEMB GOLD ADJ', 'TR_MEMB_ADJ'],
   'Reports/Account Ledger': ['Ledger Report'],
   'Reports/Outstanding (Debtors/Creditors)': ['Outstanding', 'Bill Os Day'],
-  'Reports/Tag-Stock Report': ['Stock Report', 'Tag Stock Report', 'Tag Stock'],
+  // 'Stock Report' is its own form now (RP_STOCK, MDI_FORM.cs:8881); Tag Stock is RP_TAG (MDI_FORM.cs:8891).
+  'Reports/Tag-Stock Report': ['Tag Stock Report', 'Tag Stock'],
   // Desktop MDI menu names, verbatim: 'Tag Estmate' is the desktop's own misspelling (MDI_FORM.cs:8994)
   // and 'Order Zoom' opens RP_ORDER (MDI_FORM.cs:7147). Both are bound to Ctrl chords in the shell.
   'Reports/Tag Estimate': ['Tag Estmate'],

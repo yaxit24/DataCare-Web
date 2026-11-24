@@ -22,11 +22,16 @@ import { desktopGlobalFormKeyActions, FormKeyHints } from '../../../../component
  *   Lbr%, LRate and Mrp for editing, and Print first says "Please First Update Hmid Data and Then print"; Save writes them
  *   back to BAR_DETL and then prints (:5073-5096). Set makes the chosen label file the default (:5636-5655).
  *
- * Deliberate differences: Print shows the web's label sheet because the Crystal label files are not in the repository; a
+ * Print file Name holds the empty item first (:4936) and, with no file marked, stays empty (:4954); Print sends the chosen
+ * file and the sheet follows that file's layout (QrPrint10, BarPrint10, BarPrint13, GhatTagPrnt; :5209); Set says
+ * "Tag Print Report Default Set" (:5653).
+ *
+ * Deliberate differences: Print shows the web's HTML label sheet (one layout per Crystal label file, the SubTagPrint lines
+ * from BAR_DETL's BAR_IDTL) and the QR picture is generated into it; a
  * blank Gr Code or Pr Code goes on / loads the stock (the desktop opens the help); F1 keeps the Book (the desktop's
  * CLEAR_DATA clears it); the typed cells of ItCode, Counter and GrWt are not editable because a label is copied from
  * BAR_DETL; Delete does nothing, as the desktop's empty BtnDelete_Click; Save outside Hm Id Update says so (the desktop
- * does nothing); the RFID button, the Print Type box and the QR picture (named registrations only) are left out.
+ * does nothing); the RFID button and the Print Type box (named registrations only) are left out; a name PRINT_MAST lacks is refused.
  */
 const M = {
   NO_PRINT_RIGHTS: 'You Have No Print Rights.....',
@@ -37,6 +42,7 @@ const M = {
   SAVE_HM_ONLY: 'Save writes the Hm Id data only; tick Hm Id Update to change it.',
   NOTHING: 'Please select the tags to print (Y) and try.',
   DELETE_NONE: 'Delete does nothing on this screen.',
+  DEFAULT_SET: 'Tag Print Report Default Set',
 } as const;
 
 interface Row {
@@ -572,11 +578,17 @@ export default function TagPrintPage() {
   async function stageAndShow() {
     const tags = filled.filter((r) => r.y).map((r) => ({ tagNo: r.tagNo, vchSrno: r.vchSrno }));
     if (!tags.length && !Number(skip)) return setMsg({ kind: 'err', text: M.NOTHING });
-    await post('/stock/tag-print-screen/print', { bookCode: book.trim(), labelSkip: skip, tags });
-    openDocument('/api/stock/tag-print-screen/labels');
+    await post('/stock/tag-print-screen/print', {
+      bookCode: book.trim(),
+      labelSkip: skip,
+      file,
+      tags,
+    });
+    openDocument(`/api/stock/tag-print-screen/labels?file=${encodeURIComponent(file)}`);
   }
   /** BtnPrint_Click (:5122-5226). */
   async function print() {
+    if (busy) return;
     setMsg(null);
     if (rights && !rights.canPrint) return setMsg({ kind: 'err', text: M.NO_PRINT_RIGHTS });
     if (hm && !hmDone) {
@@ -627,7 +639,7 @@ export default function TagPrintPage() {
     if (rights && !rights.canUpdate) return setMsg({ kind: 'err', text: M.NO_RIGHTS });
     try {
       await post('/stock/tag-print-screen/default-file', { file });
-      setMsg({ kind: 'ok', text: `${file} is the default label file.` });
+      setMsg({ kind: 'ok', text: M.DEFAULT_SET });
     } catch (error) {
       setMsg({ kind: 'err', text: refusal(error, M.NO_RIGHTS) });
     }
@@ -651,6 +663,24 @@ export default function TagPrintPage() {
     }
   }
   const screenRef = useScreenEscape<HTMLDivElement>(onScreenKeyDown);
+  /** &Print (:1422): Alt+P presses Print, as the desktop's mnemonic does. */
+  const printNow = useRef(print);
+  printNow.current = print;
+  useEffect(() => {
+    const onAltP = (event: globalThis.KeyboardEvent) => {
+      if (
+        !event.altKey ||
+        event.ctrlKey ||
+        event.metaKey ||
+        (event.key.toLowerCase() !== 'p' && event.code !== 'KeyP')
+      )
+        return;
+      event.preventDefault();
+      void printNow.current();
+    };
+    window.addEventListener('keydown', onAltP);
+    return () => window.removeEventListener('keydown', onAltP);
+  }, []);
   function onHelpKeyDown(event: KeyboardEvent<HTMLElement>) {
     if (!help) return;
     if (event.key === 'ArrowDown' || event.key === 'ArrowUp') {
@@ -842,7 +872,7 @@ export default function TagPrintPage() {
               onChange={(e) => setFile(e.target.value)}
               style={{ minWidth: 113 }}
             >
-              {files.map((f) => (
+              {['', ...files].map((f) => (
                 <option key={f} value={f}>
                   {f}
                 </option>

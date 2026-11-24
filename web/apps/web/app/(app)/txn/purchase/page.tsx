@@ -32,6 +32,8 @@ import {
   purchaseLineAmounts,
 } from '@datacare/core';
 import { todayLocal } from '../../../../lib/localDate';
+import { carryPurchaseHeader, carryUnmanaged } from '../../../../lib/purchaseCarry';
+import HallmarkPurchasePage from '../purchase-hm/page';
 import { openDocument } from '../../../../lib/openDocument';
 
 interface Line {
@@ -90,6 +92,8 @@ interface Line {
   loadedFineWt?: boolean;
   loadedMetalAmount?: boolean;
   loadedLabourAmount?: boolean;
+  /** WP-28: the stored line this row was reopened from; its unshown values go back on save. */
+  source?: Record<string, unknown>;
 }
 const blank = (): Line => ({
   itCode: '', // desktop grids start empty; a demo default posts to the wrong item
@@ -222,7 +226,22 @@ function loadedLabourDependsOn(line: Line, field: keyof Line, labourWithGhat: bo
   }
 }
 
+/**
+ * WP-28 (D1, D2): the one `Purchase` entry opens the layout the company setting chooses, as the desktop does:
+ * MDI_FORM.cs:7866 opens TR_PURC_HM when `MsPurcWithHmTax` is Y, else TR_PURC (MDI_FORM.cs:7884). A blank setting is
+ * N (MS_OPNCOMP.cs:1114). The setting is read when the screen opens.
+ */
 export default function PurchaseEntryPage() {
+  const settings = useCompanySettingsState();
+  if (settings.status === 'loading') return <div className="muted">Loading purchase settings…</div>;
+  return settings.status === 'ready' && companyFlag(settings.values, 'PURC_WITH_HMTAX', 'N') ? (
+    <HallmarkPurchasePage />
+  ) : (
+    <PlainPurchasePage />
+  );
+}
+
+function PlainPurchasePage() {
   const { lcCode, coYear } = useBusinessScope();
   const roundingPolicy = useRoundingPolicy();
   const router = useRouter();
@@ -279,6 +298,8 @@ export default function PurchaseEntryPage() {
   const [voucherLookup, setVoucherLookup] = useState('');
   const [loadedVchNo, setLoadedVchNo] = useState('');
   const [loadedVersion, setLoadedVersion] = useState(''); // N51 (D17): sent on update and delete
+  // WP-28 (D6): the stored voucher as read; every value this screen does not show is sent back on save.
+  const [loadedView, setLoadedView] = useState<Record<string, unknown> | null>(null);
   const [err, setErr] = useState('');
   // Desktop purchase header fields (TR_PURC:12982-13056) — party contact, bank/cheque,
   // credit terms, discount, TDS/TCS, hallmark charge and the posting-account overrides.
@@ -402,6 +423,7 @@ export default function PurchaseEntryPage() {
   function newPurchase() {
     setLoadedVchNo('');
     setLoadedVersion('');
+    setLoadedView(null);
     setVoucherLookup('');
     setResult(null);
     setErr('');
@@ -434,9 +456,33 @@ export default function PurchaseEntryPage() {
       );
       setLoadedVchNo(String(view.voucherNo));
       setLoadedVersion(String(view.version ?? ''));
+      setLoadedView(view);
       setVoucherLookup(String(view.voucherNo));
       setResult(null);
       setVchDate(String(view.vchDate));
+      // WP-28 (G2): the header fields this screen shows, from the stored voucher.
+      setAddress1(editableString(view.address1));
+      setAddress2(editableString(view.address2));
+      setAddress3(editableString(view.address3));
+      setCity(editableString(view.city));
+      setMobile(editableString(view.mobile));
+      setBankName(editableString(view.bankName));
+      setChequeNo(editableString(view.chequeNo));
+      setCardAc(editableString(view.cardAc));
+      setTaxCode(editableString(view.taxCode));
+      setTcsCode(editableString(view.tcsCode));
+      setTdsCode(editableString(view.tdsCode));
+      setSaleBillNo(editableString(view.saleBillNo));
+      setSaleBillBook(editableString(view.saleBillBook));
+      setCreditDays(str(view.creditDays));
+      setDiscountPct(str(view.discountPct));
+      setTcsPct(str(view.tcsPct));
+      setTcsAmount(str(view.tcsAmount));
+      setTdsPct(str(view.tdsPct));
+      setTdsAmount(str(view.tdsAmount));
+      setHmAmount(str(view.hmAmount));
+      setHmTaxPct(str(view.hmTaxPct));
+      setRateUnfix(!!view.rateUnfix);
       setAcCode(String(view.acCode ?? ''));
       setAcName(String(view.acName ?? ''));
       setBillNo(String(view.billNo ?? ''));
@@ -482,6 +528,30 @@ export default function PurchaseEntryPage() {
         rateType: String(line.rateType ?? ''),
         urdRateType: String(line.urdRateType ?? ''),
         huid: String(line.huid ?? '') || undefined,
+        // WP-28 (G1): the stored grid columns, so an unchanged save writes them back.
+        tblCode: editableString(line.tblCode),
+        designNo: editableString(line.designNo),
+        itDesc: editableString(line.itDesc),
+        lotNo: editableString(line.lotNo),
+        itmLot: editableString(line.itmLot),
+        withStock: editableString(line.withStock),
+        bagWt: str(line.bagWt),
+        lessWt: str(line.lessWt),
+        lossWt: str(line.lossWt),
+        ghtPct: str(line.ghtPct),
+        lessTouch: str(line.lessTouch),
+        convRate: str(line.convRate),
+        convPct: str(line.convPct),
+        otherRate: str(line.otherRate),
+        mrp: str(line.mrp),
+        commissionPct: str(line.commissionPct),
+        commissionAmount: str(line.commissionAmount),
+        fineCutPcs: str(line.fineCutPcs),
+        fineCutGrossWt: str(line.fineCutGrossWt),
+        fineCutNetWt: str(line.fineCutNetWt),
+        fineCutFine: str(line.fineCutFine),
+        prCode: editableString(line.prCode),
+        source: line,
       }));
       setLines(loadedLines.length ? loadedLines : [blank()]);
       // Repopulate the stone sub-detail per line. Without this the API returns the stones and the
@@ -540,7 +610,7 @@ export default function PurchaseEntryPage() {
     setResult(null);
     setBusy(true);
     try {
-      const body = {
+      const body = carryPurchaseHeader(loadedVchNo ? loadedView : null, {
         coBook,
         coYear,
         lcCode,
@@ -585,64 +655,66 @@ export default function PurchaseEntryPage() {
           // filtered position would attach a stone block to the wrong item.
           .map((l, sourceIndex) => ({ l, sourceIndex }))
           .filter(({ l }) => l.itCode && (l.netWt || l.rate))
-          .map(({ l, sourceIndex }) => ({
-            stones: stones.inputsFor(sourceIndex),
-            itCode: l.itCode,
-            tagNo: l.tagNo || undefined,
-            vchSrno: l.vchSrno,
-            metal: l.metal,
-            pcs: n(l.pcs),
-            grossWt: n(l.grossWt),
-            netWt: n(l.netWt),
-            touch: n(l.touch),
-            rate: n(l.rate),
-            otherFineWt: l.otherFineWt,
-            silverFineWt: l.silverFineWt,
-            otherAmount: optionalNumber(l.otherAmount),
-            tblCode: l.tblCode || undefined,
-            designNo: l.designNo || undefined,
-            itDesc: l.itDesc || undefined,
-            lotNo: l.lotNo || undefined,
-            itmLot: l.itmLot || undefined,
-            withStock: l.withStock || undefined,
-            bagWt: n(l.bagWt) || undefined,
-            lessWt: n(l.lessWt) || undefined,
-            lossWt: n(l.lossWt) || undefined,
-            ghtPct: n(l.ghtPct) || undefined,
-            ghtWt: n(l.ghtWt) || undefined,
-            westPct: n(l.westPct) || undefined,
-            fineWt: optionalNumber(l.fineWt),
-            labourPct: optionalNumber(l.labourPct),
-            labourAmount: optionalNumber(l.labourAmount),
-            lessTouch: n(l.lessTouch) || undefined,
-            lesTouch: optionalNumber(l.lesTouch),
-            kunFine: optionalNumber(l.kunFine),
-            convRate: n(l.convRate) || undefined,
-            convPct: n(l.convPct) || undefined,
-            otherRate: n(l.otherRate) || undefined,
-            mrp: n(l.mrp) || undefined,
-            metalAmount: optionalNumber(l.metalAmount),
-            commissionPct: n(l.commissionPct) || undefined,
-            commissionAmount: n(l.commissionAmount) || undefined,
-            fineCutPcs: n(l.fineCutPcs) || undefined,
-            fineCutGrossWt: n(l.fineCutGrossWt) || undefined,
-            fineCutNetWt: n(l.fineCutNetWt) || undefined,
-            fineCutFine: n(l.fineCutFine) || undefined,
-            prCode: l.prCode || undefined,
-            rateType: l.rateType || undefined,
-            urdRateType: l.urdRateType || undefined,
+          .map(({ l, sourceIndex }) =>
+            carryUnmanaged(l.source, {
+              stones: stones.inputsFor(sourceIndex),
+              itCode: l.itCode,
+              tagNo: l.tagNo || undefined,
+              vchSrno: l.vchSrno,
+              metal: l.metal,
+              pcs: n(l.pcs),
+              grossWt: n(l.grossWt),
+              netWt: n(l.netWt),
+              touch: n(l.touch),
+              rate: n(l.rate),
+              otherFineWt: l.otherFineWt,
+              silverFineWt: l.silverFineWt,
+              otherAmount: optionalNumber(l.otherAmount),
+              tblCode: l.tblCode || undefined,
+              designNo: l.designNo || undefined,
+              itDesc: l.itDesc || undefined,
+              lotNo: l.lotNo || undefined,
+              itmLot: l.itmLot || undefined,
+              withStock: l.withStock || undefined,
+              bagWt: n(l.bagWt) || undefined,
+              lessWt: n(l.lessWt) || undefined,
+              lossWt: n(l.lossWt) || undefined,
+              ghtPct: n(l.ghtPct) || undefined,
+              ghtWt: n(l.ghtWt) || undefined,
+              westPct: n(l.westPct) || undefined,
+              fineWt: optionalNumber(l.fineWt),
+              labourPct: optionalNumber(l.labourPct),
+              labourAmount: optionalNumber(l.labourAmount),
+              lessTouch: n(l.lessTouch) || undefined,
+              lesTouch: optionalNumber(l.lesTouch),
+              kunFine: optionalNumber(l.kunFine),
+              convRate: n(l.convRate) || undefined,
+              convPct: n(l.convPct) || undefined,
+              otherRate: n(l.otherRate) || undefined,
+              mrp: n(l.mrp) || undefined,
+              metalAmount: optionalNumber(l.metalAmount),
+              commissionPct: n(l.commissionPct) || undefined,
+              commissionAmount: n(l.commissionAmount) || undefined,
+              fineCutPcs: n(l.fineCutPcs) || undefined,
+              fineCutGrossWt: n(l.fineCutGrossWt) || undefined,
+              fineCutNetWt: n(l.fineCutNetWt) || undefined,
+              fineCutFine: n(l.fineCutFine) || undefined,
+              prCode: l.prCode || undefined,
+              rateType: l.rateType || undefined,
+              urdRateType: l.urdRateType || undefined,
 
-            huid: l.huid,
-            ...(l.making
-              ? { labourType: 'per_gram' as const, labourRate: n(l.making) }
-              : l.labourType
-                ? {
-                    labourType: l.labourType,
-                    labourRate: l.labourRate,
-                    labourFixed: l.labourFixed,
-                  }
-                : {}),
-          })),
+              huid: l.huid,
+              ...(l.making
+                ? { labourType: 'per_gram' as const, labourRate: n(l.making) }
+                : l.labourType
+                  ? {
+                      labourType: l.labourType,
+                      labourRate: l.labourRate,
+                      labourFixed: l.labourFixed,
+                    }
+                  : {}),
+            }),
+          ),
         cashAmt: Number(tender.cashAmt || 0),
         chequeAmt: Number(tender.chequeAmt || 0),
         cardAmt: Number(tender.cardAmt || 0),
@@ -651,7 +723,7 @@ export default function PurchaseEntryPage() {
         cashAc: tender.cashAc || undefined,
         bankAc: tender.bankAc || undefined,
         kasarAc: tender.kasarAc || undefined,
-      };
+      });
       const saved = loadedVchNo
         ? await put<any>(`/purchases/${encodeURIComponent(loadedVchNo)}`, {
             ...body,
@@ -723,12 +795,7 @@ export default function PurchaseEntryPage() {
               <label>Book</label>
               {/* TR_PURC opens on CurBookHelp("PURCHASE") (MDI_FORM.cs:7868); the writer refuses any other
                   MAIN_BOOK, so only purchase books are offered. */}
-              <BookSelect
-                value={coBook}
-                onChange={setCoBook}
-                preferred="PUR"
-                mainBooks={['PURCHASE']}
-              />
+              <BookSelect value={coBook} onChange={setCoBook} preferred="PUR" family="purchase" />
             </div>
             <div className="field">
               <label>Year</label>

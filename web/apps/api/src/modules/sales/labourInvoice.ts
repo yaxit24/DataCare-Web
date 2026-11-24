@@ -18,6 +18,7 @@ import {
   type BookPolicy,
 } from '../shared/bookPolicy.js';
 import { gstTaxRows } from '../shared/taxDataRows.js';
+import { labourGstAllocation } from './labourGstAllocation.js';
 
 /** Numeric coercion for a persisted column: a blank or absent cell is 0, never NaN. */
 const num = (v: unknown): number => {
@@ -389,8 +390,29 @@ export async function createLabourInvoice(
       MAIN_USER: mainUser,
       VCH_DESC: input.vchDesc ?? null,
     };
+    // WP-19: the per-line GST shares the desktop stores after save (TR_SALE_LBR.cs:9748-9830) and the Gst Report's
+    // HSN section sums (RP_GST.cs:2719). The web labour invoice takes no labour discount, so LBR_DISC_AMT is 0.
+    const shares = labourGstAllocation(
+      lines.map((l) => ({
+        netAmount: r2(Number(l.metalAmount ?? 0) + Number(l.labourAmount ?? 0)),
+        labourAmount: r2(Number(l.labourAmount ?? 0)),
+      })),
+      {
+        metalNet: metalT.taxable,
+        metalTax: metalT.tax,
+        labourNet: labourT.taxable,
+        labourTax: labourT.tax,
+        labourDiscount: 0,
+      },
+    );
     const detl = lines.map((l, i) => ({
       ...key,
+      IT_NET_AMT: shares[i]!.IT_NET_AMT,
+      IT_TAX_AMT: String(shares[i]!.IT_TAX_AMT),
+      IT_DISC_AMT: shares[i]!.IT_DISC_AMT,
+      IT_LBR_AMT: shares[i]!.IT_LBR_AMT,
+      IT_LBR_TAX: String(shares[i]!.IT_LBR_TAX),
+      IT_LBR_DISC: shares[i]!.IT_LBR_DISC,
       SR_NO: i + 1,
       VCH_DATE: vchDate,
       VCH_TYPE: 'LBRI',

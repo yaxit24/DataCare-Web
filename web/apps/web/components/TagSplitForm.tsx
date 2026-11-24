@@ -4,6 +4,7 @@ import { formatDesktopDate } from '@datacare/core';
 
 import { useCallback, useEffect, useMemo, useRef, useState, type CSSProperties } from 'react';
 import { ApiError, del, get, post, put } from '../lib/api';
+import { renumberNotice } from '../lib/voucherRenumber';
 import { useCompanySettings } from '../lib/companySettings';
 import {
   blankChild,
@@ -381,6 +382,9 @@ export function TagSplitForm() {
     try {
       const body = voucherPayload(header, parents, children, { coBook, coYear, lcCode });
       const verb = loaded ? 'Updated' : 'Saved';
+      // The number this screen showed for a new voucher. The server numbers a create at save, under the book's lock;
+      // when that is not the number shown, the desktop's save-time notice says so (TR_TAG_SPLIT.cs:10060 {{Current Voucher No has been changd New Voucher No is}}).
+      const shown = loaded ? '' : voucherNo;
       const result = loaded
         ? await put<{ vchNo: number; voucherNo: string }>(
             `/stock/tag-split/${encodeURIComponent(loaded.voucherNo)}`,
@@ -388,11 +392,12 @@ export function TagSplitForm() {
           )
         : await post<{ vchNo: number; voucherNo: string }>('/stock/tag-split', body);
       const saved = result.voucherNo ?? String(result.vchNo).padStart(5, '0');
+      const notice = renumberNotice(shown, saved, 'changed');
       try {
         const view = await open(saved);
-        setStatus(`${verb} voucher ${view.voucherNo}`);
+        setStatus(notice ?? `${verb} voucher ${view.voucherNo}`);
       } catch (caught) {
-        setStatus(`${verb} voucher ${saved}`);
+        setStatus(notice ?? `${verb} voucher ${saved}`);
         setError(`Saved, but reloading it failed: ${message(caught, 'reload failed')}`);
       }
       void refreshListing(coBook);
