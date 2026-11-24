@@ -38,6 +38,8 @@ const SYSTEM = new Set([
   'POST /context/select',
   'GET /lookup/:entity',
   'GET /rate',
+  // MDI_FORM.cs:11421: the main-window rate labels show on every sign-in; no form right gates them.
+  'GET /daily-rate/labels',
   'GET /rate-groups',
   'GET /party/:acCode/balance',
   'GET /vouchers/recent',

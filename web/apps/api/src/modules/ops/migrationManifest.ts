@@ -220,4 +220,9 @@ export const EXPECTED_MIGRATIONS: ReadonlyArray<{
     name: '20261123110000_seeded_ledger_groups',
     checksum: '6cd6616573b270a1ab2dc87b8f3c3b5a8b5dcc2cafa31dca5827b6f420edb52b',
   },
+  {
+    // WP-33 Daily Rate: per-company entitlement for the location-00 copy (MS_RATE.cs:1937), operator-provisioned.
+    name: '20261123090000_daily_rate_copy_entitlement',
+    checksum: '003ab85656b77e4b3a64220ab0c6a2e30704dd849d0d1f2df8578042e4e6662d',
+  },
 ];

@@ -2204,9 +2204,9 @@ None. Slice N85 (gap G71) corrected the register to this catalog; `pnpm register
 - **Does:** Stores the daily gold and silver rates and derives group sale and purchase rates by touch.
 - **Looks:** Rate Master: Vch Date with F1, Gold Rate 10gm, Silver Rate 1Kg and Employee (UAE: purchase and USD rates) above the Sr./GrCode/GrName/Touch/Tax%/Rate10gm/TaxRate/PrTouch/PrRate grid; Save, Delete, Cancel, Print.
 - **Writes:** RATE_MAST, GROUP_MAST, EMP_MAST, BOOK_IDTL.
-- **Web:** `/txn/daily-rate`; `GET /daily-rate`, `GET /daily-rate/dates`, `POST /daily-rate`, `DELETE /daily-rate`, `GET /daily-rate/print`. Can: create, reopen, edit, delete, print, list.
-- **Remaining:** The MS_RATE grid, recalculation, scoped save/delete, rights, F1 and RateRpt pass 10 browser cases. Open: the sale/purchase rate lookup ignores the location, the customer-specific per-location copy, the external app push, the MDI rate labels and a desktop-runtime comparison.
-- **Owners:** G221, N208, X10, P03-02, X08, N29, X33.
+- **Web:** `/txn/daily-rate`; `GET /daily-rate`, `GET /daily-rate/dates`, `POST /daily-rate`, `DELETE /daily-rate`, `GET /daily-rate/print`, `GET /daily-rate/labels`. Can: create, reopen, edit, delete, print, list.
+- **Remaining:** The MS_RATE grid, recalculation, scoped save/delete, rights, F1 and RateRpt pass browser cases. Implemented from source (N251, G263): the location-00 save copies the day to every other location for an entitled company, the dashboard shows the Rate_1 to Rate_7 labels, and the harness signs in at location 00. Open: the cross-year collision policy (owner), Ctrl+F1 and grid keys, an operator screen for the entitlement, UAE optional fields in a browser, the external app push and a desktop-runtime comparison; the new browser cases were not all run locally.
+- **Owners:** G221, N208, X10, P03-02, X08, N29, X33, G263, N251.
 - **Evidence:** [MS_RATE.cs:1752-1832](../../unified/src/csharp/DataCareNext/MS_RATE.cs#L1752-L1832), [MS_RATE.cs:1867-1947](../../unified/src/csharp/DataCareNext/MS_RATE.cs#L1867-L1947), [MS_RATE.cs:2095-2109](../../unified/src/csharp/DataCareNext/MS_RATE.cs#L2095-L2109), [MS_RATE.cs:2314-2368](../../unified/src/csharp/DataCareNext/MS_RATE.cs#L2314-L2368), [page.tsx](../../web/apps/web/app/%28app%29/txn/daily-rate/page.tsx).
 
 ### Data Export

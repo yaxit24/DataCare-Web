@@ -7247,3 +7247,15 @@ model audit_log {
   @@index([tenantId, ts], map: "audit_log_tenant_ts_idx")
   @@map("audit_log")
 }
+
+/// WP-33: operator-provisioned entitlement for the Daily Rate copy of a location-00 day to every other location (MS_RATE.cs:1937). No API route writes it; the default is off. Forced RLS is migration-owned.
+model DailyRateCopyEntitlement {
+  tenantId  String   @map("tenant_id") @db.VarChar(24)
+  coCode    String   @map("co_code") @db.VarChar(2)
+  enabled   Boolean  @default(false)
+  updatedBy String?  @map("updated_by") @db.VarChar(64)
+  updatedAt DateTime @default(now()) @map("updated_at") @db.Timestamptz(6)
+
+  @@id([tenantId, coCode])
+  @@map("daily_rate_copy_entitlement")
+}

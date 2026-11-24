@@ -1,3 +1,8 @@
+## 2026-11-23 — Daily Rate closes its residual MS_RATE gaps (N251 / G263, WP-33)
+
+- 2026-11-23: a save at location 00 copies the day to every other location of the company in the same transaction when the company holds the operator-provisioned `daily_rate_copy_entitlement` (the hosted form of the SSRegSrNo gate; default off; no API route writes it, so provision it by SQL). `GET /daily-rate/labels` and `DailyRateLabels` on the dashboard show the Rate_1 to Rate_7 labels (today, own location, RATE_DISPLAY = Y, seven at most, "ToDays Rate :" when empty). The browser harness `session()` takes a `location`.
+- 2026-11-23: dailyRate.copy.db.test.ts passes on an isolated database; the daily-rate browser module ran locally: 46 applicable, 42 passed, 4 blocked with reasons (cross-year collision waits for the owner; Ctrl+F1, grid keys and the optional-column projection, which is a DB case, are recorded as blocked). Open: the entitlement screen, those keys.
+
 ## 2026-11-23 — Purchase Rpt is the desktop RP_ALL purchase branch (N250 / G262, WP-12)
 
 - 2026-11-23: seven buttons (Purc Report, Purc Reg, Item Wise, Purchase Bill, Party Purc, Group Purc, Party Summ) on the shared RP_ALL engine; `GET /reports/purchase-report` with CSV/Excel/PDF behind Print; screen at `/reports/purchase-report`; the 17 baselined purchase-report cases pass and are removed from baseline.json. Unit 25, DB 11 pass on an isolated database; the purchase-report module ran locally alone (17 of 17).
