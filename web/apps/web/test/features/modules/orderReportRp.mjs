@@ -919,6 +919,67 @@ export const orderReportRp = {
           // Typing the own location back lists only the head office's own order (RP_ALL.cs:8383).
           await runMode(page00, 'report', { from: WIDE_FROM, 'lc Code': '00' });
           assertCodes(await readGrid(page00), ['O6'], ['O1', 'O2', 'O3']);
+          // A 00 session may name a branch: the box value travels as reportLcCode (not the session scope's
+          // lcCode, which would be refused 409) and lists only that location (RP_ALL.cs:8383).
+          const branch = await runMode(page00, 'report', { from: WIDE_FROM, 'lc Code': '01' });
+          assert.equal(branch.query.get('reportLcCode'), '01');
+          assert.equal(branch.query.get('lcCode'), null);
+          await page00
+            .locator('table.grid tbody')
+            .getByText('O1', { exact: true })
+            .first()
+            .waitFor();
+          assertCodes(await readGrid(page00), ['O1', 'O2'], ['O6']);
+        });
+      },
+    ),
+
+    desiredCase(
+      'scope.session-location-excludes-other-location',
+      'T01',
+      'read-only',
+      `RP_ALL.cs:6660 {{if (Operators.CompareString(DC_Main.MLc_code, "00", false) != 0)}}; RP_ALL.cs:6664 {{((Control)tLcCode).Enabled = false;}}; RP_ALL.cs:8383 {{CurFormula = CurFormula + " And {SL_ORD_DATA.LC_CODE} = '" + tLcCode.Text + "'";}}`,
+      {
+        session01Lists: ['O1', 'O2', 'O3', 'O4', 'O8'],
+        otherLocationAbsent: 'O6 (location 00)',
+        otherCompanyAbsent: 'O7 (company C2)',
+        forgedLocationRefused: 'lcCode=00 from a session at 01 is refused, nothing listed',
+        sharedCodePath: 'the shared RP_ALL scope still locks Order Report to the session location',
+      },
+      async ({ ctx, page }) => {
+        await withFixture(ctx, async () => {
+          assert.equal(await field(page, 'lc Code').isDisabled(), true);
+          const run = await runMode(page, 'report', { from: WIDE_FROM });
+          assertCodes(await readGrid(page), ['O1', 'O2', 'O3', 'O4', 'O8'], ['O6', 'O7']);
+          assert.equal(run.query.get('lcCode') ?? '01', '01', 'the locked box sends only 01');
+          // The same session cannot widen the report to another location by sending a location itself.
+          const forged = await page.evaluate(async (path) => {
+            const forgedLocation = await fetch(
+              `${path}?fromDate=2000-01-01&toDate=2099-12-31&lcCode=00`,
+              {
+                credentials: 'include',
+              },
+            );
+            const none = await fetch(`${path}?fromDate=2000-01-01&toDate=2099-12-31`, {
+              credentials: 'include',
+            });
+            return {
+              status: forgedLocation.status,
+              error: (await forgedLocation.json().catch(() => ({}))).error,
+              noneStatus: none.status,
+              noneText: await none.text(),
+            };
+          }, API_PATH);
+          assert.ok(
+            forged.status >= 400 && forged.status < 500,
+            `forged lcCode refused: ${forged.status}`,
+          );
+          assert.equal(forged.noneStatus, 200);
+          assert.ok(
+            !forged.noneText.includes('"O6"'),
+            'a request with no location is the session location only',
+          );
+          await ctx.shot(page, 'order-report-session-location');
         });
       },
     ),

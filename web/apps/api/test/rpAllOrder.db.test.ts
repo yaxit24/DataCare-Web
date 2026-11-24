@@ -768,6 +768,42 @@ const BILLS: Bill[] = [
       ).toEqual(['O6']);
     });
 
+    it('order-report.report-location: a 00 session picks a branch; invalid and locked sessions are refused', async () => {
+      const at = (q: string, user = 'admin00') =>
+        get(user, `/reports/order-report?fromDate=${FROM}&toDate=${TO}&mode=report&${q}`);
+      const vouchers = (r: any) =>
+        r
+          .json()
+          .rows.filter((x: any) => x.level === 'voucher')
+          .map((x: any) => x.cells.vchNo);
+      // RP_ALL.cs:6660-6671, 8383: the head office box names a branch; only that location's orders list.
+      const one = await at('reportLcCode=01');
+      expect(one.statusCode, one.body).toBe(200);
+      expect(vouchers(one)).toContain('O1');
+      expect(vouchers(one)).not.toContain('O6');
+      const head = await at('reportLcCode=00');
+      expect(head.statusCode, head.body).toBe(200);
+      expect(vouchers(head)).toEqual(['O6']);
+      const all = await at('reportLcCode=');
+      expect(all.statusCode, all.body).toBe(200);
+      expect(vouchers(all)).toEqual(expect.arrayContaining(['O1', 'O6']));
+      const csv = await get(
+        'admin00',
+        `/reports/order-report/export.csv?fromDate=${FROM}&toDate=${TO}&mode=report&reportLcCode=00`,
+      );
+      expect(csv.statusCode, csv.body).toBe(200);
+      expect(csv.body).toContain('O6');
+      expect(csv.body).not.toContain('O1,');
+      // RP_ALL.cs:7691: a location outside the company's LOCT_MAST is refused.
+      const bad = await at('reportLcCode=99');
+      expect(bad.statusCode).toBe(400);
+      expect(bad.json().error).toBe('invalid-location');
+      // A session that is not head office cannot send one (RP_ALL.cs:6664).
+      const locked = await at('reportLcCode=00', 'admin01');
+      expect(locked.statusCode).toBe(400);
+      expect(locked.json().error).toBe('location-locked');
+    });
+
     it('order-report.rights.caption-and-print: rights key on the Order Report caption (D6, D7)', async () => {
       const url = `/reports/order-report?fromDate=${FROM}&toDate=${TO}`;
       expect((await get('sales-only', url)).statusCode).toBe(403);

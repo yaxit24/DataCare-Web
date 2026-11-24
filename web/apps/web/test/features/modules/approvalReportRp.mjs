@@ -668,17 +668,29 @@ export const approvalReportRp = {
       'entry.location-scope-lock',
       'T01',
       'read-only',
-      'RP_ALL.cs:6662 {{tLcCode.Text = DC_Main.MLc_code;}}; RP_ALL.cs:6660 {{if (Operators.CompareString(DC_Main.MLc_code, "00", false) != 0)}}; RP_ALL.cs:6664 {{((Control)tLcCode).Enabled = false;}}; RP_ALL.cs:6669 {{tLcCode.Text = DC_Main.MLc_code;}}',
+      'RP_ALL.cs:6662 {{tLcCode.Text = DC_Main.MLc_code;}}; RP_ALL.cs:6660 {{if (Operators.CompareString(DC_Main.MLc_code, "00", false) != 0)}}; RP_ALL.cs:6664 {{((Control)tLcCode).Enabled = false;}}; RP_ALL.cs:6669 {{tLcCode.Text = DC_Main.MLc_code;}}; RP_ALL.cs:8154-8156 {{And {APR_DETL.LC_CODE} = tLcCode.Text}}',
       {
-        at01: { value: '01', editable: false, sessionScopeKept: 'AV3 (lc 02) absent' },
-        at00: { value: '00', editable: true, clearedListsAllLocations: ['AV1', 'AV3'] },
+        at01: {
+          value: '01',
+          editable: false,
+          sendsNoLocation: true,
+          sessionScopeKept: 'AV3 (lc 02) absent',
+        },
+        at00: {
+          value: '00',
+          editable: true,
+          clearedListsAllLocations: ['AV1', 'AV3'],
+          branch01ListsOnlyLocation01: ['AV1', 'AV2'],
+        },
       },
       async ({ ctx, page }) => {
         assert.equal(await field(page, 'lc Code').inputValue(), '01');
         assert.equal(await field(page, 'lc Code').isDisabled(), true);
         await withFixture(ctx, async () => {
           const locked = await runMode(page, 'issue', { Book: BOOK });
-          assert.equal(locked.query.get('lcCode'), '01');
+          // The locked box sends no location parameter at all: the server applies the session location (D9).
+          assert.equal(locked.query.get('lcCode'), null);
+          assert.equal(locked.query.get('reportLcCode'), null);
           assertCodes(await readGrid(page), ['AV1', 'AV2'], ['AV3']);
           const user = 'e2eaprloc00';
           await ensureUser(ctx, { user, subMenu: 'Approval Report', lcCode: '00' });
@@ -686,9 +698,17 @@ export const approvalReportRp = {
           assert.equal(await field(page00, 'lc Code').inputValue(), '00');
           assert.equal(await field(page00, 'lc Code').isDisabled(), false);
           await field(page00, 'lc Code').fill('');
-          await runMode(page00, 'issue', { Book: BOOK });
+          const cleared = await runMode(page00, 'issue', { Book: BOOK });
           // A 00 session that clears lc Code appends no location clause (RP_ALL.cs:8154).
+          assert.equal(cleared.query.get('reportLcCode'), '');
           assertCodes(await readGrid(page00), ['AV1', 'AV3'], []);
+          // The editable box may also name one branch (RP_ALL.cs:6660): its value is applied as
+          // {APR_DETL.LC_CODE} (RP_ALL.cs:8156) through the separate reportLcCode parameter, never as the
+          // session scope's own location.
+          await field(page00, 'lc Code').fill('01');
+          const branch = await runMode(page00, 'issue', { Book: BOOK });
+          assert.equal(branch.query.get('reportLcCode'), '01');
+          assertCodes(await readGrid(page00), ['AV1', 'AV2'], ['AV3']);
         });
       },
     ),
@@ -1296,7 +1316,9 @@ export const approvalReportRp = {
           );
           await panelButton(page, 'issue').click();
           const response = await received;
-          assert.equal(new URL(response.url()).searchParams.get('lcCode'), '01');
+          // The locked box is never sent: the session location applies on the server (RP_ALL.cs:6664, D9).
+          assert.equal(new URL(response.url()).searchParams.get('lcCode'), null);
+          assert.equal(new URL(response.url()).searchParams.get('reportLcCode'), null);
           await page.locator('table.grid').waitFor();
           assertCodes(await readGrid(page), ['AV1'], ['AV3']);
         });

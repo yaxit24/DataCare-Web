@@ -249,12 +249,12 @@ const groupsOf = (b: any): any[] => (Array.isArray(b?.groups) ? b.groups : []);
     ])
       await owner.$executeRawUnsafe(`DELETE FROM "${table}" WHERE tenant_id=$1`, tenant);
   };
-  const login = async (name: string) => {
+  const loginAs = async (name: string, lcCode: string) => {
     const response = await app.inject({
       method: 'POST',
       url: '/auth/login',
       headers: { 'x-tenant-id': TENANT },
-      payload: { coCode: '01', lcCode: '01', coYear: YEAR, loginName: name, password: PASSWORD },
+      payload: { coCode: '01', lcCode, coYear: YEAR, loginName: name, password: PASSWORD },
     });
     expect(response.statusCode, response.body).toBe(200);
     const values = response.headers['set-cookie'];
@@ -262,9 +262,19 @@ const groupsOf = (b: any): any[] => (Array.isArray(b?.groups) ? b.groups : []);
       .map((value) => value.split(';', 1)[0])
       .join('; ');
   };
+  const login = (name: string) => loginAs(name, '01');
   const get = (user: string, url: string) =>
     app.inject({ method: 'GET', url, headers: { cookie: cookies[user]! } });
   const report = async (query = '', user = 'printer') => {
+    const response = await get(
+      user,
+      `/reports/approval-report?fromDate=${FROM}&toDate=${TO}&${query}`,
+    );
+    expect(response.statusCode, response.body).toBe(200);
+    return response.json();
+  };
+  /** A head-office (00) run, the desktop's editable lc box (RP_ALL.cs:6660). */
+  const headReport = async (query = '', user = 'headprinter') => {
     const response = await get(
       user,
       `/reports/approval-report?fromDate=${FROM}&toDate=${TO}&${query}`,
@@ -378,10 +388,29 @@ const groupsOf = (b: any): any[] => (Array.isArray(b?.groups) ? b.groups : []);
         print,
       );
     }
+    // The head-office session of RP_ALL.cs:6660: location 00 exists, and its user holds the Approval
+    // Report view+print rights at 00 (authorizeForm reads the session location's USER_SET row).
+    await exec(
+      `INSERT INTO "LOCT_MAST"(tenant_id,"CO_CODE","LC_CODE","LC_NAME","AC_CODE")
+       VALUES($1,'01','00','Head Office','BRANCH')`,
+      TENANT,
+    );
+    await exec(
+      `INSERT INTO "LOGIN_MAST"(tenant_id,"CO_CODE","LOGIN_NAME","LOGIN_PWD","LOGIN_CATG","USER_UPDATE","USER_DELETE","USER_PRINT","PASSWORD_RESET_REQUIRED")
+       VALUES($1,'01','headprinter',$2,'USER','N','N','Y','N')`,
+      TENANT,
+      await hashPassword(PASSWORD),
+    );
+    await exec(
+      `INSERT INTO "USER_SET"(tenant_id,"CO_CODE","LC_CODE","USER_NAME","MAIN_MENU","SUB_MENU","FRM_VIEW","FRM_EDIT","FRM_DELETE","FRM_PRINT")
+       VALUES($1,'01','00','headprinter','Report','Approval Report','Y','N','N','Y')`,
+      TENANT,
+    );
     app = await buildApp({ prisma: runtime, secret: SECRET, secureCookies: false });
     cookies.viewer = await login('viewer');
     cookies.printer = await login('printer');
     cookies.blocked = await login('blocked');
+    cookies.headprinter = await loginAs('headprinter', '00');
   });
 
   beforeEach(async () => {
@@ -802,6 +831,106 @@ const groupsOf = (b: any): any[] => (Array.isArray(b?.groups) ? b.groups : []);
       expect(vchs(await report(`mode=${mode}`))).not.toContain('V4');
       // D4 keeps the web session-year filter; the desktop formula has no CO_YEAR predicate.
     }
+  });
+
+  it('approval-report.formula.all-location-twin-vouchers: same year/book/vch/sr in two locations both print and sum', async () => {
+    await reset(['V1', 'V2']);
+    // The location-02 twin of V1's first line: same CO_YEAR/CO_BOOK/VCH_NO/SR_NO as the location-01 line.
+    // The old voucher key (year+book+number, no location) collapsed the two into one line, so the second
+    // location's money vanished from every band (engine.ts runLayout skips a repeated line key).
+    const twin = line({ vch: 'V1', sr: 1, date: D10, ac: 'P1', it: 'I1', tag: 'T1B', lc: '02' });
+    await insertLine(TENANT, twin);
+    // RP_ALL.cs:8154: a 00 session that clears the box appends no location clause, so both locations' rows
+    // are selected — and AprPartyWise sums every selected row (AprPartyWise.xml SummaryFields; the desktop
+    // never dedupes by number). The displayed grouping is unchanged: @Group stays year+book+number
+    // (AprPartyWise.xml:268), so the twin prints inside the same voucher band.
+    const body = await headReport('mode=issue&reportLcCode=');
+    const rows = rowsOf(body);
+    expect(rows).toHaveLength(4);
+    const sr1 = rows.filter((r) => vchOf(r) === 'V1' && Number(field(r, 'srNo')) === 1);
+    expect(sr1, 'both same-numbered lines print').toHaveLength(2);
+    const lines = [...FIXTURES.V1!, twin, ...FIXTURES.V2!];
+    const totals = totalsOf(body);
+    expect(totals.pcs).toBe(sum(lines, (l) => l.pcs, 0));
+    expect(totals.grossWt).toBe(sum(lines, (l) => l.gwt, 3));
+    expect(totals.netWt).toBe(sum(lines, (l) => l.nwt, 3));
+    expect(totals.itemAmount).toBe(sum(lines, (l) => l.itmAmt));
+    expect(totals.otherAmount).toBe(sum(lines, (l) => l.oth));
+    // The one shared voucher band sums all three V1 lines (pcs 1+2+1, gross 10.5+20+10, oth 10+20+0.5).
+    const v1 = groupsOf(body).find((g) => g.depth === 1 && String(g.key).endsWith('V1'))!;
+    expect(v1.rowCount).toBe(3);
+    expect(v1.totals.pcs).toBe(4);
+    expect(v1.totals.grossWt).toBe(40.5);
+    expect(v1.totals.itemAmount).toBe(1400);
+    expect(v1.totals.otherAmount).toBe(30.5);
+    const p1 = groupsOf(body).find((g) => g.depth === 0 && g.key === 'P1')!;
+    expect(p1.totals.pcs).toBe(4);
+    expect(p1.totals.itemAmount).toBe(1400);
+    // The location is part of the voucher key, so the two same-numbered vouchers count as two.
+    expect(body.voucherCount).toBe(3);
+    // InOut and Panding are the same selection over APR_DETL: the twin survives there too.
+    for (const mode of ['inout', 'pending']) {
+      const b = await headReport(`mode=${mode}&reportLcCode=`);
+      expect(rowsOf(b), `${mode} prints every line of both locations`).toHaveLength(4);
+      expect(totalsOf(b).grossWt).toBe(72);
+      expect(totalsOf(b).otherAmount).toBe(60.5);
+    }
+  });
+
+  it('approval-report.scope.head-office-branch-pick: a 00 session names one company branch', async () => {
+    await reset(['V1', 'V2', 'V3']);
+    // RP_ALL.cs:6660 leaves the lc box editable at 00 and RP_ALL.cs:8156 applies its value as
+    // {APR_DETL.LC_CODE}; the branch travels as reportLcCode, validated against the company's locations.
+    const branch = await headReport('mode=issue&reportLcCode=01');
+    expect(vchs(branch)).toEqual(['V1', 'V2']);
+    expect(vchs(branch)).not.toContain('V3');
+    // The cleared box still lists every location (RP_ALL.cs:8154 appends no clause).
+    const all = await headReport('mode=issue&reportLcCode=');
+    expect(vchs(all)).toContain('V3');
+    // The untouched box defaults to the session location 00 (RP_ALL.cs:6669), which holds no rows here.
+    expect(rowsOf(await headReport('mode=issue'))).toEqual([]);
+    // The export routes carry the same parameter, so a download can never widen the branch the screen chose.
+    const csv = await get(
+      'headprinter',
+      `/reports/approval-report/export.csv?fromDate=${FROM}&toDate=${TO}&mode=issue&reportLcCode=01`,
+    );
+    expect(csv.statusCode, csv.body).toBe(200);
+    const text = String(csv.body);
+    expect(text, 'the branch export carries V1').toContain('V1');
+    expect(text, 'the branch export drops V3 (lc 02)').not.toContain('V3');
+    const xlsx = await get(
+      'headprinter',
+      `/reports/approval-report/export.xlsx?fromDate=${FROM}&toDate=${TO}&mode=issue&reportLcCode=01`,
+    );
+    expect(xlsx.statusCode, xlsx.body).toBe(200);
+  });
+
+  it('approval-report.scope.report-location-locked: a non-00 session cannot send a report location', async () => {
+    await reset(['V1', 'V2', 'V3']);
+    // RP_ALL.cs:6664 locks the box outside head office: any report location from another session is a
+    // client mistake (the screen never sends one), refused with 400 while the session scope stays itself.
+    for (const value of ['01', '02']) {
+      const response = await get(
+        'printer',
+        `/reports/approval-report?fromDate=${FROM}&toDate=${TO}&mode=issue&reportLcCode=${value}`,
+      );
+      expect(response.statusCode, response.body).toBe(400);
+      expect(response.json().error).toBe('location-locked');
+    }
+    // The export routes refuse it identically through the app-level RP_ALL error mapping.
+    const denied = await get(
+      'printer',
+      `/reports/approval-report/export.csv?fromDate=${FROM}&toDate=${TO}&mode=issue&reportLcCode=02`,
+    );
+    expect(denied.statusCode, denied.body).toBe(400);
+    expect(denied.json().error).toBe('location-locked');
+    // A head office naming a location the company does not have is refused as well.
+    const bad = await get(
+      'headprinter',
+      `/reports/approval-report?fromDate=${FROM}&toDate=${TO}&mode=issue&reportLcCode=99`,
+    );
+    expect(bad.statusCode, bad.body).toBe(400);
+    expect(bad.json().error).toBe('invalid-location');
   });
 
   it('approval-report.scope.view-print-rights: no view right 403, no print right refuses export', async () => {

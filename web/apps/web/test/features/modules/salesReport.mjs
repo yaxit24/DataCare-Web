@@ -510,10 +510,19 @@ const exercises = {
       for (let i = 0; i < 50 && (await voucherNo.inputValue()) !== v.no; i++)
         await page.waitForTimeout(100);
       assert.equal(await page.getByLabel('Voucher No', { exact: true }).inputValue(), v.no);
+      // The number box alone proves the route opened, not that the sale loaded: the party the GET
+      // returned must also render (page.tsx setAcName), so a zoom that loaded nothing cannot pass.
+      const customer = salesScreen.field(page, 'Customer Name');
+      for (let i = 0; i < 50 && (await customer.inputValue()) !== v.payload.acName; i++)
+        await page.waitForTimeout(100);
+      assert.equal(await customer.inputValue(), v.payload.acName);
       await page.goBack();
       await page.waitForURL(`**${ROUTE}`);
       await visibleVouchers(page, [v]);
-      return { observation: 'Six template group hierarchies and voucher zoom/back checked' };
+      return {
+        observation: 'Six template group hierarchies and voucher zoom/back checked',
+        expected: { party: v.payload.acName },
+      };
     });
   },
   async 'invalid.dates-and-empty'(ctx) {
@@ -988,7 +997,7 @@ export const salesReport = {
       'T05',
       'read-only',
       'SaleReport.xml groups CO_BOOK/@VchGroup/@SrNo; SalesSumm VCH_DATE; SalesItem IT_TYPE/PR_CODE; EmpSaleReport EMP_CODE',
-      'Group bands and nesting match each template; a voucher row zooms to the voucher screen and back',
+      'Group bands and nesting match each template; a voucher row zooms to the voucher screen, which renders the loaded sale (number and party name), and back',
     ),
     C(
       'invalid.dates-and-empty',

@@ -7,6 +7,9 @@ import {
   ledgerAgeingRefusal,
 } from './modules/rbac/editionGate.js';
 import { LastDayLockConfigurationError } from './modules/shared/lastDayLock.js';
+// The generic /reports/:report/export.* routes have no local catch, so an RP_ALL request error (a refused
+// selector such as reportLcCode on a non-head-office session) must keep its own 400 here, not become a 500.
+import { RpAllRequestError } from './modules/reports/rpAll/filters.js';
 import { loginSessionContext } from './modules/auth/sessionContextLogin.js';
 import {
   refreshSessionContext,
@@ -206,6 +209,11 @@ export async function buildApp(opts: BuildOpts): Promise<FastifyInstance> {
         .code(503)
         .header('Retry-After', '1')
         .send({ error: 'transaction-timeout', retryable: true });
+    }
+    if (error instanceof RpAllRequestError) {
+      return reply
+        .code(error.statusCode)
+        .send({ error: error.code, message: error.message, ...error.details });
     }
     return reply.send(error);
   });

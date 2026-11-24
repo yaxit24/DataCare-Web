@@ -17,6 +17,9 @@
  * Each value reaches SQL only as a bound parameter; nothing here is ever concatenated into SQL text.
  */
 
+/** Sanity bound on the Select Book list; the desktop has none. */
+export const MAX_BOOKS = 1000;
+
 export class RpAllRequestError extends Error {
   readonly statusCode = 400;
   constructor(
@@ -166,7 +169,9 @@ export function parseRpAllFilters(
       .split(',')
       .map((b) => b.trim())
       .filter(Boolean);
-    if (books.length > 50 || books.some((b) => !CODE.test(b)))
+    // The desktop appends every checked grid row with no limit (RP_ALL.cs:11378-11387, :11421). The bound is
+    // a sanity guard far above any real book count, not a desktop rule; the codes reach SQL as one array parameter.
+    if (books.length > MAX_BOOKS || books.some((b) => !CODE.test(b)))
       throw new RpAllRequestError('invalid-filter', 'books must be a comma list of book codes', {
         field: 'books',
       });

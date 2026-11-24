@@ -32,7 +32,11 @@ export function salesQuery(
     fromDate: filters.fromDate,
     toDate: filters.toDate,
   });
-  query.set('lcCode', sessionLcCode !== '00' ? sessionLcCode : filters.lcCode);
+  // The lc box is locked outside head office (RP_ALL.cs:6660-6671): that session sends its own location. At
+  // head office the box is editable and its value ('' = every location, or a branch code) travels as
+  // reportLcCode, never as the session scope's lcCode, which the request-scope guard refuses to change.
+  if (sessionLcCode === '00') query.set('reportLcCode', filters.lcCode.trim());
+  else query.set('lcCode', sessionLcCode);
   // `bookCode`, not `coBook`: `coBook` is also the session's book and would refuse a typed unknown book (409).
   const set = (name: string, value: string) => value.trim() && query.set(name, value.trim());
   set('bookCode', filters.bookCode);

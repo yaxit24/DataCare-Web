@@ -146,8 +146,10 @@ describe('route policy registry', () => {
     // WP-33 adds the MDI main-window rate labels (GET /daily-rate/labels): 773 + 1 = 774. [796 on main + 1 here = 797]
     // WP-14 adds the RP_ALL Order Report GET /reports/order-report and its CSV/XLSX exports: 771 + 3 = 774. [787 on main + 3 here = 790] [790 on main + 3 here = 793] [797 on main + 3 here = 800]
     // N255 (WP-20) adds the Ledger Report JmaUdr, Gold and Silver prints with PDF and Excel: 790 + 9 = 799. [800 on main + 9 here = 809]
-    expect(routes).toHaveLength(809);
-    expect(new Set(routes.map((route) => `${route.method} ${route.path}`)).size).toBe(809);
+    // The Sales Report's Select Book panel gets its own book list GET /reports/sales-report/books
+    // (RP_ALL.cs:11421 BookMast), uncapped and session-location-scoped: 800 + 1 = 801. [809 on main + 1 here = 810]
+    expect(routes).toHaveLength(810);
+    expect(new Set(routes.map((route) => `${route.method} ${route.path}`)).size).toBe(810);
 
     const policies = routes.map((route) => ({
       ...route,
@@ -707,6 +709,16 @@ describe('route policy registry', () => {
     ] as const) {
       expect(routePolicyFor('GET', path)).toMatchObject({ form, action: 'read' });
     }
+  });
+
+  it('maps the Sales Report Select Book list to the Sales Register read right', () => {
+    // RP_ALL.cs:6699 calls BookMast() for the "Sales Report" caption; the panel reads the same form's right.
+    expect(routePolicyFor('GET', '/reports/sales-report/books')).toMatchObject({
+      kind: 'form',
+      form: 'Reports/Sales Register',
+      action: 'read',
+      businessScope: true,
+    });
   });
 
   it('maps KRREP ISSUE endpoints to the canonical repair form and independent actions', () => {

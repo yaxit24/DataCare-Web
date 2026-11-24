@@ -100,9 +100,15 @@ export function buildApprovalQuery(args: ApprovalQueryArgs): SqlQuery {
   const resolved = bind([...APPROVAL_RESOLVED_STATUSES]);
   const inPcs = `CASE WHEN a."ISU_REC"::text=ANY(${resolved}::text[]) THEN ${NUM('a."ITM_PCS"')} ELSE 0 END`;
 
+  // LC_CODE is projected as lcCode so the layouts' voucher/line keys can tell two same-numbered vouchers in
+  // two locations apart (approvalLayouts.ts VOUCHER_KEY); the desktop templates sum every selected row
+  // (AprPartyWise.xml SummaryFields) and never dedupe by number alone. @Group (AprPartyWise.xml:268
+  // {{APR_DETL.CO_YEAR}+{APR_DETL.CO_BOOK}+{APR_DETL.VCH_NO}}) stays location-free, so the displayed
+  // grouping is unchanged; LC_CODE only joins the ORDER BY for a deterministic row order.
+
   const text = `SELECT concat(a."CO_YEAR", a."CO_BOOK", a."VCH_NO") AS "vchGroup",
        to_char(a."VCH_DATE", 'YYYY-MM-DD') AS "vchDate",
-       a."CO_YEAR" AS "coYear", a."CO_BOOK" AS "coBook", a."VCH_NO" AS "vchNo",
+       a."CO_YEAR" AS "coYear", a."CO_BOOK" AS "coBook", a."VCH_NO" AS "vchNo", a."LC_CODE" AS "lcCode",
        a."AC_CODE" AS "acCode", m."AC_NAME" AS "acName", bk."BOOK_NAME" AS "bookName",
        i."PR_CODE" AS "prCode", pm."PR_NAME" AS "productName",
        a."IT_CODE" AS "itemCode", i."IT_NAME" AS "itemName",
@@ -139,7 +145,7 @@ export function buildApprovalQuery(args: ApprovalQueryArgs): SqlQuery {
      ORDER BY p0.row_id LIMIT 1
   ) pm ON true
  WHERE ${where.join(' AND ')}
- ORDER BY a."AC_CODE", a."CO_YEAR", a."CO_BOOK", a."VCH_NO", i."PR_CODE", a."VCH_DATE", a."TAG_NO", a."SR_NO"`;
+ ORDER BY a."AC_CODE", a."CO_YEAR", a."CO_BOOK", a."VCH_NO", a."LC_CODE", i."PR_CODE", a."VCH_DATE", a."TAG_NO", a."SR_NO"`;
 
   return { text, values };
 }
