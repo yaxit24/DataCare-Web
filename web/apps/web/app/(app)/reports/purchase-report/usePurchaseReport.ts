@@ -31,14 +31,16 @@ export const REVERSED_DATES_MESSAGE =
   'From date is after To date. Choose a date range with From on or before To.';
 
 /** The canonical query of a run. Business scope is added by the server from the session. */
-export function buildQuery(f: PurchaseFilters): string {
+export function buildQuery(f: PurchaseFilters, sessionLcCode: string): string {
   const p = new URLSearchParams();
   p.set('mode', f.mode);
   p.set('fromDate', f.fromDate);
   p.set('toDate', f.toDate);
-  // The location is always sent: a head-office session clears it to see every location; any other session is
-  // refused the day it asks for a location that is not its own (RP_ALL.cs:6660-6671).
-  p.set('lcCode', f.lcCode.trim());
+  // The lc box is locked outside head office (RP_ALL.cs:6660-6671): that session sends its own location. At
+  // head office the box is editable and its value ('' = every location, or a branch code) travels as
+  // reportLcCode, never as the session scope's lcCode, which the request-scope guard refuses to change.
+  if (sessionLcCode === '00') p.set('reportLcCode', f.lcCode.trim());
+  else p.set('lcCode', sessionLcCode);
   const text: Array<[string, string]> = [
     ['coBook', f.coBook],
     ['prCode', f.prCode],
@@ -97,7 +99,7 @@ export function usePurchaseReport(sessionLcCode: string): UsePurchaseReport {
       setError(REVERSED_DATES_MESSAGE);
       return;
     }
-    const query = buildQuery(filters);
+    const query = buildQuery(filters, sessionLcCode);
     const ticket = ++seq.current;
     setBusy(true);
     try {
@@ -113,7 +115,7 @@ export function usePurchaseReport(sessionLcCode: string): UsePurchaseReport {
     } finally {
       if (ticket === seq.current) setBusy(false);
     }
-  }, [filters]);
+  }, [filters, sessionLcCode]);
 
   const exportPath = useCallback(
     (ext: 'pdf' | 'xlsx' | 'csv'): string | null =>

@@ -210,6 +210,67 @@ export const purchaseReport = {
       },
     ),
     C(
+      'entry.location-head-office',
+      'T01',
+      'read-only',
+      'RP_ALL.cs:6660-6671 {{if (Operators.CompareString(DC_Main.MLc_code, "00", false) != 0)}} locks tLcCode; RP_ALL.cs:7951-7953 {{CurFormula = CurFormula + " And {PR_DATA.LC_CODE} = \'" + tLcCode.Text + "\'";}}; RP_ALL.cs:7691 a named branch must exist',
+      async (ctx) => {
+        // The seeded session opens at 01: the query carries that location as lcCode, never reportLcCode.
+        const { page: own } = await ctx.session();
+        await openReport(own);
+        const lockedRun = await runMode(own, 'report');
+        assert.equal(new URL(lockedRun.url()).searchParams.get('lcCode'), '01');
+        assert.equal(new URL(lockedRun.url()).searchParams.get('reportLcCode'), null);
+        // A head-office user switches to 00, edits the box, and the value travels as reportLcCode.
+        const user = 'e2epurcloc00';
+        await ctx.rows(
+          `INSERT INTO "LOGIN_MAST"(tenant_id,"CO_CODE","LOGIN_NAME","LOGIN_PWD","LOGIN_CATG","USER_UPDATE","USER_DELETE","USER_PRINT","PASSWORD_RESET_REQUIRED")
+           SELECT $1::text,'01',$2::text,$3::text,'USER','N','N','Y','N'
+            WHERE NOT EXISTS (SELECT 1 FROM "LOGIN_MAST" WHERE tenant_id=$1 AND "LOGIN_NAME"=$2::text)`,
+          user,
+          await ctx.stack.hashPassword(process.env.FEATURE_E2E_PASSWORD),
+        );
+        for (const lc of ['01', '00'])
+          await ctx.rows(
+            `INSERT INTO "USER_SET"(tenant_id,"CO_CODE","LC_CODE","USER_NAME","MAIN_MENU","SUB_MENU","FRM_VIEW","FRM_EDIT","FRM_DELETE","FRM_PRINT")
+             SELECT $1::text,'01',$2::text,$3::text,'Report','Purchase Rpt','Y','N','N','Y'
+              WHERE NOT EXISTS (SELECT 1 FROM "USER_SET" WHERE tenant_id=$1 AND "LC_CODE"=$2::text AND "USER_NAME"=$3::text AND "SUB_MENU"='Purchase Rpt')`,
+            lc,
+            user,
+          );
+        // The head-office location row exists only for this case; it is removed again when added here.
+        const added = await ctx.rows(
+          `INSERT INTO "LOCT_MAST"(tenant_id,"CO_CODE","LC_CODE","LC_NAME","AC_CODE")
+           SELECT $1::text,'01','00','Head Office','BRANCH'
+            WHERE NOT EXISTS (SELECT 1 FROM "LOCT_MAST" WHERE tenant_id=$1 AND "CO_CODE"='01' AND "LC_CODE"='00')
+           RETURNING 1`,
+        );
+        try {
+          const { page } = await ctx.session(as(user));
+          await page.goto('/select');
+          await page.getByLabel('Location', { exact: true }).selectOption('00');
+          await page.getByRole('button', { name: 'Open', exact: true }).click();
+          await page.waitForURL('**/dashboard', { timeout: 20000 });
+          await openReport(page);
+          await field(page, 'location').fill('01');
+          const branchRun = await runMode(page, 'report');
+          const query = new URL(branchRun.url()).searchParams;
+          assert.equal(query.get('reportLcCode'), '01');
+          assert.equal(query.get('lcCode'), null);
+        } finally {
+          if (added?.length)
+            await ctx.rows(
+              `DELETE FROM "LOCT_MAST" WHERE tenant_id=$1 AND "CO_CODE"='01' AND "LC_CODE"='00'`,
+            );
+        }
+        return {
+          observation:
+            'a 00 session edits the lc box and sends reportLcCode; the 01 session sends its own lcCode',
+          expected: { at01: { lcCode: '01' }, at00: { reportLcCode: '01' } },
+        };
+      },
+    ),
+    C(
       'filters.header-dimensions',
       'T02',
       'mutation',
