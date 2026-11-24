@@ -154,19 +154,11 @@ export function orderHtml(header: any, lines: any[], ctx: OrderCtx = {}): string
   // subtracting ADV_AMT and then the old-gold and scheme rows again counts those twice. The desktop's balance
   // cell (BILL_TOTAL, TR_SALE_ORD.cs:11373-11375) subtracts each tender exactly once:
   // TOT − SCHM − UPI − CASH − CHQ − CARD − OLD_GL_AMT − OLD_SL_AMT, and N197 saves those tenders in their own
-  // header columns. A Tour Order — or a row saved before N197 — keeps its money advance in ADV_AMT alone,
-  // outside its old metal and scheme, and has no CASH/CHQ/CARD columns to read.
+  // header columns. A Tour Order keeps its money advance in ADV_AMT alone, outside its old metal and scheme.
   const moneyTenders = num(h.CASH_AMT) + num(h.CHQ_AMT) + num(h.CARD_AMT) + num(h.UPI_AMT);
-  // The tender columns are never NULL on a saved row (the writer defaults them to 0), so "no columns" cannot tell a
-  // Tour Order from a Sales Order. A Tour Order is named by the caller; any other row is an N197 row when it has a
-  // money tender, or when ADV_AMT (RCUT_AMT on a rate-cut order, :9124-9133) is exactly the tenders plus old metal
-  // plus scheme (:11368). Anything else is a pre-N197 row whose ADV_AMT is the money advance alone.
-  const everyTender = moneyTenders + num(h.OLD_GL_AMT) + num(h.OLD_SL_AMT) + num(h.SCHM_AMT);
-  const advColumn = num(h.RCUT_RATE) !== 0 ? num(h.RCUT_AMT) : num(h.ADV_AMT);
-  const tendered =
-    ctx.family !== 'TOUR ORDER' &&
-    (moneyTenders !== 0 || (advColumn !== 0 && Math.abs(advColumn - everyTender) < 0.005));
-  const adv = tendered ? moneyTenders : num(h.ADV_AMT);
+  // A Tour Order is named by the caller and keeps its cash advance in ADV_AMT. Every Sales Order follows the
+  // desktop columns (desktop-migrated rows and N197 web rows alike), so no amount comparison guesses the writer.
+  const adv = ctx.family === 'TOUR ORDER' ? num(h.ADV_AMT) : moneyTenders;
   const oldGold = num(h.OLD_GL_AMT) + num(h.OLD_SL_AMT);
   const balance = total - adv - oldGold - num(h.SCHM_AMT);
   const t: string[] = [`<tr><td>Order Value</td><td class="r">${money(total)}</td></tr>`];

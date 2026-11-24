@@ -824,6 +824,7 @@ describe('faithful A4 documents', () => {
         TAX_AMT: 1500,
         TOT_AMT: 51500,
         ADV_AMT: 10000,
+        CASH_AMT: 10000,
       },
       [
         {
