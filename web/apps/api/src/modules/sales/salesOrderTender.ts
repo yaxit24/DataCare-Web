@@ -151,9 +151,11 @@ export function orderTenderView(
       saved.SL_PR_DETL?.length
     );
   // A tendered order names its cash account on leg 02 only; a cheque or card leg is never the cash account.
-  const cashLeg = tendered
-    ? ledger.find((row) => /^.{21}02$/.test(String(row.LEDR_KEY ?? '')) && num(row.DR_AMT) > 0)
-    : ledger.find((row) => num(row.DR_AMT) > 0);
+  // The cash account is leg 02's (Ac_Ledr.cs:32). A Tour Order posted by the earlier web writer has one debit leg
+  // (key 52) and no leg 02, so an untendered order without leg 02 takes its only debit leg.
+  const cashLeg =
+    ledger.find((row) => /^.{21}02$/.test(String(row.LEDR_KEY ?? '')) && num(row.DR_AMT) > 0) ??
+    (tendered ? undefined : ledger.find((row) => num(row.DR_AMT) > 0));
   const advanceColumn = advanceColumnOf(header, ledger);
   return {
     tendered,
@@ -333,8 +335,11 @@ export function tourCashColumn(
   tender: OrderTender,
   previous: Record<string, unknown> | undefined,
   previousAdvance: number | undefined,
+  /** The saved ledger is the earlier web writer's cash pair (keys 51/52), which posted the whole advance as cash. */
+  earlierWebCashPair = false,
 ): { CASH_AMT?: number } {
-  if (!previous || previousAdvance === undefined) return { CASH_AMT: tender.cash };
+  if (!previous || previousAdvance === undefined || earlierWebCashPair)
+    return { CASH_AMT: tender.cash };
   const change = round(tender.cash - previousAdvance, 2);
   if (!change) return {};
   const cash = round(num(previous.CASH_AMT) + change, 2);

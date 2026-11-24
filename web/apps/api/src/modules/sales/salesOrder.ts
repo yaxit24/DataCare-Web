@@ -35,6 +35,7 @@ import * as tenders from './salesOrderTender.js';
 import * as oldMetal from './salesOrderOldMetal.js';
 import * as rateCut from './salesOrderRateCutPosting.js';
 import { orderStockWrites } from './salesOrderStock.js';
+import { orderPostingRowsTx } from './salesOrderPostingRows.js';
 export { orderTenderRequest } from './salesOrderTender.js';
 import { fineWt } from '../shared/fine.js';
 import { resolveSalesOrderDesignTx } from './orderDesignSelection.js';
@@ -757,6 +758,8 @@ type OrderWriteContext = {
   previousComponents?: Record<string, any>[];
   /** The advance the saved order reopens with (its ADV_AMT or RCUT_AMT, `orderTenderView`). */
   previousAdvance?: number;
+  /** The saved Tour ledger is the earlier web cash pair (keys 51/52) rather than Order_Ledr's legs. */
+  earlierWebCashPair?: boolean;
 };
 
 /** Existing internal compatibility entry; optional lifecycle remains replacement-only. */
@@ -1017,7 +1020,12 @@ function prepareSalesOrderCreate(input: SalesOrderInput, lifecycle?: OrderWriteC
         ...tenders.orderTenderColumns(tender, salesOrderForm, N(input.rateCutRate)),
         ...(salesOrderForm
           ? {}
-          : tenders.tourCashColumn(tender, lifecycle?.previousHeader, lifecycle?.previousAdvance)),
+          : tenders.tourCashColumn(
+              tender,
+              lifecycle?.previousHeader,
+              lifecycle?.previousAdvance,
+              lifecycle?.earlierWebCashPair,
+            )),
         VCH_TIME: vchDate,
         ENTRY_TIME:
           lifecycle?.previousHeader && !headerDirty.has('VCH_TIME') && !headerDirty.has('VCH_DATE')
@@ -1234,50 +1242,17 @@ function prepareSalesOrderCreate(input: SalesOrderInput, lifecycle?: OrderWriteC
         );
       });
     });
-    const ledger: LedgerLine[] = [
-      ...tenders.orderTenderLedger(
-        key,
-        book.vchType,
-        { code: input.acCode, name: input.acName, billNo: header.BILL_NO as string },
-        cashAc,
-        tender,
-        salesOrderForm,
-        book.inoutType,
-      ),
-      // Ac_Ledr.cs:53: the rate-cut leg, one-sided as on the desktop (see salesOrderRateCutPosting.ts).
-      ...rateCut.orderRateCutLedger(key, header, book),
-    ];
-
-    // The Rojmel (day book), Ac_Rojmel.Order_Rojmel: see orderRojmelRows.
-    const rojmelContext = {
-      scope: {
-        coCode: input.scope.coCode,
-        lcCode: input.scope.lcCode,
-        coYear: input.scope.coYear!,
-      },
-      key,
-      coBook: key.CO_BOOK,
-      vchNo: key.VCH_NO,
-    };
-    // Ac_Rojmel.cs:11 and :23: type 01 only when ADV_AMT is not 0, type 07 when RCUT_FINE is not 0.
-    const rojmelRows = rateCut.withOrderRateCutRojmel(
-      tenders.orderRojmelRows(
-        {
-          ...rojmelContext,
-          vchDate,
-          vchType: book.vchType,
-          bookName: book.mainBook,
-          partyName: input.acName ?? '',
-          partyCode: input.acCode,
-        },
-        cashAc,
-        adv,
-        tender,
-      ),
-      rojmelContext,
-      header,
+    // Order_Ledr and Order_Rojmel (salesOrderPostingRows.ts).
+    const { ledger, rojmelRows } = await orderPostingRowsTx(tx, {
+      scope: input.scope,
       book,
-    );
+      key,
+      header,
+      cashAc,
+      tender,
+      party: { code: input.acCode, name: input.acName ?? '' },
+      vchDate,
+    });
     await insertRowTx(tx, 'TEMP_BOOK_DATA', tenantId, {
       CO_CODE: scoped.coCode,
       LC_CODE: scoped.lcCode,
@@ -1758,6 +1733,9 @@ async function runSalesOrderEditTx(
       previousLines: state.SL_ORD_DETL,
       previousComponents: state.SL_ORD_IDTL,
       previousHeader: state.SL_ORD_DATA[0],
+      earlierWebCashPair: state.AC_DATA.some((row: Record<string, unknown>) =>
+        /^.{21}5[12]$/.test(String(row.LEDR_KEY ?? '')),
+      ),
       previousAdvance: tenders.orderTenderView(
         state.SL_ORD_DATA[0],
         state,
