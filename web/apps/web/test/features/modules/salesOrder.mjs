@@ -1175,6 +1175,81 @@ export const salesOrder = {
     ),
 
     C(
+      'create.rate-cut-day-book-07',
+      'T02',
+      'mutation',
+      'Ac_Rojmel.cs:23 (Order_Rojmel type 07) and :11, Ac_Ledr.cs:53 (Order_Ledr key 11), TR_SALE_ORD.cs:9124-9128, :9558-9563, :9729-9730: a rate-cut order saves ADV_AMT 0, so the day book has no type 01; type 07 debits the party with CASH+CARD+CHQ+OLD_GL_AMT+OLD_SL_AMT+SCHM_AMT (3,000) against 00008, IT_TYPE G, SIGN +, the RCUT_FINE as gross, net and fine and RCUT_RATE as rate. The ledger key 11 needs BOOK_INOUT I, so this O book posts only the balanced cash pair 01/02. An intentional one-sided desktop entry; delete removes it with the voucher',
+      async (ctx) => {
+        const { page } = await ctx.session();
+        await enterOrder(page, { advance: 3000 });
+        await openDetails(page);
+        await page.getByLabel('Cash A/c', { exact: true }).fill(CASH);
+        // The rate is read-only on the web screen; the request carries the desktop's rate-cut cells.
+        await page.route(
+          (url) => url.pathname === '/api/sales-orders',
+          async (route) => {
+            const request = route.request();
+            if (request.method() !== 'POST') return route.fallback();
+            const body = JSON.parse(request.postData() ?? '{}');
+            Object.assign(body, { rateCutRate: 6000, rateCutFine: 0.5 });
+            return route.continue({ postData: JSON.stringify(body) });
+          },
+        );
+        const created = await save(page);
+        await page.unroute('**/api/sales-orders');
+        assert.equal(created.status(), 201, await created.text());
+        const vchNo = String((await created.json()).vchNo).padStart(5, '0');
+        const party = PARTIES.local.code;
+        const dayBook = await keyedLegs(ctx, 'ROJ_MEL_DATA', vchNo);
+        const ledgerLegs = await keyedLegs(ctx, 'AC_DATA', vchNo);
+        assert.deepEqual(
+          dayBook.map((x) => [x.leg, x.ac, x.dr, x.cr]),
+          [['07', party, 3000, 0]],
+          'no type 01 (ADV_AMT 0) and the type 07 debit',
+        );
+        const [row07] = await ctx.rows(
+          `SELECT btrim("LD_CODE") ld,"IT_TYPE" it,"SIGN" sign,"ITM_GWT"::float gwt,"ITM_NWT"::float nwt,
+                  "ITM_FINE"::float fine,"ITM_RATE"::float rate,"ITM_PCS"::float pcs,"NET_AMT"::float net
+             FROM "ROJ_MEL_DATA" WHERE tenant_id=$1 AND "CO_BOOK"='${BOOK}' AND "VCH_NO"=$2`,
+          vchNo,
+        );
+        assert.deepEqual(row07, {
+          ld: '00008',
+          it: 'G',
+          sign: '+',
+          gwt: 0.5,
+          nwt: 0.5,
+          fine: 0.5,
+          rate: 6000,
+          pcs: 0,
+          net: 0,
+        });
+        assert.deepEqual(
+          ledgerLegs.map((x) => [x.leg, x.ac, x.dr, x.cr]),
+          [
+            ['01', party, 0, 3000],
+            ['02', CASH, 3000, 0],
+          ],
+          'no key 11 on an O book; the cash pair is unchanged',
+        );
+        await loadOrder(page, vchNo);
+        const deleted = await deleteLoaded(page, vchNo);
+        assert.equal(deleted.status(), 200, await deleted.text());
+        const left = {
+          dayBook: (await keyedLegs(ctx, 'ROJ_MEL_DATA', vchNo)).length,
+          ledger: (await keyedLegs(ctx, 'AC_DATA', vchNo)).length,
+        };
+        assert.deepEqual(left, { dayBook: 0, ledger: 0 }, 'delete removes the rate-cut rows');
+        return {
+          observation: `order ${vchNo}: day book ${JSON.stringify(dayBook.map((x) => x.leg))}, ledger ${JSON.stringify(ledgerLegs.map((x) => x.leg))}; after delete ${JSON.stringify(left)}`,
+          expected: { dayBook: [['07', party, 3000, 0]], ledger: ['01', '02'], afterDelete: 0 },
+          database: { dayBook, row07, ledger: ledgerLegs, afterDelete: left },
+          downstream: { dayBookDebit: dayBook[0].dr },
+        };
+      },
+    ),
+
+    C(
       'create.scheme-tender',
       'T02',
       'mutation',

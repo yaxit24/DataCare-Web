@@ -243,7 +243,9 @@ dbDescribe('Tour Order configured-book and complete editor round trip', () => {
     });
     await createTourOrder(runtime, input());
     const posted = await advanceRows();
-    expect(posted.ledger[0].dr).toBe(ADVANCE);
+    // The cash pair plus the one-sided rate-cut leg (Ac_Ledr.cs:53): CASH_AMT + OLD_GL_AMT + OLD_SL_AMT + SCHM_AMT.
+    const RATE_CUT_DEBIT = ADVANCE + 100 + 50 + 20;
+    expect(posted.ledger[0]).toEqual({ dr: ADVANCE + RATE_CUT_DEBIT, cr: ADVANCE });
     await exec(
       `UPDATE "SL_ORD_DATA" SET "ADV_AMT"=$2,"RCUT_AMT"=$3 WHERE tenant_id=$1 AND "CO_BOOK"='511'`,
       tenantId,
@@ -280,11 +282,14 @@ dbDescribe('Tour Order configured-book and complete editor round trip', () => {
       { ...document, scope: scope(), expectedVersion: document.version },
       '00001',
     );
+    // No cash leg. The only ledger row is the rate-cut leg (Ac_Ledr.cs:53), which reads CASH_AMT + OLD_GL_AMT +
+    // OLD_SL_AMT + SCHM_AMT, never RCUT_AMT, so the typed rate-cut amount is still not money.
     const ledger = await query(
-      `SELECT count(*)::int n FROM "AC_DATA" WHERE tenant_id=$1 AND "CO_BOOK"='511'`,
+      `SELECT right("LEDR_KEY",2) leg,"LD_CODE" ld,"DR_AMT"::float dr,"CR_AMT"::float cr FROM "AC_DATA" WHERE tenant_id=$1 AND "CO_BOOK"='511'`,
       tenantId,
     );
-    expect(ledger[0].n).toBe(0);
+    expect(ledger).toEqual([{ leg: '11', ld: '00008', dr: 100 + 50 + 20, cr: 0 }]);
+    expect((await getTourOrder(runtime, scope(), '00001')).advanceAmount).toBe(0);
   });
 
   it('saves OLD_GL as the typed old gold fine plus RCUT_FINE (TR_TOUR_ORD.cs:7313); an unchanged edit keeps it', async () => {

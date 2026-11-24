@@ -959,7 +959,8 @@ export function buildRateCutRojmel(ctx: RojmelContext, legs: RateCutRojmelLegs):
  * one. `Ac_Rojmel.cs` is a later version than the code that wrote this data, but the divergence is not
  * uniform across routines, so each type is verified rather than assumed either way.
  *
- * Not built here: `07` rate-cut fine (`RCUT_FINE` 0 of 76; rate cut is not taken on the order screen).
+ * `07` rate-cut fine (`RCUT_FINE` 0 of 76 in the real data) is written from the saved header by
+ * `sales/salesOrderRateCutPosting.ts`, which also drops `01` when ADV_AMT is 0 (a rate-cut order).
  * Types `03` card, `05` scheme and `08` UPI are written by the Sales Order tender module
  * (`sales/salesOrderTender.ts`, `sales/salesOrderScheme.ts`). `05` follows the source by owner decision (N230):
  * the 7 real orders without it are 3 of a year the day book no longer holds and 4 taken on the non-Lite MEMB
@@ -974,6 +975,8 @@ export const ROJMEL_ORDER_ROW_TYPE = {
   OLD_METAL_VALUED: '04',
   /** Old metal taken in with NO value assigned. Per line, money-free. */
   OLD_METAL_UNVALUED: '06',
+  /** Rate-cut fine (`Ac_Rojmel.cs:23`): party DEBIT against '00008', IT_TYPE 'G', SIGN '+'. */
+  RATE_CUT: '07',
 } as const;
 
 export type RojmelOrderRowType = (typeof ROJMEL_ORDER_ROW_TYPE)[keyof typeof ROJMEL_ORDER_ROW_TYPE];
