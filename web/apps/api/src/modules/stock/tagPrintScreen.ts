@@ -603,7 +603,12 @@ export async function tagPrintLabels(
           const key = subKey(layout.subReport, r);
           if (subs.has(key)) continue;
           const lines: any[] = await tx.$queryRawUnsafe(
-            ...subReportQuery(layout.subReport, scope, r),
+            ...subReportQuery(
+              layout.subReport,
+              scope,
+              r,
+              layout.name === 'QrPrint10' ? 'IT_NET_AMT' : 'IT_AMT',
+            ),
           );
           subs.set(
             key,
@@ -658,9 +663,15 @@ const subKey = (link: SubLink, r: any): string =>
  * SubTagPrint's BAR_IDTL selection, one query per link rule of the main file:
  * BarPrint10 company + TAG_NO + VCH_SRNO (BarPrint10.xml:100-101); QrPrint10 company + LC + year + book + VCH_NO + SR_NO
  * (QrPrint10.xml:119); GhatTagPrnt company + LC + year + book + VCH_NO (GhatTagPrnt.xml:102).
+ * OtherDetl uses IT_NET_AMT for QrPrint10 (:72), IT_AMT for BarPrint10 (:72) and GhatTagPrnt (:61).
  */
-function subReportQuery(link: SubLink, scope: TagPrintScope, r: any): [string, ...unknown[]] {
-  const head = `SELECT "IT_CODE", coalesce("IT_AMT",0)::float amt FROM "BAR_IDTL" WHERE tenant_id=$1 AND "CO_CODE"=$2`;
+function subReportQuery(
+  link: SubLink,
+  scope: TagPrintScope,
+  r: any,
+  amountColumn: 'IT_AMT' | 'IT_NET_AMT',
+): [string, ...unknown[]] {
+  const head = `SELECT "IT_CODE", coalesce("${amountColumn}",0)::float amt FROM "BAR_IDTL" WHERE tenant_id=$1 AND "CO_CODE"=$2`;
   const order = ` ORDER BY coalesce("ISR_NO",0), row_id`;
   if (link === 'tag')
     return [

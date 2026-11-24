@@ -16,7 +16,8 @@ import { assertIsolatedTestDatabase } from './support/isolatedDatabase.js';
  * - Print hands the combo text to the report (:5200, :5209). Set (:5636-5655) marks the chosen file Y and the others N
  *   of its type and says "Tag Print Report Default Set" (:5653).
  * - The four Crystal label files differ: BarPrint13 has the `L.` line and no sub-report (BarPrint13.xml:10, :217); the
- *   other three embed SubTagPrint.rpt, `{BAR_IDTL.IT_CODE} & " / " & totext({BAR_IDTL.IT_AMT},0)` (BarPrint10.xml:72),
+ *   other three embed SubTagPrint.rpt: OtherDetl uses IT_AMT (BarPrint10.xml:72, GhatTagPrnt.xml:61)
+ *   but IT_NET_AMT for QR (QrPrint10.xml:72),
  *   linked by tag + VCH_SRNO (BarPrint10.xml:100-101), by voucher row incl. SR_NO (QrPrint10.xml:119) and by voucher
  *   only (GhatTagPrnt.xml:102).
  */
@@ -143,19 +144,20 @@ type Cookie = string;
         srno,
       );
     }
-    for (const [srno, tagNo, code, amt] of [
-      [1, 'TP0001', 'GLD1', 1234.5],
-      [2, 'TP0002', 'GLD2', 99.4],
+    for (const [srno, tagNo, code, amt, netAmt] of [
+      [1, 'TP0001', 'GLD1', 1234.5, 1100.4],
+      [2, 'TP0002', 'GLD2', 99.4, 80.6],
     ] as const)
       await exec(
-        `INSERT INTO "BAR_IDTL"(tenant_id,"CO_CODE","LC_CODE","CO_YEAR","CO_BOOK","VCH_NO","SR_NO","TAG_NO","VCH_SRNO","IT_CODE","IT_AMT")
-         VALUES ($1,'01','01',$2,'TOP','88001',$3,$4,$3,$5,$6)`,
+        `INSERT INTO "BAR_IDTL"(tenant_id,"CO_CODE","LC_CODE","CO_YEAR","CO_BOOK","VCH_NO","SR_NO","TAG_NO","VCH_SRNO","IT_CODE","IT_AMT","IT_NET_AMT")
+         VALUES ($1,'01','01',$2,'TOP','88001',$3,$4,$3,$5,$6,$7)`,
         tenantId,
         YEAR,
         srno,
         tagNo,
         code,
         amt,
+        netAmt,
       );
   };
   const print = (file: string | undefined, extra: Record<string, unknown> = {}, cookie = admin) =>
@@ -474,14 +476,14 @@ type Cookie = string;
       expect(images[0]!.n).toBe(0);
     });
 
-    it('the sub-report link differs per file: tag, voucher row, or whole voucher', async () => {
+    it('the sub-report link and amount differ per file: QR uses net, barcode and ghat use IT_AMT', async () => {
       const lines = (label: string) => label.match(/GLD\d \/ \d+/g) ?? [];
       let { labels } = await sheet('BarPrint10');
       expect(lines(labelOf(labels, 'TP0001'))).toEqual(['GLD1 / 1235']);
       expect(lines(labelOf(labels, 'TP0002'))).toEqual(['GLD2 / 99']);
       ({ labels } = await sheet('QrPrint10'));
-      expect(lines(labels[0]!)).toEqual(['GLD1 / 1235']);
-      expect(lines(labels[1]!)).toEqual(['GLD2 / 99']);
+      expect(lines(labels[0]!)).toEqual(['GLD1 / 1100']);
+      expect(lines(labels[1]!)).toEqual(['GLD2 / 81']);
       ({ labels } = await sheet('GhatTagPrnt'));
       for (const label of labels) expect(lines(label)).toEqual(['GLD1 / 1235', 'GLD2 / 99']);
     });
