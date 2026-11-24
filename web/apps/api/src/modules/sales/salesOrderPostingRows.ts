@@ -5,7 +5,6 @@ import type { VoucherScope } from '../vouchers/numbering.js';
 import * as oldMetal from './salesOrderOldMetal.js';
 import { orderHeaderRojmel, orderMoneyLedger } from './salesOrderMoneyPosting.js';
 import * as rateCut from './salesOrderRateCutPosting.js';
-import { resolveSchemeAccountTx } from './salesOrderScheme.js';
 import type { OrderTender } from './salesOrderTender.js';
 
 const num = (value: unknown): number => (value == null || value === '' ? 0 : Number(value));
@@ -14,6 +13,9 @@ const num = (value: unknown): number => (value == null || value === '' ? 0 : Num
  * Every AC_DATA and ROJ_MEL_DATA row an order save writes: Ac_Ledr.Order_Ledr and Ac_Rojmel.Order_Rojmel, which both
  * forms call after every save (`TR_SALE_ORD.cs:9558-9563`, `TR_TOUR_ORD.cs:7609-7614`).
  */
+/** Ac_Rojmel.cs:19 {{'00079'}}: the day-book scheme account the desktop writes literally. */
+const DESKTOP_SCHEME_AC = '00079';
+
 export async function orderPostingRowsTx(
   tx: any,
   order: {
@@ -98,12 +100,10 @@ export async function orderPostingRowsTx(
     vchNo: key.VCH_NO,
   };
   // Ac_Rojmel.cs:11 and :23: type 01 only when ADV_AMT is not 0, type 07 when RCUT_FINE is not 0.
-  // Type 05 (Ac_Rojmel.cs:19) is written for EITHER form whenever the saved SCHM_AMT is not 0: a Tour
-  // Order's request never carries the scheme (orderTenderOf ignores it), so resolve the account from
-  // the final header rather than silently dropping the row when the tender never did (salesOrderScheme.ts).
-  const schemeAc =
-    tender.schemeAc ||
-    (num(header.SCHM_AMT) !== 0 ? await resolveSchemeAccountTx(tx, order.scope) : '');
+  // Type 05 (Ac_Rojmel.cs:19) is written for EITHER form whenever the saved SCHM_AMT is not 0, with the
+  // desktop's literal scheme account '00079' (no book lookup). A Tour Order's request never carries the
+  // scheme (orderTenderOf ignores it), so fall back to that literal rather than dropping the row.
+  const schemeAc = tender.schemeAc || (num(header.SCHM_AMT) !== 0 ? DESKTOP_SCHEME_AC : '');
   const rojmelRows = rateCut.withOrderRateCutRojmel(
     [
       // Types 01, 02, 03, 05 and 08 from the saved header.
