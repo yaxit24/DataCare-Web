@@ -169,6 +169,11 @@ async function assertNameFreeTx(
   if (!rule) return;
   const name = data[rule.column];
   if (name === undefined || name === null || name === '') return;
+  // Serialize same-name saves in this company so two concurrent creates cannot both pass the check.
+  await tx.$executeRawUnsafe(
+    'SELECT pg_advisory_xact_lock(hashtext($1))',
+    `master-name:${scope.tenantId}:${config.table}:${String(data.CO_CODE)}:${String(name).toUpperCase()}`,
+  );
   const rows: Array<{ code: unknown }> = await tx.$queryRawUnsafe(
     `SELECT "${rule.codeColumn}" AS code FROM "${config.table}"
       WHERE tenant_id=$1 AND "CO_CODE"=$2 AND upper("${rule.column}")=upper($3)

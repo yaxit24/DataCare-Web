@@ -76,6 +76,37 @@ databaseDescribe('group name duplicate (tGrName_Validating)', () => {
     expect(await names('GROUP_MAST', 'GR_NAME')).toEqual(['GOLD 18K', 'GOLD 22K']);
   });
 
+  it('a save of a name waits while another save of that name holds the lock', async () => {
+    let release!: () => void;
+    const held = new Promise<void>((r) => (release = r));
+    let locked!: () => void;
+    const isLocked = new Promise<void>((r) => (locked = r));
+    const holder = owner.$transaction(
+      async (tx: any) => {
+        await tx.$executeRawUnsafe(
+          'SELECT pg_advisory_xact_lock(hashtext($1))',
+          `master-name:${TENANT}:GROUP_MAST:07:SAME NAME`,
+        );
+        locked();
+        await held;
+      },
+      { timeout: 10_000 },
+    );
+    await isLocked;
+    let settled = false;
+    const save = createMaster(runtime, scope, GROUP_MAST_CONFIG, {
+      GR_CODE: 'G1',
+      GR_NAME: 'same name',
+      GR_TYPE: 'G',
+    }).finally(() => (settled = true));
+    await new Promise((r) => setTimeout(r, 600));
+    expect(settled).toBe(false);
+    release();
+    await holder;
+    await save;
+    expect(await names('GROUP_MAST', 'GR_NAME')).toEqual(['same name']);
+  });
+
   it('lets a group keep its own name on edit', async () => {
     await createMaster(runtime, scope, GROUP_MAST_CONFIG, {
       GR_CODE: 'G22',
