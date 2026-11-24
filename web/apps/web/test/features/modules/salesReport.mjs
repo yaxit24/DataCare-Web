@@ -571,6 +571,13 @@ const exercises = {
       const { page: denied } = await ctx.session(as(USERS.printViewer.user));
       for (const suffix of ['', '/export.csv', '/export.xlsx'])
         assert.equal((await denied.request.get(`/api${ROUTE}${suffix}${query}`)).status(), 403);
+      // RP_ALL.cs:6660-6665: outside head office the report location is locked; naming one (even repeated)
+      // is refused rather than widening or switching the branch.
+      for (const extra of ['&reportLcCode=02', '&reportLcCode=01&reportLcCode=02']) {
+        const locked = await page.request.get(`/api${ROUTE}${query}${extra}`);
+        assert.equal(locked.status(), 400);
+        assert.equal((await locked.json()).error, 'location-locked');
+      }
       const after = await footprint(ctx);
       assert.deepEqual(after, before);
       return {

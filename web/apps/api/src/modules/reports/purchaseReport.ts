@@ -8,7 +8,7 @@ import {
   type RpAllFilters,
   type RpAllSessionScope,
 } from './rpAll/filters.js';
-import type { RpAllResult } from './rpAll/index.js';
+import { resolveReportLocation, type RpAllResult } from './rpAll/index.js';
 import {
   PURCHASE_MODES,
   PURCHASE_SPECS,
@@ -237,7 +237,13 @@ export async function purchaseReport(
   session: RpAllSessionScope,
   query: Record<string, unknown>,
 ): Promise<PurchaseReportResponse> {
-  const request = parsePurchaseRequest(query, session);
+  const parsed = parsePurchaseRequest(query, session);
+  // The lc box is editable only at head office "00" and its value filters {PR_DATA.LC_CODE}
+  // (RP_ALL.cs:6660-6671, :7951-7953; a named branch must exist, :7691); it travels as `reportLcCode`, as on
+  // the Sales, Order and Approval branches.
+  const named = await resolveReportLocation(prisma, session, query);
+  const request: PurchaseRequest =
+    named === undefined ? parsed : { ...parsed, filters: { ...parsed.filters, lcCode: named } };
   const records = await fetchPurchaseRecords(prisma, session, request);
   return shapePurchaseResult(request, records);
 }
