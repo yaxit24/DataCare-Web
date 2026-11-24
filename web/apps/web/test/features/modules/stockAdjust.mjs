@@ -729,6 +729,127 @@ export const stockAdjust = {
       },
     ),
     C(
+      'concurrency.tag-adjust-stale-delete',
+      'T12',
+      'refusal',
+      'N51 (D17): a Tag Adjust voucher (TR_TAG_CAN, TAG ADJ book) deleted with the version its load returned after another request changed it is refused 409 voucher-version-conflict with the conflict message, and the changed voucher stays',
+      async (ctx) => {
+        const t = await seedTag(ctx);
+        await ctx.owner.$executeRawUnsafe(
+          `INSERT INTO "BOOK_DATA"(tenant_id,"CO_CODE","LC_CODE","CO_BOOK","BOOK_NAME","BOOK_SNAME","MAIN_BOOK",
+             "BOOK_INOUT","CUR_USE","BOOK_TBL_NAME")
+           VALUES ($1,'01','01','TAD','Tag Adjust','TADJ','TAG ADJ','T','Y','BAR_CAN_DATA')
+           ON CONFLICT DO NOTHING`,
+          TENANT,
+        );
+        try {
+          const { page } = await open(ctx);
+          await page.goto('/txn/tag-adjust');
+          await page.getByRole('heading', { name: 'Tag Adjust', exact: true }).waitFor();
+          const book = page.getByRole('combobox', { name: 'Configured book', exact: true });
+          for (let i = 0; i < 50 && (await book.inputValue()) !== 'TAD'; i++)
+            await page.waitForTimeout(100);
+          assert.equal(await book.inputValue(), 'TAD', 'the TAG ADJ book is selected');
+          const row = page.locator('table.grid tbody tr').first().locator('input');
+          await row.nth(0).fill(t.tag);
+          await row.nth(1).fill(ITEMS.gold.code);
+          await row.nth(2).fill(String(t.srno));
+          await row.nth(3).fill('R');
+          const [saved] = await Promise.all([
+            page.waitForResponse(
+              (r) =>
+                r.request().method() === 'POST' &&
+                new URL(r.url()).pathname === '/api/stock/tag-adjust',
+            ),
+            page.getByRole('button', { name: 'Save Tag Adjust', exact: true }).click(),
+          ]);
+          assert.equal(saved.status(), 201, await saved.text());
+          const savedBody = await saved.json();
+          const voucherNo = String(savedBody.vchNo).padStart(5, '0');
+          // The screen now holds the saved voucher and the version token the save returned.
+          await page.getByRole('button', { name: 'Update Tag Adjust', exact: true }).waitFor();
+          const vchDate = await page.locator('input[type=date]').inputValue();
+          // A second request changes the voucher with its CURRENT token: the token the screen holds is now stale.
+          const changed = await page.evaluate(
+            async ({ vch, tag, srno, it, version, date }) => {
+              const res = await fetch(`/api/stock/tag-adjust/${vch}`, {
+                method: 'PUT',
+                credentials: 'include',
+                headers: { 'content-type': 'application/json' },
+                body: JSON.stringify({
+                  book: 'TAD',
+                  coBook: 'TAD',
+                  expectedVersion: version,
+                  vchDate: date,
+                  lines: [{ tagNo: tag, itCode: it, vchSrno: srno, dataType: 'N' }],
+                }),
+              });
+              return res.status;
+            },
+            {
+              vch: voucherNo,
+              tag: t.tag,
+              srno: t.srno,
+              it: ITEMS.gold.code,
+              version: savedBody.version,
+              date: vchDate,
+            },
+          );
+          assert.equal(changed, 200, 'the second request saved with the current token');
+          const rowsOf = () =>
+            ctx.rows(
+              `SELECT "TAG_NO" tag,"DATA_TYPE" dt FROM "BAR_CAN_DETL"
+                WHERE tenant_id=$1 AND "CO_BOOK"='TAD' AND "VCH_NO"=$2`,
+              voucherNo,
+            );
+          const before = await rowsOf();
+          assert.deepEqual(before, [{ tag: t.tag, dt: 'N' }]);
+          const [refused] = await Promise.all([
+            page.waitForResponse(
+              (r) =>
+                r.request().method() === 'DELETE' &&
+                new URL(r.url()).pathname === `/api/stock/tag-adjust/${voucherNo}`,
+            ),
+            page.getByRole('button', { name: 'Delete', exact: true }).click(),
+          ]);
+          assert.equal(refused.status(), 409, await refused.text());
+          assert.equal((await refused.json()).error, 'voucher-version-conflict');
+          await page
+            .locator('.msg.err')
+            .filter({ hasText: 'changed by someone else after you opened it' })
+            .waitFor();
+          assert.deepEqual(await rowsOf(), before, 'the stale delete removed nothing');
+          const [head] = await ctx.rows(
+            `SELECT count(*)::int n FROM "BAR_CAN_DATA" WHERE tenant_id=$1 AND "CO_BOOK"='TAD' AND "VCH_NO"=$2`,
+            voucherNo,
+          );
+          assert.equal(head.n, 1);
+          return {
+            observation: `stale delete of ${voucherNo} answered 409 and the screen shows the conflict`,
+            expected: { status: 409, register: 'unchanged' },
+            database: { rows: await rowsOf(), headers: head.n },
+          };
+        } finally {
+          await ctx.owner.$executeRawUnsafe(
+            `DELETE FROM "BAR_CAN_IDTL" WHERE tenant_id=$1 AND "CO_BOOK"='TAD'`,
+            TENANT,
+          );
+          await ctx.owner.$executeRawUnsafe(
+            `DELETE FROM "BAR_CAN_DETL" WHERE tenant_id=$1 AND "CO_BOOK"='TAD'`,
+            TENANT,
+          );
+          await ctx.owner.$executeRawUnsafe(
+            `DELETE FROM "BAR_CAN_DATA" WHERE tenant_id=$1 AND "CO_BOOK"='TAD'`,
+            TENANT,
+          );
+          await ctx.owner.$executeRawUnsafe(
+            `DELETE FROM "BOOK_DATA" WHERE tenant_id=$1 AND "CO_BOOK"='TAD'`,
+            TENANT,
+          );
+        }
+      },
+    ),
+    C(
       'retry.replayed-save',
       'T13',
       'mutation',
