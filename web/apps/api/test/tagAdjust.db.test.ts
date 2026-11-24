@@ -362,6 +362,45 @@ databaseDescribe('TR_TAG_CAN Tag Adjust mode', () => {
     expect(await currentState()).toMatchObject({ headers: 0, details: 0, stones: 0 });
   });
 
+  it('N51: a stale delete waits for an overlapping edit, then fails 409 and removes nothing', async () => {
+    const line = { tagNo: TAG, itCode: 'ORN', vchSrno: VCH_SRNO, dataType: 'N' };
+    const created = await saveTagAdjust(runtime, {
+      scope,
+      vchDate: DAY,
+      mainUser: 'web-user',
+      lines: [line],
+    });
+    const stale = (await getTagAdjust(runtime, scope, created.vchNo))?.version;
+    const vch = String(created.vchNo).padStart(5, '0');
+    let settled: 'ok' | 'err' | null = null;
+    let outcome: Promise<unknown> | undefined;
+    // The "edit": a transaction holds the voucher header lock and changes a register row, as saveTagAdjust does.
+    await owner.$transaction(async (tx) => {
+      await tx.$queryRawUnsafe(
+        `SELECT 1 FROM "BAR_CAN_DATA" WHERE tenant_id=$1 AND "CO_BOOK"=$2 AND "VCH_NO"::text=$3 FOR UPDATE`,
+        TENANT,
+        BOOK,
+        vch,
+      );
+      await tx.$executeRawUnsafe(
+        `UPDATE "BAR_CAN_DETL" SET "ITM_REMARK"='edited' WHERE tenant_id=$1 AND "CO_BOOK"=$2 AND "VCH_NO"::text=$3`,
+        TENANT,
+        BOOK,
+        vch,
+      );
+      outcome = deleteTagAdjust(runtime, scope, created.vchNo, undefined, stale).then(
+        (r) => ((settled = 'ok'), r),
+        (e) => ((settled = 'err'), Promise.reject(e)),
+      );
+      outcome.catch(() => undefined);
+      await new Promise((r) => setTimeout(r, 600));
+      // Without the voucher lock the delete passed its check on the old rows and ran on; it must still be waiting.
+      expect(settled).toBeNull();
+    });
+    await expect(outcome).rejects.toMatchObject({ code: 'voucher-version-conflict' });
+    expect(await currentState()).toMatchObject({ headers: 1, details: 1, stones: 1 });
+  });
+
   it('WP-10: two concurrent creates of one book get two different numbers', async () => {
     const create = () =>
       saveTagAdjust(runtime, {

@@ -1,4 +1,4 @@
-import { withTxBudget } from '../shared/txBudget.js';
+import { SNAPSHOT_READ, withTxBudget } from '../shared/txBudget.js';
 import {
   round,
   roundHalfEven,
@@ -1689,7 +1689,8 @@ export async function readRateCut(
   const key = keyOf(scope, Number(voucherNo), scope.coBook ?? RCT_BOOK);
   const t = (v: unknown) => String(v ?? '').trim();
   const n = (v: unknown) => Number(v ?? 0);
-  return withTxBudget(prisma, scope.tenantId, 'read', async (tx: any) => {
+  // SNAPSHOT_READ: the voucher rows and the version token must come from one committed revision.
+  return withTxBudget(prisma, scope.tenantId, SNAPSHOT_READ, async (tx: any) => {
     const classification = await resolveBookClassification(
       tx,
       scope.tenantId,

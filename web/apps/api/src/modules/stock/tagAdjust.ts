@@ -1,4 +1,4 @@
-import { withTxBudget } from '../shared/txBudget.js';
+import { SNAPSHOT_READ, withTxBudget } from '../shared/txBudget.js';
 import { formatVoucherNo, nextVoucherNoTx, type VoucherScope } from '../vouchers/numbering.js';
 import { insertRowTx } from '../posting/posting.js';
 import { assertSavedVoucherTx } from '../vouchers/lifecycle.js';
@@ -447,7 +447,8 @@ export async function getTagAdjust(
     lines: [{ tagNo: 'x', dataType: 'x' }],
   });
   const vchNo = formatVoucherNo(vchNoInput);
-  return withTxBudget(prisma, scope.tenantId, 'read', async (tx: any) => {
+  // SNAPSHOT_READ: the rows and the version token must come from one committed revision.
+  return withTxBudget(prisma, scope.tenantId, SNAPSHOT_READ, async (tx: any) => {
     const headers = (await tx.$queryRawUnsafe(
       `SELECT * FROM "BAR_CAN_DATA"
         WHERE tenant_id=$1 AND "CO_CODE"::text=$2::text AND "LC_CODE"::text=$3::text
@@ -520,6 +521,9 @@ export async function deleteTagAdjust(
   });
   const vchNo = formatVoucherNo(vchNoInput);
   return withTxBudget(prisma, scope.tenantId, 'voucher', async (tx: any) => {
+    // Lock the header first (as saveTagAdjust does) so an overlapping edit commits before the check and
+    // this delete then sees the newer version; without it a stale delete could remove the edit's new rows.
+    await assertSavedVoucherTx(tx, 'BAR_CAN_DATA', scope, vchNo);
     // The stale-save check every edit route makes, before any row is removed.
     await assertVoucherVersionTx(
       tx,
