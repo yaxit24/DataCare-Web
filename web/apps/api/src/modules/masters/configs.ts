@@ -40,6 +40,12 @@ export const GROUP_MAST_CONFIG: MasterConfig = {
   deleteSelectionMessage: DESKTOP_MESSAGES.GROUP_SELECT_FOR_DELETE,
   // MS_AC_GROUP.cs reports the blank name in these exact words.
   columnMessages: { GR_NAME: DESKTOP_MESSAGES.GROUP_NAME_REQUIRED },
+  // MS_GROUP.cs:2029-2041 tGrName_Validating.
+  uniqueName: {
+    column: 'GR_NAME',
+    codeColumn: 'GR_CODE',
+    message: DESKTOP_MESSAGES.GROUP_NAME_DUPLICATE,
+  },
   references: ['ITEM_MAST'], // an item references its group via CO_CODE+GR_CODE
   // Item Group Master (desktop MS_GROUP) — drives ledger posting (Sale/Purc A/c) + metal valuation.
   formFields: [
@@ -371,6 +377,12 @@ export const AC_GROUP_CONFIG: MasterConfig = {
   table: 'AC_GROUP',
   keyColumns: ['CO_CODE', 'AC_GR'],
   requiredColumns: ['CO_CODE', 'AC_GR', 'AC_GR_NAME'],
+  // MS_AC_GROUP.cs:1695-1712 tGrName_Validating.
+  uniqueName: {
+    column: 'AC_GR_NAME',
+    codeColumn: 'AC_GR',
+    message: DESKTOP_MESSAGES.AC_GROUP_NAME_DUPLICATE,
+  },
   references: ['AC_MAST'],
 };
 
