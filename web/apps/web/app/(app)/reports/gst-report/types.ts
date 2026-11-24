@@ -34,6 +34,8 @@ export interface GstReportResult {
     blockedSections?: string[];
     blockedRows?: string[];
     limitations?: string[];
+    groupCaptions?: Record<string, string>;
+    headerOnly?: boolean;
   };
 }
 

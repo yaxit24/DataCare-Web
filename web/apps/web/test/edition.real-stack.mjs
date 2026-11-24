@@ -155,8 +155,23 @@ try {
     '/admin/users',
   ])
     assert(liteNav.includes(href), `Lite navigation lists ${href}`);
-  for (const href of ['/reports/rojmel', '/txn/sales-quotation', '/settings', '/txn/dhrn-issue'])
+  for (const href of [
+    '/reports/rojmel',
+    '/txn/sales-quotation',
+    '/settings',
+    '/txn/dhrn-issue',
+    '/masters/customers',
+    '/txn/journal',
+    '/reports/gstr1',
+  ])
     assert(!liteNav.includes(href), `Lite navigation hides ${href}`);
+  // WP-55: exactly the 49 desktop Lite menus, under the desktop tabs (MDI_FORM.cs:11249-11322).
+  assert.equal(liteNav.length, 49, 'Lite navigation lists exactly the 49 desktop Lite menus');
+  assert.deepEqual(
+    await page.locator('nav .group').allTextContents(),
+    ['Company', 'ExtraTran', 'Master', 'Other', 'Report', 'Transaction'],
+    'Lite navigation groups are the desktop tabs',
+  );
   assert.equal(await page.getByTestId('beta-menus').count(), 0, 'no Beta group in Lite');
   await page.goto('/reports/rojmel');
   await page.getByTestId('edition-unavailable').waitFor();

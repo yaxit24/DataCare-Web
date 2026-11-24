@@ -2,10 +2,15 @@ import { describe, expect, it } from 'vitest';
 import {
   classifyB2c,
   presentGstr3b,
+  presentHeaderOnly,
   presentHsn,
   presentTaxSection,
 } from '../src/modules/reports/gstReportSections.js';
-import { parseGstReportQuery } from '../src/modules/reports/gstReport.js';
+import {
+  assertGstCsvSection,
+  GST_WORKBOOK_SECTIONS,
+  parseGstReportQuery,
+} from '../src/modules/reports/gstReport.js';
 import { serializeGstCsv } from '../src/modules/reports/gstReportCsv.js';
 
 const tax = (overrides: Record<string, unknown> = {}) => ({
@@ -254,18 +259,235 @@ describe('RP_GST source-settled pure sections', () => {
     });
   });
 
-  it('presents only the settled GSTR-3B outward, reverse-charge and other-ITC rows', () => {
-    const out = presentGstr3b({
-      outward: { taxable: '1000', igst: '30', cgst: '15', sgst: '15' },
-      reverseCharge: { taxable: '100', igst: '3', cgst: '1.5', sgst: '1.5' },
-      otherItc: { taxable: '400', igst: '12', cgst: '6', sgst: '6' },
-    });
-    expect(out.rows.map((row) => [row.table, row.code, row.taxableValue])).toEqual([
-      ['3.1', '(a)', '1000.00'],
-      ['3.1', '(d)', '100.00'],
-      ['4(A)', '(5)', '400.00'],
+  // RP_GST.cs:3479-3818 row for row. Inputs are the SQL aggregates; every expected cell below is worked by hand.
+  const aggregate = (
+    taxable: string,
+    igst: string,
+    cgst: string,
+    sgst: string,
+    rowCount = '2',
+  ) => ({
+    rowCount,
+    taxable,
+    igst,
+    cgst,
+    sgst,
+  });
+  const grid = presentGstr3b({
+    outward: aggregate('1000.005', '30', '15.125', '15.125'),
+    reverseCharge: aggregate('100', '3', '1.5', '1.5'),
+    otherItc: aggregate('400', '12', '6', '7'),
+    unregisteredInterState: [
+      { stateCode: '27', stateName: 'Maharashtra', taxable: '250', igst: '7.5' },
+      { stateCode: '33', stateName: 'Tamil Nadu', taxable: '80', igst: '2.4' },
+    ],
+  });
+  const cells = (row: Record<string, string>) => [
+    row.table,
+    row.code,
+    row.nature,
+    row.placeOfSupply,
+    row.taxableValue,
+    row.igstAmount,
+    row.cgstAmount,
+    row.sgstAmount,
+    row.cessAmount,
+  ];
+
+  it('presents every desktop GSTR-3B row in desktop order, with figures only where RP_GST computes them', () => {
+    expect(grid.rows.map(cells)).toEqual([
+      [
+        '3.1',
+        '(a)',
+        'OutWord Taxable Supplies(Other then Zero rated)',
+        '',
+        '1000.01',
+        '30.00',
+        '15.13',
+        '15.13',
+        '',
+      ],
+      ['3.1', '(b)', 'OutWord Taxable Supplies (Zero rated) ', '', '', '', '', '', ''],
+      ['3.1', '(c)', 'Other then OutWord Supplies(Nil rated,Exempted) ', '', '', '', '', '', ''],
+      [
+        '3.1',
+        '(d)',
+        'InWord Supplies(Lible to Reverse Charge)',
+        '',
+        '100.00',
+        '3.00',
+        '1.50',
+        '1.50',
+        '',
+      ],
+      ['3.1', '(e)', 'Non-Gst OutWord Supplies', '', '', '', '', '', ''],
+      // The total adds the DISPLAYED cells (Conversion.Val of "1000.01" + "100.00"), RP_GST.cs:3555-3617.
+      ['3.1', '', '', '', '1100.01', '33.00', '16.63', '16.63', ''],
+      [
+        '3.2',
+        '',
+        'Inter State Supplies made to Unregistered Persons Comp',
+        'osition persons and UIN Holders    ',
+        '',
+        '',
+        '',
+        '',
+        '',
+      ],
+      ['3.2', '', '', 'Place of Supplies (State/Ut)', 'Taxable Val', 'Igst Tax ', '', '', ''],
+      [
+        '3.2',
+        '(1)',
+        'Supplies Made ot Unregester Persons',
+        '27 - Maharashtra',
+        '250.00',
+        '7.50',
+        '',
+        '',
+        '',
+      ],
+      ['3.2', '', '', '33 - Tamil Nadu', '80.00', '2.40', '', '', ''],
+      ['3.2', '(2)', 'Supplies Made ot Composition Taxable Persons', '', '', '', '', '', ''],
+      ['3.2', '(3)', 'Supplies Made ot UIN Holders', '', '', '', '', '', ''],
+      ['4', '4', 'Eligible ITC', '', '', '', '', '', ''],
+      ['4', '(A)', 'ITC Available(Whether in full of part)', '', '', '', '', '', ''],
+      ['4(A)', '(1)', 'Imprt of goods', '', '', '', '', '', ''],
+      ['4(A)', '(2)', 'Imprt of Service', '', '', '', '', '', ''],
+      ['4(A)', '(3)', 'Inword Supplies Liable to Reverse Charge', '', '', '', '', '', ''],
+      ['4(A)', '(4)', 'Inword Supplies From ISD', '', '', '', '', '', ''],
+      ['4(A)', '(5)', 'All Other ITC)', '', '400.00', '12.00', '6.00', '7.00', ''],
+      ['4', '(B)', 'ITC Reversed', '', '', '', '', '', ''],
+      ['4(B)', '(1)', 'As per rules 42 & 43 of CGST Rules', '', '', '', '', '', ''],
+      ['4(B)', '(2)', 'Others', '', '', '', '', '', ''],
+      ['4', '(C)', 'Net ITC Avaible (A)-(B)', '', '', '', '', '', ''],
+      ['4', '(D)', 'Ineligible ITC', '', '', '', '', '', ''],
+      ['4(D)', '(1)', 'As per Section 17(5)', '', '', '', '', '', ''],
+      ['4(D)', '(2)', 'Other', '', '', '', '', '', ''],
+      ['5', '5', 'Values of exempt,nil rated and non GST Inword supplies', '', '', '', '', '', ''],
+      ['5', '', 'Supplier Under Composition and nil rated supplies', '', '', '', '', '', ''],
+      ['5', '', 'Non GST Supplies', '', '', '', '', '', ''],
+      ['6.1', '6.1', 'Payment of Tax', '', '', '', '', '', ''],
+      [
+        '6.1',
+        'Discription',
+        'Taxpayable',
+        'Paid Igst',
+        'Paid Cgst',
+        'Paid Sgst',
+        'Paid Cess',
+        'TDS Paid',
+        'Tax Paid In Cash',
+      ],
+      // Taxpayable = the 3.1 IGST total; Paid = the 4(A)(5) IGST/CGST/SGST cells.
+      ['6.1', 'Integrated Tax', '33.00', '12.00', '6.00', '7.00', '', '', ''],
+      ['6.1', 'Centrel Tax', '16.63', '', '', '', '', '', ''],
+      // Owner decision WP-19 Q3: the SGST total (the desktop prints the CGST total here, RP_GST.cs:3800-3802).
+      ['6.1', 'State/Ut Tax', '16.63', '', '', '', '', '', ''],
+      ['6.1', 'Cess', '', '', '', '', '', '', ''],
+      ['6.2', '6.2', 'TDS/TCS Credit', '', '', '', '', '', ''],
+      ['6.2', 'TDS', '', '', '', '', '', '', ''],
+      ['6.2', 'TCS', '', '', '', '', '', '', ''],
     ]);
-    expect(out.metadata.blockedRows).toContain('3.1(b)');
+    expect(grid.metadata.blockedRows).toBeUndefined();
+  });
+
+  it('prints State/Ut Tax from SGST, not CGST, when the two differ', () => {
+    const out = presentGstr3b({
+      outward: aggregate('100', '0', '1.25', '1.75'),
+      reverseCharge: aggregate('0', '0', '0', '0', '0'),
+      otherItc: aggregate('0', '0', '0', '0', '0'),
+      unregisteredInterState: [],
+    });
+    const byCode = new Map(out.rows.map((row) => [row.code, row]));
+    expect(byCode.get('Centrel Tax')!.nature).toBe('1.25');
+    expect(byCode.get('State/Ut Tax')!.nature).toBe('1.75');
+  });
+
+  it('leaves an aggregate over no rows blank, as Format(NULL & "", "0.00") does, and counts it 0 in the totals', () => {
+    const out = presentGstr3b({
+      outward: aggregate('500', '0', '7.5', '7.5'),
+      reverseCharge: aggregate('0', '0', '0', '0', '0'),
+      otherItc: aggregate('0', '0', '0', '0', '0'),
+      unregisteredInterState: [],
+    });
+    const d = out.rows.find((row) => row.code === '(d)')!;
+    expect([d.taxableValue, d.igstAmount, d.cgstAmount, d.sgstAmount]).toEqual(['', '', '', '']);
+    const total = out.rows[5]!;
+    expect([total.taxableValue, total.cgstAmount]).toEqual(['500.00', '7.50']);
+    const unregistered = out.rows.find((row) => row.code === '(1)' && row.table === '3.2')!;
+    expect(unregistered.placeOfSupply).toBe('');
+    const integrated = out.rows.find((row) => row.code === 'Integrated Tax')!;
+    expect([integrated.placeOfSupply, integrated.taxableValue]).toEqual(['0.00', '0.00']);
+  });
+});
+
+describe('RP_GST header-only sections (EXP, EXEMP, DOCS)', () => {
+  it('shows the desktop title and captions and no rows, totals or No Record message', () => {
+    expect(presentHeaderOnly('gstr1', 'EXP')).toMatchObject({
+      section: 'EXP',
+      title: 'Summary For Exp(6)',
+      columns: [{ key: 'export', header: '' }],
+      rows: [],
+      totals: {},
+      metadata: { headerOnly: true },
+    });
+    const exemp = presentHeaderOnly('gstr1', 'EXEMP');
+    expect(exemp.title).toBe('Summary For Nill Rated,Exmp and Non Gst outword(8)');
+    expect(exemp.columns.map((c) => c.header)).toEqual([
+      'Descripition',
+      'Nil Rated Supply',
+      'Exmp and Non Gst Supply',
+      'Non Gst Supply',
+    ]);
+    expect(Object.values(exemp.metadata.groupCaptions ?? {})).toEqual([
+      'Total Nil Rated Supplies',
+      'Total Exempted Supplies',
+      'Total Non-Gst Supplies',
+    ]);
+    const docs = presentHeaderOnly('gstr1', 'DOCS');
+    expect(docs.title).toBe('Summary of Doc. issued The Tax Period');
+    expect(docs.columns.map((c) => c.header)).toEqual([
+      'Nature Of Document',
+      'Sr. No From',
+      'Sr. No To',
+      'Total Number',
+      'Cancelled',
+    ]);
+    expect(docs.rows).toEqual([]);
+  });
+
+  it('parses EXP, EXEMP and DOCS as sections and refuses TCS, which is not an RP_GST section', () => {
+    const scope = { tenantId: 't', coCode: '01', lcCode: '01', coYear: '2026-2027' };
+    const base = { view: 'gstr1', fromDate: '2026-04-01', toDate: '2026-04-30' };
+    for (const section of ['EXP', 'EXEMP', 'DOCS'])
+      expect(parseGstReportQuery(scope, { ...base, section }).section).toBe(section);
+    expect(() => parseGstReportQuery(scope, { ...base, section: 'TCS' })).toThrowError(
+      expect.objectContaining({ code: 'invalid-section' }),
+    );
+  });
+
+  it('writes no CSV for EXEMP or DOCS and refuses the unsettled EXP.csv', () => {
+    expect(() => assertGstCsvSection(presentHeaderOnly('gstr1', 'EXEMP'))).toThrowError(
+      expect.objectContaining({ code: 'csv-not-emitted', statusCode: 422 }),
+    );
+    expect(() => assertGstCsvSection(presentHeaderOnly('gstr1', 'DOCS'))).toThrowError(
+      expect.objectContaining({ code: 'csv-not-emitted' }),
+    );
+    expect(() => assertGstCsvSection(presentHeaderOnly('gstr1', 'EXP'))).toThrowError(
+      expect.objectContaining({ code: 'csv-not-settled' }),
+    );
+    expect(GST_WORKBOOK_SECTIONS).toEqual([
+      'B2B',
+      'B2CL',
+      'B2CS',
+      'CDNR',
+      'CDNUR',
+      'EXP',
+      'AT',
+      'ATADJ',
+      'EXEMP',
+      'HSN',
+    ]);
   });
 });
 

@@ -371,7 +371,7 @@ type Cookie = string;
       });
       expect(response.statusCode, response.body).toBe(200);
       // Math.Round(2.5) is 2 (banker's).
-      expect(response.json()).toEqual({ skipped: 2, staged: 2 });
+      expect(response.json()).toEqual({ skipped: 2, staged: 2, file: '' });
       expect(await staged()).toEqual([
         {
           SR_NO: 1,
@@ -498,7 +498,10 @@ type Cookie = string;
       let response = await request(adminCookie, 'POST', `${API}/default-file`, {
         file: 'TagSmall',
       });
-      expect(response.json()).toEqual({ defaultFile: 'TagSmall' });
+      expect(response.json()).toEqual({
+        defaultFile: 'TagSmall',
+        message: 'Tag Print Report Default Set',
+      });
       const rows = await query<any[]>(
         `SELECT "PRINT_TYPE","PRINT_FILE","PRINT_SET_A" FROM "PRINT_MAST" WHERE tenant_id=$1 ORDER BY "PRINT_TYPE","PRINT_FILE"`,
         tenantId,

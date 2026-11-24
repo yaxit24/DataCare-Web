@@ -7,6 +7,13 @@ export function GstReportGrid({ report }: { report: GstReportResult }) {
       <h2 style={{ marginTop: 0 }}>{report.title}</h2>
       <table className="grid">
         <thead>
+          {report.metadata.groupCaptions && (
+            <tr className="muted">
+              {report.columns.map((column) => (
+                <th key={column.key}>{report.metadata.groupCaptions?.[column.key] ?? ''}</th>
+              ))}
+            </tr>
+          )}
           <tr>
             {report.columns.map((column) => (
               <th key={column.key}>{column.header}</th>
@@ -21,7 +28,7 @@ export function GstReportGrid({ report }: { report: GstReportResult }) {
               ))}
             </tr>
           ))}
-          {report.rows.length === 0 && (
+          {report.rows.length === 0 && !report.metadata.headerOnly && (
             <tr>
               <td colSpan={report.columns.length || 1} className="muted">
                 No Record Found....

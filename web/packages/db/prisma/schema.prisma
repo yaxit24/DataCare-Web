@@ -2960,6 +2960,11 @@ model ITEM_MAST {
   TOT_PCS           Float?
   PCS_RATE          Float?
   ITM_WITH_LOT_STK  String?  @db.VarChar(1)
+  /// WP-36: desktop columns no Lite box shows; MS_ITEM writes them on every save (MS_ITEM.cs:3261-3263).
+  TAX_FREE_ITEM     String   @default("N") @db.VarChar(1)
+  APP_ITEM          String   @default("N") @db.VarChar(1)
+  EMP_COM_PRC       Float    @default(0)
+  AC_MEMB_COM_PRC   Float    @default(0)
 
   @@id([tenantId, CO_CODE, IT_CODE])
   @@map("ITEM_MAST")
@@ -3512,6 +3517,10 @@ model LBR_ISU_DETL {
   ORD_DBCD        String?   @db.VarChar(3)
   ORD_NO          String?   @db.VarChar(10)
   ORD_SRNO        Float?
+  IT_NET_AMT      Float     @default(0)
+  IT_DISC_AMT     Float     @default(0)
+  IT_LBR_AMT      Float     @default(0)
+  IT_LBR_DISC     Float     @default(0)
 
   @@index([tenantId])
   @@map("LBR_ISU_DETL")
@@ -5762,6 +5771,11 @@ model SL_DATA {
   TOT_TAX_FREE_AMT Float?
   ZERO_RATED_AMT   String?   @db.VarChar(255)
   RATE_UNFIX       String?   @db.VarChar(255)
+  MEMB_COM_AC_CODE String?   @db.VarChar(10)
+  AC_MEMB_COM_PRC  Float?
+  AC_MEMB_COM_VAL  Float?
+  WHOUT_COMM_BILL  String?   @db.VarChar(1)
+  RE_TRFR          String?   @db.VarChar(1)
 
   @@index([tenantId])
   @@index([tenantId, CO_CODE, VCH_DATE], map: "idx_sl_data_scope")
@@ -6327,6 +6341,7 @@ model SL_PR_DETL {
   CON_WT        Decimal?  @db.Decimal(14, 3)
   ITM_RATE_TYPE String?   @db.VarChar(1)
   ITM_LOT       String?   @db.VarChar(10)
+  PR_COST       Decimal?  @db.Decimal(18, 2)
 
   @@index([tenantId])
   @@map("SL_PR_DETL")
