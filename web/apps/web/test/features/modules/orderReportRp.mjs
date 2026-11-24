@@ -930,6 +930,12 @@ export const orderReportRp = {
             .first()
             .waitFor();
           assertCodes(await readGrid(page00), ['O1', 'O2'], ['O6']);
+          // One box holds one location: a repeated reportLcCode is refused, never read as every location.
+          const twice = new URLSearchParams(branch.query);
+          twice.append('reportLcCode', '00');
+          const refused = await page00.request.get(`${API_PATH}?${twice.toString()}`);
+          assert.equal(refused.status(), 400);
+          assert.equal((await refused.json()).error, 'invalid-location');
         });
       },
     ),
