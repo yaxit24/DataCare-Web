@@ -218,6 +218,7 @@ export const purchaseReport = {
         // The seeded session opens at 01: the query carries that location as lcCode, never reportLcCode.
         const { page: own } = await ctx.session();
         await openReport(own);
+        assert.equal(await own.getByLabel('lc Code', { exact: true }).isDisabled(), true);
         const lockedRun = await runMode(own, 'report');
         assert.equal(new URL(lockedRun.url()).searchParams.get('lcCode'), '01');
         assert.equal(new URL(lockedRun.url()).searchParams.get('reportLcCode'), null);
@@ -383,7 +384,6 @@ export const purchaseReport = {
         for (const [id, code] of [
           ['party', PARTIES.local.code],
           ['book', purchase.BOOK],
-          ['location', '01'],
         ]) {
           const lookup = field(page, id);
           await lookup.fill(code.toLowerCase());
@@ -396,6 +396,11 @@ export const purchaseReport = {
           await lookup.press('Escape');
           observed.push(`${id}:${code}`);
         }
+        // RP_ALL.cs:6660-6665: outside head office the location box is locked to the session's location; its
+        // typed-code help at 00 is exercised by entry.location-head-office.
+        assert.equal(await field(page, 'location').isDisabled(), true);
+        assert.equal(await field(page, 'location').inputValue(), '01');
+        observed.push('location:locked-01');
         return { observation: observed.join(', '), expected: observed };
       },
     ),
@@ -745,15 +750,16 @@ export const purchaseReport = {
       'keyboard.complete-selector-run-flow',
       'T17',
       'read-only',
-      'RP_ALL.cs:7242-7265, 7291-7545: Enter advances From, To, Location, Book, Product, Group, Party, City, Area and Item Type; F1 opens helps; Esc closes the form',
+      'RP_ALL.cs:7242-7265, 7291-7545, 6660-6665: Enter advances From, To, (Location at 00 only), Book, Product, Group, Party, City, Area and Item Type; F1 opens helps; Esc closes the form',
       async (ctx) => {
         const { page } = await ctx.session();
         await openReport(page);
         await page.setViewportSize({ width: 1366, height: 768 });
+        // The session opens at 01, so the locked location box (RP_ALL.cs:6660-6665) is skipped, as a disabled
+        // desktop control is.
         const order = [
           'from',
           'to',
-          'location',
           'book',
           'product',
           'group',

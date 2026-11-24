@@ -520,6 +520,10 @@ const lines = (vs: Voucher[]) => vs.flatMap((v) => v.lines);
       const bad = await at('reportLcCode=99');
       expect(bad.statusCode).toBe(400);
       expect(bad.json().error).toBe('invalid-location');
+      // A repeated location is refused, never read as a cleared box (every location).
+      const twice = await at('reportLcCode=01&reportLcCode=02');
+      expect(twice.statusCode).toBe(400);
+      expect(twice.json().error).toBe('invalid-location');
       // A session that is not head office cannot send one (RP_ALL.cs:6664).
       const locked = await at('reportLcCode=02', 'printer');
       expect(locked.statusCode).toBe(400);

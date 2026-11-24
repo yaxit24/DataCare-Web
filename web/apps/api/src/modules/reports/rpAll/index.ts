@@ -283,7 +283,12 @@ export async function resolveReportLocation(
       'reportLcCode is fixed to the session location',
       { field: 'reportLcCode' },
     );
-  const reportLc = typeof options.reportLcCode === 'string' ? options.reportLcCode.trim() : '';
+  // A repeated or non-text value is refused rather than read as a cleared box (every location).
+  if (typeof options.reportLcCode !== 'string')
+    throw new RpAllRequestError('invalid-location', 'reportLcCode must be a single location code', {
+      field: 'reportLcCode',
+    });
+  const reportLc = options.reportLcCode.trim();
   if (reportLc === '') return null;
   const found: unknown[] = await withTxBudget(prisma, session.tenantId, 'read', (tx: any) =>
     tx.$queryRawUnsafe(
