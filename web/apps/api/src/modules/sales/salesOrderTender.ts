@@ -304,18 +304,10 @@ export function advanceColumnOf(
     : 'ADV_AMT';
 }
 
-/**
- * The header's tender columns (`TR_SALE_ORD.cs:9131-9150`). The Tour Order's one tender is its cash advance, which
- * TR_TOUR_ORD saves as CASH_AMT beside ADV_AMT or RCUT_AMT (`TR_TOUR_ORD.cs:7295-7309`); the rate-cut ledger and day
- * book rows read CASH_AMT (`Ac_Ledr.cs:53`, `Ac_Rojmel.cs:23`).
- */
+/** The header's tender columns (`TR_SALE_ORD.cs:9131-9150`); the Tour Order writes ADV_AMT alone (see tourCashColumn). */
 export function orderTenderColumns(tender: OrderTender, salesOrder = true, rateCutRate = 0) {
   if (!salesOrder)
-    return {
-      ...orderAdvanceColumns(tender, rateCutRate),
-      CASH_AMT: tender.cash,
-      UPI_AMT: tender.upiColumn,
-    };
+    return { ...orderAdvanceColumns(tender, rateCutRate), UPI_AMT: tender.upiColumn };
   return {
     CASH_AMT: tender.cash,
     CHQ_AMT: tender.cheque,
@@ -323,6 +315,31 @@ export function orderTenderColumns(tender: OrderTender, salesOrder = true, rateC
     UPI_AMT: tender.upiColumn,
     ...orderAdvanceColumns(tender, rateCutRate),
   };
+}
+
+export const TOUR_CASH_BELOW_ZERO =
+  "The advance cannot be less than the order's saved cheque, card, old metal and scheme tenders.";
+
+/**
+ * The Tour Order's CASH_AMT, the cash tender alone (`TR_TOUR_ORD.cs:7309`, read back at `:6814`). The desktop's advance
+ * MSG2_TOTAL[9,3] is cash + scheme + cheque + card + old gold + old silver (`:9375`), and the web Tour editor shows
+ * and edits only that total. So:
+ * - a new order's advance is its cash;
+ * - an edit that keeps the reopened advance keeps the saved CASH_AMT exactly (the column is left to the saved row);
+ * - an edit that changes it moves the cash tender by the difference, leaving the other saved tenders as they were.
+ * The rate-cut rows read CASH_AMT (`Ac_Ledr.cs:53`, `Ac_Rojmel.cs:23`), so it must never take the whole advance.
+ */
+export function tourCashColumn(
+  tender: OrderTender,
+  previous: Record<string, unknown> | undefined,
+  previousAdvance: number | undefined,
+): { CASH_AMT?: number } {
+  if (!previous || previousAdvance === undefined) return { CASH_AMT: tender.cash };
+  const change = round(tender.cash - previousAdvance, 2);
+  if (!change) return {};
+  const cash = round(num(previous.CASH_AMT) + change, 2);
+  if (cash < 0) throw new SaleValidationError(TOUR_CASH_BELOW_ZERO);
+  return { CASH_AMT: cash };
 }
 
 /** Order_Ledr's tender legs (`Ac_Ledr.cs:28-47`, `:55-57`), balanced, with the desktop leg types. */

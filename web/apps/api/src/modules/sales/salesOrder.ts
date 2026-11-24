@@ -755,6 +755,8 @@ type OrderWriteContext = {
   previousLines?: Record<string, any>[];
   previousHeader?: Record<string, any>;
   previousComponents?: Record<string, any>[];
+  /** The advance the saved order reopens with (its ADV_AMT or RCUT_AMT, `orderTenderView`). */
+  previousAdvance?: number;
 };
 
 /** Existing internal compatibility entry; optional lifecycle remains replacement-only. */
@@ -1013,6 +1015,9 @@ function prepareSalesOrderCreate(input: SalesOrderInput, lifecycle?: OrderWriteC
         TAX_AMT: totals.tax,
         TOT_AMT: totals.total,
         ...tenders.orderTenderColumns(tender, salesOrderForm, N(input.rateCutRate)),
+        ...(salesOrderForm
+          ? {}
+          : tenders.tourCashColumn(tender, lifecycle?.previousHeader, lifecycle?.previousAdvance)),
         VCH_TIME: vchDate,
         ENTRY_TIME:
           lifecycle?.previousHeader && !headerDirty.has('VCH_TIME') && !headerDirty.has('VCH_DATE')
@@ -1750,6 +1755,11 @@ async function runSalesOrderEditTx(
       previousLines: state.SL_ORD_DETL,
       previousComponents: state.SL_ORD_IDTL,
       previousHeader: state.SL_ORD_DATA[0],
+      previousAdvance: tenders.orderTenderView(
+        state.SL_ORD_DATA[0],
+        state,
+        input.orderMainBook !== 'TOUR ORDER',
+      ).fields.advanceAmount,
     },
   );
 }

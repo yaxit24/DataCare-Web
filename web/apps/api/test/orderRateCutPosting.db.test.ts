@@ -331,6 +331,71 @@ run('Order rate-cut ledger and day-book rows follow Ac_Ledr.cs:53 and Ac_Rojmel.
     expect(await voucherBalance()).toEqual({ dr: 3000, cr: 3000 });
   });
 
+  it('an unchanged Tour Order re-save keeps CASH_AMT as the cash tender (TR_TOUR_ORD.cs:6814-6815, :7309-7311, :9375)', async () => {
+    // A desktop-saved rate-cut Tour Order: cash 1,000 and cheque 500, so MSG2_TOTAL[9,3] (:9375) = 1,500 = RCUT_AMT.
+    await createTourOrder(
+      runtime,
+      tourInput({ oldGoldAmount: 0, oldSilverAmount: 0, schemeAmount: 0 }) as any,
+    );
+    await exec(
+      `UPDATE "SL_ORD_DATA" SET "CASH_AMT"=1000,"CHQ_AMT"=500,"BANK_AC"='BANK1',"RCUT_AMT"=1500,"ADV_AMT"=0 WHERE tenant_id=$1`,
+      tenantId,
+    );
+    // Rebuild the voucher's rows from the saved header, as the desktop's save does (Ac_Ledr.cs:53, Ac_Rojmel.cs:23).
+    let doc = (await getTourOrder(runtime, scope('510'), '00001')) as any;
+    await editTourOrder(
+      runtime,
+      { ...doc, scope: scope('510'), expectedVersion: doc.version } as any,
+      '00001',
+    );
+    const tenders = async () =>
+      (
+        await query(
+          `SELECT "CASH_AMT"::float cash,"CHQ_AMT"::float chq,"RCUT_AMT"::float rcut FROM "SL_ORD_DATA" WHERE tenant_id=$1`,
+          tenantId,
+        )
+      )[0];
+    const before = {
+      header: await tenders(),
+      ledger: await ledgerRows(),
+      dayBook: await dayBookRows(),
+    };
+    expect(before.header).toEqual({ cash: 1000, chq: 500, rcut: 1500 });
+    expect(before.ledger.map((row: any) => row.DR_AMT)).toEqual(['1500.00']);
+    expect(before.dayBook.map((row: any) => row.DR_AMT)).toEqual(['1500.00']);
+    expect(doc.advanceAmount).toBe(1500);
+
+    doc = (await getTourOrder(runtime, scope('510'), '00001')) as any;
+    await editTourOrder(
+      runtime,
+      { ...doc, scope: scope('510'), expectedVersion: doc.version } as any,
+      '00001',
+    );
+    expect({
+      header: await tenders(),
+      ledger: await ledgerRows(),
+      dayBook: await dayBookRows(),
+    }).toEqual(before);
+
+    // A changed advance moves only the cash tender: 1,700 total = cash 1,200 + cheque 500.
+    doc = (await getTourOrder(runtime, scope('510'), '00001')) as any;
+    await editTourOrder(
+      runtime,
+      {
+        ...doc,
+        scope: scope('510'),
+        expectedVersion: doc.version,
+        advanceAmount: 1700,
+        dirtyFields: ['advanceAmount'],
+      } as any,
+      '00001',
+    );
+    expect(await tenders()).toEqual({ cash: 1200, chq: 500, rcut: 1700 });
+    expect((await ledgerRows()).map((row: any) => row.DR_AMT)).toEqual(['1700.00']);
+    expect(await ledgerRows()).toEqual(await query(DESKTOP_LEDGER, tenantId));
+    expect(await dayBookRows()).toEqual(await query(DESKTOP_DAYBOOK, tenantId));
+  });
+
   it('a Sales Order edit keeps day book 07 in step with the header', async () => {
     await createSalesOrder(runtime, salesInput() as any);
     const doc = (await getSalesOrder(runtime, scope('SOR'), 1)) as any;

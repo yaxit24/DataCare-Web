@@ -1,6 +1,11 @@
 import { describe, expect, it } from 'vitest';
 import { assertVoucherBalanced, UnbalancedError } from '../src/modules/posting/posting.js';
 import {
+  orderTenderOf,
+  TOUR_CASH_BELOW_ZERO,
+  tourCashColumn,
+} from '../src/modules/sales/salesOrderTender.js';
+import {
   isOrderRateCutLedgerRow,
   orderRateCutAmount,
   orderRateCutLedger,
@@ -158,5 +163,21 @@ describe('order rate-cut posting', () => {
     expect(
       withOrderRateCutRojmel(rows, context, { ...header, ADV_AMT: 3860.5, RCUT_FINE: 0 }, book),
     ).toEqual(rows);
+  });
+});
+
+describe('Tour Order CASH_AMT (TR_TOUR_ORD.cs:7309, :9375)', () => {
+  const tender = (cash: number) => orderTenderOf({ advanceAmount: cash }, false);
+  it('a new order saves its advance as cash; an unchanged edit leaves the saved CASH_AMT', () => {
+    expect(tourCashColumn(tender(1000), undefined, undefined)).toEqual({ CASH_AMT: 1000 });
+    expect(tourCashColumn(tender(1500), { CASH_AMT: 1000, CHQ_AMT: 500 }, 1500)).toEqual({});
+  });
+  it('a changed advance moves only the cash tender, never below zero', () => {
+    expect(tourCashColumn(tender(1700), { CASH_AMT: 1000, CHQ_AMT: 500 }, 1500)).toEqual({
+      CASH_AMT: 1200,
+    });
+    expect(() => tourCashColumn(tender(400), { CASH_AMT: 0, CHQ_AMT: 500 }, 500)).toThrow(
+      TOUR_CASH_BELOW_ZERO,
+    );
   });
 });
