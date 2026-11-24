@@ -5139,7 +5139,14 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
   app.delete('/stock/tag-adjust/:vchNo', auth, async (req, reply) => {
     if (!guard(req, reply, 'delete')) return;
     return run(reply, 200, () =>
-      deleteTagAdjust(prisma, scopeOf(req), (req.params as any).vchNo, body(req).book),
+      deleteTagAdjust(
+        prisma,
+        scopeOf(req),
+        (req.params as any).vchNo,
+        body(req).book,
+        // N51 (D17): the delete sends the version its GET returned in the query (as the edit does in the body).
+        (req.query as any)?.expectedVersion,
+      ),
     );
   });
   app.post('/stock/tag-weight-diff', auth, async (req, reply) => {
@@ -6983,6 +6990,8 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
         book: body(req).book,
         // DELETE_DATA.DELETE_USER is the signed-in user (TR_WH_SALE.cs:13569 `MCo_User`).
         deleteUser: sess(req).sub,
+        // N51 (D17): the delete sends the version its GET returned in the query (as the saved sale does).
+        expectedVersion: (req.query as any)?.expectedVersion,
       }),
     );
   });
@@ -6994,6 +7003,7 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
         vchNo: (req.params as any).vchNo,
         book: body(req).book,
         deleteUser: sess(req).sub,
+        expectedVersion: (req.query as any)?.expectedVersion,
       }),
     );
   });
@@ -7082,6 +7092,7 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
         vchNo: (req.params as any).vchNo,
         book: body(req).book,
         deleteUser: sess(req).sub,
+        expectedVersion: (req.query as any)?.expectedVersion,
       }),
     );
   });

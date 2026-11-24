@@ -221,6 +221,8 @@ databaseDescribe('TR_TAG_CAN Tag Adjust mode', () => {
     });
 
     const loaded = await getTagAdjust(runtime, scope, 1);
+    // The Load route returns this as JSON; BIGINT columns must already be numbers.
+    expect(() => JSON.stringify(loaded)).not.toThrow();
     expect(loaded?.header).toMatchObject({ CO_BOOK: BOOK, VCH_NO: '00001', AC_CODE: 'AC001' });
     expect(loaded?.lines).toHaveLength(1);
     expect(loaded?.lines[0]).toMatchObject({
@@ -262,7 +264,10 @@ databaseDescribe('TR_TAG_CAN Tag Adjust mode', () => {
       stock_type: 'R',
     });
 
-    await expect(deleteTagAdjust(runtime, scope, '00001')).resolves.toEqual({ deleted: true });
+    // N51 (D17): the delete carries the version the last write left; a stale one is refused first.
+    await expect(
+      deleteTagAdjust(runtime, scope, '00001', undefined, edited.version),
+    ).resolves.toEqual({ deleted: true });
     expect(await currentState()).toMatchObject({
       headers: 0,
       details: 0,
@@ -307,9 +312,93 @@ databaseDescribe('TR_TAG_CAN Tag Adjust mode', () => {
       lines: [{ ...line, dataType: 'R' }],
     });
     await expect(stale).rejects.toMatchObject({ code: 'voucher-version-conflict' });
-    await expect(deleteTagAdjust(runtime, scope, created.vchNo)).resolves.toEqual({
+    // The stale edit wrote nothing, so the created version is still current and the delete succeeds.
+    await expect(
+      deleteTagAdjust(runtime, scope, created.vchNo, undefined, created.version),
+    ).resolves.toEqual({
       deleted: true,
     });
+  });
+
+  it('N51: a delete without a token, or with a stale one, is refused and removes nothing', async () => {
+    const line = { tagNo: TAG, itCode: 'ORN', vchSrno: VCH_SRNO, dataType: 'N' };
+    const created = await saveTagAdjust(runtime, {
+      scope,
+      vchDate: DAY,
+      mainUser: 'web-user',
+      lines: [line],
+    });
+    // No token at all: the same refusal every versioned delete answers.
+    await expect(deleteTagAdjust(runtime, scope, created.vchNo)).rejects.toMatchObject({
+      name: 'VoucherVersionValidationError',
+    });
+    // A stale token: another operator re-saved the voucher after this copy was opened.
+    const current = await getTagAdjust(runtime, scope, created.vchNo);
+    await saveTagAdjust(runtime, {
+      scope,
+      vchNo: created.vchNo,
+      expectedVersion: current?.version,
+      vchDate: DAY,
+      mainUser: 'web-user',
+      lines: [{ ...line, dataType: 'R' }],
+    });
+    await expect(
+      deleteTagAdjust(runtime, scope, created.vchNo, undefined, current?.version),
+    ).rejects.toMatchObject({ code: 'voucher-version-conflict' });
+    // Nothing was removed by either refusal: the voucher's rows are all still there.
+    expect(await currentState()).toMatchObject({
+      headers: 1,
+      details: 1,
+      stones: 1,
+      audit_type: 'R',
+      bar_type: 'R',
+      stock_type: 'R',
+    });
+    // The fresh version deletes the voucher.
+    const fresh = await getTagAdjust(runtime, scope, created.vchNo);
+    await expect(
+      deleteTagAdjust(runtime, scope, created.vchNo, undefined, fresh?.version),
+    ).resolves.toEqual({ deleted: true });
+    expect(await currentState()).toMatchObject({ headers: 0, details: 0, stones: 0 });
+  });
+
+  it('N51: a stale delete waits for an overlapping edit, then fails 409 and removes nothing', async () => {
+    const line = { tagNo: TAG, itCode: 'ORN', vchSrno: VCH_SRNO, dataType: 'N' };
+    const created = await saveTagAdjust(runtime, {
+      scope,
+      vchDate: DAY,
+      mainUser: 'web-user',
+      lines: [line],
+    });
+    const stale = (await getTagAdjust(runtime, scope, created.vchNo))?.version;
+    const vch = String(created.vchNo).padStart(5, '0');
+    let settled: 'ok' | 'err' | null = null;
+    let outcome: Promise<unknown> | undefined;
+    // The "edit": a transaction holds the voucher header lock and changes a register row, as saveTagAdjust does.
+    await owner.$transaction(async (tx) => {
+      await tx.$queryRawUnsafe(
+        `SELECT 1 FROM "BAR_CAN_DATA" WHERE tenant_id=$1 AND "CO_BOOK"=$2 AND "VCH_NO"::text=$3 FOR UPDATE`,
+        TENANT,
+        BOOK,
+        vch,
+      );
+      await tx.$executeRawUnsafe(
+        `UPDATE "BAR_CAN_DETL" SET "ITM_REMARK"='edited' WHERE tenant_id=$1 AND "CO_BOOK"=$2 AND "VCH_NO"::text=$3`,
+        TENANT,
+        BOOK,
+        vch,
+      );
+      outcome = deleteTagAdjust(runtime, scope, created.vchNo, undefined, stale).then(
+        (r) => ((settled = 'ok'), r),
+        (e) => ((settled = 'err'), Promise.reject(e)),
+      );
+      outcome.catch(() => undefined);
+      await new Promise((r) => setTimeout(r, 600));
+      // Without the voucher lock the delete passed its check on the old rows and ran on; it must still be waiting.
+      expect(settled).toBeNull();
+    });
+    await expect(outcome).rejects.toMatchObject({ code: 'voucher-version-conflict' });
+    expect(await currentState()).toMatchObject({ headers: 1, details: 1, stones: 1 });
   });
 
   it('WP-10: two concurrent creates of one book get two different numbers', async () => {

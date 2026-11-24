@@ -1,5 +1,5 @@
 {
-  "_comment": "Which feature module covers which source files (web/scripts/check-browser-test-coverage.mjs). A change to a covered file must update that module or features/baseline.json in the same PR. A pattern ending in / covers the directory. Add an entry with every new feature module.",
+  "_comment": "Which feature module covers which source files (web/scripts/check-browser-test-coverage.mjs). A change to a covered file must update that module or features/baseline.json in the same PR. A pattern ending in / covers the directory. Add an entry with every new feature module. Shared registration files (app.ts, routePolicy.ts, routes/txn.ts) belong to no one module; a change to them still needs some browser test under the general rule.",
   "modules": {
     "salesInvoice": {
       "covers": [
@@ -97,8 +97,7 @@
         "web/apps/web/app/(app)/masters/companies/page.tsx",
         "web/apps/api/src/modules/masters/configs.ts",
         "web/apps/api/src/modules/masters/master.service.ts",
-        "web/apps/api/src/modules/auth/businessScope.ts",
-        "web/apps/api/src/app.ts"
+        "web/apps/api/src/modules/auth/businessScope.ts"
       ]
     },
     "salesReturn": {
@@ -359,7 +358,6 @@
         "web/apps/web/app/(app)/utilities/page.tsx",
         "web/apps/web/lib/nav.ts",
         "web/apps/web/lib/api.ts",
-        "web/apps/api/src/app.ts",
         "web/apps/api/src/modules/ops/backup.ts",
         "web/apps/api/src/modules/ops/backupManifest.ts",
         "web/apps/api/src/modules/ops/backupDownload.ts",
@@ -410,9 +408,7 @@
         "web/apps/api/src/modules/reports/reports2.ts",
         "web/apps/api/src/modules/reports/reports3.ts",
         "web/apps/api/src/modules/reports/statementDocs.ts",
-        "web/apps/api/src/modules/rbac/routePolicy.ts",
         "web/apps/api/src/routes/gstReport.ts",
-        "web/apps/api/src/routes/txn.ts",
         "web/apps/web/components/DesktopDateInput.tsx",
         "web/apps/api/src/modules/sales/labourGstAllocation.ts"
       ]

@@ -124,8 +124,8 @@ const DAY = `${startYear}-06-15`;
       const created = await req('POST', path, voucher(book));
       expect(created.statusCode, created.body).toBe(201);
       expect(created.json()).toMatchObject({ vchNo: 1 });
-      // And a PUT of that saved number edits it, sending the version it opened (the wholesale PUT requires it;
-      // an unused number has no version, so the 404 above comes before that check).
+      // And a PUT of that saved number edits it, sending the version it opened (every family's PUT
+      // requires it, N51/D17; an unused number has no version, so the 404 above comes before that check).
       const opened = await req('GET', `${path}/1?coBook=${book}`);
       expect(opened.statusCode, opened.body).toBe(200);
       const edited = await req('PUT', `${path}/1`, {
