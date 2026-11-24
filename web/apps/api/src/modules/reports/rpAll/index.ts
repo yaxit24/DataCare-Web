@@ -1,5 +1,12 @@
 import { round } from '@datacare/core';
 import { withTxBudget } from '../../shared/txBudget.js';
+import {
+  APPROVAL_SPECS,
+  approvalMode,
+  type ApprovalMode,
+  type ApprovalModeSpec,
+} from './approvalLayouts.js';
+import { buildApprovalQuery, type NormalizedApprovalFilters } from './approvalQuery.js';
 import { reportTitle, runLayout } from './engine.js';
 import {
   parseFlag,
@@ -369,4 +376,193 @@ export async function orderReport(
   const request = parseRpAllRequest('order', query, session);
   const records = await fetchOrderRecords(prisma, session, request);
   return shapeOrderResult(request, records);
+}
+
+// -----------------------------------------------------------------------------------------------------------
+// Approval Rpt — the three PanelApr buttons (RP_ALL.cs:5132-5134, 6707-6711).
+// -----------------------------------------------------------------------------------------------------------
+
+export interface ApprovalRequest {
+  branch: 'approval';
+  mode: ApprovalMode;
+  fromDate: string;
+  toDate: string;
+  filters: NormalizedApprovalFilters;
+  /** A/B only; the setting is supplied by the server, never by a client SQL fragment (D3). */
+  dataType?: string;
+}
+
+export interface ApprovalResult {
+  branch: 'approval';
+  mode: ApprovalMode;
+  caption: string;
+  template: string;
+  title: string;
+  columns: RpAllColumn[];
+  groups: RpAllGroup[];
+  groupLevels: { key: string; subtotal: 'header' | 'footer' | 'none'; subtotalCaption?: string }[];
+  rows: RpAllRow[];
+  totals: Record<string, number>;
+  grandTotal: boolean;
+  grandTotalCaption?: string;
+  voucherCount: number;
+  filters: NormalizedApprovalFilters;
+  ignoredFilters: string[];
+  cite: string;
+}
+
+/** Reject impossible dates safely; the desktop's click handler converts without a guard (RP_ALL.cs:8152). */
+function realIsoDate(value: unknown): string | undefined {
+  if (typeof value !== 'string' || !/^\d{4}-\d{2}-\d{2}$/.test(value)) return undefined;
+  const d = new Date(`${value}T00:00:00Z`);
+  if (
+    Number.isNaN(d.getTime()) ||
+    d.getUTCFullYear() !== Number(value.slice(0, 4)) ||
+    d.getUTCMonth() + 1 !== Number(value.slice(5, 7)) ||
+    d.getUTCDate() !== Number(value.slice(8, 10))
+  )
+    return undefined;
+  return value;
+}
+
+/**
+ * Normalise the two callers of the approval builder:
+ *  - the HTTP screen passes a session scope whose `filters` came from the shared report filter parser;
+ *  - a unit caller passes the raw scope/options directly.
+ * The desktop's lc box is session-locked (RP_ALL.cs:6664), so a client-supplied location never widens scope.
+ */
+function approvalInput(s: any, options: Record<string, unknown>): ApprovalRequest {
+  const fromDate = realIsoDate(s?.fromDate) ?? realIsoDate(options.fromDate) ?? '2010-01-01';
+  const toDate =
+    realIsoDate(s?.toDate) ?? realIsoDate(options.toDate) ?? new Date().toISOString().slice(0, 10);
+  if (!realIsoDate(s?.fromDate ?? options.fromDate) && s?.fromDate !== undefined)
+    throw new RpAllRequestError('invalid-date', 'fromDate must be a date (yyyy-mm-dd)', {
+      field: 'fromDate',
+    });
+  if (!realIsoDate(s?.toDate ?? options.toDate) && s?.toDate !== undefined)
+    throw new RpAllRequestError('invalid-date', 'toDate must be a date (yyyy-mm-dd)', {
+      field: 'toDate',
+    });
+
+  const supplied =
+    s?.filters && typeof s.filters === 'object' ? (s.filters as Record<string, unknown>) : {};
+  const pick = (...keys: string[]): string | undefined => {
+    for (const key of keys) {
+      for (const source of [supplied, options]) {
+        const value = source[key];
+        if (typeof value === 'string' && value.trim() !== '') return value.trim();
+      }
+    }
+    return undefined;
+  };
+  // D3: the A/B setting is the desktop session's MsDataType (RP_ALL.cs:8186), never a request value. Only a
+  // server-built scope may carry it; the query string and the shared filter parse are ignored.
+  const dataType = s?.dataType === 'A' || s?.dataType === 'B' ? (s.dataType as string) : undefined;
+
+  const filters: NormalizedApprovalFilters = {};
+  const coBook = pick('coBook', 'bookCode');
+  const acCode = pick('acCode');
+  const prCode = pick('prCode');
+  const grCode = pick('grCode');
+  const city = pick('city');
+  const area = pick('area');
+  const itemType = pick('itemType', 'itType');
+  if (coBook) filters.coBook = coBook;
+  if (acCode) filters.acCode = acCode;
+  if (prCode) filters.prCode = prCode;
+  if (grCode) filters.grCode = grCode;
+  if (city) filters.city = city;
+  if (area) filters.area = area;
+  if (itemType) filters.itemType = itemType.slice(0, 1).toUpperCase();
+  return {
+    branch: 'approval',
+    mode: approvalMode(options.mode),
+    fromDate,
+    toDate,
+    filters,
+    dataType,
+  };
+}
+
+/** Pure half of an Approval run: adapter records → engine rows, bands and totals; no I/O. */
+export function shapeApprovalResult(
+  request: ApprovalRequest,
+  records: readonly RpAllRecord[],
+): ApprovalResult {
+  const spec: ApprovalModeSpec = APPROVAL_SPECS[request.mode];
+  const layout = spec.layout;
+  const result = runLayout(layout, records);
+  return {
+    branch: 'approval',
+    mode: request.mode,
+    caption: spec.caption,
+    template: layout.template,
+    title: reportTitle(layout.titlePrefix, request.fromDate, request.toDate),
+    columns: [...layout.columns],
+    groups: result.groups,
+    groupLevels: layout.groups.map((g) => ({
+      key: g.key,
+      subtotal: g.subtotal,
+      ...(g.subtotalCaption ? { subtotalCaption: g.subtotalCaption } : {}),
+    })),
+    rows: result.rows,
+    totals: result.totals,
+    grandTotal: layout.grandTotal,
+    ...(layout.grandTotalCaption ? { grandTotalCaption: layout.grandTotalCaption } : {}),
+    voucherCount: result.voucherCount,
+    filters: request.filters,
+    // Cust Name, employee, state and multi-book are hidden on this panel (RP_ALL.cs:6400-6549).
+    ignoredFilters: [],
+    cite: spec.cite,
+  };
+}
+
+/** Read-only adapter for the Approval branch: one parameterised SELECT inside a read budget. */
+export async function fetchApprovalRecords(
+  prisma: any,
+  session: RpAllSessionScope,
+  request: ApprovalRequest,
+): Promise<RpAllRecord[]> {
+  const query = buildApprovalQuery({
+    mode: request.mode,
+    scope: session,
+    fromDate: request.fromDate,
+    toDate: request.toDate,
+    filters: request.filters,
+    dataType: request.dataType,
+  });
+  const rows: Record<string, unknown>[] = await withTxBudget(
+    prisma,
+    session.tenantId,
+    'read',
+    (tx: any) => tx.$queryRawUnsafe(query.text, ...query.values),
+  );
+  return rows.map(toRecord);
+}
+
+/**
+ * Report → Approval Rpt (RP_ALL caption "Approval Rpt"): the three buttons of PanelApr
+ * (RP_ALL.cs:5132-5134), selected by the session menu caption (RP_ALL.cs:6658-6711). Business scope —
+ * tenant, company, location and year — always comes from the session; the query may only narrow it.
+ */
+export async function approvalReport(
+  prisma: any,
+  s: any,
+  options: Record<string, unknown> = {},
+): Promise<ApprovalResult> {
+  const request = approvalInput(s, options);
+  const sessionLc = String(s?.lcCode ?? '');
+  // Only a head-office (00) session may edit the lc box (RP_ALL.cs:6660
+  // {{if (Operators.CompareString(DC_Main.MLc_code, "00", false) != 0)}}); a cleared box appends no location
+  // clause (RP_ALL.cs:8154 {{if (Operators.CompareString(tLcCode.Text, "", false) != 0)}}), so a 00 user who
+  // clears it lists every location, as on the Sales branch (filters.ts). Any other session stays locked (D9).
+  const lcCode = sessionLc === '00' && options.lcCode === '' ? '' : sessionLc;
+  const session: RpAllSessionScope = {
+    tenantId: String(s?.tenantId ?? ''),
+    coCode: String(s?.coCode ?? ''),
+    lcCode,
+    coYear: String(s?.coYear ?? ''),
+  };
+  const records = await fetchApprovalRecords(prisma, session, request);
+  return shapeApprovalResult(request, records);
 }

@@ -174,7 +174,11 @@ export function runLayout(layout: RpAllLayout, records: readonly RpAllRecord[]):
     while (open.length > depth) {
       const band = open.pop()!;
       const level = layout.groups[band.group.depth]!;
-      if (level.subtotal !== 'none')
+      // Crystal `EnableSuppress` hides a band when its condition holds; it never removes the records.
+      // AprPan.xml:936 suppresses the tag footer when Sum ({@PanPcs}, {@Group}) = 0.
+      const suppressed = level.footerSuppressedWhen?.(band.records) ?? false;
+      band.group.subtotal = suppressed ? 'none' : level.subtotal;
+      if (band.group.subtotal !== 'none')
         band.group.totals = countOnceTotals(layout, band.records, level.totalKeys);
       band.group.rowCount = band.records.length;
     }
@@ -197,6 +201,7 @@ export function runLayout(layout: RpAllLayout, records: readonly RpAllRecord[]):
           label: groupLabel(layout, depth, record),
           groupPath: path.slice(0, depth + 1),
           rowCount: 0,
+          subtotal: layout.groups[depth]!.subtotal,
           totals: {},
         };
         groups.push(group);

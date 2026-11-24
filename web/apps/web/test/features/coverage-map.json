@@ -432,6 +432,15 @@
         "web/packages/db/prisma/migrations/20261109090000_approval_book_identity/migration.sql"
       ]
     },
+    "approvalReportRp": {
+      "covers": [
+        "web/apps/web/app/(app)/reports/approval-report/",
+        "web/apps/api/src/modules/reports/rpAll/approvalLayouts.ts",
+        "web/apps/api/src/modules/reports/rpAll/approvalQuery.ts",
+        "web/apps/api/src/modules/reports/rpAll/exportRows.ts",
+        "web/apps/api/src/modules/reports/rpAll/index.ts"
+      ]
+    },
     "approvalReturn": {
       "covers": [
         "web/apps/web/app/(app)/txn/tour-return/page.tsx",

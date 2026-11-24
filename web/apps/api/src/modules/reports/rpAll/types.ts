@@ -13,8 +13,8 @@
  * query, and the grouping, totalling and formatting rules are written and tested once.
  */
 
-/** The menu captions RP_ALL serves (RP_ALL.cs:6676-6770). Sales, Purchase and Order adapters exist. */
-export type RpAllBranch = 'sales' | 'purchase' | 'order';
+/** The menu captions RP_ALL serves (RP_ALL.cs:6676-6770). Sales, Purchase, Order and Approval adapters exist. */
+export type RpAllBranch = 'sales' | 'purchase' | 'order' | 'approval';
 
 /** Kind of a cell: decides precision, alignment and how a total is rounded. */
 export type RpAllColumnKind = 'text' | 'date' | 'money' | 'weight' | 'pcs' | 'rate';
@@ -64,6 +64,11 @@ export interface RpAllGroupLevel {
   /** Map raw key values to a printed label (Crystal formula such as @ItemType). */
   labelMap?: Readonly<Record<string, string>>;
   labelDefault?: string;
+  /**
+   * Conditional footer suppression (Crystal `EnableSuppress`, e.g. AprPan.xml:936
+   * `Sum ({@PanPcs}, {@Group}) = 0`). Suppression hides the band and never removes its records or totals.
+   */
+  footerSuppressedWhen?: (records: readonly RpAllRecord[]) => boolean;
   /**
    * Total a column from another record key in this band's sums: column key → record key. AcPurcSummRpt prints
    * the Party Total from the in/out-signed fields ({@Pcs}, {@NetAmt}) while the lines print the raw fields.
@@ -122,6 +127,8 @@ export interface RpAllGroup {
   label: string;
   groupPath: string[];
   rowCount: number;
+  /** Effective subtotal placement after conditional suppression (a suppressed footer becomes 'none'). */
+  subtotal: 'header' | 'footer' | 'none';
   totals: Record<string, number>;
 }
 

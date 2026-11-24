@@ -2460,8 +2460,8 @@
    ],
    "formReferencedInWeb": true,
    "state": "implemented-unverified",
-   "evidence": "RP_ALL Approval Rpt modes issue/inout/pending implemented via reportFamilyReports.approvalReport with BOOK_DATA MAIN_BOOK=APR ISU and APR_DETL ISU_REC pending predicate; covered by apps/api/test/reportFamilyReports.db.test.ts, routePolicy/reportAuthorization tests, and web reportSurfaceLinks.test.ts.",
-   "note": "Implemented as an RP_ALL report-family web equivalent; remains pending desktop side-by-side certification.",
+   "evidence": "RP_ALL Approval Rpt (N254, G266): the three PanelApr modes on the shared RP_ALL engine (rpAll/approvalLayouts.ts, approvalQuery.ts) and the dedicated /reports/approval-report screen; covered by apps/api/test/rpAllApproval.test.ts, rpAllApproval.db.test.ts and the approval-report browser module.",
+   "note": "AprPartyWise, AprInOut and AprPan bands, totals and titles; screen and exports from one result. Owner questions D3 (MsDataType) and MsAllBranchAcShow; pending desktop side-by-side certification.",
    "webSurface": {
     "kind": "route",
     "surface": "GET /reports/approval-report"

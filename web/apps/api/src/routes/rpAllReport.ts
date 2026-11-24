@@ -33,6 +33,9 @@ export interface RpAllRouteHelpers {
     coCode: string;
     lcCode?: string;
     coYear?: string;
+    fromDate?: string;
+    toDate?: string;
+    filters?: unknown;
   };
 }
 
