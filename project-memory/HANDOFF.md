@@ -1,3 +1,10 @@
+## 2026-11-23 — Sales Report gets its dedicated RP_ALL screen (N253 / G265, WP-11 phase two)
+
+- 2026-11-23: `/reports/sales-report` (`reports/sales-report/`) drives GET /reports/sales-report: thirteen buttons, RP_ALL lookups (cities, areas,
+  order-customers entities in `masters/lookup.ts`, `bookCode` in `rpAll/filters.ts`), zoom, keyboard flow, grid/CSV/XLSX/PDF. Module 11 pass, 3 blocked.
+- 2026-11-23: blocked: T07/T18 Sales Return variant (G246, RTN_NET_AMT) and T13 return-bill print (SalesRtnA4Print missing). WP-14 adds the same
+  lookup entities and `bookCode`; the second of the two PRs to merge resolves that conflict.
+
 ## 2026-11-23 — Order Report is the desktop RP_ALL order branch (N252 / G264, WP-14)
 
 - 2026-11-23: `/reports/order-report` (`rpAll/orderQuery.ts`, `rpAll/orderLayouts.ts`, `reports/order-report/`) runs the seven RP_ALL order
