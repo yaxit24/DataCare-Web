@@ -957,6 +957,9 @@ route('Reports/Sales Register', [
   'GET /reports/sales-register',
   // WP-11: the RP_ALL Sales Report screen and its exports (routes/rpAllReport.ts), the "Sales Report" caption.
   'GET /reports/sales-report',
+  // The Select Book panel's own book list (RP_ALL.cs:11421 BookMast): every book of the session
+  // company+location, uncapped — the generic /lookup/books stays capped at 50 and company-wide.
+  'GET /reports/sales-report/books',
   'GET /reports/sales-report/export.csv',
   'GET /reports/sales-report/export.xlsx',
 ]);

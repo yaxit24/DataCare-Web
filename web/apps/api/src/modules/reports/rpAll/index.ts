@@ -551,18 +551,86 @@ export async function approvalReport(
   options: Record<string, unknown> = {},
 ): Promise<ApprovalResult> {
   const request = approvalInput(s, options);
+  const tenantId = String(s?.tenantId ?? '');
+  const coCode = String(s?.coCode ?? '');
   const sessionLc = String(s?.lcCode ?? '');
-  // Only a head-office (00) session may edit the lc box (RP_ALL.cs:6660
-  // {{if (Operators.CompareString(DC_Main.MLc_code, "00", false) != 0)}}); a cleared box appends no location
-  // clause (RP_ALL.cs:8154 {{if (Operators.CompareString(tLcCode.Text, "", false) != 0)}}), so a 00 user who
-  // clears it lists every location, as on the Sales branch (filters.ts). Any other session stays locked (D9).
-  const lcCode = sessionLc === '00' && options.lcCode === '' ? '' : sessionLc;
+  // tLcCode starts as the session location and is locked outside head office (RP_ALL.cs:6660
+  // {{if (Operators.CompareString(DC_Main.MLc_code, "00", false) != 0)}}); at 00 the box is editable and its
+  // value filters {APR_DETL.LC_CODE} (RP_ALL.cs:8154-8156), a cleared box appending no location clause
+  // (RP_ALL.cs:8154 {{if (Operators.CompareString(tLcCode.Text, "", false) != 0)}}), so a 00 user who clears
+  // it lists every location, as on the Sales branch (filters.ts). The report location travels as its own
+  // `reportLcCode` parameter, never as the session scope's lcCode, so the request-scope guard
+  // (businessScope.ts) keeps refusing any attempt to rewrite the session's own location (D9); the server
+  // proves a named branch is one of the company's locations before applying it. Any other session stays
+  // locked (D9) and cannot send one at all.
+  const reportLc =
+    typeof options.reportLcCode === 'string' ? options.reportLcCode.trim() : undefined;
+  if (options.reportLcCode !== undefined && sessionLc !== '00')
+    throw new RpAllRequestError(
+      'location-locked',
+      'reportLcCode is fixed to the session location',
+      {
+        field: 'reportLcCode',
+      },
+    );
+  let lcCode = sessionLc;
+  if (sessionLc === '00') {
+    if (reportLc === '') lcCode = '';
+    else if (reportLc !== undefined) {
+      const found: unknown[] = await withTxBudget(prisma, tenantId, 'read', (tx: any) =>
+        tx.$queryRawUnsafe(
+          `SELECT 1 FROM "LOCT_MAST" WHERE "tenant_id"=$1 AND "CO_CODE"::text=$2 AND "LC_CODE"::text=$3 LIMIT 1`,
+          tenantId,
+          coCode,
+          reportLc,
+        ),
+      );
+      if (!found.length)
+        throw new RpAllRequestError(
+          'invalid-location',
+          "reportLcCode must be one of the company's locations",
+          { field: 'reportLcCode' },
+        );
+      lcCode = reportLc;
+    } else if (options.lcCode === '') lcCode = '';
+  }
   const session: RpAllSessionScope = {
-    tenantId: String(s?.tenantId ?? ''),
-    coCode: String(s?.coCode ?? ''),
+    tenantId,
+    coCode,
     lcCode,
     coYear: String(s?.coYear ?? ''),
   };
   const records = await fetchApprovalRecords(prisma, session, request);
   return shapeApprovalResult(request, records);
+}
+
+/**
+ * The Sales Report "Select Book" panel's grid (RP_ALL.cs:11405-11458 BookMast, called for the "Sales
+ * Report" caption at RP_ALL.cs:6699): every book of the SESSION company+location, ordered by code, with no
+ * cap — the desktop fills the whole grid from one open record set (RP_ALL.cs:11421-11423
+ * {{SELECT A.CO_BOOK,A.BOOK_NAME FROM BOOK_DATA AS A WHERE A.CO_CODE = MCo_code AND A.LC_CODE = MLc_code
+ * ORDER BY A.CO_BOOK}}). The generic /lookup/books stays the Book box's capped, company-wide help; this
+ * list is the report panel's own, so a location's 51st book is never cut off and another location's book
+ * never appears. DISTINCT ON keeps one row per code, as the generic lookup's SELECT DISTINCT could not.
+ */
+export async function salesReportBooks(
+  prisma: any,
+  session: RpAllSessionScope,
+): Promise<Array<{ code: string; name: string }>> {
+  const rows: Array<{ code: string | null; name: string | null }> = await withTxBudget(
+    prisma,
+    session.tenantId,
+    'read',
+    (tx: any) =>
+      tx.$queryRawUnsafe(
+        `SELECT DISTINCT ON ("CO_BOOK") "CO_BOOK" AS code, "BOOK_NAME" AS name
+           FROM "BOOK_DATA"
+          WHERE "tenant_id"=$1 AND "CO_CODE"::text=$2 AND "LC_CODE"::text=$3
+          ORDER BY "CO_BOOK", "BOOK_NAME" NULLS LAST`,
+        session.tenantId,
+        session.coCode,
+        session.lcCode,
+      ),
+  );
+  return rows.map((row) => ({ code: String(row.code ?? ''), name: String(row.name ?? '') }));
 }

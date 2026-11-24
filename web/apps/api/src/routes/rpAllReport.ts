@@ -3,6 +3,7 @@ import {
   orderReport,
   RpAllRequestError,
   salesReport,
+  salesReportBooks,
   type RpAllResult,
 } from '../modules/reports/rpAll/index.js';
 import { exportCsv, exportTable, exportXlsxColumns } from '../modules/reports/rpAll/exportRows.js';
@@ -14,6 +15,7 @@ import { renderXlsx } from '../modules/reports/xlsx.js';
  *
  *   GET /reports/sales-report              mode=report|register|item|group|employee|with-order,
  *                                          returns=yes|no, orderOnly=yes|no, fromDate, toDate, selectors
+ *   GET /reports/sales-report/books        the Select Book panel's list (RP_ALL.cs:11421 BookMast)
  *   GET /reports/sales-report/export.csv   the same dataset, every row, as CSV  (Print right)
  *   GET /reports/sales-report/export.xlsx  the same dataset as Excel             (Print right)
  *
@@ -72,6 +74,17 @@ export function registerRpAllReportRoutes(app: FastifyInstance, h: RpAllRouteHel
   app.get('/reports/sales-report', auth as any, async (req, reply) => {
     try {
       return reply.send(await build('sales', req));
+    } catch (error) {
+      if (fail(reply, error)) return reply;
+      throw error;
+    }
+  });
+
+  // BookMast (RP_ALL.cs:11405-11458, called at :6699): the Select Book panel's own list — every book of the
+  // session company+location, uncapped, distinct codes. The generic /lookup/books is not changed.
+  app.get('/reports/sales-report/books', auth as any, async (req, reply) => {
+    try {
+      return reply.send(await salesReportBooks(prisma, scope(req)));
     } catch (error) {
       if (fail(reply, error)) return reply;
       throw error;

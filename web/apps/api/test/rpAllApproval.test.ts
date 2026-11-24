@@ -52,7 +52,11 @@ async function selection(
   const tx = {
     $executeRawUnsafe: async () => 1,
     $queryRawUnsafe: async (sql: unknown, ...values: unknown[]) => {
-      captured = { text: String(sql), values };
+      const text = String(sql);
+      // The head-office branch pick proves the location against LOCT_MAST first (rpAll/index.ts); the
+      // fake answers that one query and captures the report SELECT that follows.
+      if (/FROM "LOCT_MAST"/.test(text)) return [{ ok: 1 }];
+      captured = { text, values };
       return [];
     },
   };
@@ -127,6 +131,30 @@ describe('Approval Rpt selection builder (RP_ALL, three approval buttons)', () =
     // RP_ALL.cs:8154 {{if (Operators.CompareString(tLcCode.Text, "", false) != 0)}}: a cleared box at 00
     // appends no location clause.
     const cleared = await selection(undefined, 'issue', { lcCode: '00', options: { lcCode: '' } });
+    expect(cleared.text).not.toMatch(lcPredicate);
+  });
+
+  it('approval-report.entry.report-location-parameter: the branch travels as reportLcCode, never as scope', async () => {
+    const lcPredicate = /"LC_CODE"::text=\$(\d+)/;
+    // RP_ALL.cs:6664 {{((Control)tLcCode).Enabled = false;}} outside head office: a report location sent
+    // by a locked session is a client mistake, refused before any SQL runs.
+    await expect(
+      selection(undefined, 'issue', { options: { reportLcCode: '02' } }),
+    ).rejects.toMatchObject({ code: 'location-locked' });
+    // At 00 the box is editable (RP_ALL.cs:6660) and its value is applied as {APR_DETL.LC_CODE}
+    // (RP_ALL.cs:8156) after the server proves it is one of the company's locations.
+    const branch = await selection(undefined, 'issue', {
+      lcCode: '00',
+      options: { reportLcCode: '01' },
+    });
+    const m = lcPredicate.exec(branch.text);
+    expect(m, 'the named branch is applied as the location predicate').not.toBeNull();
+    expect(branch.values[Number(m![1]) - 1]).toBe('01');
+    // A cleared reportLcCode at 00 appends no location clause, exactly like the legacy cleared box.
+    const cleared = await selection(undefined, 'issue', {
+      lcCode: '00',
+      options: { reportLcCode: '' },
+    });
     expect(cleared.text).not.toMatch(lcPredicate);
   });
 });

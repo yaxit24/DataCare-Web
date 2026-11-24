@@ -36,8 +36,11 @@ export function approvalQuery(
   // D7: the desktop converts on click without a guard (RP_ALL.cs:8152); the web refuses an unfinished date.
   if (!fromDate || !toDate) return { query: '', error: DATE_FORMAT_MESSAGE };
   const query = new URLSearchParams({ mode, fromDate, toDate });
-  // The lc box is locked outside head office (RP_ALL.cs:6664); the server enforces the session location anyway (D9).
-  query.set('lcCode', sessionLcCode !== '00' ? sessionLcCode : filters.lcCode.trim());
+  // The lc box is locked outside head office (RP_ALL.cs:6664) and the session location applies itself; a
+  // locked session therefore sends no location at all. At head office the box is editable
+  // (RP_ALL.cs:6660) and its value — '' cleared for every location, or a branch code — travels as its own
+  // reportLcCode parameter, never as the session scope's lcCode (RP_ALL.cs:8154-8156 applies the box).
+  if (sessionLcCode === '00') query.set('reportLcCode', filters.lcCode.trim());
   // `bookCode`, not `coBook`: the API reads `coBook` as the session's own book.
   if (filters.bookCode.trim()) query.set('bookCode', filters.bookCode.trim());
   if (filters.partyCode.trim()) query.set('acCode', filters.partyCode.trim());

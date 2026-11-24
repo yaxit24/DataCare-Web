@@ -165,8 +165,10 @@ export default function SalesReportPage() {
   const toggleBookSelect = (checked: boolean) => {
     setFilters({ selectBook: checked });
     setBookPanel(checked);
+    // BookMast (RP_ALL.cs:11421-11423) lists EVERY book of the session company+location, uncapped; the
+    // generic /lookup/books is capped at 50 and company-wide, so the panel reads its own report list.
     if (checked && bookRows.length === 0)
-      void get<Array<{ code: string; name?: string }>>('/lookup/books?limit=50')
+      void get<Array<{ code: string; name?: string }>>('/reports/sales-report/books')
         .then((rows) =>
           setBookRows(
             rows.map((row) => ({ code: String(row.code), name: String(row.name ?? '') })),

@@ -49,7 +49,14 @@ const num = (record: RpAllRecord, key: string): number => {
   return typeof v === 'number' ? v : v === null || v === undefined || v === '' ? 0 : Number(v);
 };
 
-const VOUCHER_KEY = ['coYear', 'coBook', 'vchNo'] as const;
+/**
+ * One voucher per location: the templates print every APR_DETL row the selection returns
+ * (AprPartyWise.xml SummaryFields sum the whole record set), so two same-numbered vouchers in two
+ * locations are two vouchers. The line key therefore carries the location as well; without it the
+ * engine's count-once dedupe (engine.ts runLayout) collapses the second location's line. Purchase and
+ * Order already key the same way (purchaseLayouts.ts VOUCHER_KEY, orderLayouts.ts ORDER_KEY).
+ */
+const VOUCHER_KEY = ['lcCode', 'coYear', 'coBook', 'vchNo'] as const;
 
 // ---- Approval Isu → AprPartyWise -------------------------------------------------------------------------
 
