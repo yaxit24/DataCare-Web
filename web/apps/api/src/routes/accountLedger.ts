@@ -9,6 +9,7 @@ import {
 } from '../modules/reports/accountLedgerReport.js';
 import { toCsv } from '../modules/reports/reportCsv.js';
 import { renderXlsx, type XlsxColumn, type XlsxSheet } from '../modules/reports/xlsx.js';
+import { registerLedgerFinePrintRoutes } from './ledgerFinePrints.js';
 
 /**
  * Account Ledger report routes — the desktop RP_LEDR screen and its Excel/CSV/PDF outputs
@@ -136,6 +137,8 @@ export function registerAccountLedgerRoutes(
   h: AccountLedgerRouteHelpers,
 ): void {
   const { prisma, auth, guard, readScope, sendReportPdf } = h;
+  // WP-20: the JmaUdr, Gold and Silver prints. Static paths, so they win over the `:acCode` aliases below.
+  registerLedgerFinePrintRoutes(app, h);
 
   /** Send a domain error as its HTTP status; rethrow anything else for the global handler. */
   const fail = (reply: FastifyReply, error: unknown): boolean => {

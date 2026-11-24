@@ -1,12 +1,19 @@
 {
-  "_comment": "Which feature module covers which source files (web/scripts/check-browser-test-coverage.mjs). A change to a covered file must update that module or features/baseline.json in the same PR. A pattern ending in / covers the directory. Add an entry with every new feature module.",
+  "_comment": "Which feature module covers which source files (web/scripts/check-browser-test-coverage.mjs). A change to a covered file must update that module or features/baseline.json in the same PR. A pattern ending in / covers the directory. Add an entry with every new feature module. Shared registration files (app.ts, routePolicy.ts, routes/txn.ts) belong to no one module; a change to them still needs some browser test under the general rule.",
   "modules": {
     "salesInvoice": {
       "covers": [
         "web/apps/web/app/(app)/txn/sales/page.tsx",
         "web/apps/api/src/modules/sales/sales.ts",
+        "web/apps/api/src/modules/sales/saleRead.ts",
+        "web/apps/api/src/modules/sales/saleResiduals.ts",
+        "web/apps/api/src/modules/sales/salePrintChoice.ts",
+        "web/apps/web/components/SaleResidualPanel.tsx",
+        "web/apps/web/lib/saleResidual.ts",
         "web/packages/core/src/saleAmount.ts",
         "web/packages/core/src/calc.ts",
+        "web/packages/core/src/roundingPolicy.ts",
+        "web/apps/web/lib/lineRecalc.ts",
         "web/apps/api/src/modules/posting/lineLegs.ts",
         "web/apps/web/components/LookupPicker.tsx",
         "web/apps/web/lib/lookupEnter.ts",
@@ -17,6 +24,32 @@
         "web/apps/api/src/routes/voucherNavigation.ts"
       ]
     },
+    "salesReport": {
+      "covers": [
+        "web/apps/web/app/(app)/reports/sales-report/",
+        "web/apps/api/src/modules/masters/lookup.ts",
+        "web/apps/api/src/modules/reports/rpAll/",
+        "web/apps/api/src/routes/rpAllReport.ts"
+      ]
+    },
+    "stockReport": {
+      "covers": [
+        "web/apps/web/app/(app)/reports/stock-report/",
+        "web/apps/api/src/modules/reports/stockReport/",
+        "web/apps/api/src/routes/stockReport.ts"
+      ]
+    },
+    "orderReportRp": {
+      "covers": [
+        "web/apps/web/app/(app)/reports/order-report/",
+        "web/apps/api/src/modules/reports/rpAll/orderLayouts.ts",
+        "web/apps/api/src/modules/reports/rpAll/orderQuery.ts",
+        "web/apps/api/src/modules/reports/rpAll/filters.ts",
+        "web/apps/api/src/modules/masters/lookup.ts",
+        "web/apps/api/src/modules/reports/rpAll/index.ts",
+        "web/apps/api/src/routes/rpAllReport.ts"
+      ]
+    },
     "purchaseReport": {
       "covers": [
         "web/apps/web/app/(app)/reports/purchase-report/page.tsx",
@@ -24,6 +57,8 @@
         "web/apps/web/app/(app)/reports/purchase-report/PurchaseReportGrid.tsx",
         "web/apps/web/app/(app)/reports/purchase-report/types.ts",
         "web/apps/api/src/modules/reports/purchaseReport.ts",
+        "web/apps/api/src/modules/reports/rpAll/purchaseLayouts.ts",
+        "web/apps/api/src/modules/reports/rpAll/purchaseQuery.ts",
         "web/apps/api/src/routes/purchaseReport.ts",
         "web/apps/web/app/(app)/reports/[report]/page.tsx",
         "web/apps/api/src/modules/reports/reports.ts",
@@ -48,7 +83,13 @@
     "usersRights": {
       "covers": [
         "web/apps/web/app/(app)/admin/users/page.tsx",
-        "web/apps/api/src/modules/rbac/users.ts"
+        "web/apps/web/components/UserRightsGrid.tsx",
+        "web/apps/web/lib/userCreate.ts",
+        "web/apps/api/src/modules/rbac/users.ts",
+        "web/apps/api/src/modules/rbac/userMaster.ts",
+        "web/apps/api/src/routes/userMaster.ts",
+        "web/apps/api/src/modules/auth/password.ts",
+        "web/apps/api/src/modules/auth/commonPasswords.ts"
       ]
     },
     "companyMaster": {
@@ -56,15 +97,18 @@
         "web/apps/web/app/(app)/masters/companies/page.tsx",
         "web/apps/api/src/modules/masters/configs.ts",
         "web/apps/api/src/modules/masters/master.service.ts",
-        "web/apps/api/src/modules/auth/businessScope.ts",
-        "web/apps/api/src/app.ts"
+        "web/apps/api/src/modules/auth/businessScope.ts"
       ]
     },
     "salesReturn": {
       "covers": [
         "web/apps/web/app/(app)/txn/sale-return/page.tsx",
         "web/apps/web/lib/salesReturnCalculation.ts",
+        "web/apps/web/lib/saleReturnEdit.ts",
         "web/apps/api/src/modules/sales/salesReturn.ts",
+        "web/apps/api/src/modules/sales/saleReturnSaveChecks.ts",
+        "web/apps/api/src/modules/sales/saleReturnReopen.ts",
+        "web/apps/api/src/routes/saleReturnVoucher.ts",
         "web/packages/core/src/saleAmount.ts"
       ]
     },
@@ -86,6 +130,8 @@
         "web/apps/web/app/(app)/txn/receipt/page.tsx",
         "web/apps/web/app/(app)/txn/payment/page.tsx",
         "web/apps/api/src/modules/finance/finance.ts",
+        "web/apps/api/src/modules/finance/legCodes.ts",
+        "web/packages/core/src/cashGridTotals.ts",
         "web/apps/api/src/modules/finance/batchReceipt.ts",
         "web/apps/api/src/modules/finance/lifecycle.ts",
         "web/apps/api/src/modules/vouchers/list.ts"
@@ -95,6 +141,10 @@
       "covers": [
         "web/apps/web/app/(app)/txn/contra/page.tsx",
         "web/apps/api/src/modules/finance/contra.ts",
+        "web/apps/api/src/modules/finance/contraClearing.ts",
+        "web/apps/api/src/modules/finance/contraList.ts",
+        "web/apps/api/src/modules/finance/contraVoucher.ts",
+        "web/apps/api/src/routes/contra.ts",
         "web/apps/api/src/modules/finance/lifecycle.ts",
         "web/apps/api/src/modules/vouchers/list.ts"
       ]
@@ -117,10 +167,31 @@
         "web/apps/api/src/modules/sales/salesOrderTender.ts",
         "web/apps/api/src/modules/sales/salesOrderOldMetal.ts",
         "web/apps/api/src/modules/sales/salesOrderScheme.ts",
+        "web/apps/api/src/modules/sales/salesOrderRateCutPosting.ts",
         "web/apps/api/src/modules/sales/orderLifecyclePolicy.ts",
         "web/apps/web/components/SalesOrderUpiGrid.tsx",
         "web/apps/web/components/SalesOrderOldMetalGrid.tsx",
         "web/apps/web/lib/salesOrderOldMetal.ts"
+      ]
+    },
+    "orderCancel": {
+      "covers": [
+        "web/apps/web/app/(app)/txn/order-cancel/page.tsx",
+        "web/apps/web/components/OrderCancelGridRow.tsx",
+        "web/apps/web/components/OrderCancelOrderHelp.tsx",
+        "web/apps/api/src/modules/sales/orderCancel.ts",
+        "web/apps/api/src/modules/sales/orderCancelTags.ts",
+        "web/apps/api/src/modules/sales/orderCancelPrint.ts",
+        "web/apps/api/src/routes/orderCancel.ts"
+      ]
+    },
+    "balanceTransfer": {
+      "covers": [
+        "web/apps/web/app/(app)/company/balance-transfer/page.tsx",
+        "web/apps/api/src/modules/ops/balanceTransfer.ts",
+        "web/apps/api/src/modules/ops/balanceTransferRules.ts",
+        "web/apps/api/src/modules/ops/balanceTransferSelect.ts",
+        "web/apps/api/src/routes/balanceTransfer.ts"
       ]
     },
     "partyOpening": {
@@ -128,6 +199,17 @@
         "web/apps/web/app/(app)/txn/ac-opbl/page.tsx",
         "web/apps/api/src/modules/finance/partyOpening.ts",
         "web/apps/api/src/routes/partyOpening.ts"
+      ]
+    },
+    "tagStock": {
+      "covers": [
+        "web/apps/web/app/(app)/reports/tag-stock/page.tsx",
+        "web/apps/web/app/(app)/reports/tag-stock/TagStockGrid.tsx",
+        "web/apps/web/app/(app)/reports/tag-stock/useTagStock.ts",
+        "web/apps/web/app/(app)/reports/tag-stock/dateText.ts",
+        "web/apps/api/src/modules/reports/tagStock.ts",
+        "web/apps/api/src/modules/reports/tagStockColumns.ts",
+        "web/apps/api/src/routes/tagStock.ts"
       ]
     },
     "tagOpening": {
@@ -142,6 +224,7 @@
         "web/apps/web/app/(app)/txn/daily-rate/page.tsx",
         "web/apps/api/src/modules/masters/dailyRate.ts",
         "web/apps/api/src/routes/dailyRate.ts",
+        "web/apps/web/components/DailyRateLabels.tsx",
         "web/packages/core/src/dailyRate.ts"
       ]
     },
@@ -185,6 +268,17 @@
         "web/apps/api/src/routes/groupMaster.ts"
       ]
     },
+    "books": {
+      "covers": [
+        "web/apps/web/app/(app)/masters/books/page.tsx",
+        "web/apps/web/app/(app)/masters/books/bookScreen.ts",
+        "web/apps/web/components/BookSlotGrid.tsx",
+        "web/apps/api/src/modules/masters/booksMaster.ts",
+        "web/apps/api/src/modules/masters/bookTemplates.ts",
+        "web/apps/api/src/routes/booksMaster.ts",
+        "web/apps/api/src/modules/ops/seedCompany.ts"
+      ]
+    },
     "productMaster": {
       "covers": [
         "web/apps/web/app/(app)/masters/products/page.tsx",
@@ -223,6 +317,12 @@
         "web/apps/api/src/modules/sales/wholesaleSaveChecks.ts",
         "web/apps/api/src/modules/sales/wholesaleSaleBill.ts",
         "web/apps/api/src/modules/sales/wholesaleTagStones.ts",
+        "web/apps/api/src/modules/sales/wholesaleDetailRows.ts",
+        "web/apps/api/src/modules/sales/wholesaleResiduals.ts",
+        "web/apps/api/src/modules/sales/rateCutMasters.ts",
+        "web/apps/api/src/modules/shared/rojmelWholesale.ts",
+        "web/apps/web/components/WholesaleDetailPanel.tsx",
+        "web/packages/core/src/wholesaleDetail.ts",
         "web/apps/api/src/modules/sales/rateCutBookingDrawDown.ts",
         "web/apps/web/components/VoucherNumberKeys.tsx",
         "web/apps/web/components/VoucherList.tsx",
@@ -259,7 +359,6 @@
         "web/apps/web/app/(app)/utilities/page.tsx",
         "web/apps/web/lib/nav.ts",
         "web/apps/web/lib/api.ts",
-        "web/apps/api/src/app.ts",
         "web/apps/api/src/modules/ops/backup.ts",
         "web/apps/api/src/modules/ops/backupManifest.ts",
         "web/apps/api/src/modules/ops/backupDownload.ts",
@@ -297,6 +396,7 @@
       "covers": [
         "web/apps/web/app/(app)/txn/tag-print/page.tsx",
         "web/apps/api/src/modules/stock/tagPrintScreen.ts",
+        "web/apps/api/src/modules/stock/tagPrint.ts",
         "web/apps/api/src/routes/tagPrintScreen.ts"
       ]
     },
@@ -319,9 +419,9 @@
         "web/apps/api/src/modules/reports/reports2.ts",
         "web/apps/api/src/modules/reports/reports3.ts",
         "web/apps/api/src/modules/reports/statementDocs.ts",
-        "web/apps/api/src/modules/rbac/routePolicy.ts",
         "web/apps/api/src/routes/gstReport.ts",
-        "web/apps/api/src/routes/txn.ts"
+        "web/apps/web/components/DesktopDateInput.tsx",
+        "web/apps/api/src/modules/sales/labourGstAllocation.ts"
       ]
     },
     "approvalIssue": {
@@ -337,6 +437,15 @@
         "web/apps/api/src/modules/ops/seedCompany.ts",
         "web/apps/api/src/modules/vouchers/bookForms.ts",
         "web/packages/db/prisma/migrations/20261109090000_approval_book_identity/migration.sql"
+      ]
+    },
+    "approvalReportRp": {
+      "covers": [
+        "web/apps/web/app/(app)/reports/approval-report/",
+        "web/apps/api/src/modules/reports/rpAll/approvalLayouts.ts",
+        "web/apps/api/src/modules/reports/rpAll/approvalQuery.ts",
+        "web/apps/api/src/modules/reports/rpAll/exportRows.ts",
+        "web/apps/api/src/modules/reports/rpAll/index.ts"
       ]
     },
     "approvalReturn": {

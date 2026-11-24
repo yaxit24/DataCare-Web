@@ -180,4 +180,49 @@ export const EXPECTED_MIGRATIONS: ReadonlyArray<{
     name: '20261109120000_api_command_receipt',
     checksum: '65761595951988799d746fdd0c1020fab5d16ff20ef11000153f50602f0cfec2',
   },
+  {
+    // WP-06 D34/D35: LOGIN_MAST active flag and per-account login back-off.
+    name: '20261109150000_login_mast_active_backoff',
+    checksum: 'b13f8ce87226403aa889cc662246a7dcdf64d9844cf3cf51ae2d253c5582d910',
+  },
+  {
+    // WP-23 Balance TrFr: ITM_OPBL.CARRIED_FROM marks an Item Stock carry, which no stock reader adds.
+    name: '20261122090000_itm_opbl_carried_from',
+    checksum: 'd93584d312de4c25abd3cbde8ae75088a0116620392647d448fbb30d29c31116',
+  },
+  {
+    // WP-23: legacy Year-End Close openings (ACOP / OPENING / voucher 1) carry the carried-opening marker.
+    name: '20261122100000_legacy_year_end_openings_carried',
+    checksum: '705c320177c899478749ca679fb5233e6dd265f26c46a53cc65bfc3f045b5b80',
+  },
+  {
+    // WP-19: LBR_ISU_DETL per-line GST shares (TR_SALE_LBR.cs:9748-9830) the Gst Report HSN section sums.
+    name: '20261122110000_labour_detail_gst_shares',
+    checksum: '0ae86f271fca6186af52f18eed2d877969838c2f53452d1d905e90218a4a0984',
+  },
+  {
+    // N240/G252: existing companies' web-seeded books get the desktop template slots (TAG SPLIT 6-9 sale/purchase).
+    name: '20261122120000_book_template_slots',
+    checksum: '5d31ad3136d6d02a24da51d789e3ad3ef30724303756b3921b549df2bfb735ca',
+  },
+  {
+    // WP-26 (N243, G255): SL_DATA member-commission and RE_TRFR columns, SL_PR_DETL.PR_COST.
+    name: '20261122200000_sale_desktop_residual_columns',
+    checksum: '77b3225983a5fd8f9b41b682896a8154090960796d5af6b66aba915e6f80343c',
+  },
+  {
+    // WP-36: ITEM_MAST TAX_FREE_ITEM / APP_ITEM / EMP_COM_PRC / AC_MEMB_COM_PRC with the desktop defaults.
+    name: '20261123100000_item_mast_desktop_flags',
+    checksum: '71a4dcc133ca035479477651c22a8a3c7769990a295150256c005b45e5b99c15',
+  },
+  {
+    // WP-36: web-seeded sale/purchase/tax ledgers move to desktop groups 25/30/12 (MS_GROUP / MS_TAX helps).
+    name: '20261123110000_seeded_ledger_groups',
+    checksum: '6cd6616573b270a1ab2dc87b8f3c3b5a8b5dcc2cafa31dca5827b6f420edb52b',
+  },
+  {
+    // WP-33 Daily Rate: per-company entitlement for the location-00 copy (MS_RATE.cs:1937), operator-provisioned.
+    name: '20261123090000_daily_rate_copy_entitlement',
+    checksum: '003ab85656b77e4b3a64220ab0c6a2e30704dd849d0d1f2df8578042e4e6662d',
+  },
 ];

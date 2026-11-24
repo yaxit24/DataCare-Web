@@ -128,6 +128,20 @@ async function createReturn(
   await page.getByText(`Return saved — Voucher #${Number(vchNo)}`, { exact: false }).waitFor();
   return vchNo;
 }
+/** Load a saved return into the New return form (WP-27: Open Vch No + Open). */
+async function openSaved(page, vchNo) {
+  await field(page, 'Open Vch No').fill(vchNo);
+  const [response] = await Promise.all([
+    page.waitForResponse(
+      (r) =>
+        new URL(r.url()).pathname === `/api/sales-returns/${vchNo}` &&
+        r.request().method() === 'GET',
+    ),
+    page.getByRole('button', { name: 'Open', exact: true }).click(),
+  ]);
+  assert.equal(response.status(), 200, await response.text());
+  await page.getByText(`Editing return #${Number(vchNo)}`, { exact: false }).waitFor();
+}
 /** A sale through the Sales screen, to return against. */
 async function sellOne(page) {
   await S.openSales(page);
@@ -201,6 +215,10 @@ export const salesReturn = {
   inputs: [
     'web/apps/web/app/(app)/txn/sale-return/page.tsx',
     'web/apps/api/src/modules/sales/salesReturn.ts',
+    'web/apps/api/src/modules/sales/saleReturnSaveChecks.ts',
+    'web/apps/api/src/modules/sales/saleReturnReopen.ts',
+    'web/apps/api/src/routes/saleReturnVoucher.ts',
+    'web/apps/web/lib/saleReturnEdit.ts',
     'web/apps/web/test/features/modules/salesReturn.mjs',
     'web/apps/web/test/features/faults.mjs',
     'web/apps/web/test/features/fixtures/catalogue.mjs',
@@ -487,10 +505,15 @@ export const salesReturn = {
         const response = await saveReturn(page);
         assert(response.status() >= 400 && response.status() < 500, `status ${response.status()}`);
         await page.locator('.msg.err').waitFor();
+        // WP-27 decision D9: an empty grid totals 0, TR_SALE_RTN.cs:12398 -> :12405.
+        assert.equal(
+          (await page.locator('.msg.err').innerText()).trim(),
+          'Please Insert Item Value and try',
+        );
         assert.deepEqual(await counts(ctx), before);
         return {
           observation: `refused ${response.status()}: ${await page.locator('.msg.err').innerText()}`,
-          expected: '4xx + message + no write',
+          expected: '4xx + "Please Insert Item Value and try" + no write',
           database: { before, after: before },
         };
       },
@@ -762,17 +785,121 @@ export const salesReturn = {
       },
     ),
 
-    {
-      ...C(
-        'edit.numeric',
-        'T09',
-        'mutation',
-        "TR_SALE_RTN edits a saved return's weights and amounts and re-posts it",
-        async () => ({}),
-      ),
-      blocked:
-        'Numeric edit of a saved return is not exposed in the web yet; it is planned in the Return programme (N10 atomic numeric update, N11 saved-return Save/reopen). The Saved returns panel edits metadata only.',
-    },
+    C(
+      'edit.numeric',
+      'T09',
+      'mutation',
+      'TR_SALE_RTN.cs:12496 rewrites a saved return under its own number (WP-27 Gap 1, decision D12): net 10 -> 9 gives metal round(55,111.05) = 55,111, making round(2,137.5) = 2,138, net 57,249, total round(58,966.47) = 58,966',
+      async (ctx) => {
+        const { page } = await ctx.session();
+        const vchNo = await createReturn(ctx, page);
+        await openSaved(page, vchNo);
+        assert.equal(await cell(page, 0, 5).inputValue(), '10');
+        await cell(page, 0, 5).fill('9');
+        const [response] = await Promise.all([
+          page.waitForResponse(
+            (r) =>
+              new URL(r.url()).pathname === `/api/sales-returns/${vchNo}` &&
+              r.request().method() === 'PUT',
+          ),
+          page.getByRole('button', { name: 'Save Return', exact: true }).click(),
+        ]);
+        assert.equal(response.status(), 200, await response.text());
+        const [h] = await header(ctx, vchNo);
+        const rows = await lines(ctx, vchNo);
+        const legs = await ledger(ctx, vchNo);
+        const expected = { nwt: 9, amt: 55111, lbr: 2138, net: 57249, total: 58966 };
+        assert.equal(rows.length, 1);
+        assert.deepEqual(
+          [rows[0].nwt, rows[0].amt, rows[0].lbr, rows[0].net, h.tot],
+          [expected.nwt, expected.amt, expected.lbr, expected.net, expected.total],
+        );
+        assert.ok(balanced(legs), 'AC_DATA stays balanced');
+        return {
+          observation: `return ${vchNo} edited in place: net ${rows[0].nwt}, item ${rows[0].amt}, labour ${rows[0].lbr}, total ${h.tot}`,
+          expected,
+          database: { header: h, lines: rows },
+          downstream: { ledgerBalanced: balanced(legs) },
+        };
+      },
+    ),
+
+    C(
+      'entry.employee-field',
+      'T01',
+      'read-only',
+      'TR_SALE_RTN.cs:2647 {{Label3.Text = "Employee";}}: the form has an Employee box, empty by default (WP-27 Gap 5)',
+      async (ctx) => {
+        const { page } = await ctx.session();
+        await openReturn(page);
+        const employee = field(page, 'Employee');
+        await employee.waitFor();
+        assert.equal(await employee.inputValue(), '');
+        return { observation: 'Employee box present and empty', expected: { employee: '' } };
+      },
+    ),
+
+    C(
+      'import.refused-after-return',
+      'T04',
+      'refusal',
+      'TR_SALE_RTN.cs:16540 refuses a second whole-bill Import once a return of the bill exists (WP-27 Gap 4b, decision D6)',
+      async (ctx) => {
+        const { page } = await ctx.session();
+        const sale = await sellOne(page);
+        const importBill = async () => {
+          await openReturn(page);
+          await page
+            .getByRole('combobox', { name: 'Configured book', exact: true })
+            .nth(1)
+            .selectOption('SL');
+          await field(page, 'Orig Bill No').fill(sale);
+          await page.getByRole('button', { name: 'Import', exact: true }).click();
+        };
+        await importBill();
+        await page.waitForTimeout(1500);
+        const response = await saveReturn(page);
+        assert.equal(response.status(), 201, await response.text());
+        const first = String((await response.json()).vchNo).padStart(5, '0');
+        const before = await counts(ctx);
+        await importBill();
+        const message = page.locator('.msg.err');
+        await message.waitFor();
+        const text = await message.innerText();
+        const expected = `This Sales Bill Is All ready Import...In...${first} You Cant Re Ipmport...Please Select Single Item In Receive Item...`;
+        assert.equal(text.trim(), expected);
+        assert.equal(await cell(page, 0, 1).inputValue(), '');
+        assert.deepEqual(await counts(ctx), before);
+        return {
+          observation: `second import of sale ${sale}: "${text.trim()}"`,
+          expected,
+          database: { before, after: before },
+        };
+      },
+    ),
+
+    C(
+      'keyboard.open-with-enter',
+      'T17',
+      'read-only',
+      'TR_SALE_RTN.cs:15495 acts on keys in the voucher box; Enter in Open Vch No loads the saved return (WP-27 Gap 1)',
+      async (ctx) => {
+        const { page } = await ctx.session();
+        const vchNo = await createReturn(ctx, page);
+        await openReturn(page);
+        await field(page, 'Open Vch No').fill(vchNo);
+        await field(page, 'Open Vch No').press('Enter');
+        await page.waitForFunction(
+          () => document.querySelector('table.grid tbody tr td:nth-child(5) input')?.value === '10',
+          null,
+          { timeout: 10_000 },
+        );
+        return {
+          observation: `Enter loaded return ${vchNo} (net 10)`,
+          expected: { net: '10' },
+        };
+      },
+    ),
 
     C(
       'rights.clerk-no-return',
@@ -1045,6 +1172,41 @@ export const salesReturn = {
           };
         } finally {
           await mustSet(page, 'CO_SET.SL_AMT_TYPE', 'N');
+        }
+      },
+    ),
+    C(
+      'config.all-rof-remove-keeps-whole-rupees',
+      'T15',
+      'mutation',
+      'TR_SALE_RTN.cs:4955, :4985 round item and labour to 0 decimals with no ALL_ROF_REMOVE branch (the Sale has one, TR_SALE.cs:10343-10362; N235/G247)',
+      async (ctx) => {
+        const { page } = await ctx.session();
+        await mustSet(page, 'CO_SET.ALL_ROF_REMOVE', 'Y');
+        try {
+          const vchNo = await createReturn(ctx, page);
+          const [h] = await header(ctx, vchNo);
+          const [l] = await lines(ctx, vchNo);
+          // ALL_ROF_REMOVE = Y would keep 61,234.50 on a Sale line; the return still stores 61,234.
+          assert.deepEqual(
+            [l.amt, l.lbr, l.net, h.net, h.tax, h.tot],
+            [
+              EXPECT_R.metal,
+              EXPECT_R.labour,
+              EXPECT_R.net,
+              EXPECT_R.net,
+              EXPECT_R.tax,
+              EXPECT_R.total,
+            ],
+          );
+          return {
+            observation: `ALL_ROF_REMOVE=Y return ${vchNo}: item ${l.amt}, labour ${l.lbr}, net ${l.net}, total ${h.tot}`,
+            expected: EXPECT_R,
+            database: { header: h, line: l },
+            downstream: { total: h.tot },
+          };
+        } finally {
+          await mustSet(page, 'CO_SET.ALL_ROF_REMOVE', 'N');
         }
       },
     ),

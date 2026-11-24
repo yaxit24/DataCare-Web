@@ -590,6 +590,37 @@ export const taxMaster = {
         }),
     ),
     C(
+      'lookup.provisioned-tax-ledgers',
+      'T04',
+      'read-only',
+      "WP-36: on a company exactly as seedCompany leaves it, the header Ac Code help opened on a blank box lists the provisioned tax ledgers GST, GSTINPUT and TCS by name (AC_GR = '12' OR AC_CODE = '00013', :2039)",
+      async (ctx) => {
+        const { page } = await ctx.session();
+        await openScreen(page);
+        const box = label(page, 'Ac Code');
+        await box.focus();
+        await Promise.all([
+          page.waitForResponse((r) => path(r) === `/api${API}/accounts`),
+          box.press('F1'),
+        ]);
+        await page.waitForFunction(
+          () => document.querySelectorAll('[data-lookup-open="true"] b').length > 0,
+        );
+        const codes = (await page.locator('[data-lookup-open="true"] b').allInnerTexts()).map((t) =>
+          t.trim(),
+        );
+        // By AC_NAME: GST INPUT CREDIT, GST OUTPUT (PAYABLE), TCS PAYABLE.
+        const provisioned = codes.filter((c) => ['GST', 'GSTINPUT', 'TCS'].includes(c));
+        assert.deepEqual(provisioned, ['GSTINPUT', 'GST', 'TCS']);
+        for (const other of ['SALES', 'PURCHASE', 'CASH'])
+          assert.ok(!codes.includes(other), `${other} is not a tax ledger`);
+        return {
+          observation: `header help on a blank box ${codes.join(', ')}`,
+          expected: { provisioned: ['GSTINPUT', 'GST', 'TCS'] },
+        };
+      },
+    ),
+    C(
       'children.components',
       'T05',
       'mutation',
@@ -1418,23 +1449,24 @@ export const taxMaster = {
                  FROM "SL_DATA" WHERE tenant_id=$1 AND "CO_BOOK"='SL' AND "VCH_NO"=$2`,
               vchNo,
             );
-            // 63,609.50 × 2% = 1,272.19; SGST = CGST = 1,272.19 / 2 (TR_SALE.cs, no rounding).
+            // Line 61,234 + 2,375 = 63,609 (whole-rupee line amounts, TR_SALE.cs:10343-10362); × 2% = 1,272.18;
+            // SGST = CGST = 1,272.18 / 2 (TR_SALE.cs, no rounding).
             assert.deepEqual(sale, {
               code: '15',
               pct: 2,
-              tax: 1272.19,
-              sgst: 636.095,
-              cgst: 636.095,
+              tax: 1272.18,
+              sgst: 636.09,
+              cgst: 636.09,
             });
             const legs = await ctx.rows(
               `SELECT "AC_CODE" ac,"CR_AMT"::float cr FROM "AC_DATA"
                 WHERE tenant_id=$1 AND "CO_BOOK"='SL' AND "VCH_NO"=$2 AND "AC_CODE"='TXGST'`,
               vchNo,
             );
-            assert.deepEqual(legs, [{ ac: 'TXGST', cr: 1272.19 }]);
+            assert.deepEqual(legs, [{ ac: 'TXGST', cr: 1272.18 }]);
             return {
-              observation: `sale ${vchNo} at 2% resolved code 15 and posted 1272.19 Cr to TXGST`,
-              expected: { tax: 1272.19, sgst: 636.095, legAccount: 'TXGST' },
+              observation: `sale ${vchNo} at 2% resolved code 15 and posted 1272.18 Cr to TXGST`,
+              expected: { tax: 1272.18, sgst: 636.09, legAccount: 'TXGST' },
               database: { sale, legs },
               downstream: { vchNo },
             };

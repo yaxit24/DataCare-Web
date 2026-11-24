@@ -39,9 +39,13 @@ The desktop then calls `AcRefresh()` and a long `Ac_Ledr`, `Ac_Rojmel` and `Ac_T
 
 The preview reports exact missing-fine candidates from the opening Stock step, using net weight × (touch + wastage) / 100, and exact matching `SL_DETL_RTN` rows whose copied fine value differs (`MS_UPDATE.cs:2671-2705`). The complete `StockRefresh()` and `Ac_Stock` builder graph is not proved (`MS_UPDATE.cs:2671-3047`), so the full Stock operation refuses Apply. The separately named advanced `stock-fine-refresh` operation remains available and is not relabelled as full Stock parity.
 
-### Field Update and Old Field: classification pending
+### Field Update: implemented (two repairs)
 
-These actions cover about 27,700 lines of legacy updates. D-REF-3 requires each statement to be classified as a web-reachable repair, an old-desktop-only anomaly query, or migration-loader work before implementation. PR-1 exposes both captions and an audited classification preview, with no Apply.
+Of the 520 writes in `btnFildUpdate_Click` (`MS_UPDATE.cs:3958-8807`), two repair web data: `AC_MAST.AC_MAIN_GR` re-aligned to its `AC_GROUP` (`MS_UPDATE.cs:7214`) and a blank `AC_MAST.DEFAULTER_AC` set to `N` (`MS_UPDATE.cs:8608`). The preview reports the row count and up to 20 account codes; Apply runs both in one transaction with an audit row, scoped to the tenant and company, and a second run changes nothing. When nothing differs the screen says "No records need adjustment." The other statements are anomaly queries that must return no rows on web data (tested) or desktop migration-loader work; see `orchestration/work/WP-24/field-update.md`.
+
+### Old Field: classification pending
+
+Old Field covers about 22,900 lines of legacy updates. D-REF-3 requires each statement to be classified before implementation. It exposes the caption and an audited classification preview, with no Apply.
 
 ### Approval Adj: implemented
 

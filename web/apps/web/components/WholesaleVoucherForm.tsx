@@ -10,6 +10,7 @@ import {
   blankVoucher,
   editLine,
   fineRateCaption,
+  formatKasar,
   isActiveLine,
   lineFromTag,
   lineWithItem,
@@ -19,6 +20,7 @@ import {
   voucherPayload,
   weight,
   wholesaleSettings,
+  withRollup,
   type GridPreview,
   type LineField,
   type SavedVoucher,
@@ -29,6 +31,8 @@ import {
   type WholesaleWorkflow,
 } from '../lib/wholesaleVoucher';
 import { BookSelect } from './BookSelect';
+import { focusNext } from './focus';
+import { WholesaleDetailPanel } from './WholesaleDetailPanel';
 import { useBusinessScope } from './BusinessScope';
 import { GridModeToggle } from './ExtendedGrid';
 import { useGridKeyboard } from './GridKeyboard';
@@ -66,6 +70,7 @@ type Column =
   | { kind: 'labour'; label: string }
   | { kind: 'otherFine' }
   | { kind: 'ghat' }
+  | { kind: 'detail' }
   | { kind: 'remove' };
 
 const num = (field: LineField, label: string, width = 78): Column => ({
@@ -120,6 +125,7 @@ const ISSUE_BASE: Column[] = [
   { kind: 'labour', label: 'LbrAmt' },
   num('othAmt', 'OthAmt'),
   netAmountCell,
+  { kind: 'detail' },
 ];
 const ISSUE_EXTENDED: Column[] = [
   txt('itemName', 'ItName', 140),
@@ -231,6 +237,8 @@ const message = (caught: unknown, fallback: string): string =>
 
 export function WholesaleVoucherForm({ workflow }: { workflow: WholesaleWorkflow }) {
   const cfg = WHOLESALE_WORKFLOWS[workflow];
+  /** Item-detail rows and fine kasar are Wh Sales (and its quotation document); Rate Cut and Tour Sales keep their form. */
+  const residual = workflow === 'wholesale-sale' || workflow === 'wholesale-quotation';
   const { lcCode, coYear } = useBusinessScope();
   const companyValues = useCompanySettings();
   const settings = useMemo(() => wholesaleSettings(companyValues), [companyValues]);
@@ -243,6 +251,8 @@ export function WholesaleVoucherForm({ workflow }: { workflow: WholesaleWorkflow
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
   const [status, setStatus] = useState('');
+  /** The issue line whose item-detail panel is open (0-based), or null. */
+  const [detailLine, setDetailLine] = useState<number | null>(null);
   // The latest rows, for the tag resolver that runs after an await.
   const latest = useRef(voucher);
   useEffect(() => {
@@ -320,6 +330,7 @@ export function WholesaleVoucherForm({ workflow }: { workflow: WholesaleWorkflow
   // ---- voucher lifecycle -----------------------------------------------------------------------
   function reset() {
     setVoucher(blankVoucher());
+    setDetailLine(null);
     setVoucherNo('');
     setLoadedVoucherNo('');
     setError('');
@@ -333,6 +344,7 @@ export function WholesaleVoucherForm({ workflow }: { workflow: WholesaleWorkflow
     setVoucher(voucherFromSaved(view));
     setVoucherNo(view.voucherNo);
     setLoadedVoucherNo(view.voucherNo);
+    setDetailLine(null);
     return view;
   }
 
@@ -380,7 +392,10 @@ export function WholesaleVoucherForm({ workflow }: { workflow: WholesaleWorkflow
     setError('');
     setStatus('');
     try {
-      const body = voucherPayload(voucher, { coBook, coYear, lcCode });
+      const body = {
+        ...voucherPayload(voucher, { coBook, coYear, lcCode }),
+        ...(loadedVoucherNo && voucher.version ? { expectedVersion: voucher.version } : {}),
+      };
       const verb = loadedVoucherNo ? 'Updated' : 'Saved';
       const result = loadedVoucherNo
         ? await put<{ vchNo: number }>(
@@ -416,7 +431,9 @@ export function WholesaleVoucherForm({ workflow }: { workflow: WholesaleWorkflow
     setError('');
     try {
       await del(
-        `${cfg.endpoint}/${encodeURIComponent(loadedVoucherNo)}?coBook=${encodeURIComponent(coBook)}`,
+        `${cfg.endpoint}/${encodeURIComponent(loadedVoucherNo)}?coBook=${encodeURIComponent(coBook)}${
+          voucher.version ? `&expectedVersion=${encodeURIComponent(voucher.version)}` : ''
+        }`,
       );
       const deleted = loadedVoucherNo;
       reset();
@@ -577,6 +594,25 @@ export function WholesaleVoucherForm({ workflow }: { workflow: WholesaleWorkflow
         return filled(line.ghtPct)
           ? computed('GhtWt', result ? weight(result.ghtWt) : '', 'ghat')
           : typed('ghtWt', 'GhtWt');
+      case 'detail': {
+        // Loose lines only: a tagged line takes its stones from the tag (wholesaleDetailRows.ts).
+        const tagged = filled(line.tagNo) && line.tagNo.trim().toUpperCase() !== 'N';
+        return (
+          <td key={position}>
+            {tagged ? null : (
+              <button
+                type="button"
+                className="ghost"
+                aria-label={`Item detail ${where}`}
+                aria-expanded={detailLine === index}
+                onClick={() => setDetailLine(detailLine === index ? null : index)}
+              >
+                Detail{line.details.length ? ` (${line.details.length})` : ''}
+              </button>
+            )}
+          </td>
+        );
+      }
       case 'remove':
         return (
           <td key={position}>
@@ -607,9 +643,11 @@ export function WholesaleVoucherForm({ workflow }: { workflow: WholesaleWorkflow
                 ? 'OFine'
                 : column.kind === 'ghat'
                   ? 'GhtWt'
-                  : column.kind === 'remove'
-                    ? ''
-                    : column.label;
+                  : column.kind === 'detail'
+                    ? 'Detail'
+                    : column.kind === 'remove'
+                      ? ''
+                      : column.label;
     const numeric = column.kind === 'input' ? !column.text : column.kind !== 'index';
     return (
       <th key={position} scope="col" className={numeric ? 'num' : undefined}>
@@ -620,7 +658,9 @@ export function WholesaleVoucherForm({ workflow }: { workflow: WholesaleWorkflow
 
   function grid(side: Side, lines: VoucherLine[], view: GridPreview, full: boolean) {
     const columns = [
-      ...(side === 'issue' ? ISSUE_BASE : RECEIVE_BASE),
+      ...(side === 'issue' ? ISSUE_BASE : RECEIVE_BASE).filter(
+        (column) => column.kind !== 'detail' || residual,
+      ),
       ...(full ? (side === 'issue' ? ISSUE_EXTENDED : RECEIVE_EXTENDED) : []),
       { kind: 'remove' } as Column,
     ];
@@ -692,6 +732,27 @@ export function WholesaleVoucherForm({ workflow }: { workflow: WholesaleWorkflow
           = {format(derived)} (derived)
         </span>
       ) : null}
+    </div>
+  );
+
+  /** The fine kasar boxes (nFineKsrDr / nFineKsrCr, TR_WH_SALE.cs:5256-5271): Enter formats "0.000" and goes on. */
+  const ksrField = (field: 'ksrFineDr' | 'ksrFineCr', label: string) => (
+    <div className="field">
+      <label htmlFor={id(field)}>{label}</label>
+      <input
+        id={id(field)}
+        inputMode="decimal"
+        maxLength={10}
+        value={h[field]}
+        style={{ textAlign: 'right', background: '#f0fff0' }}
+        onChange={(event) => setHeader(field, event.target.value)}
+        onKeyDown={(event) => {
+          if (event.key !== 'Enter') return;
+          event.preventDefault();
+          setHeader(field, formatKasar(event.currentTarget.value));
+          focusNext(event.currentTarget);
+        }}
+      />
     </div>
   );
 
@@ -934,6 +995,16 @@ export function WholesaleVoucherForm({ workflow }: { workflow: WholesaleWorkflow
           />
         </div>
         {grid('issue', voucher.issued, preview.issued, fullIssue)}
+        {detailLine !== null && voucher.issued[detailLine] ? (
+          <WholesaleDetailPanel
+            lineNo={detailLine + 1}
+            rows={voucher.issued[detailLine]!.details}
+            onChange={(rows) =>
+              updateLine('issue', detailLine, (line) => withRollup({ ...line, details: rows }))
+            }
+            onClose={() => setDetailLine(null)}
+          />
+        ) : null}
       </div>
 
       <div className="panel">
@@ -955,8 +1026,8 @@ export function WholesaleVoucherForm({ workflow }: { workflow: WholesaleWorkflow
           <h2 style={{ marginTop: 0 }}>Rate cut</h2>
           {/*
             The desktop's two columns (TR_WH_SALE.cs:5217-5539): each money field sits beside the metal it
-            settles — Ac Amt Dr with Ac Fine Cr, Ac Amt Cr with Ac Fine Dr. Fine kasar (Ksr Fine Dr/Cr) is
-            not modelled yet.
+            settles — Ac Amt Dr with Ac Fine Cr, Ac Amt Cr with Ac Fine Dr. Ksr Fine Dr/Cr (Wh Sales)
+            follow Ac Fine Dr and are added into Tot Fine Dr/Cr.
           */}
           <div
             style={{
@@ -971,6 +1042,8 @@ export function WholesaleVoucherForm({ workflow }: { workflow: WholesaleWorkflow
             {settleField('settleCrFine', 'Ac Fine Cr', settlement.crFine, weight)}
             {settleField('settleCrAmt', 'Ac Amt Cr', settlement.crAmt)}
             {settleField('settleDrFine', 'Ac Fine Dr', settlement.drFine, weight)}
+            {residual ? ksrField('ksrFineDr', 'Ksr Fine Dr') : null}
+            {residual ? ksrField('ksrFineCr', 'Ksr Fine Cr') : null}
             {settleField('convPct', 'Conv %')}
             {settleField('convRate', 'Convrt Rate')}
             {readout('Os Fine', weight(band.osFine), 'os-fine')}

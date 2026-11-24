@@ -4,8 +4,12 @@ import {
   EDITION_EXEMPT_ROUTES,
   editionDescriptor,
   editionRefusal,
+  ledgerAgeingRefusal,
 } from './modules/rbac/editionGate.js';
 import { LastDayLockConfigurationError } from './modules/shared/lastDayLock.js';
+// The generic /reports/:report/export.* routes have no local catch, so an RP_ALL request error (a refused
+// selector such as reportLcCode on a non-head-office session) must keep its own 400 here, not become a 500.
+import { RpAllRequestError } from './modules/reports/rpAll/filters.js';
 import { loginSessionContext } from './modules/auth/sessionContextLogin.js';
 import {
   refreshSessionContext,
@@ -36,6 +40,7 @@ import { PasswordPolicyError } from './modules/auth/password.js';
 import {
   enforceRequestScope,
   listScopeBooks,
+  bookFamilyMainBooks,
   listScopeCompanies,
   listScopeLocations,
   listScopeYears,
@@ -94,6 +99,7 @@ import {
   supportedFilters,
 } from './modules/reports/reportFilters.js';
 import { reportFormForSlug } from './modules/reports/reportAuthorization.js';
+import { finePrintRefusalText } from './modules/reports/ledgerFinePrints.js';
 
 export interface BuildOpts {
   prisma: any;
@@ -203,6 +209,11 @@ export async function buildApp(opts: BuildOpts): Promise<FastifyInstance> {
         .code(503)
         .header('Retry-After', '1')
         .send({ error: 'transaction-timeout', retryable: true });
+    }
+    if (error instanceof RpAllRequestError) {
+      return reply
+        .code(error.statusCode)
+        .send({ error: error.code, message: error.message, ...error.details });
     }
     return reply.send(error);
   });
@@ -404,6 +415,22 @@ export async function buildApp(opts: BuildOpts): Promise<FastifyInstance> {
     // area and state are first-class selectors, not the shared RP_ALL dimensions this guard polices. Its own
     // parser validates and fails closed, so exempt its routes rather than refusing their selectors here.
     if (url.startsWith('/reports/account-ledger')) return;
+    // The Sales Report (RP_ALL) likewise owns its parser (modules/reports/rpAll/filters.ts): party, city, area,
+    // employ, product and group are its own selectors (RP_ALL.cs:7629-7631 `{SL_DATA.AC_CODE}`), and the engine
+    // refuses one its template lacks with `filter-not-in-template` (rpAll/index.ts), so this guard must not.
+    if (url.startsWith('/reports/sales-report')) return;
+    // Purchase Rpt shares the RP_ALL parser and its refusals (modules/reports/purchaseReport.ts).
+    if (url.startsWith('/reports/purchase-report')) return;
+    // Tag Stock (RP_TAG) likewise owns a typed parser (tagStock.ts parseTagStockQuery) with its own location and
+    // item selectors (lcCode, itType, tblCode); it validates, refuses unknown keys and fails closed itself.
+    if (url.startsWith('/reports/tag-stock')) return;
+    // The Stock Report (RP_STOCK) owns a typed parser (modules/reports/stockReport/parse.ts): group, product, item,
+    // design, safe, counter, tag and account are its own selectors (RP_STOCK.cs:4287-4327), and it refuses any
+    // other key itself (400 unknown-filter), so this guard, which only knows the shared RP_ALL panel, must not.
+    if (url.startsWith('/reports/stock-report')) return;
+    // WP-14: the Order Report (RP_ALL) shares that parser; its handlers append party, city, area and name
+    // (RP_ALL.cs:8391-8403, :12620-12631).
+    if (url.startsWith('/reports/order-report')) return;
     const q = (req.query ?? {}) as Record<string, string | undefined>;
     const asked = REPORT_FILTER_KEYS.filter((k) => String(q[k] ?? '').trim());
     if (!asked.length) return;
@@ -462,7 +489,10 @@ export async function buildApp(opts: BuildOpts): Promise<FastifyInstance> {
       !EDITION_EXEMPT_ROUTES.has(`${req.method} ${req.routeOptions.url}`)
     ) {
       const form = resolvePolicyForm(policy, req.params as Record<string, unknown>);
-      const refusal = form ? editionRefusal(form, opts.edition) : null;
+      const refusal = form
+        ? (editionRefusal(form, opts.edition) ??
+          ledgerAgeingRefusal(req.routeOptions.url, req.query, opts.edition))
+        : null;
       if (refusal) return reply.code(403).send(refusal);
     }
 
@@ -498,7 +528,13 @@ export async function buildApp(opts: BuildOpts): Promise<FastifyInstance> {
         return reply.code(error.statusCode).send({ error: error.code });
       }
       if (error instanceof FormForbiddenError) {
-        return reply.code(403).send({ error: 'forbidden', form: error.form, action: error.action });
+        const message = finePrintRefusalText(req.routeOptions.url ?? '', error.action);
+        return reply.code(403).send({
+          error: 'forbidden',
+          form: error.form,
+          action: error.action,
+          ...(message && { message }),
+        });
       }
       throw error;
     }
@@ -729,12 +765,16 @@ export async function buildApp(opts: BuildOpts): Promise<FastifyInstance> {
     return listScopeYears(prisma, { tenantId: s.tenantId, coCode: s.coCode });
   });
 
-  app.get('/context/books', { preHandler: requireAuth }, async (req: FastifyRequest) => {
+  app.get('/context/books', { preHandler: requireAuth }, async (req: FastifyRequest, reply) => {
     const s = sess(req);
+    // WP-28: `?family=purchase` filters by MAIN_BOOK on the server (DC_Main.cs:1503).
+    const mainBooks = bookFamilyMainBooks((req.query as Record<string, unknown>)?.family);
+    if (mainBooks === null) return reply.code(400).send({ error: 'unknown-book-family' });
     return listScopeBooks(prisma, {
       tenantId: s.tenantId,
       coCode: s.coCode,
       lcCode: s.lcCode,
+      mainBooks,
     });
   });
 
@@ -904,7 +944,8 @@ export async function buildApp(opts: BuildOpts): Promise<FastifyInstance> {
           return reply.code(400).send({ error: e.code, message: e.message });
         if (e instanceof ValidationError)
           return reply.code(400).send({ error: 'missing-required', missing: e.missing });
-        if (e instanceof DuplicateKeyError) return reply.code(409).send({ error: 'duplicate-key' });
+        if (e instanceof DuplicateKeyError)
+          return reply.code(409).send({ error: 'duplicate-key', message: e.message });
         if (e instanceof ReferencedError)
           return reply.code(409).send({ error: 'referenced', ref: e.ref });
         if (e instanceof DataError)
@@ -936,6 +977,8 @@ export async function buildApp(opts: BuildOpts): Promise<FastifyInstance> {
         if (e instanceof ValidationError)
           return reply.code(400).send({ error: 'missing-required', missing: e.missing });
         if (e instanceof NotFoundError) return reply.code(404).send({ error: 'not-found' });
+        if (e instanceof DuplicateKeyError)
+          return reply.code(409).send({ error: 'duplicate-key', message: e.message });
         if (e instanceof DataError)
           return reply.code(400).send({ error: 'invalid-data', detail: e.detail });
         throw e;

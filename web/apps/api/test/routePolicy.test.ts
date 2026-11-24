@@ -125,8 +125,31 @@ describe('route policy registry', () => {
     // Agent 07 moves the existing GST launcher route into a dedicated plugin and adds three exports:
     // 1 moved declaration out, 4 dedicated declarations in = +3: 748 + 3 = 751.
     // N229 adds Approval Isu GET/PUT/print and Approval Rtn GET/PUT/print: 751 + 6 = 757.
-    expect(routes).toHaveLength(757);
-    expect(new Set(routes.map((route) => `${route.method} ${route.path}`)).size).toBe(757);
+    // WP-06 moves the seven Users & Rights routes into routes/userMaster.ts and adds the MS_USER edit-mode Save
+    // (POST /admin/users/:loginName/update) and Delete (DELETE /admin/users/:loginName): 757 + 2 = 759.
+    // N233 removes POST /sales-orders/:vchNo/cancel-refund and adds Order Cancel's pending-orders, defaults, POST,
+    // GET, PUT, DELETE and print: 759 - 1 + 7 = 765.
+    // N234 (WP-11) adds the RP_ALL Sales Report GET /reports/sales-report and its CSV/XLSX exports: 765 + 3 = 768.
+    // WP-23 replaces Balance TrFr's preview, year-close and openings wrappers with the BtmSchm screen's GET and one
+    // POST per Lite dataset (ac-balance, item-stock, tag-stock, sales-order, approval): 768 - 3 + 6 = 771.
+    // WP-15 adds the Tag Stock Excel export (GET /reports/tag-stock.xlsx) and its Size list
+    // (GET /reports/tag-stock/sizes): 771 + 2 = 773.
+    // WP-19 adds the Gst Report all-sections workbook (GET /reports/gst-report/workbook.xlsx): 773 + 1 = 774.
+    // N240 (WP-21) adds Books (MS_BOOK): list, print, template, accounts, one, POST, PUT and DELETE: 774 + 8 = 782.
+    // N241 (WP-16) adds the RP_STOCK Stock Report GET /reports/stock-report, /defaults, /movements and the CSV/XLSX
+    // exports: 768 + 5 = 773. [774 on main + 5 here = 779] [782 on main + 5 here = 787]
+    // N242 (WP-27) adds the Sales Return edit PUT /sales-returns/:vchNo: 768 + 1 = 769. [774 on main + 1 here = 775] [787 on main + 1 here = 788]
+    // N243 (WP-26) adds the Sales Invoice print-file list and its default: 768 + 2 = 770. [774 on main + 2 here = 776] [788 on main + 2 here = 790]
+    // N246 (WP-31) adds the Contra Entry F1 list GET /contra/list: 768 + 1 = 769. [774 on main + 1 here = 775] [790 on main + 1 here = 791]
+    // N250 (WP-12) adds the RP_ALL Purchase Rpt GET /reports/purchase-report, its City/Area options and the CSV, XLSX
+    // and PDF exports: 773 + 5 = 778. [791 on main + 5 here = 796]
+    // WP-33 adds the MDI main-window rate labels (GET /daily-rate/labels): 773 + 1 = 774. [796 on main + 1 here = 797]
+    // WP-14 adds the RP_ALL Order Report GET /reports/order-report and its CSV/XLSX exports: 771 + 3 = 774. [787 on main + 3 here = 790] [790 on main + 3 here = 793] [797 on main + 3 here = 800]
+    // N255 (WP-20) adds the Ledger Report JmaUdr, Gold and Silver prints with PDF and Excel: 790 + 9 = 799. [800 on main + 9 here = 809]
+    // The Sales Report's Select Book panel gets its own book list GET /reports/sales-report/books
+    // (RP_ALL.cs:11421 BookMast), uncapped and session-location-scoped: 800 + 1 = 801. [809 on main + 1 here = 810]
+    expect(routes).toHaveLength(810);
+    expect(new Set(routes.map((route) => `${route.method} ${route.path}`)).size).toBe(810);
 
     const policies = routes.map((route) => ({
       ...route,
@@ -276,19 +299,18 @@ describe('route policy registry', () => {
     });
   });
 
-  it('maps the desktop Balance TrFr dashboard wrappers to Company rights', () => {
-    expect(routePolicyFor('POST', '/balance-transfer/preview')).toMatchObject({
+  it('maps every Balance TrFr dataset button to the catalog Create right (BtmSchm, C-----)', () => {
+    expect(routePolicyFor('GET', '/balance-transfer')).toMatchObject({
       form: 'Company/Balance TrFr',
       action: 'read',
     });
-    expect(routePolicyFor('POST', '/balance-transfer/year-close')).toMatchObject({
-      form: 'Company/Balance TrFr',
-      action: 'update',
-    });
-    expect(routePolicyFor('POST', '/balance-transfer/openings')).toMatchObject({
-      form: 'Company/Balance TrFr',
-      action: 'update',
-    });
+    for (const dataset of ['ac-balance', 'item-stock', 'tag-stock', 'sales-order', 'approval'])
+      expect(routePolicyFor('POST', `/balance-transfer/${dataset}`)).toMatchObject({
+        form: 'Company/Balance TrFr',
+        action: 'create',
+      });
+    for (const old of ['preview', 'year-close', 'openings'])
+      expect(routePolicyFor('POST', `/balance-transfer/${old}`)).toBeUndefined();
   });
 
   it('maps the desktop UT_EXPORT utility to data-export rights', () => {
@@ -530,6 +552,12 @@ describe('route policy registry', () => {
         businessScope: true,
       });
     }
+    // WP-19: "Gsrt1 Csv", the all-sections workbook (RP_GST.cs:3819-3943), is an export like the others.
+    expect(routePolicyFor('GET', '/reports/gst-report/workbook.xlsx')).toMatchObject({
+      form: 'Reports/GST Report',
+      action: 'print',
+      businessScope: true,
+    });
   });
 
   it('maps RP_ORDER Delete Data and Point Report routes to report rights', () => {
@@ -681,6 +709,16 @@ describe('route policy registry', () => {
     ] as const) {
       expect(routePolicyFor('GET', path)).toMatchObject({ form, action: 'read' });
     }
+  });
+
+  it('maps the Sales Report Select Book list to the Sales Register read right', () => {
+    // RP_ALL.cs:6699 calls BookMast() for the "Sales Report" caption; the panel reads the same form's right.
+    expect(routePolicyFor('GET', '/reports/sales-report/books')).toMatchObject({
+      kind: 'form',
+      form: 'Reports/Sales Register',
+      action: 'read',
+      businessScope: true,
+    });
   });
 
   it('maps KRREP ISSUE endpoints to the canonical repair form and independent actions', () => {

@@ -161,13 +161,12 @@
    "formReferencedInWeb": true,
    "state": "implemented-unverified",
    "evidence": null,
-   "note": "differently-named tag detail. Shares this surface with 3 other menu entries: Report/HuId Report, Report/Stock Report, Report/Tag Stock.",
+   "note": "differently-named tag detail. Shares this surface with 2 other menu entries: Report/HuId Report, Report/Tag Stock.",
    "webSurface": {
     "kind": "route",
     "surface": "GET /reports/tag-stock"
    },
    "sharedSurfaceWith": [
-    "Report/Stock Report",
     "Report/Tag Stock"
    ]
   },
@@ -217,11 +216,11 @@
    ],
    "formReferencedInWeb": true,
    "state": "implemented-unverified",
-   "evidence": "Desktop MDI_FORM.cs:7431-7438 opens BtmSchm for Balance TrFr; web adds Company/Balance TrFr rights, POST /balance-transfer/preview, POST /balance-transfer/year-close, POST /balance-transfer/openings wrappers over the existing carry-forward/year-end engines, and apps/web/app/(app)/company/balance-transfer/page.tsx operator dashboard. Covered by routePolicy.test.ts and completionRegister.test.ts; independent desktop transfer comparison remains required.",
+   "evidence": "Desktop MDI_FORM.cs:7431-7438 opens BtmSchm for Balance TrFr; web (WP-23) serves GET /balance-transfer and one POST per Lite dataset (ac-balance, item-stock carried by the BtmSchm rules; tag-stock, sales-order, approval refused pending owner decisions Q1/Q8) from routes/balanceTransfer.ts and modules/ops/balanceTransfer.ts, and apps/web/app/(app)/company/balance-transfer/page.tsx. Covered by balanceTransfer.db.test.ts, balanceTransferRules.test.ts, routePolicy.test.ts and completionRegister.test.ts; independent desktop transfer comparison remains required.",
    "note": "Implemented-unverified: desktop BtmSchm Balance Transfer dashboard now has a dedicated web operator surface for account balance transfer and party-opening carry-forward; stock/order/loan/repair/lot/MFG transfer branches are exposed through their dedicated web modules and still require side-by-side certification.",
    "webSurface": {
     "kind": "route",
-    "surface": "POST /balance-transfer/preview"
+    "surface": "POST /balance-transfer/ac-balance"
    },
    "sharedSurfaceWith": []
   },
@@ -1020,11 +1019,11 @@
    ],
    "formReferencedInWeb": true,
    "state": "implemented-unverified",
-   "evidence": null,
-   "note": "hallmark purchase page.",
+   "evidence": "apps/web/app/(app)/txn/tag-wise-purc/page.tsx; apps/api/src/modules/purchase/purchaseHallmark.ts; desktop source MDI_FORM.cs:8540-8544, TR_PURC_HM.cs:8023-8063",
+   "note": "hallmark purchase on the TAG PURCHASE books (WP-28, N244/G256): the hallmark layout at /txn/tag-wise-purc lists TAG PURCHASE books only; /txn/purchase-hm forwards to /txn/purchase. Engineering evidence only.",
    "webSurface": {
     "kind": "page",
-    "surface": "web/apps/web/app/(app)/txn/purchase-hm/page.tsx"
+    "surface": "web/apps/web/app/(app)/txn/tag-wise-purc/page.tsx"
    },
    "sharedSurfaceWith": []
   },
@@ -2199,11 +2198,11 @@
    ],
    "formReferencedInWeb": true,
    "state": "implemented-unverified",
-   "evidence": "apps/web/app/(app)/txn/order-cancel/page.tsx; desktop source MDI_FORM.cs:8628-8639, TR_SL_ORD_ADJ.cs:2523",
-   "note": "order cancel adjustment. D5 fixed 2026-09-29: the page selects the SALES ORDER book and sends the complete scope to list, void (version-guarded) and refund. The desktop lists every order with an open advance; the web lists one order book at a time (open, X14). Engineering evidence only; see ../parity-plan-2026-09-10/evidence/implementation-2026-09-29-eval-defects/contract.md.",
+   "evidence": "apps/web/app/(app)/txn/order-cancel/page.tsx; apps/api/src/routes/orderCancel.ts; desktop source MDI_FORM.cs:8628-8639, TR_SL_ORD_ADJ.cs:2140-3849",
+   "note": "Order Cancel is the TR_SL_ORD_ADJ multi-order voucher (N233/G245, WP-02): the pending-order help lists every order of the location with open advance, the grid, the ledger/Rojmel/tag write set, version-guarded edit/delete and OrderCancelVch print. Engineering evidence only.",
    "webSurface": {
     "kind": "route",
-    "surface": "POST /sales-orders/:vchNo/cancel-refund"
+    "surface": "POST /order-cancel"
    },
    "sharedSurfaceWith": []
   },
@@ -2461,8 +2460,8 @@
    ],
    "formReferencedInWeb": true,
    "state": "implemented-unverified",
-   "evidence": "RP_ALL Approval Rpt modes issue/inout/pending implemented via reportFamilyReports.approvalReport with BOOK_DATA MAIN_BOOK=APR ISU and APR_DETL ISU_REC pending predicate; covered by apps/api/test/reportFamilyReports.db.test.ts, routePolicy/reportAuthorization tests, and web reportSurfaceLinks.test.ts.",
-   "note": "Implemented as an RP_ALL report-family web equivalent; remains pending desktop side-by-side certification.",
+   "evidence": "RP_ALL Approval Rpt (N254, G266): the three PanelApr modes on the shared RP_ALL engine (rpAll/approvalLayouts.ts, approvalQuery.ts) and the dedicated /reports/approval-report screen; covered by apps/api/test/rpAllApproval.test.ts, rpAllApproval.db.test.ts and the approval-report browser module.",
+   "note": "AprPartyWise, AprInOut and AprPan bands, totals and titles; screen and exports from one result. Owner questions D3 (MsDataType) and MsAllBranchAcShow; pending desktop side-by-side certification.",
    "webSurface": {
     "kind": "route",
     "surface": "GET /reports/approval-report"
@@ -2565,7 +2564,7 @@
    "formReferencedInWeb": true,
    "state": "implemented-unverified",
    "evidence": null,
-   "note": "differently-named HUID tag listing. Shares this surface with 3 other menu entries: Analysis/Tag Detail, Report/Stock Report, Report/Tag Stock. Desktop form or web surface corrected by N85 (G71).",
+   "note": "differently-named HUID tag listing. Shares this surface with 2 other menu entries: Analysis/Tag Detail, Report/Tag Stock. Desktop form or web surface corrected by N85 (G71).",
    "webSurface": {
     "kind": "route",
     "surface": "GET /reports/huid"
@@ -2636,10 +2635,10 @@
    "formReferencedInWeb": true,
    "state": "implemented-unverified",
    "evidence": null,
-   "note": "differently-named order listing.",
+   "note": "RP_ALL order branch on its own route (N252, G264): seven order buttons, Cust Name help, CSV/XLSX; the DESIGN_ISU owner question remains.",
    "webSurface": {
     "kind": "route",
-    "surface": "GET /sales-orders"
+    "surface": "GET /reports/order-report"
    },
    "sharedSurfaceWith": []
   },
@@ -2744,14 +2743,12 @@
    "formReferencedInWeb": false,
    "state": "implemented-unverified",
    "evidence": null,
-   "note": "differently-named sales zoom. Shares this surface with 1 other menu entry: Report/Sales Report.",
+   "note": "differently-named sales zoom.",
    "webSurface": {
     "kind": "route",
     "surface": "GET /reports/sales-register"
    },
-   "sharedSurfaceWith": [
-    "Report/Sales Report"
-   ]
+   "sharedSurfaceWith": []
   },
   {
    "tab": "Report",
@@ -2763,14 +2760,12 @@
    "formReferencedInWeb": true,
    "state": "implemented-unverified",
    "evidence": null,
-   "note": "RP_ALL sales report. Shares this surface with 1 other menu entry: Report/Sale Zoom.",
+   "note": "RP_ALL sales report on its own screen (N234 engine and API, N253 screen, G265): thirteen buttons, lookups, grid/CSV/XLSX/PDF; the Sales Return variant (G246) and the SalesRtnA4Print template remain.",
    "webSurface": {
     "kind": "route",
-    "surface": "GET /reports/sales-register"
+    "surface": "GET /reports/sales-report"
    },
-   "sharedSurfaceWith": [
-    "Report/Sale Zoom"
-   ]
+   "sharedSurfaceWith": []
   },
   {
    "tab": "Report",
@@ -2782,15 +2777,12 @@
    "formReferencedInWeb": true,
    "state": "implemented-unverified",
    "evidence": null,
-   "note": "Partial: GET /reports/tag-stock covers tag stock only; RP_STOCK dimension summaries remain (item-group-stock and stock-by-location are partial candidates). Corrected by N85 (G71).",
+   "note": "RP_STOCK on its own route (N241, G253): eight summary dimensions, date-range columns, drill-down and print/export; voucher zoom and the EMP ISU adjustment remain.",
    "webSurface": {
     "kind": "route",
-    "surface": "GET /reports/tag-stock"
+    "surface": "GET /reports/stock-report"
    },
-   "sharedSurfaceWith": [
-    "Analysis/Tag Detail",
-    "Report/Tag Stock"
-   ]
+   "sharedSurfaceWith": []
   },
   {
    "tab": "Report",
@@ -2853,14 +2845,13 @@
    "formReferencedInWeb": true,
    "state": "implemented-unverified",
    "evidence": null,
-   "note": "RP_TAG stock report. Shares this surface with 3 other menu entries: Analysis/Tag Detail, Report/HuId Report, Report/Stock Report.",
+   "note": "RP_TAG stock report. Shares this surface with 2 other menu entries: Analysis/Tag Detail, Report/HuId Report.",
    "webSurface": {
     "kind": "route",
     "surface": "GET /reports/tag-stock"
    },
    "sharedSurfaceWith": [
-    "Analysis/Tag Detail",
-    "Report/Stock Report"
+    "Analysis/Tag Detail"
    ]
   },
   {
@@ -3308,8 +3299,8 @@
    ],
    "formReferencedInWeb": true,
    "state": "implemented-unverified",
-   "evidence": null,
-   "note": "purchase invoice workflow.",
+   "evidence": "apps/api/src/modules/purchase/purchase.ts; apps/api/src/modules/purchase/purchaseReopen.ts; apps/api/src/modules/purchase/purchaseHallmark.ts; apps/web/app/(app)/txn/purchase/page.tsx; desktop source MDI_FORM.cs:7866-7884, TR_PURC.cs:12120-12458, TR_PURC_HM.cs:7216-8087",
+   "note": "purchase invoice workflow. WP-28 (N244/G256): lossless reopen and edit, the hallmark receive columns, a server-side purchase book family; the screen opens the hallmark layout when PURC_WITH_HMTAX is Y. Engineering evidence only.",
    "webSurface": {
     "kind": "route",
     "surface": "POST /purchases"

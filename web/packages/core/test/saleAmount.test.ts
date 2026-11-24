@@ -6,6 +6,8 @@ import {
   saleReturnAmountBasis,
   saleItemAmount,
   saleItemAmountWhole,
+  saleItemAmountRounded,
+  saleLineDecimals,
   saleRateWithCode,
   salesReturnRoundingPolicy,
   resolveRoundingPolicy,
@@ -138,6 +140,24 @@ describe('TR_SALE item amount (CommPassTotal)', () => {
     expect(policy.roundBillTotal(61234.5)).toBe(61234);
     expect(policy.roundLabourAmount(2434.375)).toBe(2434);
     expect(policy.roundTaxAmount(1908.273)).toBe(1908.27);
+  });
+
+  it('the Sale line precision is 0, or 2 under ALL_ROF_REMOVE, and ignores TOT_AMT_ROF (TR_SALE.cs:10343-10362)', () => {
+    const basis = saleAmountBasis(
+      { pcs: 1, grossWt: 10.25, netWt: 10, ghtWt: 0, fineWt: 9.16 },
+      'N',
+    );
+    for (const tot of ['0', '2', '3', ''])
+      expect(
+        saleItemAmountRounded(basis, 6123.45, resolveRoundingPolicy({ TOT_AMT_ROF: tot })),
+      ).toBe(
+        61234, // 61234.5 to even
+      );
+    const allRof = resolveRoundingPolicy({ ALL_ROF_REMOVE: 'Y', TOT_AMT_ROF: '0' });
+    expect(saleLineDecimals(allRof)).toBe(2);
+    expect(saleItemAmountRounded(basis, 6123.45, allRof)).toBe(61234.5);
+    // Sales Return has no ALL_ROF_REMOVE branch: whole rupees always.
+    expect(saleLineDecimals(salesReturnRoundingPolicy(allRof))).toBe(0);
   });
 
   it('a zero fine (touch + wastage = 0) falls back to net + ghat, as column 20 does', () => {

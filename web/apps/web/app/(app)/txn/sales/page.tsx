@@ -6,7 +6,7 @@ import {
   extendedGridColumnCount,
   GridModeToggle,
 } from '../../../../components/ExtendedGrid';
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { del, get, post, put, ApiError } from '../../../../lib/api';
 import { useBusinessScope, useRoundingPolicy } from '../../../../components/BusinessScope';
@@ -20,15 +20,28 @@ import { VoucherList, type VoucherIdentity } from '../../../../components/Vouche
 import { useVoucherNumberKeys, VoucherNumberNote } from '../../../../components/VoucherNumberKeys';
 import { desktopGlobalFormKeyActions, FormKeyHints } from '../../../../components/FormKeys';
 import { companyFlag, useCompanySettings, companySetting } from '../../../../lib/companySettings';
-import { oldGoldRowAmount, recalcLine } from '../../../../lib/lineRecalc';
+import {
+  applySaleTagPick,
+  editSaleGridRow,
+  oldGoldRowAmount,
+  recalcSaleGridRow,
+  saleGridRowLabour,
+} from '../../../../lib/lineRecalc';
 import { billTotals, lineNet as lineNetAmount } from '@datacare/core';
 import { todayLocal } from '../../../../lib/localDate';
 import { openDocument } from '../../../../lib/openDocument';
+import {
+  SalePrintChoice,
+  SaleResidualPanel,
+  useOldMetalTodayRates,
+} from '../../../../components/SaleResidualPanel';
+import * as wp26 from '../../../../lib/saleResidual';
 
 /** BOOK_DATA.MAIN_BOOK values the retail sale writer accepts (sales.ts, workflowPolicy.SALES). */
 const SALE_MAIN_BOOKS = ['SALES'];
 
 interface Line {
+  stones?: unknown[]; // WP-26: SL_IDTL stone rows carried back unchanged
   itCode: string;
   tagNo: string;
   vchSrno?: number;
@@ -53,6 +66,7 @@ interface Line {
   itmSize: string;
   lessWt: string;
   lbrPct: string;
+  lbrPctApplied?: string; // column 83 (TR_SALE.cs:10999-11021)
   othAmt: string;
   bagWt: string;
   tagGrossWt: string;
@@ -110,6 +124,9 @@ interface OgRow {
   conversionPct: string;
   conversionWt: string;
   rateType: string;
+  amount?: string;
+  itType?: string;
+  prCost?: number; // WP-26: typed amount, stored type and PR_COST
 }
 /** Voucher margin, returned only when the company shows bill profit. */
 type SaleProfit = { total: number; lines: { basis: string; cost: number; profit: number }[] };
@@ -329,6 +346,8 @@ export default function SalesEntryPage() {
   const [ornamentIssued, setOrnamentIssued] = useState(true);
   // Old-gold / old-silver EXCHANGE grid (metal taken in against the sale) — backend createSale.oldGold[]
   const [ogRows, setOgRows] = useState<OgRow[]>([]);
+  const [residual, setResidual] = useState(wp26.emptySaleResidual);
+  const todayRates = useOldMetalTodayRates(vchDate);
   const [lines, setLines] = useState<Line[]>([blank()]);
   /**
    * P4: `SL_NWT_LOCK` — the desktop makes the sale's net-weight cell read-only when set, so the
@@ -371,23 +390,18 @@ export default function SalesEntryPage() {
   });
 
   const setLine = (i: number, k: keyof Line, v: string) =>
-    setLines((ls) => ls.map((l, j) => (j === i ? { ...l, [k]: v } : l)));
+    // Lbr% re-derives Making/g only when it changes (TR_SALE.cs:10999-11021).
+    setLines((ls) =>
+      ls.map((l, j) => (j === i ? wp26.keepFine(editSaleGridRow(l, k, v, roundingPolicy), k) : l)),
+    );
 
-  // live line preview: fine = net×touch/100, metal = fine×rate, making = net×making/g, net = metal+making
-  /**
-   * P5: the line preview now delegates to the shared recalculation kernel.
-   *
-   * The local arithmetic this replaces disagreed with the server in four ways, so the figures on
-   * screen were not the figures that posted:
-   *   - fine was rounded to 2dp; the server's fine precision is 3dp (`PRECISION.fine`)
-   *   - `westPct` was ignored entirely, while the server's fine base is (touch + wastage)
-   *   - making was `netWt x rate` with no ghat term, the same LBR_WITH_GHT understatement already
-   *     fixed on the server (blank default 'Y', so ghat counts unless switched off)
-   *   - it rounded locally instead of through the money kernel
-   * Delegating means there is one implementation, so the preview cannot drift from the posting again.
-   */
+  // P5: the live line preview delegates to the shared recalculation kernel (lib/lineRecalc.ts), so the figures on
+  // screen are the ones the server posts (fine 3dp with wastage, ghat in the labour base, the money kernel).
   const calc = (l: Line) => {
-    const r = recalcLine({ ...l, labourRate: l.making, labourType: 'G' }, 'sale', {
+    // Lbr% rows follow TR_SALE.cs:11021/:11084-11127 and amounts the Sale line precision (:10343-10362).
+    const r = recalcSaleGridRow(l, {
+      roundingPolicy,
+      labourBasis: String(companySetting(companySettings, 'LBR_TYPE') ?? ''),
       labourIncludesGhat: companyFlag(companySettings, 'LBR_WITH_GHT', 'Y'),
       // CO_SET.SL_AMT_TYPE: the basis a line without its own RtWith is priced on (blank = N).
       saleAmountType: String(companySetting(companySettings, 'SL_AMT_TYPE') ?? ''),
@@ -427,7 +441,7 @@ export default function SalesEntryPage() {
   const totalPrev = r2(itemTotal + hmAmt + hmTax + tcsAmt);
   const kasarAmt = n(kasar);
   const paid = r2(n(cashAmt) + n(cardAmt) + n(upiAmt) + n(chequeAmt) + oldGoldVal);
-  const balanceDue = r2(totalPrev - paid - kasarAmt - n(ordAmt));
+  const balanceDue = r2(totalPrev - paid - kasarAmt - n(ordAmt) - n(currentAdjustmentAmount)); // TR_SALE.cs:19390
 
   function newSale() {
     setLoadedVchNo('');
@@ -479,8 +493,20 @@ export default function SalesEntryPage() {
     setDescription('');
     setOrnamentIssued(true);
     setOgRows([]);
+    setResidual(wp26.emptySaleResidual());
     setLines([blank()]);
   }
+
+  // Zoom from a report (Reports > Sales Report): /txn/sales?vchNo=&coBook=&lcCode= opens that voucher.
+  useEffect(() => {
+    const q = new URLSearchParams(window.location.search);
+    const vchNo = q.get('vchNo');
+    const book = q.get('coBook');
+    if (!vchNo || !book) return;
+    setVoucherLookup(vchNo);
+    void openSale({ coBook: book, coYear, lcCode: q.get('lcCode') || lcCode, vchNo });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   async function loadSale() {
     await openSale({ coBook, coYear, lcCode, vchNo: voucherLookup });
@@ -550,6 +576,8 @@ export default function SalesEntryPage() {
       setIssueBook(String(view.issueBook ?? ''));
       setDescription(String(view.description ?? ''));
       setOrnamentIssued(view.ornamentIssued !== false);
+      setResidual(wp26.saleResidualFromView(view));
+      setHeaderExtra(wp26.headerExtraFromView(view)); // rate unfix and tax code go back on save (G82)
       setOgRows(
         (view.oldGold ?? []).map((row: any) => ({
           metal: row.metal === 'S' ? 'S' : 'G',
@@ -564,64 +592,11 @@ export default function SalesEntryPage() {
           conversionPct: str(row.conversionPct),
           conversionWt: str(row.conversionWt),
           rateType: String(row.rateType ?? ''),
+          itType: String(row.itType ?? ''),
+          prCost: Number(row.prCost ?? 0),
         })),
       );
-      const loadedLines: Line[] = (view.lines ?? []).map((line: any) => ({
-        itCode: String(line.itCode ?? ''),
-        tagNo: String(line.tagNo ?? ''),
-        vchSrno: Number(line.vchSrno ?? 0) || undefined,
-        pcs: str(line.pcs),
-        grossWt: str(line.grossWt),
-        netWt: str(line.netWt),
-        touch: str(line.touch),
-        rate: str(line.rate),
-        making: line.labourType === 'per_gram' ? str(line.labourRate) : '',
-        designNo: String(line.designNo ?? ''),
-        itmSize: String(line.itmSize ?? ''),
-        lessWt: str(line.lessWt),
-        lbrPct: str(line.labourPct),
-        othAmt: str(line.otherAmount),
-        bagWt: str(line.bagWt),
-        tagGrossWt: str(line.tagGrossWt),
-        tagNetWt: str(line.tagNetWt),
-        ghtPct: str(line.ghtPct),
-        style: String(line.style ?? ''),
-        itemLot: String(line.itemLot ?? ''),
-        remark: String(line.remark ?? ''),
-        discountPct: str(line.discountPct),
-        lineDiscountAmount: str(line.discountAmount),
-        ghatAmount: str(line.ghatAmount),
-        rateWith: String(line.rateWith ?? ''),
-        rateType: String(line.rateType ?? ''),
-        tagCost: str(line.tagCost),
-        karigarNetWt: str(line.karigarNetWt),
-        karigarTouch: str(line.karigarTouch),
-        karigarWestPct: str(line.karigarWestPct),
-        karigarFine: str(line.karigarFine),
-        karigarName: String(line.karigarName ?? ''),
-        employeeCode: String(line.employeeCode ?? ''),
-        prCode: String(line.prCode ?? ''),
-        orderTagStockAdd: String(line.orderTagStockAdd ?? ''),
-        designImageId: String(line.designImageId ?? ''),
-        hallmarkId2: String(line.hallmarkId2 ?? ''),
-        hallmarkId3: String(line.hallmarkId3 ?? ''),
-        hallmarkId4: String(line.hallmarkId4 ?? ''),
-        hallmarkIdWt: str(line.hallmarkIdWt),
-        hallmarkId2Wt: str(line.hallmarkId2Wt),
-        hallmarkId3Wt: str(line.hallmarkId3Wt),
-        hallmarkId4Wt: str(line.hallmarkId4Wt),
-        labourType: line.labourType,
-        labourRate: Number(line.labourRate ?? 0) || undefined,
-        labourFixed: Number(line.labourFixed ?? 0) || undefined,
-        ordNo: String(line.ordNo ?? '') || undefined,
-        ordYrcd: String(line.ordYrcd ?? '') || undefined,
-        ordDbcd: String(line.ordDbcd ?? '') || undefined,
-        ordSrno: Number(line.ordSrno ?? 0) || undefined,
-        isuNo: String(line.isuNo ?? '') || undefined,
-        isuYrcd: String(line.isuYrcd ?? '') || undefined,
-        isuDbcd: String(line.isuDbcd ?? '') || undefined,
-        isuSrno: Number(line.isuSrno ?? 0) || undefined,
-      }));
+      const loadedLines = (view.lines ?? []).map(wp26.saleLineFromView) as Line[];
       setLines(loadedLines.length ? loadedLines : [blank()]);
       return true;
     } catch (e) {
@@ -680,6 +655,8 @@ export default function SalesEntryPage() {
           conversionWt: n(o.conversionWt),
           rateType: o.rateType || undefined,
           amount: ogAmt(o),
+          itType: o.itType || undefined,
+          prCost: o.prCost || undefined,
         }));
       const body = {
         coBook,
@@ -742,9 +719,11 @@ export default function SalesEntryPage() {
         taxCode: headerExtra.taxCode || undefined,
         tcsAc: headerExtra.tcsAc || undefined,
         tcsAmount: headerExtra.tcsAmount || undefined,
+        ...wp26.saleResidualBody(residual),
         lines: lines
           .filter((l) => l.itCode && (l.netWt || l.rate))
           .map((l) => ({
+            stones: l.stones,
             itCode: l.itCode,
             tagNo: l.tagNo || undefined,
             vchSrno: l.vchSrno,
@@ -768,13 +747,17 @@ export default function SalesEntryPage() {
             discountPct: n(l.discountPct) || undefined,
             discountAmount: n(l.discountAmount) || undefined,
             ghatAmount: n(l.ghatAmount) || undefined,
-            rateWith: l.rateWith || undefined,
+            // TR_SALE.cs:9161: a new line takes SL_AMT_TYPE as the company was opened (D4).
+            rateWith:
+              l.rateWith ||
+              String(companySetting(companySettings, 'SL_AMT_TYPE') ?? '') ||
+              undefined,
             rateType: l.rateType || undefined,
             tagCost: n(l.tagCost) || undefined,
-            karigarNetWt: n(l.karigarNetWt) || undefined,
-            karigarTouch: n(l.karigarTouch) || undefined,
-            karigarWestPct: n(l.karigarWestPct) || undefined,
-            karigarFine: n(l.karigarFine) || undefined,
+            karigarNetWt: wp26.cell(l.karigarNetWt),
+            karigarTouch: wp26.cell(l.karigarTouch),
+            karigarWestPct: wp26.cell(l.karigarWestPct),
+            karigarFine: wp26.cell(l.karigarFine),
             karigarName: l.karigarName || undefined,
             employeeCode: l.employeeCode || undefined,
             prCode: l.prCode || undefined,
@@ -800,21 +783,13 @@ export default function SalesEntryPage() {
             // Desktop item-grid columns added to the detail panel; sent so they persist.
             westPct: n(l.westPct) || undefined,
             ghtWt: n(l.ghtWt) || undefined,
-            fineWt: n(l.fineWt) || undefined,
+            fineWt: wp26.cell(l.fineWt),
             tblCode: l.tblCode || undefined,
             huid: l.huid || undefined,
             mrp: n(l.mrp) || undefined,
-            metalAmount: n(l.metalAmount) || undefined,
+            metalAmount: wp26.cell(l.metalAmount),
             metal: l.metal === 'S' ? ('S' as const) : l.metal === 'G' ? ('G' as const) : undefined,
-            ...(l.making
-              ? { labourType: 'per_gram' as const, labourRate: n(l.making) }
-              : l.labourType
-                ? {
-                    labourType: l.labourType,
-                    labourRate: l.labourRate,
-                    labourFixed: l.labourFixed,
-                  }
-                : {}),
+            ...saleGridRowLabour(l),
           })),
       };
       const saved = loadedVchNo
@@ -1181,12 +1156,25 @@ export default function SalesEntryPage() {
                   ['Conversion %', 'conversionPct'],
                   ['Conversion Wt', 'conversionWt'],
                   ['Rate Type', 'rateType'],
+                  ['Amount', 'amount'],
                 ].map(([label, key]) => (
                   <div className="field" key={key}>
                     <label>{label}</label>
                     <input
-                      value={String(row[key as keyof OgRow])}
+                      aria-label={`Exchange ${index + 1} ${label}`}
+                      value={String(row[key as keyof OgRow] ?? '')}
                       onChange={(e) => setOg(index, key as keyof OgRow, e.target.value)}
+                      onBlur={(e) => {
+                        const refusal =
+                          key === 'rateType' && wp26.oldMetalRateTypeMessage(e.target.value);
+                        if (refusal) return void (window.alert(refusal), e.target.focus()); // TR_SALE.cs:7669
+                        if (key === 'amount')
+                          setOgRows((rs) =>
+                            rs.map((r, j) =>
+                              j === index ? wp26.applyOldMetalAmount(r, todayRates) : r,
+                            ),
+                          );
+                      }}
                     />
                   </div>
                 ))}
@@ -1195,6 +1183,19 @@ export default function SalesEntryPage() {
           ))}
         </div>
 
+        <SaleResidualPanel
+          value={residual}
+          onChange={(next, t) => {
+            setResidual(next);
+            if (next.upiRows.length) setUpiAmt(String(t.upi));
+            if (next.creditNotes.length) setCurrentAdjustmentAmount(String(t.credit));
+            if (next.orders.length) {
+              setOrdNo('');
+              setOrdAmt(String(t.advance));
+            }
+          }}
+        />
+        <SalePrintChoice coBook={coBook} coYear={coYear} lcCode={lcCode} vchNo={loadedVchNo} />
         <div className="panel">
           <h2>Totals</h2>
           <div className="tiles">
@@ -1288,19 +1289,10 @@ export default function SalesEntryPage() {
                         onChange={(v) => setLine(i, 'tagNo', v)}
                         style={{ width: 110 }}
                         onPick={(r) =>
+                          // Through the grid's edit rules: a new rate or weight re-prices (TR_SALE.cs:10822-10880).
                           setLines((ls) =>
                             ls.map((x, j) =>
-                              j === i
-                                ? {
-                                    ...x,
-                                    tagNo: String(r.code),
-                                    itCode: String(r.name || x.itCode),
-                                    netWt: String(r.ITM_NWT ?? x.netWt),
-                                    grossWt: String(r.ITM_GWT ?? x.grossWt),
-                                    touch: String(r.ITM_TOUCH ?? x.touch),
-                                    rate: String(r.ITM_RATE ?? x.rate),
-                                  }
-                                : x,
+                              j === i ? applySaleTagPick(x, r, roundingPolicy) : x,
                             ),
                           )
                         }

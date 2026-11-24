@@ -6,10 +6,10 @@ Order (D31, D32): every Lite menu works end to end like the desktop first, then 
 
 | Tier | Menus | With a feature module | Module with no open defect | Done |
 |---|---:|---:|---:|---:|
-| Lite (first, D32) | 49 | 39 | 36 | 0 |
+| Lite (first, D32) | 49 | 41 | 39 | 0 |
 | Basic (added by Basic) | 29 | 1 | 1 | 0 |
 | Standard (added by Standard) | 36 | 1 | 1 | 0 |
-| **Standard total** | **114** | **41** | **38** | **0** |
+| **Standard total** | **114** | **43** | **41** | **0** |
 
 ## Lite — 49 menus (first, D32)
 
@@ -17,11 +17,11 @@ Order (D31, D32): every Lite menu works end to end like the desktop first, then 
 |---|---|---|---|---|---|---|
 | Company | Company | `/masters/companies`, `/admin/provision` | PARTIAL | company-master | module, 1 open | G38 |
 | Company | Year Create | `/masters/year-create` | PARTIAL | — | no module | — |
-| Company | Balance TrFr | `/company/balance-transfer` | PARTIAL | — | no module | — |
-| Company | Books | `/masters/books` | PARTIAL | — | no module | — |
+| Company | Balance TrFr | `/company/balance-transfer` | PARTIAL | balance-transfer | module green | — |
+| Company | Books | `/masters/books` | PARTIAL | books | module green | — |
 | Company | User Create | `/admin/users` | PARTIAL | users-rights | module green | — |
-| Company | Data Refresh | `/utilities/data-refresh`, `/utilities/data-repair` | PARTIAL | data-refresh | module, 7 open | G225, X27/P11-01 |
-| Company | Data Backup | `/backup` | CONTAINED | data-backup | module, 1 open | G64/N80 |
+| Company | Data Refresh | `/utilities/data-refresh`, `/utilities/data-repair` | PARTIAL | data-refresh | module, 6 open | G225, X27/P11-01 |
+| Company | Data Backup | `/backup` | CONTAINED | data-backup | module green | — |
 | ExtraTran | Approval Isu | `/txn/tour` | PARTIAL | approval-issue | module green | — |
 | ExtraTran | Approval Rtn | `/txn/tour-return` | PARTIAL | approval-return | module green | — |
 | ExtraTran | Fine Jv Entry | `/txn/fine-jv` | PARTIAL | fine-jv | module green | — |
@@ -41,15 +41,15 @@ Order (D31, D32): every Lite menu works end to end like the desktop first, then 
 | Other | Tag Cancel | `/txn/tag-cancel` | PARTIAL | tag-cancel | module green | — |
 | Other | Tag Print | `/txn/tag-print` | PARTIAL | tag-print | module green | — |
 | Other | Stock Adjust | `/txn/stock-adjust` | PARTIAL | stock-adjust | module green | — |
-| Other | Order Cancel | `/txn/order-cancel` | PARTIAL | — | no module | — |
+| Other | Order Cancel | `/txn/order-cancel` | PARTIAL | order-cancel | module green | — |
 | Other | Data Import | `/masters/accounts` | PARTIAL | — | no module | — |
 | Report | Ledger Report | `/reports/account-ledger` | REPORT | account-ledger | module green | — |
-| Report | Stock Report | `/reports/tag-stock` | REPORT | tag-cancel | module green | — |
+| Report | Stock Report | `/reports/stock-report` | REPORT | — | no module | — |
 | Report | Tag Stock | `/reports/tag-stock` | REPORT | tag-cancel | module green | — |
-| Report | Sales Report | `/reports/sales-register` | REPORT | — | no module | — |
-| Report | Purchase Rpt | `/reports/purchase-register` | REPORT | — | no module | — |
+| Report | Sales Report | `/reports/sales-report`, `/reports/sales-register` | REPORT | — | no module | — |
+| Report | Purchase Rpt | `/reports/purchase-report`, `/reports/purchase-register` | REPORT | purchase-report | module green | — |
 | Report | Approval Rpt | `/reports/approval-report` | REPORT | — | no module | — |
-| Report | Order Report | `/txn/sales-order` | REPORT | sales-order | module green | — |
+| Report | Order Report | `/reports/order-report` | REPORT | — | no module | — |
 | Report | Cash Bank | `/reports/cash-book` | REPORT | — | no module | — |
 | Report | Gst Report | `/reports/gst-report` | REPORT | gst-report | module green | — |
 | Report | HuId Report | `/reports/huid` | REPORT | — | no module | — |

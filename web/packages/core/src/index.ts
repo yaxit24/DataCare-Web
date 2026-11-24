@@ -2,6 +2,7 @@ export {
   PRECISION,
   round,
   roundHalfEven,
+  dotNetRoundDouble,
   fineWeight,
   decimalCellText,
   roundHalfEvenDecimal,
@@ -9,6 +10,8 @@ export {
 export {
   labourCharge,
   saleLineLabourAmount,
+  percentageLabourRate,
+  desktopLabourBasisQuantity,
   metalAmount,
   lineNet,
   lineTotalDesktop,
@@ -18,6 +21,7 @@ export {
 export type {
   LabourType,
   LabourInput,
+  LabourBasisRule,
   GstSplit,
   BillInput,
   BillTotals,
@@ -52,6 +56,13 @@ export {
   valueOldGoldLine,
 } from './oldGold.js';
 export type { OldGoldLineInput, OldGoldRateType, OldGoldValuationInput } from './oldGold.js';
+export {
+  OLD_METAL_RATE_TYPE_MESSAGE,
+  oldMetalHeaderTotals,
+  oldMetalRateTypeError,
+  oldMetalTodayRates,
+  oldMetalTouchFromAmount,
+} from './oldMetalGrid.js';
 export { orderLabourAmount, orderLabourTransition, orderLabourReplay } from './orderLabour.js';
 export type {
   OrderLabourState,
@@ -266,6 +277,18 @@ export {
   wholesaleGridTotals,
   wholesaleBand,
 } from './wholesaleLine.js';
+export {
+  commPassTotalIdtl,
+  detailRowIsWritten,
+  detailWeightFromKr,
+  detailWeightFromPieces,
+  rollupWholesaleDetails,
+} from './wholesaleDetail.js';
+export type {
+  WholesaleDetailInput,
+  WholesaleDetailResult,
+  WholesaleDetailRollup,
+} from './wholesaleDetail.js';
 export type {
   WholesaleLineSettings,
   WholesaleLineInput,
@@ -298,6 +321,8 @@ export type { FiscalYearDates, FiscalYearInput } from './fiscalYear.js';
 export {
   resolveRoundingPolicy,
   roundNearest,
+  saleLineDecimals,
+  roundSaleLineAmount,
   RoundingPolicyValidationError,
 } from './roundingPolicy.js';
 export type {
@@ -320,6 +345,8 @@ export type { EditionAvailability, EditionCode, EditionPolicy, EditionTier } fro
 export { FORM_EDITION, ROUTE_EDITION } from './editionTable.js';
 export { formatDesktopDate, toIsoDate } from './dates.js';
 export { vbVal } from './vbVal.js';
+export { cashGridTotals } from './cashGridTotals.js';
+export type { CashGridRow, CashGridTotals } from './cashGridTotals.js';
 export * from './tagKarigar.js';
 
 // MS_RATE (Daily Rate) grid recalculation.
@@ -332,3 +359,25 @@ export {
   itemOpeningTotals,
 } from './itemOpening.js';
 export type { ItemOpeningRow, ItemOpeningRowInput, ItemOpeningTypeCode } from './itemOpening.js';
+export {
+  DESKTOP_DATE_MASK,
+  desktopDateMaskText,
+  desktopSetDate,
+  type SetDateMessage,
+  type SetDateResult,
+} from './setDate.js';
+export {
+  computeSaleLine,
+  derivedLabourRate,
+  formatCell2,
+  formatCell,
+  saleGhatWeight,
+  applySaleGridEdit,
+} from './saleLine.js';
+export type {
+  SaleLineCells,
+  SaleLineSettings,
+  SaleLineResult,
+  SaleLineLabourMode,
+  SaleGridLabourCells,
+} from './saleLine.js';

@@ -11,7 +11,16 @@ import { type BookWorkflow, workflowPolicy } from '../shared/bookPolicy.js';
  * Idempotent: every row is insert-if-absent, so re-provisioning is safe.
  */
 
-/** System accounts keyed by the literal AC_CODE the posting falls back to. */
+/**
+ * System accounts keyed by the literal AC_CODE the posting falls back to.
+ *
+ * WP-36: the sale, purchase and tax ledgers sit in the desktop groups the master helps filter on, so a fresh company's
+ * helps list them: Group Sales Ac takes group 25 and Purchase Ac group 30 (MS_GROUP.cs:2204 {{AND AC_GR = '25' AND
+ * AC_CODE = '" + tSalesAc.Text}}, :2242; MS_TRADE.cs:1190 {{DC_Main.MsGrCode = "25";}}, :1234 "30"), and the Tax header
+ * help lists group 12 (MS_TAX.cs:2039 {{AND (AC_GR = '12' OR  AC_CODE = '00013') ORDER BY AC_NAME}}). Group 20 is a
+ * customer group on the desktop (RP_CUST.cs:996 {{AC_GR IN ('04','05','10','15','20','45','19')}}), so a sales ledger
+ * there was listed as a customer. A web company provisioned earlier is moved by migration 20261123110000.
+ */
 const SYSTEM_ACCOUNTS: { code: string; name: string; gr: string; gstType?: string }[] = [
   // G124 / G100: the sales/hallmark-sale/sales-quotation screens default the party to WALKIN. The
   // desktop's ready-to-trade template carries a cash/walk-in party (00045); without one, the default
@@ -20,21 +29,21 @@ const SYSTEM_ACCOUNTS: { code: string; name: string; gr: string; gstType?: strin
   { code: 'WALKIN', name: 'WALK-IN CUSTOMER', gr: '10', gstType: 'L' },
   { code: 'CASH', name: 'CASH ON HAND', gr: '01' },
   { code: 'BANK', name: 'BANK A/C', gr: '02' },
-  { code: 'SALES', name: 'SALES A/C', gr: '20' },
-  { code: 'PURCHASE', name: 'PURCHASE A/C', gr: '21' },
-  { code: 'GST', name: 'GST OUTPUT (PAYABLE)', gr: '30' },
-  { code: 'GSTINPUT', name: 'GST INPUT CREDIT', gr: '30' },
+  { code: 'SALES', name: 'SALES A/C', gr: '25' },
+  { code: 'PURCHASE', name: 'PURCHASE A/C', gr: '30' },
+  { code: 'GST', name: 'GST OUTPUT (PAYABLE)', gr: '12' },
+  { code: 'GSTINPUT', name: 'GST INPUT CREDIT', gr: '12' },
   { code: 'ROUNDOFF', name: 'ROUND OFF', gr: '31' },
   { code: 'KASAR', name: 'KASAR / WRITE-OFF', gr: '31' },
-  { code: 'TCS', name: 'TCS PAYABLE', gr: '30' },
+  { code: 'TCS', name: 'TCS PAYABLE', gr: '12' },
   { code: 'HMCHRG', name: 'HALLMARK CHARGES', gr: '22' },
   { code: 'OLDGOLD', name: 'OLD GOLD EXCHANGE', gr: '21' },
   { code: 'OG', name: 'OLD GOLD', gr: '21' },
   { code: 'OS', name: 'OLD SILVER', gr: '21' },
   { code: 'INTINC', name: 'INTEREST INCOME', gr: '23' },
   { code: 'BULLION', name: 'BULLION TRADING', gr: '20' },
-  { code: 'FINESALE', name: 'FINE METAL SALE', gr: '20' },
-  { code: 'FINEPURC', name: 'FINE METAL PURCHASE', gr: '21' },
+  { code: 'FINESALE', name: 'FINE METAL SALE', gr: '25' },
+  { code: 'FINEPURC', name: 'FINE METAL PURCHASE', gr: '30' },
   { code: 'DHRN', name: 'DHIRAN / LOAN', gr: '21' },
   { code: 'CAPITAL', name: 'CAPITAL A/C', gr: '25' },
   // N198 (G208): the sale books' slot 4 is the order-advance account the sale day book names for an adjusted
@@ -45,11 +54,13 @@ const SYSTEM_ACCOUNTS: { code: string; name: string; gr: string; gstType?: strin
   // the real books 034/064.
   { code: 'LBRINC', name: 'LABOUR INCOME A/C', gr: '23' },
   { code: 'LBREXP', name: 'LABOUR EXPENSE A/C', gr: '22' },
-  { code: 'SLVSALE', name: 'SALES SILVER A/C', gr: '20' },
-  { code: 'SLVPURC', name: 'PURCHASE SILVER A/C', gr: '21' },
+  { code: 'SLVSALE', name: 'SALES SILVER A/C', gr: '25' },
+  { code: 'SLVPURC', name: 'PURCHASE SILVER A/C', gr: '30' },
   { code: 'OTHCHRG', name: 'OTHER CHARGES A/C', gr: '23' },
   { code: 'CARDCOMM', name: 'CARD / BANK COMMISSION A/C', gr: '22' },
   { code: 'FINEKSR', name: 'FINE KASAR A/C', gr: '31' },
+  // N240 (G252): the discount slot 5 of the purchase books (MS_UPDATE.cs:25022, :30221 template 00076 DISCOUNT A/C).
+  { code: 'DISCOUNT', name: 'DISCOUNT A/C', gr: '22' },
   // Stock In/Out (TR_INOUT) posts the signed metal rows against the branch account the location carries
   // (`MS_LOCT.cs:3458` binds `LOCT_MAST.AC_CODE`; `stockInout.ts:344-355` reads it). A current-asset
   // stock-in-hand control holds the branch's inter-location metal (N91/G105).
@@ -60,12 +71,14 @@ const SYSTEM_ACCOUNTS: { code: string; name: string; gr: string; gstType?: strin
  * BOOK_DETL of a purchase-family book (PURCHASE, TAG PURCHASE): 1 purchase, 2 cash, 3 round-off and 4 labour and
  * other charges. With CO_SET.PURC_WITH_LBR = 'N' the desktop posts a line's labour and other charges to slot 4
  * (Ac_Ledr.cs:419-421); without it the writer's fail-closed slot lookup refused every such purchase (G184).
+ * Slot 5 is the template's discount account (MS_UPDATE.cs:25022 PURCHASE, :30221 TAG PURCHASE; N240, G252).
  */
 const PURCHASE_BOOK_SLOTS: Array<{ srNo: number; acCode: string }> = [
   { srNo: 1, acCode: 'PURCHASE' },
   { srNo: 2, acCode: 'CASH' },
   { srNo: 3, acCode: 'ROUNDOFF' },
   { srNo: 4, acCode: 'LBREXP' },
+  { srNo: 5, acCode: 'DISCOUNT' },
 ];
 
 /**
@@ -156,7 +169,7 @@ const SALE_BOOK_SLOTS: Array<{ srNo: number; acCode: string }> = [
  * TAG PURCHASE, `:7897` FINE JV, `:7933` OTH INC and OTH EXP). Reports and numbering route by it; the Purchase
  * Return Register lists nothing for a book without it. Only families whose web writer uses the same header table.
  */
-const DESKTOP_BOOK_TABLES: Record<string, { table: string; detail: string }> = {
+export const DESKTOP_BOOK_TABLES: Record<string, { table: string; detail: string }> = {
   SALES: { table: 'SL_DATA', detail: 'SL_DETL' },
   'SALES RETURNE': { table: 'SL_DATA', detail: 'SL_DETL' },
   PURCHASE: { table: 'PR_DATA', detail: 'PR_DETL' },
@@ -215,7 +228,12 @@ const BOOKS: {
     inout: 'I',
     acCode: 'INTINC',
     shortName: 'OTINC',
-    slots: [{ srNo: 1, acCode: 'INTINC' }],
+    // Slots 2 cash and 3 kasar of the OTH INC template (MS_UPDATE.cs:22884, :22892; N240, G252).
+    slots: [
+      { srNo: 1, acCode: 'INTINC' },
+      { srNo: 2, acCode: 'CASH' },
+      { srNo: 3, acCode: 'KASAR' },
+    ],
   },
   {
     book: 'OEX',
@@ -224,7 +242,12 @@ const BOOKS: {
     inout: 'O',
     acCode: 'OTHCHRG',
     shortName: 'OTEXP',
-    slots: [{ srNo: 1, acCode: 'OTHCHRG' }],
+    // Slots 2 cash and 3 kasar of the OTH EXP template (MS_UPDATE.cs:22860, :22868; N240, G252).
+    slots: [
+      { srNo: 1, acCode: 'OTHCHRG' },
+      { srNo: 2, acCode: 'CASH' },
+      { srNo: 3, acCode: 'KASAR' },
+    ],
   },
   { book: 'SRT', name: 'Sales Return', workflow: 'SALES RETURN', acCode: 'SALES' },
   { book: 'PRT', name: 'Purchase Return', workflow: 'PURCHASE RETURN', acCode: 'PURCHASE' },
@@ -268,16 +291,23 @@ const BOOKS: {
     ],
   },
   // Desktop MDI_FORM.cs:8629 CurBookHelp("ORDER CANCEL"); the Order Cancel screen refunds an order's
-  // advance through SL_ORD_ADJ + a balanced AC_DATA refund (accounts from the payload). Without this
-  // book a provisioned company could not cancel/refund an order (N113).
+  // advance through SL_ORD_ADJ + a balanced AC_DATA refund. Without this book a provisioned company could not
+  // cancel/refund an order (N113). Slot 1 is the default refund account, the desktop's PaiidAc 00001 CASH ON HAND
+  // (TR_SL_ORD_ADJ.cs:2255-2263), and slot 2 the kasar account, the desktop's fixed 00042 (Ac_Ledr.cs:932-935). The
+  // sale-book default would have put SALES in slot 1 and CASH in slot 2, refunding through sales and writing a kasar
+  // off to cash.
   {
     book: 'ORC',
     name: 'Order Cancel',
     mainBook: 'ORDER CANCEL',
     inout: 'O',
-    acCode: 'SALES',
+    acCode: 'CASH',
     shortName: 'SADJ',
     table: 'SL_ORD_ADJ',
+    slots: [
+      { srNo: 1, acCode: 'CASH' },
+      { srNo: 2, acCode: 'KASAR' },
+    ],
   },
   // Desktop Approval Isu / Approval Rtn both open TR_APR_ISU through these exact MAIN_BOOK values
   // (MDI_FORM.cs:8300-8317) and route to APR_DATA/APR_DETL (MS_UPDATE.cs:7833).
@@ -414,12 +444,19 @@ const BOOKS: {
     acCode: 'KASAR',
     shortName: 'TGSPL',
     table: 'LBR_DATA',
+    // N240 (G252): the TAG SPLIT template (MS_UPDATE.cs:32078-32110): 1 cash, 2 kasar javk, 3 kasar avak, 4 labour
+    // income, 5 labour expense, 6 sales gold, 7 purchase gold, 8 sales silver, 9 purchase silver. The earlier seed
+    // swapped 6/7 and gave the silver slots 8/9 the gold accounts.
     slots: [
+      { srNo: 1, acCode: 'CASH' },
+      { srNo: 2, acCode: 'KASAR' },
+      { srNo: 3, acCode: 'KASAR' },
+      { srNo: 4, acCode: 'LBRINC' },
       { srNo: 5, acCode: 'LBREXP' },
-      { srNo: 6, acCode: 'PURCHASE' },
-      { srNo: 7, acCode: 'SALES' },
-      { srNo: 8, acCode: 'PURCHASE' },
-      { srNo: 9, acCode: 'SALES' },
+      { srNo: 6, acCode: 'SALES' },
+      { srNo: 7, acCode: 'PURCHASE' },
+      { srNo: 8, acCode: 'SLVSALE' },
+      { srNo: 9, acCode: 'SLVPURC' },
     ],
   },
   { book: 'ILT', name: 'Item Lot', mainBook: 'ITEM LOT', inout: 'I', acCode: 'PURCHASE' },
@@ -510,9 +547,15 @@ const BOOKS: {
     // Desktop Ac_Ledr.cs:1203 credits the labour amount to BOOK_DETL SR_NO 6 and the metal to
     // SR_NO 1. We provision both so the labour writer resolves the income account from the book
     // (G115 / P0-04) instead of a literal.
+    // Slots 8 to 11 of the LABOUR WORK template (MS_UPDATE.cs:23749-23761; N240, G252): sales silver, purchase
+    // silver, sales old gold and sales old silver.
     slots: [
       { srNo: 1, acCode: 'LBRINC' },
       { srNo: 6, acCode: 'LBRINC' },
+      { srNo: 8, acCode: 'SLVSALE' },
+      { srNo: 9, acCode: 'SLVPURC' },
+      { srNo: 10, acCode: 'OG' },
+      { srNo: 11, acCode: 'OS' },
     ],
   },
   {
@@ -767,8 +810,8 @@ export async function seedCompany(
       ) {
         await tx.$executeRawUnsafe(
           `INSERT INTO "BOOK_DATA"(tenant_id,"CO_CODE","LC_CODE","CO_BOOK","BOOK_NAME","BOOK_SNAME",
-             "MAIN_BOOK","BOOK_INOUT","CUR_USE","BOOK_TBL_NAME","BOOK_TBL_DETL")
-           VALUES ($1,$2,$3,$4,$5,$6,$7,$8,'Y',$9,$10)`,
+             "MAIN_BOOK","BOOK_INOUT","CUR_USE","BOOK_TBL_NAME","BOOK_TBL_DETL","DATA_TYPE")
+           VALUES ($1,$2,$3,$4,$5,$6,$7,$8,'Y',$9,$10,'A')`,
           tenantId,
           coCode,
           lcCode,
@@ -789,11 +832,14 @@ export async function seedCompany(
           { srNo: 2, acCode: 'CASH' },
           { srNo: 3, acCode: 'ROUNDOFF' },
         ];
+        // N240 (G252): Data Type 'A' and the account's name, as MS_BOOK's save writes them (MS_BOOK.cs:2663, :2667).
         for (const leg of legs) {
           await tx.$executeRawUnsafe(
             `INSERT INTO "BOOK_DETL"(tenant_id,"CO_CODE","LC_CODE","CO_BOOK","SR_NO","BOOK_NAME",
                "BOOK_SNAME","MAIN_BOOK","BOOK_INOUT","AC_CODE","AC_NAME","DATA_TYPE")
-             VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,'L')`,
+             VALUES ($1::text,$2::text,$3,$4,$5,$6,$7,$8,$9,$10::text,
+                     coalesce((SELECT "AC_NAME" FROM "AC_MAST" WHERE tenant_id=$1::text AND "CO_CODE"=$2::text
+                                 AND "AC_CODE"=$10::text ORDER BY row_id LIMIT 1),''),'A')`,
             tenantId,
             coCode,
             lcCode,
@@ -803,7 +849,6 @@ export async function seedCompany(
             b.shortName ?? b.book,
             mainBook,
             inout,
-            leg.acCode,
             leg.acCode,
           );
         }

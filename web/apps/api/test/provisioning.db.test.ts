@@ -75,8 +75,8 @@ d('company provisioning produces a postable company', () => {
     // 19 literal codes plus the six wholesale / rate-cut slot accounts (labour income and expense, silver
     // sale and purchase, other charges, fine kasar), plus BRANCH (the stock in/out branch account, N91),
     // plus WALKIN (the walk-in customer the sales screens default to, G124), plus ORDADV (the sale books'
-    // slot-4 order-advance account, N198).
-    expect(await count('AC_MAST')).toBe(29);
+    // slot-4 order-advance account, N198), plus DISCOUNT (the purchase books' slot 5, N240).
+    expect(await count('AC_MAST')).toBe(30);
   });
 
   it('creates every book with its posting legs', async () => {
@@ -88,33 +88,38 @@ d('company provisioning produces a postable company', () => {
     );
     expect(rows.length).toBe(38);
     // Three legs per book (1 = control/sales, 2 = cash/bank, 3 = round-off), except the cash books.
-    // RCT and PAY carry the desktop cash-book layout, 1 = cash and 2 = kasar: Ac_Ledr.cs:567-581 joins
+    // RCT, PAY and ORC (order cancel, N233) carry the cash-book layout, 1 = cash and 2 = kasar: Ac_Ledr.cs:567-581 joins
     // BOOK_DETL SR_NO 1 and SR_NO 2 for legs 01-08. Their slot 2 used to be CASH, which would have posted
     // a write-off to the cash account. The TR_WH_SALE books carry the twelve slots Wh_Sales_Ledr joins.
     // TSP (Tag Split) carries the five Tag_Split_Ledr slots (5 labour, 6/7 gold DR/CR, 8/9 silver DR/CR).
     const legs = Object.fromEntries(rows.map((r) => [String(r.CO_BOOK), Number(r.n)]));
     for (const [book, n] of Object.entries(legs))
       expect(n, book).toBe(
-        book === 'RCT' || book === 'PAY'
+        book === 'RCT' || book === 'PAY' || book === 'ORC'
           ? 2
           : book === 'WHS' || book === 'RTC' || book === 'TSL'
             ? 12
-            : book === 'TSP'
-              ? 5
-              : // PURCHASE and TAG PURCHASE add slot 4, labour and other charges (Ac_Ledr.cs:419-421, G184);
+            : // TSP carries the TAG SPLIT template's nine slots (MS_UPDATE.cs:32078-32110, N240).
+              book === 'TSP'
+              ? 9
+              : // PURCHASE and TAG PURCHASE add slot 4, labour and other charges (Ac_Ledr.cs:419-421, G184),
+                // and slot 5, the template's discount account (MS_UPDATE.cs:25022, :30221, N240);
                 // SALES adds slot 4, the order advance a sale adjusts (Ac_Rojmel.cs:96, N198).
-                book === 'PR' || book === 'TPR' || book === 'SL'
-                ? 4
-                : // LBR (labour) carries its two configured slots: SR_NO 1 (metal) and SR_NO 6
-                  // (labour income), so the labour writer resolves the income account from the book (G115).
-                  book === 'LBR' || book === 'CRD' || book === 'DIR'
-                  ? 2
-                  : // OTH INC / OTH EXP each carry a single configured expense/income slot (TR_OTH_PURC reads
-                    // slot 1); FSL/FPR (fine settlement) each carry their single configured
-                    // control slot.
-                    book === 'OIN' || book === 'OEX' || book === 'FSL' || book === 'FPR'
-                    ? 1
-                    : 3,
+                book === 'PR' || book === 'TPR'
+                ? 5
+                : book === 'SL'
+                  ? 4
+                  : // LBR (labour) carries SR_NO 1 (metal), SR_NO 6 (labour income, G115) and the template's
+                    // 8 to 11 (MS_UPDATE.cs:23749-23761, N240).
+                    book === 'LBR'
+                    ? 6
+                    : book === 'CRD' || book === 'DIR'
+                      ? 2
+                      : // FSL/FPR (fine settlement) each carry their single configured control slot.
+                        book === 'FSL' || book === 'FPR'
+                        ? 1
+                        : // OTH INC / OTH EXP: slot 1 and the template's cash 2 and kasar 3 (N240).
+                          3,
       );
   });
 
@@ -270,12 +275,17 @@ d('company provisioning produces a postable company', () => {
         CO,
       ),
     );
+    // N240 (G252): the TAG SPLIT template (MS_UPDATE.cs:32078-32110), 6/8 sales gold/silver and 7/9 purchase.
     expect(slots).toEqual([
+      { sr: 1, AC_CODE: 'CASH' },
+      { sr: 2, AC_CODE: 'KASAR' },
+      { sr: 3, AC_CODE: 'KASAR' },
+      { sr: 4, AC_CODE: 'LBRINC' },
       { sr: 5, AC_CODE: 'LBREXP' },
-      { sr: 6, AC_CODE: 'PURCHASE' },
-      { sr: 7, AC_CODE: 'SALES' },
-      { sr: 8, AC_CODE: 'PURCHASE' },
-      { sr: 9, AC_CODE: 'SALES' },
+      { sr: 6, AC_CODE: 'SALES' },
+      { sr: 7, AC_CODE: 'PURCHASE' },
+      { sr: 8, AC_CODE: 'SLVSALE' },
+      { sr: 9, AC_CODE: 'SLVPURC' },
     ]);
   });
 
@@ -364,7 +374,10 @@ d('company provisioning produces a postable company', () => {
     // + BUL x 3 (bullion booking, N103) + ORC x 3 (order cancel, N113), not doubled; PR and TPR add slot 4
     // (labour and other charges, G184): 130 + 2.
     // 133: the sale book's fourth slot, the order advance (N198).
-    expect(await count('BOOK_DETL')).toBe(133);
+    // 132: ORC carries the order-cancel layout, 1 = cash refund and 2 = kasar (TR_SL_ORD_ADJ.cs:2255-2263,
+    // Ac_Ledr.cs:932-935, N233), not the three sale-book slots.
+    // 146: the template slots N240 adds (OIN/OEX +2 each, TSP +4, PR/TPR +1 each, LBR +4).
+    expect(await count('BOOK_DETL')).toBe(146);
   });
 
   /**

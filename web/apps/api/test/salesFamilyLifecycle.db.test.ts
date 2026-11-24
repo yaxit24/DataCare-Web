@@ -36,7 +36,7 @@ import {
 import { schemePassbookData } from '../src/modules/scheme/passbook.js';
 import type { VoucherScope } from '../src/modules/vouchers/numbering.js';
 import { footprintOf, ledgerLegs, voucherTables } from './support/footprint.js';
-import { fineFor } from '@datacare/core';
+import { fineFor, round } from '@datacare/core';
 
 const RUN = process.env.RUN_DB_INTEGRITY_TESTS === '1';
 const databaseDescribe = RUN ? describe : describe.skip;
@@ -143,6 +143,9 @@ databaseDescribe('database-backed sales-family voucher lifecycles', () => {
 
   const cleanup = async (): Promise<void> => {
     for (const table of [
+      // An edit writes the USER_DATA field audit (TR_SALE_RTN.cs:13541, WP-27); left behind, it shows up in the
+      // next test's footprint under the same voucher number.
+      'USER_DATA',
       'DELETE_DATA',
       'REMARK_DATA',
       'DM_DATA',
@@ -1344,6 +1347,45 @@ databaseDescribe('database-backed sales-family voucher lifecycles', () => {
       ],
     });
     expect(labour.vchNo).toBe(8);
+    // WP-19: the post-save GST shares TR_SALE_LBR.cs:9748-9830 stores per line and RP_GST.cs:2719 sums. Hand-worked:
+    // metal net 250 at 3% = 7.50 tax, labour 50 at 5% = 2.50 tax; line NET_AMT 240 + 60 = 300, so
+    // IT_NET_AMT = 240 + 240/300 x (250 - 300) = 200 and 60 - 10 = 50; IT_TAX_AMT = 200 x 7.5/250 = 6 and 1.5;
+    // IT_LBR_AMT = 40 and 10 (DR_LBR 50 = SUM(LBR_AMT)); IT_LBR_TAX = 2 and 0.5; no labour discount on the web.
+    const shares = async () =>
+      owner.$queryRawUnsafe(
+        `SELECT "SR_NO","IT_NET_AMT","IT_TAX_AMT","IT_DISC_AMT","IT_LBR_AMT","IT_LBR_TAX","IT_LBR_DISC"
+           FROM "LBR_ISU_DETL" WHERE tenant_id=$1 AND "CO_BOOK"='LBR' AND "VCH_NO"=$2 ORDER BY "SR_NO"`,
+        TENANT,
+        '00008',
+      );
+    expect(await shares()).toEqual([
+      {
+        SR_NO: 1,
+        IT_NET_AMT: 200,
+        IT_TAX_AMT: '6',
+        IT_DISC_AMT: 0,
+        IT_LBR_AMT: 40,
+        IT_LBR_TAX: '2',
+        IT_LBR_DISC: 0,
+      },
+      {
+        SR_NO: 2,
+        IT_NET_AMT: 50,
+        IT_TAX_AMT: '1.5',
+        IT_DISC_AMT: 0,
+        IT_LBR_AMT: 10,
+        IT_LBR_TAX: '0.5',
+        IT_LBR_DISC: 0,
+      },
+    ]);
+    // Every TAX_DATA row the labour invoice writes says R_CHARG 'N', as Ac_Tax.LbrWork_GST does.
+    expect(
+      await owner.$queryRawUnsafe(
+        `SELECT DISTINCT "R_CHARG" FROM "TAX_DATA" WHERE tenant_id=$1 AND "CO_BOOK"='LBR' AND "VCH_NO"=$2`,
+        TENANT,
+        '00008',
+      ),
+    ).toEqual([{ R_CHARG: 'N' }]);
     const labourClock = await clock('LBR_DATA', 'LBR');
     await expect(getLabourInvoice(runtime, scope('LBR'), 8)).resolves.toMatchObject({
       hiddenVoucherNo: '00041',
@@ -1367,6 +1409,18 @@ databaseDescribe('database-backed sales-family voucher lifecycles', () => {
       vchDate: EDIT_DAY,
       lines: [{ itCode: 'GOLD', netWt: 3, metalAmount: 330, labourAmount: 75 }],
     });
+    // The edit rewrites the shares: one line, NET_AMT 405 against metal 330 (tax 9.90), labour 75 (tax 3.75).
+    expect(await shares()).toEqual([
+      {
+        SR_NO: 1,
+        IT_NET_AMT: 330,
+        IT_TAX_AMT: '9.9',
+        IT_DISC_AMT: 0,
+        IT_LBR_AMT: 75,
+        IT_LBR_TAX: '3.75',
+        IT_LBR_DISC: 0,
+      },
+    ]);
     expect(await clock('LBR_DATA', 'LBR')).toBe(labourClock);
     let [dr, cr] = await ledgerBalance('LBR');
     expect(dr).toBeCloseTo(cr, 6);
@@ -1513,7 +1567,7 @@ databaseDescribe('database-backed sales-family voucher lifecycles', () => {
               "CITY","MOBILE","UPI_AMT"::float upi,"OLD_GL"::float old_gl,
               "OLD_GL_AMT"::float old_gl_amt,"OLD_SL"::float old_sl,"OLD_SL_AMT"::float old_sl_amt,
               "SCHM_AMT"::float schm,"RCUT_RATE"::float rc_rate,"RCUT_FINE"::float rc_fine,
-              "RCUT_AMT"::float rc_amt,"ADJ_GOLD"::float adj_gold,"ADJ_SILVER"::float adj_silver,
+              "RCUT_AMT"::float rc_amt,"ADV_AMT"::float adv,"ADJ_GOLD"::float adj_gold,"ADJ_SILVER"::float adj_silver,
               "ORD_ADJ_AMT"::float ord_adj,"DEL_DATE"::text del_date,"FUN_DATE"::text fun_date
          FROM "SL_ORD_DATA" WHERE tenant_id=$1 AND "VCH_NO"=$2`,
       TENANT,
@@ -1533,14 +1587,19 @@ databaseDescribe('database-backed sales-family voucher lifecycles', () => {
     expect(String(h.CITY).trim()).toBe('Surat');
     expect(String(h.MOBILE).trim()).toBe('9812345670');
     expect(h.upi).toBeCloseTo(250.5, 2);
-    expect(h.old_gl).toBeCloseTo(3.25, 2);
+    // TR_SALE_ORD.cs:9143: OLD_GL is the typed old gold fine (MSG2_TOTAL[6,2]) plus RCUT_FINE ([9,2]):
+    // 3.25 + 2.5.
+    expect(h.old_gl).toBeCloseTo(5.75, 2);
     expect(h.old_gl_amt).toBeCloseTo(19_500, 2);
     expect(h.old_sl).toBeCloseTo(12.5, 2);
     expect(h.old_sl_amt).toBeCloseTo(900, 2);
     expect(h.schm).toBeCloseTo(1_000, 2);
     expect(h.rc_rate).toBeCloseTo(6_400, 2);
     expect(h.rc_fine).toBeCloseTo(2.5, 2);
-    expect(h.rc_amt).toBeCloseTo(16_000, 2);
+    // TR_SALE_ORD.cs:9124-9133: with a rate-cut rate the tender total MSG2_TOTAL[9,3] (:11368) is RCUT_AMT and
+    // ADV_AMT is 0; the typed rate-cut amount is not stored. Tenders here: cash 100, UPI 250.5, scheme 1,000.
+    expect(h.rc_amt).toBeCloseTo(round(100 + 250.5 + 1_000, 2), 2);
+    expect(h.adv).toBe(0);
     expect(h.adj_gold).toBeCloseTo(1.75, 2);
     expect(h.adj_silver).toBeCloseTo(4.5, 2);
     expect(h.ord_adj).toBeCloseTo(500, 2);
@@ -1815,6 +1874,8 @@ databaseDescribe('database-backed sales-family voucher lifecycles', () => {
       'AC_DATA',
       // The day book. Added when the order projection was implemented from the real book-020 rows.
       'ROJ_MEL_DATA',
+      // The order's own '+' advance row (TR_SALE_ORD.cs:9475-9516).
+      'SL_ORD_ADJ',
       'SL_ORD_DATA',
       'SL_ORD_DETL',
       // The fixture's line carries a stone sub-detail, so the order writes SL_ORD_IDTL too. Pinned

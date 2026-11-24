@@ -633,6 +633,47 @@ export const groupMaster = {
         }),
     ),
     C(
+      'lookup.provisioned-ledgers',
+      'T04',
+      'read-only',
+      'WP-36: on a company exactly as seedCompany leaves it, the Sales Ac help lists the provisioned sale ledgers (group 25, tSalesAc_KeyDown :2204-2208) and the Purchase Ac help the purchase ledgers (group 30, :2242-2246); the tax ledgers are in neither',
+      async (ctx) => {
+        const { page } = await ctx.session();
+        await openScreen(page);
+        const helpCodes = async (box, waitFor) => {
+          await box.focus();
+          await box.press('F1');
+          const help = box.locator('xpath=..');
+          await help.getByText(waitFor, { exact: true }).waitFor();
+          return (await help.locator('b').allInnerTexts()).map((t) => t.trim());
+        };
+        const PROVISIONED = ['FINESALE', 'SALES', 'SLVSALE', 'FINEPURC', 'PURCHASE', 'SLVPURC'];
+        const TAX = ['GST', 'GSTINPUT', 'TCS'];
+        const sale = await helpCodes(label(page, 'Sales Ac'), 'SALES');
+        const purc = await helpCodes(label(page, 'Purchase Ac'), 'PURCHASE');
+        const ours = (codes) => codes.filter((c) => PROVISIONED.includes(c));
+        // By AC_NAME: FINE METAL SALE, SALES A/C, SALES SILVER A/C; FINE METAL PURCHASE, PURCHASE A/C, PURCHASE SILVER A/C.
+        assert.deepEqual(ours(sale), ['FINESALE', 'SALES', 'SLVSALE'], 'group 25 sale ledgers');
+        assert.deepEqual(
+          ours(purc),
+          ['FINEPURC', 'PURCHASE', 'SLVPURC'],
+          'group 30 purchase ledgers',
+        );
+        assert.deepEqual(
+          [...sale, ...purc].filter((c) => TAX.includes(c)),
+          [],
+          'the tax ledgers are group 12',
+        );
+        return {
+          observation: `sales help ${sale.join(',')}; purchase help ${purc.join(',')}`,
+          expected: {
+            sale: ['FINESALE', 'SALES', 'SLVSALE'],
+            purchase: ['FINEPURC', 'PURCHASE', 'SLVPURC'],
+          },
+        };
+      },
+    ),
+    C(
       'children.items-take-the-group',
       'T05',
       'mutation',
@@ -1406,13 +1447,14 @@ export const groupMaster = {
           assert.equal(sold.status(), 201, await sold.text());
           const vchNo = String((await sold.json()).vchNo).padStart(5, '0');
           try {
-            // 10 g × 6,123.45 + 10 g × 237.50 making = 63,609.50 credited to the group's sales account.
+            // 10 g × 6,123.45 + 10 g × 237.50 making: 61,234 + 2,375 = 63,609 (each line amount Math.Round(.., 0), half to even:
+            // TR_SALE.cs:10343-10362) credited to the group's sales account.
             const legs = await ctx.rows(
               `SELECT "AC_CODE" ac,"CR_AMT"::float cr FROM "AC_DATA"
                 WHERE tenant_id=$1 AND "CO_BOOK"='SL' AND "VCH_NO"=$2 AND "AC_CODE"='GMSAL'`,
               vchNo,
             );
-            assert.deepEqual(legs, [{ ac: 'GMSAL', cr: 63609.5 }]);
+            assert.deepEqual(legs, [{ ac: 'GMSAL', cr: 63609 }]);
             const me = await (await page.request.get('/api/me')).json();
             const invoice = await page.request.get(
               `/api/sales/invoice?coBook=SL&coYear=${encodeURIComponent(me.coYear)}&vchNo=${vchNo}&format=html&copy=O`,
@@ -1422,8 +1464,8 @@ export const groupMaster = {
             assert.ok(html.includes('711319'), 'the invoice prints the HSN code from the group');
             assert.ok(!html.includes('>0000<'), 'not the HSN the item had before');
             return {
-              observation: `sale ${vchNo} credited 63609.50 to GMSAL; the invoice prints HSN 711319`,
-              expected: { leg: 63609.5, hsn: '711319' },
+              observation: `sale ${vchNo} credited 63609.00 to GMSAL; the invoice prints HSN 711319`,
+              expected: { leg: 63609, hsn: '711319' },
               database: { legs, item: await itemRows(ctx) },
               downstream: { vchNo },
             };

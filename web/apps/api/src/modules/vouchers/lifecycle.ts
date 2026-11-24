@@ -147,6 +147,36 @@ export async function persistedVoucherHeaderTx(
   return first;
 }
 
+/**
+ * A PUT edits a saved voucher; it never creates one. The desktop opens a typed number with Enter and, when no voucher
+ * has it, stays in add mode (TR_SALE.cs:14851 {{EntryMode = "A";}}); a new voucher is then numbered at save from MAX+1
+ * (TR_SALE.cs:15143 {{Current Voucher No has been changd New Voucher No is}}). The web equivalent of that add path is
+ * POST, which takes its number from `nextVoucherNoTx` under the book's advisory lock. A PUT to a number with no saved
+ * header would otherwise write that typed number outside the lock, and the header tables without a unique key
+ * (RATE_CUT_DATA, BAR_CAN_DATA) would then hold two vouchers under one number. Call this first in every edit writer:
+ * it locks the stored header rows (FOR UPDATE) or answers `404 voucher-not-found`.
+ */
+export async function assertSavedVoucherTx(
+  tx: any,
+  table: string,
+  scope: CompleteVoucherScope,
+  voucherNo: string,
+): Promise<void> {
+  const rows: unknown[] = await tx.$queryRawUnsafe(
+    `SELECT 1 FROM ${q(table)}
+      WHERE tenant_id=$1 AND "CO_CODE"::text=$2::text AND "LC_CODE"::text=$3::text
+        AND "CO_YEAR"::text=$4::text AND "CO_BOOK"::text=$5::text AND "VCH_NO"::text=$6::text
+        FOR UPDATE`,
+    scope.tenantId,
+    scope.coCode,
+    scope.lcCode,
+    scope.coYear,
+    scope.coBook,
+    voucherNo,
+  );
+  if (rows.length === 0) throw new PersistedVoucherNotFoundError(voucherNo);
+}
+
 export async function deleteVoucherWriteSetTx(
   tx: any,
   options: {

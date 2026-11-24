@@ -49,6 +49,10 @@ const GUARDED: Record<string, { page: string; sends: RegExp }> = {
     page: 'components/PaymentForm.tsx',
     sends: /postCommand<[^>]*>\(\s*`\$\{ep\}\/multi`,[\s\S]*?command\.key,?\s*\)/,
   },
+  'POST /order-cancel': {
+    page: 'app/(app)/txn/order-cancel/page.tsx',
+    sends: /postCommand<[^>]*>\(\s*'\/order-cancel',\s*body,\s*command\.key\s*\)/,
+  },
 };
 
 /** WP-04 follow-ups, in the plan's order first (Contra, Sales, Sales Order, ... Tag Cancel), then the rest. */
@@ -106,7 +110,6 @@ const NOT_YET_GUARDED = [
   'POST /repair-karigar-issues',
   'POST /repair-karigar-receipts',
   'POST /repair-receipts',
-  'POST /sales-orders/:vchNo/cancel-refund',
   'POST /sales-quotations',
   'POST /sales/vp-parcel',
   'POST /sales/wholesale-sale-return',
@@ -140,6 +143,19 @@ const NOT_YET_GUARDED = [
 const routePattern = /\b(?:app|server)\.(post)\(\s*(['"`])([^'"`]+)\2/g;
 
 /** POST routes whose policy is a create right on a voucher form (not a master, `@master` or a utility). */
+/**
+ * Creates that are not vouchers and are replay-safe by their own rule: a Balance TrFr run deletes and rewrites its
+ * dataset in the Transfer Year (BtmSchm.cs:2764, :2932), so a replayed request leaves the same rows (WP-23, cases.md
+ * retry.duplicate-request). The refused datasets write nothing.
+ */
+const REPLAY_SAFE = new Set([
+  'POST /balance-transfer/ac-balance',
+  'POST /balance-transfer/item-stock',
+  'POST /balance-transfer/tag-stock',
+  'POST /balance-transfer/sales-order',
+  'POST /balance-transfer/approval',
+]);
+
 function voucherCreateRoutes(): string[] {
   const routeDir = resolve(here, '../src/routes');
   const found = new Set<string>();
@@ -154,7 +170,8 @@ function voucherCreateRoutes(): string[] {
       if (
         policy?.kind === 'form' &&
         policy.action === 'create' &&
-        !/^(Masters\/|Utilities\/|@master$)/.test(String(policy.form))
+        !/^(Masters\/|Utilities\/|@master$)/.test(String(policy.form)) &&
+        !REPLAY_SAFE.has(`POST ${match[3]}`)
       )
         found.add(`POST ${match[3]}`);
     }

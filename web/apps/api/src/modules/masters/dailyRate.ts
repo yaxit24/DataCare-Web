@@ -198,6 +198,88 @@ export async function dailyRateExists(prisma: any, scope: DailyRateScope, rawDat
   );
 }
 
+/** MS_RATE.cs:1939: the company's locations other than '00', ORDER BY LC_CODE. */
+async function otherLocationCodesTx(tx: any, s: Complete): Promise<string[]> {
+  const rows: Array<{ lc: string | null }> = await tx.$queryRawUnsafe(
+    `SELECT DISTINCT "LC_CODE" lc FROM "LOCT_MAST"
+      WHERE tenant_id=$1 AND "CO_CODE"=$2 AND coalesce("LC_CODE",'')<>'' AND "LC_CODE"<>'00'
+      ORDER BY "LC_CODE"`,
+    s.tenantId,
+    s.coCode,
+  );
+  return rows.map((r) => text(r.lc));
+}
+
+/**
+ * The hosted form of the registration gate at MS_RATE.cs:1937. The desktop copies only for one registered install; the
+ * web copies only for a company an operator has provisioned (daily_rate_copy_entitlement, default off, no API route
+ * writes it). It is read inside the save's transaction, so a change committed before the save governs that save.
+ */
+async function copyEntitlementTx(tx: any, s: Complete): Promise<boolean> {
+  const rows: Array<{ enabled: boolean }> = await tx.$queryRawUnsafe(
+    `SELECT enabled FROM "daily_rate_copy_entitlement" WHERE tenant_id=$1 AND co_code=$2`,
+    s.tenantId,
+    s.coCode,
+  );
+  return rows[0]?.enabled === true;
+}
+
+/**
+ * MS_RATE.cs:1940-1947, per destination: delete that location's day, then insert the location-00 day with only
+ * LC_CODE replaced. The desktop SELECT names no CO_YEAR and copies it as data, so this does too; GR_NAME is not part
+ * of the projection. Runs in the save's transaction: a fault at any destination rolls the whole save back.
+ */
+async function copyDayToLocationsTx(
+  tx: any,
+  s: Complete,
+  date: string,
+  locations: string[],
+): Promise<string[]> {
+  for (const lc of locations) {
+    await tx.$executeRawUnsafe(
+      `DELETE FROM "RATE_MAST" WHERE tenant_id=$1 AND "CO_CODE"=$2 AND "LC_CODE"=$3 AND "VCH_DATE"=$4::date`,
+      s.tenantId,
+      s.coCode,
+      lc,
+      date,
+    );
+    await tx.$executeRawUnsafe(
+      `INSERT INTO "RATE_MAST"(tenant_id,"CO_CODE","LC_CODE","CO_YEAR","VCH_DATE","SR_NO","GR_CODE","FINE_GL_RATE",
+         "FINE_SL_RATE","GR_RATE","GR_TOUCH","GR_TYPE","EMP_CODE","CASH_AMT","MAIN_USER","ADD_USER","ADD_DATE",
+         "GR_PR_TOUCH","GR_PR_RATE","FINE_GL_PR_RATE","FINE_SL_PR_RATE","DOLLAR_GL_RATE","DOLLAR_SL_RATE","AND_TRFR",
+         "GR_TAX_RATE","GR_TAX_PRC","OP_GL_RATE")
+       SELECT tenant_id,"CO_CODE",$3,"CO_YEAR","VCH_DATE","SR_NO","GR_CODE","FINE_GL_RATE","FINE_SL_RATE","GR_RATE",
+              "GR_TOUCH","GR_TYPE","EMP_CODE","CASH_AMT","MAIN_USER","ADD_USER","ADD_DATE","GR_PR_TOUCH","GR_PR_RATE",
+              "FINE_GL_PR_RATE","FINE_SL_PR_RATE","DOLLAR_GL_RATE","DOLLAR_SL_RATE","AND_TRFR","GR_TAX_RATE",
+              "GR_TAX_PRC","OP_GL_RATE"
+         FROM "RATE_MAST" WHERE tenant_id=$1 AND "CO_CODE"=$2 AND "LC_CODE"='00' AND "VCH_DATE"=$4::date`,
+      s.tenantId,
+      s.coCode,
+      lc,
+      date,
+    );
+  }
+  return locations;
+}
+
+/**
+ * The copy primitive the save uses, runnable alone: replace each given location's day with the location-00 day. It
+ * does not check the entitlement; the save does. The isolated database tests use it on imported source days that a
+ * web save cannot write.
+ */
+export async function copyDailyRateDay(
+  prisma: any,
+  scope: DailyRateScope,
+  rawDate: string,
+  locations: string[],
+) {
+  const s = complete(scope);
+  const date = isoDay(rawDate);
+  return withTxBudget(prisma, s.tenantId, 'voucher', (tx: any) =>
+    copyDayToLocationsTx(tx, s, date, locations),
+  );
+}
+
 export async function saveDailyRate(prisma: any, input: DailyRateInput) {
   const s = complete(input.scope);
   const date = isoDay(input.date);
@@ -228,10 +310,14 @@ export async function saveDailyRate(prisma: any, input: DailyRateInput) {
   return withTxBudget(prisma, s.tenantId, 'voucher', async (tx: any) => {
     // The desktop deletes the day and inserts it again with no lock, so a second operator saving the same new day hits
     // the RATE_MAST primary key. Saves of one day run one after the other instead; the last writer's rates stay.
-    await tx.$executeRawUnsafe(
-      'SELECT pg_advisory_xact_lock(hashtext($1))',
-      `daily-rate|${s.tenantId}|${s.coCode}|${s.lcCode}|${date}`,
-    );
+    // A location-00 save may also replace every other location's copy of the day, so it takes the locks of all of
+    // those days too, in one sorted order, which keeps it from deadlocking with a local save of any of them.
+    const otherLocations = s.lcCode === '00' ? await otherLocationCodesTx(tx, s) : [];
+    const lockKeys = [s.lcCode, ...otherLocations]
+      .map((lc) => `daily-rate|${s.tenantId}|${s.coCode}|${lc}|${date}`)
+      .sort();
+    for (const key of lockKeys)
+      await tx.$executeRawUnsafe('SELECT pg_advisory_xact_lock(hashtext($1))', key);
     const groups = await gridGroupsTx(tx, s);
     const known = new Set(groups.map((g) => g.code));
     for (const code of requested.keys())
@@ -299,7 +385,12 @@ export async function saveDailyRate(prisma: any, input: DailyRateInput) {
         );
       count += 1;
     }
-    return { date, saved: count };
+    // MS_RATE.cs:1937-1949: the location-00 day is copied to every other location of the company.
+    const copiedTo =
+      s.lcCode === '00' && (await copyEntitlementTx(tx, s))
+        ? await copyDayToLocationsTx(tx, s, date, otherLocations)
+        : [];
+    return { date, saved: count, copiedTo };
   });
 }
 
@@ -406,4 +497,49 @@ export async function requireDailyRate(prisma: any, scope: DailyRateScope, date:
   const rate = await getDailyRate(prisma, scope, date);
   if (!rate.exists) throw new DailyRateMissingError();
   return rate;
+}
+
+export interface DailyRateLabel {
+  grCode: string;
+  grName: string;
+  /** GR_RATE as the desktop's Format(.., "0.00"). */
+  rate: string;
+  /** `GR_NAME  -  0.00`, MDI_FORM.cs:11429. */
+  text: string;
+}
+
+/** The empty-state text of the first MDI rate label (MS_RATE.cs:1956, MDI_FORM.cs:11422). */
+export const DAILY_RATE_LABELS_EMPTY = 'ToDays Rate :';
+
+/**
+ * The MDI main-window rate labels (MDI_FORM.cs:11421-11500, MS_RATE.cs:1950): today's saved rows of this company and
+ * location, joined to GROUP_MAST, for the groups with RATE_DISPLAY = 'Y', ORDER BY SR_NO, the first seven only
+ * (Rate_1 to Rate_7). No fallback to another day or location: with no row the label reads 'ToDays Rate :'.
+ */
+export async function dailyRateLabels(prisma: any, scope: DailyRateScope, rawDate: string) {
+  const s = complete(scope);
+  const date = isoDay(rawDate);
+  return withTxBudget(prisma, s.tenantId, 'read', async (tx: any) => {
+    const rows: Array<Record<string, unknown>> = await tx.$queryRawUnsafe(
+      `SELECT r."GR_CODE" code,coalesce(g."GR_NAME",'') name,
+              to_char(coalesce(r."GR_RATE",0),'FM999999999990.00') rate
+         FROM "RATE_MAST" r JOIN LATERAL (
+           SELECT m."GR_NAME" FROM "GROUP_MAST" m
+            WHERE m.tenant_id=r.tenant_id AND m."CO_CODE"=r."CO_CODE" AND m."GR_CODE"=r."GR_CODE"
+              AND m."RATE_DISPLAY"='Y' ORDER BY m.row_id LIMIT 1) g ON true
+        WHERE r.tenant_id=$1 AND r."CO_CODE"=$2 AND r."LC_CODE"=$3 AND r."VCH_DATE"=$4::date
+        ORDER BY r."SR_NO" LIMIT 7`,
+      s.tenantId,
+      s.coCode,
+      s.lcCode,
+      date,
+    );
+    const labels: DailyRateLabel[] = rows.map((r) => ({
+      grCode: text(r.code),
+      grName: text(r.name),
+      rate: text(r.rate),
+      text: `${text(r.name)}  -  ${text(r.rate)}`,
+    }));
+    return { date, empty: DAILY_RATE_LABELS_EMPTY, labels };
+  });
 }

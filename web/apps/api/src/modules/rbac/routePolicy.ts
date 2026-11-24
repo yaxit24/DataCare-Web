@@ -38,6 +38,8 @@ const SYSTEM = new Set([
   'POST /context/select',
   'GET /lookup/:entity',
   'GET /rate',
+  // MDI_FORM.cs:11421: the main-window rate labels show on every sign-in; no form right gates them.
+  'GET /daily-rate/labels',
   'GET /rate-groups',
   'GET /party/:acCode/balance',
   'GET /vouchers/recent',
@@ -95,9 +97,12 @@ const route = (form: string, paths: readonly string[]): void => {
 
 route('Utilities/Audit Log', ['GET /audit', 'GET /ops/metrics', 'GET /ops/invariants']);
 route('Utilities/Backup', ['GET /backup', 'POST /backup/restore']);
+// Desktop MS_USER, menu caption "User Create" (formCatalog alias). Save of an existing user is Edit, Delete is Delete.
 route('Utilities/Users & Rights', [
   'GET /admin/users',
   'POST /admin/users',
+  'POST /admin/users/:loginName/update',
+  'DELETE /admin/users/:loginName',
   'POST /admin/users/:loginName/rights',
   'GET /admin/form-catalog',
   'GET /admin/users/:loginName/form-rights',
@@ -152,10 +157,14 @@ route('Utilities/e-Invoice (IRN)', [
   'POST /einvoice/:vchNo/cancel',
 ]);
 route('Utilities/Year-End Close', ['POST /year-end/preview', 'POST /year-end/close']);
+// BtmSchm: the catalog right is Create (`C-----`); every dataset button is a create (WP-23).
 route('Company/Balance TrFr', [
-  'POST /balance-transfer/preview',
-  'POST /balance-transfer/year-close',
-  'POST /balance-transfer/openings',
+  'GET /balance-transfer',
+  'POST /balance-transfer/ac-balance',
+  'POST /balance-transfer/item-stock',
+  'POST /balance-transfer/tag-stock',
+  'POST /balance-transfer/sales-order',
+  'POST /balance-transfer/approval',
 ]);
 route('Utilities/Reminders', [
   'GET /reminders/overdue',
@@ -192,6 +201,9 @@ route('Sales/Sales Invoice', [
   'GET /sales/:vchNo',
   'GET /sales/:vchNo/print',
   'PUT /sales/:vchNo',
+  // WP-26 (D6): the sale book's PRINT_MAST file list and its "Set" default.
+  'GET /sales/print-files',
+  'POST /sales/print-files/default',
   'DELETE /sales/:vchNo',
   'GET /sales/invoice',
   // Contained pending an atomic Sales Invoice import + approval closure transaction.
@@ -223,6 +235,7 @@ route('Sales/Sales Return', [
   'POST /sales-returns',
   'GET /sales-returns/import',
   'GET /sales-returns/:vchNo',
+  'PUT /sales-returns/:vchNo',
   'GET /sales-returns/:vchNo/print',
   'DELETE /sales-returns/:vchNo',
   'GET /sales/credit-note',
@@ -280,8 +293,14 @@ route('Transaction/E Invoice', [
   'POST /e-invoices/:vchNo/irn/cancel',
 ]);
 route('Sales/Order Cancel', [
-  'POST /sales-orders/:vchNo/cancel-refund',
   'GET /sales-orders/:vchNo/adjustment',
+  'GET /order-cancel/pending-orders',
+  'GET /order-cancel/defaults',
+  'POST /order-cancel',
+  'GET /order-cancel/:vchNo',
+  'PUT /order-cancel/:vchNo',
+  'DELETE /order-cancel/:vchNo',
+  'GET /order-cancel/:vchNo/print',
 ]);
 route('Sales/Labour Sale', [
   'POST /labour-invoice',
@@ -444,6 +463,7 @@ route('Cash / Bank/Payment', [
 ]);
 route('Cash / Bank/Contra', [
   'POST /contra',
+  'GET /contra/list',
   'GET /contra/:vchNo',
   'GET /contra/:vchNo/print',
   'PUT /contra/:vchNo',
@@ -852,6 +872,17 @@ route('Masters/Item Groups', [
   'PUT /masters/group-master/:code',
   'DELETE /masters/group-master/:code',
 ]);
+// MS_BOOK (N240): Company → Books, the book header with its posting-account slots.
+route('Masters/Books / Series', [
+  'GET /masters/books-master',
+  'GET /masters/books-master/print',
+  'GET /masters/books-master/template',
+  'GET /masters/books-master/accounts',
+  'GET /masters/books-master/:code',
+  'POST /masters/books-master',
+  'PUT /masters/books-master/:code',
+  'DELETE /masters/books-master/:code',
+]);
 // MS_PRODUCT with CurMast 'Product' (N215): the Product master's own screen.
 route('Masters/Products', [
   'GET /masters/product-master',
@@ -922,8 +953,33 @@ route('Masters/Accounts', [
   'GET /party/:acCode/family',
 ]);
 
-route('Reports/Sales Register', ['GET /reports/sales-register']);
+route('Reports/Sales Register', [
+  'GET /reports/sales-register',
+  // WP-11: the RP_ALL Sales Report screen and its exports (routes/rpAllReport.ts), the "Sales Report" caption.
+  'GET /reports/sales-report',
+  // The Select Book panel's own book list (RP_ALL.cs:11421 BookMast): every book of the session
+  // company+location, uncapped — the generic /lookup/books stays capped at 50 and company-wide.
+  'GET /reports/sales-report/books',
+  'GET /reports/sales-report/export.csv',
+  'GET /reports/sales-report/export.xlsx',
+]);
+// WP-14: the RP_ALL Order Report screen and its exports, keyed on the "Order Report" caption's own USER_SET
+// row (MDI_FORM.cs:7034 {{DC_Main.MsUserRightForm = MsSideBtn;}}), never on Sales Order (D6).
+route('Reports/Order Report', [
+  'GET /reports/order-report',
+  'GET /reports/order-report/export.csv',
+  'GET /reports/order-report/export.xlsx',
+]);
 route('Reports/Purchase Register', ['GET /reports/purchase-register']);
+// WP-12: the RP_ALL Purchase Rpt screen, its City/Area options and its exports (routes/purchaseReport.ts), the
+// "Purchase Rpt" caption.
+route('Reports/Purchase Rpt', [
+  'GET /reports/purchase-report',
+  'GET /reports/purchase-report/options',
+  'GET /reports/purchase-report/export.csv',
+  'GET /reports/purchase-report/export.xlsx',
+  'GET /reports/purchase-report/export.pdf',
+]);
 route('Reports/Day Book', ['GET /reports/day-book']);
 route('Reports/Rojmel', ['GET /reports/rojmel']);
 route('Reports/Final Reports', ['GET /reports/final-reports', 'GET /reports/profit-loss']);
@@ -939,6 +995,16 @@ route('Reports/Account Ledger', [
   'GET /reports/account-ledger/export.csv',
   'GET /reports/account-ledger/:acCode',
   'GET /reports/account-ledger/:acCode/export.pdf',
+  // WP-20: the JmaUdr, Gold and Silver prints (RP_LEDR): view right for the data, print right for the exports.
+  'GET /reports/account-ledger/jama-udhar',
+  'GET /reports/account-ledger/jama-udhar/export.pdf',
+  'GET /reports/account-ledger/jama-udhar/export.xlsx',
+  'GET /reports/account-ledger/gold-fine',
+  'GET /reports/account-ledger/gold-fine/export.pdf',
+  'GET /reports/account-ledger/gold-fine/export.xlsx',
+  'GET /reports/account-ledger/silver-fine',
+  'GET /reports/account-ledger/silver-fine/export.pdf',
+  'GET /reports/account-ledger/silver-fine/export.xlsx',
 ]);
 route('Reports/Account Balances', ['GET /reports/account-balances']);
 route('Reports/Outstanding (Debtors/Creditors)', ['GET /reports/outstanding']);
@@ -980,7 +1046,20 @@ route('Reports/GST Input Register', ['GET /reports/gst-input-register']);
 route('Reports/Pledge Outstanding', ['GET /reports/dhrn-outstanding', 'GET /dhrn/os-letter']);
 route('Reports/Karigar Balances', ['GET /reports/karigar-balances']);
 route('Reports/Stock Valuation', ['GET /reports/stock-valuation']);
-route('Reports/Tag-Stock Report', ['GET /reports/tag-stock', 'GET /reports/tag-stock.csv']);
+route('Reports/Tag-Stock Report', [
+  'GET /reports/tag-stock',
+  'GET /reports/tag-stock.csv',
+  'GET /reports/tag-stock.xlsx',
+  'GET /reports/tag-stock/sizes',
+]);
+// WP-16: the RP_STOCK Stock Report screen, its drill-down and exports (routes/stockReport.ts), its own rights key.
+route('Reports/Stock Report', [
+  'GET /reports/stock-report',
+  'GET /reports/stock-report/defaults',
+  'GET /reports/stock-report/movements',
+  'GET /reports/stock-report/export.csv',
+  'GET /reports/stock-report/export.xlsx',
+]);
 route('Reports/HuId Report', ['GET /reports/huid']);
 route('Reports/ItStk Level', ['GET /reports/item-weight-levels']);
 route('Reports/Bill Wise Profit', ['GET /reports/bill-profit']);
@@ -1015,6 +1094,7 @@ route('Reports/GST Report', [
   'GET /reports/gst-report/export.csv',
   'GET /reports/gst-report/export.xlsx',
   'GET /reports/gst-report/export.pdf',
+  'GET /reports/gst-report/workbook.xlsx',
 ]);
 route('Reports/Delete Data', ['GET /reports/delete-data']);
 route('Reports/Point Report', ['GET /reports/point-report', 'GET /reports/point-report/detail']);
@@ -1043,12 +1123,19 @@ const PRINT_ROUTES = new Set([
   'GET /masters/employee-master/print',
   'GET /masters/tax-master/print',
   'GET /masters/group-master/print',
+  'GET /masters/books-master/print',
   'GET /masters/address-master/print',
   'POST /estimate/pdf',
   'GET /reports/account-ledger/export.pdf',
   'GET /reports/account-ledger/export.xlsx',
   'GET /reports/account-ledger/export.csv',
   'GET /reports/account-ledger/:acCode/export.pdf',
+  'GET /reports/account-ledger/jama-udhar/export.pdf',
+  'GET /reports/account-ledger/jama-udhar/export.xlsx',
+  'GET /reports/account-ledger/gold-fine/export.pdf',
+  'GET /reports/account-ledger/gold-fine/export.xlsx',
+  'GET /reports/account-ledger/silver-fine/export.pdf',
+  'GET /reports/account-ledger/silver-fine/export.xlsx',
   'GET /tour-orders/confirmation',
   'GET /sales/invoice',
   'GET /sales-quotations/quotation',
@@ -1080,10 +1167,21 @@ const PRINT_ROUTES = new Set([
   'GET /stock/tag-print-screen/labels',
   'POST /integrations/notify',
   'GET /reports/tag-stock.csv',
+  'GET /reports/tag-stock.xlsx',
   'GET /reports/karigar-ledger.print',
   'GET /reports/gst-report/export.csv',
   'GET /reports/gst-report/export.xlsx',
   'GET /reports/gst-report/export.pdf',
+  'GET /reports/sales-report/export.csv',
+  'GET /reports/sales-report/export.xlsx',
+  'GET /reports/gst-report/workbook.xlsx',
+  'GET /reports/stock-report/export.csv',
+  'GET /reports/stock-report/export.xlsx',
+  'GET /reports/purchase-report/export.csv',
+  'GET /reports/purchase-report/export.xlsx',
+  'GET /reports/purchase-report/export.pdf',
+  'GET /reports/order-report/export.csv',
+  'GET /reports/order-report/export.xlsx',
   'GET /reports/gstr2-doc',
   'GET /reports/gstr1-doc',
   'GET /reports/gstr3b-doc',
@@ -1091,6 +1189,10 @@ const PRINT_ROUTES = new Set([
   'GET /reports/balance-sheet-doc',
   'GET /reports/render',
   'GET /fine-jv/:vchNo/print',
+  // Purchase Rtn prints on FRM_PRINT (TR_KR_ISU.cs:5434 {{UserPrint}}), not on view (N245, G257).
+  'GET /purchase-returns/:vchNo/print',
+  // TR_SL_ORD_ADJ.cs:3796-3800: OrderCancelVch needs the print right.
+  'GET /order-cancel/:vchNo/print',
   // TR_CONTRA.cs:3000-3004: Contra and Journal documents are printed from the same form as Fine JV.
   'GET /contra/:vchNo/print',
   'GET /journal/:vchNo/print',
@@ -1105,6 +1207,7 @@ const PRINT_ROUTES = new Set([
 ]);
 
 const UPDATE_POST_ROUTES = new Set([
+  'POST /sales/print-files/default',
   'POST /stock/tag-print-screen/hm-update',
   'POST /stock/tag-print-screen/default-file',
   'POST /masters/item-master/:code/tag-values',
@@ -1114,6 +1217,7 @@ const UPDATE_POST_ROUTES = new Set([
   'POST /tour-orders/:vchNo/image',
   'POST /masters/design-book/image',
   'POST /repair-images',
+  'POST /admin/users/:loginName/update',
   'POST /admin/users/:loginName/rights',
   'POST /admin/users/:loginName/form-rights',
   'POST /admin/users/:loginName/password-reset',
@@ -1137,8 +1241,6 @@ const UPDATE_POST_ROUTES = new Set([
   'POST /einvoice/gsp-test',
   'POST /einvoice/:vchNo/cancel',
   'POST /year-end/close',
-  'POST /balance-transfer/year-close',
-  'POST /balance-transfer/openings',
   'POST /reports/entry-check/mark-checked',
 ]);
 
@@ -1148,7 +1250,6 @@ const READ_POST_ROUTES = new Set([
   'POST /sales-returns/:vchNo/incoming-bill-replay',
   'POST /sales-returns/:vchNo/incoming-replay',
   'POST /year-end/preview',
-  'POST /balance-transfer/preview',
   'POST /utilities/estimate-reset/preview',
   // Reads only: the framework asserts a preview writes nothing, and the diff it returns is what the operator
   // reviews before any apply exists.
@@ -1171,6 +1272,8 @@ const ADMIN_ONLY = new Set([
   'POST /backup/restore',
   'GET /admin/users',
   'POST /admin/users',
+  'POST /admin/users/:loginName/update',
+  'DELETE /admin/users/:loginName',
   'POST /admin/users/:loginName/rights',
   'GET /admin/form-catalog',
   'GET /admin/users/:loginName/form-rights',

@@ -16,6 +16,7 @@ import {
   tagState,
 } from './approvalHelpers.mjs';
 import { rollbackMatrix } from '../faults.mjs';
+import { salesInvoiceResidualCases } from './salesInvoiceResiduals.mjs';
 
 /**
  * Feature: Sales → Sales Invoice (desktop TR_SALE, opened by MDI_FORM.cs:7918-7919 CurBookHelp("SALES")).
@@ -23,8 +24,10 @@ import { rollbackMatrix } from '../faults.mjs';
  * Expected values are computed here from the desktop rules, not read from the web code:
  * - TR_SALE.cs CommPassTotal (10716-10936): with CO_SET.SL_AMT_TYPE='N' (what seedCompany provisions) a line is
  *   priced on net weight: ITM_AMT = netWt × rate; labour per gram LBR_AMT = netWt × making; fine =
- *   round(netWt × touch / 100, 3). Each component is rounded to TOT_AMT_ROF decimals (TR_SALE.cs:19192). A
- *   web-provisioned company leaves TOT_AMT_ROF and TAX_ROF blank, which the web resolves to 2 decimals
+ *   round(netWt × touch / 100, 3). ITM_AMT and LBR_AMT are each ONE Math.Round to the Sale line precision, which
+ *   CommPassTotal hardcodes: 0 decimals, or 2 under ALL_ROF_REMOVE = 'Y' (TR_SALE.cs:10343-10362; N235/G247). The
+ *   seeded company leaves ALL_ROF_REMOVE blank, so line amounts are whole rupees (.NET Math.Round: half to even).
+ *   TOT_AMT_ROF and TAX_ROF, blank on a web-provisioned company, round the bill totals and tax at 2 decimals
  *   (packages/core/src/roundingPolicy.ts; the desktop itself always stores the flag, MS_OPNCOMP.cs:991).
  * - GST on (Σ line net − discount); intra-state splits into CGST = SGST = tax / 2, inter-state is IGST.
  * - Delete writes DELETE_DATA (TR_SALE.cs:16316-16322) and reverses stock and ledger.
@@ -42,11 +45,11 @@ const as = (user, slot) => ({
 });
 
 // --- independent expectations ---------------------------------------------------------------------------------
-// Amounts at 2 decimals (blank TOT_AMT_ROF / TAX_ROF on a web-provisioned company).
+// Line amounts in whole rupees (blank ALL_ROF_REMOVE); bill totals and tax at 2 decimals (blank TOT_AMT_ROF / TAX_ROF).
 // Line A: GLD22, 10.000 g, touch 91.6, rate 6123.45, making 237.5 /g
-//   metal  = 10 × 6123.45             = 61,234.50
-//   labour = 10 × 237.5               =  2,375.00
-//   net    = 63,609.50;  fine = 9.160
+//   metal  = Math.Round(10 × 6123.45 = 61,234.5, 0) = 61,234 (half to even)
+//   labour = Math.Round(10 × 237.5, 0)               =  2,375
+//   net    = 63,609;  fine = 9.160
 // Line B: SLV92, 50.000 g, touch 92.5, rate 85.5, no making
 //   metal  = 50 × 85.5                =  4,275.00;  fine = 46.250
 const LINE_A = {
@@ -66,23 +69,23 @@ const LINE_B = {
   touch: '92.5',
   rate: '85.5',
 };
-const EXPECT_A = { metal: 61234.5, labour: 2375, net: 63609.5, fine: 9.16 };
+const EXPECT_A = { metal: 61234, labour: 2375, net: 63609, fine: 9.16 };
 const EXPECT_B = { metal: 4275, labour: 0, net: 4275, fine: 46.25 };
 
-/** Single line A, 3% GST intra-state: tax = 63,609.50 × 3% = 1,908.285 → 1,908.29 (half-up).
- *  TR_SALE.cs stores SGST_TAX = CGST_TAX = Val(tax) / 2.0 WITHOUT rounding: 954.145 each.
- *  total = 63,609.50 + 1,908.29 = 65,517.79. */
+/** Single line A, 3% GST intra-state: tax = 63,609 × 3% = 1,908.27.
+ *  TR_SALE.cs stores SGST_TAX = CGST_TAX = Val(tax) / 2.0 WITHOUT rounding: 954.135 each.
+ *  total = 63,609 + 1,908.27 = 65,517.27. */
 const ONE_LINE = {
-  net: 63609.5,
-  taxable: 63609.5,
-  tax: 1908.29,
-  cgst: 954.145,
-  sgst: 954.145,
+  net: 63609,
+  taxable: 63609,
+  tax: 1908.27,
+  cgst: 954.135,
+  sgst: 954.135,
   igst: 0,
-  total: 65517.79,
+  total: 65517.27,
 };
-/** Lines A + B: net 67,884.50; tax 3% = 2,036.535 → 2,036.54. */
-const TWO_LINES = { net: 67884.5, taxable: 67884.5, tax: 2036.54 };
+/** Lines A + B: net 67,884; tax 3% = 2,036.52. */
+const TWO_LINES = { net: 67884, taxable: 67884, tax: 2036.52 };
 
 // --- screen helpers -----------------------------------------------------------------------------------------
 const cell = (page, row, column) =>
@@ -253,6 +256,12 @@ export const salesInvoice = {
     'web/apps/api/src/modules/sales/approvalSaleReferences.ts',
     'web/apps/api/src/routes/txn.ts',
     'web/apps/web/test/features/modules/salesInvoice.mjs',
+    'web/apps/web/test/features/modules/salesInvoiceResiduals.mjs',
+    'web/apps/web/components/SaleResidualPanel.tsx',
+    'web/apps/web/lib/saleResidual.ts',
+    'web/apps/api/src/modules/sales/saleResiduals.ts',
+    'web/apps/api/src/modules/sales/saleRead.ts',
+    'web/apps/api/src/modules/sales/salePrintChoice.ts',
     'web/apps/web/test/features/faults.mjs',
     'web/apps/web/test/features/fixtures/catalogue.mjs',
   ],
@@ -354,14 +363,14 @@ export const salesInvoice = {
         await pickParty(page, PARTIES.local.code);
         await fillLine(page, 0, LINE_A);
         const row = page.locator('tr').filter({ has: page.locator('[data-grid-row="0"]') });
-        await row.filter({ hasText: '63,609.5' }).waitFor();
+        await row.filter({ hasText: '63,609' }).waitFor();
         await row.filter({ hasText: '9.16' }).waitFor();
         const totals = await screenTotals(page);
         await ctx.shot(page, 'single-line-preview');
         assert.equal(totals.net, ONE_LINE.net);
         assert.equal(totals.tax, ONE_LINE.tax);
         return {
-          observation: `preview line net 63,609.5 fine 9.16; totals ${JSON.stringify(totals)}`,
+          observation: `preview line net 63,609 fine 9.16; totals ${JSON.stringify(totals)}`,
           expected: { line: EXPECT_A, totals: ONE_LINE },
         };
       },
@@ -375,7 +384,7 @@ export const salesInvoice = {
       async (ctx) => {
         const { page } = await ctx.session();
         const before = await sentinelSnapshot(ctx.owner);
-        const vchNo = await createOneLine(ctx, page, { cash: '65517.79' });
+        const vchNo = await createOneLine(ctx, page, { cash: '65517.27' });
         await ctx.shot(page, 'saved');
         const [h] = await header(ctx, vchNo);
         const l = await lines(ctx, vchNo);
@@ -385,7 +394,7 @@ export const salesInvoice = {
         assert.equal(h.tax, ONE_LINE.tax);
         assert.equal(h.cgst, ONE_LINE.cgst);
         assert.equal(h.sgst, ONE_LINE.sgst);
-        assert.equal(h.cash, 65517.79);
+        assert.equal(h.cash, 65517.27);
         assert.deepEqual(
           l.map((x) => [x.it, x.nwt, x.fine, x.amt, x.lbr, x.net]),
           [[ITEMS.gold.code, 10, EXPECT_A.fine, EXPECT_A.metal, EXPECT_A.labour, EXPECT_A.net]],
@@ -394,7 +403,7 @@ export const salesInvoice = {
         assert.deepEqual(s, [{ it: ITEMS.gold.code, sign: '-', nwt: 10 }]);
         assert.deepEqual(await sentinelSnapshot(ctx.owner), before, 'other tenant untouched');
         const reg = await registerRow(page, vchNo);
-        assert.match(reg, /63609\.5|63,609\.5/);
+        assert.match(reg, /63609|63,609/);
         return {
           observation: `voucher ${vchNo}: SL_DATA net ${h.net} tax ${h.tax} (CGST ${h.cgst}/SGST ${h.sgst}) total ${h.tot}; 1 SL_DETL; stock -10; ${g.length} balanced ledger legs; register row present`,
           expected: { line: EXPECT_A, totals: ONE_LINE, stock: -10 },
@@ -476,6 +485,59 @@ export const salesInvoice = {
     ),
 
     C(
+      'formula.percentage-labour',
+      'T03',
+      'mutation',
+      'TR_SALE.cs:10996-11021 LBR_RATE = Math.Round(ITM_RATE x LBR_PRC / 100, MsLbrRof); :11084-11127 LBR_AMT = Math.Round(basis x LBR_RATE, digits2), the blank LBR_TYPE basis (net + ghat); :10343-10362 digits2 = 0 (N235/G247)',
+      async (ctx) => {
+        // Silver, 1000 g net, rate 85.55, Lbr% 12.5, no making; CO_SET.LBR_TYPE and LBR_ROF blank (seedCompany):
+        //   LBR_RATE = Math.Round(85.55 x 12.5 / 100 = 10.69375, 2)  = 10.69
+        //   LBR_AMT  = Math.Round((1000 + 0 ghat) x 10.69, 0)         = 10,690
+        //     (12.5 % of the item amount, the old web rule, gave 85,550 x 12.5 % = 10,693.75 -> 10,694)
+        //   ITM_AMT  = Math.Round(1000 x 85.55, 0) = 85,550; NET_AMT = 96,240; tax 3 % = 2,887.20
+        const { page } = await ctx.session();
+        await openSales(page);
+        await pickParty(page, PARTIES.local.code);
+        await fillLine(page, 0, { ...LINE_B, gross: '1000.4', net: '1000', rate: '85.55' });
+        await cell(page, 0, 11).fill('12.5');
+        const row = page.locator('tr').filter({ has: page.locator('[data-grid-row="0"]') });
+        await row.filter({ hasText: '96,240' }).waitFor();
+        const preview = await screenTotals(page);
+        assert.equal(preview.net, 96240);
+        const response = await save(page);
+        assert.equal(response.status(), 201, await response.text());
+        const vchNo = String((await response.json()).vchNo).padStart(5, '0');
+        const [h] = await header(ctx, vchNo);
+        const [l] = await ctx.rows(
+          `SELECT "ITM_RATE"::float rate,"LBR_PRC"::float pct,"LBR_RATE"::float lrate,"LBR_TYPE" ltype,
+                  "LBR_AMT"::float lbr,"ITM_AMT"::float amt,"NET_AMT"::float net
+             FROM "SL_DETL" WHERE tenant_id=$1 AND "CO_BOOK"='${BOOK}' AND "VCH_NO"=$2`,
+          vchNo,
+        );
+        assert.deepEqual(l, {
+          rate: 85.55,
+          pct: 12.5,
+          lrate: 10.69,
+          ltype: l.ltype,
+          lbr: 10690,
+          amt: 85550,
+          net: 96240,
+        });
+        assert.ok(!l.ltype, `a blank company LBR_TYPE stays blank on the line: ${l.ltype}`);
+        assert.equal(h.net, 96240);
+        assert.equal(h.tax, 2887.2);
+        const g = await ledger(ctx, vchNo);
+        assert(balanced(g));
+        return {
+          observation: `preview net ${preview.net}; voucher ${vchNo}: LBR_RATE ${l.lrate}, LBR_AMT ${l.lbr}, ITM_AMT ${l.amt}, NET_AMT ${l.net}; header net ${h.net} tax ${h.tax}`,
+          expected: { labourRate: 10.69, labour: 10690, metal: 85550, net: 96240, tax: 2887.2 },
+          database: { header: h, line: l, ledger: g },
+          downstream: { balanced: true },
+        };
+      },
+    ),
+
+    C(
       'create.interstate-igst',
       'T02',
       'mutation',
@@ -511,7 +573,7 @@ export const salesInvoice = {
       'mutation',
       'TR_SALE totals: GST on (net − discount)',
       async (ctx) => {
-        // 63,609.50 − 1,000 = 62,609.50 taxable; tax 3% = 1,878.285 → 1,878.29
+        // 63,609 − 1,000 = 62,609 taxable; tax 3% = 1,878.27
         const { page } = await ctx.session();
         await openSales(page);
         await pickParty(page, PARTIES.local.code);
@@ -522,12 +584,12 @@ export const salesInvoice = {
         const vchNo = String((await response.json()).vchNo).padStart(5, '0');
         const [h] = await header(ctx, vchNo);
         assert.equal(h.disc, 1000);
-        assert.equal(h.tax, 1878.29);
+        assert.equal(h.tax, 1878.27);
         const g = await ledger(ctx, vchNo);
         assert(balanced(g));
         return {
           observation: `voucher ${vchNo}: discount ${h.disc}, tax ${h.tax}`,
-          expected: { taxable: 62609.5, tax: 1878.29 },
+          expected: { taxable: 62609, tax: 1878.27 },
           database: { header: h, ledger: g },
           downstream: { balanced: true },
         };
@@ -706,7 +768,7 @@ export const salesInvoice = {
       'SalesBillA4Gst.rpt prints SL_DATA.CGST_TAX/SGST_TAX (line halves unused); G181: the HSN table must show the same heads as the summary and total the bill tax',
       async (ctx) => {
         const { page } = await ctx.session();
-        const vchNo = await createOneLine(ctx, page); // 1,908.29 tax: two halves of 954.145
+        const vchNo = await createOneLine(ctx, page); // 1,908.27 tax: two halves of 954.135
         await loadVoucher(page, vchNo);
         const documentRequest = page
           .context()
@@ -952,18 +1014,6 @@ export const salesInvoice = {
         };
       },
     ),
-
-    {
-      ...C(
-        'refusal.negative-weight',
-        'T06',
-        'refusal',
-        'TR_SALE item grid: no numeric validation found; TR_SALE_KeyPress (14870-14883) only uppercases and drops NUL/apostrophe',
-        async () => ({}),
-      ),
-      blocked:
-        'Expected behaviour undecided: no desktop source refuses a negative weight, and the web saves it. Needs an original-Windows run to decide refuse vs accept.',
-    },
 
     C(
       'lookup.lower-case-code',
@@ -1337,7 +1387,7 @@ export const salesInvoice = {
         await openSales(page);
         await pickParty(page, PARTIES.local.code);
         await fillLine(page, 0, LINE_A);
-        await field(page, 'Cash ₹').fill('65517.79');
+        await field(page, 'Cash ₹').fill('65517.27');
         // Measured on the first run: one save of this bill changes exactly these eight tables.
         const r = await rollbackMatrix(ctx, {
           tables: [
@@ -1355,7 +1405,7 @@ export const salesInvoice = {
           submit: () => save(page),
         });
         const [h] = await header(ctx, r.vchNo);
-        assert.equal(h.cash, 65517.79);
+        assert.equal(h.cash, 65517.27);
         return {
           observation: `${r.attempts.map((a) => `${a.table} fault -> ${a.status}`).join(', ')}; every table of the tenant unchanged after each; then voucher ${r.vchNo} saved (201) with the expected number`,
           expected: { unchangedAfterEachFault: true, nextVoucherNo: r.expectedNo },
@@ -1370,17 +1420,19 @@ export const salesInvoice = {
       },
     ),
 
-    {
-      id: 'sales-invoice.config.setting-change',
-      group: 'T15',
-      kind: 'mutation',
-      source:
-        'Playbook T15: change SL_AMT_TYPE between preview and save; reopen a historic document',
-      applicable: true,
-      requiredEvidence: ['browser', 'expected', 'database', 'downstream'],
-      blocked: 'Settings-variant fixture pack (SL_AMT_TYPE=F company) not yet in the catalogue.',
-      run: async () => ({}),
-    },
+    // WP-26 (N243, G255): residual cases, including the two formerly blocked ones (decisions D3, D4).
+    ...salesInvoiceResidualCases({
+      C,
+      BOOK,
+      LINE_A,
+      openSales,
+      pickParty,
+      fillLine,
+      save,
+      loadVoucher,
+      field,
+      cell,
+    }),
   ],
 };
 

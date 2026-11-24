@@ -94,7 +94,7 @@ d('Wholesale Quotation is a document-only TR_WH_SALE mode', () => {
 
     await editWholesaleQuotation(
       runtime,
-      { ...input, vchDesc: 'Revised quotation' },
+      { ...input, vchDesc: 'Revised quotation', expectedVersion: String(opened.version ?? '') },
       created.vchNo,
     );
     const edited = await getWholesaleQuotation(runtime, scope, created.vchNo);
@@ -105,7 +105,12 @@ d('Wholesale Quotation is a document-only TR_WH_SALE mode', () => {
     )) as Array<{ n: number }>;
     expect(temp[0]?.n).toBe(1);
 
-    await deleteWholesaleQuotation(runtime, { scope, vchNo: created.vchNo, deleteUser: 'tester' });
+    await deleteWholesaleQuotation(runtime, {
+      scope,
+      vchNo: created.vchNo,
+      deleteUser: 'tester',
+      expectedVersion: String(edited.version ?? ''),
+    });
     const after = await withTenant(runtime, TENANT, async (tx: any) => ({
       header: Number(
         (
@@ -138,5 +143,56 @@ d('Wholesale Quotation is a document-only TR_WH_SALE mode', () => {
       TENANT,
     )) as Array<{ n: number }>;
     expect(rows[0]?.n).toBe(0);
+  });
+
+  it('N51: an edit or delete with a stale or missing version token is refused and writes nothing', async () => {
+    const created = await postWholesaleQuotation(runtime, input);
+    const opened = await getWholesaleQuotation(runtime, scope, created.vchNo);
+    const stale = String(opened.version ?? '');
+    // The first save with the token it opened with succeeds and issues a fresh version.
+    const saved = await editWholesaleQuotation(
+      runtime,
+      { ...input, vchDesc: 'First save', expectedVersion: stale },
+      created.vchNo,
+    );
+    expect(saved.version).toMatch(/^[0-9a-f]{64}$/);
+    expect(saved.version).not.toBe(stale);
+    // A missing token is the same refusal the versioned routes answer.
+    await expect(
+      editWholesaleQuotation(runtime, { ...input, vchDesc: 'No token' }, created.vchNo),
+    ).rejects.toMatchObject({ name: 'VoucherVersionValidationError' });
+    // The stale second save is refused and writes nothing.
+    await expect(
+      editWholesaleQuotation(
+        runtime,
+        { ...input, vchDesc: 'Stale save', expectedVersion: stale },
+        created.vchNo,
+      ),
+    ).rejects.toMatchObject({ code: 'voucher-version-conflict' });
+    const edited = await getWholesaleQuotation(runtime, scope, created.vchNo);
+    expect(edited).toMatchObject({ vchDesc: 'First save' });
+    // A delete from the stale copy is refused and deletes nothing.
+    await expect(
+      deleteWholesaleQuotation(runtime, {
+        scope,
+        vchNo: created.vchNo,
+        deleteUser: 'tester',
+        expectedVersion: stale,
+      }),
+    ).rejects.toMatchObject({ code: 'voucher-version-conflict' });
+    const remaining = (await owner.$queryRawUnsafe(
+      `SELECT count(*)::int n FROM "RATE_CUT_DATA" WHERE tenant_id=$1 AND "CO_BOOK"='WHQ'`,
+      TENANT,
+    )) as Array<{ n: number }>;
+    expect(remaining[0]?.n).toBe(1);
+    // With the current version the delete succeeds.
+    await expect(
+      deleteWholesaleQuotation(runtime, {
+        scope,
+        vchNo: created.vchNo,
+        deleteUser: 'tester',
+        expectedVersion: String(edited.version ?? ''),
+      }),
+    ).resolves.toEqual({ reversed: true });
   });
 });

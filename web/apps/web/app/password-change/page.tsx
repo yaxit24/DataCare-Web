@@ -3,6 +3,7 @@ import { useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { ApiError, post, loadPageSession, PageContextError } from '../../lib/api';
 import { useOperationLease } from '../../components/useOperationLease';
+import { passwordReasonText } from '../../lib/userCreate';
 
 export default function PasswordChangePage() {
   const router = useRouter();
@@ -52,7 +53,7 @@ export default function PasswordChangePage() {
       if (cause instanceof PageContextError) {
         setError(cause.message);
       } else if (body?.error === 'weak-password') {
-        setError(`Password does not meet policy (${(body.reasons ?? []).join(', ')}).`);
+        setError(passwordReasonText(body.reasons));
       } else if (body?.error === 'current-password-invalid') {
         setError('Current password is incorrect.');
       } else {
@@ -71,7 +72,8 @@ export default function PasswordChangePage() {
       <form className="login-card" onSubmit={submit}>
         <h1>Change Password</h1>
         <p className="muted">
-          Use at least 12 characters with uppercase, lowercase, number, and symbol.
+          Use at least 8 characters. A common password, or one made from your user name or the
+          company code, is refused.
         </p>
         {error && <div className="msg err">{error}</div>}
         <div className="field">

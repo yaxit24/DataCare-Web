@@ -716,12 +716,18 @@ export const itemMaster = {
           await saved(page);
           const after = await counts();
           assert.deepEqual(after, { ...before, i: before.i + 1 });
+          // WP-36: the hidden desktop columns a new item writes (MS_ITEM.cs:3261-3263): N, N, 0; AC_MEMB_COM_PRC 0.
+          const [hidden] = await ctx.rows(
+            `SELECT "TAX_FREE_ITEM" tf,"APP_ITEM" app,"EMP_COM_PRC" emp,"AC_MEMB_COM_PRC" memb FROM "ITEM_MAST" WHERE tenant_id=$1 AND "IT_CODE"=$2`,
+            'IMIMG',
+          );
+          assert.deepEqual(hidden, { tf: 'N', app: 'N', emp: 0, memb: 0 });
           const list = await listed(page);
           assert.deepEqual(list, await dbList(ctx));
           return {
-            observation: `ITEM_MAST ${before.i} → ${after.i}; nothing else changed`,
-            expected: 'one row',
-            database: { before, after },
+            observation: `ITEM_MAST ${before.i} → ${after.i}; nothing else changed; hidden columns ${JSON.stringify(hidden)}`,
+            expected: 'one row; TAX_FREE_ITEM N, APP_ITEM N, EMP_COM_PRC 0, AC_MEMB_COM_PRC 0',
+            database: { before, after, hidden },
             downstream: { listed: list.some(([c]) => c === 'IMIMG') },
           };
         }),
@@ -734,6 +740,11 @@ export const itemMaster = {
       async (ctx) =>
         withMasters(ctx, async () => {
           await seedItem(ctx, 'IMIMG', 'E2E REOPEN RING', { minstk: 5, avg: 91.6, lbr: 9 });
+          // A migrated desktop item's hidden values: DISPLAY_DATA reloads them, so the save keeps them (:2989, :3024, :3032).
+          await exec(
+            ctx,
+            `UPDATE "ITEM_MAST" SET "TAX_FREE_ITEM"='Y',"APP_ITEM"='Y',"EMP_COM_PRC"=2.5 WHERE tenant_id=$1 AND "IT_CODE"='IMIMG'`,
+          );
           const before = await allItems(ctx);
           const { page } = await ctx.session();
           await openScreen(page);
@@ -744,6 +755,11 @@ export const itemMaster = {
           const after = await allItems(ctx);
           const row = await itemRow(ctx, 'IMIMG');
           assert.deepEqual([row.minstk, row.avg, row.main, row.lbr], [5, 91.6, 'DESKUSER', 9]);
+          const [hidden] = await ctx.rows(
+            `SELECT "TAX_FREE_ITEM" tf,"APP_ITEM" app,"EMP_COM_PRC" emp,"AC_MEMB_COM_PRC" memb FROM "ITEM_MAST" WHERE tenant_id=$1 AND "IT_CODE"=$2`,
+            'IMIMG',
+          );
+          assert.deepEqual(hidden, { tf: 'Y', app: 'Y', emp: 2.5, memb: 0 });
           return {
             observation: `MIN_STK ${row.minstk}, AVG_TOUCH ${row.avg}, MAIN_USER ${row.main} after an unchanged save`,
             expected: { minstk: 5, avg: 91.6, main: 'DESKUSER' },
@@ -1270,7 +1286,8 @@ export const itemMaster = {
           assert.equal(sold.status(), 201, await sold.text());
           const vchNo = String((await sold.json()).vchNo).padStart(5, '0');
           try {
-            // 10 g × 6,123.45 + 10 g × 237.50 = 63,609.50 credited to group IMG's sales account (SALES).
+            // 10 g × 6,123.45 + 10 g × 237.50 = 61,234 + 2,375 = 63,609 (each line amount Math.Round(.., 0), half to even:
+            // TR_SALE.cs:10343-10362) credited to group IMG's sales account (SALES).
             const lines = await ctx.rows(
               `SELECT "IT_CODE" it FROM "SL_DETL" WHERE tenant_id=$1 AND "CO_BOOK"='SL' AND "VCH_NO"=$2`,
               vchNo,
@@ -1280,7 +1297,7 @@ export const itemMaster = {
               `SELECT "AC_CODE" ac,"CR_AMT"::float cr FROM "AC_DATA" WHERE tenant_id=$1 AND "CO_BOOK"='SL' AND "VCH_NO"=$2 AND "AC_CODE"='SALES'`,
               vchNo,
             );
-            assert.deepEqual(legs, [{ ac: 'SALES', cr: 63609.5 }]);
+            assert.deepEqual(legs, [{ ac: 'SALES', cr: 63609 }]);
             const me = await (await page.request.get('/api/me')).json();
             const invoice = await page.request.get(
               `/api/sales/invoice?coBook=SL&coYear=${encodeURIComponent(me.coYear)}&vchNo=${vchNo}&format=html&copy=O`,
@@ -1291,8 +1308,8 @@ export const itemMaster = {
               "the invoice prints the item's HSN code",
             );
             return {
-              observation: `sale ${vchNo} of IMIMG credited 63609.50 to SALES; the invoice prints HSN 711311`,
-              expected: { leg: 63609.5, hsn: '711311' },
+              observation: `sale ${vchNo} of IMIMG credited 63609.00 to SALES; the invoice prints HSN 711311`,
+              expected: { leg: 63609, hsn: '711311' },
               database: { lines, legs },
               downstream: { vchNo },
             };

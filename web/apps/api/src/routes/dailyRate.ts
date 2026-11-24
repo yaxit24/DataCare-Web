@@ -2,6 +2,7 @@ import type { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify';
 import {
   dailyRateDates,
   dailyRateExists,
+  dailyRateLabels,
   dailyRateReportHtml,
   DailyRateNotFoundError,
   deleteDailyRate,
@@ -113,6 +114,10 @@ export function registerDailyRateRoutes(app: FastifyInstance, h: DailyRateRouteH
     if (!guard(req, reply, 'view')) return;
     return run(reply, 200, () => getDailyRate(prisma, readScope(req), dateOf(req)));
   });
+  // MDI_FORM.cs:11421: today's labels for the session's own company and location. Not behind a form right.
+  app.get('/daily-rate/labels', auth, async (req, reply) =>
+    run(reply, 200, () => dailyRateLabels(prisma, readScope(req), dateOf(req))),
+  );
   app.get('/daily-rate/dates', auth, async (req, reply) => {
     if (!guard(req, reply, 'view')) return;
     return run(reply, 200, () => dailyRateDates(prisma, readScope(req)));

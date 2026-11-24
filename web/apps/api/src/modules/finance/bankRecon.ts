@@ -1,3 +1,4 @@
+import { notCarriedOpening } from '../shared/carriedOpening.js';
 import { toIsoDate } from '@datacare/core';
 import { formatVoucherNo } from '../vouchers/numbering.js';
 import { withTxBudget } from '../shared/txBudget.js';
@@ -39,7 +40,7 @@ export async function bankReconList(
   range?: { from?: string; to?: string },
 ): Promise<BankReconList> {
   return withTxBudget(prisma, scope.tenantId, 'read', async (tx: any) => {
-    const cond: string[] = [`a."CO_CODE"=$1`, `a."AC_CODE"=$2`];
+    const cond: string[] = [`a."CO_CODE"=$1`, `a."AC_CODE"=$2`, notCarriedOpening('a')];
     const params: unknown[] = [scope.coCode, bankAc];
     if (range?.from) {
       params.push(range.from);
@@ -49,12 +50,13 @@ export async function bankReconList(
       params.push(range.to);
       cond.push(`a."VCH_DATE"::date <= $${params.length}::date`);
     }
+    // A grid voucher has one CASH_DATA row per line (TR_CASH.cs:2995-3060): name each leg from its own line's row.
     const rows: any[] = await tx.$queryRawUnsafe(
       `SELECT a."CO_BOOK" cob, a."VCH_NO" vch, coalesce(a."VCH_TYPE",'') vt, a."VCH_DATE"::text vd,
               coalesce(NULLIF(a."DR_AMT"::text,'')::numeric,0)::float dr, coalesce(NULLIF(a."CR_AMT"::text,'')::numeric,0)::float cr, a."CLR_DATE"::text clr,
-              coalesce((SELECT ch."AC_NAME" FROM "CASH_DATA" ch WHERE ch."CO_CODE"=a."CO_CODE" AND ch."CO_BOOK"=a."CO_BOOK" AND ch."VCH_NO"=a."VCH_NO" LIMIT 1),
+              coalesce((SELECT ch."AC_NAME" FROM "CASH_DATA" ch WHERE ch."CO_CODE"=a."CO_CODE" AND ch."CO_BOOK"=a."CO_BOOK" AND ch."VCH_NO"=a."VCH_NO" ORDER BY (ch."AC_CODE" IN (a."AC_CODE",a."LD_CODE")) DESC, ch."SR_NO" NULLS FIRST LIMIT 1),
                        (SELECT py."AC_NAME" FROM "PAY_DATA" py WHERE py."CO_CODE"=a."CO_CODE" AND py."CO_BOOK"=a."CO_BOOK" AND py."VCH_NO"=a."VCH_NO" LIMIT 1), '') acname,
-              coalesce((SELECT ch."CHQ_NO" FROM "CASH_DATA" ch WHERE ch."CO_CODE"=a."CO_CODE" AND ch."CO_BOOK"=a."CO_BOOK" AND ch."VCH_NO"=a."VCH_NO" LIMIT 1),
+              coalesce((SELECT ch."CHQ_NO" FROM "CASH_DATA" ch WHERE ch."CO_CODE"=a."CO_CODE" AND ch."CO_BOOK"=a."CO_BOOK" AND ch."VCH_NO"=a."VCH_NO" ORDER BY (ch."AC_CODE" IN (a."AC_CODE",a."LD_CODE")) DESC, ch."SR_NO" NULLS FIRST LIMIT 1),
                        (SELECT py."CHQ_NO" FROM "PAY_DATA" py WHERE py."CO_CODE"=a."CO_CODE" AND py."CO_BOOK"=a."CO_BOOK" AND py."VCH_NO"=a."VCH_NO" LIMIT 1), '') chq
        FROM "AC_DATA" a WHERE ${cond.join(' AND ')} ORDER BY a."VCH_DATE" NULLS LAST, a."VCH_NO"`,
       ...params,
@@ -63,7 +65,7 @@ export async function bankReconList(
     let openingBal = 0;
     if (range?.from) {
       const pr: any[] = await tx.$queryRawUnsafe(
-        `SELECT coalesce(sum(coalesce(NULLIF("DR_AMT"::text,'')::numeric,0)-coalesce(NULLIF("CR_AMT"::text,'')::numeric,0)),0)::float n FROM "AC_DATA" WHERE "CO_CODE"=$1 AND "AC_CODE"=$2 AND "VCH_DATE"::date < $3::date`,
+        `SELECT coalesce(sum(coalesce(NULLIF("DR_AMT"::text,'')::numeric,0)-coalesce(NULLIF("CR_AMT"::text,'')::numeric,0)),0)::float n FROM "AC_DATA" WHERE "CO_CODE"=$1 AND "AC_CODE"=$2 AND "VCH_DATE"::date < $3::date AND ${notCarriedOpening()}`,
         scope.coCode,
         bankAc,
         range.from,

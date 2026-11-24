@@ -223,12 +223,20 @@ d('rate-cut settlement persistence', () => {
       });
     await expect(countTemp()).resolves.toBe(1);
 
-    await editRateCut(prisma, { ...input, convRate: 7100 }, created.vchNo);
+    await editRateCut(
+      prisma,
+      { ...input, convRate: 7100, expectedVersion: String(opened.version ?? '') },
+      created.vchNo,
+    );
     const reopened = await getRateCut(prisma, scope, created.vchNo);
     expect(reopened.hiddenVoucherNo).toBe(hidden);
     await expect(countTemp()).resolves.toBe(1);
 
-    await deleteRateCut(prisma, { scope, vchNo: created.vchNo });
+    await deleteRateCut(prisma, {
+      scope,
+      vchNo: created.vchNo,
+      expectedVersion: String(reopened.version ?? ''),
+    });
     await expect(countTemp()).resolves.toBe(0);
   });
 
@@ -572,7 +580,11 @@ d('rate-cut settlement persistence', () => {
     // Booking consumed: availability falls from 25 to 15.
     expect(await adjWt()).toBeCloseTo(cutWt, 3);
 
-    await deleteRateCut(prisma, { scope, vchNo: created.vchNo } as any);
+    await deleteRateCut(prisma, {
+      scope,
+      vchNo: created.vchNo,
+      expectedVersion: created.version,
+    } as any);
 
     // Released in full — not left consumed, and not double-released.
     expect(await adjWt()).toBeCloseTo(0, 3);
@@ -1029,7 +1041,11 @@ d('rate-cut settlement persistence', () => {
       srno: 1,
     });
 
-    await deleteRateCut(prisma, { scope, vchNo: created.vchNo } as any);
+    await deleteRateCut(prisma, {
+      scope,
+      vchNo: created.vchNo,
+      expectedVersion: created.version,
+    } as any);
     expect(await adjWt()).toBeCloseTo(0, 3);
     const remaining = (await withTenant(prisma, tenantId, (tx: any) =>
       tx.$queryRawUnsafe(
