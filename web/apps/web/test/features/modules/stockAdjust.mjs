@@ -768,6 +768,22 @@ export const stockAdjust = {
           const voucherNo = String(savedBody.vchNo).padStart(5, '0');
           // The screen now holds the saved voucher and the version token the save returned.
           await page.getByRole('button', { name: 'Update Tag Adjust', exact: true }).waitFor();
+          // Load reopens it: the GET returns the voucher as JSON (BIGINT columns as numbers) with its version.
+          await page.getByPlaceholder('Voucher no').fill(voucherNo);
+          const [loadedRes] = await Promise.all([
+            page.waitForResponse(
+              (r) =>
+                r.request().method() === 'GET' &&
+                new URL(r.url()).pathname === `/api/stock/tag-adjust/${voucherNo}`,
+            ),
+            page.getByRole('button', { name: 'Load', exact: true }).click(),
+          ]);
+          assert.equal(loadedRes.status(), 200, await loadedRes.text());
+          assert.equal(
+            (await loadedRes.json()).version,
+            savedBody.version,
+            'Load returns the saved version',
+          );
           const vchDate = await page.locator('input[type=date]').inputValue();
           // A second request changes the voucher with its CURRENT token: the token the screen holds is now stale.
           const changed = await page.evaluate(

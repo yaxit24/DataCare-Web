@@ -486,7 +486,18 @@ export async function getTagAdjust(
       vchNo,
     )) as Array<Record<string, unknown>>;
     const version = await voucherVersionTx(tx, TAG_ADJUST_WRITE_TABLES, versionKeyOf(scope, vchNo));
-    return { header: headers[0], lines, stones, version };
+    // Raw rows can carry BIGINT columns (e.g. BAR_CAN_DETL), which JSON cannot serialise; the Load response
+    // would fail. Convert them as stock.ts does.
+    const plain = (r: Record<string, unknown>) =>
+      Object.fromEntries(
+        Object.entries(r).map(([k, v]) => [k, typeof v === 'bigint' ? Number(v) : v]),
+      );
+    return {
+      header: plain(headers[0]),
+      lines: lines.map(plain),
+      stones: stones.map(plain),
+      version,
+    };
   });
 }
 

@@ -221,6 +221,8 @@ databaseDescribe('TR_TAG_CAN Tag Adjust mode', () => {
     });
 
     const loaded = await getTagAdjust(runtime, scope, 1);
+    // The Load route returns this as JSON; BIGINT columns must already be numbers.
+    expect(() => JSON.stringify(loaded)).not.toThrow();
     expect(loaded?.header).toMatchObject({ CO_BOOK: BOOK, VCH_NO: '00001', AC_CODE: 'AC001' });
     expect(loaded?.lines).toHaveLength(1);
     expect(loaded?.lines[0]).toMatchObject({
