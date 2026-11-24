@@ -292,22 +292,23 @@ const marks = async (ctx) =>
     .map((r) => `${r.t}/${r.f}/${r.a}`)
     .sort();
 const options = (page) => label(page, 'Print file Name').locator('option').allInnerTexts();
-/** The sub-report rows of voucher 88001: GLD1 / 1234.50 on TP0001 and GLD2 / 99.40 on TP0002. */
+/** The sub-report rows of voucher 88001: GLD1 / IT_AMT 1234.50 / IT_NET_AMT 1000.40 on TP0001 and GLD2 / 99.40 / 55.60 on TP0002 (IT_NET_AMT differs so QrPrint10 (net) and the other files (IT_AMT) are told apart). */
 async function seedIdtl(ctx) {
   const year = await ctx.year();
-  for (const [srno, tagNo, code, amt] of [
-    [1, 'TP0001', 'GLD1', 1234.5],
-    [2, 'TP0002', 'GLD2', 99.4],
+  for (const [srno, tagNo, code, amt, net] of [
+    [1, 'TP0001', 'GLD1', 1234.5, 1000.4],
+    [2, 'TP0002', 'GLD2', 99.4, 55.6],
   ])
     await ctx.owner.$executeRawUnsafe(
-      `INSERT INTO "BAR_IDTL"(tenant_id,"CO_CODE","LC_CODE","CO_YEAR","CO_BOOK","VCH_NO","SR_NO","TAG_NO","VCH_SRNO","IT_CODE","IT_AMT")
-       VALUES ($1,'01','01',$2,'TOP','88001',$3,$4,$3,$5,$6)`,
+      `INSERT INTO "BAR_IDTL"(tenant_id,"CO_CODE","LC_CODE","CO_YEAR","CO_BOOK","VCH_NO","SR_NO","TAG_NO","VCH_SRNO","IT_CODE","IT_AMT","IT_NET_AMT")
+       VALUES ($1,'01','01',$2,'TOP','88001',$3,$4,$3,$5,$6,$7)`,
       ctx.tenantId,
       year,
       srno,
       tagNo,
       code,
       amt,
+      net,
     );
 }
 /** QR_CODE_GEN = Y for the run, then the company's previous CO_SET_NEW state back. */
@@ -1561,11 +1562,11 @@ export const tagPrint = {
           assert.deepEqual(subLines(labelFor(bar, 'TP0002')), ['GLD2 / 99']);
           const html = await sheetFor(page, 'QrPrint10');
           const qr = labelParts(html);
-          assert.deepEqual(subLines(qr[0]), ['GLD1 / 1235']);
-          assert.deepEqual(subLines(qr[1]), ['GLD2 / 99']);
+          assert.deepEqual(subLines(qr[0]), ['GLD1 / 1000']);
+          assert.deepEqual(subLines(qr[1]), ['GLD2 / 56']);
           return sheetResult(
             'each tag shows only its own line',
-            { TP0001: 'GLD1 / 1235', TP0002: 'GLD2 / 99' },
+            { TP0001: 'GLD1 / 1235', TP0002: 'GLD2 / 99', QR: 'GLD1 / 1000, GLD2 / 56' },
             html,
           );
         }),
@@ -1842,7 +1843,7 @@ export const tagPrint = {
           for (const file of LABEL_FILES) htmls[file] = await sheetFor(page, file);
           const q = labelFor(labelParts(htmls.QrPrint10), 'TP0001');
           assert.ok(
-            q.includes('data-qr="TP0001"') && !q.includes('*TP0001*') && q.includes('GLD1 / 1235'),
+            q.includes('data-qr="TP0001"') && !q.includes('*TP0001*') && q.includes('GLD1 / 1000'),
           );
           const b10 = labelFor(labelParts(htmls.BarPrint10), 'TP0001');
           assert.ok(
@@ -1898,7 +1899,7 @@ export const tagPrint = {
       'output.subtagprint-lines',
       'T16',
       'output',
-      'BarPrint10.xml:72 {BAR_IDTL.IT_CODE} & " / " & totext(IT_AMT,0) per row in QrPrint10, BarPrint10 and GhatTagPrnt; BarPrint13.xml:10 has none',
+      'BarPrint10.xml:72 {BAR_IDTL.IT_CODE} & " / " & totext(IT_AMT,0) per row in BarPrint10 and GhatTagPrnt, QrPrint10.xml:72 totext(IT_NET_AMT,0); BarPrint13.xml:10 has none',
       async (ctx) =>
         withCase(ctx, async () => {
           await putFiles(ctx, fourFiles());
@@ -1907,12 +1908,13 @@ export const tagPrint = {
           await openScreen(page);
           for (const file of ['BarPrint10', 'QrPrint10', 'GhatTagPrnt']) {
             const html = await sheetFor(page, file);
-            assert.ok(html.includes('GLD1 / 1235') && html.includes('GLD2 / 99'), file);
+            const [l1, l2] = file === 'QrPrint10' ? ['1000', '56'] : ['1235', '99'];
+            assert.ok(html.includes(`GLD1 / ${l1}`) && html.includes(`GLD2 / ${l2}`), file);
           }
           const none = await sheetFor(page, 'BarPrint13');
           assert.ok(!/GLD\d/.test(none));
           return sheetResult(
-            'GLD1 / 1235 and GLD2 / 99 on three files, none on BarPrint13',
+            'GLD1 / 1235 and GLD2 / 99 (IT_AMT) on BarPrint10 and GhatTagPrnt, GLD1 / 1000 and GLD2 / 56 (IT_NET_AMT) on QrPrint10, none on BarPrint13',
             'lines',
             none,
           );
@@ -1933,7 +1935,7 @@ export const tagPrint = {
           assert.deepEqual(subLines(labelFor(bar, 'TP0001')), ['GLD1 / 1235']);
           assert.deepEqual(subLines(labelFor(bar, 'TP0002')), ['GLD2 / 99']);
           const qr = labelParts(await sheetFor(page, 'QrPrint10'));
-          assert.deepEqual(subLines(qr[0]), ['GLD1 / 1235']);
+          assert.deepEqual(subLines(qr[0]), ['GLD1 / 1000']);
           const html = await sheetFor(page, 'GhatTagPrnt');
           for (const part of labelParts(html))
             assert.deepEqual(subLines(part), ['GLD1 / 1235', 'GLD2 / 99']);

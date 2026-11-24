@@ -8,9 +8,9 @@ import { diff, registerRepair, type RepairTableDiff } from './dataRepair.js';
  * migration loader and are not built here.
  *
  *   A1 `MS_UPDATE.cs:7214` AC_MAST.AC_MAIN_GR follows AC_GROUP.AC_MAIN_GR when the two differ. Like the
- *      desktop `<>` it ignores NULL on either side.
- *   A2 `MS_UPDATE.cs:8608` AC_MAST.DEFAULTER_AC NULL becomes 'N'. The desktop has no company filter; the web
- *      scopes to the session tenant and company.
+ *      desktop `<>` it ignores NULL on either side and only repairs the selected location.
+ *   A2 `MS_UPDATE.cs:8608` AC_MAST.DEFAULTER_AC NULL becomes 'N' across all locations. The desktop has
+ *      no company filter; the web deliberately scopes to the session tenant and company for safety.
  *
  * Both run as ONE statement so a row that needs both is counted and written once.
  */
@@ -21,10 +21,11 @@ const GROUP = `LEFT JOIN LATERAL (
    ORDER BY g.row_id LIMIT 1
 ) grp ON true`;
 const MISMATCH = `(m."AC_MAIN_GR" <> grp."AC_MAIN_GR")`;
+const SCOPED_MISMATCH = `(${MISMATCH} AND ($2::text='' OR m."LC_CODE"=$2))`;
 const NULL_DEFAULTER = `(m."DEFAULTER_AC" IS NULL)`;
 const WHERE = `m.tenant_id=current_setting('app.tenant_id',true)
-  AND m."CO_CODE"=$1 AND ($2::text='' OR m."LC_CODE"=$2)
-  AND (${MISMATCH} OR ${NULL_DEFAULTER})`;
+  AND m."CO_CODE"=$1
+  AND (${SCOPED_MISMATCH} OR ${NULL_DEFAULTER})`;
 
 registerRepair({
   id: 'data-refresh-field-update',
@@ -39,7 +40,7 @@ registerRepair({
   async preview(tx, scope) {
     const rows: any[] = await tx.$queryRawUnsafe(
       `SELECT m."AC_CODE" AS code,
-              CASE WHEN ${MISMATCH} THEN 'main group ' || coalesce(m."AC_MAIN_GR",'') || ' -> ' || grp."AC_MAIN_GR" ELSE '' END AS gr,
+              CASE WHEN ${SCOPED_MISMATCH} THEN 'main group ' || coalesce(m."AC_MAIN_GR",'') || ' -> ' || grp."AC_MAIN_GR" ELSE '' END AS gr,
               CASE WHEN ${NULL_DEFAULTER} THEN 'defaulter blank -> N' ELSE '' END AS df
          FROM "AC_MAST" m ${GROUP}
         WHERE ${WHERE}
@@ -62,7 +63,7 @@ registerRepair({
           SET "AC_MAIN_GR"=CASE WHEN x.mismatch THEN x.gr ELSE t."AC_MAIN_GR" END,
               "DEFAULTER_AC"=coalesce(t."DEFAULTER_AC",'N')
          FROM (
-           SELECT m.row_id, ${MISMATCH} AS mismatch, grp."AC_MAIN_GR" AS gr
+           SELECT m.row_id, ${SCOPED_MISMATCH} AS mismatch, grp."AC_MAIN_GR" AS gr
              FROM "AC_MAST" m ${GROUP}
             WHERE ${WHERE}
          ) x
