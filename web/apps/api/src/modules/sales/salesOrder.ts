@@ -34,6 +34,7 @@ import * as pricing from './salesOrderPricing.js';
 import * as tenders from './salesOrderTender.js';
 import * as oldMetal from './salesOrderOldMetal.js';
 import * as rateCut from './salesOrderRateCutPosting.js';
+import { orderStockWrites } from './salesOrderStock.js';
 export { orderTenderRequest } from './salesOrderTender.js';
 import { fineWt } from '../shared/fine.js';
 import { resolveSalesOrderDesignTx } from './orderDesignSelection.js';
@@ -338,11 +339,10 @@ async function resolveOrderBookTx(
   const table = text(row.BOOK_TBL_NAME).toUpperCase();
   if (table && table !== 'SL_ORD_DATA')
     throw new SaleValidationError(`${mode.mainBook} book must write SL_ORD_DATA, got ${table}`);
-  const inout = text(row.BOOK_INOUT).toUpperCase();
-  if (inout && inout !== mode.defaultInoutType)
-    throw new SaleValidationError(
-      `${mode.mainBook} book direction must be ${mode.defaultInoutType}`,
-    );
+  // No BOOK_INOUT check: the desktop opens any book of the main book (CurBookHelp, DC_Main.cs:1495-1536) and only
+  // stamps its BOOK_INOUT (FormBookInOut, TR_SALE_ORD.cs:8339) on INOUT_TYPE. An 'I' book posts more: old metal legs
+  // 07-10 and the rate-cut leg 11 (Ac_Ledr.cs:42-53) and the Order_Stk stock rows (salesOrderStock.ts). The
+  // desktop's own order books are 'I' (Order Booking, MS_UPDATE.cs:31987; Mobile Order 1-5, :17799-17831).
   return {
     mainBook: mode.mainBook,
     coBook,
@@ -1293,6 +1293,12 @@ function prepareSalesOrderCreate(input: SalesOrderInput, lifecycle?: OrderWriteC
       hdVchNo,
       mainUser,
     });
+    const oldMetalWrites = oldMetal.orderOldMetalWrites(key, tender.oldMetal, book, {
+      partyAc: input.acCode,
+      vchDate,
+      hdVchNo,
+      mainUser,
+    });
     await postVoucherTx(tx, tenantId, {
       ledger: { table: 'AC_DATA', lines: ledger },
       writes: [
@@ -1302,12 +1308,9 @@ function prepareSalesOrderCreate(input: SalesOrderInput, lifecycle?: OrderWriteC
         ...(idtl.length ? [{ table: 'SL_ORD_IDTL', rows: idtl }] : []),
         ...(rojmelRows.length ? [{ table: 'ROJ_MEL_DATA', rows: rojmelRows }] : []),
         ...tenders.orderUpiWrites(key, input.acCode, vchDate, tender),
-        ...oldMetal.orderOldMetalWrites(key, tender.oldMetal, book, {
-          partyAc: input.acCode,
-          vchDate,
-          hdVchNo,
-          mainUser,
-        }),
+        ...oldMetalWrites,
+        // Ac_Stock.Order_Stk after the save (TR_SALE_ORD.cs:9564-9566, TR_TOUR_ORD.cs:7615-7617).
+        ...orderStockWrites(key, book, oldMetalWrites[0]?.rows ?? [], detl),
       ],
     });
     // Shared insertion defaults apply to new rows. An unchanged imported NULL belongs to the

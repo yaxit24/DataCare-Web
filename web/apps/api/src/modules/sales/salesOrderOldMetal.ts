@@ -15,10 +15,8 @@ import { SaleValidationError } from './sales.js';
  *   (any other type), and the advance, `MSG2_TOTAL[9,3]`, includes both amounts (`:11368`).
  * - Order_Rojmel keys a valued row `04 + STR(SR_NO)` and an unvalued row with fine `06 + STR(SR_NO)`
  *   (`Ac_Rojmel.cs:17-21`); the shared builder (`buildOrderRojmel`) writes them.
- * - Order_Ledr legs 07-10 (`Ac_Ledr.cs:42-50`) join BOOK_DATA with `BOOK_INOUT = 'I'`. A Sales Order book here is
- *   always 'O' (`resolveOrderBookTx`), so those legs are built only when the book is 'I' and the screen's book never
- *   posts them. They are kept separate and tested so a book that is 'I' posts exactly what the desktop posts.
- *
+ * - Order_Ledr legs 07-10 (`Ac_Ledr.cs:42-50`) join BOOK_DATA with `BOOK_INOUT = 'I'`, so only an 'I' book posts them;
+ *   an 'I' book also posts each row to MAIN_STOCK (Order_Stk, `salesOrderStock.ts`).
  * - The SL_ORD_ADJ 'O' row (`:9475-9516`, TR_TOUR_ORD.cs:7560-7600) carries the unvalued old gold and silver fine in
  *   ORD_GOLD / ORD_SILVER beside the advance (`orderAdvanceAdjRow`).
  *
