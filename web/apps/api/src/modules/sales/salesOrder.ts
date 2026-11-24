@@ -38,6 +38,7 @@ import { fineWt } from '../shared/fine.js';
 import { resolveSalesOrderDesignTx } from './orderDesignSelection.js';
 import { resolveBookSlotAccountTx } from '../shared/postingAccounts.js';
 import { kasarAccountTx } from '../finance/finance.js';
+import { MONEY_ADVANCE_SQL } from './orderCancel.js';
 import {
   orderDate,
   orderClock,
@@ -945,6 +946,7 @@ function prepareSalesOrderCreate(input: SalesOrderInput, lifecycle?: OrderWriteC
       ORDER_HEADER_FIELDS,
       salesOrderForm,
       tender.oldMetalSent,
+      N(input.rateCutRate) !== 0,
     );
     const headerDirty = orderDirtyColumns(input, headerFields);
     const parentDirty = orderLines.map((line, index) =>
@@ -985,7 +987,7 @@ function prepareSalesOrderCreate(input: SalesOrderInput, lifecycle?: OrderWriteC
         TAX_PRC: input.taxRatePct,
         TAX_AMT: totals.tax,
         TOT_AMT: totals.total,
-        ...tenders.orderTenderColumns(tender, salesOrderForm),
+        ...tenders.orderTenderColumns(tender, salesOrderForm, N(input.rateCutRate)),
         VCH_TIME: vchDate,
         ENTRY_TIME:
           lifecycle?.previousHeader && !headerDirty.has('VCH_TIME') && !headerDirty.has('VCH_DATE')
@@ -1012,7 +1014,7 @@ function prepareSalesOrderCreate(input: SalesOrderInput, lifecycle?: OrderWriteC
         ...tenders.orderOldMetalColumns(tender, salesOrderForm), // G206: OLD_GL* from the grid when it is sent :9136-9144
         RCUT_RATE: N(input.rateCutRate), // MSG2_TOTAL[9,1] :9134
         RCUT_FINE: N(input.rateCutFine), // MSG2_TOTAL[9,2] :9135
-        RCUT_AMT: round2(N(input.rateCutAmount)), // MSG2_TOTAL[9,3] :9126
+        // RCUT_AMT (and ADV_AMT) come from orderTenderColumns: the tender total, filed by the rate (:9124-9133).
         ADJ_GOLD: N(input.adjustGold), // AdjGold  :9146
         ADJ_SILVER: N(input.adjustSilver), // AdjSilver:9147
         ORD_ADJ_AMT: round2(N(input.orderAdjustAmount)), // RecAdjAmt:9145
@@ -1024,7 +1026,8 @@ function prepareSalesOrderCreate(input: SalesOrderInput, lifecycle?: OrderWriteC
         CITY: txt(input.city, 20), // tCity.Text  :9160
         MOBILE: txt(input.mobile, 21), // tMobile.Text:9161
       },
-      input,
+      // RCUT_AMT is derived from the tenders, so a typed rate-cut amount is not an exact value to preserve.
+      { ...input, rateCutAmount: undefined },
       headerFields,
       headerDirty,
     );
@@ -1547,7 +1550,16 @@ export async function getSalesOrder(
       })),
     };
     // Both saved order forms retain exact mapped scalar values; calculations remain server-owned.
-    exactOrderValues(dto, x, tenders.orderHeaderFields(ORDER_HEADER_FIELDS, salesOrderForm));
+    exactOrderValues(
+      dto,
+      x,
+      tenders.orderHeaderFields(
+        ORDER_HEADER_FIELDS,
+        salesOrderForm,
+        false,
+        tenderView.advanceColumn === 'RCUT_AMT',
+      ),
+    );
     exactOrderValues(dto, x, tenderView.exactFields);
     dto.lines.forEach((line, index) => {
       const parent = d[index];
@@ -2043,7 +2055,8 @@ export async function cancelSalesOrderAdjust(
   const run = async (tx: any) => {
     const ord: any = (
       await tx.$queryRawUnsafe(
-        `SELECT "AC_CODE" ac, "AC_NAME" nm, coalesce(NULLIF("ADV_AMT"::text,'')::numeric,0)::float adv, coalesce(NULLIF("TOT_AMT"::text,'')::numeric,0)::float tot FROM "SL_ORD_DATA" WHERE "CO_CODE"=$1 AND "CO_BOOK"=$2 AND "VCH_NO"=$3 LIMIT 1`,
+        // A rate-cut order has no money advance to refund (MONEY_ADVANCE_SQL, TR_SALE_ORD.cs:9124-9133).
+        `SELECT "AC_CODE" ac, "AC_NAME" nm, ${MONEY_ADVANCE_SQL}::float adv, coalesce(NULLIF("TOT_AMT"::text,'')::numeric,0)::float tot FROM "SL_ORD_DATA" o WHERE "CO_CODE"=$1 AND "CO_BOOK"=$2 AND "VCH_NO"=$3 LIMIT 1`,
         input.scope.coCode,
         ordBook,
         formatVoucherNo(input.vchNo),

@@ -1742,6 +1742,94 @@ export const salesOrder = {
     ),
 
     C(
+      'refusal.rate-cut-advance-not-money',
+      'T06',
+      'refusal',
+      'TR_SALE_ORD.cs:9124-9133, :9504: a rate-cut order files its tender total as RCUT_AMT with ADV_AMT 0 and its + row carries ORD_AMT 0 (the fine is in ORD_GOLD). The sale order help reads ADV_AMT and keeps SUM(+ ORD_AMT) - SUM(other) > 0 (TR_SALE.cs:7299), so a sale cannot adjust that advance as money: the save is refused and the order keeps only its + row',
+      async (ctx) => {
+        const { page } = await ctx.session();
+        const order = await createOrder(ctx, page, { advance: ADVANCE });
+        // The rate is read-only on the web screen; a desktop rate-cut order is stored so (:9124-9133, :9504, :9509).
+        await ctx.rows(
+          `UPDATE "SL_ORD_DATA" SET "RCUT_RATE"=6000,"RCUT_FINE"=0.833,"RCUT_AMT"="ADV_AMT","ADV_AMT"=0
+            WHERE tenant_id=$1 AND "CO_BOOK"=$2 AND "VCH_NO"=$3 RETURNING 1`,
+          BOOK,
+          order,
+        );
+        await ctx.rows(
+          `UPDATE "SL_ORD_ADJ" SET "ORD_AMT"=0,"ORD_GOLD"=0.833
+            WHERE tenant_id=$1 AND "CO_BOOK"=$2 AND "VCH_NO"=$3 AND "ORD_SIGN"='+' RETURNING 1`,
+          BOOK,
+          order,
+        );
+        await page.goto('/txn/sales');
+        await page.getByRole('heading', { name: 'Sales Invoice', exact: true }).waitFor();
+        const book = page.getByRole('combobox', { name: 'Configured book', exact: true }).first();
+        for (let i = 0; i < 50 && !(await book.inputValue()); i++) await page.waitForTimeout(100);
+        const customer = page.getByPlaceholder('search accounts… (F1)').first();
+        await customer.fill(PARTIES.local.code);
+        await customer
+          .locator('xpath=..')
+          .getByText(PARTIES.local.code, { exact: true })
+          .first()
+          .waitFor();
+        await customer.press('Enter');
+        const grid = page
+          .locator('table', { has: page.locator('th', { hasText: 'Making/g' }) })
+          .first();
+        const cell = (n) =>
+          grid.locator('tbody tr').nth(0).locator(`td:nth-child(${n}) input`).first();
+        await cell(1).fill(LINE_W.item);
+        await cell(1).press('Escape');
+        for (const [n, v] of [
+          [3, LINE_W.pcs],
+          [4, LINE_W.gross],
+          [5, LINE_W.net],
+          [6, LINE_W.touch],
+          [7, LINE_W.rate],
+          [8, LINE_W.labour],
+        ])
+          await cell(n).fill(v);
+        const orderField = (label) =>
+          page
+            .locator('.field', { has: page.locator('label', { hasText: label }) })
+            .locator('input')
+            .first();
+        await orderField('Ord No (advance)').fill(String(Number(order)));
+        await orderField('Order Amt').fill(String(ADVANCE));
+        const sales0 = await ctx.rows(
+          `SELECT count(*)::int n FROM "SL_DATA" WHERE tenant_id=$1 AND "CO_BOOK"='SL'`,
+        );
+        const [sold] = await Promise.all([
+          page.waitForResponse(
+            (r) => new URL(r.url()).pathname === '/api/sales' && r.request().method() === 'POST',
+          ),
+          page.getByRole('button', { name: 'Save Invoice', exact: true }).click(),
+        ]);
+        const body = await sold.text();
+        assert.equal(sold.status(), 409, body);
+        assert.match(body, /0\.00 advance open/);
+        const sales1 = await ctx.rows(
+          `SELECT count(*)::int n FROM "SL_DATA" WHERE tenant_id=$1 AND "CO_BOOK"='SL'`,
+        );
+        const adj = await ctx.rows(
+          `SELECT "ORD_SIGN" sign,"ORD_AMT"::float amt,"ORD_GOLD"::float gold FROM "SL_ORD_ADJ" WHERE tenant_id=$1 AND "ORD_NO"=$2`,
+          order,
+        );
+        assert.equal(sales1[0].n, sales0[0].n, 'no sale written');
+        assert.deepEqual(
+          adj.map((a) => [a.sign, a.amt, a.gold]),
+          [['+', 0, 0.833]],
+        );
+        return {
+          observation: `rate-cut order ${order}: sale adjusting ${ADVANCE} answered ${sold.status()} "${body}"`,
+          expected: 'refused (409), no sale, order keeps only its + row',
+          database: { adjustments: adj, sales: [sales0[0].n, sales1[0].n] },
+        };
+      },
+    ),
+
+    C(
       'rollback.mid-write',
       'T14',
       'mutation',
