@@ -41,7 +41,7 @@ const LITE_MENUS: ReadonlyArray<
   ['Report', 'Ledger Report', '/reports/account-ledger', 'Reports/Account Ledger'],
   ['Report', 'Stock Report', '/reports/stock-report', 'Reports/Stock Report'],
   ['Report', 'Tag Stock', '/reports/tag-stock', 'Reports/Tag-Stock Report'],
-  ['Report', 'Sales Report', '/reports/sales-register', 'Reports/Sales Register'],
+  ['Report', 'Sales Report', '/reports/sales-report', 'Reports/Sales Report'],
   ['Report', 'Purchase Rpt', '/reports/purchase-register', 'Reports/Purchase Register'],
   ['Report', 'Approval Rpt', '/reports/approval-report', 'Reports/Approval Report'],
   ['Report', 'Order Report', '/reports/order-report', 'Reports/Order Report'],
