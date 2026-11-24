@@ -1587,7 +1587,9 @@ databaseDescribe('database-backed sales-family voucher lifecycles', () => {
     expect(String(h.CITY).trim()).toBe('Surat');
     expect(String(h.MOBILE).trim()).toBe('9812345670');
     expect(h.upi).toBeCloseTo(250.5, 2);
-    expect(h.old_gl).toBeCloseTo(3.25, 2);
+    // TR_SALE_ORD.cs:9143: OLD_GL is the typed old gold fine (MSG2_TOTAL[6,2]) plus RCUT_FINE ([9,2]):
+    // 3.25 + 2.5.
+    expect(h.old_gl).toBeCloseTo(5.75, 2);
     expect(h.old_gl_amt).toBeCloseTo(19_500, 2);
     expect(h.old_sl).toBeCloseTo(12.5, 2);
     expect(h.old_sl_amt).toBeCloseTo(900, 2);

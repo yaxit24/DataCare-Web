@@ -379,6 +379,21 @@ async function openDetail(page, line = 1) {
   await panel.waitFor();
   return panel;
 }
+/**
+ * Enter in a detail row's NetAmt commits it and the app moves the caret to the next row's ItCode on the next
+ * animation frame (TR_WH_SALE.cs:7522; WholesaleDetailPanel schedules the move after React commits). Wait for
+ * that move before typing further: Playwright's fill types into the focused element between two protocol
+ * steps, so a keystroke issued while the frame callback is still pending can land in the cell the callback
+ * is about to focus. A CI run stored row 2 with IT_CODE '2' and IT_PCS 0 because the Pcs '2' was sent to the
+ * ItCode the caret was moving to.
+ */
+const detailCaretMoved = (page, row) =>
+  page.waitForFunction(
+    (n) =>
+      document.activeElement instanceof HTMLInputElement &&
+      document.activeElement.getAttribute('aria-label') === `ItCode detail ${n}`,
+    row,
+  );
 /** Type detail rows into the panel of an issue line; Enter in NetAmt commits a row and starts the next. */
 async function typeDetails(page, rows, line = 1) {
   await openDetail(page, line);
@@ -388,6 +403,7 @@ async function typeDetails(page, rows, line = 1) {
       if (row[field] != null)
         await page.getByLabel(`${label} detail ${i + 1}`, { exact: true }).fill(row[field]);
     await page.getByLabel(`NetAmt detail ${i + 1}`, { exact: true }).press('Enter');
+    await detailCaretMoved(page, i + 2);
   }
 }
 /** A loose issue line (no tag) and its rows, then the Received cash; returns the save response. */
@@ -1844,6 +1860,7 @@ export const wholesaleSale = {
         await pcsWt.press('Enter');
         await value(page, 'Weight detail 1', '3.000');
         await page.getByLabel('NetAmt detail 1', { exact: true }).press('Enter');
+        await detailCaretMoved(page, 2);
         await page.getByLabel('Pcs detail 2', { exact: true }).waitFor();
         let question = '';
         page.removeAllListeners('dialog');
@@ -1925,6 +1942,7 @@ export const wholesaleSale = {
         await page.getByLabel('Rate detail 1', { exact: true }).fill('101');
         await page.getByLabel('NetAmt detail 1', { exact: true }).fill('0');
         await page.getByLabel('NetAmt detail 1', { exact: true }).press('Enter');
+        await detailCaretMoved(page, 2);
         await page.getByLabel('Received Cash Amt', { exact: true }).fill('202');
         const updated = await save(page);
         assert.equal(updated.status(), 200, await updated.text());
