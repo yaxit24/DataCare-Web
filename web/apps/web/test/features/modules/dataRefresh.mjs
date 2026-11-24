@@ -5,7 +5,7 @@ import { FIXTURE_MANIFEST, USERS } from '../fixtures/catalogue.mjs';
  * Feature: Company → Data Refresh (desktop MS_UPDATE).
  *
  * PR-1 deliberately proves only Approval Adj as a complete writer. Account and Stock expose exact proven
- * partial anomaly counts but cannot apply the unproved builder graphs. Field Update and Old Field await the
+ * partial anomaly counts but cannot apply the unproved builder graphs. Field Update runs its two class-a repairs; Old Field awaits the
  * PR-2 statement classification. Image Data is schema architecture, not a runtime DDL operation on the web.
  */
 const as = (user, slot) => ({
@@ -46,7 +46,6 @@ const captions = ['Account', 'Stock', 'Field Update', 'Approval Adj', 'Image Dat
 const previewOnlyOperations = [
   ['data-refresh-account', 'Account'],
   ['data-refresh-stock', 'Stock'],
-  ['data-refresh-field-update', 'Field Update'],
   ['data-refresh-image-data', 'Image Data'],
   ['data-refresh-old-field', 'Old Field'],
 ];
@@ -452,7 +451,6 @@ export const dataRefresh = {
         for (const id of [
           'data-refresh-account',
           'data-refresh-stock',
-          'data-refresh-field-update',
           'data-refresh-image-data',
           'data-refresh-old-field',
         ]) {
@@ -531,10 +529,28 @@ export const dataRefresh = {
             0,
           );
         }
+        // Field Update is no longer a preview-only classification: its two class-a repairs
+        // (MS_UPDATE.cs:7214 AC_MAIN_GR, MS_UPDATE.cs:8608 DEFAULTER_AC) apply after a preview.
+        const [fieldResponse] = await Promise.all([
+          page.waitForResponse((value) =>
+            isApi(value, '/utilities/data-repair/data-refresh-field-update/preview'),
+          ),
+          page.getByRole('button', { name: 'Field Update', exact: true }).click(),
+        ]);
+        assert.equal(fieldResponse.status(), 200, await fieldResponse.text());
+        const field = await fieldResponse.json();
+        assert.equal(field.applyAvailable, true);
+        await page.getByRole('heading', { name: 'Field Update preview', exact: true }).waitFor();
+        await (
+          field.clean
+            ? page.getByText('No records need adjustment.', { exact: true })
+            : page.getByRole('button', { name: 'Apply Field Update', exact: true })
+        ).waitFor();
+        assert.equal(await page.getByText(/Preview only:/).count(), 0);
         return {
           observation:
-            'all five classifications state the unproved work and show no Apply or authority inputs',
-          expected: 'preview-only',
+            'the four unproved classifications show no Apply or authority inputs; Field Update previews as an applicable repair',
+          expected: { previewOnly: previewOnlyOperations.map(([id]) => id), field: true },
         };
       },
     ),
@@ -572,7 +588,7 @@ export const dataRefresh = {
           assert.match(history, /applied/);
           return {
             observation:
-              'advanced Data Repair shows shared history and suppresses Apply and authority inputs for all five preview-only operations',
+              'advanced Data Repair shows shared history and suppresses Apply and authority inputs for all four preview-only operations',
             expected: 'history retained; preview-only capability honored',
           };
         }),
@@ -645,6 +661,109 @@ export const dataRefresh = {
             downstream: 'selected location and current April-March year only',
           };
         }),
+    ),
+    C(
+      'scope.defaulter-repair-all-locations',
+      'T15',
+      'mutation',
+      'MS_UPDATE.cs:8608 repairs NULL DEFAULTER_AC in every location of the company; MS_UPDATE.cs:7214 repairs AC_MAIN_GR only in the session location',
+      async (ctx) => {
+        const accounts = () =>
+          ctx.rows(
+            `SELECT row_id::text id,"AC_CODE" code,"LC_CODE" lc,"AC_GR" gr,"AC_MAIN_GR" mg,"DEFAULTER_AC" df
+               FROM "AC_MAST" WHERE tenant_id=$1 AND "CO_CODE"='01' ORDER BY row_id`,
+          );
+        const original = await accounts();
+        // The preview lists the first 20 accounts by code, so take the two that sort first.
+        const [here, there] = original
+          .filter((row) => row.lc === '01')
+          .sort((x, y) => (x.code < y.code ? -1 : 1));
+        assert.ok(here && there, 'two accounts in the session location');
+        try {
+          // The account group owns main group M1. Both accounts drift to Z and lose their defaulter flag; one of them
+          // sits in location 02, which is not the session location (01).
+          await exec(
+            ctx,
+            `INSERT INTO "AC_GROUP"(tenant_id,"CO_CODE","AC_GR","AC_MAIN_GR") VALUES ($1,'01','DRG','M1')`,
+          );
+          await exec(
+            ctx,
+            `UPDATE "AC_MAST" SET "AC_GR"='DRG',"AC_MAIN_GR"='Z',"DEFAULTER_AC"=NULL
+              WHERE tenant_id=$1 AND row_id IN ($2::bigint,$3::bigint)`,
+            here.id,
+            there.id,
+          );
+          await exec(
+            ctx,
+            `UPDATE "AC_MAST" SET "LC_CODE"='02' WHERE tenant_id=$1 AND row_id=$2::bigint`,
+            there.id,
+          );
+          const before = await accounts();
+          const { page } = await ctx.session();
+          await openScreen(page);
+          const [previewResponse] = await Promise.all([
+            page.waitForResponse((value) =>
+              isApi(value, '/utilities/data-repair/data-refresh-field-update/preview'),
+            ),
+            page.getByRole('button', { name: 'Field Update', exact: true }).click(),
+          ]);
+          assert.equal(previewResponse.status(), 200, await previewResponse.text());
+          const preview = await previewResponse.json();
+          const mine = preview.samples.filter(
+            (line) =>
+              line.startsWith(`AC_MAST ${here.code}:`) || line.startsWith(`AC_MAST ${there.code}:`),
+          );
+          assert.deepEqual(
+            mine.sort(),
+            [
+              `AC_MAST ${here.code}: main group Z -> M1; defaulter blank -> N`,
+              `AC_MAST ${there.code}: defaulter blank -> N`,
+            ].sort(),
+          );
+          await page.getByRole('heading', { name: 'Field Update preview', exact: true }).waitFor();
+          const [applyResponse] = await Promise.all([
+            page.waitForResponse((value) =>
+              isApi(value, '/utilities/data-repair/data-refresh-field-update/apply'),
+            ),
+            page.getByRole('button', { name: 'Apply Field Update', exact: true }).click(),
+          ]);
+          assert.equal(applyResponse.status(), 200, await applyResponse.text());
+          await page
+            .getByText('Field Is Update ok....Please Re open Software', { exact: true })
+            .waitFor();
+          const after = await accounts();
+          const pick = (rows, id) => rows.find((row) => row.id === id);
+          const sessionRow = pick(after, here.id);
+          const otherRow = pick(after, there.id);
+          assert.deepEqual([sessionRow.mg, sessionRow.df], ['M1', 'N']);
+          assert.deepEqual([otherRow.lc, otherRow.mg, otherRow.df], ['02', 'Z', 'N']);
+          return {
+            observation: `${there.code} in location 02: defaulter NULL -> N, main group Z kept; ${here.code} in location 01: both repaired`,
+            expected: { location02: ['Z', 'N'], location01: ['M1', 'N'] },
+            database: {
+              before: [pick(before, here.id), pick(before, there.id)],
+              after: [sessionRow, otherRow],
+            },
+            downstream: { previewSamples: mine },
+          };
+        } finally {
+          for (const row of original)
+            await exec(
+              ctx,
+              `UPDATE "AC_MAST" SET "LC_CODE"=$3,"AC_GR"=$4,"AC_MAIN_GR"=$5,"DEFAULTER_AC"=$6
+                WHERE tenant_id=$1 AND row_id=$2::bigint`,
+              row.id,
+              row.lc,
+              row.gr,
+              row.mg,
+              row.df,
+            );
+          await exec(
+            ctx,
+            `DELETE FROM "AC_GROUP" WHERE tenant_id=$1 AND "CO_CODE"='01' AND "AC_GR"='DRG'`,
+          );
+        }
+      },
     ),
     C(
       'output.message-and-history',
@@ -744,12 +863,6 @@ export const dataRefresh = {
       'T18',
       'MS_UPDATE.cs:2671-3047; playbook J23',
       'X27/P11-01: the remaining StockRefresh and Ac_Stock builder graph is not proved, so Stock remains preview-only.',
-    ),
-    blocked(
-      'journey.field-update-classification',
-      'T18',
-      'MS_UPDATE.cs:3958-8807; D-REF-3',
-      'X27/P11-01: Field Update awaits PR-2 statement-by-statement classification.',
     ),
     blocked(
       'journey.old-field-classification',

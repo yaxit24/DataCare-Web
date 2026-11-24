@@ -223,11 +223,11 @@ describe.runIf(RUN)('reopening a saved voucher (plan F2.1)', () => {
     const created = await postContra(runtime, {
       scope: scopeFor(CONTRA_BOOK),
       lines: [
-        { crdr: 'DR', acCode: '00008', amount: 7250 },
+        // The narration is the grid's description column (TR_CONTRA.cs:2535, :2800, :2868); there is no header field.
+        { crdr: 'DR', acCode: '00008', amount: 7250, itDesc: 'transfer to bank' },
         { crdr: 'CR', acCode: '00001', amount: 7250 },
       ],
       vchDate: '2024-05-10',
-      itDesc: 'transfer to bank',
       mainUser: 'reopen',
     } as never);
     const vchNo = String(created.vchNo).padStart(5, '0');
@@ -241,7 +241,7 @@ describe.runIf(RUN)('reopening a saved voucher (plan F2.1)', () => {
     expect(read.amount).toBe(7250);
     expect(read.toAc).toBe('00008');
     expect(read.fromAc).toBe('00001');
-    expect(read.itDesc).toBe('transfer to bank');
+    expect((read.lines as Array<{ itDesc?: string }>)[0]!.itDesc).toBe('transfer to bank');
     expect(read.vchDate).toBe('2024-05-10');
   });
 

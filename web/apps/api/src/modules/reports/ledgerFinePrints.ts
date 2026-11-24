@@ -150,7 +150,7 @@ interface Balance {
 
 /**
  * Opening is before the from date, closing is up to the to date. RP_LEDR.cs:8327 {{SELECT Sum(CR_AMT - DR_AMT) as BalAmt}}
- * The Gold balance has no data-type condition; the Silver and Jama/Udhar balances drop it only for type C
+ * Gold (RP_LEDR.cs:8327 and :8335), Silver and Jama/Udhar balances all drop the data-type condition only for type C
  * (RP_LEDR.cs:8942 {{Interaction.IIf(Operators.CompareString(DC_Main.MsDataType, "C", false) == 0, (object)"", (object)("AND DATA_TYPE = '"}}).
  */
 async function balanceAt(
@@ -159,14 +159,9 @@ async function balanceAt(
   q: FinePrintQuery,
   op: '<' | '<=',
   date: string,
-  byDataType: boolean,
 ): Promise<Balance> {
   const params: unknown[] = [];
-  const scope = acDataScope(
-    s,
-    { view: 'detail', dataType: byDataType ? q.dataType : undefined },
-    params,
-  );
+  const scope = acDataScope(s, { view: 'detail', dataType: q.dataType }, params);
   params.push(q.acCode, date);
   const raw: Array<Record<string, unknown>> = await tx.$queryRawUnsafe(
     `SELECT ${SIGNED_MONEY}::float8 AS amt, ${SIGNED_GOLD}::float8 AS gold, ${SIGNED_SILVER}::float8 AS silver
@@ -303,10 +298,9 @@ export async function ledgerFinePrint(
   const scope: LedgerScope = { ...s, lcCode: s.lcCode || q.location || undefined };
   return withTxBudget(prisma, s.tenantId, 'read', async (tx: any) => {
     const acName = await loadAccountName(tx, scope, q.acCode);
-    // RP_LEDR.cs:8327 (Gold, no data type) against RP_LEDR.cs:4005 and :8942 (Jama/Udhar and Silver, by data type).
-    const byDataType = kind !== 'gold-fine';
-    const opening = await balanceAt(tx, scope, q, '<', q.fromDate, byDataType);
-    const closing = await balanceAt(tx, scope, q, '<=', q.toDate, byDataType);
+    // RP_LEDR.cs:8327 and :8335 (Gold), :4005 (Jama/Udhar), :8942 (Silver): AND DATA_TYPE = MsDataType unless it is C.
+    const opening = await balanceAt(tx, scope, q, '<', q.fromDate);
+    const closing = await balanceAt(tx, scope, q, '<=', q.toDate);
     const rows = await printRows(tx, scope, q, kind);
 
     // Gold balances round to three decimals; silver to two unless SILVER_THREE_DIGIT (D14).

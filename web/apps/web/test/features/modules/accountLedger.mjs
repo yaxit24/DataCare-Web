@@ -1,5 +1,6 @@
 import assert from 'node:assert/strict';
 import { USERS } from '../fixtures/catalogue.mjs';
+import { SECOND_TENANT } from '../harness.mjs';
 
 /**
  * Feature: Reports → Ledger Report (desktop RP_LEDR, web /reports/account-ledger).
@@ -498,14 +499,30 @@ export const accountLedger = {
       async (ctx) =>
         withCase(ctx, async () => {
           await seedAlpha(ctx);
-          const { page } = await ctx.session();
-          await openScreen(page);
-          await button(page, 'Run').click();
-          await page.locator('table.grid').waitFor();
-          // The report never shows another tenant's rows (seedAlpha is this tenant only).
-          const names = await page.locator('table.grid tbody tr td:nth-child(2)').allInnerTexts();
-          assert.ok(names.every((n) => !n.includes('OTHER')));
-          return { observation: 'only this tenant rows', expected: { scoped: true } };
+          // The same account code with a moved balance in the sentinel tenant. A name test on this tenant's own
+          // accounts (for example its seeded OTHER CHARGES A/C, which earlier modules' vouchers move) proves nothing.
+          const other = { ...ctx, tenantId: SECOND_TENANT };
+          await cleanCase(other);
+          try {
+            await seedAccount(other, 'Z100', 'ZZ SENTINEL TENANT');
+            await seedLeg(other, 'Z100', { vchNo: 'Z0001', date: '2024-04-01', dr: 999 });
+            const { page } = await ctx.session();
+            await openScreen(page);
+            await button(page, 'Run').click();
+            await page.locator('table.grid').waitFor();
+            const names = await page.locator('table.grid tbody tr td:nth-child(2)').allInnerTexts();
+            assert.ok(
+              names.some((n) => n.includes('ZZ ALPHA')),
+              `this tenant's account is listed: ${names}`,
+            );
+            assert.ok(
+              names.every((n) => !n.includes('ZZ SENTINEL TENANT')),
+              `the other tenant's account is never listed: ${names}`,
+            );
+            return { observation: 'only this tenant rows', expected: { scoped: true } };
+          } finally {
+            await cleanCase(other);
+          }
         }),
     ),
     C(

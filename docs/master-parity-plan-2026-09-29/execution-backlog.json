@@ -8140,6 +8140,290 @@
       "statusNote": "IMPLEMENTED, not accepted. 88 cases: 17 pass at database/unit level (lossless reopen of every tenant row for an earlier-month hallmark voucher with typed amount, fine and stones; TAG PURCHASE ids 2-4, weights, tag band and BAR_DETL rules; HM_AMT half to even; HM tax code with no charge; server family refusal; /context/books?family=), 4 partly, 2 blocked, 3 N/A, the rest executable but not run (browser module extended, not run locally); full API suite with database 4134/4134 after the kernel fix. Frozen cases and decisions D1-D13 in orchestration/work/WP-28/cases.md; 2 cases blocked: lookup.books-data-type-filter (the web has no company data type, D10) and keyboard.hm-grid-enter-walk (the 95-column TEXT_PR_KeyDown walk is not transcribed). The new purchase-invoice browser cases were not run locally (machine rule); CI's feature job is the run of record. Not done: the employee-code book shortcut (D9), WITH_STOCK blank to Y, the TAG PURCHASE BAR_DATA/SRNO_MAST/TAG_SET write set, the print templates. Desktop match 0%."
     },
     {
+      "id": "N245",
+      "status": "implemented-unverified",
+      "action": "Purchase Rtn residuals (TR_KR_ISU, PURC RETURN): the print is gated on the desktop's print right FRM_PRINT, not on view; a return line stores TAX_PRC 0 as the desktop does while the header keeps rate and heads; reopen returns a version token and edit and delete require it (409 voucher-version-conflict, nothing changed); the grid Enter walk is a pure plan (planEnterWalk) with unit tests; the browser module gains the HSN-tax print cases and the Enter-walk case.",
+      "parentLabels": "P2; L1; T01-T18; WP-29",
+      "startAfter": [
+        "N34"
+      ],
+      "requiredProof": "DB tests derived from the desktop rules: HSN row 6,200.00 / 93.00 / 93.00 / 186.00 (intra) and IGST 186.00 (inter), FRM_PRINT refusal, line TAX_PRC 0 with header 3 / 186, 400 without and 409 with a stale token, lossless unchanged save; unit tests for the Enter walk; the browser module cases run in CI; all repository gates.",
+      "gapIds": "G257",
+      "entryDefinition": "15-standard-edition-plan.md section 5",
+      "sourceAndModuleDetail": "12-lineage-verification-2026-10-01.md",
+      "universalContract": "03-shared-contracts.md",
+      "verification": "04-verification-playbook.md",
+      "statusAsOf": "2026-11-23",
+      "evidence": [
+        "web/apps/api/src/routes/purchaseReturn.ts",
+        "web/apps/api/src/modules/purchase/purchaseReturn.ts",
+        "web/apps/api/src/modules/purchase/purchaseReturnLifecycle.ts",
+        "web/apps/api/src/modules/rbac/routePolicy.ts",
+        "web/apps/web/components/GridKeyboard.tsx",
+        "web/apps/web/app/(app)/txn/purchase-return/page.tsx",
+        "web/apps/api/test/purchaseReturnWp29.routes.db.test.ts",
+        "web/apps/web/test/gridKeyboard.test.ts",
+        "web/apps/web/test/features/modules/purchaseReturn.mjs",
+        "orchestration/work/WP-29/cases.md"
+      ],
+      "statusNote": "IMPLEMENTED, not accepted. Decisions (architect, 2026-11-23, owner may override): D1 the Purchase Return print guards the print right (the sales print keeps view until a cross-family decision); D2 line TAX_PRC 0 as TR_KR_ISU.cs:5206, no data migration (no reader uses the line column); D3 Fine/Amount stay computed cells (layout residual N77); D4 config.setting-variant stays blocked on N166; D5 edit and delete carry the version token like purchases. DB: purchaseReturn* and transaction.integrity files pass (26 tests), full API suite 4126 tests passed after the token was added to two callers. Browser cases print.hsn-tax-intra, print.hsn-tax-inter and keyboard.enter-walk were written without a local browser stack and run in CI. Still open: the UAE variant, Fine/Amount override cells, G174 fixture."
+    },
+    {
+      "id": "N246",
+      "status": "implemented-unverified",
+      "action": "Contra Entry is the desktop TR_CONTRA voucher: row 1 positional with its own side and every later row the opposite (TR_CONTRA.cs:1538, :1630), the mirror record carries row 1's description (:2868), the empty or thin grid, unequal totals, employee, company type B, year and lock date are refused in the desktop order, REMARK_DATA is written and deleted (Ac_Tax.cs:686; :2963-2968), INOUT_TYPE is the book's flag (:2774), the F1 list is one line per voucher, account and description (:3144), and the printed voucher lists every leg. Web additions for a hosted service: all legs or none in one transaction, the voucher version token on edit and delete, the bank clearing marks follow their leg, an unchanged reopen and save keeps every stored column, and accounts must exist in the company.",
+      "parentLabels": "P2; L1; T01-T18; WP-31",
+      "startAfter": [
+        "N232"
+      ],
+      "requiredProof": "contraGrid unit tests; contraResiduals.routes.db.test.ts through the real routes and the account ledger, cash book, bank reconciliation list, day book and Rojmel readers; the contraEntry browser module with the new cases (not run locally; CI runs it).",
+      "gapIds": "G258",
+      "entryDefinition": "15-standard-edition-plan.md section 5",
+      "sourceAndModuleDetail": "12-lineage-verification-2026-10-01.md",
+      "universalContract": "03-shared-contracts.md",
+      "verification": "04-verification-playbook.md",
+      "statusAsOf": "2026-11-23",
+      "evidence": [
+        "orchestration/work/WP-31/study.md",
+        "orchestration/work/WP-31/cases.md",
+        "web/apps/api/src/modules/finance/contra.ts",
+        "web/apps/api/src/modules/finance/contraClearing.ts",
+        "web/apps/api/src/modules/finance/contraList.ts",
+        "web/apps/api/src/modules/finance/contraVoucher.ts",
+        "web/apps/api/src/routes/contra.ts",
+        "web/apps/web/app/(app)/txn/contra/page.tsx",
+        "web/apps/api/test/contraGrid.test.ts",
+        "web/apps/api/test/contraResiduals.routes.db.test.ts",
+        "web/apps/api/test/contraDelete.db.test.ts",
+        "web/apps/web/test/features/modules/contraEntry.mjs"
+      ],
+      "statusNote": "IMPLEMENTED, not accepted. 74 cases written (71 executable, 2 blocked: the opening-balance label needs a balance-as-of-date API; the ContraBill.rpt layout and copy labels need a text export of the Crystal file; 1 N/A). Unit 12 and database 28 of 28 pass; the finance and contra DB suites (32 files, 359 tests) pass. The browser module changes are not run locally. Desktop match 0%: decisions D1-D16 in cases.md are architect decisions for the owner to confirm."
+    },
+    {
+      "id": "N247",
+      "status": "implemented-unverified",
+      "action": "Data Refresh Field Update runs its two desktop repairs preview-first: AC_MAST.AC_MAIN_GR re-aligned to AC_GROUP (MS_UPDATE.cs:7214) and a blank AC_MAST.DEFAULTER_AC set to N (:8608), in the existing data-repair registry (preview with counts and sample keys, one transaction, audit row, tenant-scoped, idempotent). The other 518 writes are classified in orchestration/work/WP-24/field-update.md: 172 class b anomaly queries (169 BOOK_DATA metadata checks grouped into one parameterised replay), 219 migration loader, 127 schema.",
+      "parentLabels": "P1-core; L4; WP-24",
+      "startAfter": [
+        "N235"
+      ],
+      "requiredProof": "DB test: controlled AC_MAST corruption, preview, apply, full tenant diff shows only the intended rows, other tenant untouched, audit row, replay deduplicated; DB test of the class b anomaly queries on a tenant seeded through the Lite writers.",
+      "gapIds": "G259",
+      "entryDefinition": "15-standard-edition-plan.md section 5",
+      "sourceAndModuleDetail": "12-lineage-verification-2026-10-01.md",
+      "universalContract": "03-shared-contracts.md",
+      "verification": "04-verification-playbook.md",
+      "statusAsOf": "2026-11-23",
+      "evidence": [
+        "web/apps/api/src/modules/utilities/dataRefreshFieldUpdate.ts",
+        "web/apps/api/test/dataRefreshFieldUpdate.db.test.ts",
+        "web/apps/api/test/dataRefreshFieldAnomalies.db.test.ts",
+        "web/apps/api/test/wp24FieldSeed.ts",
+        "orchestration/work/WP-24/field-update.md"
+      ],
+      "statusNote": "IMPLEMENTED, not accepted. Class a repairs and class b anomaly queries have DB tests. Finding F1 (G259): web-provisioned BOOK_DATA lacks MENU_NAME and, for many books, BOOK_TBL_NAME/BOOK_TBL_DETL on 36 books; the desktop UPDATEs fill them. Pinned in the anomaly test as a shrink-only baseline; the repair is not built here."
+    },
+    {
+      "id": "N248",
+      "status": "implemented-unverified",
+      "action": "Wh Sales like TR_WH_SALE: hand-typed item-detail rows for a loose line (CommPassTotal_Idtl, SL_IDTL, DM_DATA, roll-up), fine kasar (Ksr Fine boxes, Tot Fine, ledger legs 27/28/33/34, day book 07/08), SL_IDTL rows under the printed line, the desktop Wh_Sales_Rojmel rows for a gold voucher (05/06/14/27, names, keys) and the version token on edit and delete.",
+      "parentLabels": "P1-core; L1; T01-T18; WP-30",
+      "startAfter": [
+        "N228"
+      ],
+      "requiredProof": "wholesaleDetail, wholesaleResiduals, wholesaleSaleBill and wholesaleSaleResiduals.db tests pass under forced RLS; the wholesale, rate-cut, tour, bullion, finance, stock and GST DB suites stay green; the wholesale-sale browser module cases for the new ids pass in CI.",
+      "gapIds": "G260",
+      "entryDefinition": "02-execution-plan.md section 4",
+      "sourceAndModuleDetail": "12-lineage-verification-2026-10-01.md",
+      "universalContract": "03-shared-contracts.md",
+      "verification": "04-verification-playbook.md",
+      "statusAsOf": "2026-11-23",
+      "evidence": [
+        "web/packages/core/src/wholesaleDetail.ts",
+        "web/packages/core/src/wholesaleLine.ts",
+        "web/apps/api/src/modules/sales/wholesaleDetailRows.ts",
+        "web/apps/api/src/modules/sales/wholesaleResiduals.ts",
+        "web/apps/api/src/modules/sales/wholesaleTagStones.ts",
+        "web/apps/api/src/modules/sales/wholesaleSaleBill.ts",
+        "web/apps/api/src/modules/sales/rateCut.ts",
+        "web/apps/api/src/modules/sales/rateCutMasters.ts",
+        "web/apps/api/src/modules/shared/rojmelWholesale.ts",
+        "web/apps/web/components/WholesaleDetailPanel.tsx",
+        "web/apps/web/components/WholesaleVoucherForm.tsx",
+        "web/apps/web/lib/wholesaleVoucher.ts",
+        "web/packages/core/test/wholesaleDetail.test.ts",
+        "web/apps/api/test/wholesaleResiduals.test.ts",
+        "web/apps/api/test/wholesaleSaleResiduals.db.test.ts",
+        "web/apps/api/test/wholesaleSaleBill.test.ts",
+        "web/apps/web/test/wholesaleVoucher.test.ts",
+        "web/apps/web/test/features/modules/wholesaleSale.mjs",
+        "orchestration/work/WP-30/study.md",
+        "orchestration/work/WP-30/cases.md"
+      ],
+      "statusNote": "IMPLEMENTED, not accepted. Built and unit/DB-tested; the new browser cases were written without a local browser stack and run in CI. Blocked cases: rojmel.missing-types-and-silver, refusal.detail-row-delete-right, rights.detail-delete-and-print, retry.detail-row-double-post. Open: silver Rojmel and ledger families, Rojmel types 21/23-25/28/29-40, typed rows on a tagged line, desktop-runtime comparison and parent acceptance."
+    },
+    {
+      "id": "N249",
+      "status": "implemented-unverified",
+      "action": "Tag Print like UT_TAG_PRINT for the PRINT_MAST label-file choice and the SubTagPrint sub-report: Print sends the chosen file and the sheet is that file's layout (QrPrint10, BarPrint10, BarPrint13, GhatTagPrnt) with the BAR_IDTL lines by each file's link, the L. line, the *tag* text, the QR picture, karigar, shop and purity group; the combo's empty item and no-default rules; the desktop Set message; Alt+P.",
+      "parentLabels": "P1-core; L3; T01-T18; WP-34",
+      "startAfter": [
+        "N225"
+      ],
+      "requiredProof": "tagLabelText, tagPrintFiles.db, tagPrintScreen.db and tagPrintStaging.db tests pass under forced RLS; the tag-print browser module cases for the new ids pass in CI.",
+      "gapIds": "G261",
+      "entryDefinition": "02-execution-plan.md section 4",
+      "sourceAndModuleDetail": "12-lineage-verification-2026-10-01.md",
+      "universalContract": "03-shared-contracts.md",
+      "verification": "04-verification-playbook.md",
+      "statusAsOf": "2026-11-23",
+      "evidence": [
+        "web/apps/api/src/modules/stock/tagPrint.ts",
+        "web/apps/api/src/modules/stock/tagPrintScreen.ts",
+        "web/apps/api/src/routes/tagPrintScreen.ts",
+        "web/apps/web/app/(app)/txn/tag-print/page.tsx",
+        "web/apps/api/test/tagLabelText.test.ts",
+        "web/apps/api/test/tagPrintFiles.db.test.ts",
+        "web/apps/api/test/tagPrintScreen.db.test.ts",
+        "web/apps/web/test/features/modules/tagPrint.mjs",
+        "orchestration/work/WP-34/study.md",
+        "orchestration/work/WP-34/cases.md"
+      ],
+      "statusNote": "IMPLEMENTED, not accepted. Built and unit/DB-tested; the new browser cases were written without a local browser stack and run in CI. Blocked: tag-print.print.empty-file (no desktop message exists for an empty print file). Decisions (architect, 2026-11-23, owner may override): drop the HUID line; Set keeps the update right; GhatTagPrnt prints the whole voucher's BAR_IDTL lines. Open: exact Crystal positions and fonts, the desktop edition check, RFID and Print Type, desktop-runtime comparison and parent acceptance."
+    },
+    {
+      "id": "N250",
+      "status": "implemented-unverified",
+      "action": "Report > Purchase Rpt is the desktop RP_ALL form in its Purchase Rpt caption on the shared RP_ALL engine: the seven PanelPurc buttons (Purc Report, Purc Reg, Item Wise, Purchase Bill, Party Purc, Group Purc, Party Summ) with their templates' groups, sorts and totals, the shared selectors (dates, lc Code, Book, Pr Code, Gr Code, Party, City, Area, Item Type), signed party totals by BOOK_DATA.BOOK_INOUT, count-once voucher totals, and CSV, Excel and PDF behind the Print right; a dedicated /reports/purchase-report screen with Enter flow, F1 help and Esc.",
+      "parentLabels": "P1-core; L6; T01-T18; WP-12",
+      "startAfter": [
+        "N234"
+      ],
+      "requiredProof": "Unit and DB tests whose expected values are added up from fixture vouchers with each template's formula; route tests for the List and Print rights, scope sentinels and refusals; the purchase-report browser module (17 applicable cases) green, baseline entries removed.",
+      "gapIds": "G262",
+      "entryDefinition": "15-standard-edition-plan.md section 5",
+      "sourceAndModuleDetail": "12-lineage-verification-2026-10-01.md",
+      "universalContract": "03-shared-contracts.md",
+      "verification": "04-verification-playbook.md",
+      "statusAsOf": "2026-11-23",
+      "evidence": [
+        "web/apps/api/src/modules/reports/purchaseReport.ts",
+        "web/apps/api/src/modules/reports/rpAll/purchaseLayouts.ts",
+        "web/apps/api/src/modules/reports/rpAll/purchaseQuery.ts",
+        "web/apps/api/src/routes/purchaseReport.ts",
+        "web/apps/web/app/(app)/reports/purchase-report/page.tsx",
+        "web/apps/web/app/(app)/reports/purchase-report/PurchaseReportGrid.tsx",
+        "web/apps/api/test/purchaseReport.test.ts",
+        "web/apps/api/test/purchaseReport.db.test.ts",
+        "web/apps/web/test/features/modules/purchaseReport.mjs"
+      ],
+      "statusNote": "IMPLEMENTED, not accepted. purchase-report module: 17 applicable, 17 passed locally for this module only, 3 not applicable (read-only). Unit 25 of 25, DB 11 of 11. Open: voucher zoom, the Crystal print layouts, the session data type filter, UAE and State variants. Desktop match 0%."
+    },
+    {
+      "id": "N251",
+      "status": "implemented-unverified",
+      "action": "Other > Daily Rate closes its residual MS_RATE gaps: a save at location 00 copies the day to every other location of the company (delete the destination day, insert the 00 rows with only LC_CODE replaced) when the company holds the operator-provisioned copy entitlement (the hosted form of the SSRegSrNo gate, default off, no API route writes it); the copy, the source rows and the GROUP_MAST.GR_RATE update are one transaction with the day locks of every destination taken in sorted order; GET /daily-rate/labels serves the MDI Rate_1 to Rate_7 labels (today, own company and location, RATE_DISPLAY = Y, SR_NO order, seven at most, 'ToDays Rate :' when empty, no fallback) and the dashboard shows them and refreshes after a committed save or delete; the browser harness can sign in at another location through the Open Company selector.",
+      "parentLabels": "P1-core; L3; T01-T18; WP-33",
+      "startAfter": [
+        "N208"
+      ],
+      "requiredProof": "DB tests for the copy projection, the entitlement gate, replacement and clearing, rollback on a destination fault, the 00 versus local-save race, forged-field refusal and the label rules; routePolicy count; the daily-rate browser module run by CI with the location-00 session.",
+      "gapIds": "G263",
+      "entryDefinition": "15-standard-edition-plan.md section 5",
+      "sourceAndModuleDetail": "12-lineage-verification-2026-10-01.md",
+      "universalContract": "03-shared-contracts.md",
+      "verification": "04-verification-playbook.md",
+      "statusAsOf": "2026-11-23",
+      "evidence": [
+        "web/apps/api/src/modules/masters/dailyRate.ts",
+        "web/apps/api/src/routes/dailyRate.ts",
+        "web/packages/db/prisma/migrations/20261123090000_daily_rate_copy_entitlement/migration.sql",
+        "web/apps/web/components/DailyRateLabels.tsx",
+        "web/apps/api/test/dailyRate.copy.db.test.ts",
+        "web/apps/web/test/features/modules/dailyRate.mjs"
+      ],
+      "statusNote": "IMPLEMENTED, not accepted. 14 DB cases (11 for the copy, 3 for the labels) pass locally on an isolated database; the daily-rate browser module ran locally: 46 applicable cases, 42 passed, 4 blocked with reasons (Ctrl+F1, grid Enter/Escape keys, the optional-column projection which is a database case, the cross-year collision which waits for the owner), 0 failed. Open: the cross-year collision policy (owner), Ctrl+F1 and grid keys, an operator screen for the entitlement, UAE optional fields in a browser. Desktop match 0%."
+    },
+    {
+      "id": "N252",
+      "status": "implemented-unverified",
+      "action": "Report → Order Report is the desktop RP_ALL order branch on its own route /reports/order-report: Order Report, Order Advance, Order Adjust, Order Wise Bill, Making Panding, Making Summ and Bill Wise Adjust over SL_ORD_DATA/SL_ORD_DETL/SL_ORD_ADJ/SL_DATA with SL_ORD_ADJ joined through ORD_NO/ORD_LC/ORD_YRCD/ORD_DBCD, the template titles and bands, Cust Name help from SL_ORD_DATA, City/Area lookups, CSV/XLSX behind the Print right and the caption's own USER_SET row. The report writes nothing.",
+      "parentLabels": "P1-core; L6; WP-14; T01-T18",
+      "startAfter": [
+        "N234"
+      ],
+      "requiredProof": "Unit and DB/HTTP tests under forced RLS that run the real adapter with expected values computed from seeded orders, adjustments and bills for all seven modes, sentinels in another tenant, company and location, no writes, List and Print rights; browser module cases through the real screen.",
+      "gapIds": "G264",
+      "entryDefinition": "docs/parity/LITE-MASTER-PLAN.md section 5 (WP-14)",
+      "sourceAndModuleDetail": "12-lineage-verification-2026-10-01.md; orchestration/work/WP-14/study.md; orchestration/work/WP-14/cases.md; orchestration/work/WP-14/verify.md",
+      "universalContract": "03-shared-contracts.md",
+      "verification": "04-verification-playbook.md",
+      "statusAsOf": "2026-11-23",
+      "evidence": [
+        "web/apps/api/src/modules/reports/rpAll/orderQuery.ts",
+        "web/apps/api/src/modules/reports/rpAll/orderLayouts.ts",
+        "web/apps/api/src/routes/rpAllReport.ts",
+        "web/apps/web/app/(app)/reports/order-report/page.tsx",
+        "web/apps/api/test/rpAllOrder.test.ts",
+        "web/apps/api/test/rpAllOrder.db.test.ts",
+        "web/apps/web/test/features/modules/orderReportRp.mjs",
+        "orchestration/work/WP-14/verify.md"
+      ],
+      "statusNote": "IMPLEMENTED, not accepted. order-report browser module 25 of 25 applicable cases pass on a fresh local build (2026-11-23); pending-set, writes-nothing and sentinels are DB-layer cases in rpAllOrder.db.test.ts. The web Sales Order's '+' SL_ORD_ADJ row (#262, merged) is checked by the lifecycle and journey cases. Open: Making Panding/Summ print stored DESIGN_ISU = 'N' lines because the desktop's fully-adjusted write runs only for registration HM310NEPK (RP_ALL.cs:10925), owner question against decision D2. Desktop match 0%."
+    },
+    {
+      "id": "N253",
+      "status": "implemented-unverified",
+      "action": "Report → Sales Report gets its dedicated RP_ALL screen on /reports/sales-report (phase two of N234): the thirteen sales buttons with the desktop captions and defaults, the party/book/product/group/city/area lookups, Select Book, template grouping and zoom, the Enter flow, and grid, CSV, XLSX and PDF output behind the Print right over GET /reports/sales-report.",
+      "parentLabels": "P1-core; L6; WP-11; T01-T18",
+      "startAfter": [
+        "N234"
+      ],
+      "requiredProof": "The frozen sales-report browser module through the real screen with expected values computed from seeded vouchers: defaults, filters, register/report/item/group/employee/order totals, lookups, grouping, invalid input, scope and rights, history, output match and keyboard flow.",
+      "gapIds": "G265, G246",
+      "entryDefinition": "docs/parity/LITE-MASTER-PLAN.md section 5 (WP-11)",
+      "sourceAndModuleDetail": "docs/parity/rpall-sales-inventory.md; 12-lineage-verification-2026-10-01.md; orchestration/work/WP-11/red-browser.md; orchestration/work/WP-11/verify.md",
+      "universalContract": "03-shared-contracts.md",
+      "verification": "04-verification-playbook.md",
+      "statusAsOf": "2026-11-23",
+      "evidence": [
+        "web/apps/web/app/(app)/reports/sales-report/page.tsx",
+        "web/apps/web/app/(app)/reports/sales-report/useSalesReport.ts",
+        "web/apps/web/app/(app)/reports/sales-report/SalesReportGrid.tsx",
+        "web/apps/api/src/modules/masters/lookup.ts",
+        "web/apps/api/src/modules/reports/rpAll/filters.ts",
+        "web/apps/web/test/features/modules/salesReport.mjs",
+        "orchestration/work/WP-11/verify.md"
+      ],
+      "statusNote": "IMPLEMENTED, not accepted. sales-report browser module on a fresh local build (2026-11-23): 14 applicable, 11 pass, 3 blocked, 0 fail. Blocked: T07/T18 Sales Return variant (G246, the web return writes NET_AMT instead of RTN_NET_AMT) and T13 return-bill print (SalesRtnA4Print template missing from the repository). Desktop match 0%."
+    },
+    {
+      "id": "N254",
+      "status": "implemented-unverified",
+      "action": "Report → Approval Rpt is the desktop RP_ALL approval branch: a dedicated /reports/approval-report screen (caption Approval Rpt, PanelApr's &Approval Isu / &Approval InOut / &Approval Panding, From 01/01/2010 To the system date with SetDate, the locked lc box, the eleven selectors in desktop tab order with their Enter routes, CLEAR_DATA on Cancel, inert Save/Delete/Print) over the shared RP_ALL engine: AprPartyWise party/voucher bands without a grand total, AprInOut and AprPan party/product/tag bands with Grand Total, exact ISU_REC N for Pending, live master names, reversed dates as an empty report, and CSV/XLSX/PDF from the same result.",
+      "parentLabels": "P1-core; L6; WP-13; T01-T18",
+      "startAfter": [
+        "N234"
+      ],
+      "requiredProof": "DB/HTTP test under forced RLS with expected sums computed from seeded APR_DETL lines (selectors, bands, totals, suppression, precision, scope, rights, concurrency, custody reconciliation); browser module through the real screen and the Approval Issue/Return screens.",
+      "gapIds": "G266",
+      "entryDefinition": "docs/parity/LITE-MASTER-PLAN.md section 5 (WP-13)",
+      "sourceAndModuleDetail": "orchestration/work/WP-13/study.md; orchestration/work/WP-13/cases.md; orchestration/work/WP-13/verify.md",
+      "universalContract": "03-shared-contracts.md",
+      "verification": "04-verification-playbook.md",
+      "statusAsOf": "2026-11-23",
+      "evidence": [
+        "web/apps/api/src/modules/reports/rpAll/approvalLayouts.ts",
+        "web/apps/api/src/modules/reports/rpAll/approvalQuery.ts",
+        "web/apps/api/src/modules/reports/rpAll/index.ts",
+        "web/apps/web/app/(app)/reports/approval-report/page.tsx",
+        "web/apps/api/test/rpAllApproval.test.ts",
+        "web/apps/api/test/rpAllApproval.db.test.ts",
+        "web/apps/web/test/features/modules/approvalReportRp.mjs"
+      ],
+      "statusNote": "IMPLEMENTED, not accepted. Browser module approval-report 28 of 28 applicable pass (7 blocked, 32 N/A to the DB/unit tests or no-write groups); rpAll API tests 86 of 86 on a local database. Blocked: MsDataType source (D3), MsAllBranchAcShow, NULL-tag footer, printed decimals, Crystal drill-down, Sales Invoice approval import. Desktop match 0%."
+    },
+    {
       "id": "N255",
       "status": "implemented-unverified",
       "action": "Ledger Report fine prints and Lite ageing follow RP_LEDR: the drill-down JmaUdr, Gold and Silver buttons print server-built PDF/Excel from read-only resolvers (no FINE_DATA write, D5); the Gold and Silver rows run every BtnGold_Click/BtnSilver_Click source as one UNION ALL (RP_LEDR.cs:8256-8319, :8900-8934) under the Crystal selection (:8343); balances from AC_DATA only (Gold without data type, Silver/JmaUdr by data type, SILVER_THREE_DIGIT for silver decimals); the exact print-right text; Debit Ageing hidden and refused (403 edition-unavailable) in Lite and Basic (:4587). Two locked tests corrected from the desktop (zero-amount silver sale, router registration).",

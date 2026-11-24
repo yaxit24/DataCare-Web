@@ -633,7 +633,12 @@ databaseDescribe('database-backed transaction integrity', () => {
     // G04: the day book carries one money row per priced line, crediting the purchase account (SIGN '+').
     expect(Number(purchaseReturnRows[0]?.rojmel_money)).toBe(2);
 
-    await deletePurchaseReturn(runtime, { scope: scope('PRT'), vchNo: purchaseReturn.vchNo });
+    const returnView = await getPurchaseReturn(runtime, scope('PRT'), purchaseReturn.vchNo);
+    await deletePurchaseReturn(runtime, {
+      scope: scope('PRT'),
+      vchNo: purchaseReturn.vchNo,
+      expectedVersion: String(returnView.version),
+    });
     await expect(
       tagAvailable(runtime, TENANT, {
         CO_CODE: CO,
@@ -822,6 +827,9 @@ databaseDescribe('database-backed transaction integrity', () => {
       scope: returnScope,
       vchNo: created.vchNo,
       deleteUser: 'return-deleter',
+      expectedVersion: String(
+        (await getPurchaseReturn(runtime, returnScope, created.vchNo)).version,
+      ),
     });
     const remaining = (await owner.$queryRawUnsafe(
       `SELECT

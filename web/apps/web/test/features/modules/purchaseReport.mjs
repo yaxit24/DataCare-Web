@@ -78,6 +78,8 @@ const exec = (ctx, sql, ...params) => ctx.owner.$executeRawUnsafe(sql, ctx.tenan
 
 async function openReport(page) {
   await page.goto('/dashboard');
+  // The sidebar is drawn once the session has loaded; count the links only after it is there.
+  await page.locator('nav.sidebar a').first().waitFor();
   const link = page.locator(`a[href="${ROUTE}"]`);
   assert.equal(
     await link.count(),
@@ -123,15 +125,20 @@ async function prepareFilterMasters(ctx) {
     PARTIES.local.code,
     PARTIES.interState.code,
   );
+  // PRODUCT_MAST has no unique key: replace, never add, so the Product master's own cases see two rows at most,
+  // and keep the names off the Product master's E2E search prefix.
   await exec(
     ctx,
-    `INSERT INTO "PRODUCT_MAST"(tenant_id,"CO_CODE","PR_CODE","PR_NAME") VALUES
-       ($1,'01','P01','E2E GOLD PRODUCT'),($1,'01','P02','E2E SILVER PRODUCT')
-     ON CONFLICT DO NOTHING`,
+    `DELETE FROM "PRODUCT_MAST" WHERE tenant_id=$1 AND "CO_CODE"='01' AND "PR_CODE" IN ('Y1','Y2')`,
   );
   await exec(
     ctx,
-    `UPDATE "ITEM_MAST" SET "PR_CODE"=CASE WHEN "IT_CODE"=$2 THEN 'P01' ELSE 'P02' END
+    `INSERT INTO "PRODUCT_MAST"(tenant_id,"CO_CODE","PR_CODE","PR_NAME") VALUES
+       ($1,'01','Y1','PURCHASE RPT GOLD'),($1,'01','Y2','PURCHASE RPT SILVER')`,
+  );
+  await exec(
+    ctx,
+    `UPDATE "ITEM_MAST" SET "PR_CODE"=CASE WHEN "IT_CODE"=$2 THEN 'Y1' ELSE 'Y2' END
       WHERE tenant_id=$1 AND "CO_CODE"='01' AND "IT_CODE" IN ($2,$3)`,
     ITEMS.gold.code,
     ITEMS.silver.code,
@@ -237,7 +244,7 @@ export const purchaseReport = {
         await prepareFilterMasters(ctx);
         const vouchers = await createPair(ctx, page);
         await openReport(page);
-        await field(page, 'product').fill('P02');
+        await field(page, 'product').fill('Y2');
         await field(page, 'group').fill(ITEMS.silver.group);
         await field(page, 'item-type').selectOption('S');
         await runMode(page, 'item');
@@ -245,7 +252,7 @@ export const purchaseReport = {
         assert.match(text, new RegExp(vouchers.silver));
         assert.doesNotMatch(text, new RegExp(vouchers.gold));
         return {
-          observation: `P02/S/${ITEMS.silver.group} selected only ${vouchers.silver}`,
+          observation: `Y2/S/${ITEMS.silver.group} selected only ${vouchers.silver}`,
           expected: { included: [vouchers.silver], excluded: [vouchers.gold] },
           database: { vouchers },
           downstream: { grid: text },
@@ -260,19 +267,43 @@ export const purchaseReport = {
       async (ctx) => {
         const { page } = await ctx.session();
         await openReport(page);
+        // The company accumulates vouchers across cases and modules, so the pair's own contribution is the
+        // difference of the server's selection totals before and after it was created.
+        const MODES = ['register', 'item', 'party', 'group', 'party-summary'];
+        const selection = async (mode) =>
+          (await (await page.request.get(`/api${API}?mode=${mode}`)).json()).selection;
+        const before = {};
+        for (const mode of MODES) before[mode] = await selection(mode);
         const vouchers = await createPair(ctx, page);
+        const round2 = (x) => Math.round(x * 100) / 100;
+        const afterOf = {};
+        // Each mode reads its own record set (Group Purc adds NET_AMT <> 0), so each must add exactly the pair.
+        for (const mode of MODES) {
+          const after = (afterOf[mode] = await selection(mode));
+          assert.equal(round2(after.netAmt - before[mode].netAmt), TOTAL_TWO.net, `${mode} net`);
+          assert.equal(round2(after.taxAmt - before[mode].taxAmt), TOTAL_TWO.tax, `${mode} tax`);
+          assert.equal(
+            round2(after.totAmt - before[mode].totAmt),
+            TOTAL_TWO.total,
+            `${mode} total`,
+          );
+        }
         await openReport(page);
         const observations = {};
-        for (const mode of ['register', 'item', 'party', 'group', 'party-summary']) {
+        const inr = (n) =>
+          n.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+        for (const mode of MODES) {
           await runMode(page, mode);
           const text = await reportText(page);
-          for (const expected of ['1,21,236.00', '3,637.08', '1,24,873.08'])
-            assert.match(text, new RegExp(expected.replace(/[.]/g, '\\.')));
+          const foot = await page.getByTestId('purchase-report-selection').innerText();
+          const after = afterOf[mode];
+          for (const expected of [after.netAmt, after.taxAmt, after.totAmt])
+            assert.ok(foot.includes(inr(expected)), `${mode}: ${inr(expected)} in ${foot}`);
           observations[mode] = text;
         }
         return {
           observation:
-            'register/item/party/group/summary reconcile to the hand-computed two-voucher totals',
+            'register/item/party/group/summary print the voucher totals of the selection; the pair adds exactly the hand-computed two-voucher totals',
           expected: TOTAL_TWO,
           database: { vouchers },
           downstream: observations,
@@ -298,6 +329,8 @@ export const purchaseReport = {
           await lookup.press('Enter');
           assert.equal((await lookup.inputValue()).toUpperCase(), code);
           await lookup.press('F1');
+          // The help list is fetched after the key; wait for it before counting the open lists.
+          await page.locator('[data-lookup-open]').waitFor();
           assert.equal(await page.locator('[data-lookup-open]').count(), 1);
           await lookup.press('Escape');
           observed.push(`${id}:${code}`);
@@ -315,7 +348,7 @@ export const purchaseReport = {
         const { page } = await ctx.session();
         await openReport(page);
         for (const [id, code] of [
-          ['product', 'P01'],
+          ['product', 'Y1'],
           ['group', ITEMS.gold.group],
         ]) {
           const lookup = field(page, id);
@@ -377,7 +410,8 @@ export const purchaseReport = {
         await field(page, 'from').fill('2026-12-31');
         await field(page, 'to').fill('2026-01-01');
         await button(page, 'Run').click();
-        const alert = page.getByRole('alert');
+        // Next's route announcer is a second role=alert on every page; address the screen's own.
+        const alert = page.locator('[role="alert"][data-testid="purchase-report-error"]');
         await alert.waitFor();
         assert.match(await alert.innerText(), /from.*to|date range/i);
         assert.deepEqual(await purchase.counts(ctx), before);
@@ -400,12 +434,22 @@ export const purchaseReport = {
         const database = await snapshotVoucher(ctx, vchNo);
         await openReport(page);
         const downstream = {};
-        for (const mode of ['report', 'register', 'item', 'party', 'group', 'party-summary']) {
+        // Group Purc prints no voucher line: PurcGroupWise suppresses its Detail band (Section8,
+        // EnableSuppress=True; RP_ALL.cs:12121), so the voucher shows only through its group sums.
+        for (const mode of ['report', 'register', 'item', 'party', 'party-summary']) {
           await runMode(page, mode);
           downstream[mode] = await reportRowFor(page, vchNo);
         }
+        await runMode(page, 'group');
+        assert.equal(await reportRows(page).filter({ hasText: vchNo }).count(), 0);
+        assert.equal(
+          await reportGrid(page).locator('tbody tr.lvl-line, tbody tr.lvl-voucher').count(),
+          0,
+        );
+        assert.ok((await reportRows(page).count()) > 0, 'group bands print');
+        downstream.group = await reportText(page);
         return {
-          observation: `purchase ${vchNo} appears exactly once in six data-grid variants`,
+          observation: `purchase ${vchNo} appears in five voucher-printing data-grid variants; Group Purc prints group sums only`,
           expected: { vchNo, occurrencesPerMode: 1 },
           database,
           downstream,
@@ -464,7 +508,12 @@ export const purchaseReport = {
         assert.equal(database.header[0].tot, EDITED_GOLD.total);
         await openReport(page);
         await runMode(page, 'register');
-        const row = await reportRowFor(page, vchNo);
+        // Other books of the company can carry the same voucher number: take the row of the Purchase book.
+        const own = reportRows(page).filter({
+          has: page.locator(`td:text-is("${purchase.BOOK}") + td:text-is("${vchNo}")`),
+        });
+        await own.first().waitFor();
+        const row = await own.first().innerText();
         assert.match(row, /1,20,081\.52|120,081\.52/);
         return {
           observation: `edited ${vchNo} reaggregated to ${EDITED_GOLD.total}`,
@@ -696,7 +745,8 @@ export const purchaseReport = {
         const returned = await purchaseReturn.createReturn(ctx, page);
         await openReport(page);
         const downstream = {};
-        for (const mode of ['report', 'register', 'item', 'party', 'group', 'party-summary']) {
+        // Group Purc prints group sums only (PurcGroupWise Section8 suppressed, RP_ALL.cs:12121): no voucher numbers.
+        for (const mode of ['report', 'register', 'item', 'party', 'party-summary']) {
           await runMode(page, mode);
           const text = await reportText(page);
           assert.match(text, new RegExp(gold));

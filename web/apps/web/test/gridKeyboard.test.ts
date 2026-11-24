@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { resolveGridKey } from '../components/GridKeyboard';
+import { planEnterWalk, resolveGridKey } from '../components/GridKeyboard';
 
 const base = {
   row: 1,
@@ -77,5 +77,43 @@ describe('desktop grid keyboard decision table', () => {
     });
     expect(resolveGridKey({ ...base, key: 'Enter', shiftKey: true })).toEqual({ type: 'none' });
     expect(resolveGridKey({ ...base, key: 'ArrowDown', altKey: true })).toEqual({ type: 'none' });
+  });
+});
+
+describe('G96: the Enter walk lands on editable cells only (TR_KR_ISU.cs:3743 skip loop)', () => {
+  // Purchase Return's compact row: 8 inputs, then Fine and Amount text cells and the row's delete button.
+  const editable = (column: number) => column < 8;
+  it('skips the read-only Fine, Amount and delete cells and wraps to the next row Item', () => {
+    expect(planEnterWalk(editable, { row: 0, column: 8 }, 2, 11)).toEqual({
+      type: 'focus',
+      row: 1,
+      column: 0,
+    });
+  });
+  it('steps one editable cell inside a row', () => {
+    expect(planEnterWalk(editable, { row: 0, column: 3 }, 2, 11)).toEqual({
+      type: 'focus',
+      row: 0,
+      column: 3,
+    });
+  });
+  it('skips a read-only cell in the middle of a row', () => {
+    expect(planEnterWalk((c) => c !== 4, { row: 1, column: 4 }, 3, 8)).toEqual({
+      type: 'focus',
+      row: 1,
+      column: 5,
+    });
+  });
+  it('appends a row after the last editable cell of the last row (TR_KR_ISU.cs:3680)', () => {
+    expect(planEnterWalk(editable, { row: 1, column: 8 }, 2, 11)).toEqual({
+      type: 'append',
+      row: 2,
+    });
+  });
+  it('gives up without looping when no cell is editable', () => {
+    expect(planEnterWalk(() => false, { row: 0, column: 0 }, 1, 3)).toEqual({
+      type: 'append',
+      row: 1,
+    });
   });
 });

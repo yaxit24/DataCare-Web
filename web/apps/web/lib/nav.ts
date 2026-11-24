@@ -260,6 +260,8 @@ export const NAV: NavGroup[] = [
     items: [
       { label: 'Sales Register', href: '/reports/sales-register', ready: true },
       { label: 'Purchase Register', href: '/reports/purchase-register', ready: true },
+      // The desktop Purchase Rpt menu (RP_ALL): seven purchase reports on one selector panel.
+      { label: 'Purchase Rpt', href: '/reports/purchase-report', ready: true },
       { label: 'Day Book', href: '/reports/day-book', ready: true },
       // The desktop's F11 report: metal weights beside money, which the AC_DATA day book omits.
       { label: 'Rojmel (Day Book)', href: '/reports/rojmel', ready: true },
@@ -303,6 +305,20 @@ export const NAV: NavGroup[] = [
       { label: 'Location-wise Sales', href: '/reports/location-wise-sales', ready: true },
       { label: 'GST Input Register', href: '/reports/gst-input-register', ready: true },
       { label: 'GST Report', href: '/reports/gst-report', ready: true },
+      // RP_ALL's own caption (MDI_FORM.cs:8901-8910 {{case "Sales Report":}}), not the Sales Register screens.
+      {
+        label: 'Sales Report',
+        href: '/reports/sales-report',
+        ready: true,
+        form: 'Reports/Sales Report',
+      },
+      // RP_ALL's own caption (MDI_FORM.cs:8931 {{case "Order Report":}}): not the Sales Order voucher screen.
+      {
+        label: 'Order Report',
+        href: '/reports/order-report',
+        ready: true,
+        form: 'Reports/Order Report',
+      },
       { label: 'Delete Data', href: '/reports/delete-data', ready: true },
       { label: 'Point Report', href: '/reports/point-report', ready: true },
       { label: 'Approval Report', href: '/reports/approval-report', ready: true },

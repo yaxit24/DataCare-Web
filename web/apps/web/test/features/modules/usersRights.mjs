@@ -83,11 +83,13 @@ async function fillPasswords(page, password, confirm = password) {
   await box(page, 'Confirm Password').fill(confirm);
   await box(page, 'Confirm Password').press('Tab');
 }
-async function save(page) {
-  const response = page.waitForResponse(
-    (r) =>
-      r.request().method() === 'POST' && new URL(r.url()).pathname.startsWith('/api/admin/users'),
-  );
+/**
+ * Press Save and return its POST. `waitForResponse` is registered before the click and matches the exact
+ * endpoint and method this screen sends — add mode posts `/admin/users`, edit mode `/admin/users/<name>/update` —
+ * so the wait can neither miss its own response nor settle on an unrelated one.
+ */
+async function save(page, path = '/admin/users') {
+  const response = page.waitForResponse((r) => isApi(r, 'POST', path));
   await page.getByRole('button', { name: 'Save', exact: true }).click();
   return response;
 }
@@ -285,6 +287,11 @@ export const usersRights = {
           }
           // Eight lower-case letters: no composition rule.
           await page.getByRole('button', { name: 'Cancel', exact: true }).click();
+          // Cancel re-reads the user list and returns the caret to the name box (clear(), :2095-2117); the
+          // caret arrives when that read answers. Wait for it before typing: Playwright's fill types into the
+          // focused element between two protocol steps, so a list reply landing mid-typing could move the
+          // caret under a keystroke already aimed at another box and the Save would then never post.
+          await page.waitForFunction(() => document.activeElement?.id === 'user-name');
           await createThroughScreen(page, 'QT03NEW', 'tulsibag');
           const row = await loginRow(ctx, 'QT03NEW');
           assert.match(row.pwd, /^\$argon2id\$/);
@@ -494,7 +501,7 @@ export const usersRights = {
           const before = await tenantFingerprint(ctx);
           await pickAndType(page, 'QT08SAME');
           await box(page, 'Old Password').fill('heera-moti-8');
-          const response = await save(page);
+          const response = await save(page, `/admin/users/QT08SAME/update`);
           assert.equal(response.status(), 200);
           await shown(page, T.CREATED);
           assert.deepEqual(changedTables(before, await tenantFingerprint(ctx)), []);
@@ -523,7 +530,7 @@ export const usersRights = {
           await page.waitForFunction(() => document.activeElement?.id === 'user-oldPassword');
           await box(page, 'Old Password').fill('panna-gali-0');
           await fillPasswords(page, 'zaveri-bazar-9');
-          let response = await save(page);
+          let response = await save(page, '/admin/users/QT09EDIT/update');
           assert.equal(response.status(), 400);
           await shown(page, T.OLD_PASSWORD_WRONG);
           assert.equal(
@@ -533,7 +540,7 @@ export const usersRights = {
           );
           await box(page, 'Old Password').fill('panna-gali-9');
           await fillPasswords(page, 'zaveri-bazar-9');
-          response = await save(page);
+          response = await save(page, '/admin/users/QT09EDIT/update');
           assert.equal(response.status(), 200, await response.text());
           await shown(page, T.CREATED);
           const after = await loginRow(ctx, 'QT09EDIT');

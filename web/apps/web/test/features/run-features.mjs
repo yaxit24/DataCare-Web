@@ -19,6 +19,7 @@ import { purchaseInvoice } from './modules/purchaseInvoice.mjs';
 import { purchaseReport } from './modules/purchaseReport.mjs';
 import { salesReport } from './modules/salesReport.mjs';
 import { stockReport } from './modules/stockReport.mjs';
+import { orderReportRp } from './modules/orderReportRp.mjs';
 import { purchaseReturn } from './modules/purchaseReturn.mjs';
 import { salesOrder } from './modules/salesOrder.mjs';
 import { salesInvoice } from './modules/salesInvoice.mjs';
@@ -56,6 +57,7 @@ import { dataBackup } from './modules/dataBackup.mjs';
 import { gstReport } from './modules/gstReport.mjs';
 import { approvalIssue } from './modules/approvalIssue.mjs';
 import { approvalReturn } from './modules/approvalReturn.mjs';
+import { approvalReportRp } from './modules/approvalReportRp.mjs';
 import { runSurface } from './surface/runner.mjs';
 
 /**
@@ -77,6 +79,7 @@ const MODULES = [
   purchaseReport,
   salesReport,
   stockReport,
+  orderReportRp,
   settingsEffects,
   usersRights,
   salesReturn,
@@ -113,6 +116,7 @@ const MODULES = [
   gstReport,
   approvalIssue,
   approvalReturn,
+  approvalReportRp,
 ];
 
 const artifacts = resolve(webRoot, 'test-results/feature-e2e');

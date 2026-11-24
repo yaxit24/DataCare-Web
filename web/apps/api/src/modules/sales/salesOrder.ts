@@ -38,6 +38,7 @@ import { fineWt } from '../shared/fine.js';
 import { resolveSalesOrderDesignTx } from './orderDesignSelection.js';
 import { resolveBookSlotAccountTx } from '../shared/postingAccounts.js';
 import { kasarAccountTx } from '../finance/finance.js';
+import { MONEY_ADVANCE_SQL } from './orderCancel.js';
 import {
   orderDate,
   orderClock,
@@ -100,7 +101,7 @@ export interface SalesOrderInput {
   bankName?: string; // tBankName.Text  :9151
   cardAc?: string; // MSG2_TOTAL[5,4] :9148
   cardAdj?: string; // CardCommAdj     :9154
-  oldGoldFine?: number; // MSG2_TOTAL[6,2]+[9,2] :9143
+  oldGoldFine?: number; // MSG2_TOTAL[6,2] :9143; the saved OLD_GL adds RCUT_FINE [9,2]
   oldGoldAmount?: number; // MSG2_TOTAL[6,3] :9136
   oldSilverFine?: number; // MSG2_TOTAL[7,2] :9144
   oldSilverAmount?: number; // MSG2_TOTAL[7,3] :9137
@@ -945,8 +946,29 @@ function prepareSalesOrderCreate(input: SalesOrderInput, lifecycle?: OrderWriteC
       ORDER_HEADER_FIELDS,
       salesOrderForm,
       tender.oldMetalSent,
+      N(input.rateCutRate) !== 0,
     );
     const headerDirty = orderDirtyColumns(input, headerFields);
+    const typedOldGlDirty = headerDirty.has('OLD_GL');
+    // MSG2_TOTAL[6,2] — the old gold fine. The request's grid owns it whenever the request carries one
+    // (BILL_TOTAL re-sums the rows, TR_SALE_ORD.cs:11345-11364); otherwise it is the typed cell. A typed
+    // request that echoes the saved OLD_GL column is returning the composed value — :9143 folds RCUT_FINE
+    // into that column — so the cell it means is the saved column less the saved RCUT_FINE, the same
+    // re-derivation the desktop's reopen performs on its totals grid before the next save.
+    const oldMetalColumns: Record<string, number> = tenders.orderOldMetalColumns(
+      tender,
+      salesOrderForm,
+    );
+    const typedOldGoldFine = N(input.oldGoldFine);
+    const oldGoldFineCell =
+      oldMetalColumns.OLD_GL ??
+      (previousHeader != null && !typedOldGlDirty && typedOldGoldFine === n(previousHeader.OLD_GL)
+        ? Math.max(0, round(n(previousHeader.OLD_GL) - n(previousHeader.RCUT_FINE), 3))
+        : typedOldGoldFine);
+    // OLD_GL is composed ([6,2] + [9,2]), so it follows the rate-cut fine: a changed RCUT_FINE makes it dirty even
+    // when the request echoes the saved OLD_GL untouched, and the exact-decimal check below must not hold the
+    // request's own oldGoldFine up against the composed column.
+    if (headerDirty.has('RCUT_FINE')) headerDirty.add('OLD_GL');
     const parentDirty = orderLines.map((line, index) =>
       orderDirtyColumns(
         line,
@@ -985,7 +1007,7 @@ function prepareSalesOrderCreate(input: SalesOrderInput, lifecycle?: OrderWriteC
         TAX_PRC: input.taxRatePct,
         TAX_AMT: totals.tax,
         TOT_AMT: totals.total,
-        ...tenders.orderTenderColumns(tender, salesOrderForm),
+        ...tenders.orderTenderColumns(tender, salesOrderForm, N(input.rateCutRate)),
         VCH_TIME: vchDate,
         ENTRY_TIME:
           lifecycle?.previousHeader && !headerDirty.has('VCH_TIME') && !headerDirty.has('VCH_DATE')
@@ -1004,15 +1026,17 @@ function prepareSalesOrderCreate(input: SalesOrderInput, lifecycle?: OrderWriteC
         BANK_NAME: txt(input.bankName, 50), // tBankName.Text  :9151
         CARD_AC: txt(input.cardAc, 9), // MSG2_TOTAL[5,4] :9148
         CARD_ADJ: txt(input.cardAdj, 1), // CardCommAdj     :9154
-        OLD_GL: N(input.oldGoldFine), // [6,2]+[9,2]    :9143
         OLD_GL_AMT: round2(N(input.oldGoldAmount)), // MSG2_TOTAL[6,3] :9136
         OLD_SL: N(input.oldSilverFine), // MSG2_TOTAL[7,2] :9144
         OLD_SL_AMT: round2(N(input.oldSilverAmount)), // MSG2_TOTAL[7,3] :9137
         SCHM_AMT: round2(N(input.schemeAmount)), // MSG2_TOTAL[8,3] :9142
-        ...tenders.orderOldMetalColumns(tender, salesOrderForm), // G206: OLD_GL* from the grid when it is sent :9136-9144
+        ...oldMetalColumns, // G206: OLD_GL* from the grid when it is sent :9136-9144
+        // TR_SALE_ORD.cs:9143 and TR_TOUR_ORD.cs:7313: the saved OLD_GL is MSG2_TOTAL[6,2] (the grid's or
+        // typed old gold fine) PLUS MSG2_TOTAL[9,2] (RCUT_FINE).
+        OLD_GL: round(oldGoldFineCell + N(input.rateCutFine), 3),
         RCUT_RATE: N(input.rateCutRate), // MSG2_TOTAL[9,1] :9134
         RCUT_FINE: N(input.rateCutFine), // MSG2_TOTAL[9,2] :9135
-        RCUT_AMT: round2(N(input.rateCutAmount)), // MSG2_TOTAL[9,3] :9126
+        // RCUT_AMT (and ADV_AMT) come from orderTenderColumns: the tender total, filed by the rate (:9124-9133).
         ADJ_GOLD: N(input.adjustGold), // AdjGold  :9146
         ADJ_SILVER: N(input.adjustSilver), // AdjSilver:9147
         ORD_ADJ_AMT: round2(N(input.orderAdjustAmount)), // RecAdjAmt:9145
@@ -1024,7 +1048,8 @@ function prepareSalesOrderCreate(input: SalesOrderInput, lifecycle?: OrderWriteC
         CITY: txt(input.city, 20), // tCity.Text  :9160
         MOBILE: txt(input.mobile, 21), // tMobile.Text:9161
       },
-      input,
+      // RCUT_AMT is derived from the tenders, so a typed rate-cut amount is not an exact value to preserve.
+      { ...input, rateCutAmount: undefined, oldGoldFine: undefined },
       headerFields,
       headerDirty,
     );
@@ -1547,7 +1572,16 @@ export async function getSalesOrder(
       })),
     };
     // Both saved order forms retain exact mapped scalar values; calculations remain server-owned.
-    exactOrderValues(dto, x, tenders.orderHeaderFields(ORDER_HEADER_FIELDS, salesOrderForm));
+    exactOrderValues(
+      dto,
+      x,
+      tenders.orderHeaderFields(
+        ORDER_HEADER_FIELDS,
+        salesOrderForm,
+        false,
+        tenderView.advanceColumn === 'RCUT_AMT',
+      ),
+    );
     exactOrderValues(dto, x, tenderView.exactFields);
     dto.lines.forEach((line, index) => {
       const parent = d[index];
@@ -2043,7 +2077,8 @@ export async function cancelSalesOrderAdjust(
   const run = async (tx: any) => {
     const ord: any = (
       await tx.$queryRawUnsafe(
-        `SELECT "AC_CODE" ac, "AC_NAME" nm, coalesce(NULLIF("ADV_AMT"::text,'')::numeric,0)::float adv, coalesce(NULLIF("TOT_AMT"::text,'')::numeric,0)::float tot FROM "SL_ORD_DATA" WHERE "CO_CODE"=$1 AND "CO_BOOK"=$2 AND "VCH_NO"=$3 LIMIT 1`,
+        // A rate-cut order has no money advance to refund (MONEY_ADVANCE_SQL, TR_SALE_ORD.cs:9124-9133).
+        `SELECT "AC_CODE" ac, "AC_NAME" nm, ${MONEY_ADVANCE_SQL}::float adv, coalesce(NULLIF("TOT_AMT"::text,'')::numeric,0)::float tot FROM "SL_ORD_DATA" o WHERE "CO_CODE"=$1 AND "CO_BOOK"=$2 AND "VCH_NO"=$3 LIMIT 1`,
         input.scope.coCode,
         ordBook,
         formatVoucherNo(input.vchNo),

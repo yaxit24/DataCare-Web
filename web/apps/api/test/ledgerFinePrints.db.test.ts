@@ -1,5 +1,6 @@
 import { PrismaClient } from '@datacare/db';
 import type { FastifyInstance } from 'fastify';
+import { strFromU8, unzipSync } from 'fflate';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { buildApp } from '../src/app.js';
 import { hashPassword } from '../src/modules/auth/password.js';
@@ -111,13 +112,14 @@ const TO = '2024-06-30';
       itType?: 'G' | 'S';
       sign?: '+' | '-';
       fine?: number;
+      dataType?: 'A' | 'B';
     },
   ) => {
     ledrSeq += 1;
     return exec(
       `INSERT INTO "AC_DATA"(tenant_id,"CO_CODE","LC_CODE","CO_YEAR","CO_BOOK","VCH_NO","VCH_TYPE",
          "VCH_DATE","LEDR_KEY","BOOK_NAME","AC_CODE","CR_AMT","DR_AMT","IT_TYPE","SIGN","FINE_WT","ENTRY_TIME","DATA_TYPE")
-       VALUES($1,'01','01',$2,$3,$4,'SAL',$5::date,$6,$7,$8,$9,$10,$11,$12,$13,$14::timestamp,'A')`,
+       VALUES($1,'01','01',$2,$3,$4,'SAL',$5::date,$6,$7,$8,$9,$10,$11,$12,$13,$14::timestamp,$15)`,
       tid,
       YEAR,
       opts.book ?? 'SL',
@@ -132,6 +134,7 @@ const TO = '2024-06-30';
       opts.sign ?? null,
       opts.fine ?? null,
       `${opts.date} 09:00:00`,
+      opts.dataType ?? 'A',
     );
   };
 
@@ -413,6 +416,64 @@ const TO = '2024-06-30';
     expect(hasText(body, 'Ledr With Gold Fine Report As On 30/06/2024')).toBe(true);
     expect(hasNumber(body, 999)).toBe(false);
     expect(await stagingCounts()).toEqual(before);
+  });
+
+  it('gold balances apply DATA_TYPE like the desktop: a type-A print never carries type-B balances', async () => {
+    // Desktop: RP_LEDR.cs:8327 and :8335 {{AND DATA_TYPE = MsDataType}} unless MsDataType is C.
+    await seedAccount(tenantId, 'Z700', 'ZZ MIXED');
+    const gold = (o: Parameters<typeof seedLeg>[2]) =>
+      seedLeg(tenantId, 'Z700', { itType: 'G', ...o });
+    await gold({ vchNo: '00101', date: '2024-03-30', cr: 100, sign: '+', fine: 1, dataType: 'A' });
+    await gold({ vchNo: '00102', date: '2024-03-30', cr: 900, sign: '+', fine: 9, dataType: 'B' });
+    await gold({ vchNo: '00103', date: '2024-05-10', cr: 10, sign: '+', fine: 0.5, dataType: 'A' });
+    await gold({ vchNo: '00104', date: '2024-05-11', dr: 50, sign: '-', fine: 2, dataType: 'B' });
+    const q = `acCode=Z700&fromDate=${FROM}&toDate=${TO}`;
+    const a = (await get(`${routes[1]}?${q}&dataType=A`)).json();
+    expect([a.opening, a.closing]).toEqual([
+      { amount: 100, fine: 1 },
+      { amount: 110, fine: 1.5 },
+    ]);
+    const b = (await get(`${routes[1]}?${q}&dataType=B`)).json();
+    expect([b.opening, b.closing]).toEqual([
+      { amount: 900, fine: 9 },
+      { amount: 850, fine: 7 },
+    ]);
+    // Type C drops the predicate: both types count.
+    const c = (await get(`${routes[1]}?${q}&dataType=C`)).json();
+    expect([c.opening, c.closing]).toEqual([
+      { amount: 1000, fine: 10 },
+      { amount: 960, fine: 8.5 },
+    ]);
+  });
+
+  it('the Excel export carries the opening and closing balances and the fine totals', async () => {
+    const json = (await get(`${routes[1]}?${query}&dataType=A`)).json();
+    expect(json.totals.fineIn).toBeGreaterThan(0);
+    const res = await app.inject({
+      method: 'GET',
+      url: `${routes[1]}/export.xlsx?${query}&dataType=A`,
+      headers: { cookie },
+    });
+    expect(res.statusCode).toBe(200);
+    const parts = Object.fromEntries(
+      Object.entries(unzipSync(new Uint8Array(res.rawPayload))).map(([k, v]) => [k, strFromU8(v)]),
+    );
+    const sheet = parts['xl/worksheets/sheet1.xml'] ?? '';
+    const strings = parts['xl/sharedStrings.xml'] ?? '';
+    const text = sheet + strings;
+    expect(text).toContain('Opening Balance');
+    expect(text).toContain('Closing Balance');
+    const values = [...sheet.matchAll(/<v>([^<]*)<\/v>/g)].map((m) => Number(m[1]));
+    for (const n of [
+      json.opening.fine,
+      json.opening.amount,
+      json.closing.fine,
+      json.closing.amount,
+      json.totals.fineIn,
+      json.totals.fineOut,
+    ]) {
+      expect(values, `value ${n} in the workbook`).toContain(n);
+    }
   });
 
   it('account-ledger.output.gold-rows: the zero-amount opening-stock fine is kept, old rows excluded', async () => {

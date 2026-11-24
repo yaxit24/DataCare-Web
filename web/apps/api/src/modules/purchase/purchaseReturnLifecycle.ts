@@ -13,6 +13,7 @@ import {
   persistedVoucherHeaderTx,
 } from '../vouchers/lifecycle.js';
 import { restoreTagTx } from '../stock/stock.js';
+import { assertVoucherVersionTx, versionKeyOf, voucherVersionTx } from '../vouchers/version.js';
 import { assertPeriodOpen, reverseVoucherTx } from '../posting/posting.js';
 import { getPurchase, type PurchaseLineInput, PurchaseValidationError } from './purchase.js';
 import {
@@ -24,6 +25,10 @@ import {
 } from './purchaseReturn.js';
 
 type CompleteScope = VoucherScope & { coYear: string; coBook: string };
+
+/** N245 (D5): the version covers the whole write set; reopen returns it, edit and delete must send it back. */
+const returnVersionTx = (tx: any, scope: CompleteScope, voucherNo: string) =>
+  voucherVersionTx(tx, PURCHASE_RETURN_WRITE_TABLES, versionKeyOf(scope, voucherNo));
 type TagRestore = Record<string, unknown> & { CO_CODE: string; LC_CODE: string; TAG_NO: string };
 
 const num = (value: unknown): number => (value == null ? 0 : Number(value));
@@ -56,12 +61,14 @@ export async function getPurchaseReturn(
 ): Promise<Record<string, unknown>> {
   const complete = completeScope(scope);
   const voucherNo = formatVoucherNo(requestedVoucherNo);
+  let version = '';
   const extras: Array<Record<string, unknown>> = await withTxBudget(
     prisma,
     scope.tenantId,
     'read',
     async (tx: any) => {
       await resolveBookPolicyTx(tx, scope, 'PURCHASE RETURN');
+      version = await returnVersionTx(tx, complete, voucherNo);
       return tx.$queryRawUnsafe(
         `SELECT "SR_NO","IT_TYPE","LOT_NO","ITM_LOT","WITH_STOCK","ITM_LOSS_WT","ITM_GHT_PRC",
                 "ITM_LESS_TCH","CONV_RATE","CONV_PRC","COMM_AMT","FINE_CUT_PCS","FINE_CUT_GWT",
@@ -102,6 +109,7 @@ export async function getPurchaseReturn(
   return {
     ...view,
     lines,
+    version,
     origVchNo: view.saleBillNo,
     origBook: view.saleBillBook,
     origYear: view.saleBillYear,
@@ -203,12 +211,20 @@ export async function editPurchaseReturn(
   input: PurchaseReturnInput,
   lines: PurchaseLineInput[],
   requestedVoucherNo: number | string,
+  expectedVersion: string,
 ): Promise<PurchaseReturnResult> {
   const scope = completeScope(input.scope);
   const voucherNo = formatVoucherNo(requestedVoucherNo);
   return withTxBudget(prisma, scope.tenantId, 'voucher', async (tx: any) => {
     const bookPolicy = await resolveBookPolicyTx(tx, scope, 'PURCHASE RETURN');
     const persisted = await persistedReturnHeaderTx(tx, scope, voucherNo);
+    // N245 (D5): after the header lock and before any write, so a concurrent writer cannot slip in between.
+    await assertVoucherVersionTx(
+      tx,
+      PURCHASE_RETURN_WRITE_TABLES,
+      versionKeyOf(scope, voucherNo),
+      expectedVersion,
+    );
     // A client that omits the date keeps the voucher's date; it is never silently moved to today.
     const vchDate = input.vchDate ?? (persisted.VCH_DATE as Date);
     await assertFiscalDateTx(tx, scope, isoDay(vchDate));
@@ -227,7 +243,7 @@ export async function editPurchaseReturn(
     // Put the voucher's own tags back so the writer can issue them again; a tag the edit no longer returns
     // stays in stock, as it would after a delete.
     for (const tag of tagStockOnly) await restoreTagTx(tx, scope.tenantId, tag);
-    return writePurchaseReturnTx(tx, { ...input, vchDate }, lines, {
+    const written = await writePurchaseReturnTx(tx, { ...input, vchDate }, lines, {
       vchNo: Number(voucherNo),
       // A voucher saved before hidden numbers existed gets one now, as a new voucher would.
       hdVchNo: persistedHidden || (await nextHiddenVoucherNoTx(tx, scope)),
@@ -235,6 +251,7 @@ export async function editPurchaseReturn(
       mainUser: persisted.MAIN_USER == null ? null : String(persisted.MAIN_USER),
       persistedClock: persisted.VCH_CLOCK,
     });
+    return { ...written, version: await returnVersionTx(tx, scope, voucherNo) };
   });
 }
 
@@ -242,6 +259,7 @@ export interface DeletePurchaseReturnInput {
   scope: VoucherScope;
   vchNo: number | string;
   deleteUser?: string;
+  expectedVersion: string;
 }
 
 export async function deletePurchaseReturn(
@@ -265,6 +283,12 @@ export async function deletePurchaseReturn(
           ? `purchase return is ambiguous: ${key.VCH_NO}`
           : `purchase return not found: ${key.VCH_NO}`,
       );
+    await assertVoucherVersionTx(
+      tx,
+      PURCHASE_RETURN_WRITE_TABLES,
+      versionKeyOf(scope, key.VCH_NO),
+      input.expectedVersion,
+    );
     const tagStockOnly = await tagStockOnlyReturnTagsTx(tx, scope, key.VCH_NO);
     await reverseVoucherTx(tx, tenantId, {
       // Every table uses the complete voucher key. PR_IDTL is included although the return writer never
