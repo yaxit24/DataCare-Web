@@ -663,6 +663,109 @@ export const dataRefresh = {
         }),
     ),
     C(
+      'scope.defaulter-repair-all-locations',
+      'T15',
+      'mutation',
+      'MS_UPDATE.cs:8608 repairs NULL DEFAULTER_AC in every location of the company; MS_UPDATE.cs:7214 repairs AC_MAIN_GR only in the session location',
+      async (ctx) => {
+        const accounts = () =>
+          ctx.rows(
+            `SELECT row_id::text id,"AC_CODE" code,"LC_CODE" lc,"AC_GR" gr,"AC_MAIN_GR" mg,"DEFAULTER_AC" df
+               FROM "AC_MAST" WHERE tenant_id=$1 AND "CO_CODE"='01' ORDER BY row_id`,
+          );
+        const original = await accounts();
+        // The preview lists the first 20 accounts by code, so take the two that sort first.
+        const [here, there] = original
+          .filter((row) => row.lc === '01')
+          .sort((x, y) => (x.code < y.code ? -1 : 1));
+        assert.ok(here && there, 'two accounts in the session location');
+        try {
+          // The account group owns main group M1. Both accounts drift to Z and lose their defaulter flag; one of them
+          // sits in location 02, which is not the session location (01).
+          await exec(
+            ctx,
+            `INSERT INTO "AC_GROUP"(tenant_id,"CO_CODE","AC_GR","AC_MAIN_GR") VALUES ($1,'01','DRG','M1')`,
+          );
+          await exec(
+            ctx,
+            `UPDATE "AC_MAST" SET "AC_GR"='DRG',"AC_MAIN_GR"='Z',"DEFAULTER_AC"=NULL
+              WHERE tenant_id=$1 AND row_id IN ($2::bigint,$3::bigint)`,
+            here.id,
+            there.id,
+          );
+          await exec(
+            ctx,
+            `UPDATE "AC_MAST" SET "LC_CODE"='02' WHERE tenant_id=$1 AND row_id=$2::bigint`,
+            there.id,
+          );
+          const before = await accounts();
+          const { page } = await ctx.session();
+          await openScreen(page);
+          const [previewResponse] = await Promise.all([
+            page.waitForResponse((value) =>
+              isApi(value, '/utilities/data-repair/data-refresh-field-update/preview'),
+            ),
+            page.getByRole('button', { name: 'Field Update', exact: true }).click(),
+          ]);
+          assert.equal(previewResponse.status(), 200, await previewResponse.text());
+          const preview = await previewResponse.json();
+          const mine = preview.samples.filter(
+            (line) =>
+              line.startsWith(`AC_MAST ${here.code}:`) || line.startsWith(`AC_MAST ${there.code}:`),
+          );
+          assert.deepEqual(
+            mine.sort(),
+            [
+              `AC_MAST ${here.code}: main group Z -> M1; defaulter blank -> N`,
+              `AC_MAST ${there.code}: defaulter blank -> N`,
+            ].sort(),
+          );
+          await page.getByRole('heading', { name: 'Field Update preview', exact: true }).waitFor();
+          const [applyResponse] = await Promise.all([
+            page.waitForResponse((value) =>
+              isApi(value, '/utilities/data-repair/data-refresh-field-update/apply'),
+            ),
+            page.getByRole('button', { name: 'Apply Field Update', exact: true }).click(),
+          ]);
+          assert.equal(applyResponse.status(), 200, await applyResponse.text());
+          await page
+            .getByText('Field Is Update ok....Please Re open Software', { exact: true })
+            .waitFor();
+          const after = await accounts();
+          const pick = (rows, id) => rows.find((row) => row.id === id);
+          const sessionRow = pick(after, here.id);
+          const otherRow = pick(after, there.id);
+          assert.deepEqual([sessionRow.mg, sessionRow.df], ['M1', 'N']);
+          assert.deepEqual([otherRow.lc, otherRow.mg, otherRow.df], ['02', 'Z', 'N']);
+          return {
+            observation: `${there.code} in location 02: defaulter NULL -> N, main group Z kept; ${here.code} in location 01: both repaired`,
+            expected: { location02: ['Z', 'N'], location01: ['M1', 'N'] },
+            database: {
+              before: [pick(before, here.id), pick(before, there.id)],
+              after: [sessionRow, otherRow],
+            },
+            downstream: { previewSamples: mine },
+          };
+        } finally {
+          for (const row of original)
+            await exec(
+              ctx,
+              `UPDATE "AC_MAST" SET "LC_CODE"=$3,"AC_GR"=$4,"AC_MAIN_GR"=$5,"DEFAULTER_AC"=$6
+                WHERE tenant_id=$1 AND row_id=$2::bigint`,
+              row.id,
+              row.lc,
+              row.gr,
+              row.mg,
+              row.df,
+            );
+          await exec(
+            ctx,
+            `DELETE FROM "AC_GROUP" WHERE tenant_id=$1 AND "CO_CODE"='01' AND "AC_GR"='DRG'`,
+          );
+        }
+      },
+    ),
+    C(
       'output.message-and-history',
       'T16',
       'output',
