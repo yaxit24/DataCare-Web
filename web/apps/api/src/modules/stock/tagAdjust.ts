@@ -490,11 +490,18 @@ export async function getTagAdjust(
   });
 }
 
+/**
+ * Delete the voucher (TR_TAG_CAN.cs:5331-5364 `BtnDelete_Click`): remove its register rows. The tag's
+ * own DATA_TYPE stays as the voucher set it, as the desktop's delete does. N51 (D17): the delete must carry
+ * the `version` the GET returned; a stale one is `409 voucher-version-conflict` with nothing removed.
+ */
 export async function deleteTagAdjust(
   prisma: any,
   inputScope: VoucherScope,
   vchNoInput: string | number,
   book?: string,
+  /** N51 (D17): the `version` the GET returned; a stale or missing token refuses the delete. */
+  expectedVersion?: string,
 ): Promise<{ deleted: true }> {
   const scope = normalizeScope({
     scope: { ...inputScope, coBook: book ?? inputScope.coBook },
@@ -502,6 +509,13 @@ export async function deleteTagAdjust(
   });
   const vchNo = formatVoucherNo(vchNoInput);
   return withTxBudget(prisma, scope.tenantId, 'voucher', async (tx: any) => {
+    // The stale-save check every edit route makes, before any row is removed.
+    await assertVoucherVersionTx(
+      tx,
+      TAG_ADJUST_WRITE_TABLES,
+      versionKeyOf(scope, vchNo),
+      requiredVersion(expectedVersion),
+    );
     await deleteRegisterTx(tx, scope, vchNo);
     return { deleted: true };
   });

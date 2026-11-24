@@ -181,6 +181,8 @@ export function registerTourSaleRoutes(app: FastifyInstance, h: CrmRouteHelpers)
         vchNo: (req.params as any).vchNo,
         book: (body(req) as any).book,
         deleteUser: mainUserOf(req),
+        // N51 (D17): the delete sends the version its GET returned in the query (as the saved sale does).
+        expectedVersion: (req.query as any)?.expectedVersion,
       }),
     );
   });

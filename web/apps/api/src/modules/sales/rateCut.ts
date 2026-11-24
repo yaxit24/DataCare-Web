@@ -34,7 +34,7 @@ import {
   planWholesaleDetails,
   WholesaleDetailValidationError,
 } from './wholesaleDetailRows.js';
-import { assertVoucherVersionTx, requiredVersion } from '../vouchers/version.js';
+import { assertVoucherVersionTx, requiredVersion, voucherVersionTx } from '../vouchers/version.js';
 import { formatVoucherNo, nextVoucherNoTx, type VoucherScope } from '../vouchers/numbering.js';
 import { nextHiddenVoucherNoTx, voucherTimestamp } from '../vouchers/lifecycle.js';
 import { assertSavedRateCutTx, persistedHeaderTx } from './rateCutHeader.js';
@@ -546,7 +546,10 @@ export interface RateCutInput {
   settleCrAmt?: number;
   settleDrFine?: number;
   settleCrFine?: number;
-  /** `nFineKsrDr` / `nFineKsrCr` (Wh Sales, WP-30) and the version the voucher was opened with (edit). */
+  /**
+   * `nFineKsrDr` / `nFineKsrCr` (Wh Sales, WP-30). `expectedVersion` (N51, D17) is the `version` the read
+   * returned; every family's edit must send it, and a stale one is `409 voucher-version-conflict`.
+   */
   ksrFineDr?: number;
   ksrFineCr?: number;
   expectedVersion?: string;
@@ -556,6 +559,11 @@ export interface RateCutResult {
   vchNo: number;
   fine: number;
   netAmt: number;
+  /**
+   * N51: the fresh write-set version after this save, so a screen keeps it for its next edit or delete
+   * without a reload (as the saved sale and the tag adjust return theirs).
+   */
+  version: string;
   /** What the voucher settled, so a screen can show the derived side (e.g. 0.541 cut → ₹3517). */
   settlement?: {
     fineRate: number;
@@ -1761,16 +1769,19 @@ export async function readRateCut(
     );
 
     const extra = ['wholesale-sale', 'wholesale-quotation'].includes(options.bookGuard ?? '')
-      ? await readWholesaleExtras(
-          tx,
-          scope.tenantId,
-          key,
-          RATE_CUT_WRITE_TABLES,
-          options.bookGuard === 'wholesale-sale',
-        )
+      ? await readWholesaleExtras(tx, scope.tenantId, key, RATE_CUT_WRITE_TABLES)
       : null;
+    /**
+     * N51 (D17): every read of this family — rate cut, bullion, wholesale, quotation and tour — returns the
+     * voucher's `version`, which its edit and delete must send back as `expectedVersion`; a stale one is
+     * `409 voucher-version-conflict` before anything is written (as the saved sale, saleVoucher.ts).
+     */
+    const version =
+      extra?.version ??
+      (await voucherVersionTx(tx, RATE_CUT_WRITE_TABLES, wholesaleVersionKey(scope.tenantId, key)));
     return {
-      ...(extra ? { ...extra.ksr, ...(extra.version ? { version: extra.version } : {}) } : {}),
+      ...(extra ? extra.ksr : {}),
+      version,
       voucherNo: t(h.VCH_NO),
       hiddenVoucherNo: t(h.HD_VCH_NO),
       vchDate: toIsoDate(h.VCH_DATE),
@@ -1990,10 +2001,9 @@ export async function writeRateCut(
   const tenantId = input.scope.tenantId;
   const p = input.pay ?? {};
   const rp = input.receivedPay ?? {};
-  // WP-30: item-detail rows, fine kasar and the version token belong to Wh Sales (and its quotation document).
+  // WP-30: item-detail rows and fine kasar belong to Wh Sales (and its quotation document).
   const residual =
     options.bookGuard === 'wholesale-sale' || options.bookGuard === 'wholesale-quotation';
-  const versioned = options.bookGuard === 'wholesale-sale' && options.vchNo != null;
   if (
     !residual &&
     (num(input.ksrFineDr) || num(input.ksrFineCr) || issuedInput.some((l) => l.details?.length))
@@ -2051,15 +2061,14 @@ export async function writeRateCut(
       persistedClock = prior?.VCH_CLOCK ? String(prior.VCH_CLOCK) : undefined;
       persistedUser = String(prior?.MAIN_USER ?? '').trim() || undefined;
       hiddenVoucherNo = String(prior?.HD_VCH_NO ?? '').trim();
-      if (versioned) {
-        const wk = wholesaleVersionKey(tenantId, key);
-        await assertVoucherVersionTx(
-          tx,
-          RATE_CUT_WRITE_TABLES,
-          wk,
-          requiredVersion(input.expectedVersion),
-        );
-      }
+      // N51 (D17, G170): every family's edit must carry the version its operator read (as the saved sale
+      // does, saleVoucher.ts); a stale or missing one is refused before the edit reversal changes anything.
+      await assertVoucherVersionTx(
+        tx,
+        RATE_CUT_WRITE_TABLES,
+        wholesaleVersionKey(tenantId, key),
+        requiredVersion(input.expectedVersion),
+      );
       // An unchanged reopen+save keeps what the body leaves out: the stored date, bill no, employee and kasar.
       if (!input.vchDate && prior?.VCH_DATE) vchDate = new Date(prior.VCH_DATE as any);
       carried = { billNo: prior?.BILL_NO, empCode: prior?.EMP_CODE };
@@ -2372,6 +2381,12 @@ export async function writeRateCut(
         drFine: figures.drFine,
         crFine: figures.crFine,
       },
+      // N51: the version of the write set just stored, for the screen's next edit or delete of this voucher.
+      version: await voucherVersionTx(
+        tx,
+        RATE_CUT_WRITE_TABLES,
+        wholesaleVersionKey(tenantId, key),
+      ),
     };
   });
 }
@@ -2609,7 +2624,10 @@ export interface DeleteRateCutInput {
   vchNo: number | string;
   book?: string; // CO_BOOK used at creation (defaults to 'RCT')
   deleteUser?: string;
-  /** Wh Sales: the version the voucher was opened with (a stale or missing token refuses the delete). */
+  /**
+   * N51 (D17): the `version` the voucher was opened with; a stale or missing token refuses the delete of
+   * every family this writer serves (rate cut, bullion, wholesale, quotation and tour).
+   */
   expectedVersion?: string;
 }
 
@@ -2638,13 +2656,14 @@ export async function reverseRateCut(
     );
     assertRateCutBookGuard(classification, key.CO_BOOK, options.bookGuard);
     const header = await persistedHeaderTx(tx, tenantId, key);
-    if (options.bookGuard === 'wholesale-sale')
-      await assertVoucherVersionTx(
-        tx,
-        RATE_CUT_WRITE_TABLES,
-        wholesaleVersionKey(tenantId, key),
-        requiredVersion(input.expectedVersion),
-      );
+    // N51 (D17, G170): every family's delete must carry the version its operator read (as the saved sale
+    // does, saleVoucher.ts); a stale or missing one is refused before any tag, booking or row is released.
+    await assertVoucherVersionTx(
+      tx,
+      RATE_CUT_WRITE_TABLES,
+      wholesaleVersionKey(tenantId, key),
+      requiredVersion(input.expectedVersion),
+    );
     // Give the voucher's tags back before its stock rows go (see `releaseRateCutTagsTx`).
     const restores = quotation ? [] : await releaseRateCutTagsTx(tx, tenantId, key);
     // Release the booked weight BEFORE the reversal runs: the draw-down joins against
