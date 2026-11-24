@@ -2025,6 +2025,42 @@ export const wholesaleSale = {
       },
     ),
     C(
+      'concurrency.stale-delete-refused',
+      'T12',
+      'refusal',
+      'N51 (D17): a delete sends the version its load returned; after another session changed the voucher the delete answers 409 voucher-version-conflict, the screen shows the conflict message and every row of the write set is exactly as the other session left it',
+      async (ctx) => {
+        const first = await open(ctx);
+        const created = await looseSale(first.page);
+        const vchNo = await voucherOf(created);
+        const second = await open(ctx);
+        await load(first.page, vchNo);
+        await load(second.page, vchNo);
+        await openDetail(second.page);
+        await second.page.getByLabel('Pcs detail 2', { exact: true }).fill('3');
+        await second.page.getByLabel('NetAmt detail 2', { exact: true }).press('Enter');
+        const changed = await save(second.page);
+        assert.equal(changed.status(), 200, await changed.text());
+        const before = await writeSet(ctx, vchNo);
+        const { response } = await deleteLoaded(first.page, true);
+        assert.equal(response.status(), 409, await response.text());
+        assert.equal((await response.json()).error, 'voucher-version-conflict');
+        const shown = await alertText(first.page);
+        assert.match(shown, /changed by someone else after you opened it/);
+        assert.deepEqual(await writeSet(ctx, vchNo), before, 'the stale delete removed nothing');
+        const audit = await ctx.rows(
+          `SELECT 1 FROM "DELETE_DATA" WHERE tenant_id=$1 AND "CO_BOOK"='${BOOK}' AND "VCH_NO"=$2`,
+          vchNo,
+        );
+        assert.equal(audit.length, 0, 'no DELETE_DATA row for the refused delete');
+        return {
+          observation: `stale delete 409; screen says "${shown.trim()}"`,
+          expected: { status: 409, rowsUnchanged: true, audit: 0 },
+          database: { vchNo, slidtl: (await slidtl(ctx, vchNo)).length },
+        };
+      },
+    ),
+    C(
       'rollback.fault-on-slidtl-row',
       'T14',
       'mutation',

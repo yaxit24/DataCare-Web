@@ -158,7 +158,11 @@ export default function TagAdjustPage() {
     setBusy(true);
     setError('');
     try {
-      await del(`/stock/tag-adjust/${encodeURIComponent(loadedNo)}`, { book: coBook });
+      // N51 (D17): the delete must carry the version the Load returned, in the query as the API takes it.
+      await del(
+        `/stock/tag-adjust/${encodeURIComponent(loadedNo)}?expectedVersion=${encodeURIComponent(loadedVersion)}`,
+        { book: coBook },
+      );
       setLoadedNo(null);
       setLoadedVersion('');
       setLookupNo('');

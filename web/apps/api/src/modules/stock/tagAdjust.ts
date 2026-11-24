@@ -1,4 +1,4 @@
-import { withTxBudget } from '../shared/txBudget.js';
+import { SNAPSHOT_READ, withTxBudget } from '../shared/txBudget.js';
 import { formatVoucherNo, nextVoucherNoTx, type VoucherScope } from '../vouchers/numbering.js';
 import { insertRowTx } from '../posting/posting.js';
 import { assertSavedVoucherTx } from '../vouchers/lifecycle.js';
@@ -447,7 +447,8 @@ export async function getTagAdjust(
     lines: [{ tagNo: 'x', dataType: 'x' }],
   });
   const vchNo = formatVoucherNo(vchNoInput);
-  return withTxBudget(prisma, scope.tenantId, 'read', async (tx: any) => {
+  // SNAPSHOT_READ: the rows and the version token must come from one committed revision.
+  return withTxBudget(prisma, scope.tenantId, SNAPSHOT_READ, async (tx: any) => {
     const headers = (await tx.$queryRawUnsafe(
       `SELECT * FROM "BAR_CAN_DATA"
         WHERE tenant_id=$1 AND "CO_CODE"::text=$2::text AND "LC_CODE"::text=$3::text
@@ -486,15 +487,33 @@ export async function getTagAdjust(
       vchNo,
     )) as Array<Record<string, unknown>>;
     const version = await voucherVersionTx(tx, TAG_ADJUST_WRITE_TABLES, versionKeyOf(scope, vchNo));
-    return { header: headers[0], lines, stones, version };
+    // Raw rows can carry BIGINT columns (e.g. BAR_CAN_DETL), which JSON cannot serialise; the Load response
+    // would fail. Convert them as stock.ts does.
+    const plain = (r: Record<string, unknown>) =>
+      Object.fromEntries(
+        Object.entries(r).map(([k, v]) => [k, typeof v === 'bigint' ? Number(v) : v]),
+      );
+    return {
+      header: plain(headers[0]),
+      lines: lines.map(plain),
+      stones: stones.map(plain),
+      version,
+    };
   });
 }
 
+/**
+ * Delete the voucher (TR_TAG_CAN.cs:5331-5364 `BtnDelete_Click`): remove its register rows. The tag's
+ * own DATA_TYPE stays as the voucher set it, as the desktop's delete does. N51 (D17): the delete must carry
+ * the `version` the GET returned; a stale one is `409 voucher-version-conflict` with nothing removed.
+ */
 export async function deleteTagAdjust(
   prisma: any,
   inputScope: VoucherScope,
   vchNoInput: string | number,
   book?: string,
+  /** N51 (D17): the `version` the GET returned; a stale or missing token refuses the delete. */
+  expectedVersion?: string,
 ): Promise<{ deleted: true }> {
   const scope = normalizeScope({
     scope: { ...inputScope, coBook: book ?? inputScope.coBook },
@@ -502,6 +521,16 @@ export async function deleteTagAdjust(
   });
   const vchNo = formatVoucherNo(vchNoInput);
   return withTxBudget(prisma, scope.tenantId, 'voucher', async (tx: any) => {
+    // Lock the header first (as saveTagAdjust does) so an overlapping edit commits before the check and
+    // this delete then sees the newer version; without it a stale delete could remove the edit's new rows.
+    await assertSavedVoucherTx(tx, 'BAR_CAN_DATA', scope, vchNo);
+    // The stale-save check every edit route makes, before any row is removed.
+    await assertVoucherVersionTx(
+      tx,
+      TAG_ADJUST_WRITE_TABLES,
+      versionKeyOf(scope, vchNo),
+      requiredVersion(expectedVersion),
+    );
     await deleteRegisterTx(tx, scope, vchNo);
     return { deleted: true };
   });
