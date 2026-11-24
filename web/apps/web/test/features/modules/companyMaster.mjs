@@ -567,7 +567,9 @@ export const companyMaster = {
           await page.goto('/masters/ac-groups');
           await page.getByRole('button', { name: '+ New', exact: true }).click();
           await page.locator('.field:has(> label:text-is("A/c Group *")) input').fill('Z2');
-          await page.locator('.field:has(> label:text-is("A/c Group Name")) input').fill('zdup acc');
+          await page
+            .locator('.field:has(> label:text-is("A/c Group Name")) input')
+            .fill('zdup acc');
           await page.getByRole('button', { name: 'Save', exact: true }).click();
           const shown = await page.locator('.msg.err').textContent();
           assert.equal(
