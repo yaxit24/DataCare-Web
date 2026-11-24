@@ -8422,6 +8422,34 @@
         "web/apps/web/test/features/modules/approvalReportRp.mjs"
       ],
       "statusNote": "IMPLEMENTED, not accepted. Browser module approval-report 28 of 28 applicable pass (7 blocked, 32 N/A to the DB/unit tests or no-write groups); rpAll API tests 86 of 86 on a local database. Blocked: MsDataType source (D3), MsAllBranchAcShow, NULL-tag footer, printed decimals, Crystal drill-down, Sales Invoice approval import. Desktop match 0%."
+    },
+    {
+      "id": "N255",
+      "status": "implemented-unverified",
+      "action": "Ledger Report fine prints and Lite ageing follow RP_LEDR: the drill-down JmaUdr, Gold and Silver buttons print server-built PDF/Excel from read-only resolvers (no FINE_DATA write, D5); the Gold and Silver rows run every BtnGold_Click/BtnSilver_Click source as one UNION ALL (RP_LEDR.cs:8256-8319, :8900-8934) under the Crystal selection (:8343); balances from AC_DATA only (Gold without data type, Silver/JmaUdr by data type, SILVER_THREE_DIGIT for silver decimals); the exact print-right text; Debit Ageing hidden and refused (403 edition-unavailable) in Lite and Basic (:4587). Two locked tests corrected from the desktop (zero-amount silver sale, router registration).",
+      "parentLabels": "P2; L1; WP-20; T01-T18",
+      "startAfter": [
+        "N223"
+      ],
+      "requiredProof": "DB tests red before and green after with expected values from RP_LEDR.cs; the account-ledger browser module passes the print and Lite cases; the existing account-ledger DB tests stay green.",
+      "gapIds": "G267",
+      "entryDefinition": "docs/parity/LITE-MASTER-PLAN.md section 5 (WP-20)",
+      "sourceAndModuleDetail": "orchestration/work/WP-20/study.md; orchestration/work/WP-20/cases.md; orchestration/work/WP-20/verify.md",
+      "universalContract": "03-shared-contracts.md",
+      "verification": "04-verification-playbook.md",
+      "statusAsOf": "2026-11-23",
+      "evidence": [
+        "web/apps/api/src/modules/reports/ledgerFinePrints.ts",
+        "web/apps/api/src/modules/reports/ledgerFineSources.ts",
+        "web/apps/api/src/modules/reports/ledgerFinePrintsPdf.ts",
+        "web/apps/api/src/routes/ledgerFinePrints.ts",
+        "web/apps/api/src/modules/rbac/editionGate.ts",
+        "web/apps/web/app/(app)/reports/account-ledger/page.tsx",
+        "web/apps/api/test/ledgerFinePrints.db.test.ts",
+        "web/apps/api/test/ledgerFinePrints.test.ts",
+        "web/apps/web/test/features/modules/accountLedger.mjs"
+      ],
+      "statusNote": "IMPLEMENTED, not accepted. Fine-print DB tests 20 of 20 and the account-ledger browser module 17 of 17 applicable locally. Open on this menu: the OP_LDR ageing union (Gaps 1-4), In Out/Ac Sale, the summary Hz choice, voucher-wise summaries (D6), zoom, half-month toggle and the Crystal region comparison; desktop match 0%."
     }
   ],
   "amendments": [

@@ -39,6 +39,10 @@
 
 - 2026-11-23: architect decisions (owner may override): the Purchase Return print guards the print right (sales print unchanged); line TAX_PRC is 0 as the desktop writes it (no migration; no reader of the line column); edit and delete need `expectedVersion` like purchases; Fine/Amount stay computed cells.
 - 2026-11-23: routes moved to `routes/purchaseReturn.ts` (txn.ts ceiling 7974); `planEnterWalk` is the tested pure Enter walk; `purchaseReturnWp29.routes.db.test.ts` pins HSN 6,200/93/93/186, the refusal, the token and lossless save. Browser cases `print.hsn-tax-intra`, `print.hsn-tax-inter`, `keyboard.enter-walk` were written with no local browser stack; CI runs them. `config.setting-variant` stays blocked on N166.
+## 2026-11-23 — Ledger Report fine prints and Lite ageing (N255 / G267, WP-20)
+
+- 2026-11-23: JmaUdr, Gold and Silver in the drill-down print server-built PDF/Excel from every RP_LEDR FINE_DATA source, read in memory (no staging write, D5); balances from AC_DATA only; Debit Ageing hidden and refused in Lite and Basic. Two locked tests corrected from RP_LEDR.cs:8900 (zero-amount silver sale) and router registration.
+- Open: OP_LDR ageing union (Gaps 1-4), In Out/Ac Sale, summary Hz choice, voucher-wise summaries (D6), zoom, half-month toggle, Crystal region comparison; the Silver empty-location refusal belongs to Silver_Summ only (case-list correction proposed); manufacturing/registration-serial sources not ported.
 
 ## 2026-11-22 — Purchase residuals: lossless reopen, hallmark receive columns, purchase book family (N244 / G256, WP-28)
 
