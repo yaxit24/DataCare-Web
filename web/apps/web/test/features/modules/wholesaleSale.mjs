@@ -342,6 +342,154 @@ async function writeSet(ctx, vchNo) {
 }
 const DELETE_QUESTION = 'Are You Sure To Delete This Voucher now?';
 
+/**
+ * WP-30 helpers: the item-detail panel and the Ksr Fine boxes. Row A is 2 pcs x 1.5 = 3.000 g at 101 with Con% 0.1,
+ * Disc% 5 and labour 237.5 a piece: ItAmt 303, Disc round(15.15) = 15, Lbr 475, Net 763 (CommPassTotal_Idtl,
+ * TR_WH_SALE.cs:7750-7971). Row B is 2.000 g with Con% 0.1 and a typed net amount 500. The line (5.000 g) takes
+ * OthWt 0.3 + 0.2 = 0.5, NetWt 4.5 and OthAmt 763 + 500 = 1263.
+ */
+const ROW_A = {
+  pcs: '2',
+  pcsWt: '1.5',
+  conPct: '0.1',
+  krConPct: '0.05',
+  rate: '101',
+  discPct: '5',
+  lbrRate: '237.5',
+};
+const ROW_B = { pcs: '2', grossWt: '2', conPct: '0.1', netAmt: '500' };
+const DETAIL_LABELS = {
+  pcs: 'Pcs',
+  pcsWt: 'PcsWt',
+  krWt: 'KrWt',
+  krLessPrc: 'KrLs%',
+  grossWt: 'Weight',
+  conPct: 'Con%',
+  rateType: 'P/W',
+  rate: 'Rate',
+  discPct: 'Disc%',
+  lbrRate: 'LbrRate',
+  krConPct: 'KrCon%',
+  netAmt: 'NetAmt',
+};
+async function openDetail(page, line = 1) {
+  const panel = page.getByRole('region', { name: `Item detail Issue line ${line}` });
+  if (!(await panel.count()))
+    await page.getByRole('button', { name: `Item detail Issue line ${line}`, exact: true }).click();
+  await panel.waitFor();
+  return panel;
+}
+/** Type detail rows into the panel of an issue line; Enter in NetAmt commits a row and starts the next. */
+async function typeDetails(page, rows, line = 1) {
+  await openDetail(page, line);
+  for (const [i, row] of rows.entries()) {
+    if (row.itCode) await pick(page, `ItCode detail ${i + 1}`, row.itCode);
+    for (const [field, label] of Object.entries(DETAIL_LABELS))
+      if (row[field] != null)
+        await page.getByLabel(`${label} detail ${i + 1}`, { exact: true }).fill(row[field]);
+    await page.getByLabel(`NetAmt detail ${i + 1}`, { exact: true }).press('Enter');
+  }
+}
+/** A loose issue line (no tag) and its rows, then the Received cash; returns the save response. */
+async function looseSale(
+  page,
+  { rows = [ROW_A, ROW_B], cash = 1263, ksrDr, ksrCr, party = PARTIES.local.code } = {},
+) {
+  await page.getByLabel('Date', { exact: true }).fill(DAY);
+  await pick(page, 'Party', party);
+  await pick(page, 'ItCode Issue line 1', ITEMS.gold.code);
+  await page.getByLabel('Pcs Issue line 1', { exact: true }).fill('2');
+  await page.getByLabel('GrWt Issue line 1', { exact: true }).fill('5');
+  await page.getByLabel('Touch Issue line 1', { exact: true }).fill('91.6');
+  await typeDetails(
+    page,
+    rows.map((r, i) => (i === 0 ? { itCode: ITEMS.gold.code, ...r } : r)),
+  );
+  await page.keyboard.press('Escape');
+  if (ksrDr != null) await typeKasar(page, 'Ksr Fine Dr', ksrDr);
+  if (ksrCr != null) await typeKasar(page, 'Ksr Fine Cr', ksrCr);
+  await page.getByLabel('Received Cash Amt', { exact: true }).fill(String(cash));
+  return save(page);
+}
+async function typeKasar(page, label, typed) {
+  const box = page.getByLabel(label, { exact: true });
+  await box.fill(typed);
+  await box.press('Enter');
+}
+const slidtl = (ctx, vchNo) =>
+  ctx.rows(
+    `SELECT "SR_NO"::int AS sr,"ISR_NO"::int AS isr,"ENTRY_TYPE" AS et,"TAG_NO" AS tag,"IT_CODE" AS it,"IT_PCS"::float8 AS pcs,
+            "IT_PCS_WT"::float8 AS pcswt,"IT_GWT"::float8 AS gwt,"KR_WT"::float8 AS krwt,"IT_CON_PRC"::float8 AS con,
+            "IT_CON_WT"::float8 AS conwt,"IT_RATE"::float8 AS rate,"IT_AMT"::float8 AS amt,"IT_DISC_PRC"::float8 AS disc,
+            "IT_DISC_AMT"::float8 AS discamt,"IT_LBR_RATE"::float8 AS lr,"IT_LBR_AMT"::float8 AS la,
+            "IT_NET_AMT"::float8 AS net,"KR_CON_PRC"::float8 AS krcon,"KR_CON_WT"::float8 AS krconwt
+       FROM "SL_IDTL" WHERE tenant_id=$1 AND "CO_BOOK"='${BOOK}' AND "VCH_NO"=$2 ORDER BY "SR_NO","ISR_NO"`,
+    vchNo,
+  );
+const rojmelRows = (ctx, vchNo) =>
+  ctx.rows(
+    `SELECT "LEDR_KEY" AS key,"AC_NAME" AS name,"AC_CODE" AS ac,"LD_CODE" AS ld,"SIGN" AS sign,"ITM_FINE"::float8 AS fine,
+            "DR_AMT"::float8 AS dr,"CR_AMT"::float8 AS cr
+       FROM "ROJ_MEL_DATA" WHERE tenant_id=$1 AND "CO_BOOK"='${BOOK}' AND "VCH_NO"=$2 ORDER BY "LEDR_KEY"`,
+    vchNo,
+  );
+/** The downstream proof of a voucher: its ledger legs, day book rows and stock rows as they stand now. */
+const downstreamOf = async (ctx, vchNo) =>
+  (
+    await ctx.rows(
+      `SELECT (SELECT count(*) FROM "AC_DATA" WHERE tenant_id=$1 AND "CO_BOOK"='${BOOK}' AND "VCH_NO"=$2)::int AS legs,
+              (SELECT count(*) FROM "ROJ_MEL_DATA" WHERE tenant_id=$1 AND "CO_BOOK"='${BOOK}' AND "VCH_NO"=$2)::int AS rojmel,
+              (SELECT count(*) FROM "MAIN_STOCK" WHERE tenant_id=$1 AND "CO_BOOK"='${BOOK}' AND "VCH_NO"=$2)::int AS stock`,
+      vchNo,
+    )
+  )[0];
+const LOOSE_ROWS = [
+  {
+    sr: 1,
+    isr: 1,
+    et: 'W',
+    tag: 'N',
+    it: ITEMS.gold.code,
+    pcs: 2,
+    pcswt: 1.5,
+    gwt: 3,
+    krwt: 3,
+    con: 0.1,
+    conwt: 0.3,
+    rate: 101,
+    amt: 303,
+    disc: 5,
+    discamt: 15,
+    lr: 237.5,
+    la: 475,
+    net: 763,
+    krcon: 0.05,
+    krconwt: 0,
+  },
+  {
+    sr: 1,
+    isr: 2,
+    et: 'W',
+    tag: 'N',
+    it: '',
+    pcs: 2,
+    pcswt: 0,
+    gwt: 2,
+    krwt: 2,
+    con: 0.1,
+    conwt: 0.2,
+    rate: 0,
+    amt: 0,
+    disc: 0,
+    discamt: 0,
+    lr: 0,
+    la: 0,
+    net: 500,
+    krcon: 0,
+    krconwt: 0,
+  },
+];
+
 const MSG = {
   defaulter:
     'You Cant Save Entry Because This Party Is in Defaulter List...Please Change It First In AcMast...',
@@ -1350,6 +1498,776 @@ export const wholesaleSale = {
           downstream: { partyMoved: 0 },
         };
       },
+    ),
+    // ---- WP-30: item-detail rows, fine kasar and the Rojmel -----------------------------------------------------
+    C(
+      'entry.detail-grid-defaults',
+      'T01',
+      'read-only',
+      'MSG_IDTL is hidden until an issue line asks for it and carries the desktop captions (TR_WH_SALE.cs:4899-4903, :7115-7286); a tagged line has none',
+      async (ctx) => {
+        const { page } = await open(ctx);
+        const button = page.getByRole('button', { name: 'Item detail Issue line 1', exact: true });
+        assert.equal(await button.count(), 1, 'a loose issue line offers its item-detail rows');
+        assert.equal(
+          await page.getByRole('region', { name: 'Item detail Issue line 1' }).count(),
+          0,
+          'hidden at first',
+        );
+        const panel = await openDetail(page);
+        const captions = await panel.getByRole('columnheader').allTextContents();
+        for (const caption of [
+          'ItCode',
+          'DmCode',
+          'Pcs',
+          'PcsWt',
+          'Weight',
+          'Con%',
+          'Rate',
+          'Disc%',
+          'LbrRate',
+          'KrCon%',
+          'NetAmt',
+        ])
+          assert(captions.includes(caption), `caption ${caption}`);
+        await page.keyboard.press('Escape');
+        return {
+          observation: `captions ${captions.join(',')}`,
+          expected: { hidden: true, captions: 11 },
+        };
+      },
+    ),
+    C(
+      'entry.fine-box-defaults',
+      'T01',
+      'read-only',
+      'Ksr Fine Dr and Ksr Fine Cr follow Ac Fine Dr in tab order and are always editable (TR_WH_SALE.cs:5256-5271, :5359, :5369)',
+      async (ctx) => {
+        const { page } = await open(ctx);
+        const order = await page.evaluate(() =>
+          [...document.querySelectorAll('input')].map(
+            (i) => i.labels?.[0]?.textContent ?? i.getAttribute('aria-label') ?? '',
+          ),
+        );
+        const at = (label) => order.indexOf(label);
+        assert(
+          at('Ac Fine Dr') >= 0 &&
+            at('Ksr Fine Dr') === at('Ac Fine Dr') + 1 &&
+            at('Ksr Fine Cr') === at('Ksr Fine Dr') + 1,
+          `order ${order.join('|')}`,
+        );
+        for (const label of ['Ksr Fine Dr', 'Ksr Fine Cr']) {
+          const box = page.getByLabel(label, { exact: true });
+          assert(await box.isEditable(), `${label} editable`);
+          assert.equal(await box.inputValue(), '', `${label} starts blank`);
+        }
+        return {
+          observation: 'Ksr Fine Dr, Ksr Fine Cr after Ac Fine Dr, editable',
+          expected: { order: true },
+        };
+      },
+    ),
+    C(
+      'field.ksr-fine-dr-cr',
+      'T02',
+      'mutation',
+      'Enter formats a kasar to three decimals (TR_WH_SALE.cs:16035); Save posts ksrFineDr/ksrFineCr and stores KSR_FINE_DR/CR (:12980-12981); the reopen shows them again (:12230)',
+      async (ctx) => {
+        const t = await seedTag(ctx);
+        const { page } = await open(ctx);
+        const created = await sell(page, {
+          tag: t.tag,
+          cutFine: t.fine,
+          cash: 59540,
+          before: async () => {
+            await typeKasar(page, 'Ksr Fine Dr', '0.5');
+            await typeKasar(page, 'Ksr Fine Cr', '0.25');
+            await value(page, 'Ksr Fine Dr', '0.500');
+            await value(page, 'Ksr Fine Cr', '0.250');
+          },
+        });
+        assert.equal(created.status(), 201, await created.text());
+        const posted = created.request().postDataJSON();
+        assert.deepEqual([posted.ksrFineDr, posted.ksrFineCr], [0.5, 0.25]);
+        const vchNo = await voucherOf(created);
+        const [stored] = await ctx.rows(
+          `SELECT "KSR_FINE_DR"::float8 AS dr,"KSR_FINE_CR"::float8 AS cr FROM "RATE_CUT_DATA" WHERE tenant_id=$1 AND "CO_BOOK"='${BOOK}' AND "VCH_NO"=$2`,
+          vchNo,
+        );
+        assert.deepEqual(stored, { dr: 0.5, cr: 0.25 });
+        await load(page, vchNo);
+        await value(page, 'Ksr Fine Dr', '0.500');
+        await value(page, 'Ksr Fine Cr', '0.250');
+        return {
+          observation: 'posted 0.5/0.25, stored, shown 0.500/0.250 on reopen',
+          expected: stored,
+          database: { vchNo },
+          downstream: { reopened: true },
+        };
+      },
+    ),
+    C(
+      'field.detail-row-fields',
+      'T02',
+      'mutation',
+      'Every typed detail column reaches the request and SL_IDTL (TR_WH_SALE.cs:13190-13245)',
+      async (ctx) => {
+        const { page } = await open(ctx);
+        const created = await looseSale(page);
+        assert.equal(created.status(), 201, await created.text());
+        const sent = created.request().postDataJSON().lines[0].details[0];
+        assert.deepEqual(
+          [
+            sent.pcs,
+            sent.pcsWt,
+            sent.conPct,
+            sent.krConPct,
+            sent.rateType,
+            sent.rate,
+            sent.discPct,
+            sent.lbrRate,
+          ],
+          [2, 1.5, 0.1, 0.05, '', 101, 5, 237.5],
+        );
+        const vchNo = await voucherOf(created);
+        const [first] = await slidtl(ctx, vchNo);
+        assert.deepEqual(
+          [first.pcs, first.pcswt, first.con, first.krcon, first.rate, first.disc, first.lr],
+          [2, 1.5, 0.1, 0.05, 101, 5, 237.5],
+        );
+        return {
+          observation: 'row A typed values in the request and the stored row',
+          expected: first,
+          database: { vchNo },
+          downstream: await downstreamOf(ctx, vchNo),
+        };
+      },
+    ),
+    C(
+      'formula.ksr-fine-totals',
+      'T03',
+      'mutation',
+      'Tot Fine Dr and Cr include the kasar: 9.160 + 0.500, 9.160 + 0.250, Os Fine 0.250; SL_FINE stays (TR_WH_SALE.cs:15633-15635)',
+      async (ctx) => {
+        const t = await seedTag(ctx);
+        const { page } = await open(ctx);
+        const created = await sell(page, {
+          tag: t.tag,
+          cutFine: t.fine,
+          cash: 59540,
+          before: async () => {
+            await text(page, 'wholesale-sale-tot-fine-dr', '9.160');
+            await typeKasar(page, 'Ksr Fine Dr', '0.500');
+            await typeKasar(page, 'Ksr Fine Cr', '0.250');
+            await text(page, 'wholesale-sale-tot-fine-dr', '9.660');
+            await text(page, 'wholesale-sale-tot-fine-cr', '9.410');
+            await text(page, 'wholesale-sale-os-fine', '0.250');
+          },
+        });
+        assert.equal(created.status(), 201, await created.text());
+        const h = await header(ctx, await voucherOf(created));
+        assert.deepEqual([h.tot_dr, h.tot_cr, h.sl_fine], [9.66, 9.41, 9.16]);
+        return {
+          observation: 'totals 9.660 / 9.410 / 0.250 on screen and in the header',
+          expected: { totDr: 9.66, totCr: 9.41, slFine: 9.16 },
+          database: { header: h },
+          downstream: await downstreamOf(ctx, await voucherOf(created)),
+        };
+      },
+    ),
+    C(
+      'formula.detail-rollup-to-line',
+      'T03',
+      'mutation',
+      'The detail rows roll into the issue line: OthWt 0.500, NetWt 4.500, OthAmt 1263.00 (TR_WH_SALE.cs:7821-7880)',
+      async (ctx) => {
+        const { page } = await open(ctx);
+        const created = await looseSale(page);
+        assert.equal(created.status(), 201, await created.text());
+        const vchNo = await voucherOf(created);
+        const [line] = await ctx.rows(
+          `SELECT "ITM_OTH_WT"::float8 AS oth,"ITM_NWT"::float8 AS nwt,"OTH_AMT"::float8 AS amt FROM "RATE_CUT_ISU" WHERE tenant_id=$1 AND "CO_BOOK"='${BOOK}' AND "VCH_NO"=$2`,
+          vchNo,
+        );
+        assert.deepEqual(line, { oth: 0.5, nwt: 4.5, amt: 1263 });
+        await load(page, vchNo);
+        await value(page, 'OthWt Issue line 1', '0.5');
+        await value(page, 'NetWt Issue line 1', '4.5');
+        return {
+          observation: 'line OthWt 0.5, NetWt 4.5, OthAmt 1263 stored and shown',
+          expected: line,
+          database: { vchNo },
+          downstream: await downstreamOf(ctx, vchNo),
+        };
+      },
+    ),
+    C(
+      'create.loose-item-detail-rows',
+      'T05',
+      'mutation',
+      'Loose rows land in SL_IDTL keyed by the line, ISR_NO restarting at 1, ENTRY_TYPE W; an empty row is skipped (TR_WH_SALE.cs:13162-13250)',
+      async (ctx) => {
+        const { page } = await open(ctx);
+        const created = await looseSale(page, { rows: [ROW_A, ROW_B, {}] });
+        assert.equal(created.status(), 201, await created.text());
+        const vchNo = await voucherOf(created);
+        assert.deepEqual(await slidtl(ctx, vchNo), LOOSE_ROWS);
+        return {
+          observation: 'two rows written, the empty third skipped',
+          expected: LOOSE_ROWS,
+          database: { vchNo },
+          downstream: await downstreamOf(ctx, vchNo),
+        };
+      },
+    ),
+    C(
+      'create.loose-detail-write-set',
+      'T07',
+      'mutation',
+      'The write set of a loose-row voucher with kasar: SL_IDTL, ledger legs 27/28/33/34, day book 07/08 and the line roll-up, all from one save',
+      async (ctx) => {
+        const { page } = await open(ctx);
+        const created = await looseSale(page, { ksrDr: '0.5', ksrCr: '0.25' });
+        assert.equal(created.status(), 201, await created.text());
+        const vchNo = await voucherOf(created);
+        const set = await writeSet(ctx, vchNo);
+        assert.equal(set.SL_IDTL.length, 2);
+        const legCodes = (await legs(ctx, vchNo)).map((l) => l[0]);
+        for (const code of ['27', '28', '33', '34']) assert(legCodes.includes(code), `leg ${code}`);
+        const keys = (await rojmelRows(ctx, vchNo)).map((r) => r.key.slice(-2));
+        assert(keys.includes('07') && keys.includes('08'));
+        assert.deepEqual(
+          (await slidtl(ctx, vchNo)).map((r) => r.krconwt),
+          [0, 0],
+          'KR_CON_WT is never written (decision 2)',
+        );
+        return {
+          observation: `legs ${legCodes.join(',')}; rojmel ${keys.join(',')}`,
+          expected: { sl_idtl: 2 },
+          database: { vchNo },
+          downstream: { legCodes, rojmelTypes: keys },
+        };
+      },
+    ),
+    C(
+      'refusal.detail-row-no-item-code',
+      'T06',
+      'mutation',
+      'A detail row with no item code saves with IT_CODE empty: the only item-code refusal is for the issue grid (TR_WH_SALE.cs:12894-12895)',
+      async (ctx) => {
+        const { page } = await open(ctx);
+        // itCode '' overrides the gold code looseSale gives its first row, so the row really has no item code.
+        const created = await looseSale(page, {
+          rows: [{ itCode: '', pcs: '1', grossWt: '1' }],
+          cash: 0,
+        });
+        assert.equal(created.status(), 201, await created.text());
+        const vchNo = await voucherOf(created);
+        const [row] = await slidtl(ctx, vchNo);
+        assert.equal(row.it, '');
+        return {
+          observation: 'saved with IT_CODE empty',
+          expected: { it: '' },
+          database: { row },
+          downstream: await downstreamOf(ctx, vchNo),
+        };
+      },
+    ),
+    C(
+      'refusal.kasar-any-number',
+      'T06',
+      'refusal',
+      'The kasar boxes take any number and format it "0.000" (TR_WH_SALE.cs:16035): -1 is -1.000, 12.3456 is 12.346, text is 0.000; the hosted service refuses a negative kasar on save',
+      async (ctx) => {
+        const t = await seedTag(ctx);
+        const { page } = await open(ctx);
+        const box = page.getByLabel('Ksr Fine Dr', { exact: true });
+        for (const [typed, shown] of [
+          ['-1', '-1.000'],
+          ['12.3456', '12.346'],
+          ['abc', '0.000'],
+        ]) {
+          await typeKasar(page, 'Ksr Fine Dr', typed);
+          await value(page, 'Ksr Fine Dr', shown);
+        }
+        await typeKasar(page, 'Ksr Fine Dr', '-1');
+        const before = await counts(ctx);
+        const response = await sell(page, { tag: t.tag, cutFine: t.fine, cash: 59540 });
+        assert.equal(response.status(), 400, await response.text());
+        assert.deepEqual(await counts(ctx), before, 'nothing written');
+        assert.equal(await box.inputValue(), '-1.000');
+        return {
+          observation:
+            'formatted as the desktop does; the save of -1.000 is refused, nothing written',
+          expected: { status: 400 },
+          database: { before },
+        };
+      },
+    ),
+    C(
+      'keyboard.ksr-fine-enter-tab',
+      'T17',
+      'read-only',
+      'Enter in a kasar box formats it, recomputes the bill and moves to the next control (TR_WH_SALE.cs:16035-16047)',
+      async (ctx) => {
+        const { page } = await open(ctx);
+        const dr = page.getByLabel('Ksr Fine Dr', { exact: true });
+        await dr.fill('0.5');
+        await dr.press('Enter');
+        await value(page, 'Ksr Fine Dr', '0.500');
+        await text(page, 'wholesale-sale-tot-fine-dr', '0.500');
+        const focused = await page.evaluate(
+          () =>
+            document.activeElement?.labels?.[0]?.textContent ??
+            document.activeElement?.getAttribute('aria-label') ??
+            '',
+        );
+        assert.equal(focused, 'Ksr Fine Cr');
+        return {
+          observation: 'formatted, totals recomputed, focus on Ksr Fine Cr',
+          expected: { focus: 'Ksr Fine Cr' },
+        };
+      },
+    ),
+    C(
+      'keyboard.detail-grid-enter-esc-ctrl-d',
+      'T17',
+      'read-only',
+      'Enter walks the detail cells and sets Weight from Pcs x PcsWt (:7503); Enter in the last NetAmt adds a row (:7522); Ctrl+D asks the desktop question (:7331); Esc returns to the issue line (:13625)',
+      async (ctx) => {
+        const { page } = await open(ctx);
+        await pick(page, 'ItCode Issue line 1', ITEMS.gold.code);
+        await openDetail(page);
+        await page.getByLabel('Pcs detail 1', { exact: true }).fill('2');
+        const pcsWt = page.getByLabel('PcsWt detail 1', { exact: true });
+        await pcsWt.fill('1.5');
+        await pcsWt.press('Enter');
+        await value(page, 'Weight detail 1', '3.000');
+        await page.getByLabel('NetAmt detail 1', { exact: true }).press('Enter');
+        await page.getByLabel('Pcs detail 2', { exact: true }).waitFor();
+        let question = '';
+        page.removeAllListeners('dialog');
+        page.on('dialog', (dialog) => {
+          question = dialog.message();
+          void dialog.accept();
+        });
+        await page.getByLabel('Pcs detail 2', { exact: true }).press('Control+d');
+        for (let i = 0; i < 20 && !question; i++) await page.waitForTimeout(100);
+        page.removeAllListeners('dialog');
+        page.on('dialog', (dialog) => void dialog.accept());
+        assert.equal(question, 'This Row Record will Removed permantley ?');
+        await page.getByLabel('Pcs detail 1', { exact: true }).press('Escape');
+        assert.equal(
+          await page.getByRole('region', { name: 'Item detail Issue line 1' }).count(),
+          0,
+          'Esc closes the panel',
+        );
+        return {
+          observation: 'Weight 3.000 on Enter, row added, Ctrl+D question, Esc closes',
+          expected: { question },
+        };
+      },
+    ),
+    C(
+      'reopen.loose-detail-rows-return',
+      'T08',
+      'mutation',
+      'GET returns the detail rows and the kasar (TR_WH_SALE.cs:12588-12630, :12230); an unchanged save leaves every stored column of every table identical',
+      async (ctx) => {
+        const { page } = await open(ctx);
+        const created = await looseSale(page, { ksrDr: '0.5', ksrCr: '0.25' });
+        assert.equal(created.status(), 201, await created.text());
+        const vchNo = await voucherOf(created);
+        const before = await writeSet(ctx, vchNo);
+        await load(page, vchNo);
+        await value(page, 'Ksr Fine Dr', '0.500');
+        await value(page, 'Ksr Fine Cr', '0.250');
+        await openDetail(page);
+        await value(page, 'Pcs detail 1', '2');
+        await value(page, 'NetAmt detail 2', '500');
+        const updated = await save(page);
+        assert.equal(updated.status(), 200, await updated.text());
+        assert.deepEqual(
+          await writeSet(ctx, vchNo),
+          before,
+          'an unchanged save keeps every column',
+        );
+        return {
+          observation: 'rows, kasar and version came back; the unchanged save was identical',
+          expected: { identical: true },
+          database: { vchNo },
+          downstream: await downstreamOf(ctx, vchNo),
+        };
+      },
+    ),
+    C(
+      'edit.loose-detail-row-change',
+      'T09',
+      'mutation',
+      'Edit rewrites the rows from the screen: row B at Pcs 3 priced 101 x 2.000 g = 202.00 and row A deleted (TR_WH_SALE.cs:12937)',
+      async (ctx) => {
+        const { page } = await open(ctx);
+        const created = await looseSale(page);
+        const vchNo = await voucherOf(created);
+        await load(page, vchNo);
+        await openDetail(page);
+        let accepted = false;
+        page.removeAllListeners('dialog');
+        page.on('dialog', (dialog) => {
+          accepted = true;
+          void dialog.accept();
+        });
+        await page.getByLabel('Pcs detail 1', { exact: true }).press('Control+d');
+        for (let i = 0; i < 20 && !accepted; i++) await page.waitForTimeout(100);
+        page.removeAllListeners('dialog');
+        page.on('dialog', (dialog) => void dialog.accept());
+        await page.getByLabel('Pcs detail 1', { exact: true }).fill('3');
+        await page.getByLabel('Rate detail 1', { exact: true }).fill('101');
+        await page.getByLabel('NetAmt detail 1', { exact: true }).fill('0');
+        await page.getByLabel('NetAmt detail 1', { exact: true }).press('Enter');
+        await page.getByLabel('Received Cash Amt', { exact: true }).fill('202');
+        const updated = await save(page);
+        assert.equal(updated.status(), 200, await updated.text());
+        const rows = await slidtl(ctx, vchNo);
+        assert.equal(rows.length, 1);
+        assert.deepEqual([rows[0].isr, rows[0].pcs, rows[0].amt, rows[0].net], [1, 3, 202, 202]);
+        return {
+          observation: 'one row, Pcs 3, ItAmt 202.00',
+          expected: { isr: 1, pcs: 3, amt: 202 },
+          database: { vchNo, rows },
+          downstream: await downstreamOf(ctx, vchNo),
+        };
+      },
+    ),
+    C(
+      'delete.removes-detail-rows',
+      'T10',
+      'mutation',
+      "Delete removes this voucher's SL_IDTL rows and no other voucher's (TR_WH_SALE.cs:13567, :12937)",
+      async (ctx) => {
+        const { page } = await open(ctx);
+        const sentinel = await looseSale(page);
+        const keep = await voucherOf(sentinel);
+        await page.getByRole('button', { name: 'New', exact: true }).click();
+        const created = await looseSale(page);
+        const vchNo = await voucherOf(created);
+        await load(page, vchNo);
+        const declined = await deleteLoaded(page, false);
+        assert.equal(declined.question, DELETE_QUESTION);
+        assert.equal((await slidtl(ctx, vchNo)).length, 2, 'No leaves the rows');
+        const done = await deleteLoaded(page, true);
+        assert.equal(done.response.status(), 200, await done.response.text());
+        assert.equal((await slidtl(ctx, vchNo)).length, 0);
+        assert.equal((await slidtl(ctx, keep)).length, 2, 'the other voucher keeps its rows');
+        return {
+          observation: 'rows removed with the voucher; sentinel untouched',
+          expected: { removed: 2, kept: 2 },
+          database: { vchNo, keep },
+          downstream: {
+            deleted: await downstreamOf(ctx, vchNo),
+            kept: await downstreamOf(ctx, keep),
+          },
+        };
+      },
+    ),
+    C(
+      'concurrency.detail-row-race',
+      'T12',
+      'mutation',
+      "Two sessions edit the same voucher: the first save wins, the second answers 409 voucher-version-conflict and the rows are exactly the winner's",
+      async (ctx) => {
+        const first = await open(ctx);
+        const created = await looseSale(first.page);
+        const vchNo = await voucherOf(created);
+        const second = await open(ctx);
+        await load(first.page, vchNo);
+        await load(second.page, vchNo);
+        await openDetail(second.page);
+        await second.page.getByLabel('Pcs detail 2', { exact: true }).fill('3');
+        await openDetail(first.page);
+        await first.page.getByLabel('Pcs detail 1', { exact: true }).fill('4');
+        await first.page.getByLabel('NetAmt detail 1', { exact: true }).press('Enter');
+        const won = await save(first.page);
+        assert.equal(won.status(), 200, await won.text());
+        const lost = await save(second.page);
+        assert.equal(lost.status(), 409, await lost.text());
+        assert.equal((await lost.json()).error, 'voucher-version-conflict');
+        const rows = await slidtl(ctx, vchNo);
+        assert.deepEqual(
+          rows.map((r) => r.pcs),
+          [4, 2],
+          "exactly the winner's rows",
+        );
+        return {
+          observation: 'first save 200, second 409',
+          expected: { winner: [4, 2] },
+          database: { rows },
+          downstream: await downstreamOf(ctx, vchNo),
+        };
+      },
+    ),
+    C(
+      'rollback.fault-on-slidtl-row',
+      'T14',
+      'mutation',
+      'A fault on the second SL_IDTL insert rolls the whole voucher back: header, lines, ledger, day book and stock',
+      async (ctx) => {
+        await ctx.owner.$executeRawUnsafe(
+          `CREATE OR REPLACE FUNCTION e2e_ws_idtl_fault() RETURNS trigger AS $$ BEGIN IF NEW."ISR_NO" = 2 AND NEW.tenant_id = '${ctx.tenantId}' THEN RAISE EXCEPTION 'e2e fault'; END IF; RETURN NEW; END $$ LANGUAGE plpgsql`,
+        );
+        await ctx.owner.$executeRawUnsafe(
+          `CREATE TRIGGER e2e_ws_idtl_fault BEFORE INSERT ON "SL_IDTL" FOR EACH ROW EXECUTE FUNCTION e2e_ws_idtl_fault()`,
+        );
+        try {
+          const before = await counts(ctx);
+          const { page } = await open(ctx);
+          const response = await looseSale(page, { ksrDr: '0.5' });
+          assert(response.status() >= 400, 'the save fails');
+          assert.deepEqual(await counts(ctx), before, 'nothing written');
+          return {
+            observation: `status ${response.status()}; counts unchanged`,
+            expected: { rolledBack: true },
+            database: { before },
+            downstream: { after: await counts(ctx) },
+          };
+        } finally {
+          await ctx.owner.$executeRawUnsafe(
+            `DROP TRIGGER IF EXISTS e2e_ws_idtl_fault ON "SL_IDTL"`,
+          );
+          await ctx.owner.$executeRawUnsafe(`DROP FUNCTION IF EXISTS e2e_ws_idtl_fault()`);
+        }
+      },
+    ),
+    C(
+      'ledger.ksr-fine-legs',
+      'T18',
+      'mutation',
+      'Fine kasar posts four metal-only legs: 27 party + and 28 slot-12 - for the Cr kasar, 33 party - and 34 slot-12 + for the Dr kasar (Ac_Ledr.cs:685-705); the voucher stays balanced; an unchanged save keeps them',
+      async (ctx) => {
+        const t = await seedTag(ctx);
+        const { page } = await open(ctx);
+        const created = await sell(page, {
+          tag: t.tag,
+          cutFine: t.fine,
+          cash: 59540,
+          before: async () => {
+            await typeKasar(page, 'Ksr Fine Dr', '0.5');
+            await typeKasar(page, 'Ksr Fine Cr', '0.25');
+          },
+        });
+        assert.equal(created.status(), 201, await created.text());
+        const vchNo = await voucherOf(created);
+        const all = await legs(ctx, vchNo);
+        const pick4 = (code) => all.find((l) => l[0] === code);
+        assert.deepEqual(pick4('27').slice(2, 6), [0, 0, '+', 0.25]);
+        assert.deepEqual(pick4('28').slice(2, 6), [0, 0, '-', 0.25]);
+        assert.deepEqual(pick4('33').slice(2, 6), [0, 0, '-', 0.5]);
+        assert.deepEqual(pick4('34').slice(2, 6), [0, 0, '+', 0.5]);
+        assert.equal(pick4('27')[1], PARTIES.local.code);
+        assert.equal(pick4('33')[1], PARTIES.local.code);
+        const sums = all.reduce((a, l) => [a[0] + l[2], a[1] + l[3]], [0, 0]);
+        assert.equal(Math.round(sums[0] * 100), Math.round(sums[1] * 100), 'Dr = Cr');
+        const before = await writeSet(ctx, vchNo);
+        await load(page, vchNo);
+        const updated = await save(page);
+        assert.equal(updated.status(), 200, await updated.text());
+        assert.deepEqual(await writeSet(ctx, vchNo), before);
+        return {
+          observation: 'legs 27/28/33/34 as the source, balanced, stable on resave',
+          expected: { legs: ['27', '28', '33', '34'] },
+          database: { vchNo, legs: all },
+          downstream: { drCr: sums },
+        };
+      },
+    ),
+    C(
+      'rojmel.ksr-fine-rows',
+      'T18',
+      'mutation',
+      'Day book rows 07 (Dr kasar, sign -) and 08 (Cr kasar, sign +) named KSR - party, fine in ITM_FINE, money 0 (Ac_Rojmel.cs:235-237); both go when the kasar is 0',
+      async (ctx) => {
+        const t = await seedTag(ctx);
+        const { page } = await open(ctx);
+        const created = await sell(page, {
+          tag: t.tag,
+          cutFine: t.fine,
+          cash: 59540,
+          before: async () => {
+            await typeKasar(page, 'Ksr Fine Dr', '0.5');
+            await typeKasar(page, 'Ksr Fine Cr', '0.25');
+          },
+        });
+        const vchNo = await voucherOf(created);
+        const rows = await rojmelRows(ctx, vchNo);
+        const r07 = rows.find((r) => r.key.endsWith('07'));
+        const r08 = rows.find((r) => r.key.endsWith('08'));
+        assert.deepEqual(
+          [r07.name, r07.sign, r07.fine, r07.dr, r07.cr],
+          [`KSR - ${PARTIES.local.name}`, '-', 0.5, 0, 0],
+        );
+        assert.deepEqual(
+          [r08.name, r08.sign, r08.fine, r08.dr, r08.cr],
+          [`KSR - ${PARTIES.local.name}`, '+', 0.25, 0, 0],
+        );
+        await load(page, vchNo);
+        await typeKasar(page, 'Ksr Fine Dr', '0');
+        await typeKasar(page, 'Ksr Fine Cr', '0');
+        const updated = await save(page);
+        assert.equal(updated.status(), 200, await updated.text());
+        assert(
+          !(await rojmelRows(ctx, vchNo)).some((r) => /0[78]$/.test(r.key)),
+          'both rows gone with the kasar',
+        );
+        return {
+          observation: 'rows 07/08 written, then removed at 0',
+          expected: { r07: 0.5, r08: 0.25 },
+          database: { vchNo, rows },
+          downstream: await downstreamOf(ctx, vchNo),
+        };
+      },
+    ),
+    C(
+      'rojmel.lined-voucher-rows-05-06-14-27',
+      'T18',
+      'mutation',
+      'A fine-only issue line writes day book row 05 keyed with its line number; labour writes 27 (Ac_Rojmel.cs:231, :249, :275)',
+      async (ctx) => {
+        const { page } = await open(ctx);
+        await page.getByLabel('Date', { exact: true }).fill(DAY);
+        await pick(page, 'Party', PARTIES.local.code);
+        await pick(page, 'ItCode Issue line 1', ITEMS.gold.code);
+        await page.getByLabel('Pcs Issue line 1', { exact: true }).fill('1');
+        await page.getByLabel('GrWt Issue line 1', { exact: true }).fill('10');
+        await page.getByLabel('Touch Issue line 1', { exact: true }).fill('91.6');
+        await page.getByLabel('LbrRate Issue line 1', { exact: true }).fill('10');
+        const response = await save(page);
+        assert.equal(response.status(), 201, await response.text());
+        const vchNo = await voucherOf(response);
+        const rows = await rojmelRows(ctx, vchNo);
+        const r05 = rows.find((r) => /05 +1$/.test(r.key));
+        assert(r05, 'row 05 keyed with the line number');
+        assert.deepEqual([r05.sign, r05.name, r05.fine], ['-', PARTIES.local.name, 9.16]);
+        const [h] = await ctx.rows(
+          `SELECT "SL_LBR_AMT"::float8 AS lbr,"SL_OTH_AMT"::float8 AS oth FROM "RATE_CUT_DATA" WHERE tenant_id=$1 AND "CO_BOOK"='${BOOK}' AND "VCH_NO"=$2`,
+          vchNo,
+        );
+        const r27 = rows.find((r) => r.key.endsWith('27'));
+        assert.equal(r27.cr, h.lbr + h.oth);
+        assert.equal(r27.name, `LBR - ${PARTIES.local.name}`);
+        return {
+          observation: 'rows 05 (line 1) and 27 as the source',
+          expected: { r05: 9.16, r27: h.lbr + h.oth },
+          database: { vchNo, rows },
+          downstream: await downstreamOf(ctx, vchNo),
+        };
+      },
+    ),
+    C(
+      'rojmel.key-and-name-shape',
+      'T18',
+      'mutation',
+      'Keys and names follow Wh_Sales_Rojmel: BOOK_SNAME - AC_NAME on the header rows, KSR/LBR prefixes, the master name on line rows, the line number in 05/06 (Ac_Rojmel.cs:221-310)',
+      async (ctx) => {
+        const t = await seedTag(ctx);
+        const { page } = await open(ctx);
+        const created = await sell(page, { tag: t.tag, cutFine: t.fine, cash: 59540 });
+        const vchNo = await voucherOf(created);
+        const rows = await rojmelRows(ctx, vchNo);
+        const [{ sname }] = await ctx.rows(
+          `SELECT "BOOK_SNAME" AS sname FROM "BOOK_DATA" WHERE tenant_id=$1 AND "CO_BOOK"='${BOOK}'`,
+        );
+        for (const row of rows) {
+          const type = row.key.slice(21, 23);
+          if (['03', '04'].includes(type))
+            assert.equal(row.name, `${sname} - ${PARTIES.local.name}`, `type ${type} name`);
+          if (type === '05') assert.match(row.key, /05 +\d+$/, 'line number in the key');
+        }
+        return {
+          observation: `${rows.length} rows checked`,
+          expected: { names: true },
+          database: { vchNo, rows },
+          downstream: await downstreamOf(ctx, vchNo),
+        };
+      },
+    ),
+    C(
+      'output.print-detail-under-line',
+      'T16',
+      'output',
+      "The bill prints a line's detail rows right under it, in ISR_NO order, with name, pieces, weight, rate and net amount (WhSalesBill area 5)",
+      async (ctx) => {
+        const { page } = await open(ctx);
+        const created = await looseSale(page);
+        assert.equal(created.status(), 201, await created.text());
+        const [doc] = await Promise.all([
+          page.waitForEvent('popup'),
+          page.getByRole('button', { name: 'Print', exact: true }).click(),
+        ]);
+        await doc.waitForURL(/\/api\/wholesale-sales\/\d+\/print/);
+        await doc.waitForLoadState();
+        const body = ((await doc.textContent('body')) ?? '').replace(/\s+/g, ' ');
+        for (const expected of ['Rate 101.00', '763.00', 'Rate 0.00', '500.00'])
+          assert(body.includes(expected), `the bill shows ${expected}`);
+        assert(body.indexOf('763.00') < body.indexOf('500.00'), 'ISR_NO order');
+        return {
+          observation: 'rows 763.00 then 500.00 under the line',
+          expected: { order: true },
+          output: Buffer.from(body),
+        };
+      },
+    ),
+    C(
+      'output.print-kasar-fine-row',
+      'T16',
+      'output',
+      'The band prints the stored kasar: Kasar Fine 0.250 / 0.500 (WhSalesBill @RecFine, @IsuFine from KSR_FINE_*)',
+      async (ctx) => {
+        const t = await seedTag(ctx);
+        const { page } = await open(ctx);
+        const created = await sell(page, {
+          tag: t.tag,
+          cutFine: t.fine,
+          cash: 59540,
+          before: async () => {
+            await typeKasar(page, 'Ksr Fine Dr', '0.5');
+            await typeKasar(page, 'Ksr Fine Cr', '0.25');
+          },
+        });
+        assert.equal(created.status(), 201, await created.text());
+        const [doc] = await Promise.all([
+          page.waitForEvent('popup'),
+          page.getByRole('button', { name: 'Print', exact: true }).click(),
+        ]);
+        await doc.waitForURL(/\/api\/wholesale-sales\/\d+\/print/);
+        await doc.waitForLoadState();
+        const body = ((await doc.textContent('body')) ?? '').replace(/\s+/g, ' ');
+        assert(/Kasar Fine\s*0\.250\s*0\.500/.test(body), 'Kasar Fine 0.250 0.500');
+        return {
+          observation: 'Kasar Fine row prints 0.250 / 0.500',
+          expected: { cr: 0.25, dr: 0.5 },
+          output: Buffer.from(body),
+        };
+      },
+    ),
+    blocked(
+      'rojmel.missing-types-and-silver',
+      'T18',
+      'No owner decision on building types 21/23/24/25/28/29-40 for Wh Sales and no IT_TYPE S Wh Sales seed or decision for the silver types; unblocked by that decision plus a silver seed (decision 3).',
+    ),
+    blocked(
+      'refusal.detail-row-delete-right',
+      'T06',
+      'The web has no client-side source for UserDelete (rights are enforced by the server on save); unblocked by a session-rights hook, which is another work package.',
+    ),
+    blocked(
+      'rights.detail-delete-and-print',
+      'T11',
+      'Its Ctrl+D half needs the same client-side UserDelete source; the direct-POST and print-right halves are covered by rights.clerk-no-wh-sales and output.print-rights.',
+    ),
+    blocked(
+      'retry.detail-row-double-post',
+      'T13',
+      'POST /wholesale-sales is not yet idempotency-guarded (NOT_YET_GUARDED in apps/api/test/idempotencyRoutePolicy.test.ts, a WP-04 follow-up); unblocked when that route takes Idempotency-Key.',
     ),
   ],
 };

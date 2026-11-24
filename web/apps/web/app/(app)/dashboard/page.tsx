@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { get } from '../../../lib/api';
 import { useBusinessScope } from '../../../components/BusinessScope';
+import { DailyRateLabels } from '../../../components/DailyRateLabels';
 
 export default function Dashboard() {
   const { coYear } = useBusinessScope();
@@ -23,6 +24,7 @@ export default function Dashboard() {
       <h1>
         Dashboard <span className="muted">FY {coYear}</span>
       </h1>
+      <DailyRateLabels />
       <div className="tiles">
         <div className="tile">
           <div className="muted">Sales Invoices</div>

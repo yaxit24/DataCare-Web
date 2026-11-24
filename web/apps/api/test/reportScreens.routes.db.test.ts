@@ -124,24 +124,28 @@ const D3_SCREENS = [
   });
 
   it('forwards Approval InOut mode and totals through screen and export routes', async () => {
+    // WP-13: the screen and every export come from the one RP_ALL AprInOut result (RP_ALL.cs:8274
+    // {{DC_Main.RptName = "AprInOut";}}): OutPcs 2, InPcs 2 (ISU_REC='Y'), Panding 0.
     const screen = await get(`/reports/approval-report?coYear=${YEAR}&mode=inout`);
     expect(screen.statusCode, screen.body).toBe(200);
-    expect(screen.json().rows).toEqual([
-      expect.objectContaining({
-        crystalReport: 'AprInOut',
-        coBook: 'TUR',
-        tagNo: 'APP-ROUTE',
-        outPcs: 2,
-        inPcs: 2,
-        pendingPcs: 0,
-      }),
-    ]);
-    expect(screen.json().totals).toMatchObject({ rows: 1, outPcs: 2, inPcs: 2, pendingPcs: 0 });
+    const body = screen.json();
+    expect(body.template).toBe('AprInOut');
+    expect(body.rows).toHaveLength(1);
+    expect(body.rows[0].cells).toMatchObject({
+      tagNo: 'APP-ROUTE',
+      outPcs: 2,
+      inPcs: 2,
+      pendingPcs: 0,
+    });
+    expect(body.totals).toMatchObject({ outPcs: 2, inPcs: 2, pendingPcs: 0 });
 
     const csv = await get(`/reports/approval-report/export.csv?coYear=${YEAR}&mode=inout`);
     expect(csv.statusCode, csv.body).toBe(200);
-    expect(csv.body).toContain('outPcs,inPcs,pendingPcs');
-    expect(csv.body).toMatch(/TOTAL.*?,2,2,0,/s);
+    expect(csv.body).toContain('Out Pcs,In Pcs,Panding');
+    // The last line is the report footer "Grand Total :" with the same sums the screen shows.
+    const last = csv.body.trim().split(/\r?\n/).pop()!;
+    expect(last.startsWith('Grand Total :')).toBe(true);
+    expect(last).toMatch(/,2,2,0(,|$)/);
 
     const xlsx = await get(`/reports/approval-report/export.xlsx?coYear=${YEAR}&mode=inout`);
     expect(xlsx.statusCode, xlsx.body).toBe(200);

@@ -487,12 +487,15 @@ type GroupRow = {
         '/masters/group-master/accounts?kind=sale&q=',
       );
       expect(response.statusCode, response.body).toBe(200);
-      // The web chart keeps CAPITAL A/C in group 25 (seedCompany.ts), the desktop's sales group, so the desktop's list
-      // shows it on a web-provisioned company (desktop-equivalent provisioning, N58).
+      // A web-provisioned company's sale ledgers sit in group 25 (seedCompany.ts, WP-36), so the help lists them. The
+      // web chart still keeps CAPITAL A/C in group 25 (the desktop chart's capital group is an open N58 question).
       expect(response.json()).toEqual([
         { code: 'CAPITAL', name: 'CAPITAL A/C', group: '25' },
+        { code: 'FINESALE', name: 'FINE METAL SALE', group: '25' },
+        { code: 'SALES', name: 'SALES A/C', group: '25' },
         { code: '00025', name: 'SALES GOLD', group: '25' },
         { code: '00026', name: 'SALES SILVER', group: '25' },
+        { code: 'SLVSALE', name: 'SALES SILVER A/C', group: '25' },
       ]);
       // A typed 00099 is found in group 25 (:2204) although the help does not list it (:2208).
       response = await request(
@@ -501,7 +504,7 @@ type GroupRow = {
         '/masters/group-master/accounts?kind=sale&q=00099',
       );
       expect(response.json()).toEqual([{ code: '00099', name: 'SALES SUSPENSE', group: '25' }]);
-      // A purchase account is not a sales account, nor is the web chart's SALES (group 20).
+      // A purchase account is not a sales account.
       response = await request(
         adminCookie,
         'GET',
@@ -513,19 +516,24 @@ type GroupRow = {
         'GET',
         '/masters/group-master/accounts?kind=sale&q=SALES',
       );
-      expect(response.json().map((r: { code: string }) => r.code)).toEqual(['00025', '00026']);
+      expect(response.json().map((r: { code: string }) => r.code)).toEqual([
+        'SALES',
+        '00025',
+        '00026',
+        'SLVSALE',
+      ]);
       response = await request(
         adminCookie,
         'GET',
         '/masters/group-master/accounts?kind=purchase&q=',
       );
-      // The web chart's GST and TCS accounts sit in group 30, the desktop's purchase group (N58).
+      // The provisioned purchase ledgers are in group 30; the tax ledgers are in group 12, not here (WP-36).
       expect(response.json().map((r: { code: string }) => r.code)).toEqual([
-        'GSTINPUT',
-        'GST',
+        'FINEPURC',
+        'PURCHASE',
         '00030',
         '00031',
-        'TCS',
+        'SLVPURC',
       ]);
       response = await request(adminCookie, 'GET', '/masters/group-master/trade-types?q=');
       expect(response.json()).toEqual([

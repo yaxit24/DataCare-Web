@@ -277,6 +277,18 @@ export {
   wholesaleGridTotals,
   wholesaleBand,
 } from './wholesaleLine.js';
+export {
+  commPassTotalIdtl,
+  detailRowIsWritten,
+  detailWeightFromKr,
+  detailWeightFromPieces,
+  rollupWholesaleDetails,
+} from './wholesaleDetail.js';
+export type {
+  WholesaleDetailInput,
+  WholesaleDetailResult,
+  WholesaleDetailRollup,
+} from './wholesaleDetail.js';
 export type {
   WholesaleLineSettings,
   WholesaleLineInput,

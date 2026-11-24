@@ -13,8 +13,8 @@
  * query, and the grouping, totalling and formatting rules are written and tested once.
  */
 
-/** The menu captions RP_ALL serves (RP_ALL.cs:6676-6770). Only Sales has an adapter so far. */
-export type RpAllBranch = 'sales';
+/** The menu captions RP_ALL serves (RP_ALL.cs:6676-6770). Sales, Purchase, Order and Approval adapters exist. */
+export type RpAllBranch = 'sales' | 'purchase' | 'order' | 'approval';
 
 /** Kind of a cell: decides precision, alignment and how a total is rounded. */
 export type RpAllColumnKind = 'text' | 'date' | 'money' | 'weight' | 'pcs' | 'rate';
@@ -41,6 +41,12 @@ export interface RpAllColumn {
   total?: boolean;
   /** 'template' = a text object of the .rpt; 'field' = no caption printed, named from the bound field. */
   captionSource?: 'template' | 'field';
+  /**
+   * Header a screen prints for the column slot this column sits in. Columns of different levels that share a
+   * slot (a voucher's Pcs total and a line's Pcs) print under one header, as the template's bands share x-positions.
+   * Defaults to the caption.
+   */
+  slot?: string;
 }
 
 export interface RpAllGroupLevel {
@@ -58,6 +64,16 @@ export interface RpAllGroupLevel {
   /** Map raw key values to a printed label (Crystal formula such as @ItemType). */
   labelMap?: Readonly<Record<string, string>>;
   labelDefault?: string;
+  /**
+   * Conditional footer suppression (Crystal `EnableSuppress`, e.g. AprPan.xml:936
+   * `Sum ({@PanPcs}, {@Group}) = 0`). Suppression hides the band and never removes its records or totals.
+   */
+  footerSuppressedWhen?: (records: readonly RpAllRecord[]) => boolean;
+  /**
+   * Total a column from another record key in this band's sums: column key → record key. AcPurcSummRpt prints
+   * the Party Total from the in/out-signed fields ({@Pcs}, {@NetAmt}) while the lines print the raw fields.
+   */
+  totalKeys?: Readonly<Record<string, string>>;
 }
 
 /** One record-sort key; groups are always sorted ascending first, in group order (Crystal GroupSortField). */
@@ -80,6 +96,13 @@ export interface RpAllLayout {
   rowLevels: readonly RpAllLevel[];
   /** Whether the template prints a report-footer (grand total) band. */
   grandTotal: boolean;
+  /** As `RpAllGroupLevel.totalKeys`, for the grand total band. */
+  grandTotalKeys?: Readonly<Record<string, string>>;
+  /**
+   * Print each voucher's own band after its last line instead of before its first (AcPurcRpt prints the
+   * voucher sums in the group footer, AcPurcSummRpt in the group header).
+   */
+  voucherRowAfter?: boolean;
   /** Caption of the grand-total band, verbatim, when the template prints one. */
   grandTotalCaption?: string;
   /**
@@ -104,6 +127,8 @@ export interface RpAllGroup {
   label: string;
   groupPath: string[];
   rowCount: number;
+  /** Effective subtotal placement after conditional suppression (a suppressed footer becomes 'none'). */
+  subtotal: 'header' | 'footer' | 'none';
   totals: Record<string, number>;
 }
 
