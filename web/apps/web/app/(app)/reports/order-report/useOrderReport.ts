@@ -34,7 +34,11 @@ export function orderQuery(
       error: 'Enter a valid date in dd/MM/yyyy format (for example 01/01/2026).',
     };
   const query = new URLSearchParams({ mode, fromDate, toDate });
-  query.set('lcCode', sessionLcCode !== '00' ? sessionLcCode : filters.lcCode);
+  // The lc box is locked outside head office (RP_ALL.cs:6660-6671): that session sends its own location. At
+  // head office the box is editable and its value ('' = every location, or a branch code) travels as
+  // reportLcCode, never as the session scope's lcCode, which the request-scope guard refuses to change.
+  if (sessionLcCode === '00') query.set('reportLcCode', filters.lcCode.trim());
+  else query.set('lcCode', sessionLcCode);
   // `bookCode`, not `coBook`: the API reads `coBook` as the session's book and refuses an unknown one with 409,
   // while the desktop never re-checks a typed book on the button click (RP_ALL.cs:8387, study Rules).
   if (filters.bookCode.trim()) query.set('bookCode', filters.bookCode.trim());

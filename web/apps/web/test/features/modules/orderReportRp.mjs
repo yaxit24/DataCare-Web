@@ -919,6 +919,17 @@ export const orderReportRp = {
           // Typing the own location back lists only the head office's own order (RP_ALL.cs:8383).
           await runMode(page00, 'report', { from: WIDE_FROM, 'lc Code': '00' });
           assertCodes(await readGrid(page00), ['O6'], ['O1', 'O2', 'O3']);
+          // A 00 session may name a branch: the box value travels as reportLcCode (not the session scope's
+          // lcCode, which would be refused 409) and lists only that location (RP_ALL.cs:8383).
+          const branch = await runMode(page00, 'report', { from: WIDE_FROM, 'lc Code': '01' });
+          assert.equal(branch.query.get('reportLcCode'), '01');
+          assert.equal(branch.query.get('lcCode'), null);
+          await page00
+            .locator('table.grid tbody')
+            .getByText('O1', { exact: true })
+            .first()
+            .waitFor();
+          assertCodes(await readGrid(page00), ['O1', 'O2'], ['O6']);
         });
       },
     ),

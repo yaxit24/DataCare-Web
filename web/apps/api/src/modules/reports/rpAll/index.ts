@@ -264,13 +264,68 @@ export async function fetchSalesRecords(
   return rows.map(toRecord);
 }
 
+/**
+ * The report's own location box (tLcCode), carried as `reportLcCode` and never as the session scope's lcCode
+ * (so the request-scope guard keeps refusing a rewrite of the session location, D9). Editable only at head
+ * office "00" (RP_ALL.cs:6660-6671); a named branch must be one of the company's LOCT_MAST rows
+ * (RP_ALL.cs:7691). Returns undefined when not supplied, null for a cleared box (every location), else the
+ * validated code. Shared by the Sales, Order and Approval branches (RP_ALL.cs:7623, 8383, 8154-8156).
+ */
+export async function resolveReportLocation(
+  prisma: any,
+  session: RpAllSessionScope,
+  options: Record<string, unknown>,
+): Promise<string | null | undefined> {
+  if (options.reportLcCode === undefined) return undefined;
+  if (session.lcCode !== '00')
+    throw new RpAllRequestError(
+      'location-locked',
+      'reportLcCode is fixed to the session location',
+      { field: 'reportLcCode' },
+    );
+  const reportLc = typeof options.reportLcCode === 'string' ? options.reportLcCode.trim() : '';
+  if (reportLc === '') return null;
+  const found: unknown[] = await withTxBudget(prisma, session.tenantId, 'read', (tx: any) =>
+    tx.$queryRawUnsafe(
+      `SELECT 1 FROM "LOCT_MAST" WHERE "tenant_id"=$1 AND "CO_CODE"::text=$2 AND "LC_CODE"::text=$3 LIMIT 1`,
+      session.tenantId,
+      session.coCode,
+      reportLc,
+    ),
+  );
+  if (!found.length)
+    throw new RpAllRequestError(
+      'invalid-location',
+      "reportLcCode must be one of the company's locations",
+      { field: 'reportLcCode' },
+    );
+  return reportLc;
+}
+
+/** Apply a validated report location to a parsed Sales/Order request. */
+async function withReportLocation(
+  prisma: any,
+  session: RpAllSessionScope,
+  query: Record<string, unknown>,
+  request: RpAllRequest,
+): Promise<RpAllRequest> {
+  const named = await resolveReportLocation(prisma, session, query);
+  if (named === undefined) return request;
+  return { ...request, filters: { ...request.filters, lcCode: named } };
+}
+
 /** The Sales Report dataset: parse → read → shape. Business scope always comes from the session. */
 export async function salesReport(
   prisma: any,
   session: RpAllSessionScope,
   query: Record<string, unknown>,
 ): Promise<RpAllResult> {
-  const request = parseRpAllRequest('sales', query, session);
+  const request = await withReportLocation(
+    prisma,
+    session,
+    query,
+    parseRpAllRequest('sales', query, session),
+  );
   const records = await fetchSalesRecords(prisma, session, request);
   return shapeSalesResult(request, records);
 }
@@ -373,7 +428,12 @@ export async function orderReport(
   session: RpAllSessionScope,
   query: Record<string, unknown>,
 ): Promise<RpAllResult> {
-  const request = parseRpAllRequest('order', query, session);
+  const request = await withReportLocation(
+    prisma,
+    session,
+    query,
+    parseRpAllRequest('order', query, session),
+  );
   const records = await fetchOrderRecords(prisma, session, request);
   return shapeOrderResult(request, records);
 }
@@ -563,37 +623,14 @@ export async function approvalReport(
   // (businessScope.ts) keeps refusing any attempt to rewrite the session's own location (D9); the server
   // proves a named branch is one of the company's locations before applying it. Any other session stays
   // locked (D9) and cannot send one at all.
-  const reportLc =
-    typeof options.reportLcCode === 'string' ? options.reportLcCode.trim() : undefined;
-  if (options.reportLcCode !== undefined && sessionLc !== '00')
-    throw new RpAllRequestError(
-      'location-locked',
-      'reportLcCode is fixed to the session location',
-      {
-        field: 'reportLcCode',
-      },
-    );
+  const named = await resolveReportLocation(
+    prisma,
+    { tenantId, coCode, lcCode: sessionLc, coYear: '' },
+    options,
+  );
   let lcCode = sessionLc;
-  if (sessionLc === '00') {
-    if (reportLc === '') lcCode = '';
-    else if (reportLc !== undefined) {
-      const found: unknown[] = await withTxBudget(prisma, tenantId, 'read', (tx: any) =>
-        tx.$queryRawUnsafe(
-          `SELECT 1 FROM "LOCT_MAST" WHERE "tenant_id"=$1 AND "CO_CODE"::text=$2 AND "LC_CODE"::text=$3 LIMIT 1`,
-          tenantId,
-          coCode,
-          reportLc,
-        ),
-      );
-      if (!found.length)
-        throw new RpAllRequestError(
-          'invalid-location',
-          "reportLcCode must be one of the company's locations",
-          { field: 'reportLcCode' },
-        );
-      lcCode = reportLc;
-    } else if (options.lcCode === '') lcCode = '';
-  }
+  if (named !== undefined) lcCode = named ?? '';
+  else if (sessionLc === '00' && options.lcCode === '') lcCode = '';
   const session: RpAllSessionScope = {
     tenantId,
     coCode,
