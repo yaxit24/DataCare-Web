@@ -44,7 +44,7 @@ const LITE_MENUS: ReadonlyArray<
   ['Report', 'Sales Report', '/reports/sales-register', 'Reports/Sales Register'],
   ['Report', 'Purchase Rpt', '/reports/purchase-register', 'Reports/Purchase Register'],
   ['Report', 'Approval Rpt', '/reports/approval-report', 'Reports/Approval Report'],
-  ['Report', 'Order Report', '/txn/sales-order', 'Sales/Sales Order'],
+  ['Report', 'Order Report', '/reports/order-report', 'Reports/Order Report'],
   ['Report', 'Cash Bank', '/reports/cash-book', 'Reports/Cash / Bank Book'],
   ['Report', 'Gst Report', '/reports/gst-report', 'Reports/GST Report'],
   ['Report', 'HuId Report', '/reports/huid', 'Reports/HUID Report'],

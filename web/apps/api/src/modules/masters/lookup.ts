@@ -45,6 +45,14 @@ const SOURCES: Record<string, { table: string; code: string; name: string; extra
     extra: ['ITM_NWT', 'ITM_GWT', 'ITM_TOUCH', 'ITM_FINE', 'ITM_RATE', 'ITM_MRP'],
   },
   states: { table: 'STATE_MAST', code: 'STATE_CODE', name: 'STATE_NAME', extra: ['STATE_SHORT'] },
+  /**
+   * RP_ALL (Order Report) selector lists: the City/Area combos load the distinct AC_MAST values
+   * (RP_ALL.cs:7019 {{SELECT AC_CITY FROM AC_MAST WHERE CO_CODE = '}}, :7053 AC_AREA) and Cust Name help lists
+   * the names stored on the orders (RP_ALL.cs:9693 {{SELECT A.AC_NAME As CustomerNameL,A.AC_CODE AS AcCodel FROM SL_ORD_DATA AS A}}).
+   */
+  cities: { table: 'AC_MAST', code: 'AC_CITY', name: 'AC_CITY' },
+  areas: { table: 'AC_MAST', code: 'AC_AREA', name: 'AC_AREA' },
+  'order-customers': { table: 'SL_ORD_DATA', code: 'AC_NAME', name: 'AC_CODE' },
   books: {
     table: 'BOOK_DATA',
     code: 'CO_BOOK',

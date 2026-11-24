@@ -960,6 +960,13 @@ route('Reports/Sales Register', [
   'GET /reports/sales-report/export.csv',
   'GET /reports/sales-report/export.xlsx',
 ]);
+// WP-14: the RP_ALL Order Report screen and its exports, keyed on the "Order Report" caption's own USER_SET
+// row (MDI_FORM.cs:7034 {{DC_Main.MsUserRightForm = MsSideBtn;}}), never on Sales Order (D6).
+route('Reports/Order Report', [
+  'GET /reports/order-report',
+  'GET /reports/order-report/export.csv',
+  'GET /reports/order-report/export.xlsx',
+]);
 route('Reports/Purchase Register', ['GET /reports/purchase-register']);
 // WP-12: the RP_ALL Purchase Rpt screen, its City/Area options and its exports (routes/purchaseReport.ts), the
 // "Purchase Rpt" caption.
@@ -1154,6 +1161,8 @@ const PRINT_ROUTES = new Set([
   'GET /reports/purchase-report/export.csv',
   'GET /reports/purchase-report/export.xlsx',
   'GET /reports/purchase-report/export.pdf',
+  'GET /reports/order-report/export.csv',
+  'GET /reports/order-report/export.xlsx',
   'GET /reports/gstr2-doc',
   'GET /reports/gstr1-doc',
   'GET /reports/gstr3b-doc',

@@ -418,6 +418,9 @@ export async function buildApp(opts: BuildOpts): Promise<FastifyInstance> {
     // design, safe, counter, tag and account are its own selectors (RP_STOCK.cs:4287-4327), and it refuses any
     // other key itself (400 unknown-filter), so this guard, which only knows the shared RP_ALL panel, must not.
     if (url.startsWith('/reports/stock-report')) return;
+    // WP-14: the Order Report (RP_ALL) shares that parser; its handlers append party, city, area and name
+    // (RP_ALL.cs:8391-8403, :12620-12631).
+    if (url.startsWith('/reports/order-report')) return;
     const q = (req.query ?? {}) as Record<string, string | undefined>;
     const asked = REPORT_FILTER_KEYS.filter((k) => String(q[k] ?? '').trim());
     if (!asked.length) return;

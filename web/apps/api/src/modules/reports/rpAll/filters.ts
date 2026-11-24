@@ -58,6 +58,8 @@ export interface RpAllFilters {
   empCode?: string;
   /** One of the ITEM_TYPES letters. */
   itemType?: string;
+  /** Order Report only: exact stored customer name on SL_ORD_DATA (RP_ALL.cs:8403). */
+  custName?: string;
 }
 
 export interface RpAllSessionScope {
@@ -71,6 +73,8 @@ const ISO = /^(\d{4})-(\d{2})-(\d{2})$/;
 /** Codes are short desktop keys (CO_BOOK 8, AC_CODE 18, PR/GR/EMP codes); bounded so a query cannot carry a payload. */
 const CODE = /^[A-Za-z0-9 ._/&-]{1,20}$/;
 const TEXT = /^[^\u0000-\u001f]{1,60}$/;
+/** Cust Name text box is capped at 50 chars on the desktop (RP_ALL.cs:5792). */
+const TEXT50 = /^[^\u0000-\u001f]{1,50}$/;
 
 function isRealDate(value: string): boolean {
   const m = ISO.exec(value);
@@ -105,6 +109,15 @@ function text(query: Record<string, unknown>, name: string): string | undefined 
   const value = one(query, name);
   if (value !== undefined && !TEXT.test(value))
     throw new RpAllRequestError('invalid-filter', `${name} is not valid text`, { field: name });
+  return value;
+}
+
+function text50(query: Record<string, unknown>, name: string): string | undefined {
+  const value = one(query, name);
+  if (value !== undefined && !TEXT50.test(value))
+    throw new RpAllRequestError('invalid-filter', `${name} must be 50 characters or less`, {
+      field: name,
+    });
   return value;
 }
 
@@ -179,7 +192,10 @@ export function parseRpAllFilters(
   const set = <K extends keyof RpAllFilters>(key: K, value: RpAllFilters[K] | undefined) => {
     if (value !== undefined) filters[key] = value;
   };
-  set('coBook', code(query, 'coBook'));
+  // `bookCode` is the web screens' name for the Book box: a query named `coBook` is also the session scope's
+  // book (businessScope.ts), which refuses a book the operator merely typed with `book-unavailable`, while the
+  // desktop never re-checks it and prints an empty report (RP_ALL.cs:8387; study Rules). `coBook` stays accepted.
+  set('coBook', code(query, 'bookCode') ?? code(query, 'coBook'));
   set('books', books);
   set('acCode', code(query, 'acCode'));
   set('prCode', code(query, 'prCode'));
@@ -189,7 +205,13 @@ export function parseRpAllFilters(
   set('state', text(query, 'state'));
   set('empCode', code(query, 'empCode'));
   set('itemType', itemType);
+  set('custName', text50(query, 'custName'));
   return filters;
+}
+
+/** The Making Summ Yes/No prompt "Only Design Summery Report.." (RP_ALL.cs:11889). */
+export function parseOnlySummary(query: Record<string, unknown>): boolean {
+  return parseFlag(query, 'onlySummary');
 }
 
 /** Truthy flag from the query ("1", "true", "yes", "Y"), used for the desktop's Yes/No prompts. */

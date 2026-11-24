@@ -6,10 +6,10 @@ Order (D31, D32): every Lite menu works end to end like the desktop first, then 
 
 | Tier | Menus | With a feature module | Module with no open defect | Done |
 |---|---:|---:|---:|---:|
-| Lite (first, D32) | 49 | 42 | 40 | 0 |
+| Lite (first, D32) | 49 | 41 | 39 | 0 |
 | Basic (added by Basic) | 29 | 1 | 1 | 0 |
 | Standard (added by Standard) | 36 | 1 | 1 | 0 |
-| **Standard total** | **114** | **44** | **42** | **0** |
+| **Standard total** | **114** | **43** | **41** | **0** |
 
 ## Lite — 49 menus (first, D32)
 
@@ -49,7 +49,7 @@ Order (D31, D32): every Lite menu works end to end like the desktop first, then 
 | Report | Sales Report | `/reports/sales-register` | REPORT | — | no module | — |
 | Report | Purchase Rpt | `/reports/purchase-report`, `/reports/purchase-register` | REPORT | purchase-report | module green | — |
 | Report | Approval Rpt | `/reports/approval-report` | REPORT | — | no module | — |
-| Report | Order Report | `/txn/sales-order` | REPORT | sales-order | module green | — |
+| Report | Order Report | `/reports/order-report` | REPORT | — | no module | — |
 | Report | Cash Bank | `/reports/cash-book` | REPORT | — | no module | — |
 | Report | Gst Report | `/reports/gst-report` | REPORT | gst-report | module green | — |
 | Report | HuId Report | `/reports/huid` | REPORT | — | no module | — |

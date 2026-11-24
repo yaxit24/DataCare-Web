@@ -144,8 +144,9 @@ describe('route policy registry', () => {
     // N250 (WP-12) adds the RP_ALL Purchase Rpt GET /reports/purchase-report, its City/Area options and the CSV, XLSX
     // and PDF exports: 773 + 5 = 778. [791 on main + 5 here = 796]
     // WP-33 adds the MDI main-window rate labels (GET /daily-rate/labels): 773 + 1 = 774. [796 on main + 1 here = 797]
-    expect(routes).toHaveLength(797);
-    expect(new Set(routes.map((route) => `${route.method} ${route.path}`)).size).toBe(797);
+    // WP-14 adds the RP_ALL Order Report GET /reports/order-report and its CSV/XLSX exports: 771 + 3 = 774. [787 on main + 3 here = 790] [790 on main + 3 here = 793] [797 on main + 3 here = 800]
+    expect(routes).toHaveLength(800);
+    expect(new Set(routes.map((route) => `${route.method} ${route.path}`)).size).toBe(800);
 
     const policies = routes.map((route) => ({
       ...route,

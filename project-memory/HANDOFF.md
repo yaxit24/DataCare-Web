@@ -1,3 +1,10 @@
+## 2026-11-23 — Order Report is the desktop RP_ALL order branch (N252 / G264, WP-14)
+
+- 2026-11-23: `/reports/order-report` (`rpAll/orderQuery.ts`, `rpAll/orderLayouts.ts`, `reports/order-report/`) runs the seven RP_ALL order
+  buttons; SL_ORD_ADJ joins through ORD_*; rights key `Reports/Order Report` (alias "Order Report"), exports need Print; writes nothing. Module 25/25.
+- 2026-11-23: the `+` SL_ORD_ADJ row comes from the Sales Order since #262 (module checks it). Open: Making Panding/Summ print stored DESIGN_ISU='N' because the desktop
+  write runs only for HM310NEPK (RP_ALL.cs:10925), owner question. Shares lookup entities and `bookCode` in filters.ts with WP-11 (merge conflict).
+
 ## 2026-11-23 — Daily Rate closes its residual MS_RATE gaps (N251 / G263, WP-33)
 
 - 2026-11-23: a save at location 00 copies the day to every other location of the company in the same transaction when the company holds the operator-provisioned `daily_rate_copy_entitlement` (the hosted form of the SSRegSrNo gate; default off; no API route writes it, so provision it by SQL). `GET /daily-rate/labels` and `DailyRateLabels` on the dashboard show the Rate_1 to Rate_7 labels (today, own location, RATE_DISPLAY = Y, seven at most, "ToDays Rate :" when empty). The browser harness `session()` takes a `location`.

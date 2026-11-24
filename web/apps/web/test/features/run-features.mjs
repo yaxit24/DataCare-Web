@@ -19,6 +19,7 @@ import { purchaseInvoice } from './modules/purchaseInvoice.mjs';
 import { purchaseReport } from './modules/purchaseReport.mjs';
 import { salesReport } from './modules/salesReport.mjs';
 import { stockReport } from './modules/stockReport.mjs';
+import { orderReportRp } from './modules/orderReportRp.mjs';
 import { purchaseReturn } from './modules/purchaseReturn.mjs';
 import { salesOrder } from './modules/salesOrder.mjs';
 import { salesInvoice } from './modules/salesInvoice.mjs';
@@ -77,6 +78,7 @@ const MODULES = [
   purchaseReport,
   salesReport,
   stockReport,
+  orderReportRp,
   settingsEffects,
   usersRights,
   salesReturn,
