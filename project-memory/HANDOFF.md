@@ -1,3 +1,8 @@
+## 2026-11-23 — Purchase Rpt is the desktop RP_ALL purchase branch (N250 / G262, WP-12)
+
+- 2026-11-23: seven buttons (Purc Report, Purc Reg, Item Wise, Purchase Bill, Party Purc, Group Purc, Party Summ) on the shared RP_ALL engine; `GET /reports/purchase-report` with CSV/Excel/PDF behind Print; screen at `/reports/purchase-report`; the 17 baselined purchase-report cases pass and are removed from baseline.json. Unit 25, DB 11 pass on an isolated database; the purchase-report module ran locally alone (17 of 17).
+- 2026-11-23: five frozen-case edits, all synchronisation or schema fixes (sidebar wait, F1 wait, formula case uses the pair's delta because the company accumulates vouchers, PR_CODE is two characters, screen-specific role=alert). Open: voucher zoom, Crystal print layouts, session data type filter, UAE/State variants.
+
 ## 2026-11-23 — Contra Entry is the TR_CONTRA voucher with its grid and lifecycle (N246 / G258, WP-31)
 
 - 2026-11-23: row 1 holds the side, later rows are the opposite and read-only; the mirror record carries row 1's description (`TR_CONTRA.cs:1538`, `:1630`, `:2868`); REMARK_DATA is written and deleted; INOUT_TYPE is the book's flag; employee, company type B, year, lock date and totals are refused in the desktop order (`:2668-2694`).

@@ -6,10 +6,10 @@ Order (D31, D32): every Lite menu works end to end like the desktop first, then 
 
 | Tier | Menus | With a feature module | Module with no open defect | Done |
 |---|---:|---:|---:|---:|
-| Lite (first, D32) | 49 | 41 | 39 | 0 |
+| Lite (first, D32) | 49 | 42 | 40 | 0 |
 | Basic (added by Basic) | 29 | 1 | 1 | 0 |
 | Standard (added by Standard) | 36 | 1 | 1 | 0 |
-| **Standard total** | **114** | **43** | **41** | **0** |
+| **Standard total** | **114** | **44** | **42** | **0** |
 
 ## Lite — 49 menus (first, D32)
 
@@ -47,7 +47,7 @@ Order (D31, D32): every Lite menu works end to end like the desktop first, then 
 | Report | Stock Report | `/reports/stock-report` | REPORT | — | no module | — |
 | Report | Tag Stock | `/reports/tag-stock` | REPORT | tag-cancel | module green | — |
 | Report | Sales Report | `/reports/sales-register` | REPORT | — | no module | — |
-| Report | Purchase Rpt | `/reports/purchase-register` | REPORT | — | no module | — |
+| Report | Purchase Rpt | `/reports/purchase-report`, `/reports/purchase-register` | REPORT | purchase-report | module green | — |
 | Report | Approval Rpt | `/reports/approval-report` | REPORT | — | no module | — |
 | Report | Order Report | `/txn/sales-order` | REPORT | sales-order | module green | — |
 | Report | Cash Bank | `/reports/cash-book` | REPORT | — | no module | — |

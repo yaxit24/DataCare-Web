@@ -141,8 +141,10 @@ describe('route policy registry', () => {
     // N242 (WP-27) adds the Sales Return edit PUT /sales-returns/:vchNo: 768 + 1 = 769. [774 on main + 1 here = 775] [787 on main + 1 here = 788]
     // N243 (WP-26) adds the Sales Invoice print-file list and its default: 768 + 2 = 770. [774 on main + 2 here = 776] [788 on main + 2 here = 790]
     // N246 (WP-31) adds the Contra Entry F1 list GET /contra/list: 768 + 1 = 769. [774 on main + 1 here = 775] [790 on main + 1 here = 791]
-    expect(routes).toHaveLength(791);
-    expect(new Set(routes.map((route) => `${route.method} ${route.path}`)).size).toBe(791);
+    // N250 (WP-12) adds the RP_ALL Purchase Rpt GET /reports/purchase-report, its City/Area options and the CSV, XLSX
+    // and PDF exports: 773 + 5 = 778. [791 on main + 5 here = 796]
+    expect(routes).toHaveLength(796);
+    expect(new Set(routes.map((route) => `${route.method} ${route.path}`)).size).toBe(796);
 
     const policies = routes.map((route) => ({
       ...route,

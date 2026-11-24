@@ -1598,7 +1598,7 @@ None. Slice N85 (gap G71) corrected the register to this catalog; `pnpm register
 | Order Report | `RP_ALL` | `/txn/sales-order` | `- - - - - L` | REPORT | P1-core |
 | Party Os | `RP_OS` | `/reports/outstanding` | `- - - - P L` | REPORT | P1-core |
 | Purc Zoom | `RP_SLPR_ZOOM` | `/reports/purchase-register` | `- - - - P L` | REPORT | P1-core |
-| Purchase Rpt | `RP_ALL` | `/reports/purchase-register` | `- - - - P L` | REPORT | P1-core |
+| Purchase Rpt | `RP_ALL` | `/reports/purchase-report`, `/reports/purchase-register` | `- - - - P L` | REPORT | P1-core |
 | Reminder Rpt | `RP_REMINDER` | `/utilities/reminders`, `/txn/reminders` | `- - - - P L` | REPORT | P1-edition |
 | Rojmel | `RP_ROJMEL` | `/reports/rojmel` | `- - - - P L` | REPORT | P1-core |
 | Sale Zoom | `RP_SLPR_ZOOM` | `/reports/sales-register` | `- - - - P L` | REPORT | P1-core |
@@ -1769,11 +1769,11 @@ None. Slice N85 (gap G71) corrected the register to this catalog; `pnpm register
 
 - **Desktop:** `RP_ALL` — constructor caption 'Purchase Rpt' ([MDI_FORM.cs:8911-8920](../../unified/src/csharp/DataCareNext/MDI_FORM.cs#L8911-L8920)).
 - **Does:** Runs purchase register, party, item, bill, group and summary report variants.
-- **Looks:** Shared date/book/party/location/product/group/item filters with purchase report mode buttons.
+- **Looks:** Mode select over the seven RP_ALL purchase buttons (Purc Report, Purc Reg, Item Wise, Purchase Bill, Party Purc, Group Purc, Party Summ); From/To, lc Code, Book, Pr Code, Gr Code, Party, City, Area and Item Type selectors; the template's grouped grid with the voucher totals of the selection; Print, PDF, Excel and CSV; Enter walks the selectors and runs from the last.
 - **Reads:** PR_DATA, PR_DETL, PR_IDTL, AC_MAST, ITEM_MAST, BOOK_DATA.
-- **Web:** `/reports/purchase-register`; `GET /reports/purchase-register`, `GET /reports/purchase-by-party`, `GET /reports/purchase-by-item`. Can: print, list.
-- **Remaining:** A register exists; the RP_ALL purchase variants, the MAIN_BOOK classification remainder, filters and Crystal templates remain.
-- **Owners:** N36, G06, G48, N24, X26, N57, N75, G225, N212.
+- **Web:** `/reports/purchase-report`, `/reports/purchase-register`; `GET /reports/purchase-report`, `GET /reports/purchase-report/options`, `GET /reports/purchase-report/export.csv`, `GET /reports/purchase-report/export.xlsx`, `GET /reports/purchase-report/export.pdf`, `GET /reports/purchase-register`, `GET /reports/purchase-by-party`, `GET /reports/purchase-by-item`. Can: print, list.
+- **Remaining:** Implemented from source (N250, G262): the seven RP_ALL purchase buttons on the shared RP_ALL engine with their templates' groups, sorts and totals, the shared selectors, signed party totals by BOOK_INOUT, CSV/Excel/PDF behind the Print right. Open: voucher zoom, the Crystal print layouts (PurcReport, PurcSumm, PurcItem, PurcBillA4Gst, AcPurcRpt, PurcGroupWise, AcPurcSummRpt), the session data type filter (Ctrl+A/B/C), the UAE and State variants, desktop-runtime comparison; the browser module was run locally for this module only.
+- **Owners:** N36, G06, G48, N24, X26, N57, N75, G225, N212, G262, N250.
 - **Evidence:** [RP_ALL.cs:7946-8140](../../unified/src/csharp/DataCareNext/RP_ALL.cs#L7946-L8140).
 
 ### Reminder Rpt
