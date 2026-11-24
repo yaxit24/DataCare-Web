@@ -1069,6 +1069,112 @@ export const salesOrder = {
     ),
 
     C(
+      'create.rate-cut-fine-in-old-gl',
+      'T06',
+      'mutation',
+      'TR_SALE_ORD.cs:9143 and TR_TOUR_ORD.cs:7313: the saved OLD_GL is MSG2_TOTAL[6,2] (old gold fine) plus MSG2_TOTAL[9,2] (RCUT_FINE). An order with typed old gold and a rate-cut fine saves OLD_GL = old gold + RCUT_FINE; with no old-metal grid rows its edit is blocked (the typed old gold cannot be rebuilt), and the stored order stays as saved',
+      async (ctx) => {
+        const { page } = await ctx.session();
+        await enterOrder(page, { advance: 0 });
+        // The rate cut and the typed old gold are desktop-only boxes (read-only on the web screen), so the request the
+        // screen sends carries them as the desktop's totals grid would: no old-metal rows, old gold fine 2, fine 0.833.
+        await page.route(
+          (url) => url.pathname === '/api/sales-orders',
+          async (route) => {
+            const request = route.request();
+            if (request.method() !== 'POST') return route.fallback();
+            const body = JSON.parse(request.postData() ?? '{}');
+            delete body.oldMetalRows;
+            Object.assign(body, { oldGoldFine: 2, rateCutRate: 6000, rateCutFine: 0.833 });
+            return route.continue({ postData: JSON.stringify(body) });
+          },
+        );
+        const response = await save(page);
+        await page.unroute('**/api/sales-orders');
+        assert.equal(response.status(), 201, await response.text());
+        const vchNo = String((await response.json()).vchNo).padStart(5, '0');
+        const rows = () =>
+          ctx.rows(
+            `SELECT "OLD_GL"::float gl,"RCUT_FINE"::float fine,"RCUT_RATE"::float rate
+               FROM "SL_ORD_DATA" WHERE tenant_id=$1 AND "CO_BOOK"='${BOOK}' AND "VCH_NO"=$2`,
+            vchNo,
+          );
+        const [saved] = await rows();
+        assert.deepEqual(
+          saved,
+          { gl: 2.833, fine: 0.833, rate: 6000 },
+          'OLD_GL = old gold + RCUT_FINE',
+        );
+        // Reopen: typed old gold without old-metal grid rows cannot be rebuilt, so the edit is blocked.
+        await loadOrder(page, vchNo);
+        const reason = page.locator('p.msg.err').first();
+        await reason.waitFor();
+        assert.equal(
+          await page.getByRole('button', { name: 'Update Sales Order', exact: true }).isDisabled(),
+          true,
+        );
+        const [after] = await rows();
+        assert.deepEqual(after, saved, 'the blocked edit left the stored order as saved');
+        return {
+          observation: `order ${vchNo}: OLD_GL ${saved.gl} = 2 + ${saved.fine}; edit blocked: ${(await reason.textContent())?.trim()}`,
+          expected: { oldGl: 2.833, rcutFine: 0.833, editBlocked: true },
+          database: { header: saved, afterReopen: after },
+          downstream: { oldGl: after.gl },
+        };
+      },
+    ),
+
+    C(
+      'edit.rate-cut-only-old-gl-unchanged',
+      'T09',
+      'mutation',
+      'TR_SALE_ORD.cs:9143: with no old gold the saved OLD_GL is RCUT_FINE alone; that is the rate-cut share an edit rebuilds, so such an order reopens and saves unchanged with OLD_GL, RCUT_FINE and RCUT_RATE exactly as before',
+      async (ctx) => {
+        const { page } = await ctx.session();
+        await enterOrder(page, { advance: 0 });
+        await page.route(
+          (url) => url.pathname === '/api/sales-orders',
+          async (route) => {
+            const request = route.request();
+            if (request.method() !== 'POST') return route.fallback();
+            const body = JSON.parse(request.postData() ?? '{}');
+            delete body.oldMetalRows;
+            Object.assign(body, { rateCutRate: 6000, rateCutFine: 0.833 });
+            return route.continue({ postData: JSON.stringify(body) });
+          },
+        );
+        const created = await save(page);
+        await page.unroute('**/api/sales-orders');
+        assert.equal(created.status(), 201, await created.text());
+        const vchNo = String((await created.json()).vchNo).padStart(5, '0');
+        const rows = () =>
+          ctx.rows(
+            `SELECT "OLD_GL"::float gl,"RCUT_FINE"::float fine,"RCUT_RATE"::float rate,"OLD_GL_AMT"::float glamt
+               FROM "SL_ORD_DATA" WHERE tenant_id=$1 AND "CO_BOOK"='${BOOK}' AND "VCH_NO"=$2`,
+            vchNo,
+          );
+        const [saved] = await rows();
+        assert.deepEqual(saved, { gl: 0.833, fine: 0.833, rate: 6000, glamt: 0 });
+        await loadOrder(page, vchNo);
+        assert.equal(await page.locator('p.msg.err').count(), 0, 'the edit is not blocked');
+        const edited = await save(page, 'Update Sales Order');
+        assert.equal(edited.status(), 200, await edited.text());
+        const [after] = await rows();
+        assert.deepEqual(
+          after,
+          saved,
+          'OLD_GL and the rate cut are unchanged by an unchanged save',
+        );
+        return {
+          observation: `order ${vchNo}: OLD_GL ${saved.gl} = RCUT_FINE before and after the unchanged save`,
+          expected: { oldGl: 0.833, rcutFine: 0.833 },
+          database: { before: saved, after },
+          downstream: { oldGl: after.gl },
+        };
+      },
+    ),
+
+    C(
       'create.scheme-tender',
       'T02',
       'mutation',

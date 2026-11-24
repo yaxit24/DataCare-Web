@@ -144,10 +144,9 @@ export async function readWholesaleExtras(
   tenantId: string,
   key: { CO_CODE: string; LC_CODE: string; CO_YEAR: string; CO_BOOK: string; VCH_NO: string },
   tables: readonly string[],
-  withVersion: boolean,
 ): Promise<{
   ksr: { ksrFineDr: number; ksrFineCr: number };
-  version?: string;
+  version: string;
   details: Map<number, Row[]>;
 }> {
   const [kasar]: Array<{ dr: number; cr: number }> = await tx.$queryRawUnsafe(
@@ -160,12 +159,10 @@ export async function readWholesaleExtras(
     key.CO_BOOK,
     key.VCH_NO,
   );
-  const version = withVersion
-    ? versionOf(await writeSetStateTx(tx, tables, wholesaleVersionKey(tenantId, key)))
-    : undefined;
+  const version = versionOf(await writeSetStateTx(tx, tables, wholesaleVersionKey(tenantId, key)));
   return {
     ksr: { ksrFineDr: n(kasar?.dr), ksrFineCr: n(kasar?.cr) },
-    ...(version ? { version } : {}),
+    version,
     details: await readStoredDetails(tx, { tenantId, ...key }),
   };
 }

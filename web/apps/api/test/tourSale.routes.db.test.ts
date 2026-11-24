@@ -166,4 +166,54 @@ const DAY = `${startYear}-06-15`;
     expect(bad.statusCode).toBe(400);
     expect(bad.body).toMatch(/workflow|TOUR SALES|wholesale/i);
   });
+
+  it('N51 (D17): a tour sale edit or delete must carry the version its read returned', async () => {
+    // The tour sale voucher 1 posted earlier in this suite; drop its tag on the edit, as the desktop does.
+    const edit = { ...sale, lines: [], receivedLines: [] };
+    const opened = await req('GET', '/tour-sales/1?coBook=TSL');
+    expect(opened.statusCode, opened.body).toBe(200);
+    expect(opened.json().version).toMatch(/^[0-9a-f]{64}$/);
+    const stale = opened.json().version;
+    // A save without the token is the refusal every versioned route answers.
+    const missing = await req('PUT', '/tour-sales/1', { ...edit, fineRate: 6500 });
+    expect(missing.statusCode, missing.body).toBe(400);
+    expect(missing.json().error).toBe('VoucherVersionValidationError');
+    // One operator saves with the token they read; the save returns the fresh version.
+    const one = await req('PUT', '/tour-sales/1', {
+      ...edit,
+      fineRate: 6500,
+      expectedVersion: stale,
+    });
+    expect(one.statusCode, one.body).toBe(200);
+    expect(one.json().version).toMatch(/^[0-9a-f]{64}$/);
+    // The other operator's stale save is refused with 409 and writes nothing.
+    const two = await req('PUT', '/tour-sales/1', {
+      ...edit,
+      fineRate: 6600,
+      expectedVersion: stale,
+    });
+    expect(two.statusCode, two.body).toBe(409);
+    expect(two.json().error).toBe('voucher-version-conflict');
+    const [stored] = await query<Array<{ rate: number }>>(
+      `SELECT "FINE_RATE"::float8 rate FROM "RATE_CUT_DATA" WHERE tenant_id=$1 AND "CO_BOOK"='TSL'`,
+      tenantId,
+    );
+    expect(Number(stored?.rate)).toBe(6500);
+    // A delete from the stale copy is refused and deletes nothing.
+    const refused = await req('DELETE', `/tour-sales/1?coBook=TSL&expectedVersion=${stale}`);
+    expect(refused.statusCode, refused.body).toBe(409);
+    expect(refused.json().error).toBe('voucher-version-conflict');
+    // With the current version the delete succeeds.
+    const current = await req('GET', '/tour-sales/1?coBook=TSL');
+    const removed = await req(
+      'DELETE',
+      `/tour-sales/1?coBook=TSL&expectedVersion=${current.json().version}`,
+    );
+    expect(removed.statusCode, removed.body).toBe(200);
+    const [gone] = await query<Array<{ n: number }>>(
+      `SELECT count(*)::int n FROM "RATE_CUT_DATA" WHERE tenant_id=$1 AND "CO_BOOK"='TSL'`,
+      tenantId,
+    );
+    expect(gone?.n).toBe(0);
+  });
 });

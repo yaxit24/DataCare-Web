@@ -24,7 +24,19 @@ export interface UseAccountLedger {
   excel: () => void;
   csv: () => void;
   pdf: () => Promise<void>;
+  /** The drill-down fine prints (desktop JmaUdr, Gold, Silver buttons), each a server-built PDF. */
+  finePrint: (kind: FinePrintKind) => Promise<void>;
 }
+
+export type FinePrintKind = 'jama-udhar' | 'gold-fine' | 'silver-fine';
+
+/** The Yes/No layout question the desktop asks before the Gold and Silver prints; Yes picks the Hz layout. */
+export const FINE_PRINT_QUESTION: Partial<Record<FinePrintKind, string>> = {
+  // RP_LEDR.cs:8382 {{Hz Jama Udhar Gold Report}}
+  'gold-fine': 'Hz Jama Udhar Gold Report',
+  // RP_LEDR.cs:9013 {{Hz Jama Udhar Silver Report}}
+  'silver-fine': 'Hz Jama Udhar Silver Report',
+};
 
 const DEFAULTS: LedgerFilters = {
   view: 'summary',
@@ -135,6 +147,31 @@ export function useAccountLedger(): UseAccountLedger {
     if (path) await downloadPdf(path, `account-ledger-${filters.view}`);
   }, [exportPath, filters.view]);
 
+  const finePrint = useCallback(
+    async (kind: FinePrintKind) => {
+      const acCode = result?.account?.acCode;
+      if (!result || result.view !== 'detail' || !acCode) return;
+      setError('');
+      const p = new URLSearchParams({ acCode });
+      const fromDate = result.period.fromDate || filters.fromDate;
+      const toDate = result.period.toDate || filters.toDate;
+      if (fromDate) p.set('fromDate', fromDate);
+      if (toDate) p.set('toDate', toDate);
+      const question = FINE_PRINT_QUESTION[kind];
+      if (question) p.set('hz', window.confirm(question) ? 'Y' : 'N');
+      try {
+        await downloadPdf(
+          `/reports/account-ledger/${kind}/export.pdf?${p}`,
+          `ledger-${kind}-${acCode}`,
+        );
+      } catch (e) {
+        // The server sends the desktop text, e.g. "You Have No Print Rights....." (RP_LEDR.cs:8236).
+        setError(e instanceof ApiError ? e.body?.message || e.body?.error || e.message : 'failed');
+      }
+    },
+    [result, filters.fromDate, filters.toDate],
+  );
+
   return {
     filters,
     setFilters,
@@ -149,5 +186,6 @@ export function useAccountLedger(): UseAccountLedger {
     excel,
     csv,
     pdf,
+    finePrint,
   };
 }

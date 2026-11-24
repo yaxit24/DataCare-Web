@@ -287,6 +287,30 @@ dbDescribe('Tour Order configured-book and complete editor round trip', () => {
     expect(ledger[0].n).toBe(0);
   });
 
+  it('saves OLD_GL as the typed old gold fine plus RCUT_FINE (TR_TOUR_ORD.cs:7313); an unchanged edit keeps it', async () => {
+    await createTourOrder(runtime, input());
+    const column = async () =>
+      (
+        await query(
+          `SELECT "OLD_GL"::float gl,"RCUT_FINE"::float fine FROM "SL_ORD_DATA" WHERE tenant_id=$1 AND "CO_BOOK"='511'`,
+          tenantId,
+        )
+      )[0];
+    expect(await column()).toEqual({ gl: 1.12 + 1.1, fine: 1.1 });
+    const document: any = await getTourOrder(runtime, scope(), '00001');
+    // The reopened order shows the saved column, as the desktop's DISPLAY_DATA does (TR_TOUR_ORD.cs:6823).
+    expect(document.oldGoldFine).toBeCloseTo(1.12 + 1.1, 6);
+    expect(document.rateCutFine).toBeCloseTo(1.1, 6);
+    // A request echoing that column is returning the composed value; the [6,2] cell it means is the column
+    // less the saved RCUT_FINE, so the unchanged edit re-saves the same OLD_GL instead of growing it.
+    await editTourOrder(
+      runtime,
+      { ...document, scope: scope(), expectedVersion: document.version },
+      '00001',
+    );
+    expect(await column()).toEqual({ gl: 1.12 + 1.1, fine: 1.1 });
+  });
+
   it('preserves an imported tag and exact instance through reopen and unchanged edit, and refuses unsupported identity transitions', async () => {
     await createTourOrder(runtime, input());
     await exec(`UPDATE "SL_ORD_DETL" SET "TAG_NO"='IMPORTED-TAG-7' WHERE tenant_id=$1`, tenantId);
@@ -366,7 +390,8 @@ dbDescribe('Tour Order configured-book and complete editor round trip', () => {
       functionDate: '2024-07-22',
       empCode: 'EMP1',
       address3: 'Third road',
-      oldGoldFine: 1.12,
+      // The saved OLD_GL folds RCUT_FINE in (TR_TOUR_ORD.cs:7313): 1.12 + 1.1.
+      oldGoldFine: 2.22,
       lines: [
         {
           designImageId: 'design-00016-side',

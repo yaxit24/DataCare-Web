@@ -145,10 +145,11 @@ describe('route policy registry', () => {
     // and PDF exports: 773 + 5 = 778. [791 on main + 5 here = 796]
     // WP-33 adds the MDI main-window rate labels (GET /daily-rate/labels): 773 + 1 = 774. [796 on main + 1 here = 797]
     // WP-14 adds the RP_ALL Order Report GET /reports/order-report and its CSV/XLSX exports: 771 + 3 = 774. [787 on main + 3 here = 790] [790 on main + 3 here = 793] [797 on main + 3 here = 800]
+    // N255 (WP-20) adds the Ledger Report JmaUdr, Gold and Silver prints with PDF and Excel: 790 + 9 = 799. [800 on main + 9 here = 809]
     // The Sales Report's Select Book panel gets its own book list GET /reports/sales-report/books
-    // (RP_ALL.cs:11421 BookMast), uncapped and session-location-scoped: 800 + 1 = 801.
-    expect(routes).toHaveLength(801);
-    expect(new Set(routes.map((route) => `${route.method} ${route.path}`)).size).toBe(801);
+    // (RP_ALL.cs:11421 BookMast), uncapped and session-location-scoped: 800 + 1 = 801. [809 on main + 1 here = 810]
+    expect(routes).toHaveLength(810);
+    expect(new Set(routes.map((route) => `${route.method} ${route.path}`)).size).toBe(810);
 
     const policies = routes.map((route) => ({
       ...route,

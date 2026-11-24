@@ -191,7 +191,7 @@ run('Rate-cut Sales Order advance is metal, not money', () => {
     (
       await query(
         `SELECT "ADV_AMT"::float adv,"RCUT_AMT"::float rcut,"RCUT_RATE"::float rate,"RCUT_FINE"::float fine,
-                "CASH_AMT"::float cash
+                "CASH_AMT"::float cash,"OLD_GL"::float gl
            FROM "SL_ORD_DATA" WHERE tenant_id=$1 AND "CO_BOOK"='S95' AND "VCH_NO"='00001'`,
         tenantId,
       )
@@ -224,6 +224,10 @@ run('Rate-cut Sales Order advance is metal, not money', () => {
     silver: 0,
     paid: 0,
   };
+  /** MSG2_TOTAL[6,2] (:11345-11364): the grid's old gold fine. */
+  const GRID_GOLD_FINE = round(fineOf(goldValued) + fineOf(goldUnvalued), 3);
+  /** The saved OLD_GL is the [6,2] cell plus MSG2_TOTAL[9,2] (TR_SALE_ORD.cs:9143). */
+  const SAVED_OLD_GL = GRID_GOLD_FINE + RCUT_FINE;
   const sale = (orderRef: Record<string, unknown>) =>
     createSale(
       runtime,
@@ -248,10 +252,67 @@ run('Rate-cut Sales Order advance is metal, not money', () => {
       rate: RATE,
       fine: RCUT_FINE,
       cash: CASH,
+      gl: SAVED_OLD_GL,
     });
     expect(await adjRows()).toEqual([plusRow]);
     expect(await desktopPending()).toEqual({ amt: 0, gold: plusRow.gold });
     expect(await listPendingOrders(runtime, scope)).toEqual([]);
+  });
+
+  it('OLD_GL is the old gold fine plus RCUT_FINE (:9143); a typed rate-cut-only order re-saves it unchanged', async () => {
+    // Without the old-metal grid the typed rate cut is the only metal, so the saved OLD_GL is RCUT_FINE alone.
+    await createSalesOrder(runtime, input({ oldMetalRows: undefined, advanceAmount: 0 }) as any);
+    expect(await header()).toEqual({
+      adv: 0,
+      rcut: 0,
+      rate: RATE,
+      fine: RCUT_FINE,
+      cash: 0,
+      gl: RCUT_FINE,
+    });
+    // The typed rate cut is echoed by an edit, so it is not old metal an edit would zero.
+    const doc = (await getSalesOrder(runtime, scope, 1)) as any;
+    expect(doc.editBlockedReason).toBeUndefined();
+    expect(doc.oldGoldFine).toBeCloseTo(RCUT_FINE, 6);
+    await editSalesOrder(
+      runtime,
+      {
+        ...doc,
+        oldMetalRows: undefined,
+        scope,
+        expectedVersion: doc.version,
+        mainUser: 'clerk',
+      } as any,
+      1,
+    );
+    expect(await header()).toEqual({
+      adv: 0,
+      rcut: 0,
+      rate: RATE,
+      fine: RCUT_FINE,
+      cash: 0,
+      gl: RCUT_FINE,
+    });
+  });
+
+  it('a changed RCUT_FINE moves the saved OLD_GL with it while the request echoes the old OLD_GL (:9143)', async () => {
+    await createSalesOrder(runtime, input({ oldMetalRows: undefined, advanceAmount: 0 }) as any);
+    const doc = (await getSalesOrder(runtime, scope, 1)) as any;
+    const fine = RCUT_FINE + 1;
+    await editSalesOrder(
+      runtime,
+      {
+        ...doc,
+        oldMetalRows: undefined,
+        rateCutFine: fine,
+        dirtyFields: ['rateCutFine'],
+        scope,
+        expectedVersion: doc.version,
+        mainUser: 'clerk',
+      } as any,
+      1,
+    );
+    expect(await header()).toMatchObject({ fine, gl: fine });
   });
 
   it('a sale cannot spend the rate-cut advance as money and leaves the fine on the order', async () => {
@@ -360,6 +421,7 @@ run('Rate-cut Sales Order advance is metal, not money', () => {
       rate: RATE,
       fine: RCUT_FINE,
       cash: CASH,
+      gl: SAVED_OLD_GL,
     });
     expect(await adjRows()).toEqual([plusRow]);
 
@@ -376,7 +438,14 @@ run('Rate-cut Sales Order advance is metal, not money', () => {
       } as any,
       1,
     );
-    expect(await header()).toEqual({ adv: TOTAL, rcut: 0, rate: 0, fine: 0, cash: CASH });
+    expect(await header()).toEqual({
+      adv: TOTAL,
+      rcut: 0,
+      rate: 0,
+      fine: 0,
+      cash: CASH,
+      gl: GRID_GOLD_FINE,
+    });
     expect(await adjRows()).toEqual([{ ...plusRow, amt: TOTAL, gold: fineOf(goldUnvalued) }]);
     expect((await listPendingOrders(runtime, scope)).map((o) => [o.ordNo, o.openAmt])).toEqual([
       ['00001', TOTAL],

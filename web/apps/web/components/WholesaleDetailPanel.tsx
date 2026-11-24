@@ -107,7 +107,15 @@ export function WholesaleDetailPanel({
     if (field === 'netAmt') {
       if (index === visible.length - 1) {
         onChange([...visible, blankDetail()]);
+        // The caret moves to the new row's first cell (:7522), which only exists after React commits, so the
+        // move happens on the next frame. Guard it as useGridKeyboard's focusAfterRender does: when focus has
+        // moved on by the time the frame fires, the move must not steal it back underneath a keystroke that
+        // was already aimed at another control — on the desktop the move is synchronous inside the keydown
+        // (:7518-7531) and cannot land under a later keystroke.
+        const origin = event.currentTarget;
         requestAnimationFrame(() => {
+          const active = document.activeElement;
+          if (active != null && active !== document.body && active !== origin) return;
           const first = table.current?.querySelectorAll<HTMLInputElement>(
             `tr[data-detail-row="${index + 1}"] input`,
           )[0];

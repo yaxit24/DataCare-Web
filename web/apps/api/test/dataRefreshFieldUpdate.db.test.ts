@@ -73,6 +73,55 @@ db('WP-24 Field Update class-a repairs', () => {
     for (const s of preview.samples) expect(s).not.toContain('main group');
   });
 
+  it('repairs NULL defaulters across locations without repairing other-location main groups', async () => {
+    const first = await previewRepair(runtime, 'data-refresh-field-update', scope, 'admin');
+    if (!first.clean)
+      await applyRepair(runtime, 'data-refresh-field-update', scope, {
+        previewHash: first.previewHash,
+        operator: 'admin',
+      });
+
+    // unified/src/csharp/DataCareNext/MS_UPDATE.cs:8608 has no location filter for NULL defaulters;
+    // :7214 limits main-group repairs to the session location (01).
+    expect(scope.lcCode).toBe('01');
+    await withTenant(runtime, tenantId, async (tx: any) => {
+      await tx.$executeRawUnsafe(
+        `UPDATE "AC_MAST" SET "LC_CODE"='02', "AC_MAIN_GR"='Z',
+           "DEFAULTER_AC"=CASE WHEN "AC_CODE"='010001' THEN NULL ELSE 'Y' END
+         WHERE tenant_id=$1 AND "CO_CODE"=$2 AND "AC_CODE" IN ('010001','010002')`,
+        tenantId,
+        scope.coCode,
+      );
+    });
+    const before = await snapshot(tenantId);
+    const otherBefore = await snapshot(other);
+    const preview = await previewRepair(runtime, 'data-refresh-field-update', scope, 'admin');
+    expect(preview.diffs).toEqual([{ table: 'AC_MAST', insert: 0, update: 1, delete: 0 }]);
+    expect(preview.samples).toEqual(['AC_MAST 010001: defaulter blank -> N']);
+    expect(await snapshot(tenantId)).toEqual({ ...before, data_repair_run: expect.any(Array) });
+
+    const applied = await applyRepair(runtime, 'data-refresh-field-update', scope, {
+      previewHash: preview.previewHash,
+      operator: 'admin',
+    });
+    expect(applied.applied).toEqual(preview.diffs);
+    const after = await snapshot(tenantId);
+    const expectedAccounts = before.AC_MAST!.map((raw) => {
+      const row = JSON.parse(raw);
+      if (row.CO_CODE === scope.coCode && row.AC_CODE === '010001') row.DEFAULTER_AC = 'N';
+      return row;
+    });
+    expect(after.AC_MAST!.map((raw) => JSON.parse(raw))).toEqual(expectedAccounts);
+    for (const table of Object.keys(before)) {
+      if (table !== 'AC_MAST' && table !== 'data_repair_run')
+        expect(after[table], `unexpected write in ${table}`).toEqual(before[table]);
+    }
+    expect(await snapshot(other)).toEqual(otherBefore);
+    expect((await previewRepair(runtime, 'data-refresh-field-update', scope, 'admin')).clean).toBe(
+      true,
+    );
+  });
+
   it('previews, applies once in one transaction with an audit row, touches only intended rows', async () => {
     // Bring the tenant to the clean baseline first so the corruption is the only difference.
     const first = await previewRepair(runtime, 'data-refresh-field-update', scope, 'admin');

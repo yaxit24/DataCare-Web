@@ -337,11 +337,13 @@ export function unsupportedOrderEdit(
       : (state[table] ?? []);
   if (blocking.some((table) => rowsOf(table).length)) return blocked;
   // Old metal amounts without grid rows (the desktop's 'T' book types them and opens an URD purchase) cannot be
-  // rebuilt from the grid, so an edit would zero them.
+  // rebuilt from the grid, so an edit would zero them. The typed rate-cut fine is echoed by an edit, and the
+  // saved OLD_GL folds it in (TR_SALE_ORD.cs:9143), so only an OLD_GL that differs from RCUT_FINE blocks. Less
+  // than RCUT_FINE means a row written before OLD_GL included it: its typed old gold cannot be recovered either.
   const header = (state.SL_ORD_DATA?.[0] ?? {}) as Record<string, unknown>;
-  const metal = ['OLD_GL', 'OLD_GL_AMT', 'OLD_SL', 'OLD_SL_AMT'].some((c) =>
-    Number(header[c] ?? 0),
-  );
+  const metal =
+    Math.round((Number(header.OLD_GL ?? 0) - Number(header.RCUT_FINE ?? 0)) * 1000) !== 0 ||
+    ['OLD_GL_AMT', 'OLD_SL', 'OLD_SL_AMT'].some((c) => Number(header[c] ?? 0));
   if (salesOrder && metal && !state.SL_PR_DETL?.length) return blocked;
   return undefined;
 }
