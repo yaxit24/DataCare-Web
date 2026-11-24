@@ -414,6 +414,10 @@ d('wholesale sale / rate cut: stock movement and desktop ledger legs (X16)', () 
     await runtime.$disconnect();
   });
 
+  /** The version token a Wh Sales edit or delete must send (N51). */
+  const versionOf = async (vchNo: number): Promise<string> =>
+    ((await getWholesaleSale(runtime, WH, vchNo)) as any).version;
+
   it('V1 034/4 — tags sold by number move out of stock with their identity, and post leg 23 alone', async () => {
     const created = await postWholesaleSale(runtime, {
       ...base(WH),
@@ -683,7 +687,12 @@ d('wholesale sale / rate cut: stock movement and desktop ledger legs (X16)', () 
     const before = await head('034', '00001');
     await editWholesaleSale(
       runtime,
-      { ...base(WH), mainUser: 'other-user', lines: [{ tagNo: 'LRG00002' }] },
+      {
+        ...base(WH),
+        mainUser: 'other-user',
+        lines: [{ tagNo: 'LRG00002' }],
+        expectedVersion: await versionOf(1),
+      },
       1,
     );
     expect(await available('LRG00001')).toBe(true);
@@ -701,7 +710,12 @@ d('wholesale sale / rate cut: stock movement and desktop ledger legs (X16)', () 
       { n: 0 },
     ]);
 
-    await deleteWholesaleSale(runtime, { scope: WH, vchNo: 1, deleteUser: 'deleter' });
+    await deleteWholesaleSale(runtime, {
+      scope: WH,
+      vchNo: 1,
+      deleteUser: 'deleter',
+      expectedVersion: await versionOf(1),
+    });
     expect(await available('LRG00002')).toBe(true);
     expect(await stock('034', '00001')).toEqual([]);
     const audit = await rows(
@@ -743,7 +757,11 @@ d('wholesale sale / rate cut: stock movement and desktop ledger legs (X16)', () 
          FROM "RATE_CUT_ISU" WHERE tenant_id=$1`,
     );
     expect(line).toEqual({ id: 7, DESIGN_NO: 'D-7', ITM_SIZE: '5', PR_CODE: 'LR', gwt: 8 });
-    await deleteWholesaleSale(runtime, { scope: WH, vchNo: 1 });
+    await deleteWholesaleSale(runtime, {
+      scope: WH,
+      vchNo: 1,
+      expectedVersion: await versionOf(1),
+    });
     expect(
       await rows(
         `SELECT "TAG_NO","VCH_SRNO"::float8 AS id,"ITM_GWT"::float8 AS gwt,"ITM_NWT"::float8 AS nwt,
@@ -1262,6 +1280,7 @@ d('wholesale sale / rate cut: stock movement and desktop ledger legs (X16)', () 
         ...base(WH),
         lines: reopened.lines.map(back),
         receivedLines: reopened.receivedLines.map(back),
+        expectedVersion: reopened.version,
       },
       created.vchNo,
     );

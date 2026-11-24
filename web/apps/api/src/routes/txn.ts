@@ -1,3 +1,5 @@
+import { saleResidualInput } from '../modules/sales/saleResiduals.js';
+import { chooseSaleTemplate } from '../modules/sales/salePrintChoice.js';
 import { SessionReadSnapshotError } from '../modules/auth/sessionContextReadSnapshot.js';
 import { isTransactionTimeout, withTxBudget } from '../modules/shared/txBudget.js';
 import {
@@ -37,12 +39,6 @@ import {
   parityContainmentProblem,
   type ParityContainmentOperation,
 } from '@datacare/core/containment';
-import {
-  createSaleReturn,
-  deleteSaleReturn,
-  getSaleReturn,
-  saleForReturn,
-} from '../modules/sales/salesReturn.js';
 import {
   getSavedSaleReturnIncoming,
   listSavedSaleReturnIncoming,
@@ -147,15 +143,6 @@ import {
   listOpenConsignmentPurchaseReceipts,
 } from '../modules/purchase/purchase.js';
 import {
-  createPurchaseReturn,
-  purchaseReturnInputFromBody,
-} from '../modules/purchase/purchaseReturn.js';
-import {
-  deletePurchaseReturn,
-  editPurchaseReturn,
-  getPurchaseReturn,
-} from '../modules/purchase/purchaseReturnLifecycle.js';
-import {
   postReceipt,
   postPayment,
   editPayment,
@@ -235,9 +222,13 @@ import {
 } from '../modules/integrations/scaleProtocol.js';
 import { registerTagPrintScreenRoutes } from './tagPrintScreen.js';
 import { registerVoucherNavigationRoutes } from './voucherNavigation.js';
-import { postContra, deleteContra, getContra, editContra } from '../modules/finance/contra.js';
+import { getContra } from '../modules/finance/contra.js';
+import { registerContraRoutes } from './contra.js';
 import { registerSaleVoucherRoutes } from './saleVoucher.js';
+import { registerSaleReturnVoucherRoutes } from './saleReturnVoucher.js';
+import { getSaleReturn } from '../modules/sales/salesReturn.js';
 import { registerPurchaseVoucherRoutes } from './purchaseVoucher.js';
+import { registerPurchaseReturnRoutes } from './purchaseReturn.js';
 import { registerPartyOpeningRoutes } from './partyOpening.js';
 import { registerFineJvRoutes } from './fineJv.js';
 import { registerOrderCancelRoutes } from './orderCancel.js';
@@ -680,6 +671,13 @@ import { dhrnLoanReport } from '../modules/reports/dhrnLoanReports.js';
 import { gstLauncherReport } from '../modules/reports/gstLauncherReport.js';
 import { registerGstReportRoutes } from './gstReport.js';
 import { registerRpAllReportRoutes } from './rpAllReport.js';
+import { registerStockReportRoutes } from './stockReport.js';
+import { registerPurchaseReportRoutes } from './purchaseReport.js';
+import {
+  approvalReport as rpAllApprovalReport,
+  RpAllRequestError,
+} from '../modules/reports/rpAll/index.js';
+import { exportTable } from '../modules/reports/rpAll/exportRows.js';
 import {
   approvalReport,
   bullionReport,
@@ -1090,6 +1088,7 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
   registerVoucherNavigationRoutes(app, extraRouteHelpers);
   registerPartyOpeningRoutes(app, extraRouteHelpers, formMutationCapabilities);
   registerFineJvRoutes(app, extraRouteHelpers);
+  registerContraRoutes(app, extraRouteHelpers);
   registerOrderCancelRoutes(app, extraRouteHelpers);
   registerBalanceTransferRoutes(app, extraRouteHelpers);
   registerDailyRateRoutes(app, { ...extraRouteHelpers, formMutationCapabilities });
@@ -1194,6 +1193,10 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
     settleCrAmt: b.settleCrAmt,
     settleDrFine: b.settleDrFine,
     settleCrFine: b.settleCrFine,
+    // Wh Sales (WP-30): fine kasar and the version token of an edit.
+    ksrFineDr: b.ksrFineDr,
+    ksrFineCr: b.ksrFineCr,
+    expectedVersion: b.expectedVersion,
     // Party contact snapshot (RATE_CUT_DATA carries its own copy, as the desktop form does).
     add1: b.add1,
     add2: b.add2,
@@ -1398,6 +1401,7 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
     issueBook: b.issueBook,
     description: b.description,
     ornamentIssued: b.ornamentIssued == null ? undefined : !!b.ornamentIssued,
+    ...saleResidualInput(b), // WP-26: UPI, credit-note and order rows, member commission
   });
   app.post('/sales', auth, async (req, reply) => {
     if (!guard(req, reply, 'create')) return;
@@ -1409,19 +1413,31 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
   // G125 (Stage E): the retail Tax Invoice print (desktop SaleBillA4Gst.rpt). Every sale needs a
   // printable bill; builds the shared GST-bill HTML and renders it to PDF (or returns raw HTML).
   app.get('/sales/:vchNo/print', auth, async (req, reply) => {
-    if (!guard(req, reply, 'view')) return;
+    if (!guard(req, reply, 'print')) return; // TR_SALE.cs:16437-16439 print right
     const q = req.query as any;
     const copyLabel = standardDocumentCopy(q.copy, reply);
     if (copyLabel === null) return reply;
     const scope = resolvePrintScope(reply, readScope(req), (req.params as any).vchNo);
     if (!scope) return reply;
     await getSale(prisma, scope, scope.vchNo);
-    const data = await salesBillData(prisma, scope);
+    // WP-26 (D6): HUID box, then book 099, then the chosen PRINT_MAST file, each mapped to a web template.
+    const choice = chooseSaleTemplate({
+      huid: q.huid === '1' || q.huid === 'true',
+      coBook: scope.coBook,
+      file: q.file,
+    });
+    const data = await salesBillData(prisma, scope, { balances: choice.passBalances });
     if (!data) return reply.code(404).send({ error: 'sale-not-found' });
+    reply.header(
+      'X-Print-Template',
+      `${choice.template}; file=${choice.file}${choice.isDefault ? '; default' : ''}`,
+    );
     const html = salesBillHtml(data.header, data.lines, {
       company: data.company,
       party: data.party,
       copy: copyLabel,
+      title: choice.title,
+      balances: data.balances,
     });
     return sendVoucherDocument(reply, html, { format: q.format, filename: `sale-${scope.vchNo}` });
   });
@@ -1809,63 +1825,8 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
       };
     });
   });
-  app.post('/sales-returns', auth, async (req, reply) => {
-    if (!guard(req, reply, 'create')) return;
-    const b = body(req);
-    return run(reply, 201, () =>
-      createSaleReturn(
-        prisma,
-        {
-          scope: scopeOf(req),
-          acCode: b.acCode,
-          acName: b.acName,
-          billNo: b.billNo,
-          origVchNo: b.origVchNo,
-          origBook: b.origBook,
-          vchDate: b.vchDate,
-          discountAmount: b.discountAmount,
-          taxRatePct: b.taxRatePct,
-          taxCode: b.taxCode,
-          interState: !!b.interState,
-          cashAmt: b.cashAmt != null ? Number(b.cashAmt) : undefined,
-          chequeAmt: b.chequeAmt != null ? Number(b.chequeAmt) : undefined,
-          cardAmt: b.cardAmt != null ? Number(b.cardAmt) : undefined,
-          upiAmt: b.upiAmt != null ? Number(b.upiAmt) : undefined,
-          kasar: b.kasar != null ? Number(b.kasar) : undefined,
-          cashAc: b.cashAc,
-          bankAc: b.bankAc,
-          kasarAc: b.kasarAc,
-          mainUser: sess(req).sub, // N183 (G194): TR_SALE_RTN.cs:9966 stores MCo_User
-        },
-        b.lines ?? [],
-      ),
-    );
-  });
-  // G05: the original SALE book is the request's validated book. The page sends it as `coBook`; this
-  // route used to ignore that and read `qs.book ?? 'SAL'`, so every import came from a book named SAL.
-  app.get('/sales-returns/import', auth, async (req, reply) => {
-    const qs = (req.query as any) || {};
-    const scope = scopeOf(req);
-    if (!scope.coBook) {
-      return reply.code(400).send({
-        error: 'SaleValidationError',
-        message: 'Select the book of the original sale before importing it.',
-      });
-    }
-    return run(reply, 200, () =>
-      saleForReturn(prisma, { scope, origVchNo: qs.vchNo, origBook: scope.coBook }),
-    );
-  });
-  app.delete('/sales-returns/:vchNo', auth, async (req, reply) => {
-    if (!guard(req, reply, 'delete')) return;
-    return run(reply, 200, () =>
-      deleteSaleReturn(prisma, {
-        scope: scopeOf(req),
-        vchNo: (req.params as any).vchNo,
-        deleteUser: sess(req).sub,
-      }),
-    );
-  });
+  // POST/import/GET/PUT/DELETE /sales-returns live in routes/saleReturnVoucher.ts (WP-27 adds the edit).
+  registerSaleReturnVoucherRoutes(app, extraRouteHelpers);
 
   // ---- Sales order ----
   // Retained authenticated request context, never body/query authority or a later cookie.
@@ -2502,6 +2463,9 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
     hmAmount: b.hmAmount != null ? Number(b.hmAmount) : undefined,
     hmChargeAc: b.hmChargeAc,
     hmTaxPct: b.hmTaxPct != null ? Number(b.hmTaxPct) : undefined,
+    hmTaxCode: b.hmTaxCode,
+    empCode: b.empCode,
+    vchDesc: b.vchDesc,
     cashAmt: b.cashAmt != null ? Number(b.cashAmt) : undefined,
     chequeAmt: b.chequeAmt != null ? Number(b.chequeAmt) : undefined,
     cardAmt: b.cardAmt != null ? Number(b.cardAmt) : undefined,
@@ -2703,61 +2667,8 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
   app.delete('/other-income/:vchNo', auth, otherIncome.remove);
   app.get('/other-income/:vchNo/print', auth, otherIncome.print);
 
-  // ---- Purchase return ----
-  // No JSON Schema yet: no route in this file has one until decision D16 is accepted (N50).
-  app.post('/purchase-returns', auth, async (req, reply) => {
-    if (!guard(req, reply, 'create')) return;
-    const b = body(req);
-    const input = purchaseReturnInputFromBody(scopeOf(req), sess(req).sub, b);
-    return run(reply, 201, () => createPurchaseReturn(prisma, input, b.lines ?? []));
-  });
-  app.put('/purchase-returns/:vchNo', auth, async (req, reply) => {
-    if (!guard(req, reply, 'update')) return;
-    const b = body(req);
-    const input = purchaseReturnInputFromBody(scopeOf(req), sess(req).sub, b);
-    return run(reply, 200, () =>
-      editPurchaseReturn(prisma, input, b.lines ?? [], (req.params as any).vchNo),
-    );
-  });
-  app.get('/purchase-returns/:vchNo', auth, async (req, reply) => {
-    if (!guard(req, reply, 'view')) return;
-    return run(reply, 200, () =>
-      getPurchaseReturn(prisma, scopeOf(req), (req.params as any).vchNo),
-    );
-  });
-  app.get('/purchase-returns/:vchNo/print', auth, async (req, reply) => {
-    if (!guard(req, reply, 'view')) return;
-    const q = req.query as any;
-    const copyLabel = standardDocumentCopy(q.copy, reply);
-    if (copyLabel === null) return reply;
-    const scope = resolvePrintScope(reply, readScope(req), (req.params as any).vchNo);
-    if (!scope) return reply;
-    await getPurchaseReturn(prisma, scope, scope.vchNo);
-    const data = await purchaseBillData(prisma, scope);
-    if (!data) return reply.code(404).send({ error: 'purchase-return-not-found' });
-    const html = purchaseBillHtml(data.header, data.lines, {
-      company: data.company,
-      party: data.party,
-      copy: copyLabel,
-      title: 'Purchase Return',
-      partyCaption: 'Supplier',
-      footerText: 'Purchase return — goods and value returned to supplier.',
-    });
-    return sendVoucherDocument(reply, html, {
-      format: q.format,
-      filename: `purchase-return-${scope.vchNo}`,
-    });
-  });
-  app.delete('/purchase-returns/:vchNo', auth, async (req, reply) => {
-    if (!guard(req, reply, 'delete')) return;
-    return run(reply, 200, () =>
-      deletePurchaseReturn(prisma, {
-        scope: scopeOf(req),
-        vchNo: (req.params as any).vchNo,
-        deleteUser: sess(req).sub,
-      }),
-    );
-  });
+  // ---- Purchase return: routes/purchaseReturn.ts (N245) ----
+  registerPurchaseReturnRoutes(app, extraRouteHelpers);
 
   // ---- Finance (receipt / payment / contra) ----
   const receiptInput = (req: FastifyRequest, b: Record<string, any>) => ({
@@ -2808,19 +2719,6 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
     if (!guard(req, reply, 'update')) return;
     return run(reply, 200, () =>
       editPayment(prisma, paymentInput(req, body(req)), (req.params as any).vchNo),
-    );
-  });
-  app.post('/contra', auth, async (req, reply) => {
-    if (!guard(req, reply, 'create')) return;
-    const b = body(req);
-    return run(reply, 201, () =>
-      postContra(prisma, {
-        scope: scopeOf(req),
-        lines: Array.isArray(b.lines) ? b.lines : [], // the desktop grid (TR_CONTRA)
-        vchDate: b.vchDate,
-        itDesc: b.itDesc,
-        mainUser: sess(req).sub,
-      }),
     );
   });
   app.get('/finance/cheque-print', auth, async (req, reply) => {
@@ -4257,6 +4155,38 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
   const isReportFamilySlug = (slug: ReportSlug): slug is keyof typeof REPORT_FAMILY_BUILDERS =>
     Object.prototype.hasOwnProperty.call(REPORT_FAMILY_BUILDERS, slug);
   /**
+   * WP-13: Report → Approval Rpt runs on the shared RP_ALL engine (rpAll/index.ts). The screen and every
+   * export (CSV, XLSX, PDF) are built from that one result and flattened exactly like the Sales Report export
+   * (rpAll/exportRows.ts: rows in report order, each printed band subtotal as its own line, the grand total
+   * last), so an export can never show figures the screen does not (AprPartyWise / AprInOut / AprPan,
+   * RP_ALL.cs:8199, 8274, 8349). The band lines already carry the totals, so no separate totals row is added.
+   */
+  const runApprovalReport = (req: FastifyRequest) => {
+    const s = readScope(req);
+    return rpAllApprovalReport(
+      prisma,
+      {
+        tenantId: s.tenantId,
+        coCode: s.coCode,
+        lcCode: s.lcCode ?? '',
+        coYear: s.coYear ?? '',
+        fromDate: s.fromDate,
+        toDate: s.toDate,
+        filters: s.filters,
+      },
+      (req.query ?? {}) as Record<string, unknown>,
+    );
+  };
+  const resolveApprovalReport = async (req: FastifyRequest) => {
+    const result = await runApprovalReport(req);
+    const table = exportTable(result);
+    const rows = table.lines.map((line) =>
+      Object.fromEntries(table.columns.map((c) => [c.caption, line[c.key] ?? ''])),
+    );
+    return { rows, totals: undefined, result: { title: result.title, rows } };
+  };
+
+  /**
    * Resolve a report to its rows and totals. Shared by the XLSX and CSV exports so the two cannot
    * disagree about what a report contains, and so the filter handling below (which the shared builder
    * signature cannot express) is applied identically to both formats.
@@ -4270,6 +4200,7 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
     /** The builder's own result, as the report screen receives it. */
     result: unknown;
   }> => {
+    if (slug === 'approval-report') return resolveApprovalReport(req);
     const build = REPORT_BUILDERS[slug]!;
     const scope = readScope(req);
     const q = (req.query ?? {}) as Record<string, string | undefined>;
@@ -4481,7 +4412,15 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
   // one path. Registered here (not with the other plugins above) because it needs `sendReportPdf`.
   registerAccountLedgerRoutes(app, { prisma, auth, guard, readScope, sendReportPdf });
   registerRpAllReportRoutes(app, { prisma, auth, guard, readScope }); // WP-11 Sales Report (RP_ALL)
+  registerPurchaseReportRoutes(app, {
+    prisma,
+    auth,
+    guard,
+    readScope,
+    pdfRenderer: deps.pdfRenderer,
+  }); // WP-12 Purchase Rpt (RP_ALL)
   registerTagStockRoutes(app, { prisma, auth, guard, scopeOf });
+  registerStockReportRoutes(app, { prisma, auth, guard, readScope }); // WP-16 Stock Report (RP_STOCK)
 
   // Screens for five reports registered only in REPORT_BUILDERS (exports worked, screens 404'd —
   // PARITY-EVALUATION-2026-09-28 D3). Each calls the export's own builder with its own inputs (so the
@@ -5186,6 +5125,7 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
       saveTagAdjust(prisma, {
         scope: scopeOf(req),
         vchNo: (req.params as any).vchNo,
+        expectedVersion: b.expectedVersion,
         vchDate: b.vchDate,
         book: b.book,
         acCode: b.acCode,
@@ -6107,8 +6047,15 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
     );
   });
   app.get('/reports/approval-report', auth, async (req, reply) => {
-    const q = (req.query ?? {}) as Record<string, string | undefined>;
-    return run(reply, 200, () => approvalReport(prisma, readScope(req), { mode: q.mode }));
+    try {
+      return reply.send(await runApprovalReport(req));
+    } catch (error) {
+      if (error instanceof RpAllRequestError)
+        return reply
+          .code(error.statusCode)
+          .send({ error: error.code, message: error.message, ...error.details });
+      throw error;
+    }
   });
   app.get('/reports/vp-report', auth, async (req, reply) => {
     const q = (req.query ?? {}) as Record<string, string | undefined>;
@@ -7075,6 +7022,7 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
         vchNo: (req.params as any).vchNo,
         book: body(req).book,
         deleteUser: sess(req).sub,
+        expectedVersion: (req.query as any)?.expectedVersion,
       }),
     );
   });
@@ -7232,16 +7180,8 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
       filename: `journal-${scope.vchNo}`,
     });
   });
-  /**
-   * Contra deletion. `deleteContra` (finance.ts) reads the full CONTRA_DATA detail via editIdentityTx
-   * extraColumns so the DELETE_DATA audit carries the voucher's own amounts (not zeros). REOPENING (F2.1):
-   * the GET /:vchNo routes expose get* lifecycle functions, each `(prisma, scope, voucherNo)`.
-   */
-  app.get('/contra/:vchNo', auth, async (req, reply) => {
-    if (!guard(req, reply, 'view')) return;
-    return run(reply, 200, () => getContra(prisma, scopeOf(req), (req.params as any).vchNo));
-  });
-  // G128 (Stage E): the contra voucher print (bank<->cash transfer, desktop ContraVch.rpt).
+  // G128 (Stage E): the contra voucher print; every grid leg and the voucher total (WP-31, G23). The layout of the
+  // desktop ContraBill.rpt is not read yet (study Open question 4).
   app.get('/contra/:vchNo/print', auth, async (req, reply) => {
     if (!guard(req, reply, 'print')) return;
     const q = req.query as any;
@@ -7257,25 +7197,6 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
       format: q.format,
       filename: `contra-${scope.vchNo}`,
     });
-  });
-  app.put('/contra/:vchNo', auth, async (req, reply) => {
-    if (!guard(req, reply, 'update')) return;
-    const b = body(req);
-    return run(reply, 200, () =>
-      editContra(
-        prisma,
-        {
-          scope: scopeOf(req),
-          lines: Array.isArray(b.lines) ? b.lines : [], // the desktop grid (TR_CONTRA)
-          vchDate: b.vchDate,
-          itDesc: b.itDesc,
-          empCode: b.empCode,
-          itemType: b.itemType,
-          mainUser: sess(req).sub,
-        },
-        (req.params as any).vchNo,
-      ),
-    );
   });
   app.get('/receipts/:vchNo', auth, async (req, reply) => {
     if (!guard(req, reply, 'view')) return;
@@ -7304,10 +7225,6 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
   app.get('/labour-invoice/:vchNo', auth, async (req, reply) => {
     if (!guard(req, reply, 'view')) return;
     return run(reply, 200, () => getLabourInvoice(prisma, scopeOf(req), (req.params as any).vchNo));
-  });
-  app.get('/sales-returns/:vchNo', auth, async (req, reply) => {
-    if (!guard(req, reply, 'view')) return;
-    return run(reply, 200, () => getSaleReturn(prisma, scopeOf(req), (req.params as any).vchNo));
   });
   // G127 (Stage E): the sales-return Credit Note print (desktop SaleRtnBillA4Gst.rpt). Reads SL_DATA +
   // SL_DETL_RTN via saleReturnBill and renders the shared GST-bill chrome, marked as a credit note.
@@ -7379,17 +7296,6 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
         (req.params as any).vchNo,
         book ? String(book) : undefined,
       ),
-    );
-  });
-  app.delete('/contra/:vchNo', auth, async (req, reply) => {
-    if (!guard(req, reply, 'delete')) return;
-    return run(reply, 200, () =>
-      deleteContra(prisma, {
-        scope: scopeOf(req),
-        vchNo: (req.params as any).vchNo,
-        deleteUser: sess(req).sub,
-        book: body(req).book,
-      }),
     );
   });
   // Ledger adjustment (desktop TR_LEDR_ADJ → LDR_ADJ_DATA + balanced AC_DATA).

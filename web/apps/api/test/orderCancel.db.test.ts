@@ -891,6 +891,8 @@ describe.runIf(RUN)('Order Cancel voucher (TR_SL_ORD_ADJ)', () => {
           await adjustOrderIntoSaleTx(tx, TENANT, salesScope, {
             saleVchNo: '00011',
             ordNo: '00007',
+            ordYear: av.ordYear,
+            ordBook: av.ordBook,
             custAc: CUST_A,
             adjustAmt: take,
             vchDate: new Date('2024-05-03'),

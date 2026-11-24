@@ -16,6 +16,7 @@ import {
   tagState,
 } from './approvalHelpers.mjs';
 import { rollbackMatrix } from '../faults.mjs';
+import { salesInvoiceResidualCases } from './salesInvoiceResiduals.mjs';
 
 /**
  * Feature: Sales → Sales Invoice (desktop TR_SALE, opened by MDI_FORM.cs:7918-7919 CurBookHelp("SALES")).
@@ -255,6 +256,12 @@ export const salesInvoice = {
     'web/apps/api/src/modules/sales/approvalSaleReferences.ts',
     'web/apps/api/src/routes/txn.ts',
     'web/apps/web/test/features/modules/salesInvoice.mjs',
+    'web/apps/web/test/features/modules/salesInvoiceResiduals.mjs',
+    'web/apps/web/components/SaleResidualPanel.tsx',
+    'web/apps/web/lib/saleResidual.ts',
+    'web/apps/api/src/modules/sales/saleResiduals.ts',
+    'web/apps/api/src/modules/sales/saleRead.ts',
+    'web/apps/api/src/modules/sales/salePrintChoice.ts',
     'web/apps/web/test/features/faults.mjs',
     'web/apps/web/test/features/fixtures/catalogue.mjs',
   ],
@@ -1008,18 +1015,6 @@ export const salesInvoice = {
       },
     ),
 
-    {
-      ...C(
-        'refusal.negative-weight',
-        'T06',
-        'refusal',
-        'TR_SALE item grid: no numeric validation found; TR_SALE_KeyPress (14870-14883) only uppercases and drops NUL/apostrophe',
-        async () => ({}),
-      ),
-      blocked:
-        'Expected behaviour undecided: no desktop source refuses a negative weight, and the web saves it. Needs an original-Windows run to decide refuse vs accept.',
-    },
-
     C(
       'lookup.lower-case-code',
       'T04',
@@ -1425,17 +1420,19 @@ export const salesInvoice = {
       },
     ),
 
-    {
-      id: 'sales-invoice.config.setting-change',
-      group: 'T15',
-      kind: 'mutation',
-      source:
-        'Playbook T15: change SL_AMT_TYPE between preview and save; reopen a historic document',
-      applicable: true,
-      requiredEvidence: ['browser', 'expected', 'database', 'downstream'],
-      blocked: 'Settings-variant fixture pack (SL_AMT_TYPE=F company) not yet in the catalogue.',
-      run: async () => ({}),
-    },
+    // WP-26 (N243, G255): residual cases, including the two formerly blocked ones (decisions D3, D4).
+    ...salesInvoiceResidualCases({
+      C,
+      BOOK,
+      LINE_A,
+      openSales,
+      pickParty,
+      fillLine,
+      save,
+      loadVoucher,
+      field,
+      cell,
+    }),
   ],
 };
 

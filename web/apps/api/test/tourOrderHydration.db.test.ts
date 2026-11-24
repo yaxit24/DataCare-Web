@@ -227,6 +227,66 @@ dbDescribe('Tour Order configured-book and complete editor round trip', () => {
     return result;
   }
 
+  it('a rate-cut Tour Order saved before the ADV_AMT / RCUT_AMT split reopens and re-saves its real advance', async () => {
+    // Legacy web shape: the advance in ADV_AMT, the typed rate-cut amount in RCUT_AMT (not the advance).
+    const ADVANCE = input().advanceAmount;
+    const TYPED = input().rateCutAmount;
+    const advanceRows = async () => ({
+      ledger: await query(
+        `SELECT sum("DR_AMT")::float dr, sum("CR_AMT")::float cr FROM "AC_DATA" WHERE tenant_id=$1 AND "CO_BOOK"='511'`,
+        tenantId,
+      ),
+      dayBook: await query(
+        `SELECT sum("DR_AMT")::float dr, sum("CR_AMT")::float cr FROM "ROJ_MEL_DATA" WHERE tenant_id=$1 AND "CO_BOOK"='511'`,
+        tenantId,
+      ),
+    });
+    await createTourOrder(runtime, input());
+    const posted = await advanceRows();
+    expect(posted.ledger[0].dr).toBe(ADVANCE);
+    await exec(
+      `UPDATE "SL_ORD_DATA" SET "ADV_AMT"=$2,"RCUT_AMT"=$3 WHERE tenant_id=$1 AND "CO_BOOK"='511'`,
+      tenantId,
+      ADVANCE,
+      TYPED,
+    );
+    let document: any = await getTourOrder(runtime, scope(), '00001');
+    expect(document.advanceAmount).toBe(ADVANCE);
+    await editTourOrder(
+      runtime,
+      { ...document, scope: scope(), expectedVersion: document.version },
+      '00001',
+    );
+    expect(await advanceRows()).toEqual(posted);
+    const [header] = await query(
+      `SELECT "ADV_AMT"::float adv,"RCUT_AMT"::float rcut FROM "SL_ORD_DATA" WHERE tenant_id=$1 AND "CO_BOOK"='511'`,
+      tenantId,
+    );
+    expect(header).toEqual({ adv: 0, rcut: ADVANCE });
+  });
+
+  it('a legacy rate-cut Tour Order with no advance does not turn its typed rate-cut amount into money', async () => {
+    const TYPED = input().rateCutAmount;
+    await createTourOrder(runtime, { ...input(), advanceAmount: 0 });
+    await exec(
+      `UPDATE "SL_ORD_DATA" SET "ADV_AMT"=0,"RCUT_AMT"=$2 WHERE tenant_id=$1 AND "CO_BOOK"='511'`,
+      tenantId,
+      TYPED,
+    );
+    const document: any = await getTourOrder(runtime, scope(), '00001');
+    expect(document.advanceAmount).toBe(0);
+    await editTourOrder(
+      runtime,
+      { ...document, scope: scope(), expectedVersion: document.version },
+      '00001',
+    );
+    const ledger = await query(
+      `SELECT count(*)::int n FROM "AC_DATA" WHERE tenant_id=$1 AND "CO_BOOK"='511'`,
+      tenantId,
+    );
+    expect(ledger[0].n).toBe(0);
+  });
+
   it('preserves an imported tag and exact instance through reopen and unchanged edit, and refuses unsupported identity transitions', async () => {
     await createTourOrder(runtime, input());
     await exec(`UPDATE "SL_ORD_DETL" SET "TAG_NO"='IMPORTED-TAG-7' WHERE tenant_id=$1`, tenantId);
@@ -759,9 +819,13 @@ dbDescribe('Tour Order configured-book and complete editor round trip', () => {
       expect(await listTourOrders(runtime, current)).toEqual([]);
     }
     expect((await getTourOrder(runtime, scope(), '00001')).version).toBe(allocated.version);
-    expect(await query(`SELECT "ORD_DBCD" FROM "SL_ORD_ADJ" WHERE tenant_id=$1`, tenantId)).toEqual(
-      [{ ORD_DBCD: '511' }],
-    );
+    // The settlement row is untouched. (The blocked order keeps its own '+' advance row, TR_TOUR_ORD.cs:7560-7600.)
+    expect(
+      await query(
+        `SELECT "ORD_DBCD" FROM "SL_ORD_ADJ" WHERE tenant_id=$1 AND "CO_BOOK"='ADJ'`,
+        tenantId,
+      ),
+    ).toEqual([{ ORD_DBCD: '511' }]);
   });
 
   it('treats missing legacy allocation dimensions conservatively but respects an explicit different source dimension', async () => {
@@ -789,7 +853,10 @@ dbDescribe('Tour Order configured-book and complete editor round trip', () => {
     ).rejects.toThrow('already been');
     expect(await businessSnapshot()).toEqual(before);
     // Missing branch/year cannot turn a known other book into a match for this order.
-    await exec(`UPDATE "SL_ORD_ADJ" SET "ORD_DBCD"='Z09' WHERE tenant_id=$1`, tenantId);
+    await exec(
+      `UPDATE "SL_ORD_ADJ" SET "ORD_DBCD"='Z09' WHERE tenant_id=$1 AND "CO_BOOK"='ADJ'`,
+      tenantId,
+    );
     await editTourOrder(
       runtime,
       { ...document, scope: scope(), expectedVersion: document.version },

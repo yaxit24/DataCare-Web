@@ -36,7 +36,7 @@ import {
 import { schemePassbookData } from '../src/modules/scheme/passbook.js';
 import type { VoucherScope } from '../src/modules/vouchers/numbering.js';
 import { footprintOf, ledgerLegs, voucherTables } from './support/footprint.js';
-import { fineFor } from '@datacare/core';
+import { fineFor, round } from '@datacare/core';
 
 const RUN = process.env.RUN_DB_INTEGRITY_TESTS === '1';
 const databaseDescribe = RUN ? describe : describe.skip;
@@ -143,6 +143,9 @@ databaseDescribe('database-backed sales-family voucher lifecycles', () => {
 
   const cleanup = async (): Promise<void> => {
     for (const table of [
+      // An edit writes the USER_DATA field audit (TR_SALE_RTN.cs:13541, WP-27); left behind, it shows up in the
+      // next test's footprint under the same voucher number.
+      'USER_DATA',
       'DELETE_DATA',
       'REMARK_DATA',
       'DM_DATA',
@@ -1564,7 +1567,7 @@ databaseDescribe('database-backed sales-family voucher lifecycles', () => {
               "CITY","MOBILE","UPI_AMT"::float upi,"OLD_GL"::float old_gl,
               "OLD_GL_AMT"::float old_gl_amt,"OLD_SL"::float old_sl,"OLD_SL_AMT"::float old_sl_amt,
               "SCHM_AMT"::float schm,"RCUT_RATE"::float rc_rate,"RCUT_FINE"::float rc_fine,
-              "RCUT_AMT"::float rc_amt,"ADJ_GOLD"::float adj_gold,"ADJ_SILVER"::float adj_silver,
+              "RCUT_AMT"::float rc_amt,"ADV_AMT"::float adv,"ADJ_GOLD"::float adj_gold,"ADJ_SILVER"::float adj_silver,
               "ORD_ADJ_AMT"::float ord_adj,"DEL_DATE"::text del_date,"FUN_DATE"::text fun_date
          FROM "SL_ORD_DATA" WHERE tenant_id=$1 AND "VCH_NO"=$2`,
       TENANT,
@@ -1591,7 +1594,10 @@ databaseDescribe('database-backed sales-family voucher lifecycles', () => {
     expect(h.schm).toBeCloseTo(1_000, 2);
     expect(h.rc_rate).toBeCloseTo(6_400, 2);
     expect(h.rc_fine).toBeCloseTo(2.5, 2);
-    expect(h.rc_amt).toBeCloseTo(16_000, 2);
+    // TR_SALE_ORD.cs:9124-9133: with a rate-cut rate the tender total MSG2_TOTAL[9,3] (:11368) is RCUT_AMT and
+    // ADV_AMT is 0; the typed rate-cut amount is not stored. Tenders here: cash 100, UPI 250.5, scheme 1,000.
+    expect(h.rc_amt).toBeCloseTo(round(100 + 250.5 + 1_000, 2), 2);
+    expect(h.adv).toBe(0);
     expect(h.adj_gold).toBeCloseTo(1.75, 2);
     expect(h.adj_silver).toBeCloseTo(4.5, 2);
     expect(h.ord_adj).toBeCloseTo(500, 2);
@@ -1866,6 +1872,8 @@ databaseDescribe('database-backed sales-family voucher lifecycles', () => {
       'AC_DATA',
       // The day book. Added when the order projection was implemented from the real book-020 rows.
       'ROJ_MEL_DATA',
+      // The order's own '+' advance row (TR_SALE_ORD.cs:9475-9516).
+      'SL_ORD_ADJ',
       'SL_ORD_DATA',
       'SL_ORD_DETL',
       // The fixture's line carries a stone sub-detail, so the order writes SL_ORD_IDTL too. Pinned

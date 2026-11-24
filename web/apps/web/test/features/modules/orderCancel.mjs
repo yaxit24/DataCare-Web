@@ -685,6 +685,67 @@ export const orderCancel = {
       },
     ),
     C(
+      'refusal.rate-cut-advance-is-metal',
+      'T06',
+      'refusal',
+      'A rate-cut order (RCUT_RATE <> 0) files its tender total as RCUT_AMT with ADV_AMT 0 (TR_SALE_ORD.cs:9124-9133) and its + row has ORD_AMT 0 and the fine in ORD_GOLD (:9504, :9509). The OrdNo help reads ADV_AMT and keeps SUM(+ ORD_AMT) - SUM(other ORD_AMT) > 0 (:2499-2526), so the order is never offered; a request that names it is refused and writes nothing. Also an order whose rate-cut total still sits in ADV_AMT (saved before the split).',
+      async (ctx) => {
+        const { page } = await ctx.session();
+        const ordNo = await createOrder(page, { advance: 600 });
+        assert.ok(
+          (await pendingOf(page)).some((o) => o.ordNo === ordNo),
+          'pending as money first',
+        );
+        // The rate is not entered on the web screen (it is read-only there); a desktop rate-cut order is stored so.
+        const year = await yearOf(ctx);
+        await ctx.rows(
+          `UPDATE "SL_ORD_DATA" SET "RCUT_RATE"=6000,"RCUT_FINE"=0.1,"RCUT_AMT"="ADV_AMT","ADV_AMT"=0
+            WHERE tenant_id=$1 AND "CO_BOOK"=$2 AND "VCH_NO"=$3 RETURNING 1`,
+          ORDER_BOOK,
+          ordNo,
+        );
+        await ctx.rows(
+          `UPDATE "SL_ORD_ADJ" SET "ORD_AMT"=0,"ORD_GOLD"=0.1
+            WHERE tenant_id=$1 AND "CO_BOOK"=$2 AND "VCH_NO"=$3 AND "ORD_SIGN"='+' RETURNING 1`,
+          ORDER_BOOK,
+          ordNo,
+        );
+        assert.equal(
+          (await pendingOf(page)).find((o) => o.ordNo === ordNo),
+          undefined,
+          'a rate-cut order is not offered',
+        );
+        const before = await counts(ctx);
+        const ask = () =>
+          browserFetch(page, 'POST', '/api/order-cancel', {
+            coBook: BOOK,
+            vchDate: todayLocal(),
+            rows: [{ ordNo, ordYear: year, ordBook: ORDER_BOOK, adjAmt: 600, kasarAmt: 0 }],
+          });
+        const answer = await ask();
+        assert.equal(answer.status, 400, answer.body);
+        assert.match(JSON.parse(answer.body).message, /only 0\.00 open advance is left/);
+        // A web order saved before the split kept the rate-cut total in ADV_AMT: still no money to refund.
+        await ctx.rows(
+          `UPDATE "SL_ORD_DATA" SET "ADV_AMT"=600 WHERE tenant_id=$1 AND "CO_BOOK"=$2 AND "VCH_NO"=$3 RETURNING 1`,
+          ORDER_BOOK,
+          ordNo,
+        );
+        assert.equal(
+          (await pendingOf(page)).find((o) => o.ordNo === ordNo),
+          undefined,
+        );
+        const legacy = await ask();
+        assert.equal(legacy.status, 400, legacy.body);
+        assert.deepEqual(await counts(ctx), before);
+        return {
+          observation: `rate-cut order ${ordNo} not offered; cancel answered ${answer.status} "${JSON.parse(answer.body).message}"; legacy ADV_AMT shape answered ${legacy.status}`,
+          expected: 'not offered, refused, no write',
+          database: { before, after: await counts(ctx) },
+        };
+      },
+    ),
+    C(
       'create.write-set',
       'T07',
       'mutation',

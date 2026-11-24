@@ -23,7 +23,15 @@ import { rollbackMatrix } from '../faults.mjs';
  */
 const BOOK = 'SOR';
 /** Measured on the first run: one saved order with an advance changes exactly these tables. */
-const ORDER_WRITE_SET = ['AC_DATA', 'ROJ_MEL_DATA', 'SL_ORD_DATA', 'SL_ORD_DETL', 'TEMP_BOOK_DATA'];
+// An order with an advance also writes its own '+' SL_ORD_ADJ row (TR_SALE_ORD.cs:9475-9516).
+const ORDER_WRITE_SET = [
+  'AC_DATA',
+  'ROJ_MEL_DATA',
+  'SL_ORD_ADJ',
+  'SL_ORD_DATA',
+  'SL_ORD_DETL',
+  'TEMP_BOOK_DATA',
+];
 const CASH = 'CASH';
 const as = (user, slot) => ({
   user,
@@ -1684,8 +1692,10 @@ export const salesOrder = {
           `SELECT "TOT_AMT"::float tot,"BILL_OS"::float os,"ADV_AMT"::float adv FROM "SL_DATA" WHERE tenant_id=$1 AND "CO_BOOK"='SL' AND "VCH_NO"=$2`,
           sale,
         );
+        // The sale's adjustment row in the desktop shape (TR_SALE.cs:15715-15718): ORD_SIGN '-', ORD_AMT = the
+        // amount adjusted, PAID_AMT 0.
         const adj = await ctx.rows(
-          `SELECT "PAID_AMT"::float paid FROM "SL_ORD_ADJ" WHERE tenant_id=$1 AND "ORD_NO"=$2`,
+          `SELECT "ORD_SIGN" sign,"ORD_AMT"::float amt,"PAID_AMT"::float paid FROM "SL_ORD_ADJ" WHERE tenant_id=$1 AND "ORD_NO"=$2 ORDER BY "ORD_SIGN"='-'`,
           order,
         );
         const party1 = await balance(ctx, PARTIES.local.code);
@@ -1695,9 +1705,13 @@ export const salesOrder = {
           round2(s.tot - ADVANCE),
           `customer moved by ${party1 - party0}`,
         );
+        // The order's '+' advance row (TR_SALE_ORD.cs:9503) and the sale's '-' use of it (TR_SALE.cs:15712-15725).
         assert.deepEqual(
-          adj.map((a) => a.paid),
-          [ADVANCE],
+          adj.map((a) => [a.sign, a.amt, a.paid]),
+          [
+            ['+', ADVANCE, 0],
+            ['-', ADVANCE, 0],
+          ],
         );
         return {
           observation: `order ${order} + sale ${sale}: total ${s.tot}, outstanding ${s.os}, customer Δ ${round2(party1 - party0)}`,
@@ -1721,9 +1735,97 @@ export const salesOrder = {
             `SELECT "VCH_NO","TOT_AMT"::float tot,"BILL_OS"::float os,"ADV_AMT"::float adv FROM "SL_DATA" WHERE tenant_id=$1 AND "CO_BOOK"='SL' ORDER BY "VCH_NO" DESC LIMIT 1`,
           ),
           adjustments: await ctx.rows(
-            `SELECT "ORD_NO","PAID_AMT"::float paid FROM "SL_ORD_ADJ" WHERE tenant_id=$1 ORDER BY row_id DESC LIMIT 2`,
+            `SELECT "ORD_NO","ORD_SIGN","ORD_AMT"::float amt,"PAID_AMT"::float paid FROM "SL_ORD_ADJ" WHERE tenant_id=$1 ORDER BY row_id DESC LIMIT 2`,
           ),
         }),
+      },
+    ),
+
+    C(
+      'refusal.rate-cut-advance-not-money',
+      'T06',
+      'refusal',
+      'TR_SALE_ORD.cs:9124-9133, :9504: a rate-cut order files its tender total as RCUT_AMT with ADV_AMT 0 and its + row carries ORD_AMT 0 (the fine is in ORD_GOLD). The sale order help reads ADV_AMT and keeps SUM(+ ORD_AMT) - SUM(other) > 0 (TR_SALE.cs:7299), so a sale cannot adjust that advance as money: the save is refused and the order keeps only its + row',
+      async (ctx) => {
+        const { page } = await ctx.session();
+        const order = await createOrder(ctx, page, { advance: ADVANCE });
+        // The rate is read-only on the web screen; a desktop rate-cut order is stored so (:9124-9133, :9504, :9509).
+        await ctx.rows(
+          `UPDATE "SL_ORD_DATA" SET "RCUT_RATE"=6000,"RCUT_FINE"=0.833,"RCUT_AMT"="ADV_AMT","ADV_AMT"=0
+            WHERE tenant_id=$1 AND "CO_BOOK"=$2 AND "VCH_NO"=$3 RETURNING 1`,
+          BOOK,
+          order,
+        );
+        await ctx.rows(
+          `UPDATE "SL_ORD_ADJ" SET "ORD_AMT"=0,"ORD_GOLD"=0.833
+            WHERE tenant_id=$1 AND "CO_BOOK"=$2 AND "VCH_NO"=$3 AND "ORD_SIGN"='+' RETURNING 1`,
+          BOOK,
+          order,
+        );
+        await page.goto('/txn/sales');
+        await page.getByRole('heading', { name: 'Sales Invoice', exact: true }).waitFor();
+        const book = page.getByRole('combobox', { name: 'Configured book', exact: true }).first();
+        for (let i = 0; i < 50 && !(await book.inputValue()); i++) await page.waitForTimeout(100);
+        const customer = page.getByPlaceholder('search accounts… (F1)').first();
+        await customer.fill(PARTIES.local.code);
+        await customer
+          .locator('xpath=..')
+          .getByText(PARTIES.local.code, { exact: true })
+          .first()
+          .waitFor();
+        await customer.press('Enter');
+        const grid = page
+          .locator('table', { has: page.locator('th', { hasText: 'Making/g' }) })
+          .first();
+        const cell = (n) =>
+          grid.locator('tbody tr').nth(0).locator(`td:nth-child(${n}) input`).first();
+        await cell(1).fill(LINE_W.item);
+        await cell(1).press('Escape');
+        for (const [n, v] of [
+          [3, LINE_W.pcs],
+          [4, LINE_W.gross],
+          [5, LINE_W.net],
+          [6, LINE_W.touch],
+          [7, LINE_W.rate],
+          [8, LINE_W.labour],
+        ])
+          await cell(n).fill(v);
+        const orderField = (label) =>
+          page
+            .locator('.field', { has: page.locator('label', { hasText: label }) })
+            .locator('input')
+            .first();
+        await orderField('Ord No (advance)').fill(String(Number(order)));
+        await orderField('Order Amt').fill(String(ADVANCE));
+        const sales0 = await ctx.rows(
+          `SELECT count(*)::int n FROM "SL_DATA" WHERE tenant_id=$1 AND "CO_BOOK"='SL'`,
+        );
+        const [sold] = await Promise.all([
+          page.waitForResponse(
+            (r) => new URL(r.url()).pathname === '/api/sales' && r.request().method() === 'POST',
+          ),
+          page.getByRole('button', { name: 'Save Invoice', exact: true }).click(),
+        ]);
+        const body = await sold.text();
+        assert.equal(sold.status(), 409, body);
+        assert.match(body, /0\.00 advance open/);
+        const sales1 = await ctx.rows(
+          `SELECT count(*)::int n FROM "SL_DATA" WHERE tenant_id=$1 AND "CO_BOOK"='SL'`,
+        );
+        const adj = await ctx.rows(
+          `SELECT "ORD_SIGN" sign,"ORD_AMT"::float amt,"ORD_GOLD"::float gold FROM "SL_ORD_ADJ" WHERE tenant_id=$1 AND "ORD_NO"=$2`,
+          order,
+        );
+        assert.equal(sales1[0].n, sales0[0].n, 'no sale written');
+        assert.deepEqual(
+          adj.map((a) => [a.sign, a.amt, a.gold]),
+          [['+', 0, 0.833]],
+        );
+        return {
+          observation: `rate-cut order ${order}: sale adjusting ${ADVANCE} answered ${sold.status()} "${body}"`,
+          expected: 'refused (409), no sale, order keeps only its + row',
+          database: { adjustments: adj, sales: [sales0[0].n, sales1[0].n] },
+        };
       },
     ),
 

@@ -31,7 +31,7 @@ const displayOwners: Record<string, number> = {
   'app/(app)/reports/voucher-register/page.tsx': 1,
   'app/(app)/txn/bank-recon/page.tsx': 2,
   'app/(app)/txn/consi-purchase/page.tsx': 1,
-  'app/(app)/txn/daily-rate/page.tsx': 3,
+  'app/(app)/txn/daily-rate/page.tsx': 2,
   'app/(app)/txn/e-crnt-note/page.tsx': 1,
   'app/(app)/txn/e-invoice/page.tsx': 1,
   'app/(app)/txn/reminders/page.tsx': 1,

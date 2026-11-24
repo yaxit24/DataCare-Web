@@ -311,6 +311,29 @@ d('bullion sale workflow over RATE_CUT_DATA', () => {
     expect(await stockRows()).toEqual([]);
   }, 30_000);
 
+  // WP-10 F2: a PUT edits a saved voucher only; an unused number is a 404, not a create at the typed number.
+  it('refuses an edit of an unused bullion sale number and writes nothing', async () => {
+    await expect(
+      editBullionSale(
+        prisma,
+        {
+          scope: saleScope,
+          vchDate: '2024-06-11',
+          acCode: 'CUST',
+          lines: [{ itCode: 'GOLD', grossWt: 1, netWt: 1, touch: 100, rate: 7000 }],
+        } as any,
+        '00500',
+      ),
+    ).rejects.toMatchObject({ code: 'voucher-not-found', statusCode: 404 });
+    const rows = (await withTenant(prisma, tenantId, (tx: any) =>
+      tx.$queryRawUnsafe(
+        `SELECT count(*)::int AS n FROM "RATE_CUT_DATA" WHERE tenant_id=$1 AND "VCH_NO"='00500'`,
+        tenantId,
+      ),
+    )) as Array<{ n: number }>;
+    expect(rows[0]?.n).toBe(0);
+  });
+
   it('keeps bullion sale books out of the generic rate-cut workflow', async () => {
     await expect(
       postRateCut(prisma, {
