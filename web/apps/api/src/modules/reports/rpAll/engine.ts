@@ -178,7 +178,8 @@ export function runLayout(layout: RpAllLayout, records: readonly RpAllRecord[]):
       // AprPan.xml:936 suppresses the tag footer when Sum ({@PanPcs}, {@Group}) = 0.
       const suppressed = level.footerSuppressedWhen?.(band.records) ?? false;
       band.group.subtotal = suppressed ? 'none' : level.subtotal;
-      if (band.group.subtotal !== 'none') band.group.totals = countOnceTotals(layout, band.records, level.totalKeys);
+      if (band.group.subtotal !== 'none')
+        band.group.totals = countOnceTotals(layout, band.records, level.totalKeys);
       band.group.rowCount = band.records.length;
     }
   };
