@@ -12,6 +12,7 @@ import {
 } from './salesOrderOldMetal.js';
 import { orderSchemeOf, resolveSchemeAccountTx, withSchemeRojmel } from './salesOrderScheme.js';
 import { SaleValidationError } from './sales.js';
+import { isOrderRateCutLedgerRow } from './salesOrderRateCutPosting.js';
 
 /**
  * N197 (G206): the Sales Order's money tenders, as TR_SALE_ORD stores them and Order_Ledr posts them.
@@ -136,7 +137,8 @@ export function orderTenderView(
   },
   salesOrder: boolean,
 ) {
-  const ledger = saved.AC_DATA;
+  // The rate-cut leg (key 11, Ac_Ledr.cs:53) debits the party; it is neither a tender leg nor a cash account.
+  const ledger = saved.AC_DATA.filter((row) => !isOrderRateCutLedgerRow(row));
   const tendered =
     salesOrder &&
     !!(
@@ -302,7 +304,7 @@ export function advanceColumnOf(
     : 'ADV_AMT';
 }
 
-/** The header's tender columns (`TR_SALE_ORD.cs:9131-9150`); the Tour Order writes ADV_AMT alone, as before. */
+/** The header's tender columns (`TR_SALE_ORD.cs:9131-9150`); the Tour Order writes ADV_AMT alone (see tourCashColumn). */
 export function orderTenderColumns(tender: OrderTender, salesOrder = true, rateCutRate = 0) {
   if (!salesOrder)
     return { ...orderAdvanceColumns(tender, rateCutRate), UPI_AMT: tender.upiColumn };
@@ -313,6 +315,31 @@ export function orderTenderColumns(tender: OrderTender, salesOrder = true, rateC
     UPI_AMT: tender.upiColumn,
     ...orderAdvanceColumns(tender, rateCutRate),
   };
+}
+
+export const TOUR_CASH_BELOW_ZERO =
+  "The advance cannot be less than the order's saved cheque, card, old metal and scheme tenders.";
+
+/**
+ * The Tour Order's CASH_AMT, the cash tender alone (`TR_TOUR_ORD.cs:7309`, read back at `:6814`). The desktop's advance
+ * MSG2_TOTAL[9,3] is cash + scheme + cheque + card + old gold + old silver (`:9375`), and the web Tour editor shows
+ * and edits only that total. So:
+ * - a new order's advance is its cash;
+ * - an edit that keeps the reopened advance keeps the saved CASH_AMT exactly (the column is left to the saved row);
+ * - an edit that changes it moves the cash tender by the difference, leaving the other saved tenders as they were.
+ * The rate-cut rows read CASH_AMT (`Ac_Ledr.cs:53`, `Ac_Rojmel.cs:23`), so it must never take the whole advance.
+ */
+export function tourCashColumn(
+  tender: OrderTender,
+  previous: Record<string, unknown> | undefined,
+  previousAdvance: number | undefined,
+): { CASH_AMT?: number } {
+  if (!previous || previousAdvance === undefined) return { CASH_AMT: tender.cash };
+  const change = round(tender.cash - previousAdvance, 2);
+  if (!change) return {};
+  const cash = round(num(previous.CASH_AMT) + change, 2);
+  if (cash < 0) throw new SaleValidationError(TOUR_CASH_BELOW_ZERO);
+  return { CASH_AMT: cash };
 }
 
 /** Order_Ledr's tender legs (`Ac_Ledr.cs:28-47`, `:55-57`), balanced, with the desktop leg types. */
@@ -505,10 +532,9 @@ export function assertUpiRowsSent(saved: readonly unknown[], input: { upiRows?: 
  * advance, which is the same account the desktop names in LD_CODE. Type 01 credits ADV_AMT, 02 debits the cheque's
  * bank, 03 the card (Ac_Rojmel.cs:11-16), 04/06 each old metal row (:17-21), 05 the scheme (:19, salesOrderScheme.ts)
  * and 08 each UPI row (:25).
- * Not written yet, pending an owner decision: on a rate-cut order the desktop posts no type 01 (it reads ADV_AMT, which
- * is 0, :11) and instead type 07 (:23) and ledger key 11 (Ac_Ledr.cs:53): party Dr the tender total less UPI against
- * the literal 00008, IT_TYPE 'G', SIGN '+', FINE_WT RCUT_FINE, with no money counter-leg. The web keeps type 01 for the
- * tender total and its balanced ledger; the advance is still never spent as money (orderCancel.ts MONEY_ADVANCE_SQL).
+ * On a rate-cut order the writer then drops type 01 (it reads ADV_AMT, which is 0, :11) and adds type 07 (:23), and
+ * the ledger gets the one-sided key 11 (Ac_Ledr.cs:53): see salesOrderRateCutPosting.ts. The advance is still never
+ * spent as money (orderCancel.ts MONEY_ADVANCE_SQL).
  */
 export function orderRojmelRows(
   context: RojmelContext,

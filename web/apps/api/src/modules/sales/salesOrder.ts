@@ -33,6 +33,7 @@ import { SaleValidationError } from './sales.js';
 import * as pricing from './salesOrderPricing.js';
 import * as tenders from './salesOrderTender.js';
 import * as oldMetal from './salesOrderOldMetal.js';
+import * as rateCut from './salesOrderRateCutPosting.js';
 export { orderTenderRequest } from './salesOrderTender.js';
 import { fineWt } from '../shared/fine.js';
 import { resolveSalesOrderDesignTx } from './orderDesignSelection.js';
@@ -271,6 +272,8 @@ type ResolvedOrderBook = {
   bookName: string;
   vchType: string;
   inoutType: string;
+  /** BOOK_DATA.DATA_TYPE, copied onto the rate-cut rows (Ac_Ledr.cs:53, Ac_Rojmel.cs:23). */
+  dataType: string;
 };
 
 const ORDER_BOOK_MODES: Record<OrderMainBook, OrderBookMode> = {
@@ -312,7 +315,7 @@ async function resolveOrderBookTx(
   completeOrderScope(scope);
   const coBook = scope.coBook;
   const rows: any[] = await tx.$queryRawUnsafe(
-    `SELECT "CO_BOOK","BOOK_NAME","BOOK_SNAME","BOOK_INOUT","MAIN_BOOK","BOOK_TBL_NAME"
+    `SELECT "CO_BOOK","BOOK_NAME","BOOK_SNAME","BOOK_INOUT","MAIN_BOOK","BOOK_TBL_NAME","DATA_TYPE"
        FROM "BOOK_DATA"
       WHERE tenant_id=$1 AND "CO_CODE"=$2 AND "LC_CODE"=$3 AND "CO_BOOK"=$4
         AND coalesce(nullif(btrim("CUR_USE"::text),''),'Y') <> 'N'
@@ -346,6 +349,8 @@ async function resolveOrderBookTx(
     bookName: text(row.BOOK_NAME) || mode.mainBook,
     vchType: text(row.BOOK_SNAME) || mode.defaultVchType,
     inoutType: text(row.BOOK_INOUT) || mode.defaultInoutType,
+    // The posting layer writes 'A' for an unset DATA_TYPE on every other order row; the desktop's books carry 'A'.
+    dataType: text(row.DATA_TYPE) || 'A',
   };
 }
 
@@ -750,6 +755,8 @@ type OrderWriteContext = {
   previousLines?: Record<string, any>[];
   previousHeader?: Record<string, any>;
   previousComponents?: Record<string, any>[];
+  /** The advance the saved order reopens with (its ADV_AMT or RCUT_AMT, `orderTenderView`). */
+  previousAdvance?: number;
 };
 
 /** Existing internal compatibility entry; optional lifecycle remains replacement-only. */
@@ -1008,6 +1015,9 @@ function prepareSalesOrderCreate(input: SalesOrderInput, lifecycle?: OrderWriteC
         TAX_AMT: totals.tax,
         TOT_AMT: totals.total,
         ...tenders.orderTenderColumns(tender, salesOrderForm, N(input.rateCutRate)),
+        ...(salesOrderForm
+          ? {}
+          : tenders.tourCashColumn(tender, lifecycle?.previousHeader, lifecycle?.previousAdvance)),
         VCH_TIME: vchDate,
         ENTRY_TIME:
           lifecycle?.previousHeader && !headerDirty.has('VCH_TIME') && !headerDirty.has('VCH_DATE')
@@ -1224,36 +1234,49 @@ function prepareSalesOrderCreate(input: SalesOrderInput, lifecycle?: OrderWriteC
         );
       });
     });
-    const ledger: LedgerLine[] = tenders.orderTenderLedger(
-      key,
-      book.vchType,
-      { code: input.acCode, name: input.acName, billNo: header.BILL_NO as string },
-      cashAc,
-      tender,
-      salesOrderForm,
-      book.inoutType,
-    );
+    const ledger: LedgerLine[] = [
+      ...tenders.orderTenderLedger(
+        key,
+        book.vchType,
+        { code: input.acCode, name: input.acName, billNo: header.BILL_NO as string },
+        cashAc,
+        tender,
+        salesOrderForm,
+        book.inoutType,
+      ),
+      // Ac_Ledr.cs:53: the rate-cut leg, one-sided as on the desktop (see salesOrderRateCutPosting.ts).
+      ...rateCut.orderRateCutLedger(key, header, book),
+    ];
 
     // The Rojmel (day book), Ac_Rojmel.Order_Rojmel: see orderRojmelRows.
-    const rojmelRows = tenders.orderRojmelRows(
-      {
-        scope: {
-          coCode: input.scope.coCode,
-          lcCode: input.scope.lcCode,
-          coYear: input.scope.coYear!,
-        },
-        key,
-        coBook: key.CO_BOOK,
-        vchNo: key.VCH_NO,
-        vchDate,
-        vchType: book.vchType,
-        bookName: book.mainBook,
-        partyName: input.acName ?? '',
-        partyCode: input.acCode,
+    const rojmelContext = {
+      scope: {
+        coCode: input.scope.coCode,
+        lcCode: input.scope.lcCode,
+        coYear: input.scope.coYear!,
       },
-      cashAc,
-      adv,
-      tender,
+      key,
+      coBook: key.CO_BOOK,
+      vchNo: key.VCH_NO,
+    };
+    // Ac_Rojmel.cs:11 and :23: type 01 only when ADV_AMT is not 0, type 07 when RCUT_FINE is not 0.
+    const rojmelRows = rateCut.withOrderRateCutRojmel(
+      tenders.orderRojmelRows(
+        {
+          ...rojmelContext,
+          vchDate,
+          vchType: book.vchType,
+          bookName: book.mainBook,
+          partyName: input.acName ?? '',
+          partyCode: input.acCode,
+        },
+        cashAc,
+        adv,
+        tender,
+      ),
+      rojmelContext,
+      header,
+      book,
     );
     await insertRowTx(tx, 'TEMP_BOOK_DATA', tenantId, {
       CO_CODE: scoped.coCode,
@@ -1732,6 +1755,11 @@ async function runSalesOrderEditTx(
       previousLines: state.SL_ORD_DETL,
       previousComponents: state.SL_ORD_IDTL,
       previousHeader: state.SL_ORD_DATA[0],
+      previousAdvance: tenders.orderTenderView(
+        state.SL_ORD_DATA[0],
+        state,
+        input.orderMainBook !== 'TOUR ORDER',
+      ).fields.advanceAmount,
     },
   );
 }
