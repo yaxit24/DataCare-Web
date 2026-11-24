@@ -58,7 +58,8 @@ type Cookie = string;
       query<any[]>(
         `SELECT "IT_CODE" code,"IT_NAME" name,"IT_TYPE" type,"TAG_TYPE" tag,"TRAD_TYPE" trade,"PR_CODE" pr,"GR_CODE" gr,
               "SAFE_NAME" safe,"HSN_CODE" hsn,"UNIT_NAME" unit,"RATE_TYPE" rate,"MIN_STK" minstk,"MAIN_USER" main,
-              "STK_DISPLAY" stk,"DATA_TRFR" trfr,"TAG_IDTL_COL" tagcol,"OTH_DETL_POSTING" othpost,"OTH_ITM_WT_REMOVE" wtremove
+              "STK_DISPLAY" stk,"DATA_TRFR" trfr,"TAG_IDTL_COL" tagcol,"OTH_DETL_POSTING" othpost,"OTH_ITM_WT_REMOVE" wtremove,
+              "TAX_FREE_ITEM" taxfree,"APP_ITEM" app,"EMP_COM_PRC" empcom,"AC_MEMB_COM_PRC" membcom
          FROM "ITEM_MAST" WHERE tenant_id=$1 ORDER BY "IT_CODE"`,
         tenantId,
       );
@@ -199,6 +200,11 @@ type Cookie = string;
         tagcol: 'N',
         othpost: 'N',
         wtremove: 'N',
+        // MS_AUTO_ITEM.cs:2904 EMP_COM_PRC 0, :2912 TAX_FREE_ITEM N; APP_ITEM and AC_MEMB_COM_PRC take the column defaults.
+        taxfree: 'N',
+        app: 'N',
+        empcom: 0,
+        membcom: 0,
       };
       expect(rows).toEqual([
         { ...base, code: 'BGG22', name: 'BANGLE G22', pr: 'BG', minstk: 5, main: '' },

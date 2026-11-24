@@ -55,6 +55,8 @@
         "web/apps/web/app/(app)/reports/purchase-report/PurchaseReportGrid.tsx",
         "web/apps/web/app/(app)/reports/purchase-report/types.ts",
         "web/apps/api/src/modules/reports/purchaseReport.ts",
+        "web/apps/api/src/modules/reports/rpAll/purchaseLayouts.ts",
+        "web/apps/api/src/modules/reports/rpAll/purchaseQuery.ts",
         "web/apps/api/src/routes/purchaseReport.ts",
         "web/apps/web/app/(app)/reports/[report]/page.tsx",
         "web/apps/api/src/modules/reports/reports.ts",
@@ -138,6 +140,10 @@
       "covers": [
         "web/apps/web/app/(app)/txn/contra/page.tsx",
         "web/apps/api/src/modules/finance/contra.ts",
+        "web/apps/api/src/modules/finance/contraClearing.ts",
+        "web/apps/api/src/modules/finance/contraList.ts",
+        "web/apps/api/src/modules/finance/contraVoucher.ts",
+        "web/apps/api/src/routes/contra.ts",
         "web/apps/api/src/modules/finance/lifecycle.ts",
         "web/apps/api/src/modules/vouchers/list.ts"
       ]
@@ -216,6 +222,7 @@
         "web/apps/web/app/(app)/txn/daily-rate/page.tsx",
         "web/apps/api/src/modules/masters/dailyRate.ts",
         "web/apps/api/src/routes/dailyRate.ts",
+        "web/apps/web/components/DailyRateLabels.tsx",
         "web/packages/core/src/dailyRate.ts"
       ]
     },
@@ -308,6 +315,12 @@
         "web/apps/api/src/modules/sales/wholesaleSaveChecks.ts",
         "web/apps/api/src/modules/sales/wholesaleSaleBill.ts",
         "web/apps/api/src/modules/sales/wholesaleTagStones.ts",
+        "web/apps/api/src/modules/sales/wholesaleDetailRows.ts",
+        "web/apps/api/src/modules/sales/wholesaleResiduals.ts",
+        "web/apps/api/src/modules/sales/rateCutMasters.ts",
+        "web/apps/api/src/modules/shared/rojmelWholesale.ts",
+        "web/apps/web/components/WholesaleDetailPanel.tsx",
+        "web/packages/core/src/wholesaleDetail.ts",
         "web/apps/api/src/modules/sales/rateCutBookingDrawDown.ts",
         "web/apps/web/components/VoucherNumberKeys.tsx",
         "web/apps/web/components/VoucherList.tsx",
@@ -372,6 +385,7 @@
       "covers": [
         "web/apps/web/app/(app)/txn/tag-print/page.tsx",
         "web/apps/api/src/modules/stock/tagPrintScreen.ts",
+        "web/apps/api/src/modules/stock/tagPrint.ts",
         "web/apps/api/src/routes/tagPrintScreen.ts"
       ]
     },

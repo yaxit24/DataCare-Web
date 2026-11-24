@@ -1,4 +1,5 @@
 import { routeAvailability, type EditionPolicy } from '@datacare/core';
+import { LITE_NAV } from './liteMenus';
 import type { NavGroup, NavItem } from './nav';
 
 /**
@@ -7,7 +8,8 @@ import type { NavGroup, NavItem } from './nav';
  * The desktop builds its menus from the `MENU_DATA` rows of its edition (`MDI_FORM.cs:11249-11322`), so a Standard
  * shop never sees a Pro, Advance or Enterprise menu. Items of a higher edition are dropped; when Beta is on they are
  * collected into a separate Beta list instead, so internal users can still reach them without mixing them into the
- * Standard menus. Without an edition (no gate configured) the navigation is unchanged.
+ * Standard menus. Lite shows its own desktop menu list (`LITE_NAV`: the 49 Lite `MENU_DATA` rows under their desktop
+ * tabs and captions) rather than the web's wider route groups. Without an edition (no gate configured) the navigation is unchanged.
  */
 export interface BetaNavItem extends NavItem {
   /** The navigation group the item belongs to, kept so the rights form resolves as before. */
@@ -21,7 +23,8 @@ export interface EditionNav {
 
 export function editionNav(nav: NavGroup[], edition: EditionPolicy | null | undefined): EditionNav {
   if (!edition) return { groups: nav, beta: [] };
-  const groups: NavGroup[] = [];
+  const lite = edition.code === 'L';
+  const groups: NavGroup[] = lite ? LITE_NAV : [];
   const beta: BetaNavItem[] = [];
   for (const group of nav) {
     const items: NavItem[] = [];
@@ -30,7 +33,7 @@ export function editionNav(nav: NavGroup[], edition: EditionPolicy | null | unde
       if (availability === 'available') items.push(item);
       else if (availability === 'beta') beta.push({ ...item, group: group.label });
     }
-    if (items.length) groups.push({ label: group.label, items });
+    if (items.length && !lite) groups.push({ label: group.label, items });
   }
   return { groups, beta };
 }

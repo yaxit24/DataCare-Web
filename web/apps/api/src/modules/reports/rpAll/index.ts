@@ -60,7 +60,7 @@ export interface RpAllRequest {
 
 export interface RpAllResult {
   branch: RpAllBranch;
-  mode: SalesMode | OrderMode;
+  mode: string;
   caption: string;
   variant: 'sale' | 'return';
   template: string;

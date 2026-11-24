@@ -289,6 +289,63 @@ export interface PrintableTag {
   lbrRate?: number;
   /** TAG_PRINT_DATA.LBR_AMT, the labour amount the `Labour` formula prints as `LF:`. */
   lbrAmt?: number;
+  /** TAG_PRINT_DATA.KR_NAME: `@ACName` of the label files (`{TAG_PRINT_DATA.KR_NAME}`). */
+  krName?: string;
+  /** CO_MAST.CO_NAME, placed by all four label files. */
+  shopName?: string;
+  /** ITEM_MAST.GR_CODE, placed by all four label files. */
+  grCode?: string;
+  /** The SubTagPrint lines (`IT_CODE / totext(IT_AMT,0)`), read from BAR_IDTL by the file's link. */
+  subLines?: string[];
+  /** The QR picture (QrPrint10 only), an inline SVG of the tag number. */
+  qrSvg?: string;
+}
+
+/**
+ * The four Crystal label files UT_TAG_PRINT can choose from PRINT_MAST (UT_TAG_PRINT.cs:5209 `Cr.ReportFileName`), and
+ * what each one places (extraction_output/rpt_xml/*.xml):
+ * - `subReport` is how its SubTagPrint.rpt is linked to the staged TAG_PRINT_DATA row: `tag` = company, TAG_NO and
+ *   VCH_SRNO (BarPrint10.xml:100-101); `row` = company, LC, year, book, VCH_NO and SR_NO (QrPrint10.xml:119);
+ *   `voucher` = company, LC, year, book and VCH_NO only (GhatTagPrnt.xml:102), so the whole voucher's lines print on
+ *   every label; null = no sub-report (BarPrint13.xml:10 `<SubReports />`).
+ * - `lessWt` is BarPrint13's `L.` line (BarPrint13.xml:217); `barcodeText` the `*TAG_NO*` text (`@TagNo`), which
+ *   QrPrint10 replaces with the QR picture (QrPrint10.xml:386).
+ */
+export interface TagLabelFile {
+  name: string;
+  subReport: 'tag' | 'row' | 'voucher' | null;
+  lessWt: boolean;
+  barcodeText: boolean;
+  qr: boolean;
+}
+export const TAG_LABEL_FILES: Record<string, TagLabelFile> = {
+  qrprint10: { name: 'QrPrint10', subReport: 'row', lessWt: false, barcodeText: false, qr: true },
+  barprint10: { name: 'BarPrint10', subReport: 'tag', lessWt: false, barcodeText: true, qr: false },
+  barprint13: { name: 'BarPrint13', subReport: null, lessWt: true, barcodeText: true, qr: false },
+  ghattagprnt: {
+    name: 'GhatTagPrnt',
+    subReport: 'voucher',
+    lessWt: false,
+    barcodeText: true,
+    qr: false,
+  },
+};
+/**
+ * The layout of a PRINT_MAST file name (a trailing .rpt and the case are ignored). A name with no extracted Crystal
+ * file (a company's own label file) prints with the BarPrint10 layout, the common one.
+ */
+export function tagLabelFile(fileRaw: string | undefined): TagLabelFile {
+  const key = String(fileRaw ?? '')
+    .trim()
+    .replace(/\.rpt$/i, '')
+    .toLowerCase();
+  return TAG_LABEL_FILES[key] ?? TAG_LABEL_FILES.barprint10!;
+}
+
+/** BarPrint10.xml:72 `{BAR_IDTL.IT_CODE} & " / " & totext({BAR_IDTL.IT_AMT},0)`. */
+export function subTagPrintLine(itCode: unknown, itAmt: unknown): string {
+  const amt = typeof itAmt === 'number' && Number.isFinite(itAmt) ? itAmt : Number(itAmt) || 0;
+  return `${String(itCode ?? '').trim()} / ${decimalCellText(amt, 0)}`;
 }
 
 /**
@@ -300,7 +357,15 @@ export interface PrintableTag {
  * as 0.4 still prints its line (as `LP: 0`); with all three amounts at 0 the formula has no final else and the line is
  * empty. A value that is not a finite number prints as 0, so one bad row cannot blank the sheet.
  */
-export function tagLabelLines(t: PrintableTag): { gross: string; net: string; labour: string } {
+export function tagLabelLines(t: PrintableTag): {
+  gross: string;
+  net: string;
+  /** BarPrint13.xml:217 `'L.'+totext(ITM_GWT-ITM_NWT,3)`. */
+  less: string;
+  /** `'*' + TAG_NO + '*'` (BarPrint13.xml:225). */
+  barcodeText: string;
+  labour: string;
+} {
   const n = (v: number | undefined): number =>
     typeof v === 'number' && Number.isFinite(v) ? v : 0;
   const whole = (v: number): string => decimalCellText(v, 0);
@@ -318,6 +383,8 @@ export function tagLabelLines(t: PrintableTag): { gross: string; net: string; la
   return {
     gross: `G.${decimalCellText(n(t.grossWt), 3)}`,
     net: `N.${decimalCellText(n(t.netWt), 3)}`,
+    less: `L.${decimalCellText(n(t.grossWt) - n(t.netWt), 3)}`,
+    barcodeText: `*${t.tagNo}*`,
     labour,
   };
 }
@@ -457,8 +524,14 @@ export function code39Svg(data: string, opts: { height?: number; narrow?: number
   return `<svg xmlns="http://www.w3.org/2000/svg" width="${x}" height="${H}" viewBox="0 0 ${x} ${H}" fill="#000" preserveAspectRatio="none" style="width:100%;height:${H}px">${rects.join('')}</svg>`;
 }
 
-/** Render a print-ready HTML sheet of jewellery tag labels (real Code39 barcode + HUID + item/wt/mrp). */
-export function renderTagLabels(tags: PrintableTag[], labelSkip = 0): string {
+/**
+ * Render a print-ready HTML sheet of jewellery tag labels in the layout of the chosen Crystal file (QrPrint10,
+ * BarPrint10, BarPrint13, GhatTagPrnt; `tagLabelFile`). Every file places the karigar, the shop, the purity group, the
+ * item code and tag, the weights and the labour line; the files differ in the `L.` line (BarPrint13), the `*tag*`
+ * barcode text, the QR picture (QrPrint10) and the SubTagPrint lines. None places the hallmark id, so none is printed.
+ */
+export function renderTagLabels(tags: PrintableTag[], labelSkip = 0, file?: string): string {
+  const layout = tagLabelFile(file);
   // Blank stickers before the first real label, so a part-used sheet can be reused. Eleven TR_* forms plus
   // UT_TAG_PRINT expose this as `nLableSkip`; the desktop stages placeholder rows with IT_CODE='00'
   // (TR_TAG_OPBL.cs:11485-11492). The count uses .NET banker's rounding, so 2.5 skips 2, not 3.
@@ -470,15 +543,26 @@ export function renderTagLabels(tags: PrintableTag[], labelSkip = 0): string {
   const cells = tags
     .map((t) => {
       const lines = tagLabelLines(t);
+      const barcode =
+        layout.qr && t.qrSvg
+          ? `<div class="qr" data-qr="${esc(t.tagNo)}">${t.qrSvg}</div>`
+          : `<div class="bcode">${code39Svg(t.tagNo, { height: 26 })}</div>`;
+      const subs = layout.subReport
+        ? (t.subLines ?? []).map((l) => `<div class="row sub">${esc(l)}</div>`).join('')
+        : '';
       return `
-    <div class="lbl">
-      <div class="bcode">${code39Svg(t.tagNo, { height: 26 })}</div>
-      <div class="bcnum">${esc(t.tagNo)}</div>
+    <div class="lbl" data-file="${esc(layout.name)}">
+      ${barcode}
+      ${layout.barcodeText ? `<div class="bcnum">${esc(lines.barcodeText)}</div>` : `<div class="bcnum">${esc(t.tagNo)}</div>`}
       <div class="row"><b>${esc(t.itCode)}</b>${t.designNo ? ' · ' + esc(t.designNo) : ''}${t.pcs > 1 ? ' · ' + t.pcs + ' pc' : ''}${t.touch ? ' · ' + t.touch + '%' : ''}</div>
+      <div class="row">${esc(t.grCode ?? '')}</div>
+      <div class="row">${esc(t.krName ?? '')}</div>
+      <div class="row">${esc(t.shopName ?? '')}</div>
       <div class="row">${esc(lines.gross)}</div>
       <div class="row">${esc(lines.net)}</div>
+      ${layout.lessWt ? `<div class="row">${esc(lines.less)}</div>` : ''}
       ${lines.labour ? `<div class="row">${esc(lines.labour)}</div>` : ''}
-      ${t.hmId ? `<div class="row huid">HUID: ${esc(t.hmId)}</div>` : ''}
+      ${subs}
     </div>`;
     })
     .join('');
@@ -489,9 +573,10 @@ export function renderTagLabels(tags: PrintableTag[], labelSkip = 0): string {
       .sheet{display:flex;flex-wrap:wrap;gap:6px}
       .lbl{width:150px;border:1px solid #999;border-radius:4px;padding:6px 8px;font-size:11px}
       .bcode{height:26px;margin:1px 0}
+      .qr{width:56px;height:56px;margin:1px auto}
+      .qr svg{width:100%;height:100%}
       .bcnum{font-weight:700;font-size:12px;letter-spacing:1px;text-align:center;margin-bottom:2px}
       .row{line-height:1.35}
-      .huid{font-size:9px;color:#444;letter-spacing:.3px}
       @media print{.noprint{display:none}}
     </style></head><body>
     <div class="noprint" style="margin-bottom:8px"><button onclick="window.print()">Print</button> ${tags.length} label(s)</div>

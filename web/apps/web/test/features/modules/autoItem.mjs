@@ -546,10 +546,16 @@ export const autoItem = {
           await saved(page);
           const after = await counts();
           assert.deepEqual(after, { ...before, i: before.i + 1 });
+          // WP-36: MS_AUTO_ITEM.cs:2904 EMP_COM_PRC 0, :2912 TAX_FREE_ITEM N; APP_ITEM and AC_MEMB_COM_PRC take the defaults.
+          const [hidden] = await ctx.rows(
+            `SELECT "TAX_FREE_ITEM" tf,"APP_ITEM" app,"EMP_COM_PRC" emp,"AC_MEMB_COM_PRC" memb FROM "ITEM_MAST" WHERE tenant_id=$1 AND "IT_CODE"=$2`,
+            'A2AIS',
+          );
+          assert.deepEqual(hidden, { tf: 'N', app: 'N', emp: 0, memb: 0 });
           return {
-            observation: `ITEM_MAST ${before.i} → ${after.i}`,
-            expected: 'one row',
-            database: { before, after },
+            observation: `ITEM_MAST ${before.i} → ${after.i}; hidden columns ${JSON.stringify(hidden)}`,
+            expected: 'one row; TAX_FREE_ITEM N, APP_ITEM N, EMP_COM_PRC 0, AC_MEMB_COM_PRC 0',
+            database: { before, after, hidden },
             downstream: { code: 'A2AIS' },
           };
         }),

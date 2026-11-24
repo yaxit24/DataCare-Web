@@ -9,19 +9,28 @@ import type { XlsxColumn } from '../xlsx.js';
  * result, never a page of it.
  */
 export interface ExportTable {
-  columns: { key: string; caption: string; kind: string }[];
+  columns: { key: string; caption: string; kind: string; level?: string }[];
+  /**
+   * One printed line each. `_band` is the text a band prints (a group label, a subtotal caption, the row
+   * level); `_kind` says which sort of line it is, so a screen can style it without re-deriving anything.
+   */
   lines: Record<string, string>[];
 }
 
 export function exportTable(result: RpAllResult): ExportTable {
   const columns = [
     { key: '_band', caption: 'Band', kind: 'text' },
-    ...result.columns.map((c) => ({ key: c.key, caption: c.caption, kind: c.kind })),
+    ...result.columns.map((c) => ({
+      key: c.key,
+      caption: c.caption,
+      kind: c.kind,
+      level: c.level,
+    })),
   ];
   const lines: Record<string, string>[] = [];
   const subtotalOf = new Map(result.groupLevels.map((g, depth) => [depth, g]));
-  const totalLine = (band: string, totals: Record<string, number>) => {
-    const line: Record<string, string> = { _band: band };
+  const totalLine = (band: string, totals: Record<string, number>, kind = 'total') => {
+    const line: Record<string, string> = { _band: band, _kind: kind };
     for (const c of result.columns)
       if (totals[c.key] !== undefined) line[c.key] = formatCell(c.kind, totals[c.key]!);
     return line;
@@ -35,7 +44,7 @@ export function exportTable(result: RpAllResult): ExportTable {
       (key === null || pathKey(result.rows[rowIndex]!.groupPath) === key)
     ) {
       const row = result.rows[rowIndex]!;
-      const line: Record<string, string> = { _band: row.level };
+      const line: Record<string, string> = { _band: row.level, _kind: row.level };
       for (const c of result.columns) {
         if (c.level !== row.level) continue;
         line[c.key] = formatCell(c.kind, row.cells[c.key] ?? null);
@@ -50,8 +59,8 @@ export function exportTable(result: RpAllResult): ExportTable {
     const level = subtotalOf.get(group.depth)!;
     const isLeaf = group.depth === result.groupLevels.length - 1;
     const label = `${'  '.repeat(group.depth)}${group.label}`;
-    if (level.subtotal === 'header') lines.push({ ...totalLine(label, group.totals) });
-    else lines.push({ _band: label });
+    if (level.subtotal === 'header') lines.push(totalLine(label, group.totals, 'group'));
+    else lines.push({ _band: label, _kind: 'group' });
     if (isLeaf) {
       flushRowsFor(pathKey(group.groupPath));
       if (level.subtotal === 'footer')
@@ -74,8 +83,7 @@ export function exportTable(result: RpAllResult): ExportTable {
 }
 
 /** CSV text: header captions, then every line; values are already formatted text. */
-export function exportCsv(result: RpAllResult): string {
-  const table = exportTable(result);
+export function exportCsv(result: RpAllResult, table: ExportTable = exportTable(result)): string {
   const cell = (v: string | undefined) => {
     const s = v ?? '';
     return /[",\n\r]/.test(s) || /^[=+\-@]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
@@ -86,8 +94,11 @@ export function exportCsv(result: RpAllResult): string {
 }
 
 /** Excel columns: text cells for everything (values are pre-formatted to the desktop precision). */
-export function exportXlsxColumns(result: RpAllResult): XlsxColumn[] {
-  return exportTable(result).columns.map((c) => ({
+export function exportXlsxColumns(
+  result: RpAllResult,
+  table: ExportTable = exportTable(result),
+): XlsxColumn[] {
+  return table.columns.map((c) => ({
     header: c.caption,
     key: c.key,
     type: 'text',

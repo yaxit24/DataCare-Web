@@ -11,7 +11,16 @@ import { type BookWorkflow, workflowPolicy } from '../shared/bookPolicy.js';
  * Idempotent: every row is insert-if-absent, so re-provisioning is safe.
  */
 
-/** System accounts keyed by the literal AC_CODE the posting falls back to. */
+/**
+ * System accounts keyed by the literal AC_CODE the posting falls back to.
+ *
+ * WP-36: the sale, purchase and tax ledgers sit in the desktop groups the master helps filter on, so a fresh company's
+ * helps list them: Group Sales Ac takes group 25 and Purchase Ac group 30 (MS_GROUP.cs:2204 {{AND AC_GR = '25' AND
+ * AC_CODE = '" + tSalesAc.Text}}, :2242; MS_TRADE.cs:1190 {{DC_Main.MsGrCode = "25";}}, :1234 "30"), and the Tax header
+ * help lists group 12 (MS_TAX.cs:2039 {{AND (AC_GR = '12' OR  AC_CODE = '00013') ORDER BY AC_NAME}}). Group 20 is a
+ * customer group on the desktop (RP_CUST.cs:996 {{AC_GR IN ('04','05','10','15','20','45','19')}}), so a sales ledger
+ * there was listed as a customer. A web company provisioned earlier is moved by migration 20261123110000.
+ */
 const SYSTEM_ACCOUNTS: { code: string; name: string; gr: string; gstType?: string }[] = [
   // G124 / G100: the sales/hallmark-sale/sales-quotation screens default the party to WALKIN. The
   // desktop's ready-to-trade template carries a cash/walk-in party (00045); without one, the default
@@ -20,21 +29,21 @@ const SYSTEM_ACCOUNTS: { code: string; name: string; gr: string; gstType?: strin
   { code: 'WALKIN', name: 'WALK-IN CUSTOMER', gr: '10', gstType: 'L' },
   { code: 'CASH', name: 'CASH ON HAND', gr: '01' },
   { code: 'BANK', name: 'BANK A/C', gr: '02' },
-  { code: 'SALES', name: 'SALES A/C', gr: '20' },
-  { code: 'PURCHASE', name: 'PURCHASE A/C', gr: '21' },
-  { code: 'GST', name: 'GST OUTPUT (PAYABLE)', gr: '30' },
-  { code: 'GSTINPUT', name: 'GST INPUT CREDIT', gr: '30' },
+  { code: 'SALES', name: 'SALES A/C', gr: '25' },
+  { code: 'PURCHASE', name: 'PURCHASE A/C', gr: '30' },
+  { code: 'GST', name: 'GST OUTPUT (PAYABLE)', gr: '12' },
+  { code: 'GSTINPUT', name: 'GST INPUT CREDIT', gr: '12' },
   { code: 'ROUNDOFF', name: 'ROUND OFF', gr: '31' },
   { code: 'KASAR', name: 'KASAR / WRITE-OFF', gr: '31' },
-  { code: 'TCS', name: 'TCS PAYABLE', gr: '30' },
+  { code: 'TCS', name: 'TCS PAYABLE', gr: '12' },
   { code: 'HMCHRG', name: 'HALLMARK CHARGES', gr: '22' },
   { code: 'OLDGOLD', name: 'OLD GOLD EXCHANGE', gr: '21' },
   { code: 'OG', name: 'OLD GOLD', gr: '21' },
   { code: 'OS', name: 'OLD SILVER', gr: '21' },
   { code: 'INTINC', name: 'INTEREST INCOME', gr: '23' },
   { code: 'BULLION', name: 'BULLION TRADING', gr: '20' },
-  { code: 'FINESALE', name: 'FINE METAL SALE', gr: '20' },
-  { code: 'FINEPURC', name: 'FINE METAL PURCHASE', gr: '21' },
+  { code: 'FINESALE', name: 'FINE METAL SALE', gr: '25' },
+  { code: 'FINEPURC', name: 'FINE METAL PURCHASE', gr: '30' },
   { code: 'DHRN', name: 'DHIRAN / LOAN', gr: '21' },
   { code: 'CAPITAL', name: 'CAPITAL A/C', gr: '25' },
   // N198 (G208): the sale books' slot 4 is the order-advance account the sale day book names for an adjusted
@@ -45,8 +54,8 @@ const SYSTEM_ACCOUNTS: { code: string; name: string; gr: string; gstType?: strin
   // the real books 034/064.
   { code: 'LBRINC', name: 'LABOUR INCOME A/C', gr: '23' },
   { code: 'LBREXP', name: 'LABOUR EXPENSE A/C', gr: '22' },
-  { code: 'SLVSALE', name: 'SALES SILVER A/C', gr: '20' },
-  { code: 'SLVPURC', name: 'PURCHASE SILVER A/C', gr: '21' },
+  { code: 'SLVSALE', name: 'SALES SILVER A/C', gr: '25' },
+  { code: 'SLVPURC', name: 'PURCHASE SILVER A/C', gr: '30' },
   { code: 'OTHCHRG', name: 'OTHER CHARGES A/C', gr: '23' },
   { code: 'CARDCOMM', name: 'CARD / BANK COMMISSION A/C', gr: '22' },
   { code: 'FINEKSR', name: 'FINE KASAR A/C', gr: '31' },
