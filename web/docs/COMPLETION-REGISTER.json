@@ -2635,10 +2635,10 @@
    "formReferencedInWeb": true,
    "state": "implemented-unverified",
    "evidence": null,
-   "note": "differently-named order listing.",
+   "note": "RP_ALL order branch on its own route (N252, G264): seven order buttons, Cust Name help, CSV/XLSX; the DESIGN_ISU owner question remains.",
    "webSurface": {
     "kind": "route",
-    "surface": "GET /sales-orders"
+    "surface": "GET /reports/order-report"
    },
    "sharedSurfaceWith": []
   },
@@ -2743,14 +2743,12 @@
    "formReferencedInWeb": false,
    "state": "implemented-unverified",
    "evidence": null,
-   "note": "differently-named sales zoom. Shares this surface with 1 other menu entry: Report/Sales Report.",
+   "note": "differently-named sales zoom.",
    "webSurface": {
     "kind": "route",
     "surface": "GET /reports/sales-register"
    },
-   "sharedSurfaceWith": [
-    "Report/Sales Report"
-   ]
+   "sharedSurfaceWith": []
   },
   {
    "tab": "Report",
@@ -2762,14 +2760,12 @@
    "formReferencedInWeb": true,
    "state": "implemented-unverified",
    "evidence": null,
-   "note": "RP_ALL sales report. Shares this surface with 1 other menu entry: Report/Sale Zoom.",
+   "note": "RP_ALL sales report on its own screen (N234 engine and API, N253 screen, G265): thirteen buttons, lookups, grid/CSV/XLSX/PDF; the Sales Return variant (G246) and the SalesRtnA4Print template remain.",
    "webSurface": {
     "kind": "route",
-    "surface": "GET /reports/sales-register"
+    "surface": "GET /reports/sales-report"
    },
-   "sharedSurfaceWith": [
-    "Report/Sale Zoom"
-   ]
+   "sharedSurfaceWith": []
   },
   {
    "tab": "Report",

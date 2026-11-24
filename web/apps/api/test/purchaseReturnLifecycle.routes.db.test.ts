@@ -177,7 +177,10 @@ const DAY = `${startYear}-06-15`;
       },
     ]);
 
-    const removed = await request('DELETE', `/purchase-returns/${vchNo}?${q}`);
+    const removed = await request(
+      'DELETE',
+      `/purchase-returns/${vchNo}?${q}&expectedVersion=${read.json().version}`,
+    );
     expect(removed.statusCode, removed.body).toBe(200);
     const [after] = await query<
       Array<{ pr: number; dm: number; rojmel: number; temp: number; audit: number }>

@@ -315,6 +315,14 @@ try {
       ]);
     if (path === '/rate')
       return json(route, 200, { fineGold: 7500, fineSilver: 95, date: '2024-04-10' });
+    if (path === '/daily-rate/labels')
+      return json(route, 200, {
+        date: '2024-04-10',
+        empty: 'ToDays Rate :',
+        labels: [
+          { grCode: 'G22', grName: 'Gold 22K', rate: '7500.00', text: 'Gold 22K  -  7500.00' },
+        ],
+      });
     if (path.startsWith('/party/'))
       return json(route, 200, {
         acCode: 'WALKIN',

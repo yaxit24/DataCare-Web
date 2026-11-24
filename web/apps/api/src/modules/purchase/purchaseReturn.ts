@@ -154,6 +154,8 @@ export function buildPurchaseReturnLedger(p: {
 export interface PurchaseReturnResult {
   vchNo: number;
   totals: BillTotals;
+  /** Set by an edit: the voucher's new version token (N245). */
+  version?: string;
 }
 
 async function resolvePurchaseReturnTags(
@@ -449,7 +451,8 @@ export async function writePurchaseReturnTx(
     LBR_AMT: line.calc.labour,
     OTH_AMT: num(line.in.otherAmount),
     NET_AMT: line.calc.net,
-    TAX_PRC: input.taxRatePct,
+    // The desktop writes 0 on every return line (TR_KR_ISU.cs:5206); the rate lives on PR_DATA (N245, G257).
+    TAX_PRC: 0,
     HM_ID: text(line.in.huid) || null,
     MAIN_USER: ctx.mainUser,
     HD_VCH_NO: hdVchNo,

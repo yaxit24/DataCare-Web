@@ -26,6 +26,8 @@ export function LookupPicker({
   style,
   advanceOnPick = true,
   resolveTypedCode = false,
+  id,
+  openOnFocus = true,
 }: {
   entity: string;
   value: string;
@@ -45,6 +47,13 @@ export function LookupPicker({
    * programmatic blur, so they leave this off (G104, found 2026-10-26).
    */
   resolveTypedCode?: boolean;
+  /** DOM id of the text box, for screens whose labels and tests address it. */
+  id?: string;
+  /**
+   * Open the list when the box takes the focus (the default). The Report selectors turn it off: the desktop opens F1
+   * help only on F1 or on an unknown code, so tabbing across blank selectors must not pop a list over the next one.
+   */
+  openOnFocus?: boolean;
 }) {
   const [open, setOpen] = useState(false);
   const [rows, setRows] = useState<LookupRow[]>([]);
@@ -170,6 +179,7 @@ export function LookupPicker({
     >
       <input
         ref={inputRef}
+        id={id}
         value={value}
         aria-label={ariaLabel}
         placeholder={placeholder || `search ${entity}… (F1)`}
@@ -179,7 +189,7 @@ export function LookupPicker({
           search(e.target.value);
         }}
         onFocus={() => {
-          if (value !== undefined) search(value);
+          if (openOnFocus && value !== undefined) search(value);
         }}
         onBlur={(e) => {
           // G94: the list closes when focus moves to another control (Tab, Enter-advance, a programmatic

@@ -296,9 +296,11 @@ const DAY = `${startYear}-06-15`;
   });
 
   it('an edit that drops the tag returns it to stock; the delete audits the signed-in user', async () => {
+    const opened = await request('wholesaler', 'GET', '/wholesale-sales/1?coBook=WHS');
     const edited = await request('wholesaler', 'PUT', '/wholesale-sales/1', {
       ...sale,
       lines: [],
+      expectedVersion: opened.json().version,
     });
     expect(edited.statusCode, edited.body).toBe(200);
     expect(await available('LRG00001')).toBe(1);
@@ -312,7 +314,13 @@ const DAY = `${startYear}-06-15`;
     );
     expect(hiddenBeforeDelete[0]).toEqual({ hd: '00001', temp: 1 });
 
-    const removed = await request('wholesaler', 'DELETE', '/wholesale-sales/1', { book: 'WHS' });
+    const current = await request('wholesaler', 'GET', '/wholesale-sales/1?coBook=WHS');
+    const removed = await request(
+      'wholesaler',
+      'DELETE',
+      `/wholesale-sales/1?expectedVersion=${current.json().version}`,
+      { book: 'WHS' },
+    );
     expect(removed.statusCode, removed.body).toBe(200);
     const tempAfterDelete = await query<Array<{ n: number }>>(
       `SELECT count(*)::int n FROM "TEMP_BOOK_DATA" WHERE tenant_id=$1 AND "CO_BOOK"='WHS'`,

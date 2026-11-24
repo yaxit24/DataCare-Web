@@ -67,6 +67,18 @@ const balanceRow = (
  * (`Sum(ITM_GWT, ENTRY_TYPE)`) under the Gr Wt column.
  */
 const grid = (lines: any[], receivedLines: any[]): string => {
+  /** SL_IDTL under its line (WhSalesBill area 5): item name, pieces, weight, rate and net amount, in ISR_NO order. */
+  const detailRows = (line: any): string =>
+    (Array.isArray(line.details) ? line.details : [])
+      .map(
+        (
+          d: any,
+        ) => `<tr class="idtl"><td></td><td style="padding-left:16px">${esc(d.itemName || d.itCode)}</td>
+      <td class="r">${n(d.pcs) || ''}</td><td class="r">${wt(d.grossWt)}</td>
+      <td class="r" colspan="2">Rate ${money(d.rate)}</td><td colspan="3"></td>
+      <td class="r">${money(d.netAmt)}</td></tr>`,
+      )
+      .join('');
   const row = (line: any, serial: number) => `<tr>
       <td>${serial}</td>
       <td>${esc(line.itemName || line.itCode)}${line.tagNo ? ` <small>(${esc(line.tagNo)})</small>` : ''}</td>
@@ -75,7 +87,7 @@ const grid = (lines: any[], receivedLines: any[]): string => {
       <td class="r">${blankZero(line.westPct, (x) => n(x).toFixed(2))}</td>
       <td class="r">${wt(line.fine)}</td><td class="r">${blankZero(line.lbrAmt, money)}</td>
       <td class="r">${blankZero(line.netAmount ?? line.totalAmount, money)}</td>
-    </tr>`;
+    </tr>${detailRows(line)}`;
   let serial = 0;
   const group = (title: string, group: any[]): string =>
     group.length === 0
@@ -102,10 +114,10 @@ const grid = (lines: any[], receivedLines: any[]): string => {
  * TOT_FINE_DR - (KSR_FINE_DR + DR_FINE), `@PurcAmt` is PR_NET_AMT - CR_AMT, `@SlAmt` is SL_NET_AMT - DR_AMT, `@CrTot`
  * is CR_AMT + PR_LBR_AMT, `@DrTot` is DR_AMT + SL_LBR_AMT and `@TotIsuFine` is TOT_FINE_DR - TOT_FINE_CR.
  *
- * Deliberate differences: `@InVoiceType` is the constant 'ESTIMATE' in this report and is printed as it is; the web
- * does not store the fine kasar (KSR_FINE_CR and KSR_FINE_DR are 0), so that row prints zeros; the report's `@AcMobile`
- * prints the empty mobile in its phone branch (a formula slip), the web prints the phone there; the item-detail rows
- * (SL_IDTL under each line) wait for the web to write them.
+ * Deliberate differences: `@InVoiceType` is the constant 'ESTIMATE' in this report and is printed as it is; the fine
+ * kasar row prints the stored KSR_FINE_CR and KSR_FINE_DR; the report's `@AcMobile`
+ * prints the empty mobile in its phone branch (a formula slip), the web prints the phone there. The item-detail rows
+ * (SL_IDTL, WP-30) print under their line from the voucher's `details`.
  */
 export function wholesaleSaleBillHtml(
   voucher: any,

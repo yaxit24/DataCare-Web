@@ -6,7 +6,7 @@ import {
   extendedGridColumnCount,
   GridModeToggle,
 } from '../../../../components/ExtendedGrid';
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { del, get, post, put, ApiError } from '../../../../lib/api';
 import { useBusinessScope, useRoundingPolicy } from '../../../../components/BusinessScope';
@@ -496,6 +496,17 @@ export default function SalesEntryPage() {
     setResidual(wp26.emptySaleResidual());
     setLines([blank()]);
   }
+
+  // Zoom from a report (Reports > Sales Report): /txn/sales?vchNo=&coBook=&lcCode= opens that voucher.
+  useEffect(() => {
+    const q = new URLSearchParams(window.location.search);
+    const vchNo = q.get('vchNo');
+    const book = q.get('coBook');
+    if (!vchNo || !book) return;
+    setVoucherLookup(vchNo);
+    void openSale({ coBook: book, coYear, lcCode: q.get('lcCode') || lcCode, vchNo });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   async function loadSale() {
     await openSale({ coBook, coYear, lcCode, vchNo: voucherLookup });

@@ -409,6 +409,8 @@ export async function buildApp(opts: BuildOpts): Promise<FastifyInstance> {
     // employ, product and group are its own selectors (RP_ALL.cs:7629-7631 `{SL_DATA.AC_CODE}`), and the engine
     // refuses one its template lacks with `filter-not-in-template` (rpAll/index.ts), so this guard must not.
     if (url.startsWith('/reports/sales-report')) return;
+    // Purchase Rpt shares the RP_ALL parser and its refusals (modules/reports/purchaseReport.ts).
+    if (url.startsWith('/reports/purchase-report')) return;
     // Tag Stock (RP_TAG) likewise owns a typed parser (tagStock.ts parseTagStockQuery) with its own location and
     // item selectors (lcCode, itType, tblCode); it validates, refuses unknown keys and fails closed itself.
     if (url.startsWith('/reports/tag-stock')) return;
@@ -416,6 +418,9 @@ export async function buildApp(opts: BuildOpts): Promise<FastifyInstance> {
     // design, safe, counter, tag and account are its own selectors (RP_STOCK.cs:4287-4327), and it refuses any
     // other key itself (400 unknown-filter), so this guard, which only knows the shared RP_ALL panel, must not.
     if (url.startsWith('/reports/stock-report')) return;
+    // WP-14: the Order Report (RP_ALL) shares that parser; its handlers append party, city, area and name
+    // (RP_ALL.cs:8391-8403, :12620-12631).
+    if (url.startsWith('/reports/order-report')) return;
     const q = (req.query ?? {}) as Record<string, string | undefined>;
     const asked = REPORT_FILTER_KEYS.filter((k) => String(q[k] ?? '').trim());
     if (!asked.length) return;

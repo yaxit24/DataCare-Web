@@ -320,6 +320,9 @@ export interface WholesaleBandInput {
   receivedTender?: WholesaleTender;
   /** Column 3, captioned "Payment" — the PR_* tender (`receivedPay` on the API). */
   paymentTender?: WholesaleTender;
+  /** `nFineKsrDr` / `nFineKsrCr`: fine kasar, added into Tot Fine Dr / Cr (TR_WH_SALE.cs:15633-15634). */
+  ksrFineDr?: number;
+  ksrFineCr?: number;
 }
 
 export interface WholesaleBand {
@@ -347,7 +350,7 @@ export interface WholesaleBand {
  * - Net = `Math.Round(DR_AMT + Σ issued NET_AMT − SlOthAmtLess, 0)` (banker's), and the Payment column the same
  *   with CR_AMT and the received lines. `netAmount` already has the other charges that became fine taken out.
  * - Os = net − cash − cheque − card − kasar, formatted "0.00". The Order row (4) is shown but not subtracted.
- * - Tot fine Dr = SL_FINE + DR_FINE (+ fine kasar, not modelled), Cr = PR_FINE + CR_FINE; Os fine = Dr − Cr.
+ * - Tot fine Dr = SL_FINE + DR_FINE + KSR_FINE_DR, Cr = PR_FINE + CR_FINE + KSR_FINE_CR; Os fine = Dr − Cr.
  * - The difference label reads "<Payment Os − Received Os> Pay" or "<Received Os − Payment Os> Rec".
  * Silver amounts (`nSlvrDrAmt`/`nSlvrCrAmt`) are not modelled; they are 0 on every captured voucher.
  */
@@ -369,8 +372,10 @@ export function wholesaleBand(input: WholesaleBandInput): WholesaleBand {
   const paymentOs = format2(
     paymentNet - payment.cash - payment.cheque - payment.card - payment.kasar,
   );
-  const totFineDr = format3(n(input.issued.fine) + n(input.settlement.drFine));
-  const totFineCr = format3(n(input.received.fine) + n(input.settlement.crFine));
+  const totFineDr = format3(n(input.issued.fine) + n(input.settlement.drFine) + n(input.ksrFineDr));
+  const totFineCr = format3(
+    n(input.received.fine) + n(input.settlement.crFine) + n(input.ksrFineCr),
+  );
   const diffSide: WholesaleBand['diffSide'] =
     paymentOs > receivedOs ? 'Pay' : paymentOs < receivedOs ? 'Rec' : '';
   return {
