@@ -843,6 +843,90 @@ describe('faithful A4 documents', () => {
     expect(html).toContain('Advance Received');
   });
 
+  it('order confirmation balance subtracts each tender once, not ADV_AMT plus old gold and scheme again', () => {
+    // N197 row: ADV_AMT (:11368) is 8,000 = cash 5,000 + old gold 2,000 + scheme 1,000, and the tenders are
+    // also in their own columns. The desktop balance cell (TR_SALE_ORD.cs:11373-11375) subtracts each tender
+    // once: 51,500 - 1,000 scheme - 5,000 cash - 2,000 old gold = 43,500.
+    const html = orderHtml(
+      {
+        BILL_NO: 'O2',
+        VCH_NO: '2',
+        CO_BOOK: 'SOR',
+        AC_NAME: 'Cust',
+        DEL_DATE: '2026-08-01',
+        NET_AMT: 50000,
+        TAX_AMT: 1500,
+        TOT_AMT: 51500,
+        ADV_AMT: 8000,
+        CASH_AMT: 5000,
+        CHQ_AMT: 0,
+        CARD_AMT: 0,
+        UPI_AMT: 0,
+        OLD_GL_AMT: 2000,
+        OLD_SL_AMT: 0,
+        SCHM_AMT: 1000,
+      },
+      [
+        {
+          IT_CODE: 'NECKLACE',
+          ITM_PCS: 1,
+          ITM_GWT: 30,
+          ITM_NWT: 28,
+          ITM_RATE: 6000,
+          ITM_AMT: 50000,
+          NET_AMT: 51500,
+        },
+      ],
+      { company: CO, party: { AC_NAME: 'Cust' } },
+    );
+    expect(html).toContain('Order Value</td><td class="r">51,500.00');
+    expect(html).toContain('Advance Received</td><td class="r">-5,000.00');
+    expect(html).toContain('Old Gold / Metal Adj</td><td class="r">-2,000.00');
+    expect(html).toContain('Scheme Adjustment</td><td class="r">-1,000.00');
+    expect(html).toContain('Balance Due on Delivery</td><td class="r">₹ 43,500.00');
+    expect(html).not.toContain('-8,000.00');
+  });
+
+  it('order confirmation balance reads ADV_AMT alone for a Tour Order, whose tender columns are saved as zeros', () => {
+    // A Tour Order — or a row saved before N197 — keeps its money advance in ADV_AMT alone (TR_TOUR_ORD has
+    // no MSG2_TOTAL money rows on the web writer), so the balance stays TOT - ADV - old metal - scheme.
+    const html = orderHtml(
+      {
+        BILL_NO: 'O3',
+        VCH_NO: '3',
+        CO_BOOK: '510',
+        AC_NAME: 'Cust',
+        DEL_DATE: '2026-08-01',
+        NET_AMT: 50000,
+        TAX_AMT: 1500,
+        TOT_AMT: 51500,
+        ADV_AMT: 10000,
+        // The writer defaults the tender columns to 0, so a saved Tour Order row carries them as zeros.
+        CASH_AMT: 0,
+        CHQ_AMT: 0,
+        CARD_AMT: 0,
+        UPI_AMT: 0,
+        OLD_GL_AMT: 2000,
+        SCHM_AMT: 0,
+      },
+      [
+        {
+          IT_CODE: 'NECKLACE',
+          ITM_PCS: 1,
+          ITM_GWT: 30,
+          ITM_NWT: 28,
+          ITM_RATE: 6000,
+          ITM_AMT: 50000,
+          NET_AMT: 51500,
+        },
+      ],
+      { company: CO, party: { AC_NAME: 'Cust' }, family: 'TOUR ORDER' },
+    );
+    expect(html).toContain('Advance Received</td><td class="r">-10,000.00');
+    expect(html).toContain('Old Gold / Metal Adj</td><td class="r">-2,000.00');
+    expect(html).toContain('Balance Due on Delivery</td><td class="r">₹ 39,500.00');
+  });
+
   it('GSTR-1 / GSTR-2 / GSTR-3B statutory documents', () => {
     const g1 = gstr1DocHtml(
       {
