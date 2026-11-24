@@ -23,25 +23,26 @@ Merged to main on 2026-11-23 (17 PRs). These include #244 Tag Stock, #245 GST, #
 #261 voucher-number holes (WP-10), #262 Sales Order "+" SL_ORD_ADJ advance row, #263 masters residuals (WP-36) and
 #268 Lite sidebar = exactly the 49 desktop Lite menus (WP-55).
 
-Open PRs, in merge order. Plan ids must merge contiguously:
+**Update 2026-11-24 (Mac, 14:00):** the queue also merged #254 Data Refresh, #256 Wh Sales, #257 Tag Print,
+#259 Purchase Rpt (its 17 baseline failures removed), #258 Daily Rate, #264 Order Report, #265 Sales Report and
+#266 Approval Rpt. #264/#265 also point the Lite Report menus "Order Report" and "Sales Report" at the RP_ALL
+screens (`web/apps/web/lib/liteMenus.ts`). #269 was last in the queue (re-running a flaky Users case); check
+`gh pr view 269` before anything else.
+
+Still open:
 
 | PR | Branch | What | State |
 |---|---|---|---|
-| #254 | agent/wp24-data-refresh | Data Refresh Field Update (N247) | green, in queue |
-| #256 | agent/wp30-wh-sales-residuals | Wh Sales (N248) | green, in queue |
-| #257 | agent/wp34-tag-print-residuals | Tag Print (N249) | green, in queue |
-| #259 | agent/wp12-purchase-report | Purchase Rpt (N250), clears 17 baseline failures | green, in queue. **After it merges, remove purchase-report from `web/apps/web/test/features/baseline.json`** |
-| #258 | agent/wp33-daily-rate-residuals | Daily Rate (N251) | green, in queue |
-| #264 | agent/wp14-order-report | Order Report screen + API (N252) | green, in queue |
-| #265 | agent/wp11-sales-report-screen | Sales Report dedicated screen (N253) | green, in queue |
-| #266 | agent/wp13-approval-report | Approval Rpt screen + API (N254) | green, in queue |
+| #269 | agent/wp03-ratecut-advance | Rate-cut order advance is metal, not money | reviewed (fix 72b221b3); merge if green |
 | #267 | agent/wp20-ledger-residuals | Ledger fine prints + Lite ageing (N255) | **blocked on owner**: needs a `Browser-Test-Exempt:` line (text in the PR conversation) or real cases in companyMaster/dataBackup/gstReport |
-| #269 | agent/wp03-ratecut-advance | Rate-cut order advance is metal, not money | reviewed (fix 72b221b3), in queue |
-| #260 | agent/specs-batch-2026-11-23 | This plan, packets, studies, tooling | docs only; merge any time |
+| #260 | agent/specs-batch-2026-11-23 | This plan, packets, studies, tooling | docs only; queued after #269 |
 
-Known merge conflict ahead: #264, #265 and #266 each add the same lookup entities (`cities`, `areas`,
-`order-customers` in `masters/lookup.ts`) and `bookCode` in `rpAll/filters.ts`. Whichever merges second must keep
-one copy of each.
+Follow-ups found while merging (not yet fixed):
+
+- `rpAll/index.ts` `shapeOrderResult` on main runs the `variant.bandFormulas` block twice (a merge duplicate).
+  Harmless only if the formulas never read their own output; delete one copy and add a test.
+- `wholesale-sale.create.loose-item-detail-rows` fails intermittently on CI (3 times on 24 Nov, green on re-run);
+  `users.password-rule.d34` timed out once. Make them deterministic.
 
 Next free plan ids after the open PRs: **N256, G268**. Always re-check `gh pr list --json title` first.
 
@@ -162,15 +163,15 @@ A PR without plan ids (tooling, fixes) still loses the race against the queue on
 queue instead of merging it on the side. Regenerate `doc-register.md` from a clean checkout: untracked local files
 change it, and CI then reports it stale.
 
-CI baseline failures to ignore: purchase-report (17, until #259 merges), `company-master.fields.complete-round-trip`,
-and occasional flakes (Chrome screenshot capture, `companyMasterContainment.db.test.ts`). Re-run once.
+CI baseline failure to ignore: `company-master.fields.complete-round-trip`. Occasional flakes: Chrome screenshot
+capture, `companyMasterContainment.db.test.ts`, `wholesale-sale.create.loose-item-detail-rows`,
+`users.password-rule.d34`. Re-run the failed job once (`gh run rerun <id> --failed`).
 
 ## 7. What is still running on the Mac (stop it before starting the queue on Windows)
 
-- Merge queue `queue15` (#252 … #269). Check `gh pr list`; anything merged is done.
-- `codex-night.sh`: from 22:27 runs WP-35/WP-32/WP-51 F-04/WP-04 packets on Codex until the limit, pushing
-  branches.
-- Free-model runs: WP-32.tests and WP-35.tests.
+- Merge queue (last: #269 then #260). Check `gh pr list`; anything merged is done.
+- `codex-night.sh` and the free-model WP-32/WP-35 test runs have ended (Codex limit / timeouts); nothing of theirs
+  is pending. Re-run those packets from section 4.
 
 If the Mac is shut down, these stop. Nothing is lost: all completed work is pushed. Restart from section 4.
 
