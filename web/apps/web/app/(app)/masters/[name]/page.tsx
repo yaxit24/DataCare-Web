@@ -311,10 +311,10 @@ export default function MasterPage() {
             : b?.error === 'duplicate-key'
               ? b.message || 'Duplicate key'
               : b?.missing
-              ? 'Missing: ' + b.missing.join(', ')
-              : b?.error === 'invalid-data'
-                ? b.detail || 'Invalid data'
-                : 'Update failed',
+                ? 'Missing: ' + b.missing.join(', ')
+                : b?.error === 'invalid-data'
+                  ? b.detail || 'Invalid data'
+                  : 'Update failed',
       });
     }
   }
