@@ -944,7 +944,8 @@ export async function buildApp(opts: BuildOpts): Promise<FastifyInstance> {
           return reply.code(400).send({ error: e.code, message: e.message });
         if (e instanceof ValidationError)
           return reply.code(400).send({ error: 'missing-required', missing: e.missing });
-        if (e instanceof DuplicateKeyError) return reply.code(409).send({ error: 'duplicate-key' });
+        if (e instanceof DuplicateKeyError)
+          return reply.code(409).send({ error: 'duplicate-key', message: e.message });
         if (e instanceof ReferencedError)
           return reply.code(409).send({ error: 'referenced', ref: e.ref });
         if (e instanceof DataError)
@@ -976,6 +977,8 @@ export async function buildApp(opts: BuildOpts): Promise<FastifyInstance> {
         if (e instanceof ValidationError)
           return reply.code(400).send({ error: 'missing-required', missing: e.missing });
         if (e instanceof NotFoundError) return reply.code(404).send({ error: 'not-found' });
+        if (e instanceof DuplicateKeyError)
+          return reply.code(409).send({ error: 'duplicate-key', message: e.message });
         if (e instanceof DataError)
           return reply.code(400).send({ error: 'invalid-data', detail: e.detail });
         throw e;

@@ -124,24 +124,31 @@ const gridOf = async (page) => {
   return out;
 };
 
-/** Save; with `reloadOf` the helper also waits for the screen to reload that day after a successful save. */
-async function save(page, reloadOf) {
+/**
+ * Save. A saved day answers "Data Are Saved." and the screen runs CLEAR_DATA (MS_RATE.cs:2007-2016): the helper waits
+ * for the grid to be cleared; `reopen` shows a day again. `reloadOf` is kept for the callers' readability only.
+ */
+async function save(page, _reloadOf) {
   const [response] = await Promise.all([
     page.waitForResponse(
       (r) => r.request().method() === 'POST' && new URL(r.url()).pathname === '/api/daily-rate',
     ),
-    ...(reloadOf
-      ? [
-          page.waitForResponse(
-            (r) =>
-              r.request().method() === 'GET' &&
-              r.url().includes(`/api/daily-rate?date=${reloadOf}`),
-          ),
-        ]
-      : []),
     page.locator('button[data-save-mnemonic]').click(),
   ]);
+  if (response.status() === 201)
+    await page.waitForFunction(() => !document.querySelector('input[aria-label^="Rate10gm"]'));
   return response;
+}
+
+/** Show a day again after a save cleared the screen: the date is read when the cursor leaves it. */
+async function reopen(page, date) {
+  const input = label(page, 'Vch Date');
+  if ((await input.inputValue()) !== date) return selectDay(page, date);
+  await Promise.all([
+    page.waitForResponse((r) => r.url().includes(`/api/daily-rate?date=${date}`)),
+    input.focus().then(() => input.blur()),
+  ]);
+  await label(page, 'Touch R22').waitFor();
 }
 
 const savedRows = (ctx, date) =>
@@ -498,6 +505,51 @@ export const dailyRate = {
         };
       },
     ),
+    C(
+      'save.clears-the-form',
+      'T07',
+      'mutation',
+      'MS_RATE.cs:2007-2016 and CLEAR_DATA (:1728-1749): after "Data Are Saved." every text box is blank, the grid is cleared, Vch Date is today and holds the cursor; MsDailyRateGen (company-opening wizard only, MS_OPNCOMP.cs:1377) would close the form instead.',
+      async (ctx) => {
+        const date = nextDay();
+        const page = await open(ctx, date);
+        await priceDay(page);
+        await label(page, 'Employee').fill('E01');
+        await label(page, 'Employee').blur();
+        const response = await save(page);
+        assert.equal(response.status(), 201, await response.text());
+        assert.equal((await page.locator('.msg.ok').innerText()).trim(), 'Data Are Saved.');
+        const after = {
+          date: await label(page, 'Vch Date').inputValue(),
+          gold: await label(page, 'Gold Rate 10gm').inputValue(),
+          silver: await label(page, 'Silver Rate 1Kg').inputValue(),
+          employee: await label(page, 'Employee').inputValue(),
+          gridRows: await page.locator('input[aria-label^="Rate10gm"]').count(),
+          focused: await page.evaluate(() => document.activeElement?.id),
+          saveDisabled: await page.locator('button[data-save-mnemonic]').isDisabled(),
+        };
+        assert.deepEqual(after, {
+          date: todayLocal(),
+          gold: '',
+          silver: '',
+          employee: '',
+          gridRows: 0,
+          focused: 'daily-rate-date',
+          saveDisabled: true,
+        });
+        const rows = await savedRows(ctx, date);
+        assert.equal(rows.length, 3, 'the day is saved');
+        // The day is read again only when the cursor leaves Vch Date (DISPLAY_DATA).
+        await reopen(page, date);
+        assert.equal(await label(page, 'Gold Rate 10gm').inputValue(), '72000.00');
+        return {
+          observation: JSON.stringify(after),
+          expected: 'blank rates and employee, empty grid, date today with focus, Save disabled',
+          database: { rows },
+          downstream: { cleared: true },
+        };
+      },
+    ),
     notApplicable(
       'settlement',
       'T06',
@@ -544,6 +596,7 @@ export const dailyRate = {
         await priceDay(page);
         assert.equal((await save(page, date)).status(), 201);
         const before = await savedRows(ctx, date);
+        await reopen(page, date);
         assert.equal((await save(page, date)).status(), 201);
         const after = await savedRows(ctx, date);
         assert.deepEqual(after, before);
@@ -565,6 +618,7 @@ export const dailyRate = {
         const page = await open(ctx, date);
         await priceDay(page);
         assert.equal((await save(page, date)).status(), 201);
+        await reopen(page, date);
         await label(page, 'Rate10gm R18').fill('');
         assert.equal((await save(page)).status(), 201);
         const rows = await savedRows(ctx, date);
@@ -590,6 +644,7 @@ export const dailyRate = {
         const page = await open(ctx, date);
         await priceDay(page);
         assert.equal((await save(page)).status(), 201);
+        await reopen(page, date);
         await Promise.all([
           page.waitForResponse(
             (r) =>
@@ -733,6 +788,7 @@ export const dailyRate = {
         const page = await open(ctx, date);
         await priceDay(page);
         assert.equal((await save(page)).status(), 201);
+        await reopen(page, date);
         const before = await savedRows(ctx, date);
         await ctx.owner.$executeRawUnsafe(
           `CREATE OR REPLACE FUNCTION e2e_rate_fault() RETURNS trigger LANGUAGE plpgsql AS $f$
@@ -1166,6 +1222,7 @@ export const dailyRate = {
         await resetWorld(ctx, true);
         const date = todayLocal();
         const page = await saveDay(ctx, AT_00, date);
+        await reopen(page, date);
         for (const code of ['R18', 'R22', 'RSV']) await label(page, `Rate10gm ${code}`).fill('0');
         assert.equal((await save(page, date)).status(), 201);
         const all = await allRates(ctx);
@@ -1189,6 +1246,7 @@ export const dailyRate = {
         const date = todayLocal();
         const page = await saveDay(ctx, AT_00, date);
         const before = { rows: await allRates(ctx), groups: await groupRates(ctx) };
+        await reopen(page, date);
         await priceB(page);
         await page.getByRole('button', { name: 'Cancel', exact: true }).click();
         assert.deepEqual({ rows: await allRates(ctx), groups: await groupRates(ctx) }, before);
@@ -1308,6 +1366,7 @@ export const dailyRate = {
           `CREATE TRIGGER e2e_copy_fault BEFORE INSERT ON "RATE_MAST" FOR EACH ROW EXECUTE FUNCTION e2e_copy_fault()`,
         );
         try {
+          await reopen(page, date);
           await priceB(page);
           const response = await save(page);
           assert.ok(response.status() >= 400, `the save failed: ${response.status()}`);
@@ -1374,6 +1433,7 @@ export const dailyRate = {
           `UPDATE "GROUP_MAST" SET "GR_TOUCH"=90 WHERE tenant_id='feature-e2e' AND "GR_CODE"='R22'`,
         );
         try {
+          await reopen(page, date);
           assert.equal((await save(page, date)).status(), 201);
         } finally {
           await ctx.owner.$executeRawUnsafe(

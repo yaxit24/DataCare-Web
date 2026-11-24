@@ -120,6 +120,13 @@ export const DESKTOP_MESSAGES = {
   /** MS_PRODUCT.cs, CurMast='Scheme' — blank scheme code. */
   SCHEME_CODE_REQUIRED: 'Enter Scheme Code.',
 
+  /** MS_GROUP.cs:2035 tGrName_Validating — the name belongs to another group code. */
+  GROUP_NAME_DUPLICATE: (code: string): string =>
+    `This Group Name already Exist in  '${code}'  Group Code... Please Change Group Name...`,
+  /** MS_AC_GROUP.cs:1703 tGrName_Validating — note the desktop's different closing words. */
+  AC_GROUP_NAME_DUPLICATE: (code: string): string =>
+    `This Group Name already Exist in  '${code}'  Group Code...Please Change Gr Name...`,
+
   /** MS_STYLE.cs, CurMast='Style' — blank style/model name. */
   MODEL_NAME_REQUIRED: 'Please Insert Model Name ...',
   /** MS_STYLE.cs, CurMast='Style' — duplicate style name. */
