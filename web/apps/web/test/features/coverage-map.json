@@ -371,6 +371,7 @@
       "covers": [
         "web/apps/web/app/(app)/txn/tag-print/page.tsx",
         "web/apps/api/src/modules/stock/tagPrintScreen.ts",
+        "web/apps/api/src/modules/stock/tagPrint.ts",
         "web/apps/api/src/routes/tagPrintScreen.ts"
       ]
     },

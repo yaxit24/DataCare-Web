@@ -8261,6 +8261,35 @@
         "orchestration/work/WP-30/cases.md"
       ],
       "statusNote": "IMPLEMENTED, not accepted. Built and unit/DB-tested; the new browser cases were written without a local browser stack and run in CI. Blocked cases: rojmel.missing-types-and-silver, refusal.detail-row-delete-right, rights.detail-delete-and-print, retry.detail-row-double-post. Open: silver Rojmel and ledger families, Rojmel types 21/23-25/28/29-40, typed rows on a tagged line, desktop-runtime comparison and parent acceptance."
+    },
+    {
+      "id": "N249",
+      "status": "implemented-unverified",
+      "action": "Tag Print like UT_TAG_PRINT for the PRINT_MAST label-file choice and the SubTagPrint sub-report: Print sends the chosen file and the sheet is that file's layout (QrPrint10, BarPrint10, BarPrint13, GhatTagPrnt) with the BAR_IDTL lines by each file's link, the L. line, the *tag* text, the QR picture, karigar, shop and purity group; the combo's empty item and no-default rules; the desktop Set message; Alt+P.",
+      "parentLabels": "P1-core; L3; T01-T18; WP-34",
+      "startAfter": [
+        "N225"
+      ],
+      "requiredProof": "tagLabelText, tagPrintFiles.db, tagPrintScreen.db and tagPrintStaging.db tests pass under forced RLS; the tag-print browser module cases for the new ids pass in CI.",
+      "gapIds": "G261",
+      "entryDefinition": "02-execution-plan.md section 4",
+      "sourceAndModuleDetail": "12-lineage-verification-2026-10-01.md",
+      "universalContract": "03-shared-contracts.md",
+      "verification": "04-verification-playbook.md",
+      "statusAsOf": "2026-11-23",
+      "evidence": [
+        "web/apps/api/src/modules/stock/tagPrint.ts",
+        "web/apps/api/src/modules/stock/tagPrintScreen.ts",
+        "web/apps/api/src/routes/tagPrintScreen.ts",
+        "web/apps/web/app/(app)/txn/tag-print/page.tsx",
+        "web/apps/api/test/tagLabelText.test.ts",
+        "web/apps/api/test/tagPrintFiles.db.test.ts",
+        "web/apps/api/test/tagPrintScreen.db.test.ts",
+        "web/apps/web/test/features/modules/tagPrint.mjs",
+        "orchestration/work/WP-34/study.md",
+        "orchestration/work/WP-34/cases.md"
+      ],
+      "statusNote": "IMPLEMENTED, not accepted. Built and unit/DB-tested; the new browser cases were written without a local browser stack and run in CI. Blocked: tag-print.print.empty-file (no desktop message exists for an empty print file). Decisions (architect, 2026-11-23, owner may override): drop the HUID line; Set keeps the update right; GhatTagPrnt prints the whole voucher's BAR_IDTL lines. Open: exact Crystal positions and fonts, the desktop edition check, RFID and Print Type, desktop-runtime comparison and parent acceptance."
     }
   ],
   "amendments": [
