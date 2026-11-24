@@ -22,12 +22,14 @@ interface SaveResult {
   stones: number;
   barDetlUpdated: number;
   mainStockUpdated: number;
+  version?: string;
 }
 
 interface LoadedVoucher {
   header: Record<string, any> | null;
   lines: Array<Record<string, any>>;
   stones: Array<Record<string, any>>;
+  version: string;
 }
 
 const blank = (): Line => ({ tagNo: '', itCode: '', vchSrno: '', dataType: '', remark: '' });
@@ -45,6 +47,8 @@ export default function TagAdjustPage() {
   const [acCode, setAcCode] = useState('');
   const [lookupNo, setLookupNo] = useState('');
   const [loadedNo, setLoadedNo] = useState<string | null>(null);
+  // The version the server returned for the loaded voucher; an edit sends it so a stale save answers 409.
+  const [loadedVersion, setLoadedVersion] = useState('');
   const [lines, setLines] = useState<Line[]>([blank()]);
   const [result, setResult] = useState<SaveResult | null>(null);
   const [error, setError] = useState('');
@@ -86,9 +90,13 @@ export default function TagAdjustPage() {
     try {
       const body = payload();
       const saved = loadedNo
-        ? await put<SaveResult>(`/stock/tag-adjust/${encodeURIComponent(loadedNo)}`, body)
+        ? await put<SaveResult>(`/stock/tag-adjust/${encodeURIComponent(loadedNo)}`, {
+            ...body,
+            expectedVersion: loadedVersion,
+          })
         : await post<SaveResult>('/stock/tag-adjust', body);
       setResult(saved);
+      setLoadedVersion(saved.version ?? '');
       setLoadedNo(String(saved.vchNo).padStart(5, '0'));
       setLookupNo(String(saved.vchNo).padStart(5, '0'));
     } catch (e) {
@@ -112,6 +120,7 @@ export default function TagAdjustPage() {
         return;
       }
       setLoadedNo(lookupNo.trim().padStart(5, '0'));
+      setLoadedVersion(loaded.version ?? '');
       setVchDate(toIsoDate(loaded.header.VCH_DATE) || today());
       setVchDesc(String(loaded.header.VCH_DESC ?? ''));
       setAcCode(String(loaded.header.AC_CODE ?? ''));
@@ -149,8 +158,13 @@ export default function TagAdjustPage() {
     setBusy(true);
     setError('');
     try {
-      await del(`/stock/tag-adjust/${encodeURIComponent(loadedNo)}`, { book: coBook });
+      // N51 (D17): the delete must carry the version the Load returned, in the query as the API takes it.
+      await del(
+        `/stock/tag-adjust/${encodeURIComponent(loadedNo)}?expectedVersion=${encodeURIComponent(loadedVersion)}`,
+        { book: coBook },
+      );
       setLoadedNo(null);
+      setLoadedVersion('');
       setLookupNo('');
       setLines([blank()]);
       setResult(null);

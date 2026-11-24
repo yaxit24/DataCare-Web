@@ -140,6 +140,10 @@ export const TENANT_CONFIG_EXCLUDED_TABLES: readonly TenantConfigExcludedTablePo
   { table: 'audit_log', reason: 'platform request audit trail, kept by the platform' },
   { table: 'company_backup_run', reason: 'backup handoff ledger, written after the archive' },
   { table: 'data_repair_run', reason: 'data-repair operation ledger, kept by the platform' },
+  {
+    table: 'daily_rate_copy_entitlement',
+    reason: 'operator-provisioned entitlement; a restored archive must not grant it',
+  },
 ];
 
 export const UNREVIEWED_TENANT_TABLE_REASON =

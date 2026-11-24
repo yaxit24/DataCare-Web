@@ -49,6 +49,8 @@ export default function PurchaseReturnPage() {
   // through the same handler as a new one; loadedVchNo is the voucher being edited ('' for a new one).
   const [voucherLookup, setVoucherLookup] = useState('');
   const [loadedVchNo, setLoadedVchNo] = useState('');
+  // N245 (D5): the version the loaded voucher was read with; an edit and a delete send it back.
+  const [loadedVersion, setLoadedVersion] = useState('');
   const [vchDate, setVchDate] = useState(today);
   // Header fields the screen does not show but must send back unchanged on an edit.
   const [taxCode, setTaxCode] = useState('');
@@ -110,6 +112,7 @@ export default function PurchaseReturnPage() {
   function newReturn() {
     setVoucherLookup('');
     setLoadedVchNo('');
+    setLoadedVersion('');
     setVchDate(today());
     setTaxCode('');
     setOrigBook('');
@@ -141,6 +144,7 @@ export default function PurchaseReturnPage() {
         `/purchase-returns/${encodeURIComponent(requested.trim())}?${scopeQuery()}`,
       );
       setLoadedVchNo(String(view.voucherNo));
+      setLoadedVersion(String(view.version ?? ''));
       setVoucherLookup(String(view.voucherNo));
       setResult(null);
       setVchDate(String(view.vchDate));
@@ -178,7 +182,9 @@ export default function PurchaseReturnPage() {
     setBusy(true);
     setErr('');
     try {
-      await del(`/purchase-returns/${encodeURIComponent(loadedVchNo)}?${scopeQuery()}`);
+      await del(
+        `/purchase-returns/${encodeURIComponent(loadedVchNo)}?${scopeQuery()}&expectedVersion=${encodeURIComponent(loadedVersion)}`,
+      );
       newReturn();
     } catch (e) {
       setErr(failure(e, 'delete failed'));
@@ -247,6 +253,7 @@ export default function PurchaseReturnPage() {
         cashAc: tender.cashAc || undefined,
         bankAc: tender.bankAc || undefined,
         kasarAc: tender.kasarAc || undefined,
+        expectedVersion: loadedVchNo ? loadedVersion : undefined,
       };
       const saved = loadedVchNo
         ? await put<any>(`/purchase-returns/${encodeURIComponent(loadedVchNo)}`, body)

@@ -135,8 +135,21 @@ describe('route policy registry', () => {
     // WP-15 adds the Tag Stock Excel export (GET /reports/tag-stock.xlsx) and its Size list
     // (GET /reports/tag-stock/sizes): 771 + 2 = 773.
     // WP-19 adds the Gst Report all-sections workbook (GET /reports/gst-report/workbook.xlsx): 773 + 1 = 774.
-    expect(routes).toHaveLength(774);
-    expect(new Set(routes.map((route) => `${route.method} ${route.path}`)).size).toBe(774);
+    // N240 (WP-21) adds Books (MS_BOOK): list, print, template, accounts, one, POST, PUT and DELETE: 774 + 8 = 782.
+    // N241 (WP-16) adds the RP_STOCK Stock Report GET /reports/stock-report, /defaults, /movements and the CSV/XLSX
+    // exports: 768 + 5 = 773. [774 on main + 5 here = 779] [782 on main + 5 here = 787]
+    // N242 (WP-27) adds the Sales Return edit PUT /sales-returns/:vchNo: 768 + 1 = 769. [774 on main + 1 here = 775] [787 on main + 1 here = 788]
+    // N243 (WP-26) adds the Sales Invoice print-file list and its default: 768 + 2 = 770. [774 on main + 2 here = 776] [788 on main + 2 here = 790]
+    // N246 (WP-31) adds the Contra Entry F1 list GET /contra/list: 768 + 1 = 769. [774 on main + 1 here = 775] [790 on main + 1 here = 791]
+    // N250 (WP-12) adds the RP_ALL Purchase Rpt GET /reports/purchase-report, its City/Area options and the CSV, XLSX
+    // and PDF exports: 773 + 5 = 778. [791 on main + 5 here = 796]
+    // WP-33 adds the MDI main-window rate labels (GET /daily-rate/labels): 773 + 1 = 774. [796 on main + 1 here = 797]
+    // WP-14 adds the RP_ALL Order Report GET /reports/order-report and its CSV/XLSX exports: 771 + 3 = 774. [787 on main + 3 here = 790] [790 on main + 3 here = 793] [797 on main + 3 here = 800]
+    // N255 (WP-20) adds the Ledger Report JmaUdr, Gold and Silver prints with PDF and Excel: 790 + 9 = 799. [800 on main + 9 here = 809]
+    // The Sales Report's Select Book panel gets its own book list GET /reports/sales-report/books
+    // (RP_ALL.cs:11421 BookMast), uncapped and session-location-scoped: 800 + 1 = 801. [809 on main + 1 here = 810]
+    expect(routes).toHaveLength(810);
+    expect(new Set(routes.map((route) => `${route.method} ${route.path}`)).size).toBe(810);
 
     const policies = routes.map((route) => ({
       ...route,
@@ -696,6 +709,16 @@ describe('route policy registry', () => {
     ] as const) {
       expect(routePolicyFor('GET', path)).toMatchObject({ form, action: 'read' });
     }
+  });
+
+  it('maps the Sales Report Select Book list to the Sales Register read right', () => {
+    // RP_ALL.cs:6699 calls BookMast() for the "Sales Report" caption; the panel reads the same form's right.
+    expect(routePolicyFor('GET', '/reports/sales-report/books')).toMatchObject({
+      kind: 'form',
+      form: 'Reports/Sales Register',
+      action: 'read',
+      businessScope: true,
+    });
   });
 
   it('maps KRREP ISSUE endpoints to the canonical repair form and independent actions', () => {

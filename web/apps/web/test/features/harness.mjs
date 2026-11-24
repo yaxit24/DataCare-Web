@@ -180,8 +180,8 @@ const savedLogins = new Map();
  */
 const SAVED_LOGIN_MAX_AGE_MS = 10 * 60 * 1000;
 
-async function savedLogin(stack, { user, password, slot }) {
-  const key = slot ?? user;
+async function savedLogin(stack, { user, password, slot, location }) {
+  const key = slot ?? (location ? `${user}@${location}` : user);
   const saved = savedLogins.get(key);
   if (saved && Date.now() - saved.at < SAVED_LOGIN_MAX_AGE_MS) return saved.state;
   const context = await stack.browser.newContext({ baseURL: stack.target.webOrigin });
@@ -223,6 +223,11 @@ async function savedLogin(stack, { user, password, slot }) {
     await page
       .getByRole('heading', { name: 'Open Company', exact: true })
       .waitFor({ timeout: 20_000 });
+    // A session at another location signs in through the real Open Company selector, never by editing a request.
+    if (location) {
+      await page.locator('#context-location').selectOption(location);
+      assert.equal(await page.locator('#context-location').inputValue(), location);
+    }
     await page.getByRole('button', { name: 'Open', exact: true }).click();
     await page.waitForURL('**/dashboard', { timeout: 20_000 });
   } catch (error) {

@@ -18,6 +18,8 @@ import { seedCatalogue } from './fixtures/catalogue.mjs';
 import { purchaseInvoice } from './modules/purchaseInvoice.mjs';
 import { purchaseReport } from './modules/purchaseReport.mjs';
 import { salesReport } from './modules/salesReport.mjs';
+import { stockReport } from './modules/stockReport.mjs';
+import { orderReportRp } from './modules/orderReportRp.mjs';
 import { purchaseReturn } from './modules/purchaseReturn.mjs';
 import { salesOrder } from './modules/salesOrder.mjs';
 import { salesInvoice } from './modules/salesInvoice.mjs';
@@ -42,6 +44,7 @@ import { employeeMaster } from './modules/employeeMaster.mjs';
 import { taxMaster } from './modules/taxMaster.mjs';
 import { autoItem } from './modules/autoItem.mjs';
 import { groupMaster } from './modules/groupMaster.mjs';
+import { books } from './modules/books.mjs';
 import { productMaster } from './modules/productMaster.mjs';
 import { addressMaster } from './modules/addressMaster.mjs';
 import { partyMaster } from './modules/partyMaster.mjs';
@@ -54,6 +57,7 @@ import { dataBackup } from './modules/dataBackup.mjs';
 import { gstReport } from './modules/gstReport.mjs';
 import { approvalIssue } from './modules/approvalIssue.mjs';
 import { approvalReturn } from './modules/approvalReturn.mjs';
+import { approvalReportRp } from './modules/approvalReportRp.mjs';
 import { runSurface } from './surface/runner.mjs';
 
 /**
@@ -74,6 +78,8 @@ const MODULES = [
   purchaseInvoice,
   purchaseReport,
   salesReport,
+  stockReport,
+  orderReportRp,
   settingsEffects,
   usersRights,
   salesReturn,
@@ -97,6 +103,7 @@ const MODULES = [
   taxMaster,
   autoItem,
   groupMaster,
+  books,
   productMaster,
   addressMaster,
   partyMaster,
@@ -109,6 +116,7 @@ const MODULES = [
   gstReport,
   approvalIssue,
   approvalReturn,
+  approvalReportRp,
 ];
 
 const artifacts = resolve(webRoot, 'test-results/feature-e2e');

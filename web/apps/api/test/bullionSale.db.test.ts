@@ -225,6 +225,7 @@ d('bullion sale workflow over RATE_CUT_DATA', () => {
       silverFine: 0.25,
     });
 
+    // N51 (D17): the edit carries the version the reopen returned; a stale one is refused first.
     await editBullionSale(
       prisma,
       {
@@ -232,6 +233,7 @@ d('bullion sale workflow over RATE_CUT_DATA', () => {
         vchDate: '2024-06-11',
         acCode: 'CUST',
         acName: 'Bullion Customer',
+        expectedVersion: String(reopened.version ?? ''),
         lines: [
           {
             itCode: 'GOLD',
@@ -284,6 +286,8 @@ d('bullion sale workflow over RATE_CUT_DATA', () => {
       scope: saleScope,
       vchNo: created.vchNo,
       deleteUser: 'deleter',
+      // N51 (D17): the delete carries the version the post-edit reopen returned.
+      expectedVersion: String(edited.version ?? ''),
     });
     expect(await adjWt('00001')).toBeCloseTo(0, 3);
     expect(await adjWt('00002')).toBeCloseTo(0, 3);
@@ -311,6 +315,29 @@ d('bullion sale workflow over RATE_CUT_DATA', () => {
     expect(await stockRows()).toEqual([]);
   }, 30_000);
 
+  // WP-10 F2: a PUT edits a saved voucher only; an unused number is a 404, not a create at the typed number.
+  it('refuses an edit of an unused bullion sale number and writes nothing', async () => {
+    await expect(
+      editBullionSale(
+        prisma,
+        {
+          scope: saleScope,
+          vchDate: '2024-06-11',
+          acCode: 'CUST',
+          lines: [{ itCode: 'GOLD', grossWt: 1, netWt: 1, touch: 100, rate: 7000 }],
+        } as any,
+        '00500',
+      ),
+    ).rejects.toMatchObject({ code: 'voucher-not-found', statusCode: 404 });
+    const rows = (await withTenant(prisma, tenantId, (tx: any) =>
+      tx.$queryRawUnsafe(
+        `SELECT count(*)::int AS n FROM "RATE_CUT_DATA" WHERE tenant_id=$1 AND "VCH_NO"='00500'`,
+        tenantId,
+      ),
+    )) as Array<{ n: number }>;
+    expect(rows[0]?.n).toBe(0);
+  });
+
   it('keeps bullion sale books out of the generic rate-cut workflow', async () => {
     await expect(
       postRateCut(prisma, {
@@ -327,5 +354,85 @@ d('bullion sale workflow over RATE_CUT_DATA', () => {
         lines: [{ itCode: 'GOLD', grossWt: 1, netWt: 1, touch: 100, rate: 7000 }],
       } as any),
     ).rejects.toThrow(/use a bullion-sale book/i);
+  });
+
+  it('N51: an edit or delete with a stale or missing version token is refused and writes nothing', async () => {
+    const created = await postBullionSale(prisma, {
+      scope: saleScope,
+      vchDate: '2024-06-10',
+      acCode: 'CUST',
+      lines: [{ itCode: 'GOLD', grossWt: 3, netWt: 3, touch: 100, rate: 7000 }],
+    } as any);
+    const opened = (await getBullionSale(prisma, saleScope, created.vchNo)) as any;
+    const stale = String(opened.version ?? '');
+    // The first save with the token it opened with succeeds and issues a fresh version.
+    const saved = await editBullionSale(
+      prisma,
+      {
+        scope: saleScope,
+        vchDate: '2024-06-11',
+        acCode: 'CUST',
+        expectedVersion: stale,
+        lines: [{ itCode: 'GOLD', grossWt: 2, netWt: 2, touch: 100, rate: 7000 }],
+      } as any,
+      created.vchNo,
+    );
+    expect(saved.version).toMatch(/^[0-9a-f]{64}$/);
+    expect(saved.version).not.toBe(stale);
+    // A missing token is the same refusal the versioned routes answer.
+    await expect(
+      editBullionSale(
+        prisma,
+        {
+          scope: saleScope,
+          vchDate: '2024-06-11',
+          acCode: 'CUST',
+          lines: [{ itCode: 'GOLD', grossWt: 1, netWt: 1, touch: 100, rate: 7000 }],
+        } as any,
+        created.vchNo,
+      ),
+    ).rejects.toMatchObject({ name: 'VoucherVersionValidationError' });
+    // The stale second save is refused and writes nothing.
+    await expect(
+      editBullionSale(
+        prisma,
+        {
+          scope: saleScope,
+          vchDate: '2024-06-11',
+          acCode: 'CUST',
+          expectedVersion: stale,
+          lines: [{ itCode: 'GOLD', grossWt: 1, netWt: 1, touch: 100, rate: 7000 }],
+        } as any,
+        created.vchNo,
+      ),
+    ).rejects.toMatchObject({ code: 'voucher-version-conflict' });
+    const editedHeader = await header(created.vchNo);
+    expect(Number(editedHeader.sl_fine)).toBeCloseTo(2, 3);
+    // A delete from the stale copy is refused and deletes nothing.
+    await expect(
+      deleteBullionSale(prisma, {
+        scope: saleScope,
+        vchNo: created.vchNo,
+        deleteUser: 'deleter',
+        expectedVersion: stale,
+      }),
+    ).rejects.toMatchObject({ code: 'voucher-version-conflict' });
+    const deleteRows = (await withTenant(prisma, tenantId, (tx: any) =>
+      tx.$queryRawUnsafe(
+        `SELECT count(*)::int AS n FROM "DELETE_DATA" WHERE tenant_id=$1 AND "VCH_NO"='00001'`,
+        tenantId,
+      ),
+    )) as Array<{ n: number }>;
+    expect(deleteRows[0]?.n).toBe(0);
+    // With the current version the delete succeeds.
+    const current = (await getBullionSale(prisma, saleScope, created.vchNo)) as any;
+    await expect(
+      deleteBullionSale(prisma, {
+        scope: saleScope,
+        vchNo: created.vchNo,
+        deleteUser: 'deleter',
+        expectedVersion: String(current.version ?? ''),
+      }),
+    ).resolves.toEqual({ reversed: true });
   });
 });

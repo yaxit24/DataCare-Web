@@ -171,6 +171,46 @@ async function createReturn(ctx, page, { supplier = PARTIES.local.code, lines = 
   await page.getByText(`Return saved — Voucher #${Number(vchNo)}`, { exact: false }).waitFor();
   return vchNo;
 }
+/** Open the print popup of a saved return from the recent list and return the HSN summary table's HTML. */
+async function printedHsnTable(page, vchNo) {
+  await page.getByRole('button', { name: '▸ Recent vouchers', exact: true }).click();
+  const row = page.locator('table.grid tr', { hasText: vchNo }).last();
+  const [printed] = await Promise.all([
+    page.waitForEvent('popup'),
+    row.getByRole('link', { name: 'Print', exact: true }).click(),
+  ]);
+  await printed.waitForURL(new RegExp(`coBook=${BOOK}`));
+  await printed.waitForLoadState();
+  const html = await printed.content();
+  await printed.close();
+  return html.slice(html.indexOf('class="hsn"'), html.indexOf('class="tot"'));
+}
+/**
+ * The shared fixture's gold item and its group carry no HSN code, so a print case sets one on the item for its own
+ * run and puts the previous value back afterwards. A return saves no HSN (the print joins ITEM_MAST/GROUP_MAST when
+ * it renders, purchaseBill.ts), so nothing this leaves behind carries the code into a later module.
+ */
+const GOLD_HSN = '711320';
+async function withGoldHsn(ctx, fn) {
+  const [prior] = await ctx.rows(
+    `SELECT "HSN_CODE" h FROM "ITEM_MAST" WHERE tenant_id=$1 AND "CO_CODE"='01' AND "IT_CODE"=$2`,
+    ITEMS.gold.code,
+  );
+  assert(prior, 'the fixture gold item exists');
+  const setHsn = (value) =>
+    ctx.rows(
+      `UPDATE "ITEM_MAST" SET "HSN_CODE"=$3 WHERE tenant_id=$1 AND "CO_CODE"='01' AND "IT_CODE"=$2 RETURNING 1`,
+      ITEMS.gold.code,
+      value,
+    );
+  await setHsn(GOLD_HSN);
+  try {
+    return await fn(GOLD_HSN);
+  } finally {
+    await setHsn(prior.h ?? null);
+  }
+}
+
 async function loadReturn(page, vchNo) {
   await page.getByLabel('Voucher No', { exact: true }).fill(vchNo);
   await page.getByRole('button', { name: 'Load', exact: true }).first().click();
@@ -726,6 +766,58 @@ export const purchaseReturn = {
     ),
 
     C(
+      'print.hsn-tax-intra',
+      'T16',
+      'output',
+      'G95: PrRtnBillGst.RPT prints the PR_DATA header tax (TR_KR_ISU.cs:5519, :5102): LINE_W taxable 6,200.00, CGST 93.00, SGST 93.00, tax 186.00',
+      async (ctx) => {
+        const { page } = await ctx.session();
+        const vchNo = await createReturn(ctx, page);
+        const { hsn, table } = await withGoldHsn(ctx, async (hsn) => ({
+          hsn,
+          table: await printedHsnTable(page, vchNo),
+        }));
+        assert(
+          table.includes(
+            `<td>${hsn}</td><td>6,200.00</td><td>93.00</td><td>93.00</td><td>186.00</td>`,
+          ),
+          `HSN row for ${hsn}: ${table}`,
+        );
+        assert(!table.includes('<td>0.00</td>'), 'no HSN tax cell is 0.00');
+        return {
+          observation: `HSN ${hsn}: 6,200.00 / 93.00 / 93.00 / 186.00`,
+          expected: { taxable: 6200, cgst: 93, sgst: 93, tax: 186 },
+          output: { bytes: table.length },
+        };
+      },
+    ),
+
+    C(
+      'print.hsn-tax-inter',
+      'T16',
+      'output',
+      'G95: an inter-state return prints the whole header tax as IGST (TR_KR_ISU.cs:5095)',
+      async (ctx) => {
+        const { page } = await ctx.session();
+        const vchNo = await createReturn(ctx, page, { supplier: PARTIES.interState.code });
+        const { hsn, table } = await withGoldHsn(ctx, async (hsn) => ({
+          hsn,
+          table: await printedHsnTable(page, vchNo),
+        }));
+        assert(
+          table.includes(`<td>${hsn}</td><td>6,200.00</td><td>186.00</td><td>186.00</td>`),
+          `HSN row for ${hsn}: ${table}`,
+        );
+        assert(!table.includes('CGST'), 'an inter-state return has no CGST column');
+        return {
+          observation: `HSN ${hsn}: 6,200.00 / IGST 186.00`,
+          expected: { taxable: 6200, igst: 186 },
+          output: { bytes: table.length },
+        };
+      },
+    ),
+
+    C(
       'rights.clerk-no-return',
       'T11',
       'refusal',
@@ -871,6 +963,91 @@ export const purchaseReturn = {
           observation: 'Alt+S saved the return',
           expected: 'save',
           database: { before, after },
+          downstream: { created: 1 },
+        };
+      },
+    ),
+
+    C(
+      'keyboard.enter-walk',
+      'T17',
+      'mutation',
+      'G96: Enter advances one editable cell (TR_KR_ISU.cs:3699), walks past read-only cells (:3743) and, on the last row, adds a row at column 1 (:3680-3683)',
+      async (ctx) => {
+        const { page } = await ctx.session();
+        const before = await counts(ctx);
+        await openReturn(page);
+        await pickSupplier(page, PARTIES.local.code);
+        const at = async (row, n) =>
+          page.evaluate(
+            ([r, c]) => {
+              const input = document.activeElement;
+              const td = input?.closest('td');
+              const tr = td?.closest('tr');
+              const rows = Array.from(tr?.parentElement?.children ?? []);
+              return (
+                rows.indexOf(tr) === r && Array.from(tr.children).indexOf(td) === c - 1 && !!input
+              );
+            },
+            [row, n],
+          );
+        // An appended row mounts only after React commits, and GridKeyboard focuses it on a later animation frame,
+        // so the append checks wait (bounded) for focus to arrive rather than reading it in the same tick.
+        const reaches = async (row, n) => {
+          for (let i = 0; i < 40; i++) {
+            if (await at(row, n)) return true;
+            await page.waitForTimeout(50);
+          }
+          return false;
+        };
+        await cell(page, 0, 1).fill(LINE_W.item);
+        await cell(page, 0, 1).press('Escape');
+        await cell(page, 0, 1).focus();
+        // Item, Tag, Pcs, Gross, Net Wt, Touch%, Rate, Making/g are columns 1-8.
+        for (const [n, value] of [
+          [2, undefined],
+          [3, LINE_W.pcs],
+          [4, LINE_W.gross],
+          [5, LINE_W.net],
+          [6, LINE_W.touch],
+          [7, LINE_W.rate],
+          [8, LINE_W.making],
+        ]) {
+          await page.keyboard.press('Enter');
+          assert(await at(0, n), `Enter moved to row 1 column ${n}`);
+          if (value !== undefined) await page.keyboard.type(value);
+        }
+        // Fine, Amount and the delete button are not stops: Enter on Making/g appends row 2 at Item.
+        await page.keyboard.press('Enter');
+        assert.equal(await grid(page).locator('tbody tr').count(), 2, 'a second row was added');
+        assert(await reaches(1, 1), 'focus is on row 2 Item');
+        // A middle row: Enter from row 1 Making/g goes to row 2 Item and adds no row.
+        await cell(page, 0, 8).focus();
+        await page.keyboard.press('Enter');
+        assert(await at(1, 1), 'Enter on a middle row goes to the next row Item');
+        assert.equal(await grid(page).locator('tbody tr').count(), 2, 'no third row');
+        const [response] = await Promise.all([
+          page.waitForResponse(
+            (r) =>
+              new URL(r.url()).pathname === '/api/purchase-returns' &&
+              r.request().method() === 'POST',
+          ),
+          page.keyboard.press('Alt+s'),
+        ]);
+        assert.equal(response.status(), 201, await response.text());
+        const after = await counts(ctx);
+        assert.equal(after.pr - before.pr, 1);
+        const vchNo = String((await response.json()).vchNo).padStart(5, '0');
+        const saved = await lines(ctx, vchNo);
+        assert.deepEqual(
+          saved.map((l) => [l.it, l.nwt, l.net]),
+          [[ITEMS.gold.code, 5, 6200]],
+          'only the typed line is persisted; the empty appended row is not',
+        );
+        return {
+          observation: 'Enter walked Item to Making/g, appended row 2, and Alt+S saved one line',
+          expected: 'editable stops only; append after the last row',
+          database: { saved },
           downstream: { created: 1 },
         };
       },

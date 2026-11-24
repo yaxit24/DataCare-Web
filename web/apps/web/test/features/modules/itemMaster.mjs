@@ -716,12 +716,18 @@ export const itemMaster = {
           await saved(page);
           const after = await counts();
           assert.deepEqual(after, { ...before, i: before.i + 1 });
+          // WP-36: the hidden desktop columns a new item writes (MS_ITEM.cs:3261-3263): N, N, 0; AC_MEMB_COM_PRC 0.
+          const [hidden] = await ctx.rows(
+            `SELECT "TAX_FREE_ITEM" tf,"APP_ITEM" app,"EMP_COM_PRC" emp,"AC_MEMB_COM_PRC" memb FROM "ITEM_MAST" WHERE tenant_id=$1 AND "IT_CODE"=$2`,
+            'IMIMG',
+          );
+          assert.deepEqual(hidden, { tf: 'N', app: 'N', emp: 0, memb: 0 });
           const list = await listed(page);
           assert.deepEqual(list, await dbList(ctx));
           return {
-            observation: `ITEM_MAST ${before.i} → ${after.i}; nothing else changed`,
-            expected: 'one row',
-            database: { before, after },
+            observation: `ITEM_MAST ${before.i} → ${after.i}; nothing else changed; hidden columns ${JSON.stringify(hidden)}`,
+            expected: 'one row; TAX_FREE_ITEM N, APP_ITEM N, EMP_COM_PRC 0, AC_MEMB_COM_PRC 0',
+            database: { before, after, hidden },
             downstream: { listed: list.some(([c]) => c === 'IMIMG') },
           };
         }),
@@ -734,6 +740,11 @@ export const itemMaster = {
       async (ctx) =>
         withMasters(ctx, async () => {
           await seedItem(ctx, 'IMIMG', 'E2E REOPEN RING', { minstk: 5, avg: 91.6, lbr: 9 });
+          // A migrated desktop item's hidden values: DISPLAY_DATA reloads them, so the save keeps them (:2989, :3024, :3032).
+          await exec(
+            ctx,
+            `UPDATE "ITEM_MAST" SET "TAX_FREE_ITEM"='Y',"APP_ITEM"='Y',"EMP_COM_PRC"=2.5 WHERE tenant_id=$1 AND "IT_CODE"='IMIMG'`,
+          );
           const before = await allItems(ctx);
           const { page } = await ctx.session();
           await openScreen(page);
@@ -744,6 +755,11 @@ export const itemMaster = {
           const after = await allItems(ctx);
           const row = await itemRow(ctx, 'IMIMG');
           assert.deepEqual([row.minstk, row.avg, row.main, row.lbr], [5, 91.6, 'DESKUSER', 9]);
+          const [hidden] = await ctx.rows(
+            `SELECT "TAX_FREE_ITEM" tf,"APP_ITEM" app,"EMP_COM_PRC" emp,"AC_MEMB_COM_PRC" memb FROM "ITEM_MAST" WHERE tenant_id=$1 AND "IT_CODE"=$2`,
+            'IMIMG',
+          );
+          assert.deepEqual(hidden, { tf: 'Y', app: 'Y', emp: 2.5, memb: 0 });
           return {
             observation: `MIN_STK ${row.minstk}, AVG_TOUCH ${row.avg}, MAIN_USER ${row.main} after an unchanged save`,
             expected: { minstk: 5, avg: 91.6, main: 'DESKUSER' },

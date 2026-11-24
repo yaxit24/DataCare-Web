@@ -118,13 +118,14 @@ export function registerTagPrintScreenRoutes(
       tagPrintStage(prisma, scope(req), {
         book: String(b.bookCode ?? ''),
         labelSkip: b.labelSkip,
+        file: String(b.file ?? ''),
         tags: Array.isArray(b.tags) ? b.tags : [],
       }),
     );
   });
   app.get('/stock/tag-print-screen/labels', auth as any, async (req, reply) => {
     if (!guard(req, reply, 'print')) return;
-    const html = await tagPrintLabels(prisma, scope(req));
+    const html = await tagPrintLabels(prisma, scope(req), q(req, 'file'));
     return reply.code(200).type('text/html; charset=utf-8').send(html);
   });
 }

@@ -79,6 +79,7 @@ databaseDescribe('database-backed transaction integrity', () => {
       'GROUP_MAST',
       'TAX_MAST',
       'AC_MAST',
+      'YEAR_MAST',
       'CO_SET',
     ]) {
       await owner.$executeRawUnsafe(`DELETE FROM "${table}" WHERE tenant_id=$1`, TENANT);
@@ -86,6 +87,13 @@ databaseDescribe('database-backed transaction integrity', () => {
   };
 
   const seed = async (): Promise<void> => {
+    // The Sales Return refuses a date outside the open year (TR_SALE_RTN.cs:12255-12262, WP-27), so the year exists.
+    await owner.$executeRawUnsafe(
+      `INSERT INTO "YEAR_MAST"(tenant_id,"CO_CODE","CO_YEAR","OP_DATE","CL_DATE") VALUES ($1,$2,$3,'2024-04-01','2025-03-31')`,
+      TENANT,
+      CO,
+      YEAR,
+    );
     await owner.$executeRawUnsafe(
       `INSERT INTO "CO_SET"(tenant_id,"CO_CODE","LOCK_DATE") VALUES ($1,$2,NULL)`,
       TENANT,
@@ -625,7 +633,12 @@ databaseDescribe('database-backed transaction integrity', () => {
     // G04: the day book carries one money row per priced line, crediting the purchase account (SIGN '+').
     expect(Number(purchaseReturnRows[0]?.rojmel_money)).toBe(2);
 
-    await deletePurchaseReturn(runtime, { scope: scope('PRT'), vchNo: purchaseReturn.vchNo });
+    const returnView = await getPurchaseReturn(runtime, scope('PRT'), purchaseReturn.vchNo);
+    await deletePurchaseReturn(runtime, {
+      scope: scope('PRT'),
+      vchNo: purchaseReturn.vchNo,
+      expectedVersion: String(returnView.version),
+    });
     await expect(
       tagAvailable(runtime, TENANT, {
         CO_CODE: CO,
@@ -814,6 +827,9 @@ databaseDescribe('database-backed transaction integrity', () => {
       scope: returnScope,
       vchNo: created.vchNo,
       deleteUser: 'return-deleter',
+      expectedVersion: String(
+        (await getPurchaseReturn(runtime, returnScope, created.vchNo)).version,
+      ),
     });
     const remaining = (await owner.$queryRawUnsafe(
       `SELECT
