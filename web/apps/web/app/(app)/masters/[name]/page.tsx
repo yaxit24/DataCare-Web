@@ -258,7 +258,7 @@ export default function MasterPage() {
         kind: 'err',
         text:
           b?.error === 'duplicate-key'
-            ? 'Duplicate key'
+            ? b.message || 'Duplicate key'
             : b?.missing
               ? 'Missing: ' + b.missing.join(', ')
               : b?.error === 'invalid-data'
@@ -308,7 +308,9 @@ export default function MasterPage() {
         text:
           b?.error === 'not-found'
             ? 'Record not found'
-            : b?.missing
+            : b?.error === 'duplicate-key'
+              ? b.message || 'Duplicate key'
+              : b?.missing
               ? 'Missing: ' + b.missing.join(', ')
               : b?.error === 'invalid-data'
                 ? b.detail || 'Invalid data'

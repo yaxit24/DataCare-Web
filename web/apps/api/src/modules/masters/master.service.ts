@@ -56,6 +56,12 @@ export interface MasterConfig {
   /** Verbatim desktop message for a repeated business key, e.g. MS_STYLE's name-already-exists guard. */
   duplicateMessage?: string;
   /**
+   * A name another code already uses is refused (desktop `tGrName_Validating`, MS_GROUP.cs:2029-2041 and
+   * MS_AC_GROUP.cs:1695-1712): the check compares the name case-insensitively, as the desktop's DataView filter does,
+   * and ignores the record's own code, so keeping its own name on an edit is fine. `message` receives the other code.
+   */
+  uniqueName?: { column: string; codeColumn: string; message: (otherCode: string) => string };
+  /**
    * The master has its own screen and writer, and the generic routes only read it: a create, update or delete through
    * them is refused with this message. TAX_MAST keys several rows (a header and its components) by one code, so a
    * generic update by CO_CODE + TAX_CODE would write the header's name and rate into every component row (N213).
@@ -151,6 +157,28 @@ export class DuplicateKeyError extends Error {
     super(desktopMessage ?? 'duplicate-key');
     this.name = 'DuplicateKeyError';
   }
+}
+/** `config.uniqueName`: refuse a name that another code already uses, with the desktop's own words. */
+async function assertNameFreeTx(
+  tx: any,
+  scope: MasterScope,
+  config: MasterConfig,
+  data: Record<string, unknown>,
+): Promise<void> {
+  const rule = config.uniqueName;
+  if (!rule) return;
+  const name = data[rule.column];
+  if (name === undefined || name === null || name === '') return;
+  const rows: Array<{ code: unknown }> = await tx.$queryRawUnsafe(
+    `SELECT "${rule.codeColumn}" AS code FROM "${config.table}"
+      WHERE tenant_id=$1 AND "CO_CODE"=$2 AND upper("${rule.column}")=upper($3)
+        AND "${rule.codeColumn}" IS DISTINCT FROM $4 ORDER BY row_id LIMIT 1`,
+    scope.tenantId,
+    data.CO_CODE,
+    String(name),
+    String(data[rule.codeColumn] ?? ''),
+  );
+  if (rows.length) throw new DuplicateKeyError(rule.message(String(rows[0]!.code ?? '')));
 }
 export class ReferencedError extends Error {
   constructor(public ref: string) {
@@ -436,6 +464,7 @@ export async function createMaster(
     const dup = buildDuplicateCheck(config, data);
     const exists: unknown[] = await tx.$queryRawUnsafe(dup.sql, ...dup.params);
     if (exists.length) throw new DuplicateKeyError(config.duplicateMessage);
+    await assertNameFreeTx(tx, scope, config, data);
     const columnTypes = await tableColumnTypesTx(tx, config.table);
     const row = stampCreator(
       normalizeBlankMasterValues(data, columnTypes),
@@ -485,6 +514,7 @@ export async function updateMaster(
     const chk = buildDuplicateCheck(config, data);
     const exists: unknown[] = await tx.$queryRawUnsafe(chk.sql, ...chk.params);
     if (!exists.length) throw new NotFoundError();
+    await assertNameFreeTx(tx, scope, config, data);
     const row = normalizeBlankMasterValues(data, await tableColumnTypesTx(tx, config.table));
     // An edit keeps the stored creator (the desktop reloads MAIN_USER into the form before saving).
     delete row.MAIN_USER;

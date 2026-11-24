@@ -538,6 +538,86 @@ export const companyMaster = {
           };
         }),
     ),
+    C(
+      'duplicate.group-name',
+      'T06',
+      'refusal',
+      'MS_GROUP.cs:2029-2041 and MS_AC_GROUP.cs:1695-1712 tGrName_Validating: a group name another code already uses is refused with the other code in the message; an edit that keeps its own name is allowed',
+      async (ctx) => {
+        const { page } = await ctx.session();
+        const post = (path, data) => request(page, 'POST', path, data);
+        const body = async (response) => ({
+          status: response.status(),
+          json: await response.json(),
+        });
+        const mark = async () => [
+          await ctx.rows(
+            `SELECT "AC_GR" c,"AC_GR_NAME" n FROM "AC_GROUP" WHERE tenant_id=$1 AND "AC_GR" LIKE 'Z%' ORDER BY 1`,
+          ),
+          await ctx.rows(
+            `SELECT "GR_CODE" c,"GR_NAME" n FROM "GROUP_MAST" WHERE tenant_id=$1 AND "GR_CODE" LIKE 'Z%' ORDER BY 1`,
+          ),
+        ];
+        try {
+          // Account group, in the screen: the second code with the same name shows the desktop message.
+          assert.equal(
+            (await post('/masters/ac-groups', { AC_GR: 'Z1', AC_GR_NAME: 'ZDUP ACC' })).status(),
+            201,
+          );
+          await page.goto('/masters/ac-groups');
+          await page.getByRole('button', { name: '+ New', exact: true }).click();
+          await page.locator('.field:has(> label:text-is("A/c Group *")) input').fill('Z2');
+          await page.locator('.field:has(> label:text-is("A/c Group Name")) input').fill('zdup acc');
+          await page.getByRole('button', { name: 'Save', exact: true }).click();
+          const shown = await page.locator('.msg.err').textContent();
+          assert.equal(
+            shown.trim(),
+            "This Group Name already Exist in  'Z1'  Group Code...Please Change Gr Name...",
+          );
+          // Item group, through the generic route: the same refusal in the Item Group words.
+          assert.equal(
+            (
+              await post('/masters/groups', { GR_CODE: 'Z1', GR_NAME: 'ZDUP ITEM', GR_TYPE: 'G' })
+            ).status(),
+            201,
+          );
+          const refused = await body(
+            await post('/masters/groups', { GR_CODE: 'Z2', GR_NAME: 'ZDUP ITEM', GR_TYPE: 'G' }),
+          );
+          assert.deepEqual(refused, {
+            status: 409,
+            json: {
+              error: 'duplicate-key',
+              message:
+                "This Group Name already Exist in  'Z1'  Group Code... Please Change Group Name...",
+            },
+          });
+          // Keeping its own name on an edit is allowed.
+          const edit = await request(page, 'PUT', '/masters/groups', {
+            GR_CODE: 'Z1',
+            GR_NAME: 'ZDUP ITEM',
+            GR_TYPE: 'S',
+          });
+          assert.equal(edit.status(), 200, await edit.text());
+          const database = await mark();
+          assert.deepEqual(database, [[{ c: 'Z1', n: 'ZDUP ACC' }], [{ c: 'Z1', n: 'ZDUP ITEM' }]]);
+          return {
+            observation: `refused: ${shown.trim()} | ${refused.json.message}; own-name edit saved`,
+            expected: 'both desktop messages, one row each, own-name edit accepted',
+            database: { rows: database },
+          };
+        } finally {
+          await ctx.owner.$executeRawUnsafe(
+            `DELETE FROM "AC_GROUP" WHERE tenant_id=$1 AND "AC_GR" LIKE 'Z%'`,
+            TENANT,
+          );
+          await ctx.owner.$executeRawUnsafe(
+            `DELETE FROM "GROUP_MAST" WHERE tenant_id=$1 AND "GR_CODE" LIKE 'Z%'`,
+            TENANT,
+          );
+        }
+      },
+    ),
     pending(
       'keyboard.full-workflow',
       'T17',
