@@ -27,6 +27,7 @@ import { salesReturn } from './modules/salesReturn.mjs';
 import { settingsEffects } from './modules/settingsEffects.mjs';
 import { usersRights } from './modules/usersRights.mjs';
 import { companyOpen } from './modules/companyOpen.mjs';
+import { yearCreate } from './modules/yearCreate.mjs';
 import { companyMaster } from './modules/companyMaster.mjs';
 import { cashBank } from './modules/cashBank.mjs';
 import { contraEntry } from './modules/contraEntry.mjs';
@@ -86,6 +87,7 @@ const MODULES = [
   salesReturn,
   companyOpen,
   companyMaster,
+  yearCreate,
   purchaseReturn,
   cashBank,
   contraEntry,

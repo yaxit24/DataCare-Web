@@ -238,6 +238,7 @@ import { registerEmployeeMasterRoutes } from './employeeMaster.js';
 import { registerTaxMasterRoutes } from './taxMaster.js';
 import { registerAutoItemRoutes } from './autoItem.js';
 import { registerGroupMasterRoutes } from './groupMaster.js';
+import { registerCompanyIdentityRoutes } from './companyIdentity.js';
 import { registerProductMasterRoutes } from './productMaster.js';
 import { registerMasterScreenRoutes } from './masterScreens.js';
 import { registerWholesaleSaleRoutes } from './wholesaleSale.js';
@@ -1099,6 +1100,7 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
   registerAutoItemRoutes(app, extraRouteHelpers, formCapabilities);
   registerGroupMasterRoutes(app, extraRouteHelpers, formCapabilities);
   registerProductMasterRoutes(app, extraRouteHelpers, formCapabilities);
+  registerCompanyIdentityRoutes(app, extraRouteHelpers);
   registerTagPrintScreenRoutes(app, extraRouteHelpers, formCapabilities);
   registerMasterScreenRoutes(app, extraRouteHelpers, formCapabilities);
   registerWholesaleSaleRoutes(app, extraRouteHelpers);
@@ -6201,6 +6203,7 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
     const q = (req.query ?? {}) as Record<string, string | undefined>;
     return run(reply, 200, () => consiDetailReport(prisma, readScope(req), q.acCode));
   });
+  app.get('/years/print', auth, async () => ({ message: '' })); // MS_YEAR.cs:961-968: rights check only, no report.
   app.get('/years', auth, async (req) => {
     const s = readScope(req);
     return listYears(prisma, { tenantId: s.tenantId, coCode: s.coCode });

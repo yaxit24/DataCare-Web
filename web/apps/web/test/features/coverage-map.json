@@ -97,7 +97,10 @@
         "web/apps/web/app/(app)/masters/companies/page.tsx",
         "web/apps/api/src/modules/masters/configs.ts",
         "web/apps/api/src/modules/masters/master.service.ts",
-        "web/apps/api/src/modules/auth/businessScope.ts"
+        "web/apps/api/src/modules/auth/businessScope.ts",
+        "web/apps/api/src/modules/masters/companyIdentity.ts",
+        "web/apps/api/src/routes/companyIdentity.ts",
+        "web/apps/api/src/modules/ops/companyPurge.ts"
       ]
     },
     "salesReturn": {
@@ -463,6 +466,12 @@
         "web/apps/api/src/modules/ops/seedCompany.ts",
         "web/apps/api/src/modules/vouchers/bookForms.ts",
         "web/packages/db/prisma/migrations/20261109090000_approval_book_identity/migration.sql"
+      ]
+    },
+    "yearCreate": {
+      "covers": [
+        "web/apps/web/app/(app)/masters/year-create/",
+        "web/apps/api/src/modules/masters/year.ts"
       ]
     }
   }

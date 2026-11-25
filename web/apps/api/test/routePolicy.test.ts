@@ -33,6 +33,19 @@ function declaredRoutes(): Array<{ method: string; path: string }> {
 }
 
 describe('route policy registry', () => {
+  it('binds dedicated Company and Year Create actions to their desktop rights', () => {
+    for (const [method, path, action] of [
+      ['GET', '/company-identity/:code', 'read'],
+      ['POST', '/company-identity', 'create'],
+      ['PUT', '/company-identity', 'update'],
+      ['DELETE', '/company-identity/:code', 'delete'],
+    ])
+      expect(routePolicyFor(method!, path!)).toMatchObject({ form: 'Masters/Companies', action });
+    expect(routePolicyFor('GET', '/years/print')).toMatchObject({
+      form: 'Masters/Year Create',
+      action: 'print',
+    });
+  });
   it('uses each owning order form and Setting form for new image and lot operations', () => {
     for (const [prefix, form] of [
       ['sales-orders', 'Sales/Sales Order'],
@@ -149,9 +162,9 @@ describe('route policy registry', () => {
     // The Sales Report's Select Book panel gets its own book list GET /reports/sales-report/books
     // (RP_ALL.cs:11421 BookMast), uncapped and session-location-scoped: 800 + 1 = 801. [809 on main + 1 here = 810]
     // WP-18 replaces the HuId Report's three-line builder screen with its own plugin and adds the three
-    // export paths (CSV, XLSX, PDF) under the same Reports/HuId Report caption: 810 + 3 = 813.
-    expect(routes).toHaveLength(813);
-    expect(new Set(routes.map((route) => `${route.method} ${route.path}`)).size).toBe(813);
+    // export paths (CSV, XLSX, PDF) under the same Reports/HuId Report caption: 816 on main + 3 = 819.
+    expect(routes).toHaveLength(819);
+    expect(new Set(routes.map((route) => `${route.method} ${route.path}`)).size).toBe(819);
 
     const policies = routes.map((route) => ({
       ...route,

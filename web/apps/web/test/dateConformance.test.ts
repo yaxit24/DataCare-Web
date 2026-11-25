@@ -25,7 +25,8 @@ const displayOwners: Record<string, number> = {
   'components/SaleReturnSavedPanel.tsx': 2,
   'components/TagCancelForm.tsx': 1,
   'components/TagSplitForm.tsx': 1,
-  'app/(app)/masters/year-create/page.tsx': 6,
+  // The preview and the year list (WP-22 removed the carry-forward panel's two dates).
+  'app/(app)/masters/year-create/page.tsx': 4,
   'app/(app)/reports/karigar-ledger/page.tsx': 1,
   'app/(app)/reports/tag-stock/TagStockGrid.tsx': 1,
   'app/(app)/reports/voucher-register/page.tsx': 1,
