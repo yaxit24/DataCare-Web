@@ -1341,7 +1341,7 @@ export const salesOrder = {
       'create.cheque-card-advance',
       'T02',
       'mutation',
-      'TR_SALE_ORD.cs:9131-9150, :11368 and Order_Ledr (Ac_Ledr.cs:28-47): cash 3,000, cheque 2,000 and card 1,000 are stored per tender, ADV_AMT 6,000, and post legs 01-06; the day book credits 6,000 and debits the bank and card (Ac_Rojmel.cs:11-16)',
+      'TR_SALE_ORD.cs:9131-9150, :11368 and Order_Ledr (Ac_Ledr.cs:30-40): cash 3,000, cheque 2,000 and card 1,000 are stored per tender, ADV_AMT 6,000, and post legs 01-06, each carrying the order HD_VCH_NO, MAIN_USER and BILL_NO and the tender name on its party leg; the day book credits 6,000 and debits the bank and card, every row carrying the order VCH_DESC as IT_DESC and only type 01 the party name (Ac_Rojmel.cs:11-16)',
       async (ctx) => {
         const { page } = await ctx.session();
         await enterOrder(page, { advance: 3000 });
@@ -1361,6 +1361,26 @@ export const salesOrder = {
         const [h] = await ctx.rows(
           `SELECT "CASH_AMT"::float cash,"CHQ_AMT"::float chq,"CARD_AMT"::float card,"ADV_AMT"::float adv
              FROM "SL_ORD_DATA" WHERE tenant_id=$1 AND "CO_BOOK"='${BOOK}' AND "VCH_NO"=$2`,
+          vchNo,
+        );
+        const [stamp] = await ctx.rows(
+          `SELECT "HD_VCH_NO" hd,"MAIN_USER" mu,"BILL_NO" bill,coalesce("VCH_DESC",'') descr,"AC_NAME" name
+             FROM "SL_ORD_DATA" WHERE tenant_id=$1 AND "CO_BOOK"='${BOOK}' AND "VCH_NO"=$2`,
+          vchNo,
+        );
+        const legStamps = await ctx.rows(
+          `SELECT DISTINCT "HD_VCH_NO" hd,"MAIN_USER" mu,"BILL_NO" bill FROM "AC_DATA"
+            WHERE tenant_id=$1 AND "CO_BOOK"='${BOOK}' AND "VCH_NO"=$2`,
+          vchNo,
+        );
+        const names = await ctx.rows(
+          `SELECT right("LEDR_KEY",2) leg,"LDR_NAME" ldr FROM "AC_DATA"
+            WHERE tenant_id=$1 AND "CO_BOOK"='${BOOK}' AND "VCH_NO"=$2 ORDER BY "LEDR_KEY"`,
+          vchNo,
+        );
+        const dayBookText = await ctx.rows(
+          `SELECT right("LEDR_KEY",2) leg,"AC_NAME" name,"IT_DESC" descr FROM "ROJ_MEL_DATA"
+            WHERE tenant_id=$1 AND "CO_BOOK"='${BOOK}' AND "VCH_NO"=$2 ORDER BY "LEDR_KEY"`,
           vchNo,
         );
         const g = await ctx.rows(
@@ -1395,6 +1415,28 @@ export const salesOrder = {
             ['03', bank, 1000, 0],
           ],
         );
+        // Every leg copies A.HD_VCH_NO, A.MAIN_USER and A.BILL_NO (Ac_Ledr.cs:30-40).
+        assert.deepEqual(legStamps, [{ hd: stamp.hd, mu: stamp.mu, bill: stamp.bill }]);
+        assert.deepEqual(
+          names.map((x) => [x.leg, x.ldr]),
+          [
+            ['01', `CASH - ${stamp.name}`],
+            ['02', ''],
+            ['03', `BANK - ${stamp.name}`],
+            ['04', ''],
+            ['05', `CARD - ${stamp.name}`],
+            ['06', ''],
+          ],
+        );
+        // IT_DESC is A.VCH_DESC on 01-03; AC_NAME is the party on 01 and '' on 02/03 (Ac_Rojmel.cs:11-16).
+        assert.deepEqual(
+          dayBookText.map((x) => [x.leg, x.name, x.descr]),
+          [
+            ['01', stamp.name, stamp.descr],
+            ['02', '', stamp.descr],
+            ['03', '', stamp.descr],
+          ],
+        );
         await loadOrder(page, vchNo);
         await openDetails(page);
         const reopened = [
@@ -1406,7 +1448,7 @@ export const salesOrder = {
         return {
           observation: `order ${vchNo}: tenders ${JSON.stringify(h)}, ${g.length} legs, ${r.length} day-book rows; reopened ${reopened.join('/')}`,
           expected: { cash: 3000, cheque: 2000, card: 1000, advance: 6000, legs: '01-06' },
-          database: { header: h, ledger: g, dayBook: r },
+          database: { header: h, ledger: g, dayBook: r, legStamps, names, dayBookText },
           downstream: { reopened },
         };
       },
