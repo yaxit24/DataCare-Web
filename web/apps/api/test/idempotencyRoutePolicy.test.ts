@@ -27,15 +27,18 @@ const web = resolve(here, '../../web');
 const GUARDED: Record<string, { page: string; sends: RegExp }> = {
   'POST /sales-orders': {
     page: 'app/(app)/txn/sales-order/page.tsx',
-    sends: /postCommand<[^>]*>\(\s*`\/sales-orders\?\$\{scopeQuery\}`,\s*payload,\s*command\.key\s*\)/,
+    sends:
+      /postCommand<[^>]*>\(\s*`\/sales-orders\?\$\{scopeQuery\}`,\s*payload,\s*command\.key\s*\)/,
   },
   'POST /tour/issue': {
     page: 'components/ApprovalVoucherForm.tsx',
-    sends: /postCommand<[^>]*>\(\s*returning \? '\/tour\/return' : '\/tour\/issue',\s*payload\(\),\s*command\.key\s*\)/,
+    sends:
+      /postCommand<[^>]*>\(\s*returning \? '\/tour\/return' : '\/tour\/issue',\s*payload\(\),\s*command\.key,?\s*\)/,
   },
   'POST /tour/return': {
     page: 'components/ApprovalVoucherForm.tsx',
-    sends: /postCommand<[^>]*>\(\s*returning \? '\/tour\/return' : '\/tour\/issue',\s*payload\(\),\s*command\.key\s*\)/,
+    sends:
+      /postCommand<[^>]*>\(\s*returning \? '\/tour\/return' : '\/tour\/issue',\s*payload\(\),\s*command\.key,?\s*\)/,
   },
   'POST /stock/stock-adjust': {
     page: 'components/TagCancelForm.tsx',
