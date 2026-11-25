@@ -248,6 +248,7 @@ import { registerProductMasterRoutes } from './productMaster.js';
 import { registerMasterScreenRoutes } from './masterScreens.js';
 import { registerWholesaleSaleRoutes } from './wholesaleSale.js';
 import { registerAccountLedgerRoutes } from './accountLedger.js';
+import { registerHuidReportRoutes } from './huidReport.js';
 import { registerTagStockRoutes } from './tagStock.js';
 import { registerApprovalRoutes } from './approval.js';
 import { VoucherVersionConflictError, requiredVersion } from '../modules/vouchers/version.js';
@@ -4418,6 +4419,10 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
   // debit ageing, and its Excel/CSV/PDF outputs. The resolver feeds the screen and every export from
   // one path. Registered here (not with the other plugins above) because it needs `sendReportPdf`.
   registerAccountLedgerRoutes(app, { prisma, auth, guard, readScope, sendReportPdf });
+  // WP-18 HuId Report (RP_HUID): its own plugin owns /reports/huid and its three exports, fed by the
+  // dedicated resolver in modules/reports/huidTagReport.ts. The three-line builder screen it replaces is
+  // gone; REPORT_BUILDERS.huid above stays only so the old builder map and p9Reports keep compiling.
+  registerHuidReportRoutes(app, { prisma, auth, guard, readScope, sendReportPdf });
   registerRpAllReportRoutes(app, { prisma, auth, guard, readScope }); // WP-11 Sales Report (RP_ALL)
   registerPurchaseReportRoutes(app, {
     prisma,
@@ -4429,12 +4434,10 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
   registerTagStockRoutes(app, { prisma, auth, guard, scopeOf });
   registerStockReportRoutes(app, { prisma, auth, guard, readScope }); // WP-16 Stock Report (RP_STOCK)
 
-  // Screens for five reports registered only in REPORT_BUILDERS (exports worked, screens 404'd —
-  // PARITY-EVALUATION-2026-09-28 D3). Each calls the export's own builder with its own inputs (so the
-  // two agree); policies exist (routePolicy.ts 'Reports/HuId Report' + four); literal paths for the test.
-  app.get('/reports/huid', auth, async (req) =>
-    REPORT_BUILDERS.huid(prisma, readScope(req), range(req)),
-  );
+  // Screens for four reports registered only in REPORT_BUILDERS (exports worked, screens 404'd —
+  // PARITY-EVALUATION-2026-09-28 D3; the HuId Report moved to its own plugin above). Each calls the
+  // export's own builder with its own inputs (so the two agree); policies exist (routePolicy.ts) for
+  // each; literal paths for the test.
   app.get('/reports/item-weight-levels', auth, async (req) =>
     REPORT_BUILDERS['item-weight-levels'](prisma, readScope(req), range(req)),
   );

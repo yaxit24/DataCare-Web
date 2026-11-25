@@ -63,11 +63,13 @@ const D3_SCREENS = [
     await seedCompany(runtime, tenantId, '01');
     await exec(
       `INSERT INTO "BAR_DETL"(tenant_id,"CO_CODE","LC_CODE","CO_YEAR","CO_BOOK","VCH_NO","SR_NO",
-         "TAG_NO","VCH_SRNO","IT_CODE","ITM_PCS","ITM_GWT","ITM_NWT","HM_ID")
-       VALUES ($1,'01','01',$2,'PR','00001',1,'HUID-TAG',1,'GOLD',1,2,2,'AB12CD'),
-              ($1,'01','01',$2,'PR','00001',2,'PLAIN-TAG',2,'GOLD',1,3,3,NULL)`,
+         "VCH_DATE","STK_DATE","TAG_NO","VCH_SRNO","IT_CODE","ITM_PCS","ITM_GWT","ITM_NWT","HM_ID")
+       VALUES ($1,'01','01',$2,'PR','00001',1,$3::date,$4,'HUID-TAG',1,'GOLD',1,2,2,'AB12CD'),
+              ($1,'01','01',$2,'PR','00001',2,$3::date,$4,'PLAIN-TAG',2,'GOLD',1,3,3,NULL)`,
       tenantId,
       YEAR,
+      `${startYear}-06-10`,
+      `${startYear}-06-10`,
     );
     await exec(
       `INSERT INTO "APR_DETL"(tenant_id,"CO_CODE","LC_CODE","CO_YEAR","CO_BOOK","VCH_NO","SR_NO",
@@ -113,13 +115,19 @@ const D3_SCREENS = [
     if (owner) await owner.$disconnect();
   });
 
+  // WP-18: the HuId Report owns a typed query now (modules/reports/huidTagReport.ts). Its screen needs a
+  // view and a date window — the desktop has exactly three views and no default (RP_HUID.cs:2153-2163
+  // Tag_Summ("Stock"/"In"/"Out") are the only entries; the old "All history" tab had no desktop button).
+  const HUID_QUERY = `view=in&from=${startYear}-04-01&to=${startYear}-06-30`;
+  const D3_QUERY: Record<string, string> = { huid: `&${HUID_QUERY}` };
+
   it.each(D3_SCREENS)('D3: /reports/%s has a screen, built by the export builder', async (slug) => {
-    const screen = await get(`/reports/${slug}?coYear=${YEAR}`);
+    const screen = await get(`/reports/${slug}?coYear=${YEAR}${D3_QUERY[slug] ?? ''}`);
     expect(screen.statusCode, screen.body).toBe(200);
     const body = screen.json();
     expect(Array.isArray(body.rows), `${slug} screen returns rows`).toBe(true);
     expect(body.totals, `${slug} screen returns totals`).toBeTypeOf('object');
-    const csv = await get(`/reports/${slug}/export.csv?coYear=${YEAR}`);
+    const csv = await get(`/reports/${slug}/export.csv?coYear=${YEAR}${D3_QUERY[slug] ?? ''}`);
     expect(csv.statusCode, csv.body).toBe(200);
   });
 
@@ -152,8 +160,11 @@ const D3_SCREENS = [
     expect(xlsx.headers['content-type']).toContain('spreadsheetml');
   });
 
-  it('G13: HUID screen defaults to All and forwards With/Without query modes', async () => {
-    const all = await get(`/reports/huid?coYear=${YEAR}`);
+  it('G13: the HUID In view forwards With/Without query modes', async () => {
+    // WP-18: the desktop views are Stock, In and Out (RP_HUID.cs:2153-2163), the With/Without modes test
+    // the first HuId slot only (RP_HUID.cs:1764 `AND C.HM_ID <> ''`, :1768 `AND C.HM_ID = ''`) and the
+    // window bounds the voucher date (RP_HUID.cs:1761 `AND C.VCH_DATE >= '`).
+    const all = await get(`/reports/huid?coYear=${YEAR}&${HUID_QUERY}`);
     expect(all.statusCode, all.body).toBe(200);
     expect(
       all
@@ -162,18 +173,18 @@ const D3_SCREENS = [
         .sort(),
     ).toEqual(['HUID-TAG', 'PLAIN-TAG']);
 
-    const withHuid = await get(`/reports/huid?coYear=${YEAR}&hallmark=with`);
-    const withoutHuid = await get(`/reports/huid?coYear=${YEAR}&hallmark=without`);
+    const withHuid = await get(`/reports/huid?coYear=${YEAR}&${HUID_QUERY}&hallmark=with`);
+    const withoutHuid = await get(`/reports/huid?coYear=${YEAR}&${HUID_QUERY}&hallmark=without`);
     expect(withHuid.statusCode, withHuid.body).toBe(200);
     expect(withoutHuid.statusCode, withoutHuid.body).toBe(200);
     expect(withHuid.json().rows.map((row: any) => row.tagNo)).toEqual(['HUID-TAG']);
     expect(withoutHuid.json().rows.map((row: any) => row.tagNo)).toEqual(['PLAIN-TAG']);
-    const csv = await get(`/reports/huid/export.csv?coYear=${YEAR}&hallmark=with`);
+    const csv = await get(`/reports/huid/export.csv?coYear=${YEAR}&${HUID_QUERY}&hallmark=with`);
     expect(csv.statusCode, csv.body).toBe(200);
     expect(csv.body).toContain('HUID-TAG');
     expect(csv.body).not.toContain('PLAIN-TAG');
 
-    const invalid = await get(`/reports/huid?coYear=${YEAR}&hallmark=maybe`);
+    const invalid = await get(`/reports/huid?coYear=${YEAR}&${HUID_QUERY}&hallmark=maybe`);
     expect(invalid.statusCode).toBe(400);
   });
 
@@ -183,7 +194,7 @@ const D3_SCREENS = [
       tenantId,
       LOGIN,
     );
-    const refused = await get(`/reports/huid?coYear=${YEAR}`);
+    const refused = await get(`/reports/huid?coYear=${YEAR}&${HUID_QUERY}`);
     expect(refused.statusCode).toBe(403);
     await exec(
       `INSERT INTO "USER_SET"(tenant_id,"CO_CODE","LC_CODE","USER_NAME","MAIN_MENU","SUB_MENU","FRM_VIEW","FRM_EDIT","FRM_DELETE","FRM_PRINT")

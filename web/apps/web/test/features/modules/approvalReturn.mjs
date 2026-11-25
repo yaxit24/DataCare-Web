@@ -408,10 +408,37 @@ export const approvalReturn = {
         };
       },
     ),
-    blocked(
-      'retry',
+    C(
+      'retry.replayed-save',
       'T13',
-      'Approval Rtn POST has no idempotency-key contract; duplicate/lost acknowledgement remains open.',
+      'mutation',
+      'A replayed Approval Return save answers with the first result and leaves exactly one return voucher.',
+      async (ctx) => {
+        const issue = await issueFor(ctx, 'ARRP');
+        const page = await prepareReturn(ctx, issue);
+        await label(page, 'Vch Desc').fill('replayed approval return');
+        const first = await saveApproval(page, 'return');
+        assert.equal(first.status(), 201, await first.text());
+        assert.match(first.request().headers()['idempotency-key'] ?? '', /^[0-9a-f-]{36}$/);
+        const firstBody = await first.text();
+        const result = JSON.parse(firstBody);
+        const replay = await page.request.fetch(first.request());
+        assert.equal(replay.status(), 201, await replay.text());
+        assert.equal(
+          replay.headers()['idempotency-replayed'],
+          'true',
+          `replay headers ${JSON.stringify(replay.headers())}`,
+        );
+        assert.equal(await replay.text(), firstBody, 'replay body equals the first');
+        const rows = await approvalRows(ctx, RETURN_BOOK, result.voucherNo);
+        assert.equal(rows.length, 1, `rows ${JSON.stringify(rows)}`);
+        return {
+          observation: `the replay answered ${replay.status()} with the first body`,
+          expected: 'the first answer again; exactly one return voucher',
+          database: { rows },
+          downstream: await tagState(ctx, issue.tag),
+        };
+      },
     ),
     C(
       'rollback.last-write-fault',

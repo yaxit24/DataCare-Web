@@ -1077,7 +1077,15 @@ route('Reports/Stock Report', [
   'GET /reports/stock-report/export.csv',
   'GET /reports/stock-report/export.xlsx',
 ]);
-route('Reports/HuId Report', ['GET /reports/huid']);
+// WP-18: the RP_HUID screen, its exports and their print gate live in routes/huidReport.ts. The export
+// paths are classified read here; the handler itself re-checks the print right (USER_SET.FRM_PRINT) and
+// refuses with the desktop guard's shape, `{error:'forbidden', action:'print'}`.
+route('Reports/HuId Report', [
+  'GET /reports/huid',
+  'GET /reports/huid/export.csv',
+  'GET /reports/huid/export.xlsx',
+  'GET /reports/huid/export.pdf',
+]);
 route('Reports/ItStk Level', ['GET /reports/item-weight-levels']);
 route('Reports/Bill Wise Profit', ['GET /reports/bill-profit']);
 route('Reports/Physical Stock', ['GET /reports/physical-stock-verify']);

@@ -2,7 +2,8 @@
 
 import { useState } from 'react';
 import { round, toIsoDate } from '@datacare/core';
-import { ApiError, del, get, post, put } from '../lib/api';
+import { ApiError, del, get, postCommand, put } from '../lib/api';
+import { useIdempotencyKey } from '../lib/idempotencyKey';
 import { todayLocal } from '../lib/localDate';
 import { useBusinessScope } from './BusinessScope';
 import { BookSelect } from './BookSelect';
@@ -61,6 +62,7 @@ export default function ApprovalVoucherForm({
   const mainBook = returning ? 'APR RTN' : 'APR ISU';
   const preferredBook = returning ? 'TRR' : 'TUR';
   const route = returning ? '/tour/return' : '/tour';
+  const command = useIdempotencyKey();
   const { coYear, lcCode } = useBusinessScope();
   const [coBook, setCoBook] = useState('');
   const [origBook, setOrigBook] = useState('');
@@ -192,7 +194,12 @@ export default function ApprovalVoucherForm({
     try {
       const result = loadedNo
         ? await put<SaveResult>(`${route}/${encodeURIComponent(loadedNo)}`, payload())
-        : await post<SaveResult>(returning ? '/tour/return' : '/tour/issue', payload());
+        : await postCommand<SaveResult>(
+            returning ? '/tour/return' : '/tour/issue',
+            payload(),
+            command.key,
+          );
+      if (!loadedNo) command.renew();
       setVoucherNo(result.voucherNo);
       setLoadedNo(result.voucherNo);
       setVersion(result.version);
