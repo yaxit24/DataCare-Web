@@ -117,7 +117,7 @@ type Cookie = string;
     };
     const full = (extra: Record<string, unknown> = {}) => ({
       name: "r'amesh shah",
-      group: '10',
+      group: '20',
       acType: 'B',
       mobile: '9876543210',
       phone: '0261-2345678',
@@ -170,11 +170,7 @@ type Cookie = string;
         `UPDATE "CO_MAST" SET "CO_STATE"='GUJARAT',"CO_STATE_CODE"='24' WHERE tenant_id=$1 AND "CO_CODE"='01'`,
         tenantId,
       );
-      await exec(
-        `INSERT INTO "AC_GROUP"(tenant_id,"CO_CODE","AC_GR","AC_GR_NAME","AC_SUB_GR","AC_MAIN_GR") VALUES
-         ($1,'01','10','SUNDRY DEBTORS','CURRENT ASSETS','A'),($1,'01','11','SUNDRY CREDITORS','CURRENT LIAB','L')`,
-        tenantId,
-      );
+      // seedCompany provides the 35 desktop installer account groups (Next24 AC_GROUP); 20 = SUNDRY DEBTORS.
       await exec(
         `INSERT INTO "STATE_MAST"(tenant_id,"STATE_CODE","STATE_NAME") VALUES ($1,'24','GUJARAT'),($1,'27','MAHARASHTRA')`,
         tenantId,
@@ -183,9 +179,9 @@ type Cookie = string;
       // an address to copy and a party of another tenant.
       await exec(
         `INSERT INTO "AC_MAST"(tenant_id,"CO_CODE","LC_CODE","AC_CODE","AC_NAME","AC_GR","AC_MOBILE","AC_SHORT") VALUES
-         ($1,'01','00','05','CASH IN HAND','10','',''),
-         ($1,'01','01','150','HIDDEN LOCATION CODE','10','',''),
-         ($1,'01','02','200201','OTHER LOCATION PARTY','10','9000000002','OLP')`,
+         ($1,'01','00','05','CASH IN HAND','20','',''),
+         ($1,'01','01','150','HIDDEN LOCATION CODE','20','',''),
+         ($1,'01','02','200201','OTHER LOCATION PARTY','20','9000000002','OLP')`,
         tenantId,
       );
       await exec(
@@ -261,8 +257,8 @@ type Cookie = string;
           lc: '01',
           code: '100201',
           name: 'RAMESH SHAH',
-          grp: '10',
-          main_gr: 'A',
+          grp: '20',
+          main_gr: '2',
           typ: 'B',
           mobile: '9876543210',
           phone: '0261-2345678',
@@ -338,7 +334,7 @@ type Cookie = string;
           `SELECT "LC_CODE" lc,"AC_NAME" name,"AC_GR" grp,"MAIN_USER" u FROM "AC_MAST_SRNO" WHERE tenant_id=$1 AND "AC_CODE"='100201'`,
           tenantId,
         ),
-      ).toEqual([{ lc: '01', name: 'RAMESH SHAH', grp: '10', u: ADMIN }]);
+      ).toEqual([{ lc: '01', name: 'RAMESH SHAH', grp: '20', u: ADMIN }]);
       const list = (await request(adminCookie, 'GET', '/masters/party-master')).json();
       expect(list.nextCode).toBe('100202');
       expect(list.rows).toContainEqual({
@@ -534,10 +530,20 @@ type Cookie = string;
         account: { code: '200201', name: 'OTHER LOCATION PARTY' },
       });
       response = await request(adminCookie, 'GET', '/masters/party-master/help/groups');
-      expect(response.json().rows).toEqual([
-        { code: '10', name: 'SUNDRY DEBTORS', subGroup: 'CURRENT ASSETS', mainGroup: 'A' },
-        { code: '11', name: 'SUNDRY CREDITORS', subGroup: 'CURRENT LIAB', mainGroup: 'L' },
-      ]);
+      const groups = response.json().rows;
+      expect(groups).toHaveLength(35);
+      expect(groups).toContainEqual({
+        code: '20',
+        name: 'SUNDRY DEBTORS',
+        subGroup: 'CURRENT ASSETS',
+        mainGroup: '2',
+      });
+      expect(groups).toContainEqual({
+        code: '10',
+        name: 'KARIGAR SUNDRY CR',
+        subGroup: 'CURRENT LIABILITIES',
+        mainGroup: '1',
+      });
       response = await request(adminCookie, 'GET', '/masters/party-master/help/names');
       const names = response.json().rows.map((r: { name: string }) => r.name);
       expect(names).toContain('RAMESH SHAH');
