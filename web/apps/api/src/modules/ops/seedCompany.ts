@@ -1,6 +1,7 @@
 import { round } from '@datacare/core';
 import { withTxBudget } from '../shared/txBudget.js';
 import { type BookWorkflow, workflowPolicy } from '../shared/bookPolicy.js';
+import { seedDesktopAccountGroups } from './desktopTemplateMasters.js';
 
 /**
  * Company provisioning seed. A brand-new web company needs the system accounts that the posting engine
@@ -20,51 +21,72 @@ import { type BookWorkflow, workflowPolicy } from '../shared/bookPolicy.js';
  * help lists group 12 (MS_TAX.cs:2039 {{AND (AC_GR = '12' OR  AC_CODE = '00013') ORDER BY AC_NAME}}). Group 20 is a
  * customer group on the desktop (RP_CUST.cs:996 {{AC_GR IN ('04','05','10','15','20','45','19')}}), so a sales ledger
  * there was listed as a customer. A web company provisioned earlier is moved by migration 20261123110000.
+ *
+ * Every group below is a row of the desktop installer chart (desktopTemplateMasters.ts) and sits where the
+ * template puts the same role (AC_MAST.json), so AC_MAIN_GR classifies it as the desktop does: main group < '3' is
+ * balance sheet / carried forward, >= '3' is P&L / closed at year end (balanceTransfer.ts isPartySql, yearEnd.ts).
+ * CASH 00001 -> 21; BANK 00075 -> 22; CAPITAL 00002 -> 01; LBRINC 00041, INTINC 00061, HMCHRG 00097 and CARDCOMM
+ * 00078 -> 41; LBREXP 00056, DISCOUNT 00076, OTHCHRG 00077 -> 46; FINEKSR 00098 -> 45; WALKIN 00045 -> 20.
+ * No same-named twin, decided from use:
+ *  - OG / OS: bookTemplates.ts DESKTOP_DEFAULT_ACCOUNT_ROLES maps them to 00005 / 00006 SALES OLD GOLD / SILVER
+ *    A/C (group 25), the slots of the Old Item Sales books (BOOK_DETL 060-062) and the labour invoice.
+ *  - OLDGOLD (old metal taken against a sale, sales.ts addReceipt): the desktop books old metal taken from a customer
+ *    in the URD purchase books 037/043 against 00010 PURCHASE OLD GOLD A/C, group 30.
+ *  - KASAR: write-off Dr KASAR (sales.ts kasarAc); the desktop slot it fills is 00057 KASAR JAVK A/C, group 45
+ *    (bookTemplates.ts :181). ROUNDOFF has no template account; it is a rounding write-off like 00055 CASH ADJUST
+ *    A/C (group 45), a P&L account. Group 31 is not in the installer chart.
+ *  - DHRN: receivable loan (dhrn.ts Dr loan / Cr cash) -> 15 LOANS AND ADVANCES ASSETS.
+ *  - BULLION: bullion-payable, Cr on booking (bullion.ts :125, our obligation to deliver metal) -> 07
+ *    DEPOSIT - LIABILITIES, a balance-sheet liability that is not a customer group (group 05 is listed as one).
+ *  - BRANCH: stock-in-hand control of a location (stockInout.ts) -> 18 CURRENT ASSETS, where the template keeps
+ *    its 00021-00025 CLG.STOCK accounts.
+ * Only newly provisioned companies get these groups; an existing company's chart is never rewritten.
  */
 const SYSTEM_ACCOUNTS: { code: string; name: string; gr: string; gstType?: string }[] = [
   // G124 / G100: the sales/hallmark-sale/sales-quotation screens default the party to WALKIN. The
   // desktop's ready-to-trade template carries a cash/walk-in party (00045); without one, the default
-  // retail sale fails tax-policy resolution. Seed WALKIN as a local (intra-state) Sundry Debtor (AC_GR
-  // '10', the group the customer masters use) so a fresh company can post the default sale.
-  { code: 'WALKIN', name: 'WALK-IN CUSTOMER', gr: '10', gstType: 'L' },
-  { code: 'CASH', name: 'CASH ON HAND', gr: '01' },
-  { code: 'BANK', name: 'BANK A/C', gr: '02' },
+  // retail sale fails tax-policy resolution. Seed WALKIN as a local (intra-state) Sundry Debtor in group 20
+  // (SUNDRY DEBTORS, the group of the template's 00045 CASH SALES A/C; RP_CUST.cs:996 lists 20 as a customer
+  // group). Desktop group 10 is KARIGAR SUNDRY CR, a liability, so it is not used for the customer.
+  { code: 'WALKIN', name: 'WALK-IN CUSTOMER', gr: '20', gstType: 'L' },
+  { code: 'CASH', name: 'CASH ON HAND', gr: '21' },
+  { code: 'BANK', name: 'BANK A/C', gr: '22' },
   { code: 'SALES', name: 'SALES A/C', gr: '25' },
   { code: 'PURCHASE', name: 'PURCHASE A/C', gr: '30' },
   { code: 'GST', name: 'GST OUTPUT (PAYABLE)', gr: '12' },
   { code: 'GSTINPUT', name: 'GST INPUT CREDIT', gr: '12' },
-  { code: 'ROUNDOFF', name: 'ROUND OFF', gr: '31' },
-  { code: 'KASAR', name: 'KASAR / WRITE-OFF', gr: '31' },
+  { code: 'ROUNDOFF', name: 'ROUND OFF', gr: '45' },
+  { code: 'KASAR', name: 'KASAR / WRITE-OFF', gr: '45' },
   { code: 'TCS', name: 'TCS PAYABLE', gr: '12' },
-  { code: 'HMCHRG', name: 'HALLMARK CHARGES', gr: '22' },
-  { code: 'OLDGOLD', name: 'OLD GOLD EXCHANGE', gr: '21' },
-  { code: 'OG', name: 'OLD GOLD', gr: '21' },
-  { code: 'OS', name: 'OLD SILVER', gr: '21' },
-  { code: 'INTINC', name: 'INTEREST INCOME', gr: '23' },
-  { code: 'BULLION', name: 'BULLION TRADING', gr: '20' },
+  { code: 'HMCHRG', name: 'HALLMARK CHARGES', gr: '41' },
+  { code: 'OLDGOLD', name: 'OLD GOLD EXCHANGE', gr: '30' },
+  { code: 'OG', name: 'OLD GOLD', gr: '25' },
+  { code: 'OS', name: 'OLD SILVER', gr: '25' },
+  { code: 'INTINC', name: 'INTEREST INCOME', gr: '41' },
+  { code: 'BULLION', name: 'BULLION TRADING', gr: '07' },
   { code: 'FINESALE', name: 'FINE METAL SALE', gr: '25' },
   { code: 'FINEPURC', name: 'FINE METAL PURCHASE', gr: '30' },
-  { code: 'DHRN', name: 'DHIRAN / LOAN', gr: '21' },
-  { code: 'CAPITAL', name: 'CAPITAL A/C', gr: '25' },
+  { code: 'DHRN', name: 'DHIRAN / LOAN', gr: '15' },
+  { code: 'CAPITAL', name: 'CAPITAL A/C', gr: '01' },
   // N198 (G208): the sale books' slot 4 is the order-advance account the sale day book names for an adjusted
   // advance (Sales_Rojmel, Ac_Rojmel.cs:96, `SR_NO = 4`). The real chart carries it as 00020 ORDER ADVANCE (group 04).
   { code: 'ORDADV', name: 'ORDER ADVANCE', gr: '04' },
   // The wholesale / rate-cut slots (`Wh_Sales_Ledr`): labour income and expense, the silver twins of the sale
   // and purchase controls, other charges and fine kasar — the roles of 00041/00056/00004/00009/00077/00098 on
   // the real books 034/064.
-  { code: 'LBRINC', name: 'LABOUR INCOME A/C', gr: '23' },
-  { code: 'LBREXP', name: 'LABOUR EXPENSE A/C', gr: '22' },
+  { code: 'LBRINC', name: 'LABOUR INCOME A/C', gr: '41' },
+  { code: 'LBREXP', name: 'LABOUR EXPENSE A/C', gr: '46' },
   { code: 'SLVSALE', name: 'SALES SILVER A/C', gr: '25' },
   { code: 'SLVPURC', name: 'PURCHASE SILVER A/C', gr: '30' },
-  { code: 'OTHCHRG', name: 'OTHER CHARGES A/C', gr: '23' },
-  { code: 'CARDCOMM', name: 'CARD / BANK COMMISSION A/C', gr: '22' },
-  { code: 'FINEKSR', name: 'FINE KASAR A/C', gr: '31' },
+  { code: 'OTHCHRG', name: 'OTHER CHARGES A/C', gr: '46' },
+  { code: 'CARDCOMM', name: 'CARD / BANK COMMISSION A/C', gr: '41' },
+  { code: 'FINEKSR', name: 'FINE KASAR A/C', gr: '45' },
   // N240 (G252): the discount slot 5 of the purchase books (MS_UPDATE.cs:25022, :30221 template 00076 DISCOUNT A/C).
-  { code: 'DISCOUNT', name: 'DISCOUNT A/C', gr: '22' },
+  { code: 'DISCOUNT', name: 'DISCOUNT A/C', gr: '46' },
   // Stock In/Out (TR_INOUT) posts the signed metal rows against the branch account the location carries
   // (`MS_LOCT.cs:3458` binds `LOCT_MAST.AC_CODE`; `stockInout.ts:344-355` reads it). A current-asset
   // stock-in-hand control holds the branch's inter-location metal (N91/G105).
-  { code: 'BRANCH', name: 'BRANCH STOCK IN HAND', gr: '01' },
+  { code: 'BRANCH', name: 'BRANCH STOCK IN HAND', gr: '18' },
 ];
 
 /**
@@ -730,6 +752,14 @@ export async function seedCompany(
       );
       coMast = true;
     }
+    // Only a chart being created now: a company created by this call, or one whose CO_MAST came first (Company
+    // master, companyIdentity.ts) and has neither groups nor system accounts yet. Boot (server.ts) and
+    // /admin/companies/:coCode/provision re-run this for established companies, whose charts must not gain groups.
+    const freshChart =
+      coMast ||
+      ((await absent('AC_GROUP', '"CO_CODE"=$2', coCode)) &&
+        (await absent('AC_MAST', '"CO_CODE"=$2 AND "AC_CODE"=$3', coCode, 'CASH')));
+    if (freshChart) await seedDesktopAccountGroups(tx, absent, tenantId, coCode);
     for (const a of SYSTEM_ACCOUNTS) {
       if (await absent('AC_MAST', '"CO_CODE"=$2 AND "AC_CODE"=$3', coCode, a.code)) {
         await tx.$executeRawUnsafe(

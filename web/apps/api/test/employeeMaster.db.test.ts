@@ -452,7 +452,9 @@ type EmpRow = {
       expect(response.json().map((row: { code: string }) => row.code)).toEqual([
         '50003',
         '50002',
-        'WALKIN',
+        'FINEKSR',
+        'KASAR',
+        'ROUNDOFF',
         '50001',
       ]);
       response = await request(adminCookie, 'GET', '/masters/employee-master/accounts?q=50004');
