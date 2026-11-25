@@ -312,16 +312,18 @@ export async function exerciseSessionContext(
     return response.json();
   };
   const readSession = (id) => observeSessionContext(owner, tenantId, id);
-  const assertSelection = (request, before, targetCo) => {
+  const assertSelection = (request, before, targetCo, source = 'shell') => {
     const body = request.postDataJSON();
     assert.equal(body.expectedContextEpoch, before.epoch);
     assert.match(body.selectionId, uuid);
     assert.equal(body.coCode, targetCo);
     assert.equal(request.headers()['x-session-context-id'], before.sid);
     assert.equal(request.headers()['x-session-context-epoch'], before.epoch);
+    // MS_OPNCOMP refills Location and Year for the chosen company, so the Select page always
+    // sends the full choice. The Shell switcher sends only a changed company code.
     assert.deepEqual(
       Object.keys(body).sort(),
-      targetCo === before.co_code
+      source === 'select' || targetCo === before.co_code
         ? ['coCode', 'coYear', 'expectedContextEpoch', 'lcCode', 'selectionId']
         : ['coCode', 'expectedContextEpoch', 'selectionId'],
     );
@@ -339,7 +341,7 @@ export async function exerciseSessionContext(
     await target.getByRole('button', { name: 'Open', exact: true }).click();
     const response = await responsePromise;
     assert.equal(response.status(), 200, await response.text());
-    const body = assertSelection(response.request(), before, company);
+    const body = assertSelection(response.request(), before, company, 'select');
     const value = await response.json();
     assert.equal(value.replayed, false);
     await target.waitForURL('**/dashboard');
