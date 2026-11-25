@@ -1,8 +1,8 @@
 /**
  * AC_GROUP rows shipped in the desktop installer year database (Next24.BAK).
  *
- * These are provisioning data, not a migration: callers insert them only while creating a company, so
- * an existing tenant's chart is never rewritten. MS_YEAR.cs:1504-1595 uses company 01 as the same source
+ * These are provisioning data, not a migration: seedCompany calls seedDesktopAccountGroups only in the call
+ * that inserts the company's CO_MAST row, so an existing tenant's chart is never rewritten. MS_YEAR.cs:1504-1595 uses company 01 as the same source
  * when the desktop creates another company.
  */
 export const DESKTOP_ACCOUNT_GROUPS = [

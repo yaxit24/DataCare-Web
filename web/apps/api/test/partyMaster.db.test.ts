@@ -1,3 +1,4 @@
+import { readFileSync } from 'node:fs';
 import { PrismaClient } from '@datacare/db';
 import type { FastifyInstance } from 'fastify';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
@@ -23,6 +24,12 @@ import { assertIsolatedTestDatabase } from './support/isolatedDatabase.js';
  * Web rules on purpose (gap G236): one transaction, versions, read-only opening on an opened party.
  */
 const enabled = process.env.RUN_DB_INTEGRITY_TESTS === '1';
+/** The installer's AC_GROUP rows in the order the group help returns them (AC_GR ascending). */
+const desktopGroupFixture = (
+  JSON.parse(
+    readFileSync(new URL('./fixtures/desktop-template/AC_GROUP.json', import.meta.url), 'utf8'),
+  ) as Array<{ AC_GR: string; AC_GR_NAME: string; AC_SUB_GR: string; AC_MAIN_GR: string }>
+).sort((a, b) => (a.AC_GR < b.AC_GR ? -1 : a.AC_GR > b.AC_GR ? 1 : 0));
 const tenantId = 'party-master-db';
 const otherTenant = 'party-master-db-other';
 const PASSWORD = 'Party-Master-Routes!2026';
@@ -531,19 +538,14 @@ type Cookie = string;
       });
       response = await request(adminCookie, 'GET', '/masters/party-master/help/groups');
       const groups = response.json().rows;
-      expect(groups).toHaveLength(35);
-      expect(groups).toContainEqual({
-        code: '20',
-        name: 'SUNDRY DEBTORS',
-        subGroup: 'CURRENT ASSETS',
-        mainGroup: '2',
-      });
-      expect(groups).toContainEqual({
-        code: '10',
-        name: 'KARIGAR SUNDRY CR',
-        subGroup: 'CURRENT LIABILITIES',
-        mainGroup: '1',
-      });
+      expect(groups).toEqual(
+        desktopGroupFixture.map((row) => ({
+          code: row.AC_GR,
+          name: row.AC_GR_NAME,
+          subGroup: row.AC_SUB_GR,
+          mainGroup: row.AC_MAIN_GR,
+        })),
+      );
       response = await request(adminCookie, 'GET', '/masters/party-master/help/names');
       const names = response.json().rows.map((r: { name: string }) => r.name);
       expect(names).toContain('RAMESH SHAH');
