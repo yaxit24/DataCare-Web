@@ -159,6 +159,8 @@ type Case = {
       count: async () =>
         (await count('OP_DATA', `"CO_BOOK"='000' AND "AC_CODE"='PARTY'`)) +
         (await count('AC_DATA', `"CO_BOOK"='000' AND "AC_CODE"='PARTY'`)),
+      // Save replaces the party's rows, so the count alone cannot see a second execution. The replay case's
+      // whole-tenant snapshot (SELECT *, including row_id) and the race case's single replayed response can.
       writesOnce: (_before, after) => expect(after).toBe(2),
     },
     {

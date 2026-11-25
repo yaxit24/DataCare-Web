@@ -318,8 +318,8 @@ export default function PartyOpeningPage() {
       setBills([...(saved.bills ?? []).map(asBill), blankBill(saved.billDate ?? billDate)]);
       setMsg({ kind: 'ok', text: SAVED });
       setBalanceKey((k) => k + 1);
-      await loadList(balanceType);
       command.renew();
+      await loadList(balanceType);
     } catch (e) {
       setMsg({ kind: 'err', text: messageOf(e) });
     } finally {
