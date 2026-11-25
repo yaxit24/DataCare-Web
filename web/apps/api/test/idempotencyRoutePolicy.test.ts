@@ -25,6 +25,21 @@ const here = dirname(fileURLToPath(import.meta.url));
 const web = resolve(here, '../../web');
 
 const GUARDED: Record<string, { page: string; sends: RegExp }> = {
+  'POST /sales-orders': {
+    page: 'app/(app)/txn/sales-order/page.tsx',
+    sends:
+      /postCommand<[^>]*>\(\s*`\/sales-orders\?\$\{scopeQuery\}`,\s*payload,\s*command\.key\s*\)/,
+  },
+  'POST /tour/issue': {
+    page: 'components/ApprovalVoucherForm.tsx',
+    sends:
+      /postCommand<[^>]*>\(\s*returning \? '\/tour\/return' : '\/tour\/issue',\s*payload\(\),\s*command\.key,?\s*\)/,
+  },
+  'POST /tour/return': {
+    page: 'components/ApprovalVoucherForm.tsx',
+    sends:
+      /postCommand<[^>]*>\(\s*returning \? '\/tour\/return' : '\/tour\/issue',\s*payload\(\),\s*command\.key,?\s*\)/,
+  },
   'POST /stock/stock-adjust': {
     page: 'components/TagCancelForm.tsx',
     sends: /postCommand<[^>]*>\(\s*cfg\.endpoint,\s*body,\s*command\.key\s*\)/,
@@ -63,7 +78,6 @@ const GUARDED: Record<string, { page: string; sends: RegExp }> = {
 const NOT_YET_GUARDED = [
   'POST /contra',
   'POST /sales',
-  'POST /sales-orders',
   'POST /sales-returns',
   'POST /purchases',
   'POST /purchase-returns',
@@ -136,8 +150,6 @@ const NOT_YET_GUARDED = [
   'POST /stock/tags',
   'POST /tour-orders',
   'POST /tour-sales',
-  'POST /tour/issue',
-  'POST /tour/return',
   // Contained (routePolicy.ts) until the atomic Sales Invoice import + approval closure; guard it when it opens.
   'POST /tour/:vchNo/bill',
   'POST /wholesale-quotations',
