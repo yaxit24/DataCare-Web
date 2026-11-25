@@ -97,8 +97,12 @@ N58 remains **planned** in the execution backlog. This milestone adds containmen
   is unchanged, while the four expected `audit_log` rows record the scope-first POST `409`, two same-scope `400`
   dedicated refusals, and the `200` import result.
   Feature cases call their four-table checks “representative dependent rows,” not a complete-tenant snapshot.
-- The executable T02 case is baselined under G38 because `/masters/companies` still lacks the desktop New action and
-  editable identity fields. The generated progress page therefore reports one open Company case rather than green.
+- The executable T02 case (`company-master.fields.complete-round-trip`) was baselined under G38 at this milestone because
+  the page still lacked the desktop New action and editable identity fields. WP-07 added them, and the case now passes
+  and is no longer baselined. Its first failing run was a test timing fault, not a product defect: after a reload the
+  page draws an empty form and fills it when `GET /company-identity/<code>` answers, so the case now waits until the
+  record is displayed (`#company-code` shows `01`) before it reads any field. G38 stays open for the provisioning
+  stages below.
 
 The safe list is implemented by `web/apps/api/src/modules/auth/businessScope.ts:193-211`. Executable T11 evidence
 seeds a second same-tenant company and a foreign-tenant `CO_MAST` sentinel with owner-only fixture SQL, then removes
