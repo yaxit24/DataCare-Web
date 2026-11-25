@@ -30,13 +30,18 @@ describe('login rate limit client isolation', () => {
     await app.close();
   });
 
-  const login = (loginName: string, forwardedFor: string, remoteAddress = '127.0.0.1') =>
+  const login = (
+    loginName: string,
+    forwardedFor: string,
+    remoteAddress = '127.0.0.1',
+    coCode = '01',
+  ) =>
     app.inject({
       method: 'POST',
       url: '/auth/login',
       remoteAddress,
       headers: { 'x-forwarded-for': forwardedFor },
-      payload: { coCode: '01', loginName, password: 'incorrect-test-password' },
+      payload: { coCode, loginName, password: 'incorrect-test-password' },
     });
 
   async function exhaustClient() {
@@ -64,6 +69,13 @@ describe('login rate limit client isolation', () => {
     await exhaustClient();
     const response = await login('a', '10.0.0.3');
     // WP-51.f04.tests §3 case 3: another client retains its allowance for login a.
+    expect(response.statusCode).not.toBe(429);
+  });
+
+  it('F04-5 does not lock out the same login name of another company from the same client', async () => {
+    await exhaustClient();
+    // Login names are unique per company (auth.service.ts lookup): company 02's `a` is another account.
+    const response = await login('a', '10.0.0.1', '127.0.0.1', '02');
     expect(response.statusCode).not.toBe(429);
   });
 

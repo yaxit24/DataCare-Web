@@ -574,7 +574,13 @@ export async function buildApp(opts: BuildOpts): Promise<FastifyInstance> {
     '/auth/login',
     {
       // A shared Redis store is deferred to the operations phase (WP-52).
-      config: { rateLimit: { max: 10, timeWindow: '1 minute', keyGenerator: loginRateLimitKey } },
+      config: {
+        rateLimit: {
+          max: 10,
+          timeWindow: '1 minute',
+          keyGenerator: (req: FastifyRequest) => loginRateLimitKey(req, tenantOf(req)),
+        },
+      },
     },
     async (req: FastifyRequest, reply: FastifyReply) => {
       const b = (req.body ?? {}) as Record<string, string | undefined>;

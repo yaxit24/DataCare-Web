@@ -60,6 +60,8 @@ services:
       SMS_URL_TEMPLATE: ${SMS_URL_TEMPLATE:-}
       SMS_KEY: ${SMS_KEY:-}
       SMS_SENDER: ${SMS_SENDER:-}
+      # Only the web container (fixed address on the datacare network) may supply the client IP (WP-51 F-04).
+      TRUST_PROXY: ${TRUST_PROXY:-172.31.250.10}
     depends_on:
       postgres:
         condition: service_healthy
@@ -106,7 +108,9 @@ services:
       timeout: 5s
       retries: 5
       start_period: 20s
-    networks: [datacare]
+    networks:
+      datacare:
+        ipv4_address: 172.31.250.10
     restart: unless-stopped
 
 volumes:
@@ -115,3 +119,7 @@ volumes:
 networks:
   datacare:
     driver: bridge
+    # A fixed subnet so the API can trust exactly the web container as its proxy (TRUST_PROXY below).
+    ipam:
+      config:
+        - subnet: 172.31.250.0/24
