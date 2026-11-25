@@ -65,6 +65,7 @@ const protectedTables = [
   'LOGIN_MAST',
   'USER_SET',
   'BOOK_DATA',
+  'BOOK_DETL',
   'AC_MAST',
   'ITEM_MAST',
   'SRNO_MAST',
@@ -368,6 +369,11 @@ db('remaining five order session commands on isolated PostgreSQL', () => {
     );
     await sql(
       `INSERT INTO "BOOK_DATA"(tenant_id,"CO_CODE","LC_CODE","CO_BOOK","MAIN_BOOK","BOOK_INOUT","BOOK_SNAME","BOOK_NAME","CUR_USE","BOOK_TBL_NAME") VALUES($1,'01','01','N13','SALES ORDER','O','SORD','Next Sales','Y','SL_ORD_DATA'),($1,'01','01','N14','TOUR ORDER','I','TUROD','Next Tour','Y','SL_ORD_DATA'),($1,'01','01','N15','SALES ORDER','O','SORD','Sibling','Y','SL_ORD_DATA')`,
+      tenantId,
+    );
+    // Desktop legs 01-06 join BOOK_DETL slot 1 for the cash account and book columns (Ac_Ledr.cs:30-40, Ac_Rojmel.cs:11-21).
+    await sql(
+      `INSERT INTO "BOOK_DETL"(tenant_id,"CO_CODE","LC_CODE","CO_BOOK","SR_NO","AC_CODE","BOOK_SNAME","MAIN_BOOK","BOOK_INOUT","DATA_TYPE") VALUES($1,'01','01','N13',1,'CASH','SORD','SALES ORDER','O','A'),($1,'01','01','N14',1,'CASH','TUROD','TOUR ORDER','I','A'),($1,'01','01','N15',1,'CASH','SORD','SALES ORDER','O','A')`,
       tenantId,
     );
     await sql(
