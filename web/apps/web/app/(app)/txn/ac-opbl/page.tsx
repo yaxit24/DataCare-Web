@@ -388,7 +388,7 @@ export default function PartyOpeningPage() {
                 ariaLabel="Party Code"
                 resolveTypedCode
                 value={acCode}
-                onChange={setAcCode}
+                onChange={(v) => setAcCode(v.toUpperCase().replace(/'/g, ''))}
                 onPick={(r) => void open(String(r.code))}
               />
             </div>

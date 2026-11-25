@@ -151,6 +151,35 @@ const setLock = (ctx, flag, date) =>
   );
 const yesterday = async (ctx) =>
   (await ctx.rows('SELECT (CURRENT_DATE - 1)::text AS day WHERE $1::text IS NOT NULL'))[0].day;
+/** A second company with two locations and two years, removed afterwards (only the admin sees it). */
+async function withSecondCompany(ctx, body) {
+  const t = ctx.tenantId;
+  const clean = async () => {
+    for (const table of ['LOCT_MAST', 'YEAR_MAST', 'CO_MAST'])
+      await ctx.owner.$executeRawUnsafe(
+        `DELETE FROM "${table}" WHERE tenant_id=$1 AND "CO_CODE"='02'`,
+        t,
+      );
+  };
+  await clean();
+  try {
+    await ctx.owner.$executeRawUnsafe(
+      `INSERT INTO "CO_MAST"(tenant_id,"CO_CODE","CO_NAME","LC_CODE") VALUES ($1,'02','Second Company','01')`,
+      t,
+    );
+    await ctx.owner.$executeRawUnsafe(
+      `INSERT INTO "LOCT_MAST"(tenant_id,"CO_CODE","LC_CODE","LC_NAME") VALUES ($1,'02','01','Second Main'),($1,'02','02','Second Branch')`,
+      t,
+    );
+    await ctx.owner.$executeRawUnsafe(
+      `INSERT INTO "YEAR_MAST"(tenant_id,"CO_CODE","CO_YEAR") VALUES ($1,'02','2024-2025'),($1,'02','2025-2026')`,
+      t,
+    );
+    return await body();
+  } finally {
+    await clean();
+  }
+}
 const NA = (name, group, reason) =>
   C(
     `${name}.not-applicable`,
@@ -486,13 +515,59 @@ export const companyOpen = {
       'read-only',
       'WP-35 cases.md; MS_OPNCOMP.cs:493, :4396 company to location focus and Enter.',
       async (ctx) => {
-        const { page } = await ctx.session(as(USERS.admin.user, 'wp35-keyboard'));
+        const session = await ctx.session(as(USERS.admin.user, 'wp35-keyboard'));
+        const { page } = session;
+        const focused = (label) =>
+          page.getByLabel(label, { exact: true }).evaluate((el) => el === document.activeElement);
+        // MS_OPNCOMP.cs:487-493, :509-520, :4391-4454: after a CHANGED company, Enter still walks Company -> Location
+        // -> Year on that company's own choices and only Enter on the Year opens.
+        await withSecondCompany(ctx, async () => {
+          await openSelect(page);
+          const opened = [];
+          const selectUrl = (url) => new URL(url).pathname === '/api/context/select';
+          const abortOpen = (route) => {
+            if (route.request().method() !== 'POST') return route.fallback();
+            opened.push(route.request().postDataJSON());
+            return route.abort();
+          };
+          await page.route(selectUrl, abortOpen);
+          const changed = page.getByLabel('Company', { exact: true });
+          await changed.focus();
+          await changed.selectOption('02');
+          await changed.press('Enter');
+          await page.waitForFunction(
+            () => document.getElementById('context-location')?.options.length === 2,
+          );
+          assert.ok(await focused('Location'), 'Enter on a changed Company focuses Location');
+          assert.deepEqual(opened, [], 'Enter on Company does not open');
+          assert.deepEqual(
+            await page
+              .getByLabel('Financial Year', { exact: true })
+              .locator('option')
+              .evaluateAll((xs) => xs.map((x) => x.value)),
+            ['2025-2026', '2024-2025'],
+            "the target company's years, newest first",
+          );
+          await page.getByLabel('Location', { exact: true }).selectOption('02');
+          await page.keyboard.press('Enter');
+          assert.ok(await focused('Financial Year'), 'Enter on Location focuses Financial Year');
+          assert.deepEqual(opened, [], 'Enter on Location does not open');
+          await page.keyboard.press('Enter');
+          for (let i = 0; i < 50 && !opened.length; i++) await page.waitForTimeout(100);
+          assert.equal(opened.length, 1, 'Enter on Year opens');
+          assert.deepEqual(
+            { coCode: opened[0].coCode, lcCode: opened[0].lcCode, coYear: opened[0].coYear },
+            { coCode: '02', lcCode: '02', coYear: '2025-2026' },
+          );
+          await page.unroute(selectUrl, abortOpen);
+          // The deliberately aborted open is logged by the browser once; it is not a defect.
+          session.consoleErrors.length = 0;
+          await page.evaluate(() => sessionStorage.clear());
+        });
         await openSelect(page);
         const company = page.getByLabel('Company', { exact: true });
         await company.focus();
         await company.press('ArrowDown');
-        const focused = (label) =>
-          page.getByLabel(label, { exact: true }).evaluate((el) => el === document.activeElement);
         // MS_OPNCOMP.cs:493 / :4454: Enter on Company focuses Location, Enter on Location focuses Year.
         await company.press('Enter');
         assert.ok(await focused('Location'), 'Enter on Company focuses Location');

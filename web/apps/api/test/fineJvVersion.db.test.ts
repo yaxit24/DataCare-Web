@@ -25,6 +25,7 @@ const FROM = 'FJVFROM';
 const TO = 'FJVTO';
 // The writer's WRITE_TABLES; refusal snapshots additionally cover remarks, identity and audit.
 const WRITE_TABLES = ['CONTRA_DATA', 'AC_DATA', 'ROJ_MEL_DATA'] as const;
+const VERSION_TABLES = [...WRITE_TABLES, 'REMARK_DATA', 'APR_IDTL'] as const;
 const WATCH_TABLES = [...WRITE_TABLES, 'REMARK_DATA', 'TEMP_BOOK_DATA', 'APR_IDTL', 'DELETE_DATA'];
 const scope = { coCode: '01', lcCode: '01', coYear: YEAR };
 const key = (voucherNo: string, tenant = tenantId) => ({
@@ -170,7 +171,7 @@ const url = (no: string) => `/fine-jv/${no}?coBook=${BOOK}`;
     const before = await snapshot();
     const opened = await read(no);
     expect(opened.version).toMatch(/^[0-9a-f]{64}$/);
-    expect(opened.version).toBe(await voucherVersionTx(owner, WRITE_TABLES, key(no)));
+    expect(opened.version).toBe(await voucherVersionTx(owner, VERSION_TABLES, key(no)));
     expect((await read(no)).version).toBe(opened.version);
     expect(diffTenant(before, await snapshot())).toEqual({ added: {}, removed: {} });
   });
@@ -207,7 +208,7 @@ const url = (no: string) => `/fine-jv/${no}?coBook=${BOOK}`;
       const no = await create();
       const before = await snapshot();
       const token = '0'.repeat(64);
-      expect(await voucherVersionTx(owner, WRITE_TABLES, key(no))).not.toBe(token);
+      expect(await voucherVersionTx(owner, VERSION_TABLES, key(no))).not.toBe(token);
       const response =
         method === 'PUT'
           ? await call(first, method, url(no), { ...body(10), expectedVersion: token })
@@ -231,7 +232,7 @@ const url = (no: string) => `/fine-jv/${no}?coBook=${BOOK}`;
     const updated = await read(no);
     expect(updated.version).toMatch(/^[0-9a-f]{64}$/);
     expect(updated.version).not.toBe(opened.version);
-    expect(updated.version).toBe(await voucherVersionTx(owner, WRITE_TABLES, key(no)));
+    expect(updated.version).toBe(await voucherVersionTx(owner, VERSION_TABLES, key(no)));
   });
 
   it('fine-jv.concurrency.stale-second-save: two clients load; first save survives stale second PUT', async () => {
@@ -279,11 +280,54 @@ const url = (no: string) => `/fine-jv/${no}?coBook=${BOOK}`;
     expect((await call(first, 'GET', url(no))).statusCode).toBe(404);
   });
 
+  for (const table of ['REMARK_DATA', 'APR_IDTL'] as const)
+    it(`fine-jv.version.${table.toLowerCase()}-change: a ${table} change after open makes PUT and DELETE 409`, async () => {
+      const no = await create();
+      const opened = await read(no);
+      if (table === 'REMARK_DATA')
+        await owner.$executeRawUnsafe(
+          `UPDATE "REMARK_DATA" SET "VCH_REMARK"='changed after open' WHERE tenant_id=$1 AND "CO_CODE"=$2 AND "LC_CODE"=$3 AND "CO_YEAR"=$4 AND "CO_BOOK"=$5 AND "VCH_NO"=$6`,
+          tenantId,
+          scope.coCode,
+          scope.lcCode,
+          YEAR,
+          BOOK,
+          no,
+        );
+      else
+        await owner.$executeRawUnsafe(
+          `INSERT INTO "APR_IDTL"(tenant_id,"CO_CODE","LC_CODE","CO_YEAR","CO_BOOK","VCH_NO","SR_NO") VALUES ($1,$2,$3,$4,$5,$6,1)`,
+          tenantId,
+          scope.coCode,
+          scope.lcCode,
+          YEAR,
+          BOOK,
+          no,
+        );
+      const changed = await owner.$queryRawUnsafe<Array<{ n: number }>>(
+        `SELECT count(*)::int n FROM "${table}" WHERE tenant_id=$1 AND "CO_BOOK"=$2 AND "VCH_NO"=$3`,
+        tenantId,
+        BOOK,
+        no,
+      );
+      expect(changed[0]!.n).toBeGreaterThan(0);
+      const before = await snapshot();
+      const edited = await call(first, 'PUT', url(no), {
+        ...body(10),
+        expectedVersion: opened.version,
+      });
+      expect.soft(edited.statusCode, edited.body).toBe(409);
+      const deleted = await call(first, 'DELETE', `${url(no)}&expectedVersion=${opened.version}`);
+      expect.soft(deleted.statusCode, deleted.body).toBe(409);
+      expect(diffTenant(before, await snapshot())).toEqual({ added: {}, removed: {} });
+      await assertFine(no, 12.345);
+    });
+
   it('fine-jv.version.tenant-scope: another tenant cannot see or mutate the voucher', async () => {
     const no = await create();
     const before = await snapshot();
     const otherBefore = await snapshot(otherTenant);
-    const token = await voucherVersionTx(owner, WRITE_TABLES, key(no));
+    const token = await voucherVersionTx(owner, VERSION_TABLES, key(no));
     expect((await call(outsider, 'GET', url(no))).statusCode).toBe(404);
     const edited = await call(outsider, 'PUT', url(no), { ...body(10), expectedVersion: token });
     expect.soft(edited.statusCode, edited.body).toBe(404);

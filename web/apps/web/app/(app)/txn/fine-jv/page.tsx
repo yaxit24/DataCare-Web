@@ -111,8 +111,13 @@ export default function FineJvPage() {
     }
   }
 
-  // RP_LEDR.cs:10624-10790: the Ledger Report opens a FINE JV row here with ?vch=<no>&book=<code>; load it once the
-  // book is chosen.
+  // RP_LEDR.cs:10624-10644: the clicked ledger row's own CO_BOOK is installed as the voucher's book. The Ledger
+  // Report opens a FINE JV row here with ?vch=<no>&book=<code>; select that book (BookSelect keeps it only if it is an
+  // active FINE JV book) and then load the voucher.
+  useEffect(() => {
+    const book = new URLSearchParams(window.location.search).get('book')?.trim();
+    if (book && /^[A-Za-z0-9]{1,3}$/.test(book)) setCoBook(book);
+  }, []);
   const drilled = useRef(false);
   useEffect(() => {
     if (drilled.current || !coBook) return;

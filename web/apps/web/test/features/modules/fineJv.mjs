@@ -1203,5 +1203,68 @@ export const fineJv = {
         };
       },
     ),
+    C(
+      'drilldown.clicked-book',
+      'T18',
+      'read-only',
+      'RP_LEDR.cs:10624-10644 installs the clicked row CO_BOOK; :10788-10793 opens TR_CONTRA for a FINE JV row.',
+      async (ctx) => {
+        const { page } = await ctx.session();
+        const SECOND = 'FJ2';
+        const cleanBook = async () => {
+          for (const table of [
+            'CONTRA_DATA',
+            'AC_DATA',
+            'ROJ_MEL_DATA',
+            'REMARK_DATA',
+            'TEMP_BOOK_DATA',
+          ])
+            await ctx.owner.$executeRawUnsafe(
+              `DELETE FROM "${table}" WHERE tenant_id=$1 AND "CO_BOOK"=$2`,
+              ctx.tenantId,
+              SECOND,
+            );
+          await ctx.owner.$executeRawUnsafe(
+            `DELETE FROM "BOOK_DATA" WHERE tenant_id=$1 AND "CO_BOOK"=$2`,
+            ctx.tenantId,
+            SECOND,
+          );
+        };
+        await cleanBook();
+        try {
+          // A second active FINE JV book; BookSelect prefers FJV, so only the query string can select this one.
+          const columns = (
+            await ctx.rows(
+              `SELECT column_name c FROM information_schema.columns WHERE table_schema='public' AND table_name='BOOK_DATA' AND column_name<>'row_id' AND $1::text IS NOT NULL ORDER BY ordinal_position`,
+            )
+          ).map((r) => `"${r.c}"`);
+          await ctx.owner.$executeRawUnsafe(
+            `INSERT INTO "BOOK_DATA" (${columns.join(',')}) SELECT ${columns
+              .map((c) =>
+                c === '"CO_BOOK"' ? `'${SECOND}'` : c === '"BOOK_NAME"' ? `'Fine JV Two'` : c,
+              )
+              .join(',')} FROM "BOOK_DATA" WHERE tenant_id=$1 AND "CO_BOOK"='${BOOK}' LIMIT 1`,
+            ctx.tenantId,
+          );
+          await openFineJv(page);
+          const book = page.getByRole('combobox', { name: 'Configured book', exact: true });
+          await book.selectOption(SECOND);
+          await fillGrid(page, twoRows({ fine: '4.5' }));
+          const response = await save(page);
+          assert.equal(response.status(), 201, await response.text());
+          const no = String((await response.json()).vchNo).padStart(5, '0');
+          await page.goto(`/txn/fine-jv?vch=${no}&book=${SECOND}`);
+          await page.getByRole('button', { name: `Update #${no}`, exact: true }).waitFor();
+          assert.equal(await book.inputValue(), SECOND, 'the clicked book is installed');
+          assert.equal(await label(page, 'Fine row 2').inputValue(), '4.500');
+          return {
+            observation: `?book=${SECOND} opens voucher ${no} of that book`,
+            expected: { book: SECOND, voucher: no },
+          };
+        } finally {
+          await cleanBook();
+        }
+      },
+    ),
   ],
 };

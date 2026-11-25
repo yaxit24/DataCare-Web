@@ -747,6 +747,11 @@ export const partyOpening = {
         await bill.fill('');
         await bill.pressSequentially("ab'c");
         assert.equal(await bill.inputValue(), 'ABC');
+        // TR_AC_OPBL.cs:2905-2916: the form-wide KeyPress also normalises the Party Code box.
+        const party = page.getByLabel('Party Code', { exact: true });
+        await party.fill('');
+        await party.pressSequentially("ab'c");
+        assert.equal(await party.inputValue(), 'ABC');
         return {
           observation: 'Esc follows dirty state; text keys normalized',
           expected: 'ABC and Save focus',
