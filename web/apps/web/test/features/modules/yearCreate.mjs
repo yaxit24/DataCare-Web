@@ -110,39 +110,43 @@ export const yearCreate = {
       requiredEvidence: ['browser', 'expected', 'database', 'downstream'],
       async run(ctx) {
         const { page } = await ctx.session();
-        await page.goto('/masters/year-create');
-        await page.getByLabel('Year (CO_YEAR)', { exact: true }).fill('2040-2041');
-        await page.getByRole('button', { name: 'Create Year', exact: true }).click();
-        await page
-          .getByText('New Year are Created...Now ReOpen Sofware...', { exact: true })
-          .waitFor();
-        await page.reload();
-        await page.getByRole('cell', { name: '2040-2041', exact: true }).waitFor();
-        const database = await ctx.rows(
-          `SELECT "CO_YEAR","OP_DATE",to_char("CL_DATE",'YYYY-MM-DD') "CL_DATE","YEAR_MONTH","OLD_METHOD" FROM "YEAR_MAST" WHERE tenant_id=$1 AND "CO_CODE"='01' AND "CO_YEAR"='2040-2041'`,
-        );
-        assert.deepEqual(database, [
-          {
-            CO_YEAR: '2040-2041',
-            OP_DATE: '2040-04-01',
-            CL_DATE: '2041-03-31',
-            YEAR_MONTH: '04',
-            OLD_METHOD: 'Y',
-          },
-        ]);
-        await page.getByLabel('Year (CO_YEAR)', { exact: true }).fill('2040-2041');
-        await page.getByRole('button', { name: 'Create Year', exact: true }).click();
-        await page
-          .getByText('Year Is Already Exist...Now ReOpen Sofware...', { exact: true })
-          .waitFor();
-        assert.equal(await page.getByRole('button', { name: 'Delete', exact: true }).count(), 0);
-        return {
-          observation:
-            'Created year persisted; duplicate refused; no destructive desktop user-delete action exposed',
-          expected: database[0],
-          database,
-          downstream: { availableYear: '2040-2041' },
-        };
+        try {
+          await page.goto('/masters/year-create');
+          await page.getByLabel('Year (CO_YEAR)', { exact: true }).fill('2040-2041');
+          await page.getByRole('button', { name: 'Create Year', exact: true }).click();
+          await page
+            .getByText('New Year are Created...Now ReOpen Sofware...', { exact: true })
+            .waitFor();
+          await page.reload();
+          await page.getByRole('cell', { name: '2040-2041', exact: true }).waitFor();
+          const database = await ctx.rows(
+            `SELECT "CO_YEAR","OP_DATE",to_char("CL_DATE",'YYYY-MM-DD') "CL_DATE","YEAR_MONTH","OLD_METHOD" FROM "YEAR_MAST" WHERE tenant_id=$1 AND "CO_CODE"='01' AND "CO_YEAR"='2040-2041'`,
+          );
+          assert.deepEqual(database, [
+            {
+              CO_YEAR: '2040-2041',
+              OP_DATE: '2040-04-01',
+              CL_DATE: '2041-03-31',
+              YEAR_MONTH: '04',
+              OLD_METHOD: 'Y',
+            },
+          ]);
+          await page.getByLabel('Year (CO_YEAR)', { exact: true }).fill('2040-2041');
+          await page.getByRole('button', { name: 'Create Year', exact: true }).click();
+          await page
+            .getByText('Year Is Already Exist...Now ReOpen Sofware...', { exact: true })
+            .waitFor();
+          assert.equal(await page.getByRole('button', { name: 'Delete', exact: true }).count(), 0);
+          return {
+            observation:
+              'Created year persisted; duplicate refused; no destructive desktop user-delete action exposed',
+            expected: database[0],
+            database,
+            downstream: { availableYear: '2040-2041' },
+          };
+        } finally {
+          await dropYears(ctx, ['2040-2041']);
+        }
       },
       observe: (ctx) =>
         ctx.rows(`SELECT "CO_YEAR" FROM "YEAR_MAST" WHERE tenant_id=$1 ORDER BY "CO_YEAR"`),

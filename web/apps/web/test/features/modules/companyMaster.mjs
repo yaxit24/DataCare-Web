@@ -158,59 +158,7 @@ export const companyMaster = {
       'mutation',
       'MS_COMPANY.cs:5882-6001,6074-6189',
       async (ctx) => {
-        const { page } = await ctx.session();
-        await open(page);
-        await page.getByRole('button', { name: 'New', exact: true }).click();
-        for (const label of ['Name', 'Address 1', 'State', 'City', 'GST No', 'PAN No'])
-          assert.equal(await page.getByLabel(label, { exact: true }).isEditable(), true);
-        // Lite cannot save a second company. Exercise New, then edit the default company's identity.
-        await page.getByRole('button', { name: 'Cancel', exact: true }).click();
-        await page.getByRole('button', { name: 'Edit', exact: true }).click();
-        const values = {
-          Name: 'IDENTITY ROUND TRIP',
-          'Address 1': 'TEST ROAD',
-          'Address 2': 'TEST FLOOR',
-          'Address 3': 'TEST AREA',
-          Country: 'INDIA',
-          'State Code': '24',
-          State: 'GUJARAT',
-          City: 'SURAT',
-          'Pin Code': '395001',
-          Phone: '111111',
-          'Phone 2': '222222',
-          Mobile: '333333',
-          'Mobile 2': '444444',
-          Email: 'TEST@EXAMPLE.INVALID',
-          Jurisdiction: 'SURAT',
-          'GST No': '24ABCDE1234F1Z5',
-          'CST No': 'CST TEST',
-          'PAN No': 'ABCDE1234F',
-          'Dhiran No': 'DH TEST',
-          'Bank Name': 'TEST BANK',
-          'Bank Area': 'TEST BRANCH',
-          'Bank Account No': '123456',
-          'RTGS No': 'TEST0001',
-          'Company Type': 'A',
-        };
-        for (const [label, value] of Object.entries(values))
-          await page.getByLabel(label, { exact: true }).fill(value);
-        await page.getByLabel('Report Header', { exact: true }).selectOption('B');
-        await page.getByLabel('Work Type', { exact: true }).selectOption('W');
-        await page.getByLabel('Metal Type', { exact: true }).selectOption('S');
-        await page.getByRole('button', { name: 'Save', exact: true }).click();
-        await page.getByText('Data Are Saved.', { exact: true }).waitFor();
-        await page.reload();
-        for (const [label, value] of Object.entries(values)) {
-          await page.getByLabel(label, { exact: true }).waitFor();
-          assert.equal(await page.getByLabel(label, { exact: true }).inputValue(), value);
-        }
-        for (const [label, value] of Object.entries({
-          'Report Header': 'B',
-          'Work Type': 'W',
-          'Metal Type': 'S',
-        }))
-          assert.equal(await page.getByLabel(label, { exact: true }).inputValue(), value);
-        const identityKeys = [
+        const restoreKeys = [
           'CO_NAME',
           'CO_ADD1',
           'CO_ADD2',
@@ -235,26 +183,119 @@ export const companyMaster = {
           'BANK_AC_NO',
           'BANK_RTGS_NO',
           'CO_TYPE',
+          'REP_ADD_TYPE',
+          'WORK_TYPE',
+          'METAL_TYPE',
         ];
-        const database = await ctx.rows(
-          `SELECT ${identityKeys.map((key) => '"' + key + '"').join(',')},"REP_ADD_TYPE","WORK_TYPE","METAL_TYPE" FROM "CO_MAST" WHERE tenant_id=$1 AND "CO_CODE"='01'`,
+        const [original] = await ctx.rows(
+          `SELECT ${restoreKeys.map((key) => '"' + key + '"').join(',')} FROM "CO_MAST" WHERE tenant_id=$1 AND "CO_CODE"='01'`,
         );
-        assert.deepEqual(database, [
-          {
-            ...Object.fromEntries(
-              identityKeys.map((key, index) => [key, Object.values(values)[index]]),
-            ),
-            REP_ADD_TYPE: 'B',
-            WORK_TYPE: 'W',
-            METAL_TYPE: 'S',
-          },
-        ]);
-        return {
-          observation: 'New permits identity entry; all identity fields survive save and reload',
-          expected: values,
-          database,
-          downstream: { companyHeader: database[0].CO_NAME },
-        };
+        const { page } = await ctx.session();
+        try {
+          await open(page);
+          await page.getByRole('button', { name: 'New', exact: true }).click();
+          for (const label of ['Name', 'Address 1', 'State', 'City', 'GST No', 'PAN No'])
+            assert.equal(await page.getByLabel(label, { exact: true }).isEditable(), true);
+          // Lite cannot save a second company. Exercise New, then edit the default company's identity.
+          await page.getByRole('button', { name: 'Cancel', exact: true }).click();
+          await page.getByRole('button', { name: 'Edit', exact: true }).click();
+          const values = {
+            Name: 'IDENTITY ROUND TRIP',
+            'Address 1': 'TEST ROAD',
+            'Address 2': 'TEST FLOOR',
+            'Address 3': 'TEST AREA',
+            Country: 'INDIA',
+            'State Code': '24',
+            State: 'GUJARAT',
+            City: 'SURAT',
+            'Pin Code': '395001',
+            Phone: '111111',
+            'Phone 2': '222222',
+            Mobile: '333333',
+            'Mobile 2': '444444',
+            Email: 'TEST@EXAMPLE.INVALID',
+            Jurisdiction: 'SURAT',
+            'GST No': '24ABCDE1234F1Z5',
+            'CST No': 'CST TEST',
+            'PAN No': 'ABCDE1234F',
+            'Dhiran No': 'DH TEST',
+            'Bank Name': 'TEST BANK',
+            'Bank Area': 'TEST BRANCH',
+            'Bank Account No': '123456',
+            'RTGS No': 'TEST0001',
+            'Company Type': 'A',
+          };
+          for (const [label, value] of Object.entries(values))
+            await page.getByLabel(label, { exact: true }).fill(value);
+          await page.getByLabel('Report Header', { exact: true }).selectOption('B');
+          await page.getByLabel('Work Type', { exact: true }).selectOption('W');
+          await page.getByLabel('Metal Type', { exact: true }).selectOption('S');
+          await page.getByRole('button', { name: 'Save', exact: true }).click();
+          await page.getByText('Data Are Saved.', { exact: true }).waitFor();
+          await page.reload();
+          for (const [label, value] of Object.entries(values)) {
+            await page.getByLabel(label, { exact: true }).waitFor();
+            assert.equal(await page.getByLabel(label, { exact: true }).inputValue(), value);
+          }
+          for (const [label, value] of Object.entries({
+            'Report Header': 'B',
+            'Work Type': 'W',
+            'Metal Type': 'S',
+          }))
+            assert.equal(await page.getByLabel(label, { exact: true }).inputValue(), value);
+          const identityKeys = [
+            'CO_NAME',
+            'CO_ADD1',
+            'CO_ADD2',
+            'CO_ADD3',
+            'CO_COUNTRY',
+            'CO_STATE_CODE',
+            'CO_STATE',
+            'CO_CITY',
+            'CO_PIN',
+            'CO_PHONE',
+            'CO_PHONE2',
+            'CO_MOBILE',
+            'CO_MOBILE2',
+            'CO_MAIL',
+            'CO_JUD',
+            'CO_GST_NO',
+            'CO_CSTNO',
+            'CO_PAN_NO',
+            'DHIRAN_NO',
+            'BANK_NAME',
+            'BANK_AREA',
+            'BANK_AC_NO',
+            'BANK_RTGS_NO',
+            'CO_TYPE',
+          ];
+          const database = await ctx.rows(
+            `SELECT ${identityKeys.map((key) => '"' + key + '"').join(',')},"REP_ADD_TYPE","WORK_TYPE","METAL_TYPE" FROM "CO_MAST" WHERE tenant_id=$1 AND "CO_CODE"='01'`,
+          );
+          assert.deepEqual(database, [
+            {
+              ...Object.fromEntries(
+                identityKeys.map((key, index) => [key, Object.values(values)[index]]),
+              ),
+              REP_ADD_TYPE: 'B',
+              WORK_TYPE: 'W',
+              METAL_TYPE: 'S',
+            },
+          ]);
+          return {
+            observation: 'New permits identity entry; all identity fields survive save and reload',
+            expected: values,
+            database,
+            downstream: { companyHeader: database[0].CO_NAME },
+          };
+        } finally {
+          // Later modules share this database; put the default company's identity back even when an assertion fails.
+          await ctx.owner.$executeRawUnsafe(
+            `UPDATE "CO_MAST" SET ${restoreKeys.map((key, i) => '"' + key + '"=$' + (i + 2)).join(',')} WHERE tenant_id=$1 AND "CO_CODE"='01'`,
+            TENANT,
+            ...restoreKeys.map((key) => original[key] ?? null),
+          );
+        }
       },
       { observe: (ctx) => rows(ctx, 'CO_MAST') },
     ),
