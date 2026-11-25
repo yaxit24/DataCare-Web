@@ -50,7 +50,10 @@ const line = (tagNo: string, tblCode = '001') => ({
   hallmarkId2: 'H32A',
   hallmarkId2Wt: 1,
 });
-const payload = (book: string, tags = [line('W32A'), line('W32B')]) => ({
+const payload = (
+  book: string,
+  tags: Array<Record<string, unknown>> = [line('W32A'), line('W32B')],
+) => ({
   coBook: book,
   vchDate: DAY,
   stockItCode: 'LOOSE',

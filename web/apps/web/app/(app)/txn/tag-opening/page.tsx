@@ -361,7 +361,7 @@ export default function TagOpeningPage() {
   const [fullGrid, setFullGrid] = useState(false);
   const configuredExtendedFields = useMemo(() => {
     const settings = new Map(
-      (setup?.columns.TAG_DETL ?? []).map((column) => [column.name, column] as const),
+      (setup?.columns?.TAG_DETL ?? []).map((column) => [column.name, column] as const),
     );
     return extendedLineFields
       .filter(([key, label]) => {
@@ -426,7 +426,7 @@ export default function TagOpeningPage() {
       .then((value) => {
         if (!live) return;
         setSetup(value);
-        setLabelFile(value.defaultLabelFile || value.labelFiles[0] || '');
+        setLabelFile(value.defaultLabelFile || value.labelFiles?.[0] || '');
       })
       .catch((error) => live && setErr(errorText(error)));
     return () => {
