@@ -1330,6 +1330,7 @@ model CONV_MAST {
 }
 
 model CO_MAST {
+  deleted_at DateTime? @db.Timestamptz(6)
   tenantId       String  @map("tenant_id") @db.VarChar(24)
   CO_CODE        String  @db.VarChar(2)
   CO_NAME        String? @db.VarChar(50)

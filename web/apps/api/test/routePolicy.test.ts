@@ -33,6 +33,19 @@ function declaredRoutes(): Array<{ method: string; path: string }> {
 }
 
 describe('route policy registry', () => {
+  it('binds dedicated Company and Year Create actions to their desktop rights', () => {
+    for (const [method, path, action] of [
+      ['GET', '/company-identity/:code', 'read'],
+      ['POST', '/company-identity', 'create'],
+      ['PUT', '/company-identity', 'update'],
+      ['DELETE', '/company-identity/:code', 'delete'],
+    ])
+      expect(routePolicyFor(method!, path!)).toMatchObject({ form: 'Masters/Companies', action });
+    expect(routePolicyFor('GET', '/years/print')).toMatchObject({
+      form: 'Masters/Year Create',
+      action: 'print',
+    });
+  });
   it('uses each owning order form and Setting form for new image and lot operations', () => {
     for (const [prefix, form] of [
       ['sales-orders', 'Sales/Sales Order'],
@@ -148,8 +161,8 @@ describe('route policy registry', () => {
     // N255 (WP-20) adds the Ledger Report JmaUdr, Gold and Silver prints with PDF and Excel: 790 + 9 = 799. [800 on main + 9 here = 809]
     // The Sales Report's Select Book panel gets its own book list GET /reports/sales-report/books
     // (RP_ALL.cs:11421 BookMast), uncapped and session-location-scoped: 800 + 1 = 801. [809 on main + 1 here = 810]
-    expect(routes).toHaveLength(810);
-    expect(new Set(routes.map((route) => `${route.method} ${route.path}`)).size).toBe(810);
+    expect(routes).toHaveLength(816);
+    expect(new Set(routes.map((route) => `${route.method} ${route.path}`)).size).toBe(816);
 
     const policies = routes.map((route) => ({
       ...route,
