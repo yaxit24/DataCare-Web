@@ -96,7 +96,6 @@ const input = (family: Family): SalesOrderInput => ({
   mainUser: 'original',
   acCode: golden.fixture.account,
   acName: 'Customer',
-  cashAc: golden.fixture.cashAccount,
   vchDate: golden.fixture.vchDate,
   vchTime: golden.fixture.clock,
   taxRatePct: golden.fixture.taxRatePct,

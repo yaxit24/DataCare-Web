@@ -35,6 +35,7 @@ import * as tenders from './salesOrderTender.js';
 import * as oldMetal from './salesOrderOldMetal.js';
 import * as rateCut from './salesOrderRateCutPosting.js';
 import { orderStockWrites } from './salesOrderStock.js';
+import * as orderTags from './salesOrderTags.js';
 import { orderPostingRowsTx } from './salesOrderPostingRows.js';
 export { orderTenderRequest } from './salesOrderTender.js';
 import { fineWt } from '../shared/fine.js';
@@ -90,7 +91,6 @@ export interface SalesOrderInput {
   chequeAmount?: number; // N197: MSG2_TOTAL[4,3] (CHQ_AMT), with bankAc and chequeNo
   cardAmount?: number; // N197: MSG2_TOTAL[5,3] (CARD_AMT), with cardAc
   vchDate?: Date | string;
-  cashAc?: string;
   mainUser?: string;
   /** Desktop FormMainBook mode: Sales Order uses SALES ORDER; Tour Order uses TOUR ORDER. */
   orderMainBook?: OrderMainBook;
@@ -831,19 +831,8 @@ function prepareSalesOrderCreate(input: SalesOrderInput, lifecycle?: OrderWriteC
   const run = async (tx: any) => {
     const mode = requestedMode(input.orderMainBook);
     const book = await resolveOrderBookTx(tx, input.scope, mode);
-    // N59/G164: the advance debit account is NOT the literal 'CASH'. The desktop debits the order
-    // book's BOOK_DETL slot-1 account for the advance (verified at :1197 below); only when an advance
-    // is actually taken does the account matter. Explicit request account wins, else resolve slot 1
-    // on this transaction and FAIL-CLOSED when unconfigured.
-    const cashAc = tenders.needsAdvanceContra(tender)
-      ? await resolveBookSlotAccountTx(
-          tx,
-          { ...input.scope, coBook: book.coBook },
-          'cash-settlement',
-          1,
-          input.cashAc,
-        )
-      : (input.cashAc ?? '');
+    // The contra account is BOOK_DETL slot 1, joined by Ac_Ledr.cs:30-40 / Ac_Rojmel.cs:11-21 and resolved in
+    // orderPostingRowsTx. Neither desktop order form has a Cash A/c control, so the request carries none.
     await tenders.resolveOrderTenderTx(tx, input.scope, tender, !lifecycle);
     await oldMetal.resolveOrderOldMetalTx(tx, input.scope, tender.oldMetal);
     if (mode.mainBook === 'SALES ORDER')
@@ -1248,7 +1237,6 @@ function prepareSalesOrderCreate(input: SalesOrderInput, lifecycle?: OrderWriteC
       book,
       key,
       header,
-      cashAc,
       tender,
       party: { code: input.acCode, name: input.acName ?? '' },
       vchDate,
@@ -1288,6 +1276,9 @@ function prepareSalesOrderCreate(input: SalesOrderInput, lifecycle?: OrderWriteC
         ...orderStockWrites(key, book, oldMetalWrites[0]?.rows ?? [], detl),
       ],
     });
+    // Order_Stk is followed by the tag reservation on BAR_DETL/MAIN_STOCK (TR_SALE_ORD.cs:9552-9556).
+    if (mode.mainBook === 'SALES ORDER')
+      await orderTags.reserveOrderTagsTx(tx, scoped as CompleteOrderScope, key.VCH_NO);
     // Shared insertion defaults apply to new rows. An unchanged imported NULL belongs to the
     // saved snapshot and must not become zero/blank merely because an order was reopened.
     for (const [table, rows, priorRows] of [
@@ -1479,6 +1470,7 @@ export async function getSalesOrder(
       taxRatePct: n(x.TAX_PRC),
       total: n(x.TOT_AMT),
       ...tenderView.fields,
+      // Read-only: the account of the posted cash leg, which is the book's BOOK_DETL slot 1 (not an input).
       cashAc: tenderView.cashAc,
       empCode: text(x.EMP_CODE) || text(d[0]?.EMP_CODE),
       taxCode: text(x.TAX_CODE),
@@ -1898,10 +1890,19 @@ async function runSalesOrderCancelTx(
   const state = await assertOrderVersionTx(tx, scope, voucherNo, input.expectedVersion);
   const blocked = unsupportedOrderEdit(state, input.orderMainBook !== 'TOUR ORDER');
   if (blocked) throw new SaleValidationError(blocked);
-  if (state.SL_ORD_DETL.some((row) => text(row.TAG_NO) && text(row.TAG_NO) !== 'N'))
+  const taggedRow = (row: Record<string, unknown>) => text(row.TAG_NO) && text(row.TAG_NO) !== 'N';
+  const salesOrderForm = input.orderMainBook !== 'TOUR ORDER';
+  // Only a Sales Order line that reserved its tag (TAG_STK_LESS 'Y') is released by the desktop delete
+  // (TR_SALE_ORD.cs:9684-9706); any other tagged line still needs its stock resolved first.
+  if (
+    state.SL_ORD_DETL.some(
+      (row) => taggedRow(row) && !(salesOrderForm && text(row.TAG_STK_LESS) === 'Y'),
+    )
+  )
     throw new SaleValidationError(
       'A tagged order cannot be deleted in this editor; its stock allocation must be resolved first.',
     );
+  if (salesOrderForm) await orderTags.assertOrderTagsNotSoldTx(tx, scope, voucherNo);
   await assertPeriodOpen(tx, tenantId, {
     ledger: { table: 'AC_DATA', lines: [{ CO_CODE: scope.coCode, VCH_DATE: header.VCH_DATE }] },
   });
@@ -1914,6 +1915,7 @@ async function runSalesOrderCancelTx(
     scope.coBook,
   );
   if (books.length !== 1) throw new SaleValidationError('sales order book configuration not found');
+  if (salesOrderForm) await orderTags.releaseOrderTagsTx(tx, scope, voucherNo);
   await reverseVoucherTx(tx, tenantId, { tables: [...ORDER_WRITE_TABLES], key });
   await tx.$executeRawUnsafe(
     `DELETE FROM "TEMP_BOOK_DATA" WHERE tenant_id=$1 AND "CO_CODE"=$2 AND "LC_CODE"=$3 AND "CO_BOOK"=$4 AND "VCH_NO"=$5`,

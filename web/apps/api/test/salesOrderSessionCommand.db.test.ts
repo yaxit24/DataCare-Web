@@ -71,6 +71,7 @@ const protectedTables = [
   'USER_SET',
   'CO_SET',
   'CO_SET_NEW',
+  'BOOK_DETL',
   'BOOK_DATA',
   'AC_MAST',
   'ITEM_MAST',
@@ -300,7 +301,6 @@ run('Sales Order financial edit joins the admitted HTTP session transaction', ()
     acName: 'Saved customer',
     taxRatePct: 0,
     advanceAmount: 100,
-    cashAc: 'CASH',
     lines: [
       {
         srNo: 7,
@@ -494,6 +494,11 @@ run('Sales Order financial edit joins the admitted HTTP session transaction', ()
     );
     await sql(
       `INSERT INTO "BOOK_DATA"(tenant_id,"CO_CODE","LC_CODE","CO_BOOK","MAIN_BOOK","BOOK_INOUT","BOOK_SNAME","BOOK_NAME","CUR_USE","BOOK_TBL_NAME") VALUES($1,'01','01','C13','SALES ORDER','O','SORD','Command One','Y','SL_ORD_DATA'),($1,'01','01','C14','SALES ORDER','O','SORD','Command Two','Y','SL_ORD_DATA')`,
+      tenantId,
+    );
+    // Desktop legs 01-06 join BOOK_DETL slot 1 for the cash account and book columns (Ac_Ledr.cs:30-40, Ac_Rojmel.cs:11-21).
+    await sql(
+      `INSERT INTO "BOOK_DETL"(tenant_id,"CO_CODE","LC_CODE","CO_BOOK","SR_NO","AC_CODE","BOOK_SNAME","MAIN_BOOK","BOOK_INOUT","DATA_TYPE") VALUES($1,'01','01','C13',1,'CASH','SORD','SALES ORDER','O','A'),($1,'01','01','C14',1,'CASH','SORD','SALES ORDER','O','A')`,
       tenantId,
     );
     await sql(
