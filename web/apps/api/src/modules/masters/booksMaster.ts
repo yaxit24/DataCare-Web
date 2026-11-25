@@ -120,6 +120,7 @@ export interface BookView {
   family: string;
   itemType: string;
   inout: string;
+  dataType?: string;
   bookType: string;
   vchSeries: string;
   resetBook: string;
@@ -413,6 +414,7 @@ export async function getBook(
       family: text(head.MAIN_BOOK),
       itemType: comboLetter(head.ITM_TYPE, 'AGS', 'A'),
       inout: comboLetter(head.BOOK_INOUT, 'IO', 'I'),
+      dataType: text(head.DATA_TYPE) || 'A',
       bookType: comboLetter(head.BOOK_TYPE, 'FTM', 'F'),
       vchSeries: text(head.BOOK_SR_NAME),
       resetBook: text(head.RESET_BOOK),
@@ -563,7 +565,9 @@ export async function saveBook(
       bookType = text(stored.BOOK_TYPE) || h.bookType;
       mobileEntry = text(stored.WITH_MOBILE_ENTRY);
     }
-    const dataType = text(stored?.DATA_TYPE) || 'A';
+    const dataType = text(input.values.dataType ?? stored?.DATA_TYPE) || 'A';
+    if (!['A', 'B'].includes(dataType))
+      throw new BooksMasterValidationError('Data Type must be A or B');
     const tables = DESKTOP_BOOK_TABLES[h.family];
     const header: Record<string, unknown> = {
       BOOK_NAME: h.name,

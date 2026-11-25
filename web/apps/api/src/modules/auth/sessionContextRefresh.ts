@@ -1,3 +1,4 @@
+import { dataTypeAccessTx } from './dataTypeAccess.js';
 import { createHash, randomBytes, timingSafeEqual } from 'node:crypto';
 import {
   withTxBudget,
@@ -19,6 +20,9 @@ import {
 
 /** Private server descriptor. Dates stay text so authority never loses PostgreSQL microseconds. */
 export interface RefreshedSessionContext {
+  dataType?: string;
+  allowedDataTypes?: string[];
+  features?: { dataTypes: boolean };
   readonly tenantId: string;
   readonly sessionId: string;
   readonly loginName: string;
@@ -35,6 +39,7 @@ export interface RefreshedSessionContext {
 }
 
 interface RefreshSessionRow {
+  dataType: string;
   tenantId: string;
   sessionId: string;
   loginName: string;
@@ -101,6 +106,7 @@ function projectContext(row: RefreshSessionRow): RefreshedSessionContext {
     fromEpoch = from.value;
   }
   return Object.freeze({
+    dataType: row.dataType,
     tenantId: row.tenantId,
     sessionId: row.sessionId,
     loginName: row.loginName,
@@ -165,7 +171,7 @@ export async function refreshSessionContext(
     READ_COMMITTED_VOUCHER,
     async (tx) => {
       const rows = await tx.$queryRawUnsafe<RefreshSessionRow[]>(
-        `SELECT "tenant_id" AS "tenantId","session_id" AS "sessionId",
+        `SELECT "data_type" AS "dataType","tenant_id" AS "tenantId","session_id" AS "sessionId",
               "login_name" AS "loginName","login_co_code" AS "loginCoCode",
               "co_code" AS "coCode","lc_code" AS "lcCode","co_year" AS "coYear",
               "context_epoch"::text AS "contextEpoch","ledger_context" AS "ledgerContext",
@@ -208,13 +214,22 @@ export async function refreshSessionContext(
         // Throwing here would roll back the required reuse/expiry revocation.
         return { status: 'rejected' as const, code: rejection };
       }
-      const session = projectContext(row);
+      const projected = projectContext(row);
       const currentPrincipal = await loadPrincipalTx(tx, {
-        tenantId: session.tenantId,
-        loginName: session.loginName,
-        coCode: session.coCode,
-        loginCoCode: session.loginCoCode,
+        tenantId: projected.tenantId,
+        loginName: projected.loginName,
+        coCode: projected.coCode,
+        loginCoCode: projected.loginCoCode,
       });
+      const access = await dataTypeAccessTx(tx, row.tenantId, row.loginCoCode, row.loginName);
+      if (access.enabled && !access.allowed.includes(row.dataType))
+        throw new SessionRejectedError('session-invalid');
+      const session = {
+        ...projected,
+        dataType: access.enabled ? row.dataType : 'C',
+        allowedDataTypes: access.allowed.split(''),
+        features: { dataTypes: access.enabled },
+      };
       const principal = Object.freeze({
         ...currentPrincipal,
         rights: Object.freeze({ ...currentPrincipal.rights }),

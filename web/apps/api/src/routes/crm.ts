@@ -53,6 +53,7 @@ export interface CrmRouteHelpers {
   run: (reply: FastifyReply, okCode: number, fn: () => Promise<unknown>) => Promise<unknown>;
   body: (req: FastifyRequest) => Record<string, any>;
   mainUserOf: (req: FastifyRequest) => string;
+  dataTypeOf: (req: FastifyRequest) => string;
   rateCutInput?: (req: FastifyRequest, b: Record<string, any>) => any;
 }
 

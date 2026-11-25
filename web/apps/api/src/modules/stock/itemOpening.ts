@@ -1,3 +1,4 @@
+import { openingDataType } from '../auth/dataTypePolicy.js';
 import {
   isItemOpeningType,
   itemOpeningRowSaved,
@@ -42,7 +43,6 @@ const VCH_TYPE = 'ITOBL';
 const STOCK_BOOK_NAME = 'ITM OPBL';
 const OPENING_AC_CODE = '00000';
 /** The desktop data type for a single-book company (MsDataType 'A'); the A/B split is an Advance-edition feature. */
-const DATA_TYPE = 'A';
 /** The rows a save or delete of one type replaces; the version token is computed over them. */
 const WRITE_SET = ['ITM_OPBL', 'MAIN_STOCK', 'DM_DATA'] as const;
 
@@ -54,6 +54,7 @@ export class ItemOpeningValidationError extends Error {
 }
 
 export interface ItemOpeningScope {
+  dataType?: string;
   tenantId: string;
   coCode: string;
   lcCode?: string;
@@ -231,7 +232,7 @@ export async function getItemOpening(
       lcCode,
       coYear,
       ITEM_OPENING_BOOK,
-      DATA_TYPE,
+      openingDataType(scope.dataType),
     );
     const byCode = new Map(saved.map((r) => [String(r.code), r]));
     const rows = items.map((item, index): ItemOpeningGridRow => {
@@ -298,15 +299,17 @@ async function carriedRowsTx(
 
 async function deleteTypeTx(tx: any, scope: ItemOpeningScope, type: string): Promise<number> {
   const { coCode, lcCode, coYear } = scopeOf(scope);
-  const where = `"CO_CODE"=$1 AND "LC_CODE"=$2 AND "CO_YEAR"=$3 AND "CO_BOOK"=$4 AND "VCH_NO"=$5`;
-  const args = [coCode, lcCode, coYear, ITEM_OPENING_BOOK, type];
+  const base = `"CO_CODE"=$1 AND "LC_CODE"=$2 AND "CO_YEAR"=$3 AND "CO_BOOK"=$4 AND "VCH_NO"=$5`;
+  // DM_DATA carries no DATA_TYPE column; the stock tables are scoped to the session's opening type.
+  const where = `${base} AND "DATA_TYPE"=$6`;
+  const args = [coCode, lcCode, coYear, ITEM_OPENING_BOOK, type, openingDataType(scope.dataType)];
   await tx.$executeRawUnsafe(
     `DELETE FROM "MAIN_STOCK" WHERE ${where} AND "VCH_TYPE"='${VCH_TYPE}'`,
     ...args,
   );
   await tx.$executeRawUnsafe(
-    `DELETE FROM "DM_DATA" WHERE ${where} AND "BOOK_NAME"='${VCH_TYPE}'`,
-    ...args,
+    `DELETE FROM "DM_DATA" WHERE ${base} AND "BOOK_NAME"='${VCH_TYPE}'`,
+    ...args.slice(0, 5),
   );
   return Number(await tx.$executeRawUnsafe(`DELETE FROM "ITM_OPBL" WHERE ${where}`, ...args));
 }
@@ -390,7 +393,7 @@ export async function saveItemOpening(
         OTH_AMT: row.othAmt,
         NET_AMT: row.netAmt,
         MAIN_USER: mainUser,
-        DATA_TYPE,
+        DATA_TYPE: openingDataType(input.scope.dataType),
         // The save leaves DATA_TRFR to the column default 'Y' (MS_UPDATE.cs:21658); the migrated rows all hold 'Y'.
         DATA_TRFR: 'Y',
         ...(carried.has(itCode) ? { CARRIED_FROM: carried.get(itCode)!.from } : {}),
@@ -439,7 +442,7 @@ export async function saveItemOpening(
         EMP_CODE: '',
         ENTRY_TIME: stockDate,
         MAIN_USER: mainUser,
-        DATA_TYPE,
+        DATA_TYPE: openingDataType(input.scope.dataType),
         DESIGN_NO: '',
         ITM_SIZE: '',
         ITM_DESC: '',

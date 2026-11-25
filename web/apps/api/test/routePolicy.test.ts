@@ -164,9 +164,10 @@ describe('route policy registry', () => {
     // WP-32 adds the Tag Opening label-file setup, the label print POST /stock/tag-opening/:vchNo/print
     // (TR_TAG_OPBL.cs:11477-11551) and its Set default-file: 816 + 3 = 819.
     // WP-18 replaces the HuId Report's three-line builder screen with its own plugin and adds the three
-    // export paths (CSV, XLSX, PDF) under the same Reports/HuId Report caption: 819 + 3 = 822.
-    expect(routes).toHaveLength(822);
-    expect(new Set(routes.map((route) => `${route.method} ${route.path}`)).size).toBe(822);
+    // export paths (CSV, XLSX, PDF) under the same Reports/HuId Report caption: 819 + 3 = 822, + POST /auth/data-type = 823.
+    // Owner data-type decision adds POST /auth/data-type.
+    expect(routes).toHaveLength(823);
+    expect(new Set(routes.map((route) => `${route.method} ${route.path}`)).size).toBe(823);
 
     const policies = routes.map((route) => ({
       ...route,

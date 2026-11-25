@@ -568,6 +568,31 @@ interface DetlRow {
       expect(after.length - before.length).toBe(7);
     });
 
+    it('data type: a B book stamps the header and every slot; other values are refused (MS_BOOK.cs:2628-2671)', async () => {
+      const values = {
+        name: 'Zeta B Sales',
+        short: 'ZBS',
+        curUse: 'Y',
+        family: 'ITEM SALES',
+        itemType: 'A',
+        inout: 'O',
+        bookType: 'F',
+        vchSeries: '',
+        resetBook: '',
+        trfrBook: '',
+        mobileEntry: '',
+        slots: templateSlots('ITEM SALES'),
+      };
+      const refused = await admin('POST', API, book({ code: 'Z1B', ...values, dataType: 'C' }));
+      expect(refused.statusCode, refused.body).toBe(400);
+      const saved = await admin('POST', API, book({ code: 'Z1B', ...values, dataType: 'B' }));
+      expect(saved.statusCode, saved.body).toBe(201);
+      expect((await header('Z1B'))[0]!.DATA_TYPE).toBe('B');
+      const slots = await detail('Z1B');
+      expect(slots.length).toBe(6);
+      expect(new Set(slots.map((row) => row.dtype))).toEqual(new Set(['B']));
+    });
+
     it('T02 stores the first letter of each combo in both tables and keeps the name case', async () => {
       const response = await admin(
         'POST',

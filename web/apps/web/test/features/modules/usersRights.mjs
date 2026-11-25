@@ -989,5 +989,114 @@ export const usersRights = {
           };
         }),
     ),
+    C(
+      'data-type.user-controls',
+      'T19',
+      'mutation',
+      'Owner decision 2026-11-25: User Create carries the data-type checkboxes (A, B, All) and a default; the row stores DATA_TYPE_ALLOW/DATA_TYPE_DEFAULT; an unticked default is moved to an allowed type',
+      async (ctx) =>
+        withUsers(ctx, ['QT19TYPES'], async () => {
+          const { page } = await ctx.session();
+          await openUsers(page);
+          const before = await tenantFingerprint(ctx);
+          await typeName(page, 'QT19TYPES');
+          await fillPasswords(page, 'mangal-sutra-19');
+          await box(page, 'Allow All').uncheck();
+          await box(page, 'Allow A').uncheck();
+          assert.equal(await box(page, 'Default data type').inputValue(), 'B');
+          const response = await save(page);
+          assert.equal(response.status(), 201, await response.text());
+          await shown(page, T.CREATED);
+          const [row] = await ctx.rows(
+            `SELECT "DATA_TYPE_ALLOW" allow,"DATA_TYPE_DEFAULT" def FROM "LOGIN_MAST" WHERE tenant_id=$1 AND "LOGIN_NAME"=$2`,
+            'QT19TYPES',
+          );
+          assert.deepEqual(row, { allow: 'B', def: 'B' });
+          return {
+            observation: 'unticked A and All; saved a B-only user',
+            expected: { allow: 'B', def: 'B' },
+            database: row,
+            downstream: { changed: changedTables(before, await tenantFingerprint(ctx)) },
+          };
+        }),
+    ),
+    C(
+      'data-type.shell-switch',
+      'T20',
+      'mutation',
+      'Owner decision 2026-11-25: Ctrl+B selects B, Ctrl+C selects All within the permission; the badge is red B / green All, is hidden for A, and the switch is audited; Ctrl+B is ignored while typing in a field',
+      async (ctx) => {
+        // Its own server session: a switch bumps the context epoch, which would stale the slot's shared saved login.
+        const { page } = await ctx.session(as(USERS.admin.user, 'datatype-switch'));
+        try {
+          await page.goto('/dashboard');
+          const badge = page.getByTestId('data-type-badge');
+          await badge.filter({ hasText: /^All$/ }).waitFor();
+          // The page reloads after a switch, so wait on the badge text rather than on the load event.
+          await page.keyboard.press('Control+b');
+          await badge.filter({ hasText: /^B$/ }).waitFor();
+          const audit = await ctx.rows(
+            `SELECT path FROM audit_log WHERE tenant_id=$1 AND action='DATA_TYPE' AND login_name=$2 ORDER BY id DESC LIMIT 1`,
+            USERS.admin.user,
+          );
+          assert.equal(audit[0]?.path, '/auth/data-type/B');
+          await page.keyboard.press('Control+c');
+          await badge.filter({ hasText: /^All$/ }).waitFor();
+          return {
+            observation: 'Ctrl+B showed the B badge and wrote an audit row; Ctrl+C returned to All',
+            expected: { badge: ['B', 'All'] },
+            database: { audit: audit[0] },
+            downstream: {},
+          };
+        } finally {
+          // A failed case must not leave the shared admin session on another data type.
+          await ctx.owner.$executeRawUnsafe(
+            `UPDATE auth_session SET revoked_at=clock_timestamp(),revoke_reason='test-cleanup' WHERE tenant_id=$1 AND session_id IN (SELECT session_id FROM auth_session WHERE tenant_id=$1 AND login_name=$2 AND data_type<>'C')`,
+            ctx.tenantId,
+            USERS.admin.user,
+          );
+        }
+      },
+    ),
+    C(
+      'data-type.flag-off',
+      'T21',
+      'refusal',
+      'Owner decision 2026-11-25: with tenant_feature dataTypes off the session is All, the badge and the User Create checkboxes are hidden and /auth/data-type answers 404',
+      async (ctx) => {
+        await ctx.owner.$executeRawUnsafe(
+          `INSERT INTO tenant_feature(tenant_id,feature,enabled) VALUES ($1,'dataTypes',false) ON CONFLICT (tenant_id,feature) DO UPDATE SET enabled=false`,
+          ctx.tenantId,
+        );
+        try {
+          const { page } = await ctx.session();
+          await page.goto('/dashboard');
+          await openUsers(page);
+          assert.equal(await page.getByTestId('data-type-badge').count(), 0);
+          assert.equal(await page.getByLabel('Allow B', { exact: true }).count(), 0);
+          const status = await page.evaluate(
+            async () =>
+              (
+                await fetch('/api/auth/data-type', {
+                  method: 'POST',
+                  headers: { 'content-type': 'application/json' },
+                  body: JSON.stringify({ type: 'B' }),
+                })
+              ).status,
+          );
+          assert.equal(status, 404);
+          return {
+            observation: 'flag off: no badge, no checkboxes, switch refused',
+            expected: { status: 404 },
+            database: { feature: false },
+          };
+        } finally {
+          await ctx.owner.$executeRawUnsafe(
+            `DELETE FROM tenant_feature WHERE tenant_id=$1 AND feature='dataTypes'`,
+            ctx.tenantId,
+          );
+        }
+      },
+    ),
   ],
 };

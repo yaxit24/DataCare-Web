@@ -101,6 +101,7 @@ const rawSql = `(SELECT jsonb_object_agg(j.key,j.value) FROM jsonb_each_text(to_
     'expires_at',t.expires_at::text,'revoked_at',t.revoked_at::text)`;
 const mapped = (row: Row): Row => ({
   ...row,
+  data_type: row.data_type ?? 'C',
   tenant_id: row.tenant_id === 'refresh-matrix' ? tenantId : foreignTenant,
 });
 const claims = (jti = currentJti): RefreshClaims => ({

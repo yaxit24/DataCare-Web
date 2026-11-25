@@ -1,3 +1,4 @@
+import { postingDataTypeTx } from './dataType.js';
 import { formatDesktopDate } from '@datacare/core';
 import { withTxBudget } from '../shared/txBudget.js';
 import { DESKTOP_COLUMN_DEFAULTS } from './desktopColumnDefaults.js';
@@ -539,7 +540,9 @@ export async function postVoucherTx(tx: any, tenantId: string, input: PostInput)
     const stampDt = await tableHasDataType(tx, w.table); // desktop parity: DATA_TYPE='A' on all data rows
     const tableColumns = await columnsOf(tx, w.table);
     for (const r of w.rows) {
-      const withDataType = stampDt && r.DATA_TYPE == null ? { ...r, DATA_TYPE: 'A' } : r;
+      const withDataType = stampDt
+        ? { ...r, DATA_TYPE: await postingDataTypeTx(tx, tenantId, w.table, r) }
+        : r;
       await insertRowTx(
         tx,
         w.table,
@@ -623,6 +626,7 @@ export async function postVoucherTx(tx: any, tenantId: string, input: PostInput)
       [ORDER_RATE_CUT_ONE_SIDED]: _oneSided,
       ...columns
     } = line as Record<string, unknown>;
+    columns.DATA_TYPE = await postingDataTypeTx(tx, tenantId, input.ledger.table, columns);
     const row =
       input.ledger.table === 'AC_DATA'
         ? enrichLedgerLine(

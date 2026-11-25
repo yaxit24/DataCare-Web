@@ -1,3 +1,4 @@
+import { openingDataType } from '../auth/dataTypePolicy.js';
 import { round, toIsoDate } from '@datacare/core';
 import { withTxBudget } from '../shared/txBudget.js';
 import { insertRowTx } from '../posting/posting.js';
@@ -30,7 +31,6 @@ export const OPENING_VCH_NO = '00000';
 const OPENING_BOOK_NAME = 'TR_AC_OPBL';
 const OPENING_VCH_TYPE = 'ACOP';
 /** The desktop data type for a single-book company (MsDataType 'A'); the A/B split is an Advance-edition feature. */
-const DATA_TYPE = 'A';
 
 export type CrDr = 'C' | 'D';
 export type OpeningBalanceType = 'amount' | 'gold' | 'silver';
@@ -43,6 +43,7 @@ export class PartyOpeningValidationError extends Error {
 }
 
 export interface PartyOpeningScope {
+  dataType?: string;
   tenantId: string;
   coCode: string;
   lcCode?: string;
@@ -141,7 +142,7 @@ export function openingLegs(
   heads: PartyOpeningHeads,
   legDate: Date,
   mainUser: string,
-  dataType: string = DATA_TYPE,
+  dataType: string = openingDataType(scope.dataType),
 ): Record<string, unknown>[] {
   const { coCode, lcCode, coYear } = scopeOf(scope);
   const leg = (
@@ -342,7 +343,7 @@ export async function writePartyOpeningTx(
     lcCode,
     coYear,
     acCode,
-    DATA_TYPE,
+    openingDataType(scope.dataType),
   );
   const owner = String(previous[0]?.mu ?? '') || mainUser;
   const transfer = String(previous[0]?.tr ?? '') || 'N';
@@ -352,7 +353,7 @@ export async function writePartyOpeningTx(
     lcCode,
     coYear,
     acCode,
-    DATA_TYPE,
+    openingDataType(scope.dataType),
   );
   await insertRowTx(tx, 'OP_DATA', scope.tenantId, {
     CO_CODE: coCode,
@@ -367,7 +368,7 @@ export async function writePartyOpeningTx(
     FINE_SIGN: heads.goldSign,
     SL_FINE_BAL: heads.silver,
     SL_FINE_SIGN: heads.silverSign,
-    DATA_TYPE,
+    DATA_TYPE: openingDataType(scope.dataType),
     DATA_TRFR: transfer,
     MAIN_USER: owner,
   });
@@ -377,7 +378,7 @@ export async function writePartyOpeningTx(
     lcCode,
     coYear,
     acCode,
-    DATA_TYPE,
+    openingDataType(scope.dataType),
   );
   const legDate = await openingLegDateTx(tx, scope);
   for (const leg of openingLegs(scope, acCode, heads, legDate, owner))
@@ -458,7 +459,7 @@ export async function refuseCarriedOpeningTx(
   tx: any,
   scope: PartyOpeningScope,
   acCode: string,
-  dataType: string = DATA_TYPE,
+  dataType: string = openingDataType(scope.dataType),
 ): Promise<void> {
   const { coCode, lcCode, coYear } = scopeOf(scope);
   const carried: any[] = await tx.$queryRawUnsafe(
@@ -500,7 +501,7 @@ export async function writeMasterOpeningTx(
     lcCode,
     coYear,
     acCode,
-    DATA_TYPE,
+    openingDataType(scope.dataType),
     CARRIED_OPENING_BOOK_NAME,
   );
   if (carried.length) {
@@ -512,7 +513,7 @@ export async function writeMasterOpeningTx(
       lcCode,
       coYear,
       acCode,
-      DATA_TYPE,
+      openingDataType(scope.dataType),
     );
     const c = cur[0];
     const same =
@@ -657,7 +658,7 @@ export async function getPartyOpening(
       lcCode,
       coYear,
       acCode,
-      DATA_TYPE,
+      openingDataType(scope.dataType),
     );
     const r = rows[0];
     const bills = await billsTx(tx, scope, acCode);
@@ -735,7 +736,7 @@ export async function listPartyOpenings(
       coCode,
       lcCode,
       coYear,
-      DATA_TYPE,
+      openingDataType(scope.dataType),
     );
     const out = rows.map((r) => ({
       acCode: String(r.ac),
@@ -787,7 +788,7 @@ export async function deletePartyOpening(
       lcCode,
       coYear,
       acCode,
-      DATA_TYPE,
+      openingDataType(scope.dataType),
     );
     if (!rows.length) return { deleted: false };
     const legDate = await openingLegDateTx(tx, scope);
@@ -846,7 +847,7 @@ export async function deletePartyOpening(
       lcCode,
       coYear,
       acCode,
-      DATA_TYPE,
+      openingDataType(scope.dataType),
     );
     await tx.$executeRawUnsafe(
       `DELETE FROM "OP_DETL" WHERE ${opDataWhere}`,
@@ -861,7 +862,7 @@ export async function deletePartyOpening(
       lcCode,
       coYear,
       acCode,
-      DATA_TYPE,
+      openingDataType(scope.dataType),
     );
     return { deleted: true };
   });

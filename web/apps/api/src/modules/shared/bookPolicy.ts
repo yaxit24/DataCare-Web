@@ -184,3 +184,24 @@ export async function resolveBookSlotRowTx(
   }
   return rows[0] as Record<string, string | null>;
 }
+
+/** MS_BOOK.cs:2628-2671 stamps every slot with the book's type. */
+export async function resolveBookDataTypeTx(
+  tx: any,
+  tenantId: string,
+  row: Record<string, unknown>,
+): Promise<string> {
+  const rows: Array<{ dataType: string }> = await tx.$queryRawUnsafe(
+    `SELECT DISTINCT coalesce(nullif(btrim("DATA_TYPE"),''),'A') AS "dataType" FROM "BOOK_DETL"
+     WHERE tenant_id=$1 AND "CO_CODE"=$2 AND "LC_CODE"=$3 AND "CO_BOOK"=$4`,
+    tenantId,
+    row.CO_CODE,
+    row.LC_CODE,
+    row.CO_BOOK,
+  );
+  // MS_BOOK writes the same DATA_TYPE to every slot (:2628-2671). Refuse inconsistent configuration.
+  if (rows.length === 0) return 'A'; // blank/unconfigured book -> 'A' (MS_BOOK.cs:2524)
+  if (rows.length !== 1 || !['A', 'B'].includes(rows[0]!.dataType))
+    throw new Error('book-data-type-unavailable');
+  return rows[0]!.dataType;
+}

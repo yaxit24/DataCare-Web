@@ -1,3 +1,6 @@
+import { registerDataTypeRoute } from './routes/dataType.js';
+import { sessionDataType } from './modules/auth/dataTypeAccess.js';
+import { sessionReportQuery } from './modules/auth/dataTypePolicy.js';
 import type { EditionPolicy } from '@datacare/core';
 import {
   assertFormClassified,
@@ -315,6 +318,7 @@ export async function buildApp(opts: BuildOpts): Promise<FastifyInstance> {
   }) => {
     const accessToken = await issueAccess(
       {
+        dataType: session.dataType,
         sub: session.loginName,
         tenantId: session.tenantId,
         sid: session.sessionId,
@@ -381,9 +385,16 @@ export async function buildApp(opts: BuildOpts): Promise<FastifyInstance> {
         coCode: stored.coCode,
         loginCoCode: stored.loginCoCode,
       });
+      const dataTypes = await sessionDataType(prisma, claims);
+      if (route.startsWith('/reports/'))
+        req.query = sessionReportQuery(
+          (req.query ?? {}) as Record<string, unknown>,
+          dataTypes.dataType,
+        );
       state.principal = principal;
       state.session = {
         ...claims,
+        ...dataTypes,
         contextEpoch: stored.contextEpoch,
         ledgerContext: stored.ledgerContext,
         coCode: stored.coCode,
@@ -610,6 +621,9 @@ export async function buildApp(opts: BuildOpts): Promise<FastifyInstance> {
           .setCookie('access', created.accessToken, accessCookie)
           .setCookie('refresh', created.refreshToken, refreshCookie);
         return {
+          dataType: created.session.dataType,
+          allowedDataTypes: created.session.allowedDataTypes,
+          features: created.session.features,
           user: created.session.loginName,
           rights: created.principal.rights,
           forcedReset: created.principal.passwordResetRequired,
@@ -707,6 +721,13 @@ export async function buildApp(opts: BuildOpts): Promise<FastifyInstance> {
     },
   );
 
+  registerDataTypeRoute(app, {
+    prisma,
+    requireAuth,
+    session: sess,
+    sign: (s) => issueAccess(s, secret),
+    cookie: accessCookie,
+  });
   app.get('/me', { preHandler: requireAuth }, async (req: FastifyRequest, reply: FastifyReply) => {
     reply.header('Cache-Control', 'no-store');
     const s = sess(req);
@@ -721,6 +742,7 @@ export async function buildApp(opts: BuildOpts): Promise<FastifyInstance> {
     // server posts (G102/G84). Null when no company is selected yet or settings are ambiguous.
     const roundingFlags = s.coCode ? await loadRoundingFlags(prisma, s.tenantId, s.coCode) : null;
     return {
+      ...(await sessionDataType(prisma, s)),
       user: s.sub,
       context: contextDescriptor({
         sessionId: s.sid,
@@ -798,6 +820,7 @@ export async function buildApp(opts: BuildOpts): Promise<FastifyInstance> {
       coCode: s.coCode,
       lcCode: s.lcCode,
       mainBooks,
+      dataType: s.dataType,
     });
   });
 
@@ -823,7 +846,10 @@ export async function buildApp(opts: BuildOpts): Promise<FastifyInstance> {
             },
             request: req.body,
           },
-          { signAccess: (descriptor) => issueAccess({ ...descriptor }, secret) },
+          {
+            signAccess: (descriptor) =>
+              issueAccess({ ...descriptor, dataType: s.dataType }, secret),
+          },
         );
         reply.setCookie('access', selected.accessToken, accessCookie);
         return {
