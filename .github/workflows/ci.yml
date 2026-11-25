@@ -315,7 +315,9 @@ jobs:
   real-stack-browser:
     name: Real-stack browser journeys (zero mocks)
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    # The feature matrix grows with every screen (about 27 min after WP-32, plus the surface crawl);
+    # 30 minutes cancelled runs whose features had all passed.
+    timeout-minutes: 45
     env:
       PARITY_TEST_PORT: '55433'
       PARITY_API_PORT: '4410'

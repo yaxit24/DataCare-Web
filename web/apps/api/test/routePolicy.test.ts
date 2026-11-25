@@ -162,9 +162,11 @@ describe('route policy registry', () => {
     // The Sales Report's Select Book panel gets its own book list GET /reports/sales-report/books
     // (RP_ALL.cs:11421 BookMast), uncapped and session-location-scoped: 800 + 1 = 801. [809 on main + 1 here = 810]
     // WP-32 adds the Tag Opening label-file setup, the label print POST /stock/tag-opening/:vchNo/print
-    // (TR_TAG_OPBL.cs:11477-11551) and its Set default-file: 816 on main + 3 = 819.
-    expect(routes).toHaveLength(819);
-    expect(new Set(routes.map((route) => `${route.method} ${route.path}`)).size).toBe(819);
+    // (TR_TAG_OPBL.cs:11477-11551) and its Set default-file: 816 + 3 = 819.
+    // WP-18 replaces the HuId Report's three-line builder screen with its own plugin and adds the three
+    // export paths (CSV, XLSX, PDF) under the same Reports/HuId Report caption: 819 + 3 = 822.
+    expect(routes).toHaveLength(822);
+    expect(new Set(routes.map((route) => `${route.method} ${route.path}`)).size).toBe(822);
 
     const policies = routes.map((route) => ({
       ...route,
