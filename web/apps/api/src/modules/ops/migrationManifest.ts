@@ -225,4 +225,9 @@ export const EXPECTED_MIGRATIONS: ReadonlyArray<{
     name: '20261123090000_daily_rate_copy_entitlement',
     checksum: '003ab85656b77e4b3a64220ab0c6a2e30704dd849d0d1f2df8578042e4e6662d',
   },
+  {
+    // WP-07 Company: soft delete (OD-5/D38) — nullable CO_MAST.deleted_at plus a partial index.
+    name: '20261125120000_company_soft_delete',
+    checksum: '37964a30d01d481c5c13a4b3468d4c4b058b78accd48ac1fb20453c109aeadf4',
+  },
 ];

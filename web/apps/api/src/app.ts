@@ -529,9 +529,12 @@ export async function buildApp(opts: BuildOpts): Promise<FastifyInstance> {
         return reply.code(error.statusCode).send({ error: error.code });
       }
       if (error instanceof FormForbiddenError) {
-        const message =
-          finePrintRefusalText(req.routeOptions.url ?? '', error.action) ??
-          tagOpeningRefusalText(req.routeOptions.url ?? '', error.action);
+        const message = /^(\/company-identity|\/years)/.test(req.routeOptions.url ?? '')
+          ? error.action === 'print'
+            ? 'You Have No Print Rights.....'
+            : 'You Have No Rights.....'
+          : (finePrintRefusalText(req.routeOptions.url ?? '', error.action) ??
+            tagOpeningRefusalText(req.routeOptions.url ?? '', error.action));
         return reply.code(403).send({
           error: 'forbidden',
           form: error.form,

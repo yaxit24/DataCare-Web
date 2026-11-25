@@ -82,6 +82,35 @@ type Cookie = string;
     if (owner) await owner.$disconnect();
   });
 
+  it('round trips the dedicated identity route and refuses malformed, stale and default-delete commands', async () => {
+    const opened = await request('GET', '/company-identity/01');
+    expect(opened.statusCode, opened.body).toBe(200);
+    const { version, ...identity } = opened.json();
+    const malformed = await request('PUT', '/company-identity', { ...identity, CO_NAME: 'BAD' });
+    expect(malformed.statusCode).toBe(400);
+    const changed = await request('PUT', '/company-identity', {
+      ...identity,
+      CO_ADD1: 'IDENTITY ROAD',
+      expectedVersion: version,
+    });
+    expect(changed.statusCode, changed.body).toBe(200);
+    expect(changed.json().CO_ADD1).toBe('IDENTITY ROAD');
+    const stale = await request('PUT', '/company-identity', {
+      ...identity,
+      CO_ADD1: 'LOST UPDATE',
+      expectedVersion: version,
+    });
+    expect(stale.statusCode, stale.body).toBe(409);
+    const reopened = await request('GET', '/company-identity/01');
+    expect(reopened.json().CO_ADD1).toBe('IDENTITY ROAD');
+    const removed = await request(
+      'DELETE',
+      `/company-identity/01?expectedVersion=${reopened.json().version}`,
+    );
+    expect(removed.statusCode, removed.body).toBe(400);
+    expect(removed.json().message).toBe('You cant Delete Defoult company...');
+  });
+
   it('rejects all generic mutations, changes no non-audit tenant table, and records exact rejection audits', async () => {
     const before = await snapshot();
     const created = await request('POST', '/masters/companies', {

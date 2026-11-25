@@ -951,7 +951,19 @@ route('Masters/Item Stock Limits', [
   'POST /masters/item-stock-limits',
   'DELETE /masters/item-stock-limits',
 ]);
-route('Masters/Year Create', ['GET /years', 'POST /years', 'POST /years/carry-forward']);
+route('Masters/Companies', [
+  'GET /company-identity/states',
+  'GET /company-identity/:code',
+  'POST /company-identity',
+  'PUT /company-identity',
+  'DELETE /company-identity/:code',
+]);
+route('Masters/Year Create', [
+  'GET /years',
+  'GET /years/print',
+  'POST /years',
+  'POST /years/carry-forward',
+]);
 route('Masters/Accounts', [
   'GET /party/:acCode/photo',
   'POST /party/:acCode/photo',
@@ -1124,6 +1136,7 @@ route('Reports/Mfg Ledger', ['GET /reports/mfg-ledger', 'GET /reports/mfg-ledger
 route('Reports/Scheme Monthly Report', ['GET /reports/scheme-monthly']);
 
 const PRINT_ROUTES = new Set([
+  'GET /years/print',
   'GET /masters/party-master/print',
   'GET /masters/employee-master/print',
   'GET /masters/tax-master/print',
@@ -1314,6 +1327,11 @@ const SCOPED_ADMIN_ONLY = new Set([
 ]);
 
 const NO_BUSINESS_SCOPE = new Set([
+  'GET /company-identity/states',
+  'GET /company-identity/:code',
+  'POST /company-identity',
+  'PUT /company-identity',
+  'DELETE /company-identity/:code',
   'GET /audit',
   'GET /ops/metrics',
   'GET /ops/invariants',

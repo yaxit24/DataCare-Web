@@ -3,8 +3,7 @@ import { useCallback, useEffect, useId, useMemo, useState } from 'react';
 import { fiscalYearDates, formatDesktopDate } from '@datacare/core';
 import { get, post, ApiError } from '../../../../lib/api';
 
-/** Year Create (desktop MS_YEAR, YEAR_MAST): create a financial year and carry the prior year's closing
- *  party balances forward as the new year's opening (OP_DATA).
+/** Year Create (desktop MS_YEAR, YEAR_MAST): create a financial year.
  *
  *  The closing date is the year's last day (MS_YEAR.cs:1035-1040 fills 01/04/yyyy – 31/03/yyyy+1), and every
  *  voucher is bounded by it, so this screen never clears or moves it. Period locking is Settings → lock
@@ -30,7 +29,6 @@ export default function YearCreatePage() {
   const [opDate, setOpDate] = useState('');
   const [clDate, setClDate] = useState('');
   const [yearMonth, setYearMonth] = useState('04');
-  const [cf, setCf] = useState({ fromYear: '', toYear: '' });
   const [msg, setMsg] = useState<{ kind: 'ok' | 'err'; text: string } | null>(null);
   const [busy, setBusy] = useState(false);
 
@@ -68,8 +66,19 @@ export default function YearCreatePage() {
   return (
     <div>
       <h1>
-        Year Create <span className="muted">— financial year and opening carry-forward</span>
+        Year Create <span className="muted">— financial year</span>
       </h1>
+      <button
+        disabled={busy}
+        onClick={() =>
+          act(async () => {
+            await get('/years/print');
+            return '';
+          })
+        }
+      >
+        Print
+      </button>
       {msg && (
         <div className={`msg ${msg.kind}`} role={msg.kind === 'err' ? 'alert' : 'status'}>
           {msg.text}
@@ -124,16 +133,13 @@ export default function YearCreatePage() {
               disabled={busy || !coYear.trim() || !!preview.error}
               onClick={() =>
                 act(async () => {
-                  const r = await post<{ coYear: string; opDate: string; clDate: string }>(
-                    '/years',
-                    {
-                      coYear: coYear.trim(),
-                      opDate: opDate || undefined,
-                      clDate: clDate || undefined,
-                      yearMonth,
-                    },
-                  );
-                  return `Year ${r.coYear} created (${formatDesktopDate(r.opDate)} to ${formatDesktopDate(r.clDate)})`;
+                  await post<{ coYear: string; opDate: string; clDate: string }>('/years', {
+                    coYear: coYear.trim(),
+                    opDate: opDate || undefined,
+                    clDate: clDate || undefined,
+                    yearMonth,
+                  });
+                  return 'New Year are Created...Now ReOpen Sofware...';
                 })
               }
             >
@@ -186,52 +192,6 @@ export default function YearCreatePage() {
             )}
           </tbody>
         </table>
-      </div>
-
-      <div className="panel">
-        <h2>Carry forward openings</h2>
-        <div className="row">
-          <div className="field">
-            <label htmlFor={`${id}-from`}>From Year (closing)</label>
-            <input
-              id={`${id}-from`}
-              value={cf.fromYear}
-              onChange={(e) => setCf((c) => ({ ...c, fromYear: e.target.value }))}
-              placeholder="2026-2027"
-            />
-          </div>
-          <div className="field">
-            <label htmlFor={`${id}-to`}>To Year (opening)</label>
-            <input
-              id={`${id}-to`}
-              value={cf.toYear}
-              onChange={(e) => setCf((c) => ({ ...c, toYear: e.target.value }))}
-              placeholder="2027-2028"
-            />
-          </div>
-          <div className="field" style={{ alignSelf: 'end' }}>
-            <button
-              type="button"
-              className="primary"
-              disabled={busy || !cf.fromYear.trim() || !cf.toYear.trim()}
-              onClick={() =>
-                act(async () => {
-                  const r = await post<{ parties: number }>('/years/carry-forward', {
-                    fromYear: cf.fromYear.trim(),
-                    toYear: cf.toYear.trim(),
-                  });
-                  return `Carried ${r.parties} party opening(s) into ${cf.toYear.trim()}`;
-                })
-              }
-            >
-              Carry Forward
-            </button>
-          </div>
-          <div className="field muted" style={{ flex: 1, alignSelf: 'center' }}>
-            Writes each party's From-year closing balance as the To-year opening (OP_DATA).
-            Idempotent.
-          </div>
-        </div>
       </div>
     </div>
   );
