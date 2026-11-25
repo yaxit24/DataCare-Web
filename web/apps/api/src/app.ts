@@ -100,6 +100,7 @@ import {
 } from './modules/reports/reportFilters.js';
 import { reportFormForSlug } from './modules/reports/reportAuthorization.js';
 import { finePrintRefusalText } from './modules/reports/ledgerFinePrints.js';
+import { tagOpeningRefusalText } from './modules/stock/tagOpeningPrint.js';
 
 export interface BuildOpts {
   prisma: any;
@@ -528,7 +529,9 @@ export async function buildApp(opts: BuildOpts): Promise<FastifyInstance> {
         return reply.code(error.statusCode).send({ error: error.code });
       }
       if (error instanceof FormForbiddenError) {
-        const message = finePrintRefusalText(req.routeOptions.url ?? '', error.action);
+        const message =
+          finePrintRefusalText(req.routeOptions.url ?? '', error.action) ??
+          tagOpeningRefusalText(req.routeOptions.url ?? '', error.action);
         return reply.code(403).send({
           error: 'forbidden',
           form: error.form,

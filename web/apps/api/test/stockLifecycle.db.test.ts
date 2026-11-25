@@ -42,8 +42,14 @@ type FamilyCase = {
     scope: VoucherScope,
     voucherNo: string,
     date?: string,
+    version?: string,
   ) => Promise<unknown>;
-  remove: (runtime: PrismaClient, scope: VoucherScope, voucherNo: string) => Promise<unknown>;
+  remove: (
+    runtime: PrismaClient,
+    scope: VoucherScope,
+    voucherNo: string,
+    version?: string,
+  ) => Promise<unknown>;
   expectedEditedItem: string;
   seedConsumption: (
     owner: PrismaClient,
@@ -80,7 +86,7 @@ const cases: FamilyCase[] = [
         ],
       }),
     get: getTagOpening,
-    edit: (runtime, scope, voucherNo, date = NEXT_DAY) =>
+    edit: (runtime, scope, voucherNo, date = NEXT_DAY, version) =>
       editTagOpening(
         runtime,
         {
@@ -102,9 +108,15 @@ const cases: FamilyCase[] = [
           ],
         },
         voucherNo,
+        version,
       ),
-    remove: (runtime, scope, voucherNo) =>
-      deleteTagOpening(runtime, { scope, vchNo: voucherNo, deleteUser: 'deleter' }),
+    remove: (runtime, scope, voucherNo, version) =>
+      deleteTagOpening(runtime, {
+        scope,
+        vchNo: voucherNo,
+        deleteUser: 'deleter',
+        expectedVersion: version,
+      }),
     expectedEditedItem: 'GOLD2',
     seedConsumption: async (owner, scope, _voucherNo, view) => {
       const line = view.lines[0]!;
@@ -427,7 +439,8 @@ databaseDescribe('database-backed tag/stock voucher lifecycle', () => {
         lines: [{ itCode: 'GOLD1' }],
       });
 
-      await row.edit(runtime, scope, voucherNo);
+      // N51 (D17): every edit and delete now carries the read's version token.
+      await row.edit(runtime, scope, voucherNo, undefined, String(opened.version));
       const edited = await row.get(runtime, scope, voucherNo);
       expect(edited).toMatchObject({
         voucherNo: '00001',
@@ -479,9 +492,9 @@ databaseDescribe('database-backed tag/stock voucher lifecycle', () => {
         CO,
       );
       const beforeLockedEdit = await row.get(runtime, scope, voucherNo);
-      await expect(row.edit(runtime, scope, voucherNo, '2024-04-12')).rejects.toBeInstanceOf(
-        PeriodLockValidationError,
-      );
+      await expect(
+        row.edit(runtime, scope, voucherNo, '2024-04-12', String(beforeLockedEdit.version)),
+      ).rejects.toBeInstanceOf(PeriodLockValidationError);
       expect(await row.get(runtime, scope, voucherNo)).toEqual(beforeLockedEdit);
       expect(await state(row, voucherNo)).toMatchObject({
         headers: 1,
@@ -497,9 +510,9 @@ databaseDescribe('database-backed tag/stock voucher lifecycle', () => {
 
       await row.seedConsumption(owner, scope, voucherNo, edited);
       const beforeConsumedEdit = await row.get(runtime, scope, voucherNo);
-      await expect(row.edit(runtime, scope, voucherNo, '2024-04-12')).rejects.toBeInstanceOf(
-        StockVoucherValidationError,
-      );
+      await expect(
+        row.edit(runtime, scope, voucherNo, '2024-04-12', String(beforeConsumedEdit.version)),
+      ).rejects.toBeInstanceOf(StockVoucherValidationError);
       expect(await row.get(runtime, scope, voucherNo)).toEqual(beforeConsumedEdit);
       expect(await state(row, voucherNo)).toMatchObject({
         headers: 1,
@@ -520,7 +533,14 @@ databaseDescribe('database-backed tag/stock voucher lifecycle', () => {
           voucherNo,
         );
       }
-      await expect(row.remove(runtime, scope, voucherNo)).resolves.toEqual({ reversed: true });
+      await expect(
+        row.remove(
+          runtime,
+          scope,
+          voucherNo,
+          String((await row.get(runtime, scope, voucherNo)).version),
+        ),
+      ).resolves.toEqual({ reversed: true });
       const afterDelete = await state(row, voucherNo);
       expect(afterDelete).toMatchObject({
         headers: 0,

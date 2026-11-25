@@ -1,5 +1,14 @@
 import { round, toIsoDate } from '@datacare/core';
 import { tagKarigarLineColumns } from './tagKarigarLine.js';
+import type { TagOpeningInput, TagOpeningLine } from './tagOpeningLifecycle.js';
+import {
+  assertTagOpeningCounterCodes,
+  assertTagOpeningVersionTx,
+  deleteTagOpeningOwnedRows,
+  TAG_OPENING_VERSION_TABLES,
+  tagOpeningVersionTx,
+  withLotKarigarFill,
+} from './tagOpeningLifecycle.js';
 import { DESKTOP_MESSAGES } from '../shared/desktopMessages.js';
 import { withTxBudget } from '../shared/txBudget.js';
 import { assertPeriodOpen, insertRowTx, postVoucherTx } from '../posting/posting.js';
@@ -17,104 +26,15 @@ import {
   nextVoucherNoTx,
   type VoucherScope,
 } from '../vouchers/numbering.js';
+import { versionKeyOf, voucherVersionTx } from '../vouchers/version.js';
+
+export type { TagOpeningInput, TagOpeningLine } from './tagOpeningLifecycle.js';
 
 export class StockVoucherValidationError extends Error {
   constructor(message: string) {
     super(message);
     this.name = 'StockVoucherValidationError';
   }
-}
-
-export interface TagOpeningLine {
-  tagNo?: string;
-  vchSrno?: number;
-  itCode: string;
-  pcs?: number;
-  grossWt?: number;
-  netWt?: number;
-  touch?: number;
-  ghtWt?: number;
-  westPct?: number;
-  fineWt?: number;
-  rate?: number;
-  mrp?: number;
-  tblCode?: string;
-  designNo?: string;
-  itmSize?: string;
-  lessWt?: number;
-  lbrPct?: number;
-  lbrType?: string;
-  lbrRate?: number;
-  lbrAmt?: number;
-  othAmt?: number;
-  tagCost?: number;
-  // Desktop tag-grid columns (TR_TAG_OPBL.cs `mSG[i, c]`); each maps to one BAR_DETL column.
-  // Item attributes — mSG 8/9/49/24/38/100/101.
-  itmStyle?: string;
-  itmColor?: string;
-  itmMargin?: number;
-  lbrCode?: string;
-  slType?: string;
-  empIsu?: string;
-  designImageId?: string;
-  // Retail pricing — mSG 47/48.
-  mainMarginPct?: number;
-  mainMrp?: number;
-  // Hallmark identifiers and weights — mSG 82-88.
-  hallmarkId2?: string;
-  hallmarkId3?: string;
-  hallmarkId4?: string;
-  hallmarkIdWt?: number;
-  hallmarkId2Wt?: number;
-  hallmarkId3Wt?: number;
-  hallmarkId4Wt?: number;
-  // Karigar weight block — mSG 17-23 (KrOthWt, KrNwt, KrGht%, KrGht, KrTouch, KrWst%, KrFine; N204).
-  karigarOthWt?: number;
-  karigarNetWt?: number;
-  karigarGhtPct?: number;
-  karigarGhtWt?: number;
-  karigarTouch?: number;
-  karigarWestPct?: number;
-  karigarFine?: number;
-  // Karigar costing — mSG 35/36/37/39/40/41/42/45/53/60.
-  karigarLbrRate?: number;
-  karigarLbrAmt?: number;
-  karigarOthAmt?: number;
-  karigarOthRate?: number;
-  karigarOthFine?: number;
-  karigarTotFine?: number;
-  karigarGwtTouch?: number;
-  karigarCost?: number;
-  karigarName?: string;
-  karigarWaxWt?: number;
-  // Jadtar (stone-set) weights — mSG 54-59.
-  jdtJdtWt?: number;
-  jdtGhtWt?: number;
-  jdtKunWt?: number;
-  jdtKunTouch?: number;
-  jdtKunNet?: number;
-  jdtWaxWt?: number;
-  // Sales-order linkage — mSG 4/90/91/92/94/95/97.
-  ordNo?: string;
-  ordSrno?: number;
-  ordYrcd?: string;
-  ordDbcd?: string;
-  ordAc?: string;
-  ordLcCode?: string;
-  sfNo?: string;
-  // Manufacturing linkage — mSG 2/103/104/106.
-  mfgNo?: string;
-  mfgYrcd?: string;
-  mfgDbcd?: string;
-  mfgSrno?: number;
-}
-
-export interface TagOpeningInput {
-  scope: VoucherScope;
-  mainUser?: string;
-  vchDate?: Date | string;
-  stockItCode?: string;
-  lines: TagOpeningLine[];
 }
 
 export interface ItemOpeningLine {
@@ -602,6 +522,8 @@ async function writeTagOpeningTx(
       ) !== index,
   );
   if (duplicate) throw new StockVoucherValidationError(DESKTOP_MESSAGES.TAG_DUPLICATE);
+  // The lot header's karigar fill runs before the block is worked out (TR_TAG_OPBL.cs:10990-10996).
+  const lines = withLotKarigarFill(input);
   // Only Tag Entry makes tags out of a loose stock item, so the item is required (TR_TAG_OPBL.cs:10813-10818); the
   // opening books (OPSTK) hide the field and draw on no stock (CLEAR_DATA, :10303-10310).
   const tagGen = policy.mainBook === TAG_GEN;
@@ -613,8 +535,8 @@ async function writeTagOpeningTx(
   const fineOf = (line: TagOpeningLine): number =>
     line.fineWt != null ? n(line.fineWt) : fineFor('tagOpening', line);
   // The karigar weight block as BtnSave_Click writes it (TR_TAG_OPBL.cs:10975-11022, N204).
-  const karigar = input.lines.map((line) => tagKarigarLineColumns(line, fineOf(line)));
-  const details = input.lines.map((line, index) => ({
+  const karigar = lines.map((line) => tagKarigarLineColumns(line, fineOf(line)));
+  const details = lines.map((line, index) => ({
     ...key,
     SR_NO: index + 1,
     OLD_SRNO: index + 1,
@@ -699,7 +621,7 @@ async function writeTagOpeningTx(
     MFG_DBCD: text(line.mfgDbcd).slice(0, 3) || null, // mSG[i,104]:11124
     MFG_SRNO: n(line.mfgSrno), // mSG[i,106]:11125
   }));
-  const itemDetails = input.lines.map((line, index) => ({
+  const itemDetails = lines.map((line, index) => ({
     ...key,
     SR_NO: index + 1,
     ISR_NO: 1,
@@ -721,8 +643,8 @@ async function writeTagOpeningTx(
   // the stock item it was made from goes out once, by the voucher's totals ('O', '-', TAG_NO 'N'). A tag row's quantity
   // is always 1, and the row carries the tag's karigar weight block (Ac_Stock.cs:28), karigar costing and design.
   const sum = (pick: (line: TagOpeningLine) => number) =>
-    input.lines.reduce((total, line) => total + pick(line), 0);
-  const tagStock = input.lines.map((line, index) => ({
+    lines.reduce((total, line) => total + pick(line), 0);
+  const tagStock = lines.map((line, index) => ({
     ...key,
     SR_NO: index + 1,
     VCH_DATE: date,
@@ -1005,13 +927,20 @@ export async function tagOpening(prisma: any, input: TagOpeningInput) {
   return withTxBudget(prisma, scope.tenantId, 'voucher', async (tx: any) => {
     const policy = await resolveBookTx(tx, scope, 'tag-opening');
     await assertDatesOpenTx(tx, scope, requested);
-    return writeTagOpeningTx(
+    // TR_TAG_OPBL.cs:10793-10806: with counter-wise stock on, every tag row needs its counter code.
+    await assertTagOpeningCounterCodes(tx, scope, input.lines);
+    const result = await writeTagOpeningTx(
       tx,
       input,
       policy,
       requested.date,
       await createContextTx(tx, scope, input.mainUser),
     );
+    // N51 (D17): the token a reopen hands back for PUT/DELETE as expectedVersion.
+    return {
+      ...result,
+      version: await tagOpeningVersionTx(tx, scope, formatVoucherNo(String(result.vchNo))),
+    };
   });
 }
 
@@ -1056,10 +985,13 @@ async function getHeaderAndRows(
   kind: Kind,
   table: string,
   columns: string,
+  /** N51 (D17): when given, the read also returns the write set's `version` from the same transaction. */
+  versionTables?: readonly string[],
 ): Promise<{
   header: Record<string, unknown>;
   rows: Array<Record<string, unknown>>;
   voucherNo: string;
+  version?: string;
 }> {
   completeScope(scopeInput);
   const scope = scopeInput;
@@ -1084,7 +1016,14 @@ async function getHeaderAndRows(
         AND "CO_YEAR"=$4 AND "CO_BOOK"=$5 AND "VCH_NO"=$6 ORDER BY "SR_NO"`,
       ...params(scope, voucherNo),
     );
-    return { header: headers[0]!, rows, voucherNo };
+    return {
+      header: headers[0]!,
+      rows,
+      voucherNo,
+      ...(versionTables
+        ? { version: await voucherVersionTx(tx, versionTables, versionKeyOf(scope, voucherNo)) }
+        : {}),
+    };
   });
 }
 
@@ -1093,7 +1032,7 @@ export async function getTagOpening(
   scope: VoucherScope,
   requestedVoucherNo: number | string,
 ): Promise<Record<string, unknown>> {
-  const { header, rows, voucherNo } = await getHeaderAndRows(
+  const { header, rows, voucherNo, version } = await getHeaderAndRows(
     prisma,
     scope,
     requestedVoucherNo,
@@ -1120,9 +1059,12 @@ export async function getTagOpening(
       '"JDT_JDT_WT","JDT_GHT_WT","JDT_KUN_WT","JDT_KUN_TOUCH","JDT_KUN_NET","JDT_WAX_WT",' +
       '"ORD_NO","ORD_SRNO","ORD_YRCD","ORD_DBCD","ORD_AC","ORD_LC_CODE","SF_NO",' +
       '"MFG_NO","MFG_YRCD","MFG_DBCD","MFG_SRNO"',
+    // N51 (D17): the write set's token, handed back for PUT/DELETE as expectedVersion.
+    TAG_OPENING_VERSION_TABLES,
   );
   return {
     voucherNo,
+    version,
     hiddenVoucherNo: text(header.HD_VCH_NO),
     mainUser: text(header.MAIN_USER),
     vchDate: toIsoDate(header.VCH_DATE),
@@ -1305,6 +1247,8 @@ export async function editTagOpening(
   prisma: any,
   input: TagOpeningInput,
   requestedVoucherNo: number | string,
+  /** N51 (D17): the `version` the operator read; a stale one is `409 voucher-version-conflict`. */
+  expectedVersion?: string,
 ) {
   completeScope(input.scope);
   const scope = input.scope;
@@ -1313,6 +1257,10 @@ export async function editTagOpening(
   return withTxBudget(prisma, scope.tenantId, 'voucher', async (tx: any) => {
     const policy = await resolveBookTx(tx, scope, 'tag-opening');
     const ctx = await editContextTx(tx, scope, voucherNo, 'tag-opening', requested);
+    // N51 (D17): refuse a stale token after the header lock, before the write set is replaced.
+    await assertTagOpeningVersionTx(tx, scope, voucherNo, expectedVersion ?? '');
+    // TR_TAG_OPBL.cs:10793-10806 applies to the edit save exactly as to the create.
+    await assertTagOpeningCounterCodes(tx, scope, input.lines);
     // Desktop blocks edits/deletes after a generated tag is consumed: TR_TAG_OPBL.cs:11373-11381.
     ctx.persistedTagSrnos = await assertTagOpeningUnconsumedTx(tx, scope, voucherNo);
     await deleteVoucherWriteSetTx(tx, {
@@ -1322,7 +1270,11 @@ export async function editTagOpening(
       key: { scope, voucherNo },
       tempBook: { voucherNo: ctx.hiddenVoucherNo },
     });
-    return writeTagOpeningTx(tx, input, policy, requested.date, ctx);
+    const result = await writeTagOpeningTx(tx, input, policy, requested.date, ctx);
+    return {
+      ...result,
+      version: await tagOpeningVersionTx(tx, scope, voucherNo),
+    };
   });
 }
 
@@ -1381,7 +1333,13 @@ export async function editItemLot(
 
 export async function deleteTagOpening(
   prisma: any,
-  input: { scope: VoucherScope; vchNo: number | string; deleteUser?: string },
+  input: {
+    scope: VoucherScope;
+    vchNo: number | string;
+    deleteUser?: string;
+    /** N51 (D17): the `version` the operator read; a stale one is `409 voucher-version-conflict`. */
+    expectedVersion?: string;
+  },
 ): Promise<{ reversed: true }> {
   completeScope(input.scope);
   const scope = input.scope;
@@ -1389,6 +1347,8 @@ export async function deleteTagOpening(
   return withTxBudget(prisma, scope.tenantId, 'voucher', async (tx: any) => {
     const policy = await resolveBookTx(tx, scope, 'tag-opening');
     const persisted = await headerTx(tx, scope, voucherNo, 'tag-opening');
+    // N51 (D17): refuse a stale token after the header lock, before anything is deleted.
+    await assertTagOpeningVersionTx(tx, scope, voucherNo, input.expectedVersion ?? '');
     const persistedBusinessDate = businessDate(toIsoDate(persisted.VCH_DATE));
     await assertDatesOpenTx(tx, scope, persistedBusinessDate, persisted.VCH_DATE);
     // TR_TAG_OPBL.cs:11376-11385: a voucher whose tag is already sold cannot be deleted.
@@ -1430,6 +1390,7 @@ export async function deleteTagOpening(
         VCH_DESC: `ItCode/${text(row.IT_CODE)} TagNo/${text(row.TAG_NO)}`.slice(0, 150),
       });
     }
+    await deleteTagOpeningOwnedRows(tx, scope, voucherNo, rows);
     await deleteVoucherWriteSetTx(tx, {
       tables: ['BAR_IDTL', 'BAR_DETL', 'MAIN_STOCK', 'BAR_DATA'],
       key: { scope, voucherNo },

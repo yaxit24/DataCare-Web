@@ -51,10 +51,14 @@ export async function resolveCounterStockPolicyTx(
  * Desktop condition (`TR_PURC.cs:12868`): with counter-wise stock on, any row whose item code is set
  * must carry a counter code. The desktop reads the item code of the FIRST row (`MSG[1,3]`) as the
  * "grid has items" test and then checks each row's counter, so a grid with no items is not blocked.
+ *
+ * The refusal text is per form: `TR_PURC.cs` says "Please Insert Tag Entry Counter Code ...", while
+ * `TR_TAG_OPBL.cs:10801` says "Please Insert Counter Code and Try Because It is Mandatory...".
  */
 export function assertCounterCodes(
   policy: CounterStockPolicy,
   lines: Array<{ itCode?: unknown; tblCode?: unknown }>,
+  message: string = DESKTOP_MESSAGES.TAG_COUNTER_MANDATORY,
 ): void {
   if (!policy.enforced) return;
   const hasItems = lines.some((l) => String(l.itCode ?? '').trim() !== '');
@@ -62,7 +66,7 @@ export function assertCounterCodes(
   for (const line of lines) {
     if (String(line.itCode ?? '').trim() === '') continue;
     if (String(line.tblCode ?? '').trim() === '') {
-      throw new CounterStockValidationError(DESKTOP_MESSAGES.TAG_COUNTER_MANDATORY);
+      throw new CounterStockValidationError(message);
     }
   }
 }

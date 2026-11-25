@@ -148,8 +148,10 @@ describe('route policy registry', () => {
     // N255 (WP-20) adds the Ledger Report JmaUdr, Gold and Silver prints with PDF and Excel: 790 + 9 = 799. [800 on main + 9 here = 809]
     // The Sales Report's Select Book panel gets its own book list GET /reports/sales-report/books
     // (RP_ALL.cs:11421 BookMast), uncapped and session-location-scoped: 800 + 1 = 801. [809 on main + 1 here = 810]
-    expect(routes).toHaveLength(810);
-    expect(new Set(routes.map((route) => `${route.method} ${route.path}`)).size).toBe(810);
+    // WP-32 adds the Tag Opening label-file setup, the label print POST /stock/tag-opening/:vchNo/print
+    // (TR_TAG_OPBL.cs:11477-11551) and its Set default-file: 810 + 3 = 813.
+    expect(routes).toHaveLength(813);
+    expect(new Set(routes.map((route) => `${route.method} ${route.path}`)).size).toBe(813);
 
     const policies = routes.map((route) => ({
       ...route,
