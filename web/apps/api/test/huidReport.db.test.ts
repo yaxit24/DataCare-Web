@@ -433,7 +433,11 @@ const ORIGINS: Origin[] = [
       expect((await run(IN, cookieViewer)).statusCode).toBe(200);
       const r = await run(IN, cookieViewer, `/export.${kind}`);
       expect(r.statusCode, r.body).toBe(403);
-      expect(r.json()).toEqual({ error: 'forbidden', action: 'print' });
+      expect(r.json()).toEqual({
+        error: 'forbidden',
+        form: 'Reports/HuId Report',
+        action: 'print',
+      });
     },
   );
 

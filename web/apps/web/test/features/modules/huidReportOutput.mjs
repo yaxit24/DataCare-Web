@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 import { inflateRawSync } from 'node:zlib';
 import { USERS } from '../fixtures/catalogue.mjs';
-import { cleanHuid, seedHuid } from './huidSeed.mjs';
+import { HUID_LC, cleanHuid, huidUser, seedHuid } from './huidSeed.mjs';
 /**
  * Feature: Report → HuId Report (RP_HUID.cs, /reports/huid), part B, first slice: T04, T05, T11 and T12.
  * Still to write from the frozen list: T15 history.group-renamed-live-master, T16 output (ten ids), T17 keyboard (nine ids).
@@ -20,15 +20,10 @@ const NO_PRINT = 'You Have No Print Rights.....';
 const GRANTED = [USERS.admin.user, USERS.clerk.user, USERS.printViewer.user];
 /** tagNo is the fourth visible In and Stock column (RP_HUID.cs:1761 SELECT order; CoCode is hidden). */
 const TAG_AT = 3;
-const DELETE_RIGHTS = `DELETE FROM "USER_SET" WHERE tenant_id=$1 AND "LC_CODE"='01' AND "SUB_MENU"='HuId Report' AND "USER_NAME" = ANY($2::text[])`;
-const GRANT_RIGHTS = `INSERT INTO "USER_SET"(tenant_id,"CO_CODE","LC_CODE","USER_NAME","MAIN_MENU","SUB_MENU","FRM_VIEW","FRM_EDIT","FRM_DELETE","FRM_PRINT") VALUES ($1,'01','01',$2,'Reports','HuId Report','Y','N','N',$3)`;
+const DELETE_RIGHTS = `DELETE FROM "USER_SET" WHERE tenant_id=$1 AND "LC_CODE"='${HUID_LC}' AND "SUB_MENU"='HuId Report' AND "USER_NAME" = ANY($2::text[])`;
+const GRANT_RIGHTS = `INSERT INTO "USER_SET"(tenant_id,"CO_CODE","LC_CODE","USER_NAME","MAIN_MENU","SUB_MENU","FRM_VIEW","FRM_EDIT","FRM_DELETE","FRM_PRINT") VALUES ($1,'01','${HUID_LC}',$2,'Reports','HuId Report','Y','N','N',$3)`;
 
-const as = (user) => ({
-  user,
-  get password() {
-    return process.env.FEATURE_E2E_PASSWORD;
-  },
-});
+const as = huidUser;
 const C = (id, group, source, fn) => ({
   id,
   group,
@@ -305,7 +300,7 @@ export const outputCases = [
       await setWindow(page);
       await absentFromViews(page, 'TG-S2');
       return {
-        observation: 'TG-S2 (location 02) absent from In, Out and Stock',
+        observation: 'TG-S2 (location 01, not the session location) absent from In, Out and Stock',
         expected: { absent: 'TG-S2' },
       };
     },
@@ -341,7 +336,11 @@ export const outputCases = [
           button(page, name).click(),
         ]);
         assert.equal(res.status(), 403, `${name} is refused`);
-        assert.deepEqual(JSON.parse(await res.text()), { error: 'forbidden', action: 'print' });
+        assert.deepEqual(JSON.parse(await res.text()), {
+          error: 'forbidden',
+          form: 'Reports/HuId Report',
+          action: 'print',
+        });
         return res;
       };
       const pdf = await refused('Print');
@@ -349,7 +348,11 @@ export const outputCases = [
       // The CSV of the same query is refused too (no CSV button in the page contract).
       const csv = await fetchText(page, csvUrl(pdf.url()));
       assert.equal(csv.status, 403, 'CSV is refused');
-      assert.deepEqual(JSON.parse(csv.body), { error: 'forbidden', action: 'print' });
+      assert.deepEqual(JSON.parse(csv.body), {
+        error: 'forbidden',
+        form: 'Reports/HuId Report',
+        action: 'print',
+      });
       return {
         observation: 'PDF, Excel and CSV refused with 403 forbidden/print',
         expected: { status: 403 },

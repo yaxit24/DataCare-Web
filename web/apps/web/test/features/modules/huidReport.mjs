@@ -1,4 +1,5 @@
 import { USERS } from '../fixtures/catalogue.mjs';
+import { huidUser } from './huidSeed.mjs';
 import { filterCases } from './huidReportFilters.mjs';
 import { outputCases } from './huidReportOutput.mjs';
 
@@ -13,12 +14,7 @@ import { outputCases } from './huidReportOutput.mjs';
  * not run and no shared setup is created.
  */
 
-const as = (user) => ({
-  user,
-  get password() {
-    return process.env.FEATURE_E2E_PASSWORD;
-  },
-});
+const as = huidUser;
 
 const SOURCE = 'orchestration/work/WP-18/cases.md';
 

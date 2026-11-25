@@ -136,7 +136,7 @@ export function registerHuidReportRoutes(app: FastifyInstance, h: HuidReportRout
    * The print gate. The route's policy classifies GET as a read, so the central preHandler has already
    * proved the view right; the export itself needs the desktop's print right (USER_SET.FRM_PRINT,
    * read at RP_HUID.cs:1414 and tested by the desktop's Excel button at :1359), so it is re-checked here
-   * and refused with the refusal shape the desktop's own guard uses, `{error:'forbidden', action:'print'}`
+   * and refused with the shape every report export uses, `{error:'forbidden', form, action:'print'}`
    * (txn.ts guard). Admins keep their bootstrap bypass (authorization.ts).
    */
   const requirePrint = async (req: FastifyRequest, reply: FastifyReply): Promise<boolean> => {
@@ -156,7 +156,7 @@ export function registerHuidReportRoutes(app: FastifyInstance, h: HuidReportRout
       return true;
     } catch (error) {
       if (error instanceof FormForbiddenError) {
-        void reply.code(403).send({ error: 'forbidden', action: 'print' });
+        void reply.code(403).send({ error: 'forbidden', form: HUID_FORM, action: 'print' });
         return false;
       }
       throw error;

@@ -7,8 +7,24 @@ import { SECOND_TENANT } from '../harness.mjs';
  * accounts V1, V2, K1, K2 have no spec names and are named 'TEST ACCOUNT <code>'. Cleanup removes only the rows it wrote.
  */
 const CO = '01';
-const LC = '01';
+/**
+ * Dedicated location. The browser runner shares one database across about 45 modules and every other module seeds
+ * company 01, location 01 in the current year; a HuId grid at location 01 would list their tags. The huid-report
+ * session signs in at this location (huidUser) and the seed writes its rows here, so the report returns exactly the
+ * rows seeded. Location 01 is not filtered out: it stays the "other location" the report must exclude.
+ */
+export const HUID_LC = '09';
+const LC = HUID_LC;
 const YEAR = '2026-2027';
+/** Credentials for a huid-report session: the user at the dedicated location (the real Open Company selector). */
+export const huidUser = (user) => ({
+  user,
+  location: HUID_LC,
+  get password() {
+    return process.env.FEATURE_E2E_PASSWORD;
+  },
+});
+
 /** Origin tags: one BAR_DETL row and one '+' MAIN_STOCK row each. `mv` adds sales ('-') and returns ('+'). hm: slot -> [value, weight]. */
 export const HUID_TAGS = [
   {
@@ -243,7 +259,7 @@ export const HUID_TAGS = [
   },
 ];
 
-/** Sentinels: other company (TG-S1), other location (TG-S2), other tenant (TG-S3). Never in the company 01 window. */
+/** Sentinels: other company (TG-S1), other location 01 (TG-S2), other tenant (TG-S3). Never in the company 01 window. */
 export const SENTINEL_TAGS = [
   {
     tag: 'TG-S1',
@@ -264,7 +280,7 @@ export const SENTINEL_TAGS = [
   {
     tag: 'TG-S2',
     n: 'X2',
-    lc: '02',
+    lc: '01',
     it: 'GDR',
     d: '2026-04-10',
     s: '2026-04-10',
@@ -391,6 +407,12 @@ export async function seedHuid(ctx) {
   await cleanHuid(ctx);
   const db = ctx.owner;
   const t = ctx.tenantId;
+  // The dedicated location must exist for the Open Company selector; cleanHuid removes it again.
+  await db.$executeRawUnsafe(
+    `INSERT INTO "LOCT_MAST"(tenant_id,"CO_CODE","LC_CODE","LC_NAME") SELECT $1::text,'01',$2::text,'E2E HUID LOCATION' WHERE NOT EXISTS (SELECT 1 FROM "LOCT_MAST" WHERE tenant_id=$1::text AND "CO_CODE"='01' AND "LC_CODE"=$2::text)`,
+    t,
+    HUID_LC,
+  );
   for (const [code, name, type, pr, gr] of ITEMS) {
     await db.$executeRawUnsafe(
       `INSERT INTO "ITEM_MAST"(tenant_id,"CO_CODE","IT_CODE","IT_NAME","IT_TYPE","PR_CODE","GR_CODE") VALUES ($1,'01',$2,$3,$4,$5,$6) ON CONFLICT (tenant_id,"CO_CODE","IT_CODE") DO UPDATE SET "IT_NAME"=EXCLUDED."IT_NAME","IT_TYPE"=EXCLUDED."IT_TYPE","PR_CODE"=EXCLUDED."PR_CODE","GR_CODE"=EXCLUDED."GR_CODE"`,
@@ -420,10 +442,11 @@ export async function seedHuid(ctx) {
   }
   for (const [code, name] of ACCOUNTS) {
     await db.$executeRawUnsafe(
-      `INSERT INTO "AC_MAST"(tenant_id,"CO_CODE","LC_CODE","AC_CODE","AC_NAME") SELECT $1::text,'01','01',$2::text,$3::text WHERE NOT EXISTS (SELECT 1 FROM "AC_MAST" WHERE tenant_id=$1::text AND "CO_CODE"='01' AND "LC_CODE"='01' AND "AC_CODE"=$2::text)`,
+      `INSERT INTO "AC_MAST"(tenant_id,"CO_CODE","LC_CODE","AC_CODE","AC_NAME") SELECT $1::text,'01',$4::text,$2::text,$3::text WHERE NOT EXISTS (SELECT 1 FROM "AC_MAST" WHERE tenant_id=$1::text AND "CO_CODE"='01' AND "LC_CODE"=$4::text AND "AC_CODE"=$2::text)`,
       t,
       code,
       name,
+      HUID_LC,
     );
   }
   for (const r of ALL) {
@@ -446,4 +469,16 @@ export async function cleanHuid(ctx) {
       );
     }
   }
+  // The dedicated location and its accounts belong to this seed alone.
+  await ctx.owner.$executeRawUnsafe(
+    `DELETE FROM "AC_MAST" WHERE tenant_id=$1 AND "CO_CODE"='01' AND "LC_CODE"=$2 AND "AC_CODE" = ANY($3::text[])`,
+    ctx.tenantId,
+    HUID_LC,
+    ACCOUNTS.map(([code]) => code),
+  );
+  await ctx.owner.$executeRawUnsafe(
+    `DELETE FROM "LOCT_MAST" WHERE tenant_id=$1 AND "CO_CODE"='01' AND "LC_CODE"=$2 AND "LC_NAME"='E2E HUID LOCATION'`,
+    ctx.tenantId,
+    HUID_LC,
+  );
 }
