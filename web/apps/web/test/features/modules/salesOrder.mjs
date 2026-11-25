@@ -1765,6 +1765,38 @@ export const salesOrder = {
     ),
 
     C(
+      'retry.replayed-save',
+      'T13',
+      'mutation',
+      'A replayed Sales Order save answers with the first result and leaves exactly one order.',
+      async (ctx) => {
+        const { page } = await ctx.session();
+        await enterOrder(page);
+        const first = await save(page);
+        assert.equal(first.status(), 201, await first.text());
+        assert.match(first.request().headers()['idempotency-key'] ?? '', /^[0-9a-f-]{36}$/);
+        const firstBody = await first.text();
+        const result = JSON.parse(firstBody);
+        const replay = await page.request.fetch(first.request());
+        assert.equal(replay.status(), 201, await replay.text());
+        assert.equal(
+          replay.headers()['idempotency-replayed'],
+          'true',
+          `replay headers ${JSON.stringify(replay.headers())}`,
+        );
+        assert.equal(await replay.text(), firstBody, 'replay body equals the first');
+        const rows = await header(ctx, String(result.vchNo).padStart(5, '0'));
+        assert.equal(rows.length, 1, `rows ${JSON.stringify(rows)}`);
+        return {
+          observation: `the replay answered ${replay.status()} with the first body`,
+          expected: 'the first answer again; exactly one order',
+          database: { rows },
+          downstream: { order: rows[0] },
+        };
+      },
+    ),
+
+    C(
       'print.order',
       'T16',
       'output',

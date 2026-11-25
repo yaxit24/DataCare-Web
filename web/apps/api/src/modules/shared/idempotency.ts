@@ -42,6 +42,9 @@ export interface IdempotentRoute {
 
 /** Every voucher create guarded so far. Literal paths: the route-policy test matches them to registrations. */
 export const IDEMPOTENT_CREATE_ROUTES: readonly IdempotentRoute[] = Object.freeze([
+  { method: 'POST', url: '/sales-orders', status: 201, menus: ['Transaction/Sales Order'] },
+  { method: 'POST', url: '/tour/issue', status: 201, menus: ['Transaction/Approval Isu'] },
+  { method: 'POST', url: '/tour/return', status: 201, menus: ['Transaction/Approval Rtn'] },
   { method: 'POST', url: '/stock/stock-adjust', status: 201, menus: ['Other/Stock Adjust'] },
   { method: 'POST', url: '/stock/tag-cancel', status: 201, menus: ['Other/Tag Cancel'] },
   {

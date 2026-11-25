@@ -1,7 +1,8 @@
 'use client';
 import { formatDesktopDate } from '@datacare/core';
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { get, post, put, del, ApiError } from '../../../../lib/api';
+import { get, postCommand, put, del, ApiError } from '../../../../lib/api';
+import { useIdempotencyKey } from '../../../../lib/idempotencyKey';
 import { LookupPicker } from '../../../../components/LookupPicker';
 import { BookSelect } from '../../../../components/BookSelect';
 import { useBusinessScope } from '../../../../components/BusinessScope';
@@ -51,6 +52,7 @@ const oldMetalTotalFields = {
 
 export default function SalesOrderPage() {
   const scope = useBusinessScope();
+  const command = useIdempotencyKey();
   const [coBook, setCoBook] = useState('');
   const [labourPolicy, setLabourPolicy] = useState<{
     scope: string;
@@ -423,7 +425,8 @@ export default function SalesOrderPage() {
             `/sales-orders/${encodeURIComponent(selected.voucherNo)}?${scopeQuery}`,
             payload,
           )
-        : await post(`/sales-orders?${scopeQuery}`, payload);
+        : await postCommand<any>(`/sales-orders?${scopeQuery}`, payload, command.key);
+      if (!selected) command.renew();
       if (scopeRef.current !== scopeQuery) return;
       resetForm();
       setMsg({
