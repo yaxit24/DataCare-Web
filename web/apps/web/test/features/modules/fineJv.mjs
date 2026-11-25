@@ -1197,7 +1197,12 @@ export const fineJv = {
           ].sort(),
         );
         // The frozen drill-down assertion remains executable even if the report has not wired it yet.
-        await page.locator('table.grid tbody tr').filter({ hasText: no }).first().dblclick();
+        await page
+          .locator('table.grid tbody tr')
+          .filter({ hasText: no })
+          .filter({ hasText: 'FINE JV' })
+          .first()
+          .dblclick();
         await page.waitForURL(/\/txn\/fine-jv/);
         await page.getByRole('button', { name: `Update #${no}`, exact: true }).waitFor();
         assert.equal(await label(page, 'Fine row 2').inputValue(), '12.346');
