@@ -29,7 +29,15 @@ const owner = new PrismaClient({
 });
 const runtime = new PrismaClient({ datasources: { db: { url: process.env.DATABASE_URL ?? '' } } });
 
-const TABLES = ['GROUP_MAST', 'AC_MAST', 'ITEM_MAST', 'YEAR_MAST', 'CO_SET', 'CO_SET_NEW'];
+const TABLES = [
+  'GROUP_MAST',
+  'AC_MAST',
+  'ITEM_MAST',
+  'YEAR_MAST',
+  'CO_SET',
+  'CO_SET_NEW',
+  'CO_MAST',
+];
 async function clean(): Promise<void> {
   for (const table of TABLES)
     await owner.$executeRawUnsafe(`DELETE FROM "${table}" WHERE tenant_id=$1`, TENANT);
@@ -41,7 +49,14 @@ const one = async (sql: string, ...params: unknown[]): Promise<Record<string, un
 };
 
 databaseDescribe('master and year save fidelity (desktop blank/stamp/date rules)', () => {
-  beforeEach(clean);
+  beforeEach(async () => {
+    await clean();
+    await owner.$executeRawUnsafe(
+      `INSERT INTO "CO_MAST"(tenant_id,"CO_CODE","CO_NAME") VALUES ($1,$2,'COMPANY'),($1,'01','TEMPLATE')`,
+      TENANT,
+      CO,
+    );
+  });
   afterAll(async () => {
     await clean();
     await owner.$disconnect();
@@ -218,7 +233,7 @@ databaseDescribe('master and year save fidelity (desktop blank/stamp/date rules)
     );
     await createYear(runtime, scope, { coYear: '2027-2028' });
     await expect(createYear(runtime, scope, { coYear: '2027-2028' })).rejects.toThrow(
-      /already exists/,
+      /Year Is Already Exist/,
     );
     const rows = (await owner.$queryRawUnsafe(
       `SELECT count(*)::int n FROM "YEAR_MAST" WHERE tenant_id=$1`,

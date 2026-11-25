@@ -56,7 +56,7 @@ async function companyTx(
                 SELECT 1 FROM "LOGIN_MAST" l
                  WHERE l."CO_CODE"=c."CO_CODE" AND l."LOGIN_NAME"=$2
               )) AS allowed
-         FROM "CO_MAST" c WHERE c."CO_CODE"=$1 LIMIT 1`,
+         FROM "CO_MAST" c WHERE c."CO_CODE"=$1 AND c.deleted_at IS NULL LIMIT 1`,
     coCode,
     access?.loginName ?? '',
     access?.isAdmin ?? true,
@@ -197,10 +197,10 @@ export async function listScopeCompanies(
   return withTxBudget(prisma, input.tenantId, 'read', (tx: any) =>
     tx.$queryRawUnsafe(
       `SELECT c."CO_CODE",c."CO_NAME" FROM "CO_MAST" c
-        WHERE $2::boolean OR EXISTS(
+        WHERE c.deleted_at IS NULL AND ($2::boolean OR EXISTS(
           SELECT 1 FROM "LOGIN_MAST" l
            WHERE l."CO_CODE"=c."CO_CODE" AND l."LOGIN_NAME"=$1
-        )
+        ))
         ORDER BY c."CO_CODE"`,
       input.loginName,
       input.isAdmin,

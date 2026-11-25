@@ -25,7 +25,7 @@ databaseDescribe('database-backed company settings provisioning', () => {
   let runtime: PrismaClient;
 
   const cleanup = async (): Promise<void> => {
-    for (const table of [...COMPANY_CLONE_TABLES.map((t) => t.table), 'YEAR_MAST']) {
+    for (const table of [...COMPANY_CLONE_TABLES.map((t) => t.table), 'YEAR_MAST', 'CO_MAST']) {
       await owner.$executeRawUnsafe(`DELETE FROM "${table}" WHERE tenant_id=$1`, TENANT);
     }
   };
@@ -151,6 +151,11 @@ databaseDescribe('database-backed company settings provisioning', () => {
 
   it('provisions configuration as part of creating a year', async () => {
     await seedTemplate();
+    await owner.$executeRawUnsafe(
+      `INSERT INTO "CO_MAST"(tenant_id,"CO_CODE","CO_NAME") VALUES ($1,$2,'NEW COMPANY')`,
+      TENANT,
+      NEW_CO,
+    );
     await createYear(runtime, { tenantId: TENANT, coCode: NEW_CO }, { coYear: YEAR });
 
     const rows: any[] = await owner.$queryRawUnsafe(
