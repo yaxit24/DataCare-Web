@@ -1,7 +1,7 @@
 import { roundHalfEven, vbVal } from '@datacare/core';
 import { withTxBudget } from '../shared/txBudget.js';
 import { resolveSettingsBehaviorTx } from '../shared/settingsBehavior.js';
-import { stageTagPrintRowsTx } from './tagPrint.js';
+import { lockTagPrintDataTx, stageTagPrintRowsTx } from './tagPrint.js';
 import { tagPrintLabelsTx, tagPrintSetDefault } from './tagPrintScreen.js';
 
 /**
@@ -202,6 +202,8 @@ export async function tagOpeningPrint(
   if (skip > 500) throw new TagOpeningPrintValidationError('Lable Skip is at most 500');
   const srNo = Number(input.srNo ?? 0);
   return withTxBudget(prisma, scope.tenantId, 'voucher', async (tx: any) => {
+    // One staging table per tenant: serialize whole print jobs (stage + render) on the same key as Tag Print.
+    await lockTagPrintDataTx(tx, scope.tenantId);
     const headers: Array<Record<string, unknown>> = await tx.$queryRawUnsafe(
       `SELECT "VCH_NO" FROM "BAR_DATA" WHERE tenant_id=$1 AND "CO_CODE"=$2 AND "LC_CODE"=$3
          AND "CO_YEAR"=$4 AND "CO_BOOK"=$5 AND "VCH_NO"=$6 FOR UPDATE`,

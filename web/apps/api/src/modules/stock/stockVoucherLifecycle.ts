@@ -1359,7 +1359,7 @@ export async function deleteTagOpening(
       DESKTOP_MESSAGES.TAG_OPENING_DELETE_SOLD,
     );
     const rows: Array<Record<string, unknown>> = await tx.$queryRawUnsafe(
-      `SELECT "SR_NO","VCH_DATE","VCH_TIME","AC_CODE","IT_CODE","TAG_NO","IT_TYPE","ITM_NWT","HD_VCH_NO","MAIN_USER"
+      `SELECT "SR_NO","VCH_SRNO","VCH_DATE","VCH_TIME","AC_CODE","IT_CODE","TAG_NO","IT_TYPE","ITM_NWT","HD_VCH_NO","MAIN_USER"
          FROM "BAR_DETL" WHERE tenant_id=$1 AND "CO_CODE"=$2 AND "LC_CODE"=$3
           AND "CO_YEAR"=$4 AND "CO_BOOK"=$5 AND "VCH_NO"=$6 ORDER BY "SR_NO" FOR UPDATE`,
       ...params(scope, voucherNo),

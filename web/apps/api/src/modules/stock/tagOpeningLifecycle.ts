@@ -1,4 +1,4 @@
-import { roundHalfEven } from '@datacare/core';
+import { round, tagKarigarBlock } from '@datacare/core';
 import { assertCounterCodes, resolveCounterStockPolicyTx } from '../shared/counterStockPolicy.js';
 import { DESKTOP_MESSAGES } from '../shared/desktopMessages.js';
 import { assertVoucherVersionTx, versionKeyOf, voucherVersionTx } from '../vouchers/version.js';
@@ -87,6 +87,8 @@ export interface TagOpeningLine {
   mfgDbcd?: string;
   mfgSrno?: number;
   sourceType?: string;
+  /** Set by the lot-header fill only: the "0.00" KrFine of TR_TAG_OPBL.cs:10996 (0 = left unwritten). */
+  lotFine?: number;
 }
 
 export interface TagOpeningInput {
@@ -158,18 +160,22 @@ export function withLotKarigarFill(input: TagOpeningInput): TagOpeningLine[] {
   const lotTouch = n(input.lotTouch);
   const lotNo = text(input.lotNo);
   if (lotTouch === 0 || !lotNo) return input.lines;
-  const lotWest = Number(roundHalfEven(n(input.lotWestPrc), 2).toFixed(2));
-  return input.lines.map((line) =>
-    n(line.karigarTouch) === 0 && (text(line.sourceType) || 'A') === 'A'
-      ? {
-          ...line,
-          karigarTouch: Number(roundHalfEven(lotTouch, 2).toFixed(2)),
-          karigarWestPct: lotWest,
-          // The desktop recomputes KrFine from the lot values (:10996), so a typed cell gives way.
-          karigarFine: 0,
-        }
-      : line,
-  );
+  const lotWest = n(input.lotWestPrc);
+  return input.lines.map((line) => {
+    if (n(line.karigarTouch) !== 0 || (text(line.sourceType) || 'A') !== 'A') return line;
+    // :10994-10995 format the raw lot values "0.00" (half away from zero); the columns writer rounds them.
+    // :10996 writes KrFine only for a non-zero KrNwt cell, from the raw values, formatted "0.00".
+    const { karigarNetWt } = tagKarigarBlock({ ...line, karigarTouch: 0, karigarWestPct: 0 });
+    return {
+      ...line,
+      karigarTouch: lotTouch,
+      karigarWestPct: lotWest,
+      lotFine:
+        karigarNetWt !== 0
+          ? round(((karigarNetWt + n(line.karigarGhtWt)) * (lotTouch + lotWest)) / 100, 2)
+          : 0,
+    };
+  });
 }
 
 /**

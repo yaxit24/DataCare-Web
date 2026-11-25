@@ -4,6 +4,7 @@ import type { FastifyInstance } from 'fastify';
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest';
 import { buildApp } from '../src/app.js';
 import { hashPassword } from '../src/modules/auth/password.js';
+import { withLotKarigarFill } from '../src/modules/stock/tagOpeningLifecycle.js';
 import { seedCompany } from '../src/modules/ops/seedCompany.js';
 import { assertIsolatedTestDatabase } from './support/isolatedDatabase.js';
 import { snapshotTenant, diffTenant, tenantTables } from './support/tenantSnapshot.js';
@@ -303,6 +304,118 @@ describe.runIf(RUN)('WP-32 tag opening residual HTTP contracts', () => {
           opened.lines[0].karigarWestPct,
           opened.lines[0].karigarFine,
         ]).toEqual([92, 1.5, 9.35]);
+      });
+      it('lot fill formats touch and wastage half away from zero and fine "0.00" from raw values', async () => {
+        // TR_TAG_OPBL.cs:10994-10996: Strings.Format(Val(..),"0.00") for touch and wastage, and
+        // KR_FINE = Format((KrNwt + KrGht) * (lotTouch + lotWest) / 100, "0.00") from the raw values.
+        const vectors = [
+          { net: 10, touch: 91.125, west: 0.125, kTouch: 91.13, kWest: 0.13, fine: 9.13 },
+          { net: 10.333, touch: 91.37, west: 0.5, kTouch: 91.37, kWest: 0.5, fine: 9.49 },
+        ];
+        for (const v of vectors) {
+          const saved = await request(
+            'POST',
+            BASE,
+            {
+              ...payload(book, [{ ...line('W32A'), karigarNetWt: v.net }]),
+              lotNo: 'L32',
+              lotTouch: v.touch,
+              lotWestPrc: v.west,
+            },
+            TENANT,
+            'operator',
+          );
+          expect(saved.statusCode, saved.body).toBe(201);
+          const no = String(saved.json().vchNo).padStart(5, '0');
+          const sql = (t: string, a: string, b: string, c: string) =>
+            `SELECT "${a}"::float touch, "${b}"::float west, "${c}"::float fine FROM "${t}"
+              WHERE tenant_id=$1 AND "CO_BOOK"=$2 AND "VCH_NO"=$3 AND "TAG_NO"<>'N'`;
+          const [bar] = await query<any>(
+            sql('BAR_DETL', 'KR_TOUCH', 'KR_WEST_PRC', 'KR_FINE'),
+            TENANT,
+            book,
+            no,
+          );
+          const [stock] = await query<any>(
+            sql('MAIN_STOCK', 'KR_TOUCH', 'KR_WEST', 'KR_FINE'),
+            TENANT,
+            book,
+            no,
+          );
+          const want = { touch: v.kTouch, west: v.kWest, fine: v.fine };
+          expect(bar).toEqual(want);
+          expect(stock).toEqual(want);
+        }
+      });
+      it('lot fill leaves KR_FINE unwritten when the KrNwt cell is zero', () => {
+        const [row] = withLotKarigarFill({
+          scope: {} as any,
+          lotNo: 'L32',
+          lotTouch: 92,
+          lotWestPrc: 1.5,
+          lines: [{ ...line('W32A'), netWt: 0, grossWt: 0, karigarGhtWt: 2 }],
+        } as any);
+        expect(row).toMatchObject({ karigarTouch: 92, karigarWestPct: 1.5, lotFine: 0 });
+      });
+      it('delete removes the tag image row of the voucher serial and keeps a decoy with serial 0', async () => {
+        const no = await create(book, [line('W32A')]);
+        const [tag] = await query<any>(
+          `SELECT "TAG_NO", "VCH_SRNO"::float srno FROM "BAR_DETL" WHERE tenant_id=$1 AND "CO_BOOK"=$2 AND "VCH_NO"=$3`,
+          TENANT,
+          book,
+          no,
+        );
+        expect(tag.srno).not.toBe(0);
+        for (const srno of [tag.srno, 0])
+          await exec(
+            `INSERT INTO "TAG_IMAGE_DATA"(tenant_id,"CO_CODE","LC_CODE","TAG_NO","VCH_SRNO","IMAGE_TYPE")
+             VALUES ($1,'01','01',$2,$3,'J')`,
+            TENANT,
+            tag.TAG_NO,
+            srno,
+          );
+        const opened = await reopen(book, no);
+        const removed = await request(
+          'DELETE',
+          url(book, no) + `&expectedVersion=${opened.version}`,
+        );
+        expect(removed.statusCode, removed.body).toBe(200);
+        expect(
+          await query(
+            `SELECT "VCH_SRNO"::float srno FROM "TAG_IMAGE_DATA" WHERE tenant_id=$1 AND "TAG_NO"=$2`,
+            TENANT,
+            tag.TAG_NO,
+          ),
+        ).toEqual([{ srno: 0 }]);
+      });
+      it('print waits while another job holds the tag print staging lock', async () => {
+        const no = await create(book, [line('W32A')]);
+        let release!: () => void;
+        const held = new Promise<void>((r) => (release = r));
+        let locked!: () => void;
+        const isLocked = new Promise<void>((r) => (locked = r));
+        const holder = owner.$transaction(
+          async (tx: any) => {
+            await tx.$executeRawUnsafe(
+              'SELECT pg_advisory_xact_lock(hashtext($1))',
+              `tag-print-data:${TENANT}`,
+            );
+            locked();
+            await held;
+          },
+          { timeout: 10_000 },
+        );
+        await isLocked;
+        let settled = false;
+        const printed = request('POST', url(book, no, '/print'), { labelFile: 'A32' }).finally(
+          () => (settled = true),
+        );
+        await new Promise((r) => setTimeout(r, 600));
+        expect(settled).toBe(false);
+        release();
+        await holder;
+        const result = await printed;
+        expect(result.statusCode, result.body).toBe(200);
       });
       it('D-32-2 create denial uses the required message and changes nothing', async () => {
         const before = await snapshot();

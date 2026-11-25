@@ -28,6 +28,11 @@ export interface TagKarigarSaveInput extends TagKarigarInput {
   touch?: number | string | null;
   westPct?: number | string | null;
   fineWt?: number | string | null;
+  /**
+   * The lot-header path's KrFine (TR_TAG_OPBL.cs:10996), already formatted "0.00" or 0 when the desktop
+   * leaves KR_FINE unwritten. When present it is KR_FINE as is, whatever the cells say.
+   */
+  lotFine?: number | null;
 }
 
 /** The BAR_DETL karigar columns a save writes. */
@@ -96,7 +101,12 @@ export function tagKarigarColumns(input: TagKarigarSaveInput): TagKarigarColumns
     KR_TOUCH: touch !== 0 ? round(touch, 2) : round(value(input.touch), 2),
     KR_WEST_PRC:
       touch !== 0 ? round(value(input.karigarWestPct), 2) : round(value(input.westPct), 2),
-    KR_FINE: touch !== 0 ? block.karigarFine : round(value(input.fineWt), 3),
+    KR_FINE:
+      input.lotFine != null
+        ? value(input.lotFine)
+        : touch !== 0
+          ? block.karigarFine
+          : round(value(input.fineWt), 3),
   };
 }
 
