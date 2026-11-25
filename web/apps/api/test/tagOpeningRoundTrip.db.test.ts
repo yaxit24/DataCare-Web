@@ -268,9 +268,11 @@ describe.runIf(RUN)('tag opening survives a reopen-and-save unchanged', () => {
     const reopened = (await getTagOpening(runtime, scope, 1)) as {
       vchDate: string;
       stockItCode: string;
+      version: string;
       lines: Array<Record<string, unknown>>;
     };
-    // Feed the reopened payload straight back, which is what an operator pressing save does.
+    // Feed the reopened payload straight back, which is what an operator pressing save does. The
+    // version token is the read's (N51, D17): an edit without it is refused.
     await editTagOpening(
       runtime,
       {
@@ -281,6 +283,7 @@ describe.runIf(RUN)('tag opening survives a reopen-and-save unchanged', () => {
         lines: reopened.lines,
       } as never,
       1,
+      reopened.version,
     );
     const after = await persistedLine();
     const subAfter = await persistedSubDetail();
@@ -317,6 +320,7 @@ describe.runIf(RUN)('tag opening survives a reopen-and-save unchanged', () => {
     } as never);
     const reopened = (await getTagOpening(runtime, scope, 1)) as {
       vchDate: string;
+      version: string;
       lines: Array<Record<string, unknown>>;
     };
     const identityBefore = { tagNo: reopened.lines[0]!.tagNo, vchSrno: reopened.lines[0]!.vchSrno };
@@ -330,6 +334,7 @@ describe.runIf(RUN)('tag opening survives a reopen-and-save unchanged', () => {
         lines: reopened.lines,
       } as never,
       1,
+      reopened.version,
     );
 
     const after = (await getTagOpening(runtime, scope, 1)) as {

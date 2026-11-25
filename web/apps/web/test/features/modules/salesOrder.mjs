@@ -23,7 +23,15 @@ import { rollbackMatrix } from '../faults.mjs';
  */
 const BOOK = 'SOR';
 /** Measured on the first run: one saved order with an advance changes exactly these tables. */
-const ORDER_WRITE_SET = ['AC_DATA', 'ROJ_MEL_DATA', 'SL_ORD_DATA', 'SL_ORD_DETL', 'TEMP_BOOK_DATA'];
+// An order with an advance also writes its own '+' SL_ORD_ADJ row (TR_SALE_ORD.cs:9475-9516).
+const ORDER_WRITE_SET = [
+  'AC_DATA',
+  'ROJ_MEL_DATA',
+  'SL_ORD_ADJ',
+  'SL_ORD_DATA',
+  'SL_ORD_DETL',
+  'TEMP_BOOK_DATA',
+];
 const CASH = 'CASH';
 const as = (user, slot) => ({
   user,
@@ -1061,6 +1069,187 @@ export const salesOrder = {
     ),
 
     C(
+      'create.rate-cut-fine-in-old-gl',
+      'T06',
+      'mutation',
+      'TR_SALE_ORD.cs:9143 and TR_TOUR_ORD.cs:7313: the saved OLD_GL is MSG2_TOTAL[6,2] (old gold fine) plus MSG2_TOTAL[9,2] (RCUT_FINE). An order with typed old gold and a rate-cut fine saves OLD_GL = old gold + RCUT_FINE; with no old-metal grid rows its edit is blocked (the typed old gold cannot be rebuilt), and the stored order stays as saved',
+      async (ctx) => {
+        const { page } = await ctx.session();
+        await enterOrder(page, { advance: 0 });
+        // The rate cut and the typed old gold are desktop-only boxes (read-only on the web screen), so the request the
+        // screen sends carries them as the desktop's totals grid would: no old-metal rows, old gold fine 2, fine 0.833.
+        await page.route(
+          (url) => url.pathname === '/api/sales-orders',
+          async (route) => {
+            const request = route.request();
+            if (request.method() !== 'POST') return route.fallback();
+            const body = JSON.parse(request.postData() ?? '{}');
+            delete body.oldMetalRows;
+            Object.assign(body, { oldGoldFine: 2, rateCutRate: 6000, rateCutFine: 0.833 });
+            return route.continue({ postData: JSON.stringify(body) });
+          },
+        );
+        const response = await save(page);
+        await page.unroute('**/api/sales-orders');
+        assert.equal(response.status(), 201, await response.text());
+        const vchNo = String((await response.json()).vchNo).padStart(5, '0');
+        const rows = () =>
+          ctx.rows(
+            `SELECT "OLD_GL"::float gl,"RCUT_FINE"::float fine,"RCUT_RATE"::float rate
+               FROM "SL_ORD_DATA" WHERE tenant_id=$1 AND "CO_BOOK"='${BOOK}' AND "VCH_NO"=$2`,
+            vchNo,
+          );
+        const [saved] = await rows();
+        assert.deepEqual(
+          saved,
+          { gl: 2.833, fine: 0.833, rate: 6000 },
+          'OLD_GL = old gold + RCUT_FINE',
+        );
+        // Reopen: typed old gold without old-metal grid rows cannot be rebuilt, so the edit is blocked.
+        await loadOrder(page, vchNo);
+        const reason = page.locator('p.msg.err').first();
+        await reason.waitFor();
+        assert.equal(
+          await page.getByRole('button', { name: 'Update Sales Order', exact: true }).isDisabled(),
+          true,
+        );
+        const [after] = await rows();
+        assert.deepEqual(after, saved, 'the blocked edit left the stored order as saved');
+        return {
+          observation: `order ${vchNo}: OLD_GL ${saved.gl} = 2 + ${saved.fine}; edit blocked: ${(await reason.textContent())?.trim()}`,
+          expected: { oldGl: 2.833, rcutFine: 0.833, editBlocked: true },
+          database: { header: saved, afterReopen: after },
+          downstream: { oldGl: after.gl },
+        };
+      },
+    ),
+
+    C(
+      'edit.rate-cut-only-old-gl-unchanged',
+      'T09',
+      'mutation',
+      'TR_SALE_ORD.cs:9143: with no old gold the saved OLD_GL is RCUT_FINE alone; that is the rate-cut share an edit rebuilds, so such an order reopens and saves unchanged with OLD_GL, RCUT_FINE and RCUT_RATE exactly as before',
+      async (ctx) => {
+        const { page } = await ctx.session();
+        await enterOrder(page, { advance: 0 });
+        await page.route(
+          (url) => url.pathname === '/api/sales-orders',
+          async (route) => {
+            const request = route.request();
+            if (request.method() !== 'POST') return route.fallback();
+            const body = JSON.parse(request.postData() ?? '{}');
+            delete body.oldMetalRows;
+            Object.assign(body, { rateCutRate: 6000, rateCutFine: 0.833 });
+            return route.continue({ postData: JSON.stringify(body) });
+          },
+        );
+        const created = await save(page);
+        await page.unroute('**/api/sales-orders');
+        assert.equal(created.status(), 201, await created.text());
+        const vchNo = String((await created.json()).vchNo).padStart(5, '0');
+        const rows = () =>
+          ctx.rows(
+            `SELECT "OLD_GL"::float gl,"RCUT_FINE"::float fine,"RCUT_RATE"::float rate,"OLD_GL_AMT"::float glamt
+               FROM "SL_ORD_DATA" WHERE tenant_id=$1 AND "CO_BOOK"='${BOOK}' AND "VCH_NO"=$2`,
+            vchNo,
+          );
+        const [saved] = await rows();
+        assert.deepEqual(saved, { gl: 0.833, fine: 0.833, rate: 6000, glamt: 0 });
+        await loadOrder(page, vchNo);
+        assert.equal(await page.locator('p.msg.err').count(), 0, 'the edit is not blocked');
+        const edited = await save(page, 'Update Sales Order');
+        assert.equal(edited.status(), 200, await edited.text());
+        const [after] = await rows();
+        assert.deepEqual(
+          after,
+          saved,
+          'OLD_GL and the rate cut are unchanged by an unchanged save',
+        );
+        return {
+          observation: `order ${vchNo}: OLD_GL ${saved.gl} = RCUT_FINE before and after the unchanged save`,
+          expected: { oldGl: 0.833, rcutFine: 0.833 },
+          database: { before: saved, after },
+          downstream: { oldGl: after.gl },
+        };
+      },
+    ),
+
+    C(
+      'create.rate-cut-day-book-07',
+      'T02',
+      'mutation',
+      'Ac_Rojmel.cs:23 (Order_Rojmel type 07) and :11, Ac_Ledr.cs:53 (Order_Ledr key 11), TR_SALE_ORD.cs:9124-9128, :9558-9563, :9729-9730: a rate-cut order saves ADV_AMT 0, so the day book has no type 01; type 07 debits the party with CASH+CARD+CHQ+OLD_GL_AMT+OLD_SL_AMT+SCHM_AMT (3,000) against 00008, IT_TYPE G, SIGN +, the RCUT_FINE as gross, net and fine and RCUT_RATE as rate. The ledger key 11 needs BOOK_INOUT I, so this O book posts only the balanced cash pair 01/02. An intentional one-sided desktop entry; delete removes it with the voucher',
+      async (ctx) => {
+        const { page } = await ctx.session();
+        await enterOrder(page, { advance: 3000 });
+        await openDetails(page);
+        await page.getByLabel('Cash A/c', { exact: true }).fill(CASH);
+        // The rate is read-only on the web screen; the request carries the desktop's rate-cut cells.
+        await page.route(
+          (url) => url.pathname === '/api/sales-orders',
+          async (route) => {
+            const request = route.request();
+            if (request.method() !== 'POST') return route.fallback();
+            const body = JSON.parse(request.postData() ?? '{}');
+            Object.assign(body, { rateCutRate: 6000, rateCutFine: 0.5 });
+            return route.continue({ postData: JSON.stringify(body) });
+          },
+        );
+        const created = await save(page);
+        await page.unroute('**/api/sales-orders');
+        assert.equal(created.status(), 201, await created.text());
+        const vchNo = String((await created.json()).vchNo).padStart(5, '0');
+        const party = PARTIES.local.code;
+        const dayBook = await keyedLegs(ctx, 'ROJ_MEL_DATA', vchNo);
+        const ledgerLegs = await keyedLegs(ctx, 'AC_DATA', vchNo);
+        assert.deepEqual(
+          dayBook.map((x) => [x.leg, x.ac, x.dr, x.cr]),
+          [['07', party, 3000, 0]],
+          'no type 01 (ADV_AMT 0) and the type 07 debit',
+        );
+        const [row07] = await ctx.rows(
+          `SELECT btrim("LD_CODE") ld,"IT_TYPE" it,"SIGN" sign,"ITM_GWT"::float gwt,"ITM_NWT"::float nwt,
+                  "ITM_FINE"::float fine,"ITM_RATE"::float rate,"ITM_PCS"::float pcs,"NET_AMT"::float net
+             FROM "ROJ_MEL_DATA" WHERE tenant_id=$1 AND "CO_BOOK"='${BOOK}' AND "VCH_NO"=$2`,
+          vchNo,
+        );
+        assert.deepEqual(row07, {
+          ld: '00008',
+          it: 'G',
+          sign: '+',
+          gwt: 0.5,
+          nwt: 0.5,
+          fine: 0.5,
+          rate: 6000,
+          pcs: 0,
+          net: 0,
+        });
+        assert.deepEqual(
+          ledgerLegs.map((x) => [x.leg, x.ac, x.dr, x.cr]),
+          [
+            ['01', party, 0, 3000],
+            ['02', CASH, 3000, 0],
+          ],
+          'no key 11 on an O book; the cash pair is unchanged',
+        );
+        await loadOrder(page, vchNo);
+        const deleted = await deleteLoaded(page, vchNo);
+        assert.equal(deleted.status(), 200, await deleted.text());
+        const left = {
+          dayBook: (await keyedLegs(ctx, 'ROJ_MEL_DATA', vchNo)).length,
+          ledger: (await keyedLegs(ctx, 'AC_DATA', vchNo)).length,
+        };
+        assert.deepEqual(left, { dayBook: 0, ledger: 0 }, 'delete removes the rate-cut rows');
+        return {
+          observation: `order ${vchNo}: day book ${JSON.stringify(dayBook.map((x) => x.leg))}, ledger ${JSON.stringify(ledgerLegs.map((x) => x.leg))}; after delete ${JSON.stringify(left)}`,
+          expected: { dayBook: [['07', party, 3000, 0]], ledger: ['01', '02'], afterDelete: 0 },
+          database: { dayBook, row07, ledger: ledgerLegs, afterDelete: left },
+          downstream: { dayBookDebit: dayBook[0].dr },
+        };
+      },
+    ),
+
+    C(
       'create.scheme-tender',
       'T02',
       'mutation',
@@ -1152,7 +1341,7 @@ export const salesOrder = {
       'create.cheque-card-advance',
       'T02',
       'mutation',
-      'TR_SALE_ORD.cs:9131-9150, :11368 and Order_Ledr (Ac_Ledr.cs:28-47): cash 3,000, cheque 2,000 and card 1,000 are stored per tender, ADV_AMT 6,000, and post legs 01-06; the day book credits 6,000 and debits the bank and card (Ac_Rojmel.cs:11-16)',
+      'TR_SALE_ORD.cs:9131-9150, :11368 and Order_Ledr (Ac_Ledr.cs:30-40): cash 3,000, cheque 2,000 and card 1,000 are stored per tender, ADV_AMT 6,000, and post legs 01-06, each carrying the order HD_VCH_NO, MAIN_USER and BILL_NO and the tender name on its party leg; the day book credits 6,000 and debits the bank and card, every row carrying the order VCH_DESC as IT_DESC and only type 01 the party name (Ac_Rojmel.cs:11-16)',
       async (ctx) => {
         const { page } = await ctx.session();
         await enterOrder(page, { advance: 3000 });
@@ -1172,6 +1361,26 @@ export const salesOrder = {
         const [h] = await ctx.rows(
           `SELECT "CASH_AMT"::float cash,"CHQ_AMT"::float chq,"CARD_AMT"::float card,"ADV_AMT"::float adv
              FROM "SL_ORD_DATA" WHERE tenant_id=$1 AND "CO_BOOK"='${BOOK}' AND "VCH_NO"=$2`,
+          vchNo,
+        );
+        const [stamp] = await ctx.rows(
+          `SELECT "HD_VCH_NO" hd,"MAIN_USER" mu,"BILL_NO" bill,coalesce("VCH_DESC",'') descr,"AC_NAME" name
+             FROM "SL_ORD_DATA" WHERE tenant_id=$1 AND "CO_BOOK"='${BOOK}' AND "VCH_NO"=$2`,
+          vchNo,
+        );
+        const legStamps = await ctx.rows(
+          `SELECT DISTINCT "HD_VCH_NO" hd,"MAIN_USER" mu,"BILL_NO" bill FROM "AC_DATA"
+            WHERE tenant_id=$1 AND "CO_BOOK"='${BOOK}' AND "VCH_NO"=$2`,
+          vchNo,
+        );
+        const names = await ctx.rows(
+          `SELECT right("LEDR_KEY",2) leg,"LDR_NAME" ldr FROM "AC_DATA"
+            WHERE tenant_id=$1 AND "CO_BOOK"='${BOOK}' AND "VCH_NO"=$2 ORDER BY "LEDR_KEY"`,
+          vchNo,
+        );
+        const dayBookText = await ctx.rows(
+          `SELECT right("LEDR_KEY",2) leg,"AC_NAME" name,"IT_DESC" descr FROM "ROJ_MEL_DATA"
+            WHERE tenant_id=$1 AND "CO_BOOK"='${BOOK}' AND "VCH_NO"=$2 ORDER BY "LEDR_KEY"`,
           vchNo,
         );
         const g = await ctx.rows(
@@ -1206,6 +1415,28 @@ export const salesOrder = {
             ['03', bank, 1000, 0],
           ],
         );
+        // Every leg copies A.HD_VCH_NO, A.MAIN_USER and A.BILL_NO (Ac_Ledr.cs:30-40).
+        assert.deepEqual(legStamps, [{ hd: stamp.hd, mu: stamp.mu, bill: stamp.bill }]);
+        assert.deepEqual(
+          names.map((x) => [x.leg, x.ldr]),
+          [
+            ['01', `CASH - ${stamp.name}`],
+            ['02', ''],
+            ['03', `BANK - ${stamp.name}`],
+            ['04', ''],
+            ['05', `CARD - ${stamp.name}`],
+            ['06', ''],
+          ],
+        );
+        // IT_DESC is A.VCH_DESC on 01-03; AC_NAME is the party on 01 and '' on 02/03 (Ac_Rojmel.cs:11-16).
+        assert.deepEqual(
+          dayBookText.map((x) => [x.leg, x.name, x.descr]),
+          [
+            ['01', stamp.name, stamp.descr],
+            ['02', '', stamp.descr],
+            ['03', '', stamp.descr],
+          ],
+        );
         await loadOrder(page, vchNo);
         await openDetails(page);
         const reopened = [
@@ -1217,7 +1448,7 @@ export const salesOrder = {
         return {
           observation: `order ${vchNo}: tenders ${JSON.stringify(h)}, ${g.length} legs, ${r.length} day-book rows; reopened ${reopened.join('/')}`,
           expected: { cash: 3000, cheque: 2000, card: 1000, advance: 6000, legs: '01-06' },
-          database: { header: h, ledger: g, dayBook: r },
+          database: { header: h, ledger: g, dayBook: r, legStamps, names, dayBookText },
           downstream: { reopened },
         };
       },
@@ -1684,8 +1915,10 @@ export const salesOrder = {
           `SELECT "TOT_AMT"::float tot,"BILL_OS"::float os,"ADV_AMT"::float adv FROM "SL_DATA" WHERE tenant_id=$1 AND "CO_BOOK"='SL' AND "VCH_NO"=$2`,
           sale,
         );
+        // The sale's adjustment row in the desktop shape (TR_SALE.cs:15715-15718): ORD_SIGN '-', ORD_AMT = the
+        // amount adjusted, PAID_AMT 0.
         const adj = await ctx.rows(
-          `SELECT "PAID_AMT"::float paid FROM "SL_ORD_ADJ" WHERE tenant_id=$1 AND "ORD_NO"=$2`,
+          `SELECT "ORD_SIGN" sign,"ORD_AMT"::float amt,"PAID_AMT"::float paid FROM "SL_ORD_ADJ" WHERE tenant_id=$1 AND "ORD_NO"=$2 ORDER BY "ORD_SIGN"='-'`,
           order,
         );
         const party1 = await balance(ctx, PARTIES.local.code);
@@ -1695,9 +1928,13 @@ export const salesOrder = {
           round2(s.tot - ADVANCE),
           `customer moved by ${party1 - party0}`,
         );
+        // The order's '+' advance row (TR_SALE_ORD.cs:9503) and the sale's '-' use of it (TR_SALE.cs:15712-15725).
         assert.deepEqual(
-          adj.map((a) => a.paid),
-          [ADVANCE],
+          adj.map((a) => [a.sign, a.amt, a.paid]),
+          [
+            ['+', ADVANCE, 0],
+            ['-', ADVANCE, 0],
+          ],
         );
         return {
           observation: `order ${order} + sale ${sale}: total ${s.tot}, outstanding ${s.os}, customer Δ ${round2(party1 - party0)}`,
@@ -1721,9 +1958,97 @@ export const salesOrder = {
             `SELECT "VCH_NO","TOT_AMT"::float tot,"BILL_OS"::float os,"ADV_AMT"::float adv FROM "SL_DATA" WHERE tenant_id=$1 AND "CO_BOOK"='SL' ORDER BY "VCH_NO" DESC LIMIT 1`,
           ),
           adjustments: await ctx.rows(
-            `SELECT "ORD_NO","PAID_AMT"::float paid FROM "SL_ORD_ADJ" WHERE tenant_id=$1 ORDER BY row_id DESC LIMIT 2`,
+            `SELECT "ORD_NO","ORD_SIGN","ORD_AMT"::float amt,"PAID_AMT"::float paid FROM "SL_ORD_ADJ" WHERE tenant_id=$1 ORDER BY row_id DESC LIMIT 2`,
           ),
         }),
+      },
+    ),
+
+    C(
+      'refusal.rate-cut-advance-not-money',
+      'T06',
+      'refusal',
+      'TR_SALE_ORD.cs:9124-9133, :9504: a rate-cut order files its tender total as RCUT_AMT with ADV_AMT 0 and its + row carries ORD_AMT 0 (the fine is in ORD_GOLD). The sale order help reads ADV_AMT and keeps SUM(+ ORD_AMT) - SUM(other) > 0 (TR_SALE.cs:7299), so a sale cannot adjust that advance as money: the save is refused and the order keeps only its + row',
+      async (ctx) => {
+        const { page } = await ctx.session();
+        const order = await createOrder(ctx, page, { advance: ADVANCE });
+        // The rate is read-only on the web screen; a desktop rate-cut order is stored so (:9124-9133, :9504, :9509).
+        await ctx.rows(
+          `UPDATE "SL_ORD_DATA" SET "RCUT_RATE"=6000,"RCUT_FINE"=0.833,"RCUT_AMT"="ADV_AMT","ADV_AMT"=0
+            WHERE tenant_id=$1 AND "CO_BOOK"=$2 AND "VCH_NO"=$3 RETURNING 1`,
+          BOOK,
+          order,
+        );
+        await ctx.rows(
+          `UPDATE "SL_ORD_ADJ" SET "ORD_AMT"=0,"ORD_GOLD"=0.833
+            WHERE tenant_id=$1 AND "CO_BOOK"=$2 AND "VCH_NO"=$3 AND "ORD_SIGN"='+' RETURNING 1`,
+          BOOK,
+          order,
+        );
+        await page.goto('/txn/sales');
+        await page.getByRole('heading', { name: 'Sales Invoice', exact: true }).waitFor();
+        const book = page.getByRole('combobox', { name: 'Configured book', exact: true }).first();
+        for (let i = 0; i < 50 && !(await book.inputValue()); i++) await page.waitForTimeout(100);
+        const customer = page.getByPlaceholder('search accounts… (F1)').first();
+        await customer.fill(PARTIES.local.code);
+        await customer
+          .locator('xpath=..')
+          .getByText(PARTIES.local.code, { exact: true })
+          .first()
+          .waitFor();
+        await customer.press('Enter');
+        const grid = page
+          .locator('table', { has: page.locator('th', { hasText: 'Making/g' }) })
+          .first();
+        const cell = (n) =>
+          grid.locator('tbody tr').nth(0).locator(`td:nth-child(${n}) input`).first();
+        await cell(1).fill(LINE_W.item);
+        await cell(1).press('Escape');
+        for (const [n, v] of [
+          [3, LINE_W.pcs],
+          [4, LINE_W.gross],
+          [5, LINE_W.net],
+          [6, LINE_W.touch],
+          [7, LINE_W.rate],
+          [8, LINE_W.labour],
+        ])
+          await cell(n).fill(v);
+        const orderField = (label) =>
+          page
+            .locator('.field', { has: page.locator('label', { hasText: label }) })
+            .locator('input')
+            .first();
+        await orderField('Ord No (advance)').fill(String(Number(order)));
+        await orderField('Order Amt').fill(String(ADVANCE));
+        const sales0 = await ctx.rows(
+          `SELECT count(*)::int n FROM "SL_DATA" WHERE tenant_id=$1 AND "CO_BOOK"='SL'`,
+        );
+        const [sold] = await Promise.all([
+          page.waitForResponse(
+            (r) => new URL(r.url()).pathname === '/api/sales' && r.request().method() === 'POST',
+          ),
+          page.getByRole('button', { name: 'Save Invoice', exact: true }).click(),
+        ]);
+        const body = await sold.text();
+        assert.equal(sold.status(), 409, body);
+        assert.match(body, /0\.00 advance open/);
+        const sales1 = await ctx.rows(
+          `SELECT count(*)::int n FROM "SL_DATA" WHERE tenant_id=$1 AND "CO_BOOK"='SL'`,
+        );
+        const adj = await ctx.rows(
+          `SELECT "ORD_SIGN" sign,"ORD_AMT"::float amt,"ORD_GOLD"::float gold FROM "SL_ORD_ADJ" WHERE tenant_id=$1 AND "ORD_NO"=$2`,
+          order,
+        );
+        assert.equal(sales1[0].n, sales0[0].n, 'no sale written');
+        assert.deepEqual(
+          adj.map((a) => [a.sign, a.amt, a.gold]),
+          [['+', 0, 0.833]],
+        );
+        return {
+          observation: `rate-cut order ${order}: sale adjusting ${ADVANCE} answered ${sold.status()} "${body}"`,
+          expected: 'refused (409), no sale, order keeps only its + row',
+          database: { adjustments: adj, sales: [sales0[0].n, sales1[0].n] },
+        };
       },
     ),
 

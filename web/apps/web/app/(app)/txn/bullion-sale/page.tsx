@@ -89,6 +89,8 @@ interface BullionSaleView {
   settleCrAmt?: unknown;
   settleDrFine?: unknown;
   settleCrFine?: unknown;
+  /** N51 (D17): the voucher's version token; the update and delete must send it back. */
+  version?: unknown;
   pay?: ViewRow;
   receivedPay?: ViewRow;
   lines?: ViewRow[];
@@ -99,6 +101,8 @@ interface BullionSaleResult {
   vchNo: number;
   fine: number;
   netAmt: number;
+  /** N51 (D17): the fresh version after the save, kept for the next update or delete. */
+  version?: string;
 }
 
 type DisplayResult = BullionSaleResult & { updated: boolean };
@@ -293,6 +297,8 @@ export default function BullionSalePage() {
   const [vchDate, setVchDate] = useState('');
   const [voucherSearch, setVoucherSearch] = useState('');
   const [loadedVoucherNo, setLoadedVoucherNo] = useState('');
+  // N51 (D17): the version the loaded voucher was opened with; the update and the delete send it back.
+  const [loadedVersion, setLoadedVersion] = useState('');
   const [fineRate, setFineRate] = useState('');
   const [convRate, setConvRate] = useState('');
   const [convPct, setConvPct] = useState('');
@@ -472,6 +478,7 @@ export default function BullionSalePage() {
     setVchDate('');
     setVoucherSearch('');
     setLoadedVoucherNo('');
+    setLoadedVersion('');
     setFineRate('');
     setConvRate('');
     setConvPct('');
@@ -567,13 +574,16 @@ export default function BullionSalePage() {
       const saved = updated
         ? await put<BullionSaleResult>(
             `/bullion-sales/${encodeURIComponent(loadedVoucherNo)}`,
-            payload(),
+            // N51 (D17): an update must carry the version the voucher was opened with; a stale one is 409.
+            { ...payload(), ...(loadedVersion ? { expectedVersion: loadedVersion } : {}) },
           )
         : await post<BullionSaleResult>('/bullion-sales', payload());
       const voucherNo = String(saved.vchNo);
       setResult({ ...saved, updated });
       setLoadedVoucherNo(voucherNo);
       setVoucherSearch(voucherNo);
+      // The save returned the fresh write-set version; keep it for the next update or delete.
+      setLoadedVersion(saved.version ?? '');
     } catch (e) {
       setErr(e instanceof ApiError ? e.body?.message || e.body?.error || e.message : 'failed');
     } finally {
@@ -635,6 +645,8 @@ export default function BullionSalePage() {
       setLines(issueLines.length ? issueLines : [blankLine()]);
       setReceivedLines(receiptLines.length ? receiptLines : [blankLine()]);
       setLoadedVoucherNo(voucherNo);
+      // N51 (D17): keep the version the reopen returned for this voucher's update and delete.
+      setLoadedVersion(String(view.version ?? ''));
       setVoucherSearch(voucherNo);
     } catch (e) {
       setErr(
@@ -654,12 +666,16 @@ export default function BullionSalePage() {
     setBusy(true);
     setErr('');
     try {
-      await del(`/bullion-sales/${encodeURIComponent(loadedVoucherNo)}`, {
-        coBook,
-        coYear,
-        lcCode,
-        book: coBook,
-      });
+      await del(
+        // N51 (D17): the delete must carry the version the voucher was opened with, in the query.
+        `/bullion-sales/${encodeURIComponent(loadedVoucherNo)}?expectedVersion=${encodeURIComponent(loadedVersion)}`,
+        {
+          coBook,
+          coYear,
+          lcCode,
+          book: coBook,
+        },
+      );
       reset();
     } catch (e) {
       setErr(

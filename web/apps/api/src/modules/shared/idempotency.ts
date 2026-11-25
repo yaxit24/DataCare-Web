@@ -70,6 +70,14 @@ export const IDEMPOTENT_CREATE_ROUTES: readonly IdempotentRoute[] = Object.freez
   },
   // WP-02: Order Cancel (TR_SL_ORD_ADJ) refunds an advance; a replayed save must not refund it twice.
   { method: 'POST', url: '/order-cancel', status: 201, menus: ['Other/Order Cancel'] },
+  // WP-32: Tag Opening / Only Tag Entry (TR_TAG_OPBL) rewrites BAR_DATA/BAR_DETL/BAR_IDTL/MAIN_STOCK;
+  // a replayed create must not write the voucher's tags twice (D18).
+  {
+    method: 'POST',
+    url: '/stock/tag-opening',
+    status: 201,
+    menus: ['Master/Tag Opening', 'Other/Only Tag Entry'],
+  },
 ]);
 
 export const IDEMPOTENCY_KEY_HEADER = 'idempotency-key';

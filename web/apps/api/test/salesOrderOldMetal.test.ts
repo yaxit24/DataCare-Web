@@ -138,7 +138,8 @@ describe('Order_Ledr legs 07-10', () => {
   it('posts nothing for a book whose BOOK_INOUT is not I (Ac_Ledr.cs:42-50 joins BOOK_INOUT = I)', () => {
     expect(orderOldMetalLedger(key, 'SORD', 'PARTY', [valued, unvalued], 'O')).toEqual([]);
   });
-  it('posts 07/08 for a valued row and 09/10 for fine with no amount, keyed STR(SR_NO) + leg', () => {
+  it('posts 07/08 for a valued row and 09 for fine with no amount; 10 only for a trading-fine company', () => {
+    // TRAD_FINE blank is 'N' (MS_OPNCOMP.cs:813-816), so the purchase account keeps no fine mirror.
     const legs = orderOldMetalLedger(key, 'SORD', 'PARTY', [valued, unvalued], 'I');
     expect(
       legs.map((l) => [
@@ -154,11 +155,18 @@ describe('Order_Ledr legs 07-10', () => {
       ['         107', 'PARTY', 'PURCHASE', 0, 2000, '', 0],
       ['         108', 'PURCHASE', 'PARTY', 2000, 0, '', 0],
       ['         209', 'PARTY', 'SLVPURC', 0, 0, '+', 20],
-      ['         210', 'SLVPURC', 'PARTY', 0, 0, '-', 20],
     ]);
-    expect(legs.map((l) => (l.legKeySuffix as string).length)).toEqual([12, 12, 12, 12]);
+    expect(legs.map((l) => (l.legKeySuffix as string).length)).toEqual([12, 12, 12]);
     expect(legs.every((l) => l.BILL_NO === '')).toBe(true);
-    expect(legs.map((l) => l.PARTY_AC_CODE)).toEqual(['PARTY', '', 'PARTY', '']);
+    expect(legs.map((l) => l.PARTY_AC_CODE)).toEqual(['PARTY', '', 'PARTY']);
+    // CO_SET.TRAD_FINE 'Y' adds the purchase account's -fine leg 10 (Ac_Ledr.cs:48-50).
+    const trading = orderOldMetalLedger(key, 'SORD', 'PARTY', [valued, unvalued], 'I', true);
+    expect(trading.map((l) => [l.legKeySuffix, l.AC_CODE, l.LD_CODE, l.SIGN, l.FINE_WT])).toEqual([
+      ['         107', 'PARTY', 'PURCHASE', '', 0],
+      ['         108', 'PURCHASE', 'PARTY', '', 0],
+      ['         209', 'PARTY', 'SLVPURC', '+', 20],
+      ['         210', 'SLVPURC', 'PARTY', '-', 20],
+    ]);
   });
 });
 

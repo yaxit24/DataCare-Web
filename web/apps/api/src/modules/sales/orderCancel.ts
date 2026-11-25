@@ -126,8 +126,9 @@ const TOLERANCE = 0.004;
  * How much of an order's advance is already used. The desktop stores a use as an SL_ORD_ADJ row with ORD_SIGN '-' and
  * the amount in ORD_AMT (TR_SALE.cs:15715, TR_SL_ORD_ADJ.cs:3552). The web's earlier writers stored it with ORD_SIGN
  * 'C' (sale) or 'D' (cancel) and the amount in PAID_AMT (+ KASAR_AMT for a cancel); those rows are read the same way.
- * ORD_SIGN '+' is the advance itself (TR_SALE_ORD.cs:9503); the web reads the advance from SL_ORD_DATA.ADV_AMT
- * because the web Sales Order writes no '+' row, so a '+' row is not counted twice.
+ * ORD_SIGN '+' is the advance itself (TR_SALE_ORD.cs:9503), which the Sales Order save now writes; the web reads the
+ * advance from SL_ORD_DATA.ADV_AMT and never counts a '+' row as used. The web sale now stores its use as the desktop
+ * does ('-', ORD_AMT, the order's own ORD_YRCD / ORD_DBCD).
  */
 const CONSUMED_SQL = `
   CASE
@@ -139,6 +140,16 @@ const CONSUMED_SQL = `
       THEN coalesce(NULLIF(a."PAID_AMT"::text,'')::numeric,0) + coalesce(NULLIF(a."KASAR_AMT"::text,'')::numeric,0)
     ELSE 0
   END`;
+
+/**
+ * The money advance of an order `o`. A rate-cut order (RCUT_RATE != 0) has none: the desktop files its tender total
+ * as RCUT_AMT with ADV_AMT 0 (TR_SALE_ORD.cs:9124-9133) and its '+' row carries ORD_AMT 0 and the rate-cut fine in
+ * ORD_GOLD (:9504, :9509), so neither the sale's order help (TR_SALE.cs:7299) nor Order Cancel's
+ * (TR_SL_ORD_ADJ.cs:2526), which read ADV_AMT and keep SUM('+' ORD_AMT) - SUM(other ORD_AMT) > 0, can spend it as money.
+ * The CASE also covers web orders saved before the header split, which kept the rate-cut total in ADV_AMT.
+ */
+export const MONEY_ADVANCE_SQL = `CASE WHEN coalesce(NULLIF(o."RCUT_RATE"::text,'')::numeric,0) <> 0 THEN 0
+  ELSE coalesce(NULLIF(o."ADV_AMT"::text,'')::numeric,0) END`;
 
 /**
  * Orders of the location with their advance and what is used; callers decide which are still open. With `lock`,
@@ -162,7 +173,7 @@ async function ordersWithAdvanceTx(
   const rows: Array<Record<string, unknown>> = await tx.$queryRawUnsafe(
     `SELECT o."VCH_NO" AS ord_no, o."AC_CODE" AS ac_code, o."AC_NAME" AS ac_name, o."VCH_DATE"::text AS ord_date,
             o."CO_YEAR" AS ord_year, o."CO_BOOK" AS ord_book, o."HD_VCH_NO" AS hd_vch_no,
-            coalesce(NULLIF(o."ADV_AMT"::text,'')::numeric,0)::float AS adv,
+            ${MONEY_ADVANCE_SQL}::float AS adv,
             coalesce((
               SELECT sum(${CONSUMED_SQL}) FROM "SL_ORD_ADJ" a
                WHERE a.tenant_id = o.tenant_id AND a."CO_CODE" = o."CO_CODE"
@@ -255,7 +266,8 @@ export async function openAdvanceOfOrderTx(
 ): Promise<PendingOrder | null> {
   const no = formatVoucherNo(ordNo);
   const orders = await ordersWithAdvanceTx(tx, scope, [no]);
-  return orders.find((o) => o.ordBook === ordBook) ?? orders[0] ?? null;
+  // The named book only: another book's order of the same number is a different order (review of #250).
+  return orders.find((o) => o.ordBook === ordBook) ?? null;
 }
 
 interface CheckedRow {

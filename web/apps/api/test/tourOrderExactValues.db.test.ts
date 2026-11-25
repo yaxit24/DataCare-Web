@@ -235,7 +235,12 @@ db('Tour exact mapped saved values retain existing writer guards', () => {
     const after = await business();
     expect(after.SL_ORD_DETL).toEqual(before.SL_ORD_DETL);
     expect(after.SL_ORD_IDTL).toEqual(before.SL_ORD_IDTL);
-    expect(after.SL_ORD_DATA![0]).toEqual({ ...before.SL_ORD_DATA![0], ADV_AMT: '40' });
+    // The Tour Order's cash advance is also CASH_AMT (TR_TOUR_ORD.cs:7309), which the rate-cut rows read.
+    expect(after.SL_ORD_DATA![0]).toEqual({
+      ...before.SL_ORD_DATA![0],
+      ADV_AMT: '40',
+      CASH_AMT: '40.00',
+    });
     expect(
       after
         .AC_DATA!.map(({ AC_CODE, DR_AMT, CR_AMT }) => ({ AC_CODE, DR_AMT, CR_AMT }))
@@ -249,8 +254,12 @@ db('Tour exact mapped saved values retain existing writer guards', () => {
       LD_CODE: 'CASH',
       CR_AMT: '40.00',
     });
+    // The order's own '+' row follows the advance (TR_TOUR_ORD.cs:7560-7600) and changes nothing else.
+    expect(after.SL_ORD_ADJ).toEqual(
+      before.SL_ORD_ADJ!.map((row) => ({ ...row, ORD_AMT: '40.00' })),
+    );
     for (const table of writes.filter(
-      (table) => !['SL_ORD_DATA', 'AC_DATA', 'ROJ_MEL_DATA'].includes(table),
+      (table) => !['SL_ORD_DATA', 'AC_DATA', 'ROJ_MEL_DATA', 'SL_ORD_ADJ'].includes(table),
     ))
       expect(after[table]).toEqual(before[table]);
   });

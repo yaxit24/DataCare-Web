@@ -1,3 +1,4 @@
+import { salePartyBalancesTx } from './salePrintChoice.js';
 import { formatDesktopDate } from '@datacare/core';
 import { withTxBudget } from '../shared/txBudget.js';
 import { docShell, gstBillBody, billFooter, type DocMeta } from '../documents/docChrome.js';
@@ -21,7 +22,14 @@ export type SalesBillScope = VoucherDocumentScope;
 export async function salesBillData(
   prisma: any,
   scope: SalesBillScope,
-): Promise<{ header: any; lines: any[]; company: any; party: any } | null> {
+  opts: { balances?: boolean } = {},
+): Promise<{
+  header: any;
+  lines: any[];
+  company: any;
+  party: any;
+  balances?: { opAmt: number; clAmt: number };
+} | null> {
   const s = requireVoucherDocumentScope(scope);
   return withTxBudget(prisma, s.tenantId, 'read', async (tx: any) => {
     const params = voucherKeyParams(s);
@@ -41,7 +49,12 @@ export async function salesBillData(
     );
     const company = await documentCompanyTx(tx, s);
     const party = await documentPartyTx(tx, s, header.AC_CODE);
-    return { header, lines, company, party };
+    // WP-26: OpAmt/ClAmt of the party at the voucher time (TR_SALE.cs:16259-16261, :16505-16506).
+    const at = header.VCH_TIME instanceof Date ? header.VCH_TIME : new Date(header.VCH_DATE);
+    const balances = opts.balances
+      ? await salePartyBalancesTx(tx, s as any, String(header.AC_CODE), at)
+      : undefined;
+    return { header, lines, company, party, balances };
   });
 }
 
@@ -53,6 +66,8 @@ export interface SalesBillCtx {
   title?: string;
   partyCaption?: string;
   footerText?: string;
+  /** WP-26: the party's opening/closing balance the desktop passes as OpAmt/ClAmt. */
+  balances?: { opAmt: number; clAmt: number };
 }
 
 export function salesBillHtml(header: any, lines: any[], ctx: SalesBillCtx = {}): string {
@@ -63,6 +78,12 @@ export function salesBillHtml(header: any, lines: any[], ctx: SalesBillCtx = {})
     { k: 'Bill No', v: String(h.BILL_NO ?? h.VCH_NO ?? '') },
     { k: 'Date', v: vchDate },
     { k: 'Book / Vch', v: `${h.CO_BOOK ?? ''} / ${h.VCH_NO ?? ''}` },
+    ...(ctx.balances
+      ? [
+          { k: 'Opening Bal', v: ctx.balances.opAmt.toFixed(2) },
+          { k: 'Closing Bal', v: ctx.balances.clAmt.toFixed(2) },
+        ]
+      : []),
   ];
 
   const mob = h.MOBILE ?? p.AC_MOBILE;

@@ -291,14 +291,24 @@ const DAY = `${startYear}-06-15`;
 
     const wrongRight = await request('wholesaler', 'POST', '/wholesale-quotations', quote);
     expect(wrongRight.statusCode).toBe(403);
-    const removed = await request('quoter', 'DELETE', `/wholesale-quotations/${vchNo}?coBook=WHQ`);
+    // N51 (D17): the delete must carry the version the reopen returned; a missing one is refused first.
+    const noToken = await request('quoter', 'DELETE', `/wholesale-quotations/${vchNo}?coBook=WHQ`);
+    expect(noToken.statusCode, noToken.body).toBe(400);
+    expect(noToken.json().error).toBe('VoucherVersionValidationError');
+    const removed = await request(
+      'quoter',
+      'DELETE',
+      `/wholesale-quotations/${vchNo}?coBook=WHQ&expectedVersion=${opened.json().version}`,
+    );
     expect(removed.statusCode, removed.body).toBe(200);
   });
 
   it('an edit that drops the tag returns it to stock; the delete audits the signed-in user', async () => {
+    const opened = await request('wholesaler', 'GET', '/wholesale-sales/1?coBook=WHS');
     const edited = await request('wholesaler', 'PUT', '/wholesale-sales/1', {
       ...sale,
       lines: [],
+      expectedVersion: opened.json().version,
     });
     expect(edited.statusCode, edited.body).toBe(200);
     expect(await available('LRG00001')).toBe(1);
@@ -312,7 +322,13 @@ const DAY = `${startYear}-06-15`;
     );
     expect(hiddenBeforeDelete[0]).toEqual({ hd: '00001', temp: 1 });
 
-    const removed = await request('wholesaler', 'DELETE', '/wholesale-sales/1', { book: 'WHS' });
+    const current = await request('wholesaler', 'GET', '/wholesale-sales/1?coBook=WHS');
+    const removed = await request(
+      'wholesaler',
+      'DELETE',
+      `/wholesale-sales/1?expectedVersion=${current.json().version}`,
+      { book: 'WHS' },
+    );
     expect(removed.statusCode, removed.body).toBe(200);
     const tempAfterDelete = await query<Array<{ n: number }>>(
       `SELECT count(*)::int n FROM "TEMP_BOOK_DATA" WHERE tenant_id=$1 AND "CO_BOOK"='WHS'`,
@@ -332,5 +348,77 @@ const DAY = `${startYear}-06-15`;
         MAIN_USER: 'wholesaler',
       },
     ]);
+  });
+
+  it('N51 (D17): a rate-cut edit or delete must carry the version its read returned', async () => {
+    // The header-only rate cut voucher 1 on the provisioned RTC book, as posted earlier in this suite.
+    const cut = {
+      coBook: 'RTC',
+      vchDate: DAY,
+      acCode: 'WHCUST',
+      itType: 'G',
+      lines: [],
+      receivedLines: [],
+      fineRate: 7300,
+      settleDrFine: 2.05,
+      receivedPay: { cash: 14965 },
+    };
+    const opened = await request('ratecutter', 'GET', '/rate-cut/1?coBook=RTC');
+    expect(opened.statusCode, opened.body).toBe(200);
+    expect(opened.json().version).toMatch(/^[0-9a-f]{64}$/);
+    const stale = opened.json().version;
+    // A save without the token is the refusal every versioned route answers.
+    const missing = await request('ratecutter', 'PUT', '/rate-cut/1', { ...cut, fineRate: 7400 });
+    expect(missing.statusCode, missing.body).toBe(400);
+    expect(missing.json().error).toBe('VoucherVersionValidationError');
+    // One operator saves with the token they read; the save returns the fresh version.
+    const one = await request('ratecutter', 'PUT', '/rate-cut/1', {
+      ...cut,
+      fineRate: 7400,
+      expectedVersion: stale,
+    });
+    expect(one.statusCode, one.body).toBe(200);
+    expect(one.json().version).toMatch(/^[0-9a-f]{64}$/);
+    expect(one.json().version).not.toBe(stale);
+    // The other operator's stale save is refused with 409 and writes nothing.
+    const two = await request('ratecutter', 'PUT', '/rate-cut/1', {
+      ...cut,
+      fineRate: 7500,
+      expectedVersion: stale,
+    });
+    expect(two.statusCode, two.body).toBe(409);
+    expect(two.json()).toMatchObject({ error: 'voucher-version-conflict' });
+    const [stored] = await query<Array<{ rate: number }>>(
+      `SELECT "FINE_RATE"::float8 rate FROM "RATE_CUT_DATA"
+        WHERE tenant_id=$1 AND "CO_BOOK"='RTC' AND "VCH_NO"='00001'`,
+      tenantId,
+    );
+    expect(Number(stored?.rate)).toBe(7400);
+    // A delete from the stale copy is refused and deletes nothing.
+    const refused = await request(
+      'ratecutter',
+      'DELETE',
+      `/rate-cut/1?coBook=RTC&expectedVersion=${stale}`,
+    );
+    expect(refused.statusCode, refused.body).toBe(409);
+    expect(refused.json().error).toBe('voucher-version-conflict');
+    const headersAfterRefusal = await query<Array<{ n: number }>>(
+      `SELECT count(*)::int n FROM "RATE_CUT_DATA" WHERE tenant_id=$1 AND "CO_BOOK"='RTC'`,
+      tenantId,
+    );
+    expect(headersAfterRefusal[0]?.n).toBe(1);
+    // With the current version the delete succeeds.
+    const current = await request('ratecutter', 'GET', '/rate-cut/1?coBook=RTC');
+    const removed = await request(
+      'ratecutter',
+      'DELETE',
+      `/rate-cut/1?coBook=RTC&expectedVersion=${current.json().version}`,
+    );
+    expect(removed.statusCode, removed.body).toBe(200);
+    const gone = await query<Array<{ n: number }>>(
+      `SELECT count(*)::int n FROM "RATE_CUT_DATA" WHERE tenant_id=$1 AND "CO_BOOK"='RTC'`,
+      tenantId,
+    );
+    expect(gone[0]?.n).toBe(0);
   });
 });

@@ -231,12 +231,13 @@ databaseDescribe('WP-02A company logical backup/restore', () => {
     expect(document.kind).toBe(COMPANY_BACKUP_KIND);
     expect(document.version).toBe(COMPANY_BACKUP_VERSION);
     // N52 adds api_command_receipt: tenant_id without CO_CODE, so tenant-shared and excluded (Idempotency-Key
-    // receipts are transient request state, not company data).
-    expect(document.manifest.tables).toHaveLength(176);
+    // receipts are transient request state, not company data). WP-33 adds daily_rate_copy_entitlement, also
+    // tenant-shared (operator-provisioned, a restore must not grant it): 177 tables, 16 tenant-shared.
+    expect(document.manifest.tables).toHaveLength(177);
     expect(document.manifest.tables.filter((table) => table.included)).toHaveLength(160);
     expect(
       document.manifest.tables.filter((table) => table.scope === 'tenant-shared'),
-    ).toHaveLength(15);
+    ).toHaveLength(16);
     expect(document.manifest.tables.filter((table) => table.scope === 'system')).toHaveLength(1);
     expect(document.manifest.tables.every((table) => table.primaryKey.length > 0)).toBe(true);
     expect(document.manifest.fingerprint).toMatch(/^[a-f0-9]{64}$/);

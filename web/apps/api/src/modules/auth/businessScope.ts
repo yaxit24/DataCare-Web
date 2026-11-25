@@ -56,7 +56,7 @@ async function companyTx(
                 SELECT 1 FROM "LOGIN_MAST" l
                  WHERE l."CO_CODE"=c."CO_CODE" AND l."LOGIN_NAME"=$2
               )) AS allowed
-         FROM "CO_MAST" c WHERE c."CO_CODE"=$1 LIMIT 1`,
+         FROM "CO_MAST" c WHERE c."CO_CODE"=$1 AND c.deleted_at IS NULL LIMIT 1`,
     coCode,
     access?.loginName ?? '',
     access?.isAdmin ?? true,
@@ -197,10 +197,10 @@ export async function listScopeCompanies(
   return withTxBudget(prisma, input.tenantId, 'read', (tx: any) =>
     tx.$queryRawUnsafe(
       `SELECT c."CO_CODE",c."CO_NAME" FROM "CO_MAST" c
-        WHERE $2::boolean OR EXISTS(
+        WHERE c.deleted_at IS NULL AND ($2::boolean OR EXISTS(
           SELECT 1 FROM "LOGIN_MAST" l
            WHERE l."CO_CODE"=c."CO_CODE" AND l."LOGIN_NAME"=$1
-        )
+        ))
         ORDER BY c."CO_CODE"`,
       input.loginName,
       input.isAdmin,
@@ -236,9 +236,25 @@ export async function listScopeYears(
   );
 }
 
+/**
+ * WP-28 (D7, D8): the book families a screen may ask `/context/books` for. The desktop lists a form's books by
+ * `CUR_USE = 'Y' AND MAIN_BOOK = '<family>' ORDER BY BOOK_NAME` (DC_Main.cs:1503); the filter now runs on the server
+ * instead of in the browser. An unknown family is a client error, never an unfiltered list.
+ */
+export const BOOK_FAMILIES: Record<string, readonly string[]> = {
+  purchase: ['PURCHASE'],
+  'tag-purchase': ['TAG PURCHASE'],
+  sales: ['SALES'],
+};
+
+export function bookFamilyMainBooks(family: unknown): readonly string[] | undefined | null {
+  if (family == null || family === '') return undefined;
+  return BOOK_FAMILIES[String(family).trim().toLowerCase()] ?? null;
+}
+
 export async function listScopeBooks(
   prisma: any,
-  input: { tenantId: string; coCode: string; lcCode: string },
+  input: { tenantId: string; coCode: string; lcCode: string; mainBooks?: readonly string[] },
 ): Promise<
   Array<{
     CO_BOOK: string;
@@ -252,9 +268,11 @@ export async function listScopeBooks(
       `SELECT "CO_BOOK","BOOK_NAME","BOOK_SNAME","MAIN_BOOK" FROM "BOOK_DATA"
         WHERE "CO_CODE"=$1 AND ("LC_CODE"=$2 OR "LC_CODE"='00' OR "LC_CODE" IS NULL)
           AND "CO_BOOK" IS NOT NULL AND COALESCE(UPPER("CUR_USE"),'Y')<>'N'
-        ORDER BY "CO_BOOK"`,
+          AND ($3::text[] IS NULL OR UPPER(btrim(COALESCE("MAIN_BOOK",''))) = ANY($3::text[]))
+        ORDER BY CASE WHEN $3::text[] IS NULL THEN "CO_BOOK" ELSE "BOOK_NAME" END, "CO_BOOK"`,
       input.coCode,
       input.lcCode,
+      input.mainBooks ? [...input.mainBooks] : null,
     ),
   );
 }

@@ -3,7 +3,14 @@ import { insertRowTx } from '../posting/posting.js';
 import { withTxBudget } from '../shared/txBudget.js';
 import { resolveSettingsBehaviorTx } from '../shared/settingsBehavior.js';
 import { barTagAvailableSql } from '../shared/stockSql.js';
-import { TAG_PRINT_STAGING_COLUMNS, renderTagLabels, type PrintableTag } from './tagPrint.js';
+import { qrSvg } from '../integrations/barcode.js';
+import {
+  TAG_PRINT_STAGING_COLUMNS,
+  renderTagLabels,
+  subTagPrintLine,
+  tagLabelFile,
+  type PrintableTag,
+} from './tagPrint.js';
 
 /**
  * Tag Print (desktop UT_TAG_PRINT, menu Other → Tag Print; MDI_FORM.cs:8596-8605 opens the form directly).
@@ -26,9 +33,10 @@ import { TAG_PRINT_STAGING_COLUMNS, renderTagLabels, type PrintableTag } from '.
  * (BAR_CAN_DATA) instead of the literal book code 140; the stock rule is the web's tag balance over MAIN_STOCK
  * (every year) rather than the year's rows; TAG_PRINT_DATA is cleared for the tenant only, and IMAGE_DATA is not
  * cleared (the desktop's unqualified DELETE FROM IMAGE_DATA also removes scheme member pictures); the labels print in
- * the web's label sheet because the Crystal label files are not in the repository; Hm Id Update and Set need the edit
- * right (the desktop checks none). The RFID writer and the Print Type combo (shown for named registrations only,
- * :4960-4980) and the QR picture are left out.
+ * the web's HTML label sheet, one layout per Crystal label file (QrPrint10, BarPrint10, BarPrint13, GhatTagPrnt; N249/G261),
+ * with the SubTagPrint lines read from BAR_IDTL by each file's link; the QR picture is generated into the sheet and
+ * IMAGE_DATA is not written; Hm Id Update and Set need the edit right (the desktop checks none). The RFID writer and the
+ * Print Type combo (shown for named registrations only, :4960-4980) are left out.
  */
 export class TagPrintValidationError extends Error {
   constructor(message: string) {
@@ -60,6 +68,8 @@ export const TAG_PRINT_MESSAGES = {
   HM_FIRST: 'Please First Update Hmid Data and Then print',
   DUPLICATE_TAG: 'Duplicate Tag No',
   REMOVE_ROW: 'This Row Record will Removed permantley ?',
+  /** BtnTagSet_Click, UT_TAG_PRINT.cs:5653. */
+  DEFAULT_SET: 'Tag Print Report Default Set',
 } as const;
 
 /** One grid row (MSG columns 1-44 of MSG_CLEAR :1816-2077). */
@@ -153,12 +163,14 @@ export async function tagPrintSetup(prisma: any, scope: TagPrintScope): Promise<
       scope.coCode,
     );
     const names = files.map((f) => text(f.PRINT_FILE)).filter(Boolean);
-    const marked = files.find((f) => text(f.PRINT_SET_A) === 'Y');
+    // The Load loop (UT_TAG_PRINT.cs:4942-4954) has no break, so the last row marked Y wins; with none marked the box
+    // stays empty.
+    const marked = [...files].reverse().find((f) => text(f.PRINT_SET_A) === 'Y');
     // MS_OPNCOMP.cs:481-485: a blank METAL_TYPE is G.
     const metal = text(co?.METAL_TYPE) || 'G';
     return {
       files: names,
-      defaultFile: marked ? text(marked.PRINT_FILE) : (names[0] ?? ''),
+      defaultFile: marked ? text(marked.PRINT_FILE) : '',
       qr,
       itemTypes: TAG_PRINT_ITEM_TYPES.map(([name]) => name),
       itemType: metal === 'G' ? 'Gold' : 'Silver',
@@ -171,7 +183,7 @@ export async function tagPrintSetDefault(
   prisma: any,
   scope: TagPrintScope,
   fileRaw: string,
-): Promise<{ defaultFile: string }> {
+): Promise<{ defaultFile: string; message: string }> {
   const file = text(fileRaw);
   if (!file) throw new TagPrintValidationError('choose a print file first');
   return withTxBudget(prisma, scope.tenantId, 'voucher', async (tx: any) => {
@@ -184,7 +196,7 @@ export async function tagPrintSetDefault(
       type,
       file,
     );
-    if (!known) throw new TagPrintValidationError(`print file ${file} is not in PRINT_MAST`);
+    if (!known) throw new TagPrintValidationError(`Unknown print file: ${file}`);
     await tx.$executeRawUnsafe(
       `UPDATE "PRINT_MAST" SET "PRINT_SET_A"=CASE WHEN "PRINT_FILE"=$4 THEN 'Y' ELSE 'N' END
         WHERE tenant_id=$1 AND "CO_CODE"=$2 AND "PRINT_TYPE"=$3`,
@@ -193,7 +205,7 @@ export async function tagPrintSetDefault(
       type,
       file,
     );
-    return { defaultFile: file };
+    return { defaultFile: file, message: TAG_PRINT_MESSAGES.DEFAULT_SET };
   });
 }
 
@@ -484,6 +496,8 @@ export async function tagPrintHmUpdate(
 export interface TagPrintStageInput {
   book: string;
   labelSkip?: string | number;
+  /** cboPrintfile.Text (UT_TAG_PRINT.cs:5200): the label file the print is for; checked against PRINT_MAST when given. */
+  file?: string;
   tags: Array<{ tagNo: string; vchSrno: number }>;
 }
 
@@ -495,14 +509,28 @@ export async function tagPrintStage(
   prisma: any,
   scope: TagPrintScope,
   input: TagPrintStageInput,
-): Promise<{ skipped: number; staged: number }> {
+): Promise<{ skipped: number; staged: number; file: string }> {
   const skip = Math.max(0, roundHalfEven(vbVal(input.labelSkip), 0));
   if (skip > 500) throw new TagPrintValidationError('Lable Skip is at most 500');
   const tags = input.tags.filter((t) => text(t.tagNo));
   if (!tags.length && !skip) throw new TagPrintValidationError('mark at least one tag Y to print');
   const book = text(input.book).toUpperCase();
   const cols = TAG_PRINT_STAGING_COLUMNS.filter((c) => c !== 'CO_CODE').map((c) => `"${c}"`);
+  const file = text(input.file);
   return withTxBudget(prisma, scope.tenantId, 'voucher', async (tx: any) => {
+    if (file) {
+      // The desktop hands any text to Crystal and fails at run time (:5209); the web refuses a name PRINT_MAST lacks,
+      // before anything is cleared.
+      const behavior = await resolveSettingsBehaviorTx(tx, scope);
+      const [known]: any[] = await tx.$queryRawUnsafe(
+        `SELECT 1 FROM "PRINT_MAST" WHERE tenant_id=$1 AND "CO_CODE"=$2 AND "PRINT_TYPE"=$3 AND "PRINT_FILE"=$4 LIMIT 1`,
+        scope.tenantId,
+        scope.coCode,
+        behavior.qrCodeGeneration ? 'QR' : 'TAG',
+        file,
+      );
+      if (!known) throw new TagPrintValidationError(`Unknown print file: ${file}`);
+    }
     await tx.$executeRawUnsafe(`DELETE FROM "TAG_PRINT_DATA" WHERE tenant_id=$1`, scope.tenantId);
     for (let i = 1; i <= skip; i += 1)
       await insertRowTx(tx, 'TAG_PRINT_DATA', scope.tenantId, {
@@ -530,23 +558,69 @@ export async function tagPrintStage(
           Number(t.vchSrno ?? 0),
         ),
       );
-    return { skipped: skip, staged };
+    return { skipped: skip, staged, file };
   });
 }
 
-/** The label sheet of the staged rows (the label file reads SELECT * FROM TAG_PRINT_DATA). */
-export async function tagPrintLabels(prisma: any, scope: TagPrintScope): Promise<string> {
-  const rows: any[] = await withTxBudget(prisma, scope.tenantId, 'read', (tx: any) =>
-    tx.$queryRawUnsafe(
+/**
+ * The label sheet of the staged rows in the layout of `file` (the label file reads SELECT * FROM TAG_PRINT_DATA,
+ * UT_TAG_PRINT.cs:5189). The file is a print-time choice, not a column of TAG_PRINT_DATA.
+ *
+ * Besides the staged row, a label reads CO_MAST.CO_NAME and ITEM_MAST.GR_CODE (placed by all four files) and, for the
+ * files with SubTagPrint.rpt, the BAR_IDTL rows its link selects (`TAG_LABEL_FILES`). A Lable Skip blank has no tag and
+ * prints none.
+ *
+ * The `_*Tx` form runs inside the caller's transaction, so a screen that stages and renders in ONE transaction
+ * (the tag-opening print, WP-32) reads back exactly the rows it staged: another operator's interleaved job
+ * cannot contaminate the response.
+ */
+export async function tagPrintLabelsTx(
+  tx: any,
+  scope: TagPrintScope,
+  fileRaw = '',
+): Promise<string> {
+  const layout = tagLabelFile(fileRaw);
+  const { rows, shop, groups, subs } = await (async () => {
+    const rows: any[] = await tx.$queryRawUnsafe(
       `SELECT * FROM "TAG_PRINT_DATA" WHERE tenant_id=$1 AND "CO_CODE"=$2 ORDER BY row_id`,
       scope.tenantId,
       scope.coCode,
-    ),
-  );
+    );
+    const [co]: any[] = await tx.$queryRawUnsafe(
+      `SELECT "CO_NAME" FROM "CO_MAST" WHERE tenant_id=$1 AND "CO_CODE"=$2 LIMIT 1`,
+      scope.tenantId,
+      scope.coCode,
+    );
+    const items: any[] = await tx.$queryRawUnsafe(
+      `SELECT "IT_CODE","GR_CODE" FROM "ITEM_MAST" WHERE tenant_id=$1 AND "CO_CODE"=$2`,
+      scope.tenantId,
+      scope.coCode,
+    );
+    const groups = new Map<string, string>(items.map((i) => [text(i.IT_CODE), text(i.GR_CODE)]));
+    const subs = new Map<string, string[]>();
+    if (layout.subReport)
+      for (const r of rows.filter((x) => text(x.TAG_NO))) {
+        const key = subKey(layout.subReport, r);
+        if (subs.has(key)) continue;
+        const lines: any[] = await tx.$queryRawUnsafe(
+          ...subReportQuery(
+            layout.subReport,
+            scope,
+            r,
+            layout.name === 'QrPrint10' ? 'IT_NET_AMT' : 'IT_AMT',
+          ),
+        );
+        subs.set(
+          key,
+          lines.map((l) => subTagPrintLine(l.IT_CODE, l.amt)),
+        );
+      }
+    return { rows, shop: text(co?.CO_NAME), groups, subs };
+  })();
   const skip = rows.filter((r) => text(r.IT_CODE) === '00' && Number(r.VCH_SRNO ?? 0) === 0).length;
-  const tags: PrintableTag[] = rows
-    .filter((r) => text(r.TAG_NO))
-    .map((r) => ({
+  const tags: PrintableTag[] = [];
+  for (const r of rows.filter((x) => text(x.TAG_NO))) {
+    tags.push({
       tagNo: text(r.TAG_NO),
       itCode: text(r.IT_CODE),
       designNo: text(r.DESIGN_NO) || null,
@@ -560,6 +634,72 @@ export async function tagPrintLabels(prisma: any, scope: TagPrintScope): Promise
       pcs: vbVal(r.ITM_PCS),
       lbrRate: vbVal(r.LBR_RATE),
       lbrAmt: vbVal(r.LBR_AMT),
-    }));
-  return renderTagLabels(tags, skip);
+      krName: text(r.KR_NAME),
+      shopName: shop,
+      grCode: groups.get(text(r.IT_CODE)) ?? '',
+      subLines: layout.subReport ? (subs.get(subKey(layout.subReport, r)) ?? []) : [],
+      // The QR picture comes from the tag number; the desktop writes it to IMAGE_DATA (:5181), the web does not.
+      ...(layout.qr ? { qrSvg: await qrSvg(text(r.TAG_NO), 120) } : {}),
+    });
+  }
+  return renderTagLabels(tags, skip, layout.name);
+}
+
+export async function tagPrintLabels(
+  prisma: any,
+  scope: TagPrintScope,
+  fileRaw = '',
+): Promise<string> {
+  return withTxBudget(prisma, scope.tenantId, 'read', (tx: any) =>
+    tagPrintLabelsTx(tx, scope, fileRaw),
+  );
+}
+
+type SubLink = 'tag' | 'row' | 'voucher';
+const subKey = (link: SubLink, r: any): string =>
+  link === 'tag'
+    ? `t|${text(r.TAG_NO)}|${Number(r.VCH_SRNO ?? 0)}`
+    : [
+        link,
+        text(r.LC_CODE),
+        text(r.CO_YEAR),
+        text(r.CO_BOOK),
+        text(r.VCH_NO),
+        link === 'row' ? Number(r.SR_NO ?? 0) : '',
+      ].join('|');
+
+/**
+ * SubTagPrint's BAR_IDTL selection, one query per link rule of the main file:
+ * BarPrint10 company + TAG_NO + VCH_SRNO (BarPrint10.xml:100-101); QrPrint10 company + LC + year + book + VCH_NO + SR_NO
+ * (QrPrint10.xml:119); GhatTagPrnt company + LC + year + book + VCH_NO (GhatTagPrnt.xml:102).
+ * OtherDetl uses IT_NET_AMT for QrPrint10 (:72), IT_AMT for BarPrint10 (:72) and GhatTagPrnt (:61).
+ */
+function subReportQuery(
+  link: SubLink,
+  scope: TagPrintScope,
+  r: any,
+  amountColumn: 'IT_AMT' | 'IT_NET_AMT',
+): [string, ...unknown[]] {
+  const head = `SELECT "IT_CODE", coalesce("${amountColumn}",0)::float amt FROM "BAR_IDTL" WHERE tenant_id=$1 AND "CO_CODE"=$2`;
+  const order = ` ORDER BY coalesce("ISR_NO",0), row_id`;
+  if (link === 'tag')
+    return [
+      `${head} AND "TAG_NO"=$3 AND coalesce("VCH_SRNO",0)=$4${order}`,
+      scope.tenantId,
+      scope.coCode,
+      text(r.TAG_NO),
+      Number(r.VCH_SRNO ?? 0),
+    ];
+  const base: unknown[] = [
+    scope.tenantId,
+    scope.coCode,
+    text(r.LC_CODE),
+    text(r.CO_YEAR),
+    text(r.CO_BOOK),
+    text(r.VCH_NO),
+  ];
+  const sql = `${head} AND "LC_CODE"=$3 AND "CO_YEAR"=$4 AND "CO_BOOK"=$5 AND "VCH_NO"=$6`;
+  return link === 'row'
+    ? [`${sql} AND coalesce("SR_NO",0)=$7${order}`, ...base, Number(r.SR_NO ?? 0)]
+    : [`${sql}${order}`, ...base];
 }

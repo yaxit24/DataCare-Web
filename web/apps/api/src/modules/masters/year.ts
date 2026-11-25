@@ -5,8 +5,8 @@ import { carryOpeningsTx } from '../ops/yearEnd.js';
 
 /**
  * Financial-year master (desktop "Year Create", `MS_YEAR`): create a company year (YEAR_MAST: OP_DATE opening,
- * CL_DATE closing, YEAR_MONTH start month) and carry the prior year's CLOSING party balances forward as the new
- * year's OPENING balances (OP_DATA). Additive; RLS-scoped.
+ * CL_DATE closing, YEAR_MONTH start month). First-year provisioning copies masters;
+ * balances are carried separately by Year-End Close. Additive; RLS-scoped.
  *
  * CL_DATE is the year's last day, not a "closed" flag: `MS_YEAR.cs:1035-1040` fills 01/04/yyyy and 31/03/yyyy+1
  * from the year code and `:1196`/`:1224` save it as entered. Every voucher writer bounds its date by OP_DATE and
@@ -19,9 +19,6 @@ export interface YearRow {
   clDate: string | null;
   yearMonth: string;
 }
-const num = (v: unknown): number => Number(v ?? 0);
-const r2 = (n: number): number => Math.round((n + 1e-9) * 100) / 100;
-const r3 = (n: number): number => Math.round((n + 1e-9) * 1000) / 1000;
 
 export class YearValidationError extends Error {
   override name = 'YearValidationError';
@@ -72,18 +69,33 @@ export async function createYear(
     mainUser?: string;
   },
 ): Promise<{ coYear: string; opDate: string; clDate: string }> {
-  const coYear = String(input.coYear ?? '').trim();
+  let coYear = String(input.coYear ?? '').trim();
   if (!coYear) throw new YearValidationError('coYear is required');
   if (coYear.length > 9) throw new YearValidationError('year code is at most 9 characters');
   const dates = resolveYearDates({ ...input, coYear });
   return withTxBudget(prisma, scope.tenantId, 'heavy', async (tx: any) => {
+    // Serialize duplicate checks and derive alternate-year mode from stored company configuration.
+    await tx.$executeRawUnsafe(
+      'SELECT pg_advisory_xact_lock(hashtext($1))',
+      `year-create:${scope.tenantId}:${scope.coCode}`,
+    );
+    const [company] = await tx.$queryRawUnsafe(
+      'SELECT "ALTER_YEAR" FROM "CO_MAST" WHERE tenant_id=$1 AND "CO_CODE"=$2 AND deleted_at IS NULL',
+      scope.tenantId,
+      scope.coCode,
+    );
+    if (!company) throw new YearValidationError('Company is unavailable');
+    const alternate = company.ALTER_YEAR === 'Y';
+    if (alternate) coYear = coYear.slice(0, 4) + dates.yearMonth;
     const ex: any[] = await tx.$queryRawUnsafe(
       `SELECT count(*) FILTER (WHERE "CO_YEAR"=$2)::int n, count(*)::int years
-         FROM "YEAR_MAST" WHERE "CO_CODE"=$1`,
+         FROM "YEAR_MAST" WHERE "CO_CODE"=$1 AND tenant_id=$3`,
       scope.coCode,
       coYear,
+      scope.tenantId,
     );
-    if (ex[0]?.n > 0) throw new YearValidationError(`year ${coYear} already exists`);
+    if (ex[0]?.n > 0)
+      throw new YearValidationError('Year Is Already Exist...Now ReOpen Sofware...');
     const firstYear = Number(ex[0]?.years ?? 0) === 0;
     // OP_DATE is varchar in the migrated schema and CL_DATE a timestamp; both carry the ISO day.
     // OLD_METHOD 'Y' is what the standard (non alter-year) desktop save writes (MS_YEAR.cs:1197).
@@ -96,7 +108,7 @@ export async function createYear(
       dates.opDate,
       dates.clDate,
       dates.yearMonth,
-      input.oldMethod ?? 'Y',
+      alternate ? 'N' : 'Y',
       input.mainUser ? String(input.mainUser).slice(0, 15) : null,
     );
     // The desktop copies the company's masters and configuration only when a NEW company gets its first year
@@ -104,7 +116,7 @@ export async function createYear(
     // Opening the next year of an existing company copies nothing, and the template company (01) is the copy
     // source, so it is never cloned into itself. Non-destructive: each table is skipped when it already has rows.
     if (firstYear && scope.coCode !== CLONE_TEMPLATE_CO_CODE)
-      await cloneCompanyTx(tx, scope.tenantId, scope.coCode);
+      await cloneCompanyTx(tx, scope.tenantId, scope.coCode, { desktopDefaults: true });
     return { coYear, opDate: dates.opDate, clDate: dates.clDate };
   });
 }

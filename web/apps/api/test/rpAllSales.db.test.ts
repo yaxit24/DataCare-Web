@@ -223,12 +223,12 @@ const lines = (vs: Voucher[]) => vs.flatMap((v) => v.lines);
       for (const row of rows)
         await owner.$executeRawUnsafe(`DELETE FROM "${row.table_name}" WHERE tenant_id=$1`, tenant);
     };
-    const login = async (name: string) => {
+    const login = async (name: string, lcCode = '01') => {
       const response = await app.inject({
         method: 'POST',
         url: '/auth/login',
         headers: { 'x-tenant-id': TENANT },
-        payload: { coCode: '01', lcCode: '01', coYear: YEAR, loginName: name, password: PASSWORD },
+        payload: { coCode: '01', lcCode, coYear: YEAR, loginName: name, password: PASSWORD },
       });
       expect(response.statusCode, response.body).toBe(200);
       const values = response.headers['set-cookie'];
@@ -352,10 +352,16 @@ const lines = (vs: Voucher[]) => vs.flatMap((v) => v.lines);
       for (const v of [...IN_SCOPE, V0, ...SENTINELS]) await insertVoucher(TENANT, v);
       await insertVoucher(OTHER_TENANT, OTHER_TENANT_VOUCHER);
 
-      for (const [name, view, print] of [
-        ['viewer', 'Y', 'N'],
-        ['printer', 'Y', 'Y'],
-        ['blocked', 'N', 'N'],
+      // Location rows for the report-location box: head office 00 and branch 02 beside the seeded 01.
+      await exec(
+        `INSERT INTO "LOCT_MAST"(tenant_id,"CO_CODE","LC_CODE","LC_NAME","AC_CODE") VALUES($1,'01','00','Head Office','BRANCH'),($1,'01','02','Branch Two','BRANCH')`,
+        TENANT,
+      );
+      for (const [name, view, print, lc] of [
+        ['viewer', 'Y', 'N', '01'],
+        ['printer', 'Y', 'Y', '01'],
+        ['blocked', 'N', 'N', '01'],
+        ['admin00', 'Y', 'Y', '00'],
       ] as const) {
         await exec(
           `INSERT INTO "LOGIN_MAST"(tenant_id,"CO_CODE","LOGIN_NAME","LOGIN_PWD","LOGIN_CATG","USER_UPDATE","USER_DELETE","USER_PRINT","PASSWORD_RESET_REQUIRED")
@@ -367,17 +373,19 @@ const lines = (vs: Voucher[]) => vs.flatMap((v) => v.lines);
         );
         await exec(
           `INSERT INTO "USER_SET"(tenant_id,"CO_CODE","LC_CODE","USER_NAME","MAIN_MENU","SUB_MENU","FRM_VIEW","FRM_EDIT","FRM_DELETE","FRM_PRINT")
-         VALUES($1,'01','01',$2,'Report','Sales Report',$3,'N','N',$4)`,
+         VALUES($1,'01',$5,$2,'Report','Sales Report',$3,'N','N',$4)`,
           TENANT,
           name,
           view,
           print,
+          lc,
         );
       }
       app = await buildApp({ prisma: runtime, secret: SECRET, secureCookies: false });
       cookies.viewer = await login('viewer');
       cookies.printer = await login('printer');
       cookies.blocked = await login('blocked');
+      cookies.admin00 = await login('admin00', '00');
     });
 
     afterAll(async () => {
@@ -521,6 +529,66 @@ const lines = (vs: Voucher[]) => vs.flatMap((v) => v.lines);
       );
       expect(lacks.statusCode).toBe(400);
       expect(lacks.json().error).toBe('filter-not-in-template');
+    });
+
+    it('sales-report.books.no-desktop-cap: 51 selected books run the report and both exports', async () => {
+      // RP_ALL.cs:11378-11387 appends every checked grid row; the 51 picks are the two real books plus 49 more.
+      const picks = [
+        'SL',
+        'SX',
+        ...Array.from({ length: 49 }, (_, i) => `K${String(i + 1).padStart(2, '0')}`),
+      ];
+      expect(picks).toHaveLength(51);
+      const q = `books=${picks.join(',')}`;
+      const body = await report(`mode=report&${q}`);
+      expect(vchNos(body)).toEqual(['S0001', 'S0002', 'X0001']);
+      // Only the picked books count: 51 codes that include just SX list only X0001.
+      const only = await report(`mode=report&books=${picks.filter((b) => b !== 'SL').join(',')}`);
+      expect(vchNos(only)).toEqual(['X0001']);
+      for (const ext of ['csv', 'xlsx']) {
+        const r = await get(
+          'printer',
+          `/reports/sales-report/export.${ext}?fromDate=${FROM}&toDate=${TO}&mode=report&${q}`,
+        );
+        expect(r.statusCode, r.body).toBe(200);
+      }
+      // A bound far above any real book count is still refused, with a 400 rather than a giant query.
+      const huge = await get(
+        'printer',
+        `/reports/sales-report?fromDate=${FROM}&toDate=${TO}&books=${Array.from({ length: 1001 }, (_, i) => `H${i}`).join(',')}`,
+      );
+      expect(huge.statusCode).toBe(400);
+      expect(huge.json().error).toBe('invalid-filter');
+    });
+
+    it('sales-report.report-location: a 00 session picks one branch; invalid and locked sessions are refused', async () => {
+      const at = (q: string, user = 'admin00') =>
+        get(user, `/reports/sales-report?fromDate=${FROM}&toDate=${TO}&mode=report&${q}`);
+      // RP_ALL.cs:6660-6671, 7623: the head office box names a branch; only that location's vouchers list.
+      const own = await at('reportLcCode=');
+      expect(own.statusCode, own.body).toBe(200);
+      expect(vchNos(own.json())).toEqual(['S0001', 'S0002', 'X0001', 'Z-LC']);
+      const one = await at('reportLcCode=01');
+      expect(one.statusCode, one.body).toBe(200);
+      expect(vchNos(one.json())).toEqual(['S0001', 'S0002', 'X0001']);
+      const two = await at('reportLcCode=02');
+      expect(two.statusCode, two.body).toBe(200);
+      expect(vchNos(two.json())).toEqual(['Z-LC']);
+      const csv = await get(
+        'admin00',
+        `/reports/sales-report/export.csv?fromDate=${FROM}&toDate=${TO}&mode=report&reportLcCode=02`,
+      );
+      expect(csv.statusCode, csv.body).toBe(200);
+      expect(csv.body).toContain('Z-LC');
+      expect(csv.body).not.toContain('S0001');
+      // RP_ALL.cs:7691: a location outside the company's LOCT_MAST is refused.
+      const bad = await at('reportLcCode=99');
+      expect(bad.statusCode).toBe(400);
+      expect(bad.json().error).toBe('invalid-location');
+      // A session that is not head office cannot send one (RP_ALL.cs:6664).
+      const locked = await at('reportLcCode=02', 'printer');
+      expect(locked.statusCode).toBe(400);
+      expect(locked.json().error).toBe('location-locked');
     });
   },
 );

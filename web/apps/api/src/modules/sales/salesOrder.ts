@@ -1,5 +1,4 @@
 import { withTxBudget, SNAPSHOT_READ, type TxBudgetPrisma, type Tx } from '../shared/txBudget.js';
-import { openAdvanceOfOrderTx } from './orderCancel.js';
 import { withSessionContextCommand } from '../auth/sessionContextCommand.js';
 import { createHash } from 'node:crypto';
 import {
@@ -34,11 +33,15 @@ import { SaleValidationError } from './sales.js';
 import * as pricing from './salesOrderPricing.js';
 import * as tenders from './salesOrderTender.js';
 import * as oldMetal from './salesOrderOldMetal.js';
+import * as rateCut from './salesOrderRateCutPosting.js';
+import { orderStockWrites } from './salesOrderStock.js';
+import { orderPostingRowsTx } from './salesOrderPostingRows.js';
 export { orderTenderRequest } from './salesOrderTender.js';
 import { fineWt } from '../shared/fine.js';
 import { resolveSalesOrderDesignTx } from './orderDesignSelection.js';
 import { resolveBookSlotAccountTx } from '../shared/postingAccounts.js';
 import { kasarAccountTx } from '../finance/finance.js';
+import { MONEY_ADVANCE_SQL } from './orderCancel.js';
 import {
   orderDate,
   orderClock,
@@ -101,7 +104,7 @@ export interface SalesOrderInput {
   bankName?: string; // tBankName.Text  :9151
   cardAc?: string; // MSG2_TOTAL[5,4] :9148
   cardAdj?: string; // CardCommAdj     :9154
-  oldGoldFine?: number; // MSG2_TOTAL[6,2]+[9,2] :9143
+  oldGoldFine?: number; // MSG2_TOTAL[6,2] :9143; the saved OLD_GL adds RCUT_FINE [9,2]
   oldGoldAmount?: number; // MSG2_TOTAL[6,3] :9136
   oldSilverFine?: number; // MSG2_TOTAL[7,2] :9144
   oldSilverAmount?: number; // MSG2_TOTAL[7,3] :9137
@@ -271,6 +274,8 @@ type ResolvedOrderBook = {
   bookName: string;
   vchType: string;
   inoutType: string;
+  /** BOOK_DATA.DATA_TYPE, copied onto the rate-cut rows (Ac_Ledr.cs:53, Ac_Rojmel.cs:23). */
+  dataType: string;
 };
 
 const ORDER_BOOK_MODES: Record<OrderMainBook, OrderBookMode> = {
@@ -312,7 +317,7 @@ async function resolveOrderBookTx(
   completeOrderScope(scope);
   const coBook = scope.coBook;
   const rows: any[] = await tx.$queryRawUnsafe(
-    `SELECT "CO_BOOK","BOOK_NAME","BOOK_SNAME","BOOK_INOUT","MAIN_BOOK","BOOK_TBL_NAME"
+    `SELECT "CO_BOOK","BOOK_NAME","BOOK_SNAME","BOOK_INOUT","MAIN_BOOK","BOOK_TBL_NAME","DATA_TYPE"
        FROM "BOOK_DATA"
       WHERE tenant_id=$1 AND "CO_CODE"=$2 AND "LC_CODE"=$3 AND "CO_BOOK"=$4
         AND coalesce(nullif(btrim("CUR_USE"::text),''),'Y') <> 'N'
@@ -335,17 +340,18 @@ async function resolveOrderBookTx(
   const table = text(row.BOOK_TBL_NAME).toUpperCase();
   if (table && table !== 'SL_ORD_DATA')
     throw new SaleValidationError(`${mode.mainBook} book must write SL_ORD_DATA, got ${table}`);
-  const inout = text(row.BOOK_INOUT).toUpperCase();
-  if (inout && inout !== mode.defaultInoutType)
-    throw new SaleValidationError(
-      `${mode.mainBook} book direction must be ${mode.defaultInoutType}`,
-    );
+  // No BOOK_INOUT check: the desktop opens any book of the main book (CurBookHelp, DC_Main.cs:1495-1536) and only
+  // stamps its BOOK_INOUT (FormBookInOut, TR_SALE_ORD.cs:8339) on INOUT_TYPE. An 'I' book posts more: old metal legs
+  // 07-10 and the rate-cut leg 11 (Ac_Ledr.cs:42-53) and the Order_Stk stock rows (salesOrderStock.ts). The
+  // desktop's own order books are 'I' (Order Booking, MS_UPDATE.cs:31987; Mobile Order 1-5, :17799-17831).
   return {
     mainBook: mode.mainBook,
     coBook,
     bookName: text(row.BOOK_NAME) || mode.mainBook,
     vchType: text(row.BOOK_SNAME) || mode.defaultVchType,
     inoutType: text(row.BOOK_INOUT) || mode.defaultInoutType,
+    // The posting layer writes 'A' for an unset DATA_TYPE on every other order row; the desktop's books carry 'A'.
+    dataType: text(row.DATA_TYPE) || 'A',
   };
 }
 
@@ -750,6 +756,10 @@ type OrderWriteContext = {
   previousLines?: Record<string, any>[];
   previousHeader?: Record<string, any>;
   previousComponents?: Record<string, any>[];
+  /** The advance the saved order reopens with (its ADV_AMT or RCUT_AMT, `orderTenderView`). */
+  previousAdvance?: number;
+  /** The saved Tour ledger is the earlier web cash pair (keys 51/52) rather than Order_Ledr's legs. */
+  earlierWebCashPair?: boolean;
 };
 
 /** Existing internal compatibility entry; optional lifecycle remains replacement-only. */
@@ -946,8 +956,29 @@ function prepareSalesOrderCreate(input: SalesOrderInput, lifecycle?: OrderWriteC
       ORDER_HEADER_FIELDS,
       salesOrderForm,
       tender.oldMetalSent,
+      N(input.rateCutRate) !== 0,
     );
     const headerDirty = orderDirtyColumns(input, headerFields);
+    const typedOldGlDirty = headerDirty.has('OLD_GL');
+    // MSG2_TOTAL[6,2] — the old gold fine. The request's grid owns it whenever the request carries one
+    // (BILL_TOTAL re-sums the rows, TR_SALE_ORD.cs:11345-11364); otherwise it is the typed cell. A typed
+    // request that echoes the saved OLD_GL column is returning the composed value — :9143 folds RCUT_FINE
+    // into that column — so the cell it means is the saved column less the saved RCUT_FINE, the same
+    // re-derivation the desktop's reopen performs on its totals grid before the next save.
+    const oldMetalColumns: Record<string, number> = tenders.orderOldMetalColumns(
+      tender,
+      salesOrderForm,
+    );
+    const typedOldGoldFine = N(input.oldGoldFine);
+    const oldGoldFineCell =
+      oldMetalColumns.OLD_GL ??
+      (previousHeader != null && !typedOldGlDirty && typedOldGoldFine === n(previousHeader.OLD_GL)
+        ? Math.max(0, round(n(previousHeader.OLD_GL) - n(previousHeader.RCUT_FINE), 3))
+        : typedOldGoldFine);
+    // OLD_GL is composed ([6,2] + [9,2]), so it follows the rate-cut fine: a changed RCUT_FINE makes it dirty even
+    // when the request echoes the saved OLD_GL untouched, and the exact-decimal check below must not hold the
+    // request's own oldGoldFine up against the composed column.
+    if (headerDirty.has('RCUT_FINE')) headerDirty.add('OLD_GL');
     const parentDirty = orderLines.map((line, index) =>
       orderDirtyColumns(
         line,
@@ -986,7 +1017,15 @@ function prepareSalesOrderCreate(input: SalesOrderInput, lifecycle?: OrderWriteC
         TAX_PRC: input.taxRatePct,
         TAX_AMT: totals.tax,
         TOT_AMT: totals.total,
-        ...tenders.orderTenderColumns(tender, salesOrderForm),
+        ...tenders.orderTenderColumns(tender, salesOrderForm, N(input.rateCutRate)),
+        ...(salesOrderForm
+          ? {}
+          : tenders.tourCashColumn(
+              tender,
+              lifecycle?.previousHeader,
+              lifecycle?.previousAdvance,
+              lifecycle?.earlierWebCashPair,
+            )),
         VCH_TIME: vchDate,
         ENTRY_TIME:
           lifecycle?.previousHeader && !headerDirty.has('VCH_TIME') && !headerDirty.has('VCH_DATE')
@@ -1005,15 +1044,17 @@ function prepareSalesOrderCreate(input: SalesOrderInput, lifecycle?: OrderWriteC
         BANK_NAME: txt(input.bankName, 50), // tBankName.Text  :9151
         CARD_AC: txt(input.cardAc, 9), // MSG2_TOTAL[5,4] :9148
         CARD_ADJ: txt(input.cardAdj, 1), // CardCommAdj     :9154
-        OLD_GL: N(input.oldGoldFine), // [6,2]+[9,2]    :9143
         OLD_GL_AMT: round2(N(input.oldGoldAmount)), // MSG2_TOTAL[6,3] :9136
         OLD_SL: N(input.oldSilverFine), // MSG2_TOTAL[7,2] :9144
         OLD_SL_AMT: round2(N(input.oldSilverAmount)), // MSG2_TOTAL[7,3] :9137
         SCHM_AMT: round2(N(input.schemeAmount)), // MSG2_TOTAL[8,3] :9142
-        ...tenders.orderOldMetalColumns(tender, salesOrderForm), // G206: OLD_GL* from the grid when it is sent :9136-9144
+        ...oldMetalColumns, // G206: OLD_GL* from the grid when it is sent :9136-9144
+        // TR_SALE_ORD.cs:9143 and TR_TOUR_ORD.cs:7313: the saved OLD_GL is MSG2_TOTAL[6,2] (the grid's or
+        // typed old gold fine) PLUS MSG2_TOTAL[9,2] (RCUT_FINE).
+        OLD_GL: round(oldGoldFineCell + N(input.rateCutFine), 3),
         RCUT_RATE: N(input.rateCutRate), // MSG2_TOTAL[9,1] :9134
         RCUT_FINE: N(input.rateCutFine), // MSG2_TOTAL[9,2] :9135
-        RCUT_AMT: round2(N(input.rateCutAmount)), // MSG2_TOTAL[9,3] :9126
+        // RCUT_AMT (and ADV_AMT) come from orderTenderColumns: the tender total, filed by the rate (:9124-9133).
         ADJ_GOLD: N(input.adjustGold), // AdjGold  :9146
         ADJ_SILVER: N(input.adjustSilver), // AdjSilver:9147
         ORD_ADJ_AMT: round2(N(input.orderAdjustAmount)), // RecAdjAmt:9145
@@ -1025,7 +1066,8 @@ function prepareSalesOrderCreate(input: SalesOrderInput, lifecycle?: OrderWriteC
         CITY: txt(input.city, 20), // tCity.Text  :9160
         MOBILE: txt(input.mobile, 21), // tMobile.Text:9161
       },
-      input,
+      // RCUT_AMT is derived from the tenders, so a typed rate-cut amount is not an exact value to preserve.
+      { ...input, rateCutAmount: undefined, oldGoldFine: undefined },
       headerFields,
       headerDirty,
     );
@@ -1200,37 +1242,17 @@ function prepareSalesOrderCreate(input: SalesOrderInput, lifecycle?: OrderWriteC
         );
       });
     });
-    const ledger: LedgerLine[] = tenders.orderTenderLedger(
+    // Order_Ledr and Order_Rojmel (salesOrderPostingRows.ts).
+    const { ledger, rojmelRows } = await orderPostingRowsTx(tx, {
+      scope: input.scope,
+      book,
       key,
-      book.vchType,
-      { code: input.acCode, name: input.acName, billNo: header.BILL_NO as string },
+      header,
       cashAc,
       tender,
-      salesOrderForm,
-      book.inoutType,
-    );
-
-    // The Rojmel (day book), Ac_Rojmel.Order_Rojmel: see orderRojmelRows.
-    const rojmelRows = tenders.orderRojmelRows(
-      {
-        scope: {
-          coCode: input.scope.coCode,
-          lcCode: input.scope.lcCode,
-          coYear: input.scope.coYear!,
-        },
-        key,
-        coBook: key.CO_BOOK,
-        vchNo: key.VCH_NO,
-        vchDate,
-        vchType: book.vchType,
-        bookName: book.mainBook,
-        partyName: input.acName ?? '',
-        partyCode: input.acCode,
-      },
-      cashAc,
-      adv,
-      tender,
-    );
+      party: { code: input.acCode, name: input.acName ?? '' },
+      vchDate,
+    });
     await insertRowTx(tx, 'TEMP_BOOK_DATA', tenantId, {
       CO_CODE: scoped.coCode,
       LC_CODE: scoped.lcCode,
@@ -1238,20 +1260,32 @@ function prepareSalesOrderCreate(input: SalesOrderInput, lifecycle?: OrderWriteC
       VCH_NO: hdVchNo,
       BOOK_NAME: book.bookName,
     });
+    // The order's own '+' advance row, SR_NO 1 (TR_SALE_ORD.cs:9475-9516). An edit has already deleted the old one
+    // with the rest of the write set, as the desktop's delete-then-insert does (`:9475`).
+    const advanceAdj = oldMetal.orderAdvanceAdjRow(key, header, tender.oldMetal, book, {
+      partyAc: input.acCode,
+      vchDate,
+      hdVchNo,
+      mainUser,
+    });
+    const oldMetalWrites = oldMetal.orderOldMetalWrites(key, tender.oldMetal, book, {
+      partyAc: input.acCode,
+      vchDate,
+      hdVchNo,
+      mainUser,
+    });
     await postVoucherTx(tx, tenantId, {
       ledger: { table: 'AC_DATA', lines: ledger },
       writes: [
         { table: 'SL_ORD_DATA', rows: [header] },
+        ...(advanceAdj ? [{ table: 'SL_ORD_ADJ', rows: [advanceAdj] }] : []),
         ...(detl.length ? [{ table: 'SL_ORD_DETL', rows: detl }] : []),
         ...(idtl.length ? [{ table: 'SL_ORD_IDTL', rows: idtl }] : []),
         ...(rojmelRows.length ? [{ table: 'ROJ_MEL_DATA', rows: rojmelRows }] : []),
         ...tenders.orderUpiWrites(key, input.acCode, vchDate, tender),
-        ...oldMetal.orderOldMetalWrites(key, tender.oldMetal, book, {
-          partyAc: input.acCode,
-          vchDate,
-          hdVchNo,
-          mainUser,
-        }),
+        ...oldMetalWrites,
+        // Ac_Stock.Order_Stk after the save (TR_SALE_ORD.cs:9564-9566, TR_TOUR_ORD.cs:7615-7617).
+        ...orderStockWrites(key, book, oldMetalWrites[0]?.rows ?? [], detl),
       ],
     });
     // Shared insertion defaults apply to new rows. An unchanged imported NULL belongs to the
@@ -1298,6 +1332,7 @@ function prepareSalesOrderCreate(input: SalesOrderInput, lifecycle?: OrderWriteC
             : ['VCH_TIME', 'ENTRY_TIME'],
         ],
         ['SL_ORD_DETL', ['VCH_TIME']],
+        ['SL_ORD_ADJ', ['VCH_TIME']],
         ['AC_DATA', ['ENTRY_TIME']],
       ] as const)
         await tx.$executeRawUnsafe(
@@ -1538,7 +1573,16 @@ export async function getSalesOrder(
       })),
     };
     // Both saved order forms retain exact mapped scalar values; calculations remain server-owned.
-    exactOrderValues(dto, x, tenders.orderHeaderFields(ORDER_HEADER_FIELDS, salesOrderForm));
+    exactOrderValues(
+      dto,
+      x,
+      tenders.orderHeaderFields(
+        ORDER_HEADER_FIELDS,
+        salesOrderForm,
+        false,
+        tenderView.advanceColumn === 'RCUT_AMT',
+      ),
+    );
     exactOrderValues(dto, x, tenderView.exactFields);
     dto.lines.forEach((line, index) => {
       const parent = d[index];
@@ -1575,6 +1619,8 @@ async function assertOrderUnconsumedTx(
   // the later settlement voucher. A missing legacy dimension is unknown, so it can still
   // block a possible match. An explicitly different dimension must not block another order
   // merely because voucher numbers are reused across books, financial years or branches.
+  // A '+' row is the order's own advance (TR_SALE_ORD.cs:9503), not a use of it: the desktop counts only '-' rows as
+  // adjusted (AdjAmtR, :10092), so the '+' row alone never blocks.
   const blocked: any[] = await tx.$queryRawUnsafe(
     `SELECT 1 FROM "SL_ORD_DETL" d
       WHERE d.tenant_id=$1 AND d."CO_CODE"=$2 AND d."LC_CODE"=$3
@@ -1584,6 +1630,7 @@ async function assertOrderUnconsumedTx(
           OR EXISTS (SELECT 1 FROM "SL_ORD_ADJ" a
             WHERE a.tenant_id=d.tenant_id AND a."CO_CODE"=d."CO_CODE"
               AND a."ORD_NO"=d."VCH_NO"
+              AND coalesce(a."ORD_SIGN",'')<>'+'
               AND (nullif(trim(a."ORD_LC"),'') IS NULL OR trim(a."ORD_LC")=d."LC_CODE")
               AND (nullif(trim(a."ORD_YRCD"),'') IS NULL OR trim(a."ORD_YRCD")=d."CO_YEAR")
               AND (nullif(trim(a."ORD_DBCD"),'') IS NULL OR trim(a."ORD_DBCD")=d."CO_BOOK")))
@@ -1686,6 +1733,14 @@ async function runSalesOrderEditTx(
       previousLines: state.SL_ORD_DETL,
       previousComponents: state.SL_ORD_IDTL,
       previousHeader: state.SL_ORD_DATA[0],
+      earlierWebCashPair: state.AC_DATA.some((row: Record<string, unknown>) =>
+        /^.{21}5[12]$/.test(String(row.LEDR_KEY ?? '')),
+      ),
+      previousAdvance: tenders.orderTenderView(
+        state.SL_ORD_DATA[0],
+        state,
+        input.orderMainBook !== 'TOUR ORDER',
+      ).fields.advanceAmount,
     },
   );
 }
@@ -2003,89 +2058,7 @@ export async function editTourOrderInSession(
 
 // ───────────────────────── F4 · SL_ORD_ADJ order-adjust helpers ─────────────────────────
 
-/**
- * Advance still available on an order to consume into a sale. The rule is shared with Order Cancel
- * (`openAdvanceOfOrderTx`), so a sale and a cancellation can never use the same advance twice: it counts what earlier
- * sales and cancellations used, including a cancellation's kasar.
- */
-export async function orderAdvanceAvailableTx(
-  tx: any,
-  scope: VoucherScope,
-  ordNo: number | string,
-  ordBook = 'SOR',
-): Promise<{ custAc: string; custName: string | null; advance: number; available: number }> {
-  const ord = await openAdvanceOfOrderTx(tx, scope, ordNo, ordBook);
-  if (!ord) throw new SaleValidationError(`sales order #${ordNo} not found`);
-  return {
-    custAc: ord.acCode,
-    custName: ord.acName || null,
-    advance: ord.advAmt,
-    available: ord.openAmt,
-  };
-}
-
-/** Write an SL_ORD_ADJ row consuming `adjustAmt` of an order's advance into a sale (within the sale's tx).
- *  No ledger here — the sale (createSale) reduces the customer Dr by adjustAmt (the advance is applied). */
-export async function adjustOrderIntoSaleTx(
-  tx: any,
-  tenantId: string,
-  scope: VoucherScope,
-  args: {
-    saleVchNo: string;
-    ordNo: number | string;
-    custAc: string;
-    custName?: string | null;
-    adjustAmt: number;
-    vchDate: Date;
-    /** ORD_HD_VCH_NO — the order's hidden book number, so the adjustment ties to the exact order row. */
-    ordHiddenVchNo?: string | null;
-    /** EMP_CODE — varchar(3); the salesperson credited with the order. */
-    empCode?: string | null;
-  },
-): Promise<{ vchNo: number }> {
-  const no = await nextVoucherNoTx(tx, { ...scope, coBook: 'ORA' });
-  const key: VoucherKey = {
-    CO_CODE: scope.coCode,
-    LC_CODE: scope.lcCode,
-    CO_YEAR: scope.coYear ?? '',
-    CO_BOOK: 'ORA',
-    VCH_NO: formatVoucherNo(no),
-  };
-  const row = {
-    ...key,
-    SR_NO: 1,
-    VCH_DATE: args.vchDate,
-    VCH_TYPE: 'SADJ',
-    INOUT_TYPE: 'O',
-    ENTRY_TYPE: 'A',
-    BOOK_NAME: 'ORDER ADJUST',
-    AC_CODE: args.custAc,
-    AC_NAME: args.custName ?? null,
-    ORD_NO: formatVoucherNo(args.ordNo),
-    ORD_AC_CODE: args.custAc,
-    ORD_SIGN: 'C',
-    PAID_AMT: round2(args.adjustAmt),
-    OLD_VCH_NO: scope.coBook,
-    NEW_VCH_NO: args.saleVchNo,
-    IT_DESC: `Advance adjusted into sale ${args.saleVchNo}`,
-    // TR_SALE_HM.cs carries the full ORDER key on the adjustment so the advance can be traced back to the
-    // exact order line: location, year and book alongside the order number, plus its hidden book number.
-    ORD_LC: scope.lcCode,
-    ORD_YRCD: scope.coYear ?? null,
-    ORD_DBCD: scope.coBook ?? null,
-    ORD_HD_VCH_NO: args.ordHiddenVchNo ?? null,
-    // Metal advances are tracked separately from the money advance; a pure cash advance leaves both 0,
-    // which is what the desktop writes.
-    ORD_GOLD: 0,
-    ORD_SILVER: 0,
-    EMP_CODE: args.empCode ?? null,
-  };
-  await postVoucherTx(tx, tenantId, {
-    ledger: { table: 'AC_DATA', lines: [] },
-    writes: [{ table: 'SL_ORD_ADJ', rows: [row] }],
-  });
-  return { vchNo: no };
-}
+export { orderAdvanceAvailableTx, adjustOrderIntoSaleTx } from './orderAdvanceAdjust.js';
 
 /**
  * Order Cancel with refund (desktop TR_SL_ORD_ADJ): refund the advance through an operator-chosen
@@ -2113,7 +2086,8 @@ export async function cancelSalesOrderAdjust(
   const run = async (tx: any) => {
     const ord: any = (
       await tx.$queryRawUnsafe(
-        `SELECT "AC_CODE" ac, "AC_NAME" nm, coalesce(NULLIF("ADV_AMT"::text,'')::numeric,0)::float adv, coalesce(NULLIF("TOT_AMT"::text,'')::numeric,0)::float tot FROM "SL_ORD_DATA" WHERE "CO_CODE"=$1 AND "CO_BOOK"=$2 AND "VCH_NO"=$3 LIMIT 1`,
+        // A rate-cut order has no money advance to refund (MONEY_ADVANCE_SQL, TR_SALE_ORD.cs:9124-9133).
+        `SELECT "AC_CODE" ac, "AC_NAME" nm, ${MONEY_ADVANCE_SQL}::float adv, coalesce(NULLIF("TOT_AMT"::text,'')::numeric,0)::float tot FROM "SL_ORD_DATA" o WHERE "CO_CODE"=$1 AND "CO_BOOK"=$2 AND "VCH_NO"=$3 LIMIT 1`,
         input.scope.coCode,
         ordBook,
         formatVoucherNo(input.vchNo),

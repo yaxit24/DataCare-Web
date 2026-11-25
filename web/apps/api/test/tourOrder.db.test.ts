@@ -210,9 +210,10 @@ databaseDescribe('TR_SALE_ORD Tour Order lifecycle parity', () => {
       `SELECT "VCH_TYPE","AC_CODE","DR_AMT"::float8 AS dr,"CR_AMT"::float8 AS cr FROM "AC_DATA" WHERE tenant_id=$1 ORDER BY "LEDR_KEY"`,
       tenantId,
     )) as Array<Record<string, unknown>>;
+    // Order_Ledr legs 01 (party Cr) and 02 (slot-1 cash account Dr), Ac_Ledr.cs:30-32.
     expect(ledger).toMatchObject([
-      { VCH_TYPE: 'TUROD', AC_CODE: 'CASH', dr: 25, cr: 0 },
       { VCH_TYPE: 'TUROD', AC_CODE: 'TOURAC', dr: 0, cr: 25 },
+      { VCH_TYPE: 'TUROD', AC_CODE: 'CASH', dr: 25, cr: 0 },
     ]);
 
     const rojmel = (await owner.$queryRawUnsafe(

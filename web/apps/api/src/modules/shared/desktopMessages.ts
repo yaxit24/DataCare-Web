@@ -71,6 +71,12 @@ export const DESKTOP_MESSAGES = {
    */
   TAG_COUNTER_MANDATORY: 'Please Insert Tag Entry Counter Code and Try Because It is Mandatory...',
 
+  /**
+   * TR_TAG_OPBL.cs — desktop condition: `MsCntrStk = 'Y'` AND a grid row's counter cell is blank
+   * (`MSG[M,6] = ''`, :10793-10806). The tag-opening text differs from TR_PURC's "Tag Entry" wording.
+   */
+  TAG_OPENING_COUNTER_MANDATORY: 'Please Insert Counter Code and Try Because It is Mandatory...',
+
   /** TR_PURC.cs — desktop condition: `tHmId2 <> '' AND Val(nHmWt2) = 0`. Same shape for IDs 3 and 4. */
   HALLMARK_ID2_WEIGHT: 'Please Insert HmId2 Weight and try...',
   HALLMARK_ID3_WEIGHT: 'Please Insert HmId3 Weight and try...',
@@ -119,6 +125,13 @@ export const DESKTOP_MESSAGES = {
   SCHEME_NAME_REQUIRED: 'Please Insert Scheme Name ...',
   /** MS_PRODUCT.cs, CurMast='Scheme' — blank scheme code. */
   SCHEME_CODE_REQUIRED: 'Enter Scheme Code.',
+
+  /** MS_GROUP.cs:2035 tGrName_Validating — the name belongs to another group code. */
+  GROUP_NAME_DUPLICATE: (code: string): string =>
+    `This Group Name already Exist in  '${code}'  Group Code... Please Change Group Name...`,
+  /** MS_AC_GROUP.cs:1703 tGrName_Validating — note the desktop's different closing words. */
+  AC_GROUP_NAME_DUPLICATE: (code: string): string =>
+    `This Group Name already Exist in  '${code}'  Group Code...Please Change Gr Name...`,
 
   /** MS_STYLE.cs, CurMast='Style' — blank style/model name. */
   MODEL_NAME_REQUIRED: 'Please Insert Model Name ...',

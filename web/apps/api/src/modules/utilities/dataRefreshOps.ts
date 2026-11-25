@@ -7,6 +7,7 @@ import {
   type RepairScope,
   type RepairTableDiff,
 } from './dataRepair.js';
+import './dataRefreshFieldUpdate.js';
 
 /**
  * The six operator-visible MS_UPDATE actions. Account, Stock, Field Update, Image Data and Old Field are
@@ -26,8 +27,6 @@ const blocked = {
     'Full Account apply is unavailable: the complete Ac_Ledr, Ac_Rojmel and Ac_Tax builder graph after AcRefresh is not yet proved.',
   stock:
     'Full Stock apply is unavailable: the remaining Ac_Stock builder graph after StockRefresh is not yet proved.',
-  field:
-    'Field Update is classification-pending; its legacy statements must be classified as web repair, historical anomaly, or migration-loader work before apply is safe.',
   image:
     'Image Data apply is unavailable: TAG_IMAGE_DATA is committed schema, while legacy MOB_IMAGE, IMG_IMPORT and CONV_IMAGE semantics are unproved and runtime schema mutation is forbidden.',
   oldField:
@@ -138,22 +137,6 @@ registerRepair({
     };
   },
   apply: refuseApply(blocked.stock),
-});
-
-registerRepair({
-  id: 'data-refresh-field-update',
-  title: 'Field Update',
-  description: 'Visible desktop action retained as a classification-pending milestone item.',
-  desktopSource: 'MS_UPDATE.cs:3958-8807',
-  risk: 'danger',
-  applyAvailable: false,
-  blockedReason: blocked.field,
-  completionText: 'Field Is Update ok....Please Re open Software',
-  tables: ['BOOK_DATA'],
-  async preview() {
-    return { diffs: [], samples: [blocked.field], candidateFingerprint: fingerprint([]) };
-  },
-  apply: refuseApply(blocked.field),
 });
 
 const CONSUMED = `

@@ -1,9 +1,18 @@
-import { withTxBudget } from '../shared/txBudget.js';
+import { SNAPSHOT_READ, withTxBudget } from '../shared/txBudget.js';
 import { formatVoucherNo, nextVoucherNoTx, type VoucherScope } from '../vouchers/numbering.js';
 import { insertRowTx } from '../posting/posting.js';
+import { assertSavedVoucherTx } from '../vouchers/lifecycle.js';
+import {
+  assertVoucherVersionTx,
+  requiredVersion,
+  versionKeyOf,
+  voucherVersionTx,
+} from '../vouchers/version.js';
 import { resolveLiveTagIdentityTx } from './stock.js';
 
 export const TAG_ADJUST_BOOK = 'TAD' as const;
+/** The rows an edit or delete replaces (`deleteRegisterTx`); the version token hashes exactly these. */
+const TAG_ADJUST_WRITE_TABLES = ['BAR_CAN_DATA', 'BAR_CAN_DETL', 'BAR_CAN_IDTL'] as const;
 
 export class TagAdjustError extends Error {
   constructor(message: string) {
@@ -25,6 +34,8 @@ export interface TagAdjustInput {
   vchDate?: Date | string;
   book?: string;
   vchNo?: string | number;
+  /** Required on an edit: the `version` the GET returned (N51 voucher version token). */
+  expectedVersion?: string;
   acCode?: string;
   empCode?: string;
   vchDesc?: string;
@@ -36,6 +47,7 @@ export interface TagAdjustVoucher {
   header: Record<string, unknown> | null;
   lines: Array<Record<string, unknown>>;
   stones: Array<Record<string, unknown>>;
+  version: string;
 }
 
 const text = (value: unknown, max = 255): string =>
@@ -385,16 +397,29 @@ export async function saveTagAdjust(
   stones: number;
   barDetlUpdated: number;
   mainStockUpdated: number;
+  version: string;
 }> {
   if (!input.lines?.length) throw new TagAdjustError('tagAdjust requires at least one line');
   const scope = normalizeScope(input);
   const vchDate = input.vchDate ? new Date(input.vchDate) : new Date();
   return withTxBudget(prisma, scope.tenantId, 'voucher', async (tx: any) => {
     const meta = await assertTagAdjustBookTx(tx, scope);
-    const vchNo =
-      input.vchNo == null
-        ? formatVoucherNo(await nextVoucherNoTx(tx, scope))
-        : formatVoucherNo(input.vchNo);
+    const editing = input.vchNo != null;
+    const vchNo = editing
+      ? formatVoucherNo(input.vchNo as string | number)
+      : formatVoucherNo(await nextVoucherNoTx(tx, scope));
+    if (editing) {
+      // WP-10: a PUT edits a saved voucher only; BAR_CAN_DATA has no unique key on the number, so creating at a typed
+      // number outside the allocator's lock could duplicate one. Then the stale-save check every edit route makes.
+      const expected = requiredVersion(input.expectedVersion);
+      await assertSavedVoucherTx(tx, 'BAR_CAN_DATA', scope, vchNo);
+      await assertVoucherVersionTx(
+        tx,
+        TAG_ADJUST_WRITE_TABLES,
+        versionKeyOf(scope, vchNo),
+        expected,
+      );
+    }
     await deleteRegisterTx(tx, scope, vchNo);
     await insertRowTx(tx, 'BAR_CAN_DATA', scope.tenantId, headerRow(scope, input, vchNo, vchDate));
     let stones = 0;
@@ -406,7 +431,8 @@ export async function saveTagAdjust(
       stones += await copyStoneRowsTx(tx, scope.tenantId, detail, source, index + 1);
     }
     const updates = await updateSourceDataTypesTx(tx, scope, vchNo);
-    return { vchNo: Number(vchNo), lines: input.lines.length, stones, ...updates };
+    const version = await voucherVersionTx(tx, TAG_ADJUST_WRITE_TABLES, versionKeyOf(scope, vchNo));
+    return { vchNo: Number(vchNo), lines: input.lines.length, stones, ...updates, version };
   });
 }
 
@@ -421,7 +447,8 @@ export async function getTagAdjust(
     lines: [{ tagNo: 'x', dataType: 'x' }],
   });
   const vchNo = formatVoucherNo(vchNoInput);
-  return withTxBudget(prisma, scope.tenantId, 'read', async (tx: any) => {
+  // SNAPSHOT_READ: the rows and the version token must come from one committed revision.
+  return withTxBudget(prisma, scope.tenantId, SNAPSHOT_READ, async (tx: any) => {
     const headers = (await tx.$queryRawUnsafe(
       `SELECT * FROM "BAR_CAN_DATA"
         WHERE tenant_id=$1 AND "CO_CODE"::text=$2::text AND "LC_CODE"::text=$3::text
@@ -459,15 +486,34 @@ export async function getTagAdjust(
       scope.coBook,
       vchNo,
     )) as Array<Record<string, unknown>>;
-    return { header: headers[0], lines, stones };
+    const version = await voucherVersionTx(tx, TAG_ADJUST_WRITE_TABLES, versionKeyOf(scope, vchNo));
+    // Raw rows can carry BIGINT columns (e.g. BAR_CAN_DETL), which JSON cannot serialise; the Load response
+    // would fail. Convert them as stock.ts does.
+    const plain = (r: Record<string, unknown>) =>
+      Object.fromEntries(
+        Object.entries(r).map(([k, v]) => [k, typeof v === 'bigint' ? Number(v) : v]),
+      );
+    return {
+      header: plain(headers[0]),
+      lines: lines.map(plain),
+      stones: stones.map(plain),
+      version,
+    };
   });
 }
 
+/**
+ * Delete the voucher (TR_TAG_CAN.cs:5331-5364 `BtnDelete_Click`): remove its register rows. The tag's
+ * own DATA_TYPE stays as the voucher set it, as the desktop's delete does. N51 (D17): the delete must carry
+ * the `version` the GET returned; a stale one is `409 voucher-version-conflict` with nothing removed.
+ */
 export async function deleteTagAdjust(
   prisma: any,
   inputScope: VoucherScope,
   vchNoInput: string | number,
   book?: string,
+  /** N51 (D17): the `version` the GET returned; a stale or missing token refuses the delete. */
+  expectedVersion?: string,
 ): Promise<{ deleted: true }> {
   const scope = normalizeScope({
     scope: { ...inputScope, coBook: book ?? inputScope.coBook },
@@ -475,6 +521,16 @@ export async function deleteTagAdjust(
   });
   const vchNo = formatVoucherNo(vchNoInput);
   return withTxBudget(prisma, scope.tenantId, 'voucher', async (tx: any) => {
+    // Lock the header first (as saveTagAdjust does) so an overlapping edit commits before the check and
+    // this delete then sees the newer version; without it a stale delete could remove the edit's new rows.
+    await assertSavedVoucherTx(tx, 'BAR_CAN_DATA', scope, vchNo);
+    // The stale-save check every edit route makes, before any row is removed.
+    await assertVoucherVersionTx(
+      tx,
+      TAG_ADJUST_WRITE_TABLES,
+      versionKeyOf(scope, vchNo),
+      requiredVersion(expectedVersion),
+    );
     await deleteRegisterTx(tx, scope, vchNo);
     return { deleted: true };
   });

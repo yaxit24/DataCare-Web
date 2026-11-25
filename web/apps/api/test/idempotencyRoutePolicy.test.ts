@@ -53,6 +53,10 @@ const GUARDED: Record<string, { page: string; sends: RegExp }> = {
     page: 'app/(app)/txn/order-cancel/page.tsx',
     sends: /postCommand<[^>]*>\(\s*'\/order-cancel',\s*body,\s*command\.key\s*\)/,
   },
+  'POST /stock/tag-opening': {
+    page: 'app/(app)/txn/tag-opening/page.tsx',
+    sends: /postCommand<[^>]*>\(\s*'\/stock\/tag-opening',\s*body,\s*command\.key\s*\)/,
+  },
 };
 
 /** WP-04 follow-ups, in the plan's order first (Contra, Sales, Sales Order, ... Tag Cancel), then the rest. */
@@ -126,7 +130,6 @@ const NOT_YET_GUARDED = [
   'POST /stock/physical-stock',
   'POST /stock/stone-dm-cf',
   'POST /stock/tag-adjust',
-  'POST /stock/tag-opening',
   'POST /stock/tag-split',
   'POST /stock/tag-transfer',
   'POST /stock/tag-weight-diff',

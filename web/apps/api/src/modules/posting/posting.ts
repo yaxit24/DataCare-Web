@@ -55,6 +55,36 @@ export function assertBalanced(lines: LedgerLine[]): void {
 }
 
 /**
+ * The ONE documented one-sided ledger entry: an order's rate-cut leg (`Ac_Ledr.cs:53`, sales/salesOrderRateCutPosting.ts).
+ *
+ * Order_Ledr debits the party with the order's tenders against the literal '00008' under key 11 and writes no
+ * counter-leg, so the desktop's order voucher does not balance. The web copies it exactly (owner's rule), so the
+ * balance check must leave out this leg and no other. A leg is exempt only when it carries the marker AND has exactly
+ * this shape; a marked leg of any other shape is refused rather than silently exempted.
+ */
+export const ORDER_RATE_CUT_ONE_SIDED = 'desktopOneSidedOrderRateCut';
+export const ORDER_RATE_CUT_LEG_TYPE = 11;
+export const ORDER_RATE_CUT_LD_CODE = '00008';
+
+function isOrderRateCutOneSidedLeg(line: LedgerLine): boolean {
+  if (line[ORDER_RATE_CUT_ONE_SIDED] !== true) return false;
+  const shaped =
+    line.legType === ORDER_RATE_CUT_LEG_TYPE &&
+    line.LD_CODE === ORDER_RATE_CUT_LD_CODE &&
+    Number(line.CR_AMT ?? 0) === 0 &&
+    line.IT_TYPE === 'G' &&
+    line.SIGN === '+' &&
+    (line.BOOK_NAME === 'SALES ORDER' || line.BOOK_NAME === 'TOUR ORDER');
+  if (!shaped) throw new Error('A one-sided ledger leg must be the order rate-cut leg (key 11)');
+  return true;
+}
+
+/** The voucher's balance check: every leg except the documented order rate-cut leg. */
+export function assertVoucherBalanced(lines: LedgerLine[]): void {
+  assertBalanced(lines.filter((line) => !isOrderRateCutOneSidedLeg(line)));
+}
+
+/**
  * Columns the desktop never leaves NULL, with the default it writes — derived from the real database by
  * `apps/api/integration/derive-column-defaults.mjs` and consumed here.
  *
@@ -503,7 +533,7 @@ export const PROVENANCE_COLUMN_NAMES = PROVENANCE_COLUMNS;
 
 /** Post a voucher's writes within an EXISTING transaction (used by sales/purchase composition). */
 export async function postVoucherTx(tx: any, tenantId: string, input: PostInput): Promise<void> {
-  assertBalanced(input.ledger.lines);
+  assertVoucherBalanced(input.ledger.lines);
   await assertPeriodOpen(tx, tenantId, input);
   for (const w of input.writes ?? []) {
     const stampDt = await tableHasDataType(tx, w.table); // desktop parity: DATA_TYPE='A' on all data rows
@@ -590,6 +620,7 @@ export async function postVoucherTx(tx: any, tenantId: string, input: PostInput)
       legType: _legType,
       legLine: _legLine,
       legKeySuffix: _legKeySuffix,
+      [ORDER_RATE_CUT_ONE_SIDED]: _oneSided,
       ...columns
     } = line as Record<string, unknown>;
     const row =

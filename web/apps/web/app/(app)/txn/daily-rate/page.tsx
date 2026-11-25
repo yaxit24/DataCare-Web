@@ -3,6 +3,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { formatDesktopDate, recalcDailyRateGrid } from '@datacare/core';
 import { get, post, del, ApiError } from '../../../../lib/api';
 import { RateTicker } from '../../../../components/RateTicker';
+import { DAILY_RATE_CHANGED } from '../../../../components/DailyRateLabels';
 import { LookupPicker } from '../../../../components/LookupPicker';
 import { todayLocal } from '../../../../lib/localDate';
 
@@ -64,6 +65,9 @@ export default function DailyRatePage() {
   const [busy, setBusy] = useState(false);
   // The day the screen shows; a load for an earlier date that answers late is dropped.
   const shown = useRef('');
+  // CLEAR_DATA puts the date back to today without reading it: the day is read when the cursor leaves the date.
+  const skipLoad = useRef<string | null>(null);
+  const dateInput = useRef<HTMLInputElement>(null);
 
   const load = useCallback(async (d: string) => {
     shown.current = d;
@@ -96,8 +100,34 @@ export default function DailyRatePage() {
     }
   }, []);
   useEffect(() => {
+    if (skipLoad.current === date) {
+      skipLoad.current = null;
+      return;
+    }
+    skipLoad.current = null;
     void load(date);
   }, [date, load]);
+
+  /**
+   * MS_RATE.cs:2007-2016: after "Data Are Saved." the desktop runs CLEAR_DATA (:1728-1749): every text box blank
+   * (rates, employee), the grid cleared (MSG_CLEAR), Vch Date back to the system date, the old rates zero, a new
+   * entry, and the cursor in Vch Date. (It closes the form instead when MsDailyRateGen is set; the web has no such
+   * setting, because that flag is only raised by the desktop's company-opening wizard, MS_OPNCOMP.cs:1377.)
+   */
+  function clearData() {
+    shown.current = '';
+    const today = todayLocal();
+    skipLoad.current = today === date ? null : today;
+    setHeader(blankHeader);
+    setLoaded({ goldRate: 0, silverRate: 0, prGoldRate: 0, prSilverRate: 0 });
+    setEmpCode('');
+    setEmpName('');
+    setRows([]);
+    setExists(false);
+    setDays(null);
+    setDate(today);
+    dateInput.current?.focus();
+  }
 
   const setCell = (i: number, key: keyof Row, value: string) =>
     setRows((rs) => rs.map((r, j) => (j === i ? { ...r, [key]: n(value) } : r)));
@@ -126,7 +156,7 @@ export default function DailyRatePage() {
     setMsg(null);
     setBusy(true);
     try {
-      const saved = await post<{ date: string; saved: number }>('/daily-rate', {
+      await post<{ date: string; saved: number }>('/daily-rate', {
         date,
         goldRate: n(header.goldRate),
         silverRate: n(header.silverRate),
@@ -148,11 +178,10 @@ export default function DailyRatePage() {
           prRate: r.prRate,
         })),
       });
-      setMsg({
-        kind: 'ok',
-        text: `Saved ${saved.saved} group rate(s) for ${formatDesktopDate(saved.date)}`,
-      });
-      await load(date);
+      // MS_RATE.cs:2007: the desktop's own text, character for character.
+      setMsg({ kind: 'ok', text: 'Data Are Saved.' });
+      window.dispatchEvent(new Event(DAILY_RATE_CHANGED));
+      clearData();
     } catch (err) {
       setMsg({ kind: 'err', text: errText(err, 'failed') });
     } finally {
@@ -167,6 +196,7 @@ export default function DailyRatePage() {
     try {
       await del(`/daily-rate?date=${encodeURIComponent(date)}`);
       setMsg({ kind: 'ok', text: 'Deleted.' });
+      window.dispatchEvent(new Event(DAILY_RATE_CHANGED));
       await load(date);
     } catch (err) {
       setMsg({ kind: 'err', text: errText(err, 'delete failed') });
@@ -212,9 +242,13 @@ export default function DailyRatePage() {
             <label htmlFor="daily-rate-date">Vch Date</label>
             <input
               id="daily-rate-date"
+              ref={dateInput}
               type="date"
               value={date}
               onChange={(e) => setDate(e.target.value)}
+              onBlur={() => {
+                if (!rows.length && !busy) void load(date);
+              }}
               onKeyDown={(e) => {
                 if (e.key === 'F1') {
                   e.preventDefault();
