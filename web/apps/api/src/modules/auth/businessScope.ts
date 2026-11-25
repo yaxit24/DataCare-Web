@@ -221,6 +221,7 @@ export async function listScopeLocations(
   );
 }
 
+// MS_OPNCOMP.cs:487 lists YEAR_MAST ORDER BY CO_YEAR DESC (newest first).
 export async function listScopeYears(
   prisma: any,
   input: { tenantId: string; coCode: string },
@@ -230,7 +231,7 @@ export async function listScopeYears(
       `SELECT DISTINCT COALESCE(NULLIF(TRIM("CO_YEAR"),''),LEFT("OP_DATE",4)) AS year
          FROM "YEAR_MAST" WHERE "CO_CODE"=$1
           AND COALESCE(NULLIF(TRIM("CO_YEAR"),''),LEFT("OP_DATE",4)) IS NOT NULL
-        ORDER BY 1`,
+        ORDER BY 1 DESC`,
       input.coCode,
     ),
   );

@@ -1,6 +1,6 @@
 'use client';
 import { toIsoDate } from '@datacare/core';
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { postCommand, put, get, del, ApiError } from '../../../../lib/api';
 import { useIdempotencyKey } from '../../../../lib/idempotencyKey';
 import { useBusinessScope } from '../../../../components/BusinessScope';
@@ -46,6 +46,7 @@ export default function FineJvPage() {
   const [notice, setNotice] = useState('');
   const [err, setErr] = useState('');
   const [busy, setBusy] = useState(false);
+  const [version, setVersion] = useState('');
   const [loadedVch, setLoadedVch] = useState('');
   const [voucherLookup, setVoucherLookup] = useState('');
   const command = useIdempotencyKey();
@@ -67,6 +68,7 @@ export default function FineJvPage() {
 
   function resetForm() {
     setLoadedVch('');
+    setVersion('');
     setVoucherLookup('');
     setRows([blankRow('DR'), blankRow('CR')]);
     setVchDate(todayLocal());
@@ -87,6 +89,7 @@ export default function FineJvPage() {
       );
       const no = String(d.voucherNo ?? vchNo);
       setLoadedVch(no);
+      setVersion(d.version);
       setVoucherLookup(no);
       setRows(
         (d.lines ?? []).map((l: any) => ({
@@ -110,6 +113,24 @@ export default function FineJvPage() {
     }
   }
 
+  // RP_LEDR.cs:10624-10644: the clicked ledger row's own CO_BOOK is installed as the voucher's book. The Ledger
+  // Report opens a FINE JV row here with ?vch=<no>&book=<code>; select that book (BookSelect keeps it only if it is an
+  // active FINE JV book) and then load the voucher.
+  useEffect(() => {
+    const book = new URLSearchParams(window.location.search).get('book')?.trim();
+    if (book && /^[A-Za-z0-9]{1,3}$/.test(book)) setCoBook(book);
+  }, []);
+  const drilled = useRef(false);
+  useEffect(() => {
+    if (drilled.current || !coBook) return;
+    const params = new URLSearchParams(window.location.search);
+    const vch = params.get('vch');
+    if (!vch || (params.get('book') && params.get('book') !== coBook)) return;
+    drilled.current = true;
+    void loadFineJv(vch);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [coBook]);
+
   // N172 (G179): the voucher number box's F1, Up, Down and Enter (TR_CONTRA tVchNo_KeyDown).
   const numberKeys = useVoucherNumberKeys({
     table: 'CONTRA_DATA',
@@ -127,6 +148,7 @@ export default function FineJvPage() {
     setBusy(true);
     try {
       const body = {
+        ...(loadedVch ? { expectedVersion: version } : {}),
         coBook,
         coYear,
         lcCode,
@@ -143,6 +165,7 @@ export default function FineJvPage() {
       const saved = loadedVch
         ? await put<{ vchNo: number }>(`/fine-jv/${encodeURIComponent(loadedVch)}`, body)
         : await postCommand<{ vchNo: number }>('/fine-jv', body, command.key);
+      if (loadedVch) await loadFineJv(loadedVch);
       setResult(saved);
       if (!loadedVch) {
         setRows([blankRow('DR'), blankRow('CR')]);
@@ -165,7 +188,9 @@ export default function FineJvPage() {
     setBusy(true);
     setErr('');
     try {
-      await del(`/fine-jv/${encodeURIComponent(loadedVch)}?coBook=${encodeURIComponent(coBook)}`);
+      await del(
+        `/fine-jv/${encodeURIComponent(loadedVch)}?coBook=${encodeURIComponent(coBook)}&expectedVersion=${encodeURIComponent(version)}`,
+      );
       resetForm();
       setNotice('Delete Success.');
     } catch (e) {
