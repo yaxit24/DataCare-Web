@@ -286,11 +286,18 @@ export const filterCases = [
       showing(ctx, { ...WINDOW, hm: 'Without HuId' }, 'In Tag', [
         'TG-002',
         'TG-003',
+        'TG-004',
         'TG-010',
         'TG-012',
         'TG-013',
         'TG-015',
       ]),
+  ),
+  C(
+    'huid-report.hallmark.whitespace-only-first-slot',
+    'T02',
+    `RP_HUID.cs:1768 {{DC_Main.RsQry += "AND C.HM_ID = '' ";}} (SQL Server ignores trailing spaces, so three spaces equal '')`,
+    (ctx) => showing(ctx, { ...WINDOW, hm: 'With HuId' }, 'In Tag', ['TG-001', 'TG-005', 'TG-006']),
   ),
   C(
     'huid-report.filter.tag-no-exact',

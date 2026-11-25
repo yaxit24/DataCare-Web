@@ -83,7 +83,7 @@ export type HuidHallmark = 'all' | 'with' | 'without';
 export interface HuidFilters {
   fromDate: string;
   toDate: string;
-  itemType: 'G' | 'S';
+  itemType: string;
   product: string;
   group: string;
   tagNo: string;

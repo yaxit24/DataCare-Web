@@ -72,11 +72,6 @@ const blockedCases = [
     'blocked: the source of `DC_Main.MsMetalType` (the company setting that holds the metal type) is not traced in the study. It unblocks when the settings catalogue entry for the metal type is read.',
   ),
   notRun(
-    'huid-report.hallmark.whitespace-only-first-slot',
-    'T02',
-    "blocked: the desktop runs on SQL Server (`unified/src/csharp/DataCareNext/DC_Main.cs:37 {{public static SqlConnection Mc = new SqlConnection();}}`). In SQL Server, `'   ' = ''` is true, so `RP_HUID.cs:1768 {{DC_Main.RsQry += \"AND C.HM_ID = '' \";}}` would put TG-004 under \"Without\". The study's Gap 11 says the desktop counts it as present; that is not verified and may be wrong. The supervisor's rule and the desktop engine disagree. Unblocks when the owner confirms the rule (and, if needed, a SQL Server check of `'   ' = ''` on the desktop schema). The web currently treats TG-004 as absent (`web/apps/api/src/modules/reports/huid.ts:129-132`).",
-  ),
-  notRun(
     'huid-report.total.weights-rounding-to-precision',
     'T03',
     "blocked: the stored precision of the weight columns is not known (study Open question 9). The web rounds each weight to `PRECISION.weight` (`web/apps/api/src/modules/reports/huid.ts:82`, `:177`). It unblocks when the weight column's scale is read from the schema, and the owner accepts the result.",

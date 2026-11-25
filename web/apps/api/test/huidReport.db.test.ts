@@ -234,6 +234,7 @@ const ORIGINS: Origin[] = [
     expect(await tags({ ...IN, hallmark: 'without' })).toEqual([
       'TG-002',
       'TG-003',
+      'TG-004',
       'TG-010',
       'TG-012',
       'TG-013',
@@ -250,6 +251,35 @@ const ORIGINS: Origin[] = [
     expect(await tags({ ...IN, hallmark: 'without' })).toEqual(
       expect.arrayContaining(['TG-003', 'TG-010', 'TG-013']),
     );
+  });
+
+  // RP_HUID.cs:1768 + SQL Server trailing-space equality: TG-004 (three spaces) is Without, never With.
+  it('huid-report.hallmark.whitespace-only-first-slot', async () => {
+    expect(await tags({ ...IN, hallmark: 'without' })).toContain('TG-004');
+    expect(await tags({ ...IN, hallmark: 'with' })).not.toContain('TG-004');
+  });
+
+  // RP_HUID.cs:1555-1561 lists seven Item Types; :1778 filters on the first letter.
+  it('huid-report.filter.item-type-diamond', async () => {
+    const o = O('TG-D01', 'DIAMD', '04-11', '04-11', 31, 'C1', 1, 1, 1, 'V1');
+    await insert(T, 'ITEM_MAST', {
+      CO_CODE: '01',
+      IT_CODE: 'DIAMD',
+      IT_TYPE: 'D',
+      PR_CODE: 'RG',
+      GR_CODE: 'PLN',
+    });
+    await insert(T, 'BAR_DETL', barRow(o));
+    await insert(T, 'MAIN_STOCK', movement(o, '+', o.d, o.ac, 'PUR'));
+    try {
+      expect(await tags({ ...IN, itemType: 'D' })).toEqual(['TG-D01']);
+      expect(await tags({ ...IN, itemType: 'G' })).not.toContain('TG-D01');
+      expect((await run({ ...IN, itemType: 'X' })).statusCode).toBe(400);
+    } finally {
+      await exec(`DELETE FROM "MAIN_STOCK" WHERE tenant_id=$1 AND "TAG_NO"='TG-D01'`, T);
+      await exec(`DELETE FROM "BAR_DETL" WHERE tenant_id=$1 AND "TAG_NO"='TG-D01'`, T);
+      await exec(`DELETE FROM "ITEM_MAST" WHERE tenant_id=$1 AND "IT_CODE"='DIAMD'`, T);
+    }
   });
 
   // RP_HUID.cs:1784 {{DC_Main.RsQry = DC_Main.RsQry + "AND C.TAG_NO =  '" + tTagNo.Text + "'";}}: exact in In and Stock; no sale row for TG-001.

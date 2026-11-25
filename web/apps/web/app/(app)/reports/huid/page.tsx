@@ -204,12 +204,15 @@ export default function HuidReportPage() {
               <select
                 id="huid-item-type"
                 value={filters.itemType}
-                onChange={(event) =>
-                  setFilters({ itemType: event.target.value === 'S' ? 'S' : 'G' })
-                }
+                onChange={(event) => setFilters({ itemType: event.target.value })}
               >
                 <option value="G">Gold</option>
                 <option value="S">Silver</option>
+                <option value="D">Diamond</option>
+                <option value="R">Real Stone</option>
+                <option value="E">Emitation</option>
+                <option value="O">Other</option>
+                <option value="P">Platinum</option>
               </select>
             </div>
             <div className="field">

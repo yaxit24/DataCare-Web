@@ -54,7 +54,7 @@ export interface HuidTagQuery {
   /** ISO `YYYY-MM-DD`; required by every view (the desktop formats `mToDt.Text` into each query). */
   to: string;
   /** First letter of the desktop Item Type box (`B.IT_TYPE`, RP_HUID.cs:1778). */
-  itemType?: 'G' | 'S';
+  itemType?: 'G' | 'S' | 'D' | 'R' | 'E' | 'O' | 'P';
   /** `B.PR_CODE` (RP_HUID.cs:1772). */
   product?: string;
   /** `B.GR_CODE` (RP_HUID.cs:1815). */
@@ -223,9 +223,11 @@ export function parseHuidTagQuery(query: Record<string, unknown>): HuidTagQuery 
   const itemType = String(query.itemType ?? '')
     .trim()
     .toUpperCase();
-  if (itemType && itemType !== 'G' && itemType !== 'S')
-    throw new HuidTagReportValidationError('itemType must be G or S');
-  if (itemType) q.itemType = itemType as 'G' | 'S';
+  // The seven desktop Item Types (RP_HUID.cs:1555-1561): the first letter of Gold, Silver, Diamond, Real Stone,
+  // Emitation, Other and Platinum.
+  if (itemType && !['G', 'S', 'D', 'R', 'E', 'O', 'P'].includes(itemType))
+    throw new HuidTagReportValidationError('itemType must be one of G, S, D, R, E, O or P');
+  if (itemType) q.itemType = itemType as NonNullable<HuidTagQuery['itemType']>;
   const hallmark = String(query.hallmark ?? '')
     .trim()
     .toLowerCase();
@@ -272,14 +274,11 @@ function commonConditions({ scope, q }: BuildInput, p: Params, alias: 'c' | 'a')
     `${alias}."CO_YEAR"::text=${p.push(scope.coYear)}`,
     `${alias}."TAG_NO"::text <> 'N'`,
   ];
-  // With/Without test the FIRST slot only (RP_HUID.cs:1764 `AND C.HM_ID <> ''`, :1768 `AND C.HM_ID = ''`).
-  // A whitespace-only slot is in NEITHER mode on the web (pinned by the two hallmark cases: the desktop's
-  // `<> ''`/`= ''` pair is a SQL Server trailing-space comparison, which PostgreSQL does not reproduce with
-  // one rule — `btrim` makes 'with' exclude it, a plain `= ''` makes 'without' exclude it). The disputed
-  // classification is the blocked case `huid-report.hallmark.whitespace-only-first-slot`.
+  // With/Without test the FIRST slot only (RP_HUID.cs:1764 `AND C.HM_ID <> ''`, :1768 `AND C.HM_ID = ''`). SQL Server
+  // ignores trailing spaces in `=`/`<>`, so a whitespace-only first slot equals '' and counts as Without.
   const firstSlot = `${alias === 'a' ? 'c' : alias}."HM_ID"`;
   if (q.hallmark === 'with') filters.push(`btrim(coalesce(${firstSlot},'')) <> ''`);
-  if (q.hallmark === 'without') filters.push(`coalesce(${firstSlot},'') = ''`);
+  if (q.hallmark === 'without') filters.push(`btrim(coalesce(${firstSlot},'')) = ''`);
   if (q.tagNo) filters.push(`${alias}."TAG_NO"::text=${p.push(q.tagNo)}`);
   return filters;
 }
