@@ -522,8 +522,7 @@ async function writeTagOpeningTx(
       ) !== index,
   );
   if (duplicate) throw new StockVoucherValidationError(DESKTOP_MESSAGES.TAG_DUPLICATE);
-  // The lot header's karigar fill runs before the block is worked out (TR_TAG_OPBL.cs:10990-10996).
-  const lines = withLotKarigarFill(input);
+  const lines = input.lines;
   // Only Tag Entry makes tags out of a loose stock item, so the item is required (TR_TAG_OPBL.cs:10813-10818); the
   // opening books (OPSTK) hide the field and draw on no stock (CLEAR_DATA, :10303-10310).
   const tagGen = policy.mainBook === TAG_GEN;
@@ -535,7 +534,11 @@ async function writeTagOpeningTx(
   const fineOf = (line: TagOpeningLine): number =>
     line.fineWt != null ? n(line.fineWt) : fineFor('tagOpening', line);
   // The karigar weight block as BtnSave_Click writes it (TR_TAG_OPBL.cs:10975-11022, N204).
-  const karigar = lines.map((line) => tagKarigarLineColumns(line, fineOf(line)));
+  // The lot header's karigar fill runs before the block is worked out (TR_TAG_OPBL.cs:10990-10996); it
+  // changes only karigar values, one filled line per input line.
+  const karigar = withLotKarigarFill(input).map((line) =>
+    tagKarigarLineColumns(line, fineOf(line)),
+  );
   const details = lines.map((line, index) => ({
     ...key,
     SR_NO: index + 1,
