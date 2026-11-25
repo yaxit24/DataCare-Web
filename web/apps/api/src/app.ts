@@ -101,6 +101,7 @@ import {
 import { reportFormForSlug } from './modules/reports/reportAuthorization.js';
 import { finePrintRefusalText } from './modules/reports/ledgerFinePrints.js';
 import { tagOpeningRefusalText } from './modules/stock/tagOpeningPrint.js';
+import { loginRateLimitKey } from './modules/auth/loginRateLimitKey.js';
 
 export interface BuildOpts {
   prisma: any;
@@ -116,6 +117,8 @@ export interface BuildOpts {
   defaultTenantId?: string;
   /** Enable only when x-tenant-id is supplied by a trusted gateway (enabled by default in tests). */
   allowTenantHeader?: boolean;
+  /** Proxy addresses allowed to supply the real client IP. Defaults to the local Next server. */
+  trustProxy?: string | string[];
 }
 
 interface Session extends SessionClaims {
@@ -141,6 +144,7 @@ export async function buildApp(opts: BuildOpts): Promise<FastifyInstance> {
   const metrics = new MetricsRegistry();
   const app = Fastify({
     logger: opts.logger ?? false,
+    trustProxy: opts.trustProxy ?? '127.0.0.1',
     disableRequestLogging: true,
     genReqId: (rawRequest) => correlationId(rawRequest.headers['x-request-id']),
   });
@@ -162,7 +166,7 @@ export async function buildApp(opts: BuildOpts): Promise<FastifyInstance> {
   const accessCookie = { ...cookieBase, maxAge: ACCESS_COOKIE_SECONDS };
   const refreshCookie = { ...cookieBase, maxAge: REFRESH_COOKIE_SECONDS };
   await app.register(cookie);
-  await app.register(rateLimit, { global: false });
+  await app.register(rateLimit, { global: false, hook: 'preHandler' });
 
   app.addHook('onRequest', async (req: FastifyRequest, reply: FastifyReply) => {
     (req as RequestState).requestStartedAt = process.hrtime.bigint();
@@ -568,7 +572,16 @@ export async function buildApp(opts: BuildOpts): Promise<FastifyInstance> {
 
   app.post(
     '/auth/login',
-    { config: { rateLimit: { max: 10, timeWindow: '1 minute' } } },
+    {
+      // A shared Redis store is deferred to the operations phase (WP-52).
+      config: {
+        rateLimit: {
+          max: 10,
+          timeWindow: '1 minute',
+          keyGenerator: (req: FastifyRequest) => loginRateLimitKey(req, tenantOf(req)),
+        },
+      },
+    },
     async (req: FastifyRequest, reply: FastifyReply) => {
       const b = (req.body ?? {}) as Record<string, string | undefined>;
       const tenantId = tenantOf(req);

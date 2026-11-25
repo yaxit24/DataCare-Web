@@ -93,6 +93,7 @@ async function main() {
     defaultTenantId: config.tenantId,
     allowTenantHeader: !config.isProduction,
     edition: config.edition,
+    trustProxy: process.env.TRUST_PROXY?.trim() || undefined,
   });
   // One catalog query now, so no posting or numbering transaction queries information_schema (N53). If the
   // database is not reachable yet, start anyway as before: the first posting then loads the catalog once.
