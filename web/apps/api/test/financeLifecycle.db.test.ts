@@ -198,9 +198,19 @@ const engines: Engine[] = [
     }),
     create: postFineJv,
     get: getFineJv,
-    edit: editFineJv,
-    remove: (prisma, scope, vchNo) =>
-      deleteFineJv(prisma, { scope, vchNo, deleteUser: 'delete-user' }),
+    edit: async (prisma, input, vchNo) => {
+      const opened = await getFineJv(prisma, input.scope, vchNo);
+      return editFineJv(prisma, { ...input, expectedVersion: opened.version }, vchNo);
+    },
+    remove: async (prisma, scope, vchNo) => {
+      const opened = await getFineJv(prisma, scope, vchNo);
+      return deleteFineJv(prisma, {
+        scope,
+        vchNo,
+        deleteUser: 'delete-user',
+        expectedVersion: opened.version,
+      });
+    },
     initialGet: {
       metal: 'G',
       lines: [

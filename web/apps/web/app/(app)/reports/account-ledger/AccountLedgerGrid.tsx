@@ -1,5 +1,6 @@
 'use client';
 import { formatDesktopDate } from '@datacare/core';
+import { useRouter } from 'next/navigation';
 import type { AccountLedgerResult, AgeingRow, DetailRow, SummaryRow } from './types';
 
 /** en-IN money (2dp) and weight (3dp) formatting; blank for zero so the grid reads like the desktop. */
@@ -98,7 +99,16 @@ function SummaryGrid({
 }
 
 function DetailGrid({ result }: { result: AccountLedgerResult }) {
+  const router = useRouter();
   const rows = result.rows as DetailRow[];
+  // RP_LEDR.cs:10624-10790 (DGV_VCH_DoubleClick): a ledger row opens its voucher's own form. Only the FINE JV branch
+  // (TR_CONTRA) is wired so far; other books keep their present behaviour (no drill-down).
+  const openVoucher = (r: DetailRow) => {
+    if (r.bookName === 'FINE JV' && r.vchNo && r.book)
+      router.push(
+        `/txn/fine-jv?vch=${encodeURIComponent(r.vchNo)}&book=${encodeURIComponent(r.book)}`,
+      );
+  };
   const tot = result.totals;
   return (
     <table className="grid">
@@ -124,7 +134,7 @@ function DetailGrid({ result }: { result: AccountLedgerResult }) {
       </thead>
       <tbody>
         {rows.map((r) => (
-          <tr key={r.srNo}>
+          <tr key={r.srNo} onDoubleClick={() => openVoucher(r)}>
             <td>{r.srNo}</td>
             <td>{r.bookName ?? r.book ?? ''}</td>
             <td>{r.vchNo ?? ''}</td>
