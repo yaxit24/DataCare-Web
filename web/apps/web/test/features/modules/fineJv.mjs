@@ -1,4 +1,5 @@
 import assert from 'node:assert/strict';
+import { rollbackMatrix, tenantFingerprint, changedTables, withWriteFault } from '../faults.mjs';
 import { FIXTURE_MANIFEST, PARTIES, USERS, sentinelSnapshot } from '../fixtures/catalogue.mjs';
 
 /**
@@ -51,10 +52,6 @@ const C = (id, group, kind, source, run, extra = {}) => ({
           : ['browser', 'expected'],
   run,
   ...extra,
-});
-const blocked = (name, group, reason) => ({
-  ...C(`${name}.pending`, group, 'read-only', `Playbook ${group}`, async () => ({})),
-  blocked: reason,
 });
 const notApplicable = (name, group, source, reason) => ({
   ...C(`${name}.not-applicable`, group, 'read-only', source, async () => ({})),
@@ -265,10 +262,30 @@ const plainLedger = (rows) =>
     }) => row,
   );
 
-function assertLedgerIdentity(rows, vchNo) {
+/**
+ * TR_CONTRA.cs:2802/:2870 stamp every row with tHdVchNo, the hidden TEMP_BOOK_DATA number (its own sequence, not the
+ * visible voucher number); :2430 reloads it. One non-empty value must be shared by source rows, ledger rows and
+ * the TEMP_BOOK_DATA identity row.
+ */
+async function assertHiddenNumber(ctx, source, ledger, message) {
+  const hidden = source[0]?.hidden;
+  assert(hidden, `${message}: source rows have a hidden number`);
+  assert(
+    [...source, ...ledger].every((row) => row.hidden === hidden),
+    message,
+  );
+  const [identity] = await ctx.rows(
+    `SELECT count(*)::int n FROM "TEMP_BOOK_DATA" WHERE tenant_id=$1 AND "CO_BOOK"='${BOOK}' AND "VCH_NO"=$2`,
+    hidden,
+  );
+  assert.equal(identity.n, 1, `${message}: one TEMP_BOOK_DATA identity row`);
+  return hidden;
+}
+
+function assertLedgerIdentity(rows, vchNo, hidden) {
   assert.deepEqual(
     rows.map((row) => [row.len, row.book, row.hidden, row.mainuser]),
-    rows.map(() => [33, 'FINE JV', vchNo, USERS.admin.user]),
+    rows.map(() => [33, 'FINE JV', hidden, USERS.admin.user]),
   );
   rows.forEach((row) =>
     assert(
@@ -295,6 +312,8 @@ export const fineJv = {
   title: 'ExtraTran → Fine Jv Entry (TR_CONTRA, FINE JV)',
   defaultUser: as(USERS.admin.user),
   inputs: [
+    'web/apps/web/test/features/faults.mjs',
+    'web/apps/api/src/modules/vouchers/version.ts',
     'web/apps/web/app/(app)/txn/fine-jv/page.tsx',
     'web/apps/api/src/modules/finance/fineJv.ts',
     'web/apps/api/src/modules/finance/contraVoucher.ts',
@@ -390,7 +409,7 @@ export const fineJv = {
         const response = await save(page);
         assert.equal(response.status(), 400, await response.text());
         const message = 'You Cant Save This Voucher Becouse Cr Value and Dr Value is not same....';
-        await page.getByRole('alert').filter({ hasText: message }).waitFor();
+        await page.locator('.msg[role="alert"]').filter({ hasText: message }).waitFor();
         const after = await countRows(ctx);
         assert.deepEqual(after, before);
         return {
@@ -439,7 +458,7 @@ export const fineJv = {
         assert.equal(response.status(), 400, await response.text());
         const message =
           'You Cant Save Entry Because Voucher Date Not In Current Year... Please Change Date...';
-        await page.getByRole('alert').filter({ hasText: message }).waitFor();
+        await page.locator('.msg[role="alert"]').filter({ hasText: message }).waitFor();
         const after = await countRows(ctx);
         assert.deepEqual(after, before);
         return {
@@ -479,8 +498,10 @@ export const fineJv = {
           expected,
           JSON.stringify(source),
         );
-        assert(
-          source.every((row) => row.hidden === vchNo),
+        const hidden = await assertHiddenNumber(
+          ctx,
+          source,
+          ledger,
           'source rows carry the hidden number',
         );
         const projection = expectedProjection({
@@ -490,7 +511,7 @@ export const fineJv = {
           metal: 'G',
         });
         assert.deepEqual(plainLedger(ledger), projection);
-        assertLedgerIdentity(ledger, vchNo);
+        assertLedgerIdentity(ledger, vchNo, hidden);
         assert.deepEqual(
           rojmel,
           projection.map((row) => ({ ...row, gross: 0 })),
@@ -540,7 +561,13 @@ export const fineJv = {
             [FROM.code, '-', 2],
           ],
         );
-        assertLedgerIdentity(ledger, vchNo);
+        const hidden = await assertHiddenNumber(
+          ctx,
+          source,
+          ledger,
+          'multi-account rows share the hidden number',
+        );
+        assertLedgerIdentity(ledger, vchNo, hidden);
         const remarks = await remarkRows(ctx, vchNo);
         assert.deepEqual(
           remarks.map((row) => [row.sr, row.remark]),
@@ -664,8 +691,10 @@ export const fineJv = {
           source.map(({ hidden: _hidden, ...row }) => row),
           expected,
         );
-        assert(
-          source.every((row) => row.hidden === vchNo),
+        const hidden = await assertHiddenNumber(
+          ctx,
+          source,
+          ledger,
           'edited rows keep the hidden number',
         );
         const projection = expectedProjection({
@@ -675,7 +704,7 @@ export const fineJv = {
           metal: 'S',
         });
         assert.deepEqual(plainLedger(ledger), projection);
-        assertLedgerIdentity(ledger, vchNo);
+        assertLedgerIdentity(ledger, vchNo, hidden);
         assert.deepEqual(
           rojmel,
           projection.map((row) => ({ ...row, gross: 0 })),
@@ -817,20 +846,170 @@ export const fineJv = {
         };
       },
     ),
-    blocked(
-      'concurrency',
+
+    C(
+      'concurrency.stale-second-save',
       'T12',
-      'Fine JV has no persisted version token or conditional update/delete yet, so two browser sessions cannot be asserted to reject a stale change.',
+      'refusal',
+      'WP-35 cases.md D2; TR_CONTRA.cs:2739 rewrites rows; D17 prevents hosted lost updates.',
+      async (ctx) => {
+        const { page: a } = await ctx.session();
+        const { page: b } = await ctx.session(as(USERS.admin.user, 'wp35-fine-second'));
+        const no = await create(a);
+        await load(a, no);
+        await openFineJv(b);
+        await load(b, no);
+        for (const n of [1, 2]) await label(a, `Fine row ${n}`).fill('11');
+        assert.equal((await save(a, 'PUT')).status(), 200);
+        const before = await tenantFingerprint(ctx);
+        for (const n of [1, 2]) await label(b, `Fine row ${n}`).fill('10');
+        const refused = await save(b, 'PUT');
+        assert.equal(refused.status(), 409);
+        assert.equal((await refused.json()).error, 'voucher-version-conflict');
+        await b
+          .locator('.msg[role="alert"]')
+          .filter({
+            hasText:
+              'This voucher was changed by someone else after you opened it. Reload it before saving or deleting.',
+          })
+          .waitFor();
+        assert.equal(await label(b, 'Fine row 2').inputValue(), '10.000');
+        assert.deepEqual(await tenantFingerprint(ctx), before);
+        const rows = await sourceRows(ctx, no);
+        assert.equal(rows.find((r) => r.ac === FROM.code).drfine, 11);
+        // A stale delete must also preserve the first operator's save.
+        const [deleted] = await Promise.all([
+          b.waitForResponse((r) => isApi(r, 'DELETE', `/fine-jv/${no}`)),
+          b.locator('form').getByRole('button', { name: 'Delete', exact: true }).click(),
+        ]);
+        assert.equal(deleted.status(), 409);
+        assert.deepEqual(await tenantFingerprint(ctx), before);
+        await openFineJv(b);
+        await load(b, no);
+        assert.equal(await label(b, 'Fine row 2').inputValue(), '11.000');
+        return {
+          observation: 'Stale save and delete refused; operator grid retained until reload.',
+          expected: { status: 409, fine: 11 },
+          database: rows,
+        };
+      },
     ),
-    blocked(
-      'retry',
+    C(
+      'retry.idempotent-replay',
       'T13',
-      'Fine JV POST has no idempotency-key contract yet, so a lost acknowledgement/double-submit case remains blocked rather than assumed safe.',
+      'read-only',
+      'WP-35 cases.md D1; TR_CONTRA.cs:2723; hosted replay safety D18.',
+      async () => ({}),
+      { blocked: 'WP-04 batch B (agent/wp04-idem-lite) must merge first' },
     ),
-    blocked(
-      'rollback',
+    ...['save', 'edit'].map((mode) =>
+      C(
+        `rollback.${mode}`,
+        'T14',
+        'refusal',
+        'WP-35 cases.md; TR_CONTRA.cs:2739, :2886-2890; hosted atomic write set.',
+        async (ctx) => {
+          const { page } = await ctx.session();
+          const before = await tenantFingerprint(ctx);
+          const no = await create(
+            page,
+            twoRows({ fromDesc: 'main note', toDesc: 'bill line note' }),
+          );
+          const tables = changedTables(before, await tenantFingerprint(ctx)).filter(
+            (t) => t !== 'api_command_receipt',
+          );
+          assert.deepEqual(
+            [...tables].sort(),
+            ['CONTRA_DATA', 'AC_DATA', 'ROJ_MEL_DATA', 'REMARK_DATA', 'TEMP_BOOK_DATA'].sort(),
+          );
+          // An edit must change the remark text too, or REMARK_DATA is rewritten to identical rows and a fingerprint
+          // does not show the table the writer touches (Ac_Tax.cs:686-694 rebuilds it on every save).
+          const reedit = async () => {
+            for (const n of [1, 2]) await label(page, `Fine row ${n}`).fill('11');
+            await label(page, 'It Desc row 1').fill('main note edited');
+            await label(page, 'It Desc row 2').fill('bill line note edited');
+          };
+          await openFineJv(page);
+          if (mode === 'edit') {
+            await load(page, no);
+            await reedit();
+          } else await fillGrid(page, twoRows({ fromDesc: 'main note', toDesc: 'bill line note' }));
+          const result = await rollbackMatrix(ctx, {
+            tables,
+            book: BOOK,
+            headerTable: 'CONTRA_DATA',
+            fixedVoucherNo: mode === 'edit',
+            voucherNoOf: async (r) => (mode === 'edit' ? no : String((await r.json()).vchNo)),
+            submit: async () => {
+              const response = await save(page, mode === 'edit' ? 'PUT' : 'POST');
+              if (response.status() >= 400) {
+                await page.locator('.msg[role="alert"]').waitFor();
+                if (mode === 'edit') {
+                  await openFineJv(page);
+                  await load(page, no);
+                  assert.equal(await label(page, 'Fine row 2').inputValue(), '12.346');
+                  await reedit();
+                }
+              }
+              return response;
+            },
+          });
+          return {
+            observation: JSON.stringify(result),
+            expected: 'Every fault rolls back the complete tenant',
+            database: result,
+          };
+        },
+      ),
+    ),
+    C(
+      'rollback.delete',
       'T14',
-      'The feature harness has no declared Fine JV mid-write transport or database fault injector (G173 / N166).',
+      'refusal',
+      'WP-35 cases.md; TR_CONTRA.cs:2961-2969 audit and reversal must be atomic.',
+      async (ctx) => {
+        const { page } = await ctx.session();
+        const no = await create(page, twoRows({ toDesc: 'bill line note' }));
+        await load(page, no);
+        const submit = async () =>
+          (
+            await Promise.all([
+              page.waitForResponse((r) => isApi(r, 'DELETE', `/fine-jv/${no}`)),
+              page.locator('form').getByRole('button', { name: 'Delete', exact: true }).click(),
+            ])
+          )[0];
+        const before = await tenantFingerprint(ctx);
+        await withWriteFault(ctx, 'CONTRA_DATA', 'DELETE', async () => {
+          assert.ok((await submit()).status() >= 400);
+          assert.deepEqual(await tenantFingerprint(ctx), before);
+          await page.locator('.msg[role="alert"]').waitFor();
+        });
+        await openFineJv(page);
+        await load(page, no);
+        const collapsed = page.getByRole('button', { name: '▸ Recent vouchers', exact: true });
+        if (await collapsed.count()) await collapsed.click();
+        const row = recentRow(page, no);
+        const [printed] = await Promise.all([
+          page.waitForEvent('popup'),
+          row.getByRole('link', { name: 'Print', exact: true }).click(),
+        ]);
+        await printed.waitForURL(new RegExp(`coBook=${BOOK}`));
+        await printed.waitForLoadState();
+        assert.match(await printed.content(), /bill line note/);
+        await printed.close();
+        assert.equal((await submit()).status(), 200);
+        await page.getByText('Delete Success.', { exact: true }).waitFor();
+        assert.deepEqual(await sourceRows(ctx, no), []);
+        assert.deepEqual(await ledgerRows(ctx, no), []);
+        assert.deepEqual(await remarkRows(ctx, no), []);
+        assert.deepEqual(await rojmelRows(ctx, no), []);
+        assert.equal((await deleteRows(ctx, no)).length, 2);
+        return {
+          observation: 'Fault preserves voucher and print; retry reverses once',
+          expected: 'Atomic delete',
+          database: { before, audit: await deleteRows(ctx, no) },
+        };
+      },
     ),
     C(
       'settings.lock-date',
@@ -972,10 +1151,131 @@ export const fineJv = {
         };
       },
     ),
-    blocked(
+
+    C(
       'downstream-report',
       'T18',
-      'The Rojmel projection is asserted in T05/T09, but the L6 Rojmel/ledger report filter-and-total browser cases have not been frozen for Fine JV yet.',
+      'mutation',
+      'WP-35 cases.md D8; TR_CONTRA.cs:2787-2788, :2886-2889; cell leave rounds to three decimals (:1689-1692).',
+      async (ctx) => {
+        const { page } = await ctx.session();
+        const no = await create(page, twoRows({ toDesc: 'bill line note' }));
+        const reports = [];
+        for (const party of [TO, FROM]) {
+          await page.goto('/reports/account-ledger');
+          await page.locator('#al-view').selectOption('detail');
+          await page.getByLabel('Account', { exact: true }).fill(party.code);
+          const [response] = await Promise.all([
+            page.waitForResponse(
+              (r) => new URL(r.url()).pathname === '/api/reports/account-ledger',
+            ),
+            page.getByRole('button', { name: 'Run', exact: true }).click(),
+          ]);
+          assert.equal(response.status(), 200);
+          const data = await response.json();
+          const entries = data.rows.filter((r) => r.vchNo === no && r.book === BOOK);
+          assert.equal(entries.length, 1);
+          assert.equal(entries[0].drGold, party === FROM ? 12.346 : 0);
+          assert.equal(entries[0].crGold, party === TO ? 12.346 : 0);
+          // The shared CI database holds other books' vouchers with the same number: pin the FINE JV row and
+          // wait for its rendered weight rather than reading the first match once.
+          const row = page
+            .locator('table.grid tbody tr')
+            .filter({ hasText: no })
+            .filter({ hasText: 'FINE JV' })
+            .filter({ hasText: '12.346' });
+          await row.first().waitFor();
+          assert.match(await row.first().innerText(), /12\.346/);
+          reports.push({ account: party.code, data });
+        }
+        const legs = await ledgerRows(ctx, no);
+        assert.deepEqual(
+          legs.map((r) => [r.ac, r.sign, r.fine]).sort(),
+          [
+            [FROM.code, '-', 12.346],
+            [TO.code, '+', 12.346],
+          ].sort(),
+        );
+        // The frozen drill-down assertion remains executable even if the report has not wired it yet.
+        await page
+          .locator('table.grid tbody tr')
+          .filter({ hasText: no })
+          .filter({ hasText: 'FINE JV' })
+          .first()
+          .dblclick();
+        await page.waitForURL(/\/txn\/fine-jv/);
+        await page.getByRole('button', { name: `Update #${no}`, exact: true }).waitFor();
+        assert.equal(await label(page, 'Fine row 2').inputValue(), '12.346');
+        return {
+          observation: 'Fine movement and voucher drill-down checked',
+          expected: { dr: 12.346, cr: 12.346 },
+          database: legs,
+          downstream: reports,
+        };
+      },
+    ),
+    C(
+      'drilldown.clicked-book',
+      'T18',
+      'read-only',
+      'RP_LEDR.cs:10624-10644 installs the clicked row CO_BOOK; :10788-10793 opens TR_CONTRA for a FINE JV row.',
+      async (ctx) => {
+        const { page } = await ctx.session();
+        const SECOND = 'FJ2';
+        const cleanBook = async () => {
+          for (const table of [
+            'CONTRA_DATA',
+            'AC_DATA',
+            'ROJ_MEL_DATA',
+            'REMARK_DATA',
+            'TEMP_BOOK_DATA',
+          ])
+            await ctx.owner.$executeRawUnsafe(
+              `DELETE FROM "${table}" WHERE tenant_id=$1 AND "CO_BOOK"=$2`,
+              ctx.tenantId,
+              SECOND,
+            );
+          await ctx.owner.$executeRawUnsafe(
+            `DELETE FROM "BOOK_DATA" WHERE tenant_id=$1 AND "CO_BOOK"=$2`,
+            ctx.tenantId,
+            SECOND,
+          );
+        };
+        await cleanBook();
+        try {
+          // A second active FINE JV book; BookSelect prefers FJV, so only the query string can select this one.
+          const columns = (
+            await ctx.rows(
+              `SELECT column_name c FROM information_schema.columns WHERE table_schema='public' AND table_name='BOOK_DATA' AND column_name<>'row_id' AND $1::text IS NOT NULL ORDER BY ordinal_position`,
+            )
+          ).map((r) => `"${r.c}"`);
+          await ctx.owner.$executeRawUnsafe(
+            `INSERT INTO "BOOK_DATA" (${columns.join(',')}) SELECT ${columns
+              .map((c) =>
+                c === '"CO_BOOK"' ? `'${SECOND}'` : c === '"BOOK_NAME"' ? `'Fine JV Two'` : c,
+              )
+              .join(',')} FROM "BOOK_DATA" WHERE tenant_id=$1 AND "CO_BOOK"='${BOOK}' LIMIT 1`,
+            ctx.tenantId,
+          );
+          await openFineJv(page);
+          const book = page.getByRole('combobox', { name: 'Configured book', exact: true });
+          await book.selectOption(SECOND);
+          await fillGrid(page, twoRows({ fine: '4.5' }));
+          const response = await save(page);
+          assert.equal(response.status(), 201, await response.text());
+          const no = String((await response.json()).vchNo).padStart(5, '0');
+          await page.goto(`/txn/fine-jv?vch=${no}&book=${SECOND}`);
+          await page.getByRole('button', { name: `Update #${no}`, exact: true }).waitFor();
+          assert.equal(await book.inputValue(), SECOND, 'the clicked book is installed');
+          assert.equal(await label(page, 'Fine row 2').inputValue(), '4.500');
+          return {
+            observation: `?book=${SECOND} opens voucher ${no} of that book`,
+            expected: { book: SECOND, voucher: no },
+          };
+        } finally {
+          await cleanBook();
+        }
+      },
     ),
   ],
 };

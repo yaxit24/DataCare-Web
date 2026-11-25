@@ -397,6 +397,7 @@ type Line = { crdr: 'DR' | 'CR'; acCode: string; fine: number; itDesc?: string }
     try {
       // TR_CONTRA.cs:2550 reloads the saved AC_NAME; an unchanged account is re-saved with it.
       const resaved = await adminRequest('PUT', `/fine-jv/${vchNo}?coBook=${BOOK}`, {
+        expectedVersion: reopened.json().version,
         lines: reopened
           .json()
           .lines.map(({ acName: _name, ...line }: Record<string, unknown>) => line),
@@ -410,7 +411,9 @@ type Line = { crdr: 'DR' | 'CR'; acCode: string; fine: number; itDesc?: string }
       expect((await remarks(vchNo)).map((r) => [r.sr, r.ac, r.name, r.remark])).toEqual([
         [1, TO2, '', 'split'],
       ]);
+      const reopenedAfterSave = await adminRequest('GET', `/fine-jv/${vchNo}?coBook=${BOOK}`);
       const changed = await adminRequest('PUT', `/fine-jv/${vchNo}?coBook=${BOOK}`, {
+        expectedVersion: reopenedAfterSave.json().version,
         lines: [
           { crdr: 'DR', acCode: TO2, fine: 5 },
           { crdr: 'CR', acCode: FROM, fine: 5 },
@@ -612,7 +615,9 @@ type Line = { crdr: 'DR' | 'CR'; acCode: string; fine: number; itDesc?: string }
       TO,
     );
 
+    const opened = await adminRequest('GET', `/fine-jv/${vchNo}?coBook=${BOOK}`);
     const updated = await adminRequest('PUT', `/fine-jv/${vchNo}?coBook=${BOOK}`, {
+      expectedVersion: opened.json().version,
       lines: [
         { crdr: 'DR', acCode: FROM, fine: 4.3216, itDesc: 'new from' },
         { crdr: 'CR', acCode: TO2, fine: 4.3216, itDesc: 'new to' },
@@ -661,7 +666,9 @@ type Line = { crdr: 'DR' | 'CR'; acCode: string; fine: number; itDesc?: string }
       [1, TO2, TO2_NAME, 'new to'],
       [2, FROM, FROM_NAME, 'new from'],
     ]);
+    const openedBeforeOutOfYear = await adminRequest('GET', `/fine-jv/${vchNo}?coBook=${BOOK}`);
     const outOfYear = await adminRequest('PUT', `/fine-jv/${vchNo}?coBook=${BOOK}`, {
+      expectedVersion: openedBeforeOutOfYear.json().version,
       vchDate: OUT_OF_YEAR,
       lines: twoRows(1),
     });
@@ -672,7 +679,9 @@ type Line = { crdr: 'DR' | 'CR'; acCode: string; fine: number; itDesc?: string }
     ]);
 
     const longDesc = 'L'.repeat(150);
+    const openedBeforeDescribe = await adminRequest('GET', `/fine-jv/${vchNo}?coBook=${BOOK}`);
     const described = await adminRequest('PUT', `/fine-jv/${vchNo}?coBook=${BOOK}`, {
+      expectedVersion: openedBeforeDescribe.json().version,
       lines: [
         { crdr: 'DR', acCode: FROM, fine: 4.322, itDesc: longDesc },
         { crdr: 'CR', acCode: TO2, fine: 4.322, itDesc: 'new to' },
@@ -680,7 +689,11 @@ type Line = { crdr: 'DR' | 'CR'; acCode: string; fine: number; itDesc?: string }
     });
     expect(described.statusCode, described.body).toBe(200);
     const hidden = String((await source(vchNo))[0]!.hidden);
-    const deleted = await adminRequest('DELETE', `/fine-jv/${vchNo}?coBook=${BOOK}`);
+    const openedBeforeDelete = await adminRequest('GET', `/fine-jv/${vchNo}?coBook=${BOOK}`);
+    const deleted = await adminRequest(
+      'DELETE',
+      `/fine-jv/${vchNo}?coBook=${BOOK}&expectedVersion=${openedBeforeDelete.json().version}`,
+    );
     expect(deleted.statusCode, deleted.body).toBe(200);
     const left = await query<Array<Record<string, number>>>(
       `SELECT (SELECT count(*)::int FROM "REMARK_DATA" WHERE tenant_id=$1 AND "CO_BOOK"=$2 AND "VCH_NO"=$3) remarks,
@@ -720,16 +733,18 @@ type Line = { crdr: 'DR' | 'CR'; acCode: string; fine: number; itDesc?: string }
     expect(denied.json()).toMatchObject({ error: 'forbidden', action: 'print' });
     const malformed = await adminRequest('GET', `/fine-jv/12ab/print?coBook=${BOOK}&format=html`);
     expect(malformed.statusCode, malformed.body).toBe(400);
+    const missingVersion = '0'.repeat(64);
     for (const [method, url] of [
       ['GET', `/fine-jv/99999/print?coBook=${BOOK}&format=html`],
       ['GET', `/fine-jv/99999?coBook=${BOOK}`],
-      ['DELETE', `/fine-jv/99999?coBook=${BOOK}`],
+      ['DELETE', `/fine-jv/99999?coBook=${BOOK}&expectedVersion=${missingVersion}`],
     ] as const) {
       const response = await adminRequest(method, url);
       expect(response.statusCode, `${method} ${url} => ${response.body}`).toBe(404);
       expect(response.json()).toMatchObject({ error: 'fine-jv-not-found' });
     }
     const missingEdit = await adminRequest('PUT', `/fine-jv/99999?coBook=${BOOK}`, {
+      expectedVersion: missingVersion,
       lines: twoRows(),
     });
     expect(missingEdit.statusCode, missingEdit.body).toBe(404);
