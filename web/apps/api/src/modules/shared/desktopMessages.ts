@@ -71,6 +71,12 @@ export const DESKTOP_MESSAGES = {
    */
   TAG_COUNTER_MANDATORY: 'Please Insert Tag Entry Counter Code and Try Because It is Mandatory...',
 
+  /**
+   * TR_TAG_OPBL.cs — desktop condition: `MsCntrStk = 'Y'` AND a grid row's counter cell is blank
+   * (`MSG[M,6] = ''`, :10793-10806). The tag-opening text differs from TR_PURC's "Tag Entry" wording.
+   */
+  TAG_OPENING_COUNTER_MANDATORY: 'Please Insert Counter Code and Try Because It is Mandatory...',
+
   /** TR_PURC.cs — desktop condition: `tHmId2 <> '' AND Val(nHmWt2) = 0`. Same shape for IDs 3 and 4. */
   HALLMARK_ID2_WEIGHT: 'Please Insert HmId2 Weight and try...',
   HALLMARK_ID3_WEIGHT: 'Please Insert HmId3 Weight and try...',

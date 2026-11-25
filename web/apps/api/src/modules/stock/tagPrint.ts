@@ -210,6 +210,17 @@ export async function stageTagStockPrintRowsTx(
  * behaviour remains desktop's last-writer-wins, which is a real concurrency limitation recorded in
  * project-memory/contracts/TR_TAG_OPBL.contract.md rather than silently "improved" here.
  */
+/**
+ * TAG_PRINT_DATA is one shared staging table per tenant that the render reads back whole, so a job
+ * (stage + render) must not interleave with another. Held to the end of the transaction.
+ */
+export async function lockTagPrintDataTx(tx: any, tenantId: string): Promise<void> {
+  await tx.$executeRawUnsafe(
+    'SELECT pg_advisory_xact_lock(hashtext($1))',
+    `tag-print-data:${tenantId}`,
+  );
+}
+
 export async function stageTagPrintRowsTx(
   tx: any,
   tenantId: string,
@@ -231,6 +242,7 @@ export async function stageTagPrintRowsTx(
   const q = (c: string): string => `"${c}"`;
   const cols = TAG_PRINT_STAGING_COLUMNS.map(q).join(',');
 
+  await lockTagPrintDataTx(tx, tenantId);
   await tx.$executeRawUnsafe(`DELETE FROM "TAG_PRINT_DATA" WHERE tenant_id=$1`, tenantId);
 
   // Placeholder rows first: the desktop inserts them before the real labels so they print at the top.

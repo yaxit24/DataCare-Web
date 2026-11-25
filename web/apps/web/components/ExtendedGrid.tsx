@@ -62,7 +62,7 @@ export function ExtendedHeaderCells<K extends string>({
   fields,
 }: {
   full: boolean;
-  fields: ReadonlyArray<readonly [K, string]>;
+  fields: ReadonlyArray<readonly [K, string, string?]>;
 }) {
   if (!full) return null;
   return (
@@ -88,7 +88,13 @@ export function ExtendedBodyCells<K extends string, L extends object>({
   readOnlyFields,
 }: {
   full: boolean;
-  fields: ReadonlyArray<readonly [K, string]>;
+  /**
+   * [field, displayed header, stable aria name]. The third element keeps an input's accessibility
+   * identity on the ORIGINAL column name when a company renames the header through COL_MAST
+   * (TR_TAG_OPBL.cs:5395-5402 renames only what the operator sees), so tests and screen readers
+   * keep working while the visible caption changes.
+   */
+  fields: ReadonlyArray<readonly [K, string, string?]>;
   line: L;
   row: number;
   baseColumns: number;
@@ -110,14 +116,14 @@ export function ExtendedBodyCells<K extends string, L extends object>({
   const locked = new Set(readOnlyFields ?? []);
   return (
     <>
-      {fields.map(([key, label], offset) => (
+      {fields.map(([key, label, aria], offset) => (
         <td
           key={`xc-${String(key)}`}
           className="num"
           {...(cellProps ? cellProps(row, baseColumns + offset) : {})}
         >
           <input
-            aria-label={`${label} row ${row + 1}`}
+            aria-label={`${aria ?? label} row ${row + 1}`}
             style={{ width: 72, textAlign: 'right' }}
             value={String((line as Record<string, unknown>)[key] ?? '')}
             onChange={(event) => setValue(row, key, event.target.value)}

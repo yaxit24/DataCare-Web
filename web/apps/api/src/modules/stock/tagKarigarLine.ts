@@ -13,6 +13,8 @@ export interface TagKarigarLine {
   karigarTouch?: number;
   karigarWestPct?: number;
   karigarFine?: number;
+  /** Lot-header KrFine (TR_TAG_OPBL.cs:10996); see tagKarigarColumns. */
+  lotFine?: number;
 }
 
 /**
@@ -36,6 +38,7 @@ export function tagKarigarLineColumns(
     karigarTouch: line.karigarTouch,
     karigarWestPct: line.karigarWestPct,
     karigarFine: line.karigarFine,
+    lotFine: line.lotFine,
   });
   return { detail, stock: tagKarigarStock(detail) };
 }

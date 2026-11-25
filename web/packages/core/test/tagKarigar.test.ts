@@ -116,4 +116,20 @@ describe('tag karigar weight block (TR_TAG_OPBL columns 17-23)', () => {
       }),
     ).toEqual({ KR_NWT: 10, KR_TOUCH: 92, KR_WEST: 1.5, KR_FINE: 9.584 });
   });
+
+  it('a lot-path fine is KR_FINE as given, and 0 stays 0 (TR_TAG_OPBL.cs:10996)', () => {
+    const base = {
+      karigarTouch: 91.125,
+      karigarWestPct: 0.125,
+      karigarNetWt: 10.333,
+      karigarGhtWt: 2,
+    };
+    expect(tagKarigarColumns({ ...base, lotFine: 9.49 })).toMatchObject({
+      KR_TOUCH: 91.13,
+      KR_WEST_PRC: 0.13,
+      KR_FINE: 9.49,
+    });
+    expect(tagKarigarColumns({ ...base, lotFine: 0 }).KR_FINE).toBe(0);
+    expect(tagKarigarColumns(base).KR_FINE).not.toBe(0);
+  });
 });

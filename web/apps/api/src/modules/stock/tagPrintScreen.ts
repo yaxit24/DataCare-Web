@@ -569,55 +569,54 @@ export async function tagPrintStage(
  * Besides the staged row, a label reads CO_MAST.CO_NAME and ITEM_MAST.GR_CODE (placed by all four files) and, for the
  * files with SubTagPrint.rpt, the BAR_IDTL rows its link selects (`TAG_LABEL_FILES`). A Lable Skip blank has no tag and
  * prints none.
+ *
+ * The `_*Tx` form runs inside the caller's transaction, so a screen that stages and renders in ONE transaction
+ * (the tag-opening print, WP-32) reads back exactly the rows it staged: another operator's interleaved job
+ * cannot contaminate the response.
  */
-export async function tagPrintLabels(
-  prisma: any,
+export async function tagPrintLabelsTx(
+  tx: any,
   scope: TagPrintScope,
   fileRaw = '',
 ): Promise<string> {
   const layout = tagLabelFile(fileRaw);
-  const { rows, shop, groups, subs } = await withTxBudget(
-    prisma,
-    scope.tenantId,
-    'read',
-    async (tx: any) => {
-      const rows: any[] = await tx.$queryRawUnsafe(
-        `SELECT * FROM "TAG_PRINT_DATA" WHERE tenant_id=$1 AND "CO_CODE"=$2 ORDER BY row_id`,
-        scope.tenantId,
-        scope.coCode,
-      );
-      const [co]: any[] = await tx.$queryRawUnsafe(
-        `SELECT "CO_NAME" FROM "CO_MAST" WHERE tenant_id=$1 AND "CO_CODE"=$2 LIMIT 1`,
-        scope.tenantId,
-        scope.coCode,
-      );
-      const items: any[] = await tx.$queryRawUnsafe(
-        `SELECT "IT_CODE","GR_CODE" FROM "ITEM_MAST" WHERE tenant_id=$1 AND "CO_CODE"=$2`,
-        scope.tenantId,
-        scope.coCode,
-      );
-      const groups = new Map<string, string>(items.map((i) => [text(i.IT_CODE), text(i.GR_CODE)]));
-      const subs = new Map<string, string[]>();
-      if (layout.subReport)
-        for (const r of rows.filter((x) => text(x.TAG_NO))) {
-          const key = subKey(layout.subReport, r);
-          if (subs.has(key)) continue;
-          const lines: any[] = await tx.$queryRawUnsafe(
-            ...subReportQuery(
-              layout.subReport,
-              scope,
-              r,
-              layout.name === 'QrPrint10' ? 'IT_NET_AMT' : 'IT_AMT',
-            ),
-          );
-          subs.set(
-            key,
-            lines.map((l) => subTagPrintLine(l.IT_CODE, l.amt)),
-          );
-        }
-      return { rows, shop: text(co?.CO_NAME), groups, subs };
-    },
-  );
+  const { rows, shop, groups, subs } = await (async () => {
+    const rows: any[] = await tx.$queryRawUnsafe(
+      `SELECT * FROM "TAG_PRINT_DATA" WHERE tenant_id=$1 AND "CO_CODE"=$2 ORDER BY row_id`,
+      scope.tenantId,
+      scope.coCode,
+    );
+    const [co]: any[] = await tx.$queryRawUnsafe(
+      `SELECT "CO_NAME" FROM "CO_MAST" WHERE tenant_id=$1 AND "CO_CODE"=$2 LIMIT 1`,
+      scope.tenantId,
+      scope.coCode,
+    );
+    const items: any[] = await tx.$queryRawUnsafe(
+      `SELECT "IT_CODE","GR_CODE" FROM "ITEM_MAST" WHERE tenant_id=$1 AND "CO_CODE"=$2`,
+      scope.tenantId,
+      scope.coCode,
+    );
+    const groups = new Map<string, string>(items.map((i) => [text(i.IT_CODE), text(i.GR_CODE)]));
+    const subs = new Map<string, string[]>();
+    if (layout.subReport)
+      for (const r of rows.filter((x) => text(x.TAG_NO))) {
+        const key = subKey(layout.subReport, r);
+        if (subs.has(key)) continue;
+        const lines: any[] = await tx.$queryRawUnsafe(
+          ...subReportQuery(
+            layout.subReport,
+            scope,
+            r,
+            layout.name === 'QrPrint10' ? 'IT_NET_AMT' : 'IT_AMT',
+          ),
+        );
+        subs.set(
+          key,
+          lines.map((l) => subTagPrintLine(l.IT_CODE, l.amt)),
+        );
+      }
+    return { rows, shop: text(co?.CO_NAME), groups, subs };
+  })();
   const skip = rows.filter((r) => text(r.IT_CODE) === '00' && Number(r.VCH_SRNO ?? 0) === 0).length;
   const tags: PrintableTag[] = [];
   for (const r of rows.filter((x) => text(x.TAG_NO))) {
@@ -644,6 +643,16 @@ export async function tagPrintLabels(
     });
   }
   return renderTagLabels(tags, skip, layout.name);
+}
+
+export async function tagPrintLabels(
+  prisma: any,
+  scope: TagPrintScope,
+  fileRaw = '',
+): Promise<string> {
+  return withTxBudget(prisma, scope.tenantId, 'read', (tx: any) =>
+    tagPrintLabelsTx(tx, scope, fileRaw),
+  );
 }
 
 type SubLink = 'tag' | 'row' | 'voucher';

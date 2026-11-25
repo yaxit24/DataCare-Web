@@ -540,6 +540,11 @@ route('Inventory/Tag Opening', [
   'GET /stock/tag-opening/:vchNo',
   'PUT /stock/tag-opening/:vchNo',
   'DELETE /stock/tag-opening/:vchNo',
+  // WP-32: the screen's label-file chooser and grid settings, its Set button, and the print
+  // (BtnPrint_Click TR_TAG_OPBL.cs:11477-11551) behind the print right.
+  'GET /stock/tag-opening/setup',
+  'POST /stock/tag-opening/:vchNo/print',
+  'POST /stock/tag-opening/default-file',
 ]);
 route('Masters/Design Book', [
   'GET /masters/design-book/calculation-config',
@@ -1222,6 +1227,8 @@ const PRINT_ROUTES = new Set([
   // TR_TAG_CAN.cs:5390-5393: TagCanBill needs print rights.
   'GET /stock/tag-cancel/:vchNo/print',
   'GET /stock/stock-adjust/:vchNo/print',
+  // TR_TAG_OPBL.cs:11477-11479: the tag-opening label print needs the print right.
+  'POST /stock/tag-opening/:vchNo/print',
   // TR_APR_ISU.cs:6712-6717: AprBill needs the selected menu's print right.
   'GET /tour/:vchNo/print',
   'GET /tour/return/:vchNo/print',
@@ -1231,6 +1238,8 @@ const UPDATE_POST_ROUTES = new Set([
   'POST /sales/print-files/default',
   'POST /stock/tag-print-screen/hm-update',
   'POST /stock/tag-print-screen/default-file',
+  // TR_TAG_OPBL.cs:12345-12364: Set rewrites PRINT_MAST, the same update right UT_TAG_PRINT's Set needs.
+  'POST /stock/tag-opening/default-file',
   'POST /masters/item-master/:code/tag-values',
   'POST /masters/auto-item',
   'POST /stock/tag-image',

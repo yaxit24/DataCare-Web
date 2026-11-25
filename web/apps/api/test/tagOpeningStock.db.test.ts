@@ -3,6 +3,7 @@ import { afterAll, beforeEach, describe, expect, it } from 'vitest';
 import {
   deleteTagOpening,
   editTagOpening,
+  getTagOpening,
   tagOpening,
 } from '../src/modules/stock/stockVoucherLifecycle.js';
 
@@ -210,11 +211,14 @@ describe.skipIf(!RUN)('Tag Opening and Only Tag Entry stock rows (Ac_Stock.Tag_O
       vchNo,
     );
     expect(header.stk).toBe('LOOSE');
-    // An edit rewrites the rows the same way: one tag left, so the stock item goes out by that tag alone.
+    // An edit rewrites the rows the same way: one tag left, so the stock item goes out by that tag
+    // alone. The version token is the read's (N51, D17): an edit without it is refused.
+    const view = (await getTagOpening(runtime, scopeOf('TGN'), vchNo)) as { version: string };
     await editTagOpening(
       runtime,
       { scope: scopeOf('TGN'), vchDate: DAY, stockItCode: 'LOOSE', lines: [line('G-1', 10.5, 10)] },
       vchNo,
+      view.version,
     );
     expect((await stock('TGN', vchNo)).map((r) => [r.tr, r.it, r.gwt, r.fine])).toEqual([
       ['O', 'LOOSE', 10.5, 9.36],
@@ -295,9 +299,10 @@ describe.skipIf(!RUN)('Tag Opening and Only Tag Entry stock rows (Ac_Stock.Tag_O
       YEAR,
       tag.srno,
     );
-    await expect(deleteTagOpening(runtime, { scope: scopeOf('000'), vchNo })).rejects.toThrow(
-      'You Cant Delete This Voucher Because  Tag Use in Sales Transection....',
-    );
+    const sold = (await getTagOpening(runtime, scopeOf('000'), vchNo)) as { version: string };
+    await expect(
+      deleteTagOpening(runtime, { scope: scopeOf('000'), vchNo, expectedVersion: sold.version }),
+    ).rejects.toThrow('You Cant Delete This Voucher Because  Tag Use in Sales Transection....');
     expect(await stock('000', vchNo)).toHaveLength(1);
   });
 });

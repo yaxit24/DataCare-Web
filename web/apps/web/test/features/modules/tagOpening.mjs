@@ -1,5 +1,6 @@
 import assert from 'node:assert/strict';
 import { FIXTURE_MANIFEST, ITEMS, PARTIES, USERS } from '../fixtures/catalogue.mjs';
+import { TENANT } from '../harness.mjs';
 
 /**
  * Feature: Master → Tag Opening and Other → Only Tag Entry (desktop TR_TAG_OPBL, web /txn/tag-opening and
@@ -188,6 +189,10 @@ export const tagOpening = {
         assert.equal(await page.getByLabel('Stock Item Code', { exact: true }).count(), 0);
         assert.equal(await deleteButton(page).count(), 0);
         assert.equal(await page.getByLabel('Voucher No', { exact: true }).inputValue(), '');
+        await page.getByLabel('Print file Name', { exact: true }).waitFor();
+        await page.getByLabel('Lable Skip', { exact: true }).waitFor();
+        await page.getByRole('button', { name: 'Set', exact: true }).waitFor();
+        await page.getByRole('button', { name: 'Print', exact: true }).waitFor();
         await openScreen(page, { tagGen: true });
         await page.getByLabel('Stock Item Code', { exact: true }).waitFor();
         return {
@@ -336,6 +341,96 @@ export const tagOpening = {
           };
         } finally {
           await removeVoucher(page, vchNo);
+        }
+      },
+    ),
+    C(
+      'formula.lot-blank-touch',
+      'T03',
+      'mutation',
+      'TR_TAG_OPBL.cs:10990-10996: a source-A row with blank KrTouch takes the lot touch/wastage and formats lot-derived KrFine to two decimals',
+      async (ctx) => {
+        const observations = [];
+        for (const tagGen of [false, true]) {
+          const { page } = await ctx.session(
+            as(USERS.admin.user, `lot-${tagGen ? 'taggen' : 'opstk'}`),
+          );
+          await openScreen(page, { tagGen });
+          if (tagGen) await pick(page, 'Stock Item Code', GOLD);
+          await page.getByLabel('Lot No', { exact: true }).fill('L32');
+          await page.getByLabel('Lot Touch', { exact: true }).fill('92');
+          await page.getByLabel('Lot Wastage %', { exact: true }).fill('1.5');
+          await fillTag(page, 1, {
+            gross: '10.5',
+            less: '0.5',
+            net: '10',
+            extra: { KrOthWt: '0.5', KrTouch: '' },
+          });
+          const response = await save(page);
+          const body = await response.json();
+          assert.equal(response.status(), 201, JSON.stringify(body));
+          const vchNo = pad(body.vchNo);
+          const book = tagGen ? TAG_GEN_BOOK : OPEN_BOOK;
+          try {
+            const [detail] = await ctx.rows(
+              `SELECT coalesce("KR_NET_WT",0)::float net, coalesce("KR_TOUCH",0)::float touch,
+                      coalesce("KR_WEST_PRC",0)::float west, coalesce("KR_FINE",0)::float fine
+                 FROM "BAR_DETL" WHERE tenant_id=$1 AND "CO_BOOK"=$2 AND "VCH_NO"=$3`,
+              book,
+              vchNo,
+            );
+            assert.deepEqual(detail, { net: 10, touch: 92, west: 1.5, fine: 9.35 });
+            observations.push({ book, detail });
+          } finally {
+            await removeVoucher(page, vchNo, { tagGen });
+          }
+        }
+        return {
+          observation: JSON.stringify(observations),
+          expected: 'both OPSTK and TAG GEN persist 10 / 92 / 1.5 / 9.35',
+          database: observations,
+          downstream: { modes: 2 },
+        };
+      },
+    ),
+    C(
+      'settings.default-label-file',
+      'T15',
+      'mutation',
+      'TR_TAG_OPBL.cs:10090 and :12345-12362: TAG files are ordered and Set leaves exactly the selected TAG file marked PRINT_SET_A=Y',
+      async (ctx) => {
+        await ctx.owner.$executeRawUnsafe(
+          `INSERT INTO "PRINT_MAST"(tenant_id,"CO_CODE","PRINT_TYPE","PRINT_FILE","PRINT_SET_A") VALUES
+             ($1,'01','TAG','Z32','N'),($1,'01','TAG','A32','Y')`,
+          TENANT,
+        );
+        const { page } = await ctx.session();
+        try {
+          await openScreen(page);
+          const chooser = page.getByLabel('Print file Name', { exact: true });
+          assert.deepEqual(await chooser.locator('option').allTextContents(), ['A32', 'Z32']);
+          await chooser.selectOption('Z32');
+          await page.getByRole('button', { name: 'Set', exact: true }).click();
+          await page.getByText('Tag Print Report Default Set', { exact: true }).waitFor();
+          const rows = await ctx.rows(
+            `SELECT "PRINT_FILE" file,"PRINT_SET_A" chosen FROM "PRINT_MAST"
+               WHERE tenant_id=$1 AND "CO_CODE"='01' AND "PRINT_TYPE"='TAG' ORDER BY "PRINT_FILE"`,
+          );
+          assert.deepEqual(rows, [
+            { file: 'A32', chosen: 'N' },
+            { file: 'Z32', chosen: 'Y' },
+          ]);
+          return {
+            observation: 'A32, Z32; Z32 became the sole TAG default',
+            expected: 'Tag Print Report Default Set',
+            database: rows,
+            downstream: { selected: 'Z32' },
+          };
+        } finally {
+          await ctx.owner.$executeRawUnsafe(
+            `DELETE FROM "PRINT_MAST" WHERE tenant_id=$1 AND "CO_CODE"='01' AND "PRINT_FILE" IN ('A32','Z32')`,
+            TENANT,
+          );
         }
       },
     ),

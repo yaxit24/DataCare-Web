@@ -221,6 +221,11 @@ import {
   scaleCaptureEnabled,
 } from '../modules/integrations/scaleProtocol.js';
 import { registerTagPrintScreenRoutes } from './tagPrintScreen.js';
+import {
+  tagOpeningPrint,
+  tagOpeningSetDefaultLabelFile,
+  tagOpeningSetup,
+} from '../modules/stock/tagOpeningPrint.js';
 import { registerVoucherNavigationRoutes } from './voucherNavigation.js';
 import { getContra } from '../modules/finance/contra.js';
 import { registerContraRoutes } from './contra.js';
@@ -246,7 +251,7 @@ import { registerAccountLedgerRoutes } from './accountLedger.js';
 import { registerHuidReportRoutes } from './huidReport.js';
 import { registerTagStockRoutes } from './tagStock.js';
 import { registerApprovalRoutes } from './approval.js';
-import { VoucherVersionConflictError } from '../modules/vouchers/version.js';
+import { VoucherVersionConflictError, requiredVersion } from '../modules/vouchers/version.js';
 import { listYears, createYear, carryForwardOpenings } from '../modules/masters/year.js';
 import { reminders } from '../modules/finance/reminders.js';
 import { getPartyPhoto, setPartyPhoto, familyMembers } from '../modules/masters/party.js';
@@ -4778,18 +4783,35 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
     const s = readScope(req);
     return listTags(prisma, s.tenantId, { CO_CODE: s.coCode, LC_CODE: s.lcCode });
   });
+  // The lot header fields the karigar block draws from (TR_TAG_OPBL.cs:10990-10996).
+  const tagOpeningInput = (req: FastifyRequest, b: any) => ({
+    scope: scopeOf(req),
+    mainUser: sess(req).sub,
+    vchDate: b.vchDate,
+    stockItCode: b.stockItCode,
+    lotNo: b.lotNo,
+    lotTouch: b.lotTouch,
+    lotWestPrc: b.lotWestPrc,
+    lines: b.lines ?? [],
+  });
+  // The screen's chooser, Set and grid settings (TR_TAG_OPBL.cs:10086-10090, :5156, :5395-5402).
+  app.get('/stock/tag-opening/setup', auth, async (req, reply) => {
+    if (!guard(req, reply, 'view')) return;
+    const s = scopeOf(req);
+    const { isAdmin } = await loadPrincipal(prisma, {
+      tenantId: s.tenantId,
+      coCode: s.coCode,
+      loginCoCode: sess(req).loginCoCode,
+      loginName: sess(req).sub,
+    });
+    return run(reply, 200, () =>
+      tagOpeningSetup(prisma, s, isAdmin).then((setup) => ({ ...setup, isAdmin })),
+    );
+  });
   app.post('/stock/tag-opening', auth, async (req, reply) => {
     if (!guard(req, reply, 'create')) return;
     const b = body(req);
-    return run(reply, 201, () =>
-      tagOpening(prisma, {
-        scope: scopeOf(req),
-        mainUser: sess(req).sub,
-        vchDate: b.vchDate,
-        stockItCode: b.stockItCode,
-        lines: b.lines ?? [],
-      }),
-    );
+    return run(reply, 201, () => tagOpening(prisma, tagOpeningInput(req, b)));
   });
   app.get('/stock/tag-opening/:vchNo', auth, async (req, reply) => {
     if (!guard(req, reply, 'view')) return;
@@ -4804,14 +4826,10 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
     return run(reply, 200, () =>
       editTagOpening(
         prisma,
-        {
-          scope: scopeOf(req),
-          mainUser: sess(req).sub,
-          vchDate: b.vchDate,
-          stockItCode: b.stockItCode,
-          lines: b.lines ?? [],
-        },
+        tagOpeningInput(req, b),
         (req.params as any).vchNo,
+        // N51 (D17): the read's `version`; a stale one is 409 voucher-version-conflict.
+        requiredVersion(b.expectedVersion),
       ),
     );
   });
@@ -4822,7 +4840,51 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
         scope: scopeOf(req),
         vchNo: (req.params as any).vchNo,
         deleteUser: sess(req).sub,
+        expectedVersion: requiredVersion((req.query as any)?.expectedVersion),
       }),
+    );
+  });
+  // BtnPrint_Click (TR_TAG_OPBL.cs:11477-11551): the print right guards the route; label skip, staging
+  // and the rendered sheet answer in one response.
+  app.post('/stock/tag-opening/:vchNo/print', auth, async (req, reply) => {
+    if (!guard(req, reply, 'print')) return;
+    const b = body(req);
+    const s = scopeOf(req);
+    if (!s.coBook || !s.coYear) {
+      return reply.code(400).send({ error: 'invalid-request', message: 'coBook is required' });
+    }
+    const scope = {
+      tenantId: s.tenantId,
+      coCode: s.coCode,
+      lcCode: s.lcCode,
+      coYear: s.coYear,
+      coBook: s.coBook,
+    };
+    try {
+      const out = await tagOpeningPrint(prisma, scope, String((req.params as any).vchNo ?? ''), {
+        labelSkip: b.labelSkip,
+        labelFile: b.labelFile,
+        srNo: b.srNo,
+      });
+      return reply.code(200).type('text/html; charset=utf-8').send(out.html);
+    } catch (e: any) {
+      if (/(ValidationError|NumberingConfigurationError)$/.test(e?.name ?? ''))
+        return reply.code(400).send({ error: e.name, message: e.message });
+      throw e;
+    }
+  });
+  // BtnTagSet_Click (TR_TAG_OPBL.cs:12345-12364): the chosen label file becomes the family default.
+  app.post('/stock/tag-opening/default-file', auth, async (req, reply) => {
+    if (!guard(req, reply, 'update')) return;
+    const s = scopeOf(req);
+    const scope = {
+      tenantId: s.tenantId,
+      coCode: s.coCode,
+      lcCode: s.lcCode,
+      coYear: s.coYear ?? '',
+    };
+    return run(reply, 200, () =>
+      tagOpeningSetDefaultLabelFile(prisma, scope, String(body(req).file ?? '')),
     );
   });
   // Item (non-tag) opening balance (desktop TR_ITM_OPBL → ITM_OPBL + MAIN_STOCK 'ITOBL').
