@@ -822,10 +822,37 @@ export const fineJv = {
       'T12',
       'Fine JV has no persisted version token or conditional update/delete yet, so two browser sessions cannot be asserted to reject a stale change.',
     ),
-    blocked(
-      'retry',
+    C(
+      'retry.replayed-save',
       'T13',
-      'Fine JV POST has no idempotency-key contract yet, so a lost acknowledgement/double-submit case remains blocked rather than assumed safe.',
+      'mutation',
+      'A replayed Fine JV save answers with the first result and leaves exactly one voucher.',
+      async (ctx) => {
+        const { page } = await ctx.session();
+        await openFineJv(page);
+        await fillGrid(page, twoRows());
+        const first = await save(page);
+        assert.equal(first.status(), 201, await first.text());
+        assert.match(first.request().headers()['idempotency-key'] ?? '', /^[0-9a-f-]{36}$/);
+        const firstBody = await first.text();
+        const result = JSON.parse(firstBody);
+        const replay = await page.request.fetch(first.request());
+        assert.equal(replay.status(), 201, await replay.text());
+        assert.equal(replay.headers()['idempotency-replayed'], 'true');
+        assert.equal(await replay.text(), firstBody);
+        const rows = await ctx.rows(
+          `SELECT "VCH_NO" vch FROM "CONTRA_DATA" WHERE tenant_id=$1 AND "CO_BOOK"=$2 AND "VCH_NO"=$3`,
+          BOOK,
+          String(result.vchNo).padStart(5, '0'),
+        );
+        assert.equal(rows.length, 2, JSON.stringify(rows));
+        return {
+          observation: 'replay answered the first Fine JV result',
+          expected: 'one Fine JV voucher',
+          database: { rows },
+          downstream: { replay: 'idempotency-replayed true', rows: rows.length },
+        };
+      },
     ),
     blocked(
       'rollback',

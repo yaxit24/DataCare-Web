@@ -1,7 +1,8 @@
 'use client';
 import { toIsoDate } from '@datacare/core';
 import { useState } from 'react';
-import { post, put, get, del, ApiError } from '../../../../lib/api';
+import { postCommand, put, get, del, ApiError } from '../../../../lib/api';
+import { useIdempotencyKey } from '../../../../lib/idempotencyKey';
 import { useBusinessScope } from '../../../../components/BusinessScope';
 import { BookSelect } from '../../../../components/BookSelect';
 import { VoucherList } from '../../../../components/VoucherList';
@@ -47,6 +48,7 @@ export default function FineJvPage() {
   const [busy, setBusy] = useState(false);
   const [loadedVch, setLoadedVch] = useState('');
   const [voucherLookup, setVoucherLookup] = useState('');
+  const command = useIdempotencyKey();
 
   const n = (v: string) => Number(v || 0);
   const filled = rows.filter((r) => r.acCode.trim() && n(r.fine) > 0);
@@ -140,9 +142,12 @@ export default function FineJvPage() {
       };
       const saved = loadedVch
         ? await put<{ vchNo: number }>(`/fine-jv/${encodeURIComponent(loadedVch)}`, body)
-        : await post<{ vchNo: number }>('/fine-jv', body);
+        : await postCommand<{ vchNo: number }>('/fine-jv', body, command.key);
       setResult(saved);
-      if (!loadedVch) setRows([blankRow('DR'), blankRow('CR')]);
+      if (!loadedVch) {
+        setRows([blankRow('DR'), blankRow('CR')]);
+        command.renew();
+      }
     } catch (e) {
       setErr(
         e instanceof ApiError

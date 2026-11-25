@@ -589,10 +589,10 @@ export const partyOpening = {
       'Two-session save of one party: the party row lock serialises the saves; a browser case needs a second operator slot.',
     ),
     C(
-      'retry.double-save',
+      'retry.replayed-save',
       'T13',
       'mutation',
-      "A save is a replace of the party's row (TR_AC_OPBL.cs:2694-2722), so sending it twice leaves one row and one set of legs",
+      'A replayed save returns the first result and leaves one party opening row and one set of legs.',
       async (ctx) => {
         const { page } = await ctx.session();
         try {
@@ -602,17 +602,21 @@ export const partyOpening = {
           const first = await save(page);
           assert.equal(first.status(), 200);
           // Replay the screen's own request (same headers, session context and body), as a lost acknowledgement would.
-          const replay = (await page.request.fetch(first.request())).status();
-          assert.equal(replay, 200);
+          assert.match(first.request().headers()['idempotency-key'] ?? '', /^[0-9a-f-]{36}$/);
+          const firstBody = await first.text();
+          const replay = await page.request.fetch(first.request());
+          assert.equal(replay.status(), 200);
+          assert.equal(replay.headers()['idempotency-replayed'], 'true');
+          assert.equal(await replay.text(), firstBody);
           const op = await opData(ctx);
           const posted = await legs(ctx);
           assert.equal(op.length, 1);
           assert.deepEqual(legShape(posted), [['02', 777, 0, 'A', '', 0]]);
           return {
-            observation: `replay answered ${replay}; ${op.length} row, legs ${JSON.stringify(legShape(posted))}`,
+            observation: `replay answered ${replay.status()}; ${op.length} row, legs ${JSON.stringify(legShape(posted))}`,
             expected: 'one row, one leg',
             database: { op, legs: posted },
-            downstream: { replay },
+            downstream: { replay: replay.status() },
           };
         } finally {
           await removeOpening(page);
