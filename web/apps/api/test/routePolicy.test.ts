@@ -148,8 +148,10 @@ describe('route policy registry', () => {
     // N255 (WP-20) adds the Ledger Report JmaUdr, Gold and Silver prints with PDF and Excel: 790 + 9 = 799. [800 on main + 9 here = 809]
     // The Sales Report's Select Book panel gets its own book list GET /reports/sales-report/books
     // (RP_ALL.cs:11421 BookMast), uncapped and session-location-scoped: 800 + 1 = 801. [809 on main + 1 here = 810]
-    expect(routes).toHaveLength(810);
-    expect(new Set(routes.map((route) => `${route.method} ${route.path}`)).size).toBe(810);
+    // WP-18 replaces the HuId Report's three-line builder screen with its own plugin and adds the three
+    // export paths (CSV, XLSX, PDF) under the same Reports/HuId Report caption: 810 + 3 = 813.
+    expect(routes).toHaveLength(813);
+    expect(new Set(routes.map((route) => `${route.method} ${route.path}`)).size).toBe(813);
 
     const policies = routes.map((route) => ({
       ...route,

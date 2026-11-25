@@ -87,7 +87,11 @@ async function expectTags(page, want) {
   assert.deepEqual(await readTags(page), want);
 }
 const noMessage = async (page) =>
-  assert.equal(await page.locator('[role="alert"]').count(), 0, 'no message is shown');
+  assert.equal(
+    await page.locator('[role="alert"]:not(#__next-route-announcer__)').count(),
+    0,
+    'no message is shown',
+  );
 const noHelp = async (page) => {
   await settle();
   assert.equal(await page.getByRole('dialog').count(), 0, 'no help list opens');

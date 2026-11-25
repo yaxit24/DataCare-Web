@@ -415,6 +415,10 @@ export async function buildApp(opts: BuildOpts): Promise<FastifyInstance> {
     // area and state are first-class selectors, not the shared RP_ALL dimensions this guard polices. Its own
     // parser validates and fails closed, so exempt its routes rather than refusing their selectors here.
     if (url.startsWith('/reports/account-ledger')) return;
+    // The HuId Report (WP-18, RP_HUID) likewise owns a typed parser (modules/reports/huidTagReport.ts) in
+    // which the account code is a first-class selector (RP_HUID.cs:1788 `AND C.AC_CODE =  '`), so this
+    // shared-panel guard must not refuse it.
+    if (url.startsWith('/reports/huid')) return;
     // The Sales Report (RP_ALL) likewise owns its parser (modules/reports/rpAll/filters.ts): party, city, area,
     // employ, product and group are its own selectors (RP_ALL.cs:7629-7631 `{SL_DATA.AC_CODE}`), and the engine
     // refuses one its template lacks with `filter-not-in-template` (rpAll/index.ts), so this guard must not.
