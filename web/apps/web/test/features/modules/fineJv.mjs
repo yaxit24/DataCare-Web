@@ -1177,7 +1177,13 @@ export const fineJv = {
           assert.equal(entries.length, 1);
           assert.equal(entries[0].drGold, party === FROM ? 12.346 : 0);
           assert.equal(entries[0].crGold, party === TO ? 12.346 : 0);
-          const row = page.locator('table.grid tbody tr').filter({ hasText: no });
+          // The shared CI database holds other books' vouchers with the same number: pin the FINE JV row and
+          // wait for its rendered weight rather than reading the first match once.
+          const row = page
+            .locator('table.grid tbody tr')
+            .filter({ hasText: no })
+            .filter({ hasText: 'FINE JV' })
+            .filter({ hasText: '12.346' });
           await row.first().waitFor();
           assert.match(await row.first().innerText(), /12\.346/);
           reports.push({ account: party.code, data });
