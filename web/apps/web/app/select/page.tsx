@@ -156,6 +156,16 @@ export default function SelectPage() {
     }
   }
 
+  // MS_OPNCOMP.cs:423-493, :4391-4454, :509: Enter moves Company -> Location -> Year; Enter on the year opens.
+  function enterAdvances(nextId: string | null) {
+    return (event: React.KeyboardEvent<HTMLSelectElement>) => {
+      if (event.key !== 'Enter') return;
+      event.preventDefault();
+      if (nextId) document.getElementById(nextId)?.focus();
+      else event.currentTarget.form?.requestSubmit();
+    };
+  }
+
   const changingCompany = current !== null && coCode !== current.coCode;
   return (
     <div className="login-wrap">
@@ -192,6 +202,7 @@ export default function SelectPage() {
             value={coCode}
             disabled={!ready || busy || needsReload || !!pending}
             onChange={(event) => setCoCode(event.target.value)}
+            onKeyDown={enterAdvances(changingCompany ? null : 'context-location')}
           >
             {companies.map((company) => (
               <option key={company.CO_CODE} value={company.CO_CODE}>
@@ -207,6 +218,7 @@ export default function SelectPage() {
             value={lcCode}
             disabled={!ready || busy || needsReload || changingCompany || !!pending}
             onChange={(event) => setLcCode(event.target.value)}
+            onKeyDown={enterAdvances('context-year')}
           >
             {locations.map((location) => (
               <option key={location.LC_CODE} value={location.LC_CODE}>
@@ -222,6 +234,7 @@ export default function SelectPage() {
             value={coYear}
             disabled={!ready || busy || needsReload || changingCompany || !!pending}
             onChange={(event) => setCoYear(event.target.value)}
+            onKeyDown={enterAdvances(null)}
           >
             {years.map((year) => (
               <option key={year} value={year}>

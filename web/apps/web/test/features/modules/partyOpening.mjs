@@ -1,4 +1,5 @@
 import assert from 'node:assert/strict';
+import { rollbackMatrix } from '../faults.mjs';
 import { FIXTURE_MANIFEST, PARTIES, USERS } from '../fixtures/catalogue.mjs';
 
 /**
@@ -43,11 +44,6 @@ const C = (id, group, kind, source, run, extra = {}) => ({
   run,
   ...extra,
 });
-const pending = (name, group, reason) => ({
-  ...C(`${name}.pending`, group, 'read-only', `Playbook ${group}`, async () => ({})),
-  blocked: reason,
-});
-
 const isApi = (r, method, path) =>
   r.request().method() === method && new URL(r.url()).pathname === `/api${path}`;
 
@@ -149,6 +145,7 @@ export const partyOpening = {
   title: 'Master → Party Opening (TR_AC_OPBL)',
   defaultUser: as(USERS.admin.user),
   inputs: [
+    'web/apps/web/test/features/faults.mjs',
     'web/apps/web/app/(app)/txn/ac-opbl/page.tsx',
     'web/apps/api/src/modules/finance/partyOpening.ts',
     'web/apps/api/src/routes/partyOpening.ts',
@@ -583,10 +580,41 @@ export const partyOpening = {
         }
       },
     ),
-    pending(
-      'concurrency',
+
+    C(
+      'concurrency.last-save-wins',
       'T12',
-      'Two-session save of one party: the party row lock serialises the saves; a browser case needs a second operator slot.',
+      'mutation',
+      'WP-35 cases.md; TR_AC_OPBL.cs:2694, :2710 replace the party opening; last save wins.',
+      async (ctx) => {
+        const { page: a } = await ctx.session();
+        const { page: b } = await ctx.session(as(USERS.admin.user, 'wp35-party-second'));
+        try {
+          for (const page of [a, b]) {
+            await openScreen(page);
+            await pickParty(page, PARTY.code);
+          }
+          await fillHeads(a, { amount: '777' });
+          await fillHeads(b, { amount: '888' });
+          assert.equal((await save(a)).status(), 200);
+          assert.equal((await save(b)).status(), 200);
+          const rows = await opData(ctx),
+            posted = await legs(ctx);
+          assert.equal(rows.length, 1);
+          assert.equal(rows[0].vch, '00000');
+          assert.equal(rows[0].amt, 888);
+          assert.equal(rows[0].osg, 'C');
+          assert.deepEqual(legShape(posted), [['01', 0, 888, 'A', '', 0]]);
+          return {
+            observation: 'Later save replaces the opening and its one amount leg',
+            expected: 888,
+            database: rows,
+            downstream: posted,
+          };
+        } finally {
+          await removeOpening(a);
+        }
+      },
     ),
     C(
       'retry.double-save',
@@ -619,11 +647,111 @@ export const partyOpening = {
         }
       },
     ),
-    pending('rollback', 'T14', 'No fault injector in the harness yet (G173 / N166).'),
-    pending(
-      'config',
+
+    C(
+      'rollback.save',
+      'T14',
+      'refusal',
+      'WP-35 cases.md; TR_AC_OPBL.cs:2706 fixed 00000; :2765-2785 desktop split transactions are hardened.',
+      async (ctx) => {
+        const { page } = await ctx.session();
+        try {
+          await openScreen(page);
+          await pickParty(page, PARTY.code);
+          const cell = (name, n) => page.getByLabel(`${name} row ${n}`, { exact: true });
+          await cell('VchNo', 1).fill('00012');
+          await cell('BillNo', 1).fill('B12');
+          await cell('Amount', 1).fill('30000');
+          await cell('Cr/Dr', 1).selectOption('D');
+          await cell('Cr/Dr', 1).press('Enter');
+          await cell('VchNo', 2).fill('00015');
+          await cell('BillNo', 2).fill('B15');
+          await cell('Amount', 2).fill('5000');
+          await cell('Amount', 2).press('Tab');
+          const result = await rollbackMatrix(ctx, {
+            tables: ['OP_DATA', 'OP_DETL', 'AC_DATA'],
+            book: '000',
+            headerTable: 'OP_DATA',
+            fixedVoucherNo: true,
+            voucherNoOf: async () => '00000',
+            submit: () => save(page),
+          });
+          assert.equal((await opData(ctx))[0].amt, 25000);
+          return {
+            observation: JSON.stringify(result),
+            expected: 'No partial opening or legs',
+            database: result,
+          };
+        } finally {
+          await removeOpening(page);
+        }
+      },
+    ),
+    C(
+      'config.data-type-a-only',
       'T15',
-      'The A/B data type split is an Advance-edition feature; Standard has data type A only.',
+      'mutation',
+      'WP-35 cases.md D3; TR_AC_OPBL.cs:2499, :2519; MS_OPNCOMP.cs:612 Lite data type A.',
+      async (ctx) => {
+        const { page } = await ctx.session();
+        try {
+          await enter(page, { amount: '100' });
+          assert.equal(await page.getByRole('button', { name: /A.*B.*Merge/i }).count(), 0);
+          assert.equal(await page.locator('select option[value="B"]').count(), 0);
+          const rows = await ctx.rows(
+            'SELECT "DATA_TYPE" type FROM "OP_DATA" WHERE tenant_id=$1 AND "AC_CODE"=$2',
+            PARTY.code,
+          );
+          assert.deepEqual(rows, [{ type: 'A' }]);
+          return {
+            observation: 'Single A opening; no B choice or merge',
+            expected: 'A',
+            database: rows,
+            downstream: await legs(ctx),
+          };
+        } finally {
+          await removeOpening(page);
+        }
+      },
+    ),
+    C(
+      'config.ab-merge',
+      'T15',
+      'read-only',
+      'WP-35 cases.md D3; TR_AC_OPBL.cs:2499, :3387 Advance/Enterprise only.',
+      async () => ({}),
+      { applicable: false, reason: 'A/B Merge is Advance/Enterprise only; outside Lite.' },
+    ),
+    C(
+      'keyboard.esc-and-keys',
+      'T17',
+      'read-only',
+      'WP-35 cases.md; TR_AC_OPBL.cs:2916, :2924 uppercase, swallow apostrophe, Esc depends on changed total.',
+      async (ctx) => {
+        const { page } = await ctx.session();
+        await openScreen(page);
+        await pickParty(page, PARTY.code);
+        await page.getByLabel('Opening Amount', { exact: true }).press('Escape');
+        await page.waitForURL((url) => url.pathname !== '/txn/ac-opbl');
+        await openScreen(page);
+        await pickParty(page, PARTY.code);
+        await page.getByLabel('Opening Amount', { exact: true }).fill('123');
+        await page.getByLabel('Opening Amount', { exact: true }).press('Escape');
+        assert.equal(new URL(page.url()).pathname, '/txn/ac-opbl');
+        assert.ok(
+          await page
+            .getByRole('button', { name: 'Save', exact: true })
+            .evaluate((el) => el === document.activeElement),
+        );
+        const bill = page.getByLabel('BillNo row 1', { exact: true });
+        await bill.fill('');
+        await bill.pressSequentially("ab'c");
+        assert.equal(await bill.inputValue(), 'ABC');
+        return {
+          observation: 'Esc follows dirty state; text keys normalized',
+          expected: 'ABC and Save focus',
+        };
+      },
     ),
     C(
       'output.list-by-type',

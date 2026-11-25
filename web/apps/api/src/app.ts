@@ -815,6 +815,8 @@ export async function buildApp(opts: BuildOpts): Promise<FastifyInstance> {
           coYear: selected.session.coYear,
           scoped: true,
           replayed: selected.replayed,
+          // MS_OPNCOMP.cs:1503-1505: whether opening this company just set yesterday's lock (null on a replay).
+          lastDayLock: selected.lastDayLock,
           ledgerContext: selected.session.ledgerContext,
           context: contextDescriptor(selected.session),
         };
