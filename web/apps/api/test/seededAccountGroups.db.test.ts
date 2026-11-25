@@ -14,11 +14,45 @@ const enabled = process.env.RUN_DB_INTEGRITY_TESTS === '1';
 const tenantId = 'seeded-account-groups';
 const CO = '91';
 const OLD_CO = '92';
+const LATE_CO = '93';
 
 /** System accounts deliberately left without a group: none. */
 const GROUPLESS: string[] = [];
-const BALANCE_SHEET = ['CASH', 'BANK', 'CAPITAL', 'ORDADV'];
-const PROFIT_AND_LOSS = ['LBRINC', 'LBREXP', 'INTINC', 'HMCHRG', 'DISCOUNT', 'SALES', 'PURCHASE'];
+// Every system account, by the class its desktop twin has in the installer chart.
+const BALANCE_SHEET = [
+  'CASH',
+  'BANK',
+  'CAPITAL',
+  'ORDADV',
+  'WALKIN',
+  'DHRN',
+  'BRANCH',
+  'BULLION',
+  'GST',
+  'GSTINPUT',
+  'TCS',
+];
+const PROFIT_AND_LOSS = [
+  'LBRINC',
+  'LBREXP',
+  'INTINC',
+  'HMCHRG',
+  'DISCOUNT',
+  'SALES',
+  'PURCHASE',
+  'CARDCOMM',
+  'OTHCHRG',
+  'FINEKSR',
+  'KASAR',
+  'ROUNDOFF',
+  'OG',
+  'OS',
+  'OLDGOLD',
+  'FINESALE',
+  'FINEPURC',
+  'SLVSALE',
+  'SLVPURC',
+];
 
 (enabled ? describe : describe.skip)('seeded account groups of a new company', () => {
   let owner: PrismaClient;
@@ -73,6 +107,8 @@ const PROFIT_AND_LOSS = ['LBRINC', 'LBREXP', 'INTINC', 'HMCHRG', 'DISCOUNT', 'SA
       CO,
     )) as Array<{ code: string; gr: string | null; found: string | null }>;
     expect(rows.length).toBeGreaterThan(20);
+    // Every seeded account is classified below, so a mis-grouped one cannot slip past the year-end checks.
+    expect(rows.map((r) => r.code).sort()).toEqual([...BALANCE_SHEET, ...PROFIT_AND_LOSS].sort());
     expect(await groupCount(CO)).toBe(DESKTOP_ACCOUNT_GROUPS.length);
     expect(
       rows
@@ -104,5 +140,19 @@ const PROFIT_AND_LOSS = ['LBRINC', 'LBREXP', 'INTINC', 'HMCHRG', 'DISCOUNT', 'SA
     const result = await seedCompany(runtime, tenantId, OLD_CO);
     expect(result.created.coMast).toBe(false);
     expect(await groupCount(OLD_CO)).toBe(0);
+  });
+
+  it('seeds the groups when the company row came first and its chart is provisioned later', async () => {
+    // Company master (companyIdentity.ts) writes only CO_MAST; a later provision creates the chart.
+    await seedCompany(runtime, tenantId, LATE_CO);
+    for (const table of ['AC_GROUP', 'AC_MAST'])
+      await owner.$executeRawUnsafe(
+        `DELETE FROM "${table}" WHERE tenant_id=$1 AND "CO_CODE"=$2`,
+        tenantId,
+        LATE_CO,
+      );
+    const result = await seedCompany(runtime, tenantId, LATE_CO);
+    expect(result.created.coMast).toBe(false);
+    expect(await groupCount(LATE_CO)).toBe(DESKTOP_ACCOUNT_GROUPS.length);
   });
 });

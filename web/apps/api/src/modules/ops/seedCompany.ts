@@ -752,9 +752,14 @@ export async function seedCompany(
       );
       coMast = true;
     }
-    // Only a company created by this call: boot (server.ts) and /admin/companies/:coCode/provision re-run this for
-    // companies that already exist, and those charts must not gain groups.
-    if (coMast) await seedDesktopAccountGroups(tx, absent, tenantId, coCode);
+    // Only a chart being created now: a company created by this call, or one whose CO_MAST came first (Company
+    // master, companyIdentity.ts) and has neither groups nor system accounts yet. Boot (server.ts) and
+    // /admin/companies/:coCode/provision re-run this for established companies, whose charts must not gain groups.
+    const freshChart =
+      coMast ||
+      ((await absent('AC_GROUP', '"CO_CODE"=$2', coCode)) &&
+        (await absent('AC_MAST', '"CO_CODE"=$2 AND "AC_CODE"=$3', coCode, 'CASH')));
+    if (freshChart) await seedDesktopAccountGroups(tx, absent, tenantId, coCode);
     for (const a of SYSTEM_ACCOUNTS) {
       if (await absent('AC_MAST', '"CO_CODE"=$2 AND "AC_CODE"=$3', coCode, a.code)) {
         await tx.$executeRawUnsafe(
