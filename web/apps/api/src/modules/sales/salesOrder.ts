@@ -1120,8 +1120,16 @@ function prepareSalesOrderCreate(input: SalesOrderInput, lifecycle?: OrderWriteC
           RATE_TYPE: txt(c.in.rateType, 1), // mSG[i,48] :9259
           IT_TYPE: txt(c.in.itType, 1), // mSG[i,49] :9260
           PR_CODE: txt(c.in.prCode, 2), // mSG[i,51] :9261
-          OLD_TBL_CODE: txt(c.in.oldTblCode, 3), // mSG[i,69] :9266
-          TAG_STK_LESS: txt(c.in.tagStockLess, 1), // mSG[i,70] :9267
+          // mSG[i,69] :9266. An edit that omits it keeps the saved line's value: the delete path restores BAR_DETL.TBL_CODE from it.
+          OLD_TBL_CODE: txt(
+            c.in.oldTblCode ?? previousLines.get(parentNumbers[i]!)?.OLD_TBL_CODE,
+            3,
+          ),
+          // mSG[i,70] :9267. An edit that omits it keeps the saved value, so it cannot drop the tag reservation.
+          TAG_STK_LESS: txt(
+            c.in.tagStockLess ?? previousLines.get(parentNumbers[i]!)?.TAG_STK_LESS,
+            1,
+          ),
           DESIGN_IMG_ID:
             c.in.designImageId === undefined
               ? previousLines.has(parentNumbers[i]!)
