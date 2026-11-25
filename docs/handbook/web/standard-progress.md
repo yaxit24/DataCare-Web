@@ -6,10 +6,10 @@ Order (D31, D32): every Lite menu works end to end like the desktop first, then 
 
 | Tier | Menus | With a feature module | Module with no open defect | Done |
 |---|---:|---:|---:|---:|
-| Lite (first, D32) | 49 | 41 | 39 | 0 |
+| Lite (first, D32) | 49 | 42 | 40 | 0 |
 | Basic (added by Basic) | 29 | 1 | 1 | 0 |
 | Standard (added by Standard) | 36 | 1 | 1 | 0 |
-| **Standard total** | **114** | **43** | **41** | **0** |
+| **Standard total** | **114** | **44** | **42** | **0** |
 
 ## Lite — 49 menus (first, D32)
 
@@ -52,7 +52,7 @@ Order (D31, D32): every Lite menu works end to end like the desktop first, then 
 | Report | Order Report | `/reports/order-report` | REPORT | — | no module | — |
 | Report | Cash Bank | `/reports/cash-book` | REPORT | — | no module | — |
 | Report | Gst Report | `/reports/gst-report` | REPORT | gst-report | module green | — |
-| Report | HuId Report | `/reports/huid` | REPORT | — | no module | — |
+| Report | HuId Report | `/reports/huid` | REPORT | huid-report | module green | — |
 | Transaction | Purchase | `/txn/purchase` | PARTIAL | purchase-invoice | module green | — |
 | Transaction | Purchase Rtn | `/txn/purchase-return` | PARTIAL | purchase-return | module green | — |
 | Transaction | Sales Order | `/txn/sales-order` | PARTIAL | sales-order | module green | — |
