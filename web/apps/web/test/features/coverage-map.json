@@ -116,10 +116,7 @@
       ]
     },
     "companyOpen": {
-      "covers": [
-        "web/apps/web/app/select/page.tsx",
-        "web/apps/web/lib/contextSelection.ts"
-      ]
+      "covers": ["web/apps/web/app/select/page.tsx", "web/apps/web/lib/contextSelection.ts"]
     },
     "purchaseReturn": {
       "covers": [
