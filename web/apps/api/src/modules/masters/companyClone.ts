@@ -211,49 +211,6 @@ export const COMPANY_CLONE_TABLES: readonly CompanyCloneTable[] = [
     ],
   },
   {
-    /**
-     * Account serial allocation, written by `MS_OPNCOMP` when a company is opened. Company- and
-     * location-scoped, so it belongs with the provisioning set rather than with master CRUD.
-     */
-    table: 'AC_MAST_SRNO',
-    line: 1511,
-    columns: ['LC_CODE', 'AC_CODE', 'AC_NAME', 'AC_GR', 'MAIN_USER'],
-  },
-  {
-    /**
-     * Bank reconciliation marks (`LEDR_KEY` + `CLR_DATE`), written by `MS_UPDATE`. Cloned so a new
-     * company starts with the template's reconciliation state rather than an unwritten table.
-     */
-    table: 'BANK_RECONCILE',
-    line: 1511,
-    columns: ['LC_CODE', 'LEDR_KEY', 'CLR_DATE'],
-  },
-  {
-    /**
-     * Book DETAIL rows, seeded alongside BOOK_DATA. The desktop writes these from `MS_LOCT`, `MS_YEAR`
-     * and `MS_UPDATE` (14 columns, identical list in all three), and the web READS them in `bookPolicy`
-     * to resolve a voucher's posting account and main book — so a company created without them has
-     * books that cannot post. That read-without-write gap is why this entry exists.
-     */
-    table: 'BOOK_DETL',
-    line: 1531,
-    columns: [
-      'LC_CODE',
-      'CO_BOOK',
-      'SR_NO',
-      'BOOK_NAME',
-      'BOOK_SNAME',
-      'BOOK_TYPE',
-      'ITM_TYPE',
-      'BOOK_INOUT',
-      'AC_CODE',
-      'AC_NAME',
-      'MAIN_BOOK',
-      'RESET_BOOK',
-      'DATA_TYPE',
-    ],
-  },
-  {
     table: 'BOOK_DATA',
     line: 1525,
     columns: [
@@ -459,6 +416,10 @@ export const CLONE_TEMPLATE_CO_CODE = '01';
 
 export interface CloneCompanyOptions {
   sourceCoCode?: string;
+  /** MS_YEAR.cs:1557-1591 blank old-company selection copies only default masters. */
+  desktopDefaults?: boolean;
+  /** Apply the selected-company branch, including its optional party copy. */
+  importAllParties?: boolean;
   /** Desktop copy-company behaviour: clear the target company's rows first. Default false. */
   replace?: boolean;
   /** Restrict to these tables (used by tests and partial re-provisioning). */
@@ -488,7 +449,6 @@ export async function cloneCompanyTx(
 
   for (const spec of COMPANY_CLONE_TABLES) {
     if (options.only && !options.only.includes(spec.table)) continue;
-    const cols = spec.columns.map(q).join(',');
 
     if (options.replace) {
       await tx.$executeRawUnsafe(
@@ -508,12 +468,55 @@ export async function cloneCompanyTx(
       }
     }
 
+    const defaultFilters: Record<string, string> = {
+      AC_MAST: ` AND "LC_CODE"='00' AND CASE WHEN "AC_CODE" ~ '^[0-9]+$' THEN "AC_CODE"::numeric < 101 ELSE false END`,
+      BOOK_DATA: ` AND "LC_CODE"='00'`,
+      BOOK_DETL: ` AND "LC_CODE"='00'`,
+      EMP_MAST: ` AND "EMP_CODE"='001'`,
+      GROUP_MAST: ` AND "GR_CODE" IN ('916','DM','EM','FGL','FSL','GO','OG','ORD','OS','OT','SL','SN')`,
+      ITEM_MAST: ` AND "IT_CODE" IN ('999','DM','EM','FSL','HM','OG','ORG','ORS','OS','OT','RD','SN')`,
+      LOCT_MAST: ` AND "LC_CODE"='00'`,
+      PRODUCT_MAST: ` AND "PR_CODE" IN ('DM','EM','FN','HM','OD','OG','OR','OS','OT','RD','SN')`,
+      TABLE_MAST: ` AND "TABLE_CODE"='001'`,
+    };
+    const desktop = options.desktopDefaults !== undefined || options.importAllParties !== undefined;
+    const defaultAccounts = options.desktopDefaults || options.importAllParties === false;
+    const tableSource =
+      desktop && (spec.table === 'LOCT_MAST' || (spec.table === 'AC_MAST' && defaultAccounts))
+        ? '01'
+        : source;
+    const filter = options.desktopDefaults
+      ? (defaultFilters[spec.table] ?? '')
+      : desktop && ['AC_MAST', 'BOOK_DATA', 'BOOK_DETL', 'LOCT_MAST'].includes(spec.table)
+        ? spec.table === 'AC_MAST' && defaultAccounts
+          ? defaultFilters.AC_MAST!
+          : ` AND "LC_CODE"='00'`
+        : '';
+    // Default account copy omits personal/contact columns and always resets DATA_TRFR (MS_YEAR:1515,1520,1560).
+    const defaultAccountColumns = [
+      'AC_CODE',
+      'LC_CODE',
+      'AC_NAME',
+      'AC_SHORT',
+      'AC_MAIN_GR',
+      'AC_GR',
+      'AC_GST_TYPE',
+      'DATA_TRFR',
+    ];
+    const selectedColumns =
+      desktop && spec.table === 'AC_MAST' && defaultAccounts
+        ? defaultAccountColumns
+        : [...spec.columns];
+    const targetCols = selectedColumns.map(q).join(',');
+    const sourceCols = selectedColumns
+      .map((c) => (desktop && spec.table === 'AC_MAST' && c === 'DATA_TRFR' ? "'N'" : q(c)))
+      .join(',');
     written[spec.table] = (await tx.$executeRawUnsafe(
-      `INSERT INTO "${spec.table}"(tenant_id,"CO_CODE",${cols})
-         SELECT $1::text,$2::text,${cols} FROM "${spec.table}" WHERE tenant_id=$1 AND "CO_CODE"=$3`,
+      `INSERT INTO "${spec.table}"(tenant_id,"CO_CODE",${targetCols})
+         SELECT $1::text,$2::text,${sourceCols} FROM "${spec.table}" WHERE tenant_id=$1 AND "CO_CODE"=$3${filter}`,
       tenantId,
       coCode,
-      source,
+      tableSource,
     )) as number;
   }
   return { written, skipped };

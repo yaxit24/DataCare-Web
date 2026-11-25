@@ -142,6 +142,16 @@ const CONSUMED_SQL = `
   END`;
 
 /**
+ * The money advance of an order `o`. A rate-cut order (RCUT_RATE != 0) has none: the desktop files its tender total
+ * as RCUT_AMT with ADV_AMT 0 (TR_SALE_ORD.cs:9124-9133) and its '+' row carries ORD_AMT 0 and the rate-cut fine in
+ * ORD_GOLD (:9504, :9509), so neither the sale's order help (TR_SALE.cs:7299) nor Order Cancel's
+ * (TR_SL_ORD_ADJ.cs:2526), which read ADV_AMT and keep SUM('+' ORD_AMT) - SUM(other ORD_AMT) > 0, can spend it as money.
+ * The CASE also covers web orders saved before the header split, which kept the rate-cut total in ADV_AMT.
+ */
+export const MONEY_ADVANCE_SQL = `CASE WHEN coalesce(NULLIF(o."RCUT_RATE"::text,'')::numeric,0) <> 0 THEN 0
+  ELSE coalesce(NULLIF(o."ADV_AMT"::text,'')::numeric,0) END`;
+
+/**
  * Orders of the location with their advance and what is used; callers decide which are still open. With `lock`,
  * the named orders' rows are locked first (FOR UPDATE, in key order) so a concurrent sale or cancel of the same order
  * waits and then sees this transaction's use.
@@ -163,7 +173,7 @@ async function ordersWithAdvanceTx(
   const rows: Array<Record<string, unknown>> = await tx.$queryRawUnsafe(
     `SELECT o."VCH_NO" AS ord_no, o."AC_CODE" AS ac_code, o."AC_NAME" AS ac_name, o."VCH_DATE"::text AS ord_date,
             o."CO_YEAR" AS ord_year, o."CO_BOOK" AS ord_book, o."HD_VCH_NO" AS hd_vch_no,
-            coalesce(NULLIF(o."ADV_AMT"::text,'')::numeric,0)::float AS adv,
+            ${MONEY_ADVANCE_SQL}::float AS adv,
             coalesce((
               SELECT sum(${CONSUMED_SQL}) FROM "SL_ORD_ADJ" a
                WHERE a.tenant_id = o.tenant_id AND a."CO_CODE" = o."CO_CODE"

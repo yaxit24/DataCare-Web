@@ -9,10 +9,11 @@ import {
   extendedGridColumnCount,
   GridModeToggle,
 } from '../../../../components/ExtendedGrid';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { desktopGlobalFormKeyActions, FormKeyHints } from '../../../../components/FormKeys';
-import { del, get, post, put, ApiError } from '../../../../lib/api';
+import { del, get, post, postCommand, put, ApiError } from '../../../../lib/api';
+import { useIdempotencyKey } from '../../../../lib/idempotencyKey';
 import { LookupPicker } from '../../../../components/LookupPicker';
 import { VoucherList } from '../../../../components/VoucherList';
 import { useVoucherNumberKeys, VoucherNumberNote } from '../../../../components/VoucherNumberKeys';
@@ -27,9 +28,43 @@ import { todayLocal } from '../../../../lib/localDate';
 /** Tag Opening and Only Tag Entry (TR_TAG_OPBL): load opening barcoded stock. Tag No auto-generates (SRNO_MAST.TAG_SRNO)
  *  when left blank. Rich per-tag fields → BAR_DETL (Counter/Design/Size/LsWt/Lbr%/LbrRate/OthAmt).
  *  The two menus share the form and differ by book family (MDI_FORM.cs:7700-7710 CurBookHelp("OPSTK"), :8574-8584
- *  CurBookHelp("TAG GEN")): Only Tag Entry (`?mode=TAG GEN`) makes the tags out of a loose stock item, which it asks for. */
+ *  CurBookHelp("TAG GEN")): Only Tag Entry (`?mode=TAG GEN`) makes the tags out of a loose stock item, which it asks for.
+ *  WP-32 residuals: the Print / Lable Skip / label-file / Set controls (BtnPrint_Click :11477-11551, BtnTagSet_Click
+ *  :12345-12364), the lot header that fills a blank-touch row's karigar block at save (:10990-10996), the COL_MAST
+ *  grid captions (:5395-5402), the MsUserKrTouchHide karigar hiding (:5156-5172) and the Enter-at-last-cell auto
+ *  save / row print (:9108-9114). */
 const DELETE_CONFIRM = 'Are You Sure To Delete This Voucher now?'; // TR_TAG_OPBL.cs:11387
 const DELETE_DONE = 'Delete Success.'; // :11431
+/** BtnTagSet_Click, TR_TAG_OPBL.cs:12362. */
+const DEFAULT_SET = 'Tag Print Report Default Set';
+/** TR_TAG_OPBL.cs:10801 — the counter rule's refusal; the row's counter cell takes focus, as MSG.Col = 6 does. */
+const COUNTER_REQUIRED = 'Please Insert Counter Code and Try Because It is Mandatory...';
+/** The extended fields a non-admin never sees when USER_KR_TOUCH_HIDE is Y (TR_TAG_OPBL.cs:5156-5172). */
+const KARIGAR_HIDDEN_FIELDS = new Set<keyof Line>([
+  'karigarTouch',
+  'karigarWestPct',
+  'karigarFine',
+]);
+interface ColumnSetting {
+  name: string;
+  newName: string;
+  visible: boolean;
+}
+interface Setup {
+  labelFiles: string[];
+  defaultLabelFile: string;
+  qr: boolean;
+  hideKarigarTouch: boolean;
+  autoSave: boolean;
+  autoRowPrint: boolean;
+  columns: Record<'TAG_DETL' | 'TAG_IDTL', ColumnSetting[]>;
+}
+interface SavedOpening {
+  vchNo: number;
+  tags: number;
+  tagNos: string[];
+  version: string;
+}
 interface Line {
   tagNo: string;
   vchSrno?: number;
@@ -288,18 +323,26 @@ export default function TagOpeningPage() {
   const [vchDate, setVchDate] = useState(currentDate);
   const [voucherLookup, setVoucherLookup] = useState('');
   const [loadedVchNo, setLoadedVchNo] = useState('');
+  const [version, setVersion] = useState('');
   const [lines, setLines] = useState<Line[]>([blank()]);
   const [res, setRes] = useState<{ vchNo: number; tags: number; tagNos: string[] } | null>(null);
   const [err, setErr] = useState('');
   const [busy, setBusy] = useState(false);
   // P3: The loose-stock item code the opened tag draws its metal from.
   const [stockItCode, setStockItCode] = useState('');
+  const [lotNo, setLotNo] = useState('');
+  const [lotTouch, setLotTouch] = useState('');
+  const [lotWestPrc, setLotWestPrc] = useState('');
+  const [setup, setSetup] = useState<Setup | null>(null);
+  const [labelFile, setLabelFile] = useState('');
+  const [labelSkip, setLabelSkip] = useState('0');
   // The menu decides the book family: Tag Opening lists OPSTK books, Only Tag Entry (?mode=TAG GEN) TAG GEN books.
   const [tagGen, setTagGen] = useState(false);
   useEffect(() => {
     setTagGen(new URLSearchParams(window.location.search).get('mode')?.toUpperCase() === 'TAG GEN');
   }, []);
   const [notice, setNotice] = useState('');
+  const command = useIdempotencyKey();
   const submitRef = useRef<HTMLButtonElement>(null);
   // Desktop parity: TR_TAG_OPBL reads the scale only while the NET WEIGHT cell is current
   // (`if (MSG.Col != 14) continue;`), so the row that owns focus is tracked and a reading is discarded
@@ -316,9 +359,20 @@ export default function TagOpeningPage() {
 
   // Desktop parity: TR_TAG_OPBL's grid types every tag attribute inline.
   const [fullGrid, setFullGrid] = useState(false);
+  const configuredExtendedFields = useMemo(() => {
+    const settings = new Map(
+      (setup?.columns?.TAG_DETL ?? []).map((column) => [column.name, column] as const),
+    );
+    return extendedLineFields
+      .filter(([key, label]) => {
+        if (setup?.hideKarigarTouch && KARIGAR_HIDDEN_FIELDS.has(key)) return false;
+        return settings.get(label)?.visible !== false;
+      })
+      .map(([key, label]) => [key, settings.get(label)?.newName || label, label] as const);
+  }, [setup]);
   const handleGridKey = useGridKeyboard({
     rowCount: lines.length,
-    columnCount: extendedGridColumnCount(fullGrid, 14, extendedLineFields.length),
+    columnCount: extendedGridColumnCount(fullGrid, 14, configuredExtendedFields.length),
     onAppendRow: () => setLines((current) => [...current, blank()]),
     onRemoveRow: (row) => {
       if (!window.confirm('Remove this tag row?')) return false;
@@ -365,6 +419,20 @@ export default function TagOpeningPage() {
           westPct: n(l.westPct),
         });
   const scopeQuery = `coBook=${encodeURIComponent(coBook)}&coYear=${encodeURIComponent(coYear)}&lcCode=${encodeURIComponent(lcCode)}`;
+  useEffect(() => {
+    if (!coBook || !coYear || !lcCode) return;
+    let live = true;
+    get<Setup>(`/stock/tag-opening/setup?${scopeQuery}`)
+      .then((value) => {
+        if (!live) return;
+        setSetup(value);
+        setLabelFile(value.defaultLabelFile || value.labelFiles?.[0] || '');
+      })
+      .catch((error) => live && setErr(errorText(error)));
+    return () => {
+      live = false;
+    };
+  }, [coBook, coYear, lcCode, scopeQuery]);
   const errorText = (error: unknown) =>
     error instanceof ApiError
       ? error.body?.detail || error.body?.message || error.body?.error || error.message
@@ -372,10 +440,14 @@ export default function TagOpeningPage() {
 
   function newVoucher() {
     setLoadedVchNo('');
+    setVersion('');
     setVoucherLookup('');
     setVchDate(currentDate());
     setLines([blank()]);
     setStockItCode('');
+    setLotNo('');
+    setLotTouch('');
+    setLotWestPrc('');
     setRes(null);
     setErr('');
     setNotice('');
@@ -390,6 +462,7 @@ export default function TagOpeningPage() {
     try {
       const view = await get<any>(`/stock/tag-opening/${encodeURIComponent(vchNo)}?${scopeQuery}`);
       setLoadedVchNo(String(view.voucherNo));
+      setVersion(String(view.version ?? ''));
       setVoucherLookup(String(view.voucherNo));
       setVchDate(String(view.vchDate));
       // TR_TAG_OPBL.cs:10398 reloads the stock item (BAR_DATA.STK_IT_CODE) with the voucher.
@@ -426,7 +499,9 @@ export default function TagOpeningPage() {
     setBusy(true);
     setErr('');
     try {
-      await del(`/stock/tag-opening/${encodeURIComponent(loadedVchNo)}?${scopeQuery}`);
+      await del(
+        `/stock/tag-opening/${encodeURIComponent(loadedVchNo)}?${scopeQuery}&expectedVersion=${encodeURIComponent(version)}`,
+      );
       newVoucher();
       setNotice(DELETE_DONE);
     } catch (error) {
@@ -443,7 +518,11 @@ export default function TagOpeningPage() {
     setBusy(true);
     try {
       const body = {
+        expectedVersion: loadedVchNo ? version : undefined,
         stockItCode: tagGen ? stockItCode.trim() || undefined : undefined,
+        lotNo: lotNo.trim() || undefined,
+        lotTouch: n(lotTouch),
+        lotWestPrc: n(lotWestPrc),
         coBook: coBook || undefined,
         coYear,
         lcCode,
@@ -515,6 +594,7 @@ export default function TagOpeningPage() {
             ordSrno: Number(line.ordSrno || 0) || undefined,
             ordYrcd: line.ordYrcd || undefined,
             sfNo: line.sfNo || undefined,
+            sourceType: 'A',
             slType: line.slType || undefined,
             tagCost: Number(line.tagCost || 0) || undefined,
             westPct: Number(line.westPct || 0) || undefined,
@@ -532,15 +612,56 @@ export default function TagOpeningPage() {
           })),
       };
       const saved = loadedVchNo
-        ? await put<{ vchNo: number; tags: number; tagNos: string[] }>(
-            `/stock/tag-opening/${encodeURIComponent(loadedVchNo)}`,
-            body,
-          )
-        : await post<{ vchNo: number; tags: number; tagNos: string[] }>('/stock/tag-opening', body);
+        ? await put<SavedOpening>(`/stock/tag-opening/${encodeURIComponent(loadedVchNo)}`, body)
+        : await postCommand<SavedOpening>('/stock/tag-opening', body, command.key);
       const savedNo = String(saved.vchNo).padStart(5, '0');
       setLoadedVchNo(savedNo);
       setVoucherLookup(savedNo);
+      setVersion(saved.version);
       setRes(saved);
+      command.renew();
+    } catch (error) {
+      const message = errorText(error);
+      setErr(message);
+      if (message === COUNTER_REQUIRED) {
+        const row = lines.findIndex((line) => line.itCode && !line.tblCode.trim());
+        if (row >= 0)
+          document
+            .querySelector<HTMLInputElement>(`[aria-label="Tag opening tblCode row ${row + 1}"]`)
+            ?.focus();
+      }
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function setDefaultLabelFile() {
+    if (!labelFile) return;
+    setBusy(true);
+    setErr('');
+    try {
+      await post(`/stock/tag-opening/default-file?${scopeQuery}`, { file: labelFile });
+      setNotice(DEFAULT_SET);
+    } catch (error) {
+      setErr(errorText(error));
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function printVoucher(srNo?: number) {
+    if (!loadedVchNo) return;
+    setBusy(true);
+    setErr('');
+    try {
+      const rendered = await post<any>(
+        `/stock/tag-opening/${encodeURIComponent(loadedVchNo)}/print?${scopeQuery}`,
+        { labelSkip, labelFile, srNo },
+      );
+      const html = typeof rendered === 'string' ? rendered : String(rendered?.error ?? '');
+      const previewUrl = URL.createObjectURL(new Blob([html], { type: 'text/html' }));
+      window.open(previewUrl, '_blank', 'noopener,noreferrer');
+      window.setTimeout(() => URL.revokeObjectURL(previewUrl), 60_000);
     } catch (error) {
       setErr(errorText(error));
     } finally {
@@ -627,6 +748,60 @@ export default function TagOpeningPage() {
                 mainBooks={tagGen ? ['TAG GEN'] : ['OPSTK', 'TAG OPENING']}
               />
             </div>
+            <div className="field">
+              <label>Lot No</label>
+              <input aria-label="Lot No" value={lotNo} onChange={(e) => setLotNo(e.target.value)} />
+            </div>
+            <div className="field">
+              <label>Lot Touch</label>
+              <input
+                aria-label="Lot Touch"
+                value={lotTouch}
+                onChange={(e) => setLotTouch(e.target.value)}
+              />
+            </div>
+            <div className="field">
+              <label>Lot Wastage %</label>
+              <input
+                aria-label="Lot Wastage %"
+                value={lotWestPrc}
+                onChange={(e) => setLotWestPrc(e.target.value)}
+              />
+            </div>
+          </div>
+          <div className="row">
+            <div className="field">
+              <label>Print file Name</label>
+              <select
+                aria-label="Print file Name"
+                value={labelFile}
+                onChange={(e) => setLabelFile(e.target.value)}
+              >
+                {(setup?.labelFiles ?? []).map((file) => (
+                  <option key={file} value={file}>
+                    {file}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div className="field">
+              <label>Lable Skip</label>
+              <input
+                aria-label="Lable Skip"
+                value={labelSkip}
+                onChange={(e) => setLabelSkip(e.target.value)}
+              />
+            </div>
+            <button type="button" disabled={busy || !labelFile} onClick={setDefaultLabelFile}>
+              Set
+            </button>
+            <button
+              type="button"
+              disabled={busy || !loadedVchNo}
+              onClick={() => void printVoucher()}
+            >
+              Print
+            </button>
           </div>
         </div>
         <fieldset
@@ -685,7 +860,7 @@ export default function TagOpeningPage() {
                 <th className="num">LbrRate</th>
                 <th className="num">OthAmt</th>
                 <th className="num">MRP</th>
-                <ExtendedHeaderCells full={fullGrid} fields={extendedLineFields} />
+                <ExtendedHeaderCells full={fullGrid} fields={configuredExtendedFields} />
                 <th></th>
               </tr>
             </thead>
@@ -769,7 +944,7 @@ export default function TagOpeningPage() {
                   ))}
                   <ExtendedBodyCells
                     full={fullGrid}
-                    fields={extendedLineFields}
+                    fields={configuredExtendedFields}
                     line={line}
                     row={i}
                     baseColumns={14}
@@ -813,11 +988,11 @@ export default function TagOpeningPage() {
             >
               <summary>Tag row {index + 1} desktop fields</summary>
               <div className="row">
-                {extendedLineFields.map(([key, label]) => (
+                {configuredExtendedFields.map(([key, label, aria]) => (
                   <div className="field" key={String(key)}>
                     <label>{label}</label>
                     <input
-                      aria-label={`${label} row ${index + 1}`}
+                      aria-label={`${aria} row ${index + 1}`}
                       value={String(line[key] ?? '')}
                       onChange={(e) => setLine(index, key, e.target.value)}
                       onBlur={() => leaveKarigar(index)}

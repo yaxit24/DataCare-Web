@@ -843,15 +843,19 @@ async function exerciseTourOrderExactValues(page, { owner, tenantId, fixture, ch
   const afterAdvance = await snapshot(voucherNo);
   assert.deepEqual(afterAdvance.SL_ORD_DETL, before.SL_ORD_DETL);
   assert.deepEqual(afterAdvance.SL_ORD_IDTL, before.SL_ORD_IDTL);
+  // The order's only tender is cash, so the advance edit is the cash cell: ADV_AMT is MSG2_TOTAL[9,3] (the tender
+  // total, TR_TOUR_ORD.cs:9375) and CASH_AMT is MSG2_TOTAL[3,3] (:7309); both move 25 -> 40, nothing else does.
   const withoutAdvance = (header) => {
-    const { ADV_AMT, ...rest } = header;
+    const { ADV_AMT, CASH_AMT, ...rest } = header;
     return rest;
   };
   assert.deepEqual(
     afterAdvance.SL_ORD_DATA.map(withoutAdvance),
     before.SL_ORD_DATA.map(withoutAdvance),
   );
+  assert.match(before.SL_ORD_DATA[0].CASH_AMT, /^25(?:\.0+)?$/);
   assert.match(afterAdvance.SL_ORD_DATA[0].ADV_AMT, /^40(?:\.0+)?$/);
+  assert.match(afterAdvance.SL_ORD_DATA[0].CASH_AMT, /^40(?:\.0+)?$/);
   assert.equal(afterAdvance.AC_DATA.length, 2);
   const cash = afterAdvance.AC_DATA.find((row) => row.AC_CODE === 'CASH');
   const customer = afterAdvance.AC_DATA.find((row) => row.AC_CODE === fixture.acCode);

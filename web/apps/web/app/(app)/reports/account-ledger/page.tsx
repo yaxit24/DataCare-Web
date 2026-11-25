@@ -1,8 +1,9 @@
 'use client';
 import { useRouter } from 'next/navigation';
 import { useEffect, useRef } from 'react';
+import { useEditionCode } from '../../../../components/BusinessScope';
 import { LookupPicker } from '../../../../components/LookupPicker';
-import { useAccountLedger } from './useAccountLedger';
+import { useAccountLedger, type FinePrintKind } from './useAccountLedger';
 import { AccountLedgerGrid } from './AccountLedgerGrid';
 import type { AccountLedgerView } from './types';
 
@@ -23,6 +24,26 @@ const VIEWS: Array<{ value: AccountLedgerView; label: string }> = [
   { value: 'ageing', label: 'Debit Ageing' },
 ];
 
+/**
+ * Lite and Basic hide the ageing view: the desktop hides Time Wise for MsSoftType L and B
+ * (RP_LEDR.cs:4587, RP_LEDR.cs:4589 {{((Control)BtnTimeWise).Visible = false;}}). A stack without an edition gate is
+ * the Lite default (D33).
+ */
+function ageingOffered(edition: string | null): boolean {
+  const code = String(edition ?? '').toUpperCase();
+  return code !== '' && code !== 'L' && code !== 'B';
+}
+
+/** The drill-down print buttons, visible only inside the detail drill-down (Esc hides them, RP_LEDR.cs:6024). */
+const FINE_PRINTS: Array<{ kind: FinePrintKind; label: string; key: string }> = [
+  // RP_LEDR.cs:2439 {{BtnGold.Text = "&Gold";}}
+  { kind: 'gold-fine', label: 'Gold', key: 'KeyG' },
+  // RP_LEDR.cs:2453 {{BtnSilver.Text = "&Silver";}}
+  { kind: 'silver-fine', label: 'Silver', key: 'KeyS' },
+  // RP_LEDR.cs:2425 {{BtnDelete.Text = "&JmaUdr";}}
+  { kind: 'jama-udhar', label: 'JmaUdr', key: 'KeyJ' },
+];
+
 const money = (n: number): string =>
   Number(n || 0).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 const wt = (n: number): string =>
@@ -33,14 +54,25 @@ export default function AccountLedgerPage() {
   const l = useAccountLedger();
   const { filters, setFilters, result, error, busy, message } = l;
   const needsAccount = filters.view === 'detail' || filters.view === 'voucher-summary';
+  const views = ageingOffered(useEditionCode()) ? VIEWS : VIEWS.filter((v) => v.value !== 'ageing');
+  const drilled = result?.view === 'detail' && !!result.account;
 
   // Esc (desktop RP_LEDR.cs:5998-6095): from a drill-down return to the account summary; from the summary
   // leave the screen. A document listener so it works regardless of which control holds focus, matching the
   // desktop form-level key handler. A ref keeps the latest result/run without re-binding the listener.
-  const escState = useRef({ result, run: l.run, back: router.back });
-  escState.current = { result, run: l.run, back: router.back };
+  const escState = useRef({ result, run: l.run, back: router.back, finePrint: l.finePrint });
+  escState.current = { result, run: l.run, back: router.back, finePrint: l.finePrint };
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
+      // Alt+G / Alt+S / Alt+J: the desktop caption hot keys of the drill-down prints.
+      if (e.altKey && !e.ctrlKey && !e.metaKey && escState.current.result?.view === 'detail') {
+        const hit = FINE_PRINTS.find((f) => f.key === e.code);
+        if (hit) {
+          e.preventDefault();
+          void escState.current.finePrint(hit.kind);
+          return;
+        }
+      }
       if (e.key !== 'Escape' || e.defaultPrevented) return;
       // A lookup/dialog open marks itself; let it handle its own Esc first.
       if (document.querySelector('[data-lookup-open]')) return;
@@ -68,7 +100,7 @@ export default function AccountLedgerPage() {
               value={filters.view}
               onChange={(e) => setFilters({ view: e.target.value as AccountLedgerView })}
             >
-              {VIEWS.map((v) => (
+              {views.map((v) => (
                 <option key={v.value} value={v.value}>
                   {v.label}
                 </option>
@@ -157,6 +189,19 @@ export default function AccountLedgerPage() {
             <button type="button" className="ghost" onClick={l.csv} disabled={!l.ranQuery}>
               CSV
             </button>
+            {drilled &&
+              FINE_PRINTS.map((f) => (
+                <button
+                  key={f.kind}
+                  type="button"
+                  className="ghost"
+                  aria-keyshortcuts={`Alt+${f.label[0]}`}
+                  data-testid={`ledger-print-${f.kind}`}
+                  onClick={() => void l.finePrint(f.kind)}
+                >
+                  {f.label}
+                </button>
+              ))}
           </div>
         )}
       </div>

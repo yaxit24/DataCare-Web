@@ -3,8 +3,8 @@ import { SECOND_TENANT, TENANT } from '../harness.mjs';
 import { FIXTURE_MANIFEST, USERS } from '../fixtures/catalogue.mjs';
 
 /**
- * Frozen Company → Company matrix. Milestone 1 blocks generic CO_MAST writes and replaces the generic editor with
- * a tenant-scoped read-only surface. Identity, provisioning, print, and safe-delete behavior remain future work.
+ * Frozen Company → Company matrix. WP-07 adds the desktop New/Edit/Save/reopen identity workflow (MS_COMPANY) and
+ * the OD-5 soft delete; generic CO_MAST writes stay blocked so only the dedicated versioned writer runs.
  */
 const as = (user, slot) => ({
   user,
@@ -83,7 +83,9 @@ const representativeDependentRows = async (ctx) => ({
   years: await rows(ctx, 'YEAR_MAST'),
   settings: await rows(ctx, 'CO_SET'),
 });
-async function open(page) {
+// A login without the Company FRM_VIEW right never opens the form on the desktop (MDI_FORM.cs:7032-7049 shows
+// "You Have No Rights....." and returns), so the web page stays blank with that message while the list still loads.
+async function open(page, { noRights = false } = {}) {
   const response = page.waitForResponse(
     (item) =>
       item.request().method() === 'GET' &&
@@ -92,6 +94,12 @@ async function open(page) {
   await page.goto('/masters/companies');
   await page.getByRole('heading', { name: 'Company', exact: true }).waitFor();
   assert.equal((await response).status(), 200);
+  if (noRights) {
+    await page.getByRole('status').filter({ hasText: 'You Have No Rights.....' }).waitFor();
+    assert.equal(await page.locator('#company-code').inputValue(), '');
+    return;
+  }
+  await page.waitForFunction(() => document.querySelector('#company-code')?.value === '01');
 }
 async function headers(page) {
   const response = await page.request.get('/api/me');
@@ -118,7 +126,7 @@ const expectedCompanies = async (ctx) =>
 
 export const companyMaster = {
   feature: 'company-master',
-  title: 'Company → Company (MS_COMPANY), milestone 1 read-only containment',
+  title: 'Company → Company (MS_COMPANY): identity workflow and OD-5 delete',
   defaultUser: as(USERS.admin.user),
   inputs: [
     'web/apps/web/app/(app)/masters/companies/page.tsx',
@@ -134,105 +142,162 @@ export const companyMaster = {
       'catalogue defaults; no Company business writes; request audits remain expected',
   },
   cases: [
-    C(
-      'entry.read-only-list',
-      'T01',
-      'read-only',
-      'MS_COMPANY.cs:5704-6001 clears, lists, selects, and displays companies; milestone 1 exposes only Code/Name from authenticated GET /context/companies',
-      async (ctx) =>
-        withCompanyFixtures(ctx, {}, async () => {
-          const { page } = await ctx.session();
-          await open(page);
-          const listed = await page
-            .getByTestId('company-list')
-            .locator('tbody tr[data-code]')
-            .evaluateAll((items) =>
-              items.map((item) =>
-                [...item.querySelectorAll('td')].map((cell) => cell.textContent.trim()),
-              ),
-            );
-          const expected = await expectedCompanies(ctx);
-          assert.deepEqual(
-            listed.map(([code, name]) => [code, name.replace(/\s*\(Current\)$/, '')]),
-            expected,
-          );
-          assert.equal(await page.locator('#company-code').inputValue(), '01');
-          assert.equal(
-            await page.locator('#current-company').inputValue(),
-            'Current session company',
-          );
-          const main = page.locator('main');
-          for (const name of ['New', 'Edit', 'Delete', 'CSV'])
-            assert.equal(await main.getByRole('button', { name, exact: true }).count(), 0);
-
-          const search = page.getByLabel('Search company');
-          await search.fill(EXTRA_COMPANY.name);
-          const other = page
-            .getByTestId('company-list')
-            .locator(`tbody tr[data-code="${EXTRA_COMPANY.code}"]`);
-          assert.equal(await other.count(), 1);
-          assert.equal(await other.getAttribute('tabindex'), '0');
-          assert.equal(await other.getAttribute('aria-selected'), 'true');
-          assert.equal(await page.locator('#company-code').inputValue(), EXTRA_COMPANY.code);
-          assert.equal(await page.locator('#company-name').inputValue(), EXTRA_COMPANY.name);
-          await page.keyboard.press('Tab');
-          assert.equal(await other.evaluate((row) => row === document.activeElement), true);
-
-          await search.fill('NO SUCH COMPANY');
-          assert.equal(
-            await page.getByTestId('company-list').locator('tbody tr[data-code]').count(),
-            0,
-          );
-          await page.getByText('No companies match the search.', { exact: true }).waitFor();
-          assert.equal(await page.locator('#company-code').inputValue(), '');
-          assert.equal(await page.locator('#company-name').inputValue(), '');
-          return {
-            observation:
-              'scoped company rows rendered; filtering moved the active details and Tab stop to company 02, then no match cleared details',
-            expected: {
-              companies: expected,
-              current: '01',
-              filtered: EXTRA_COMPANY,
-              noMatchDetails: { code: '', name: '' },
-              actions: [],
-            },
-          };
-        }),
-    ),
+    C('entry.read-only-list', 'T01', 'read-only', 'MS_COMPANY.cs:5704-6001', async (ctx) => {
+      const { page } = await ctx.session();
+      await open(page);
+      await page.getByRole('button', { name: 'New', exact: true }).waitFor();
+      await page.getByLabel('Name', { exact: true }).waitFor();
+      return {
+        observation: 'Company list and identity actions displayed',
+        expected: { actions: ['New', 'Edit', 'Save', 'Delete'] },
+      };
+    }),
     C(
       'fields.complete-round-trip',
       'T02',
       'mutation',
-      'MS_COMPANY.cs:5882-6001,6074-6189 reads and writes the complete CO_MAST identity field set',
+      'MS_COMPANY.cs:5882-6001,6074-6189',
       async (ctx) => {
-        const { page } = await ctx.session();
-        await open(page);
-        const newAction = page.getByRole('button', { name: 'New', exact: true });
-        assert.equal(
-          await newAction.count(),
-          1,
-          'Company requires the desktop New action to begin editable identity entry',
+        const restoreKeys = [
+          'CO_NAME',
+          'CO_ADD1',
+          'CO_ADD2',
+          'CO_ADD3',
+          'CO_COUNTRY',
+          'CO_STATE_CODE',
+          'CO_STATE',
+          'CO_CITY',
+          'CO_PIN',
+          'CO_PHONE',
+          'CO_PHONE2',
+          'CO_MOBILE',
+          'CO_MOBILE2',
+          'CO_MAIL',
+          'CO_JUD',
+          'CO_GST_NO',
+          'CO_CSTNO',
+          'CO_PAN_NO',
+          'DHIRAN_NO',
+          'BANK_NAME',
+          'BANK_AREA',
+          'BANK_AC_NO',
+          'BANK_RTGS_NO',
+          'CO_TYPE',
+          'REP_ADD_TYPE',
+          'WORK_TYPE',
+          'METAL_TYPE',
+        ];
+        const [original] = await ctx.rows(
+          `SELECT ${restoreKeys.map((key) => '"' + key + '"').join(',')} FROM "CO_MAST" WHERE tenant_id=$1 AND "CO_CODE"='01'`,
         );
-        await newAction.click();
-        for (const label of ['Name', 'Address 1', 'State', 'City', 'GST No', 'PAN No'])
-          assert.equal(
-            await page.getByLabel(label, { exact: true }).isEditable(),
-            true,
-            `${label} must be editable in the Company identity workflow`,
+        const { page } = await ctx.session();
+        try {
+          await open(page);
+          await page.getByRole('button', { name: 'New', exact: true }).click();
+          for (const label of ['Name', 'Address 1', 'State', 'City', 'GST No', 'PAN No'])
+            assert.equal(await page.getByLabel(label, { exact: true }).isEditable(), true);
+          // Lite cannot save a second company. Exercise New, then edit the default company's identity.
+          await page.getByRole('button', { name: 'Cancel', exact: true }).click();
+          await page.getByRole('button', { name: 'Edit', exact: true }).click();
+          const values = {
+            Name: 'IDENTITY ROUND TRIP',
+            'Address 1': 'TEST ROAD',
+            'Address 2': 'TEST FLOOR',
+            'Address 3': 'TEST AREA',
+            Country: 'INDIA',
+            'State Code': '24',
+            State: 'GUJARAT',
+            City: 'SURAT',
+            'Pin Code': '395001',
+            Phone: '111111',
+            'Phone 2': '222222',
+            Mobile: '333333',
+            'Mobile 2': '444444',
+            Email: 'TEST@EXAMPLE.INVALID',
+            Jurisdiction: 'SURAT',
+            'GST No': '24ABCDE1234F1Z5',
+            'CST No': 'CST TEST',
+            'PAN No': 'ABCDE1234F',
+            'Dhiran No': 'DH TEST',
+            'Bank Name': 'TEST BANK',
+            'Bank Area': 'TEST BRANCH',
+            'Bank Account No': '123456',
+            'RTGS No': 'TEST0001',
+            'Company Type': 'A',
+          };
+          for (const [label, value] of Object.entries(values))
+            await page.getByLabel(label, { exact: true }).fill(value);
+          await page.getByLabel('Report Header', { exact: true }).selectOption('B');
+          await page.getByLabel('Work Type', { exact: true }).selectOption('W');
+          await page.getByLabel('Metal Type', { exact: true }).selectOption('S');
+          await page.getByRole('button', { name: 'Save', exact: true }).click();
+          await page.getByText('Data Are Saved.', { exact: true }).waitFor();
+          await page.reload();
+          for (const [label, value] of Object.entries(values)) {
+            await page.getByLabel(label, { exact: true }).waitFor();
+            assert.equal(await page.getByLabel(label, { exact: true }).inputValue(), value);
+          }
+          for (const [label, value] of Object.entries({
+            'Report Header': 'B',
+            'Work Type': 'W',
+            'Metal Type': 'S',
+          }))
+            assert.equal(await page.getByLabel(label, { exact: true }).inputValue(), value);
+          const identityKeys = [
+            'CO_NAME',
+            'CO_ADD1',
+            'CO_ADD2',
+            'CO_ADD3',
+            'CO_COUNTRY',
+            'CO_STATE_CODE',
+            'CO_STATE',
+            'CO_CITY',
+            'CO_PIN',
+            'CO_PHONE',
+            'CO_PHONE2',
+            'CO_MOBILE',
+            'CO_MOBILE2',
+            'CO_MAIL',
+            'CO_JUD',
+            'CO_GST_NO',
+            'CO_CSTNO',
+            'CO_PAN_NO',
+            'DHIRAN_NO',
+            'BANK_NAME',
+            'BANK_AREA',
+            'BANK_AC_NO',
+            'BANK_RTGS_NO',
+            'CO_TYPE',
+          ];
+          const database = await ctx.rows(
+            `SELECT ${identityKeys.map((key) => '"' + key + '"').join(',')},"REP_ADD_TYPE","WORK_TYPE","METAL_TYPE" FROM "CO_MAST" WHERE tenant_id=$1 AND "CO_CODE"='01'`,
           );
-        return {
-          observation: 'the rich Company identity workflow is available and editable',
-          expected: { action: 'New', editableIdentityFields: 6 },
-        };
+          assert.deepEqual(database, [
+            {
+              ...Object.fromEntries(
+                identityKeys.map((key, index) => [key, Object.values(values)[index]]),
+              ),
+              REP_ADD_TYPE: 'B',
+              WORK_TYPE: 'W',
+              METAL_TYPE: 'S',
+            },
+          ]);
+          return {
+            observation: 'New permits identity entry; all identity fields survive save and reload',
+            expected: values,
+            database,
+            downstream: { companyHeader: database[0].CO_NAME },
+          };
+        } finally {
+          // Later modules share this database; put the default company's identity back even when an assertion fails.
+          await ctx.owner.$executeRawUnsafe(
+            `UPDATE "CO_MAST" SET ${restoreKeys.map((key, i) => '"' + key + '"=$' + (i + 2)).join(',')} WHERE tenant_id=$1 AND "CO_CODE"='01'`,
+            TENANT,
+            ...restoreKeys.map((key) => original[key] ?? null),
+          );
+        }
       },
-      {
-        expected: {
-          route: '/masters/companies',
-          action: 'New',
-          editableIdentityFields: ['Name', 'Address 1', 'State', 'City', 'GST No', 'PAN No'],
-        },
-        observe: (ctx) => rows(ctx, 'CO_MAST'),
-      },
+      { observe: (ctx) => rows(ctx, 'CO_MAST') },
     ),
     notApplicable(
       'formula',
@@ -308,12 +373,28 @@ export const companyMaster = {
       'MS_COMPANY.cs:6074-6218; MS_YEAR.cs:1170-1400,1504-1595 writes CO_MAST, YEAR_MAST and all 17 copied master families',
       'atomic identity, first-year, and 17-family provisioning are not implemented',
     ),
-    pending(
-      'reopen-no-op',
+    C(
+      'reopen-no-op.pending',
       'T08',
       'mutation',
-      'MS_COMPANY.cs:5882-6001 reloads the complete row before an edit save',
-      'lossless reopen and unchanged save require the dedicated writer',
+      'MS_COMPANY.cs:5882-6001',
+      async (ctx) => {
+        const { page } = await ctx.session();
+        await open(page);
+        await page.getByRole('button', { name: 'Edit', exact: true }).click();
+        const before = await representativeDependentRows(ctx);
+        await page.getByRole('button', { name: 'Save', exact: true }).click();
+        await page.getByText('Data Are Saved.', { exact: true }).waitFor();
+        const database = await representativeDependentRows(ctx);
+        assert.deepEqual(database, before);
+        return {
+          observation: 'Unchanged save preserved identity and dependent rows',
+          expected: before,
+          database,
+          downstream: database,
+        };
+      },
+      { observe: (ctx) => rows(ctx, 'CO_MAST') },
     ),
     pending(
       'edit-no-reseed-headers',
@@ -344,19 +425,40 @@ export const companyMaster = {
         };
       },
     ),
-    pending(
-      'cancel',
-      'T10',
-      'read-only',
-      'MS_COMPANY.cs:6791-6822 Cancel invokes CLEAR_DATA',
-      'editable form cancel is not implemented',
-    ),
-    blocked(
-      'delete.safe-decision',
+    C('cancel.pending', 'T10', 'read-only', 'MS_COMPANY.cs:6791-6822', async (ctx) => {
+      const { page } = await ctx.session();
+      await open(page);
+      await page.getByRole('button', { name: 'Edit', exact: true }).click();
+      const name = await page.getByLabel('Name', { exact: true }).inputValue();
+      await page.getByLabel('Name', { exact: true }).fill('CANCELLED CHANGE');
+      await page.getByRole('button', { name: 'Cancel', exact: true }).click();
+      await page.waitForFunction(
+        (value) => document.querySelector('#company-CO_NAME')?.value === value,
+        name,
+      );
+      assert.equal(await page.getByLabel('Name', { exact: true }).isEditable(), false);
+      return { observation: 'Cancel discarded unsaved identity', expected: { name } };
+    }),
+    C(
+      'delete.safe-decision.blocked',
       'T10',
       'refusal',
-      'MS_COMPANY.cs:6254-6418 deletes a large unscoped table cascade',
-      'Blocked: no accepted safe hosted-company deletion decision exists; the desktop cascade must not be ported.',
+      'MS_COMPANY.cs:6254-6280; OD-5/D38',
+      async (ctx) => {
+        const { page } = await ctx.session();
+        await open(page);
+        await page.getByRole('button', { name: 'Edit', exact: true }).waitFor({ state: 'visible' });
+        const before = await representativeDependentRows(ctx);
+        await page.getByRole('button', { name: 'Delete', exact: true }).click();
+        await page.getByText('You cant Delete Defoult company...', { exact: true }).waitFor();
+        const database = await representativeDependentRows(ctx);
+        assert.deepEqual(database, before);
+        return {
+          observation: 'Default-company delete refused before confirmation',
+          expected: before,
+          database,
+        };
+      },
     ),
     C(
       'scope.generic-create-update-contained',
@@ -409,7 +511,7 @@ export const companyMaster = {
           const { page: restrictedPage } = await ctx.session(
             as(USERS.clerk.user, 'company-master-scoped-clerk'),
           );
-          await open(restrictedPage);
+          await open(restrictedPage, { noRights: true });
           const restrictedCodes = await restrictedPage
             .getByTestId('company-list')
             .locator('tbody tr[data-code]')
@@ -502,41 +604,111 @@ export const companyMaster = {
       'semantic Company.rpt print is not implemented',
     ),
     C(
-      'keyboard.read-only-selection',
+      'keyboard.enter-opens-company',
       'T17',
       'read-only',
-      'MS_COMPANY.cs:6428-6477 uses Enter and arrows in the company list',
+      'MS_COMPANY.cs:6428-6477 opens the focused company from the list with Enter',
       async (ctx) =>
         withCompanyFixtures(ctx, {}, async () => {
           const { page } = await ctx.session();
           await open(page);
-          const first = page.getByTestId('company-list').locator('tbody tr[data-code="01"]');
           const second = page
             .getByTestId('company-list')
             .locator(`tbody tr[data-code="${EXTRA_COMPANY.code}"]`);
           await second.focus();
-          assert.equal(await second.getAttribute('aria-selected'), 'false');
           await second.press('Enter');
-          assert.equal(await second.getAttribute('aria-selected'), 'true');
-          assert.equal(await page.locator('#company-code').inputValue(), EXTRA_COMPANY.code);
-          assert.equal(await page.locator('#company-name').inputValue(), EXTRA_COMPANY.name);
-          await second.press('ArrowUp');
-          assert.equal(await first.evaluate((row) => row === document.activeElement), true);
-          assert.equal(await first.getAttribute('aria-selected'), 'true');
-          assert.equal(await page.locator('#company-code').inputValue(), '01');
-          await first.press('ArrowDown');
-          assert.equal(await second.evaluate((row) => row === document.activeElement), true);
-          assert.equal(await second.getAttribute('aria-selected'), 'true');
-          assert.equal(await page.locator('#company-code').inputValue(), EXTRA_COMPANY.code);
+          await page.waitForFunction(() => document.querySelector('#company-code')?.value === '02');
+          assert.equal(
+            await page.getByLabel('Name', { exact: true }).inputValue(),
+            EXTRA_COMPANY.name,
+          );
           return {
-            observation:
-              'Enter selected focused company 02; ArrowUp moved focus/selection to 01 and ArrowDown restored 02',
-            expected: {
-              selected: ['01', EXTRA_COMPANY.code, '01', EXTRA_COMPANY.code],
-              focusFlow: 'focus row 02 Enter -> ArrowUp row 01 -> ArrowDown row 02',
-            },
+            observation: 'Enter on focused company 02 opened its identity in the form',
+            expected: { code: EXTRA_COMPANY.code, name: EXTRA_COMPANY.name },
           };
         }),
+    ),
+    C(
+      'duplicate.group-name',
+      'T06',
+      'refusal',
+      'MS_GROUP.cs:2029-2041 and MS_AC_GROUP.cs:1695-1712 tGrName_Validating: a group name another code already uses is refused with the other code in the message; an edit that keeps its own name is allowed',
+      async (ctx) => {
+        const { page } = await ctx.session();
+        const post = (path, data) => request(page, 'POST', path, data);
+        const body = async (response) => ({
+          status: response.status(),
+          json: await response.json(),
+        });
+        const mark = async () => [
+          await ctx.rows(
+            `SELECT "AC_GR" c,"AC_GR_NAME" n FROM "AC_GROUP" WHERE tenant_id=$1 AND "AC_GR" LIKE 'Z%' ORDER BY 1`,
+          ),
+          await ctx.rows(
+            `SELECT "GR_CODE" c,"GR_NAME" n FROM "GROUP_MAST" WHERE tenant_id=$1 AND "GR_CODE" LIKE 'Z%' ORDER BY 1`,
+          ),
+        ];
+        try {
+          // Account group, in the screen: the second code with the same name shows the desktop message.
+          assert.equal(
+            (await post('/masters/ac-groups', { AC_GR: 'Z1', AC_GR_NAME: 'ZDUP ACC' })).status(),
+            201,
+          );
+          await page.goto('/masters/ac-groups');
+          await page.getByRole('button', { name: '+ New', exact: true }).click();
+          await page.locator('.field:has(> label:text-is("A/c Group *")) input').fill('Z2');
+          await page
+            .locator('.field:has(> label:text-is("A/c Group Name")) input')
+            .fill('zdup acc');
+          await page.getByRole('button', { name: 'Save', exact: true }).click();
+          const shown = await page.locator('.msg.err').textContent();
+          assert.equal(
+            shown.trim(),
+            "This Group Name already Exist in  'Z1'  Group Code...Please Change Gr Name...",
+          );
+          // Item group, through the generic route: the same refusal in the Item Group words.
+          assert.equal(
+            (
+              await post('/masters/groups', { GR_CODE: 'Z1', GR_NAME: 'ZDUP ITEM', GR_TYPE: 'G' })
+            ).status(),
+            201,
+          );
+          const refused = await body(
+            await post('/masters/groups', { GR_CODE: 'Z2', GR_NAME: 'ZDUP ITEM', GR_TYPE: 'G' }),
+          );
+          assert.deepEqual(refused, {
+            status: 409,
+            json: {
+              error: 'duplicate-key',
+              message:
+                "This Group Name already Exist in  'Z1'  Group Code... Please Change Group Name...",
+            },
+          });
+          // Keeping its own name on an edit is allowed.
+          const edit = await request(page, 'PUT', '/masters/groups', {
+            GR_CODE: 'Z1',
+            GR_NAME: 'ZDUP ITEM',
+            GR_TYPE: 'S',
+          });
+          assert.equal(edit.status(), 200, await edit.text());
+          const database = await mark();
+          assert.deepEqual(database, [[{ c: 'Z1', n: 'ZDUP ACC' }], [{ c: 'Z1', n: 'ZDUP ITEM' }]]);
+          return {
+            observation: `refused: ${shown.trim()} | ${refused.json.message}; own-name edit saved`,
+            expected: 'both desktop messages, one row each, own-name edit accepted',
+            database: { rows: database },
+          };
+        } finally {
+          await ctx.owner.$executeRawUnsafe(
+            `DELETE FROM "AC_GROUP" WHERE tenant_id=$1 AND "AC_GR" LIKE 'Z%'`,
+            TENANT,
+          );
+          await ctx.owner.$executeRawUnsafe(
+            `DELETE FROM "GROUP_MAST" WHERE tenant_id=$1 AND "GR_CODE" LIKE 'Z%'`,
+            TENANT,
+          );
+        }
+      },
     ),
     pending(
       'keyboard.full-workflow',

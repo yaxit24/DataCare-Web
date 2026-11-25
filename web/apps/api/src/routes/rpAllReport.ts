@@ -1,7 +1,9 @@
 import type { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify';
 import {
+  orderReport,
   RpAllRequestError,
   salesReport,
+  salesReportBooks,
   type RpAllResult,
 } from '../modules/reports/rpAll/index.js';
 import { exportCsv, exportTable, exportXlsxColumns } from '../modules/reports/rpAll/exportRows.js';
@@ -13,6 +15,7 @@ import { renderXlsx } from '../modules/reports/xlsx.js';
  *
  *   GET /reports/sales-report              mode=report|register|item|group|employee|with-order,
  *                                          returns=yes|no, orderOnly=yes|no, fromDate, toDate, selectors
+ *   GET /reports/sales-report/books        the Select Book panel's list (RP_ALL.cs:11421 BookMast)
  *   GET /reports/sales-report/export.csv   the same dataset, every row, as CSV  (Print right)
  *   GET /reports/sales-report/export.xlsx  the same dataset as Excel             (Print right)
  *
@@ -32,19 +35,29 @@ export interface RpAllRouteHelpers {
     coCode: string;
     lcCode?: string;
     coYear?: string;
+    fromDate?: string;
+    toDate?: string;
+    filters?: unknown;
   };
 }
 
 export function registerRpAllReportRoutes(app: FastifyInstance, h: RpAllRouteHelpers): void {
   const { prisma, auth, guard, readScope } = h;
 
-  const build = (req: FastifyRequest): Promise<RpAllResult> => {
+  const scope = (req: FastifyRequest) => {
     const s = readScope(req);
-    return salesReport(
-      prisma,
-      { tenantId: s.tenantId, coCode: s.coCode, lcCode: s.lcCode ?? '', coYear: s.coYear ?? '' },
-      (req.query ?? {}) as Record<string, unknown>,
-    );
+    return {
+      tenantId: s.tenantId,
+      coCode: s.coCode,
+      lcCode: s.lcCode ?? '',
+      coYear: s.coYear ?? '',
+    };
+  };
+  const build = (branch: 'sales' | 'order', req: FastifyRequest): Promise<RpAllResult> => {
+    const query = (req.query ?? {}) as Record<string, unknown>;
+    return branch === 'order'
+      ? orderReport(prisma, scope(req), query)
+      : salesReport(prisma, scope(req), query);
   };
   const fail = (reply: FastifyReply, error: unknown): boolean => {
     if (error instanceof RpAllRequestError) {
@@ -56,11 +69,22 @@ export function registerRpAllReportRoutes(app: FastifyInstance, h: RpAllRouteHel
     return false;
   };
   const fileName = (r: RpAllResult) =>
-    `sales-report-${r.mode}${r.variant === 'return' ? '-return' : ''}-${r.filters.fromDate}-${r.filters.toDate}`;
+    `${r.branch}-report-${r.mode}${r.variant === 'return' ? '-return' : ''}-${r.filters.fromDate}-${r.filters.toDate}`;
 
   app.get('/reports/sales-report', auth as any, async (req, reply) => {
     try {
-      return reply.send(await build(req));
+      return reply.send(await build('sales', req));
+    } catch (error) {
+      if (fail(reply, error)) return reply;
+      throw error;
+    }
+  });
+
+  // BookMast (RP_ALL.cs:11405-11458, called at :6699): the Select Book panel's own list — every book of the
+  // session company+location, uncapped, distinct codes. The generic /lookup/books is not changed.
+  app.get('/reports/sales-report/books', auth as any, async (req, reply) => {
+    try {
+      return reply.send(await salesReportBooks(prisma, scope(req)));
     } catch (error) {
       if (fail(reply, error)) return reply;
       throw error;
@@ -70,7 +94,7 @@ export function registerRpAllReportRoutes(app: FastifyInstance, h: RpAllRouteHel
   app.get('/reports/sales-report/export.csv', auth as any, async (req, reply) => {
     if (!guard(req, reply, 'print')) return;
     try {
-      const result = await build(req);
+      const result = await build('sales', req);
       return reply
         .header('content-type', 'text/csv; charset=utf-8')
         .header('content-disposition', `attachment; filename="${fileName(result)}.csv"`)
@@ -84,7 +108,49 @@ export function registerRpAllReportRoutes(app: FastifyInstance, h: RpAllRouteHel
   app.get('/reports/sales-report/export.xlsx', auth as any, async (req, reply) => {
     if (!guard(req, reply, 'print')) return;
     try {
-      const result = await build(req);
+      const result = await build('sales', req);
+      const table = exportTable(result);
+      const out = await renderXlsx(
+        [{ name: result.caption, columns: exportXlsxColumns(result), rows: table.lines }],
+        fileName(result),
+      );
+      return reply
+        .header('content-type', out.contentType)
+        .header('content-disposition', `attachment; filename="${out.fileName}"`)
+        .send(out.buffer);
+    } catch (error) {
+      if (fail(reply, error)) return reply;
+      throw error;
+    }
+  });
+
+  app.get('/reports/order-report', auth as any, async (req, reply) => {
+    try {
+      return reply.send(await build('order', req));
+    } catch (error) {
+      if (fail(reply, error)) return reply;
+      throw error;
+    }
+  });
+
+  app.get('/reports/order-report/export.csv', auth as any, async (req, reply) => {
+    if (!guard(req, reply, 'print')) return;
+    try {
+      const result = await build('order', req);
+      return reply
+        .header('content-type', 'text/csv; charset=utf-8')
+        .header('content-disposition', `attachment; filename="${fileName(result)}.csv"`)
+        .send(exportCsv(result));
+    } catch (error) {
+      if (fail(reply, error)) return reply;
+      throw error;
+    }
+  });
+
+  app.get('/reports/order-report/export.xlsx', auth as any, async (req, reply) => {
+    if (!guard(req, reply, 'print')) return;
+    try {
+      const result = await build('order', req);
       const table = exportTable(result);
       const out = await renderXlsx(
         [{ name: result.caption, columns: exportXlsxColumns(result), rows: table.lines }],

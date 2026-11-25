@@ -16,8 +16,17 @@ import { FIXTURE_MANIFEST, USERS } from '../fixtures/catalogue.mjs';
  *   and Then print"), TAG_PRINT_DATA cleared, Lable Skip blank rows (SR_NO 1..n, VCH_NO 00000, IT_CODE '00', Math.Round
  *   of Val), then the BAR_DETL row of every Y row copied. Save (:5073-5096) writes the HM ids, weights, Lbr%, Mrp and LRate
  *   back to BAR_DETL (only with Hm Id Update). Set (:5636-5655) makes the chosen file the default.
- * Web rules that differ on purpose (gap G237): the label sheet is the web's (the Crystal files are not in the repository);
- * a blank Gr Code or Pr Code goes on or loads the stock; Delete does nothing (the desktop's BtnDelete_Click is empty).
+ * Web rules that differ on purpose (gap G237): the label sheet is the web's HTML sheet, one layout per Crystal label file
+ * (N249/G261); a blank Gr Code or Pr Code goes on or loads the stock; Delete does nothing (the desktop's BtnDelete_Click
+ * is empty).
+ *
+ * N249 / G261 (orchestration/work/WP-34/cases.md): the PRINT_MAST label-file choice (cboPrintfile :4936-4954, :5200-5209,
+ * Set :5636-5655) and the SubTagPrint sub-report (BarPrint10.xml:72, :100-101; QrPrint10.xml:119; GhatTagPrnt.xml:102;
+ * BarPrint13.xml:10). The browser cases are the `tag-print.*` ids of cases.md at layer browser. Its unit and database
+ * layer ids are vitest cases (apps/api/test/tagLabelText.test.ts, tagPrintFiles.db.test.ts, tagPrintScreen.db.test.ts):
+ * calc.*, required.set-empty-or-unknown, set.default-switches-only-one-file, create.print-does-not-write-master,
+ * edit.set-leaves-staging, rights.cross-tenant-file, concurrency.two-sets-one-default, rollback.set-second-statement-fails.
+ * Deliberate difference: KR_NAME is VARCHAR(5) (a karigar code), so the fixture karigar is `KARI1`, not cases.md's `KARI-1`.
  */
 const as = (user, slot) => ({
   user,
@@ -73,6 +82,14 @@ async function cleanCase(ctx) {
     await exec(ctx, `DELETE FROM "${table}" WHERE tenant_id=$1`);
   await exec(
     ctx,
+    `DELETE FROM "BAR_IDTL" WHERE tenant_id=$1 AND "CO_BOOK"='TOP' AND "VCH_NO"='88001'`,
+  );
+  await exec(
+    ctx,
+    `DELETE FROM "PRINT_MAST" WHERE tenant_id=$1 AND "PRINT_TYPE"='QR' AND "PRINT_FILE" LIKE 'QrPrint10%'`,
+  );
+  await exec(
+    ctx,
     `DELETE FROM "MAIN_STOCK" WHERE tenant_id=$1 AND "TAG_NO" = ANY($2::text[])`,
     TAGS,
   );
@@ -99,8 +116,8 @@ async function tag(ctx, tagNo, srno, over = {}, stock = true) {
   const year = row.year ?? (await ctx.year());
   await ctx.owner.$executeRawUnsafe(
     `INSERT INTO "BAR_DETL"(tenant_id,"CO_CODE","LC_CODE","CO_YEAR","CO_BOOK","VCH_NO","SR_NO","IT_CODE","TAG_NO","VCH_SRNO","DESIGN_NO",
-       "TBL_CODE","ITM_PCS","ITM_GWT","ITM_NWT","ITM_TOUCH","ITM_MRP","LBR_PRC","STK_DATE","VCH_TIME","HM_ID")
-     VALUES ($1,'01','01',$2,$3,$4,$5,$6,$7,$5,$8,$9,1,$10,$11,91.6,$12,8,$13,now(),'')`,
+       "TBL_CODE","ITM_PCS","ITM_GWT","ITM_NWT","ITM_TOUCH","ITM_MRP","LBR_PRC","STK_DATE","VCH_TIME","HM_ID","KR_NAME")
+     VALUES ($1,'01','01',$2,$3,$4,$5,$6,$7,$5,$8,$9,1,$10,$11,91.6,$12,8,$13,now(),'','KARI1')`,
     ctx.tenantId,
     year,
     row.book,
@@ -158,10 +175,22 @@ async function withCase(ctx, run, seed = true) {
     await tag(ctx, 'TP0002', 2, { design: 'DSG-NEWER' });
     await tag(ctx, 'TP0003', 3, { it: 'TPS1', counter: 'T2' });
   }
+  const [shop] = await ctx.rows(
+    `SELECT "CO_NAME" n FROM "CO_MAST" WHERE tenant_id=$1 AND "CO_CODE"='01' LIMIT 1`,
+  );
+  await exec(
+    ctx,
+    `UPDATE "CO_MAST" SET "CO_NAME"='E2E SHOP' WHERE tenant_id=$1 AND "CO_CODE"='01'`,
+  );
   try {
     return await run();
   } finally {
     await cleanCase(ctx);
+    await exec(
+      ctx,
+      `UPDATE "CO_MAST" SET "CO_NAME"=$2 WHERE tenant_id=$1 AND "CO_CODE"='01'`,
+      shop?.n ?? null,
+    );
   }
 }
 
@@ -236,6 +265,108 @@ async function printNow(page) {
   return response;
 }
 
+// ---- N249 / G261 helpers: the PRINT_MAST label files and the SubTagPrint sub-report ----
+const LABEL_FILES = ['QrPrint10', 'BarPrint10', 'BarPrint13', 'GhatTagPrnt'];
+const fourFiles = (def = 'BarPrint10') => LABEL_FILES.map((f) => ['TAG', f, f === def ? 'Y' : 'N']);
+async function putFiles(ctx, rows) {
+  await exec(ctx, `DELETE FROM "PRINT_MAST" WHERE tenant_id=$1 AND "PRINT_TYPE"='TAG'`);
+  await exec(
+    ctx,
+    `DELETE FROM "PRINT_MAST" WHERE tenant_id=$1 AND "PRINT_TYPE"='QR' AND "PRINT_FILE" LIKE 'QrPrint10%'`,
+  );
+  for (const [type, file, flag] of rows)
+    await exec(
+      ctx,
+      `INSERT INTO "PRINT_MAST"(tenant_id,"CO_CODE","PRINT_TYPE","PRINT_FILE","PRINT_SET_A") VALUES ($1,'01',$2,$3,$4)`,
+      type,
+      file,
+      flag,
+    );
+}
+const marks = async (ctx) =>
+  (
+    await ctx.rows(
+      `SELECT "PRINT_TYPE" t,"PRINT_FILE" f,"PRINT_SET_A" a FROM "PRINT_MAST" WHERE tenant_id=$1 AND ("PRINT_TYPE"='TAG' OR "PRINT_FILE" LIKE 'QrPrint10%')`,
+    )
+  )
+    .map((r) => `${r.t}/${r.f}/${r.a}`)
+    .sort();
+const options = (page) => label(page, 'Print file Name').locator('option').allInnerTexts();
+/** The sub-report rows of voucher 88001: GLD1 / IT_AMT 1234.50 / IT_NET_AMT 1000.40 on TP0001 and GLD2 / 99.40 / 55.60 on TP0002 (IT_NET_AMT differs so QrPrint10 (net) and the other files (IT_AMT) are told apart). */
+async function seedIdtl(ctx) {
+  const year = await ctx.year();
+  for (const [srno, tagNo, code, amt, net] of [
+    [1, 'TP0001', 'GLD1', 1234.5, 1000.4],
+    [2, 'TP0002', 'GLD2', 99.4, 55.6],
+  ])
+    await ctx.owner.$executeRawUnsafe(
+      `INSERT INTO "BAR_IDTL"(tenant_id,"CO_CODE","LC_CODE","CO_YEAR","CO_BOOK","VCH_NO","SR_NO","TAG_NO","VCH_SRNO","IT_CODE","IT_AMT","IT_NET_AMT")
+       VALUES ($1,'01','01',$2,'TOP','88001',$3,$4,$3,$5,$6,$7)`,
+      ctx.tenantId,
+      year,
+      srno,
+      tagNo,
+      code,
+      amt,
+      net,
+    );
+}
+/** QR_CODE_GEN = Y for the run, then the company's previous CO_SET_NEW state back. */
+async function withQr(ctx, run) {
+  const [before] = await ctx.rows(
+    `SELECT count(*)::int n, max("QR_CODE_GEN") v FROM "CO_SET_NEW" WHERE tenant_id=$1 AND "CO_CODE"='01'`,
+  );
+  if (before.n)
+    await exec(
+      ctx,
+      `UPDATE "CO_SET_NEW" SET "QR_CODE_GEN"='Y' WHERE tenant_id=$1 AND "CO_CODE"='01'`,
+    );
+  else
+    await exec(
+      ctx,
+      `INSERT INTO "CO_SET_NEW"(tenant_id,"CO_CODE","QR_CODE_GEN") VALUES ($1,'01','Y')`,
+    );
+  try {
+    return await run();
+  } finally {
+    if (before.n)
+      await exec(
+        ctx,
+        `UPDATE "CO_SET_NEW" SET "QR_CODE_GEN"=$2 WHERE tenant_id=$1 AND "CO_CODE"='01'`,
+        before.v,
+      );
+    else await exec(ctx, `DELETE FROM "CO_SET_NEW" WHERE tenant_id=$1 AND "CO_CODE"='01'`);
+  }
+}
+const TWO_TAGS = [
+  { tagNo: 'TP0001', vchSrno: 1 },
+  { tagNo: 'TP0002', vchSrno: 2 },
+];
+/** Print through the API as the screen does (file in the body), then fetch that file's sheet. */
+async function sheetFor(page, file, extra = {}) {
+  const printed = await page.request.post(`/api${API}/print`, {
+    data: { bookCode: BOOK, file, tags: TWO_TAGS, ...extra },
+  });
+  assert.equal(printed.status(), 200, await printed.text());
+  const response = await page.request.get(`/api${API}/labels?file=${encodeURIComponent(file)}`);
+  assert.equal(response.status(), 200);
+  return response.text();
+}
+const labelParts = (html) => html.split(/<div class="lbl[ "]/).slice(1);
+const labelFor = (parts, tagNo) =>
+  parts.find((p) => p.includes(`>*${tagNo}*<`) || p.includes(`>${tagNo}<`)) ?? '';
+const subLines = (part) => part.match(/[A-Z0-9]+ \/ \d+/g) ?? [];
+const sheetResult = (observation, expected, html, extra = {}) => ({
+  observation,
+  expected,
+  output: Buffer.from(html),
+  ...extra,
+});
+const blockedCase = (name, group, reason) => ({
+  ...C(name, group, 'read-only', `cases.md tag-print.${name}`, async () => ({})),
+  blocked: reason,
+});
+
 export const tagPrint = {
   feature: 'tag-print',
   title: 'Other → Tag Print (UT_TAG_PRINT)',
@@ -263,7 +394,7 @@ export const tagPrint = {
           await openScreen(page);
           assert.equal(await label(page, 'Print file Name').inputValue(), FILES[0]);
           const options = await label(page, 'Print file Name').locator('option').allInnerTexts();
-          assert.deepEqual(options, [...FILES].sort());
+          assert.deepEqual(options, ['', ...FILES].sort());
           assert.equal(await label(page, 'Item Type').inputValue(), 'Gold');
           assert.deepEqual(await label(page, 'Item Type').locator('option').allInnerTexts(), [
             'Gold',
@@ -994,9 +1125,9 @@ export const tagPrint = {
           await loadVoucher(page);
           assert.equal((await printNow(page)).status(), 200);
           const html = await labelsHtml(page);
-          const blocks = html.split('<div class="lbl">').slice(1);
+          const blocks = html.split(/<div class="lbl[ "]/).slice(1);
           assert.equal(blocks.length, 3, 'one label per staged row');
-          const of = (tagNo) => blocks.find((b) => b.includes(`>${tagNo}<`)) ?? '';
+          const of = (tagNo) => blocks.find((b) => b.includes(`>*${tagNo}*<`)) ?? '';
           const [one, two, three] = [of('TP0001'), of('TP0002'), of('TP0003')];
           assert.ok(one.includes('LP: 600'), 'tag 1: LP:');
           assert.ok(!one.includes('MRP') && !one.includes('LF:'), 'tag 1 has only the LP line');
@@ -1128,7 +1259,7 @@ export const tagPrint = {
       'journey.hm-id-reaches-the-label',
       'T18',
       'mutation',
-      'An HM id keyed in Hm Id Update is written to BAR_DETL (:5087) and copied to TAG_PRINT_DATA by the print that follows (:5161), so the next plain print of that voucher carries it too',
+      'An HM id keyed in Hm Id Update is written to BAR_DETL (:5087) and copied to TAG_PRINT_DATA by the print that follows (:5161), so the next plain print of that voucher carries it too; none of the four label files places HM_ID, so the label prints no HUID line (cases.md OQ1)',
       async (ctx) =>
         withCase(ctx, async () => {
           const { page } = await ctx.session();
@@ -1159,13 +1290,913 @@ export const tagPrint = {
           assert.equal((await gridRows(page))[0][0], '1');
           assert.equal((await printNow(page)).status(), 200);
           const html = await labelsHtml(page);
-          assert.ok(html.includes('HJOURNEY'), 'the label shows the HM id');
+          // N249: none of the four label files places the hallmark id, so the label no longer shows it.
+          assert.ok(
+            !html.includes('HUID') && !html.includes('HJOURNEY'),
+            'no HUID line on the label',
+          );
           return {
             observation:
-              "HJOURNEY saved, staged by the save's print and on the next plain print's label",
-            expected: { hm: 'HJOURNEY' },
+              "HJOURNEY saved and staged by the save's print; the label files place no HM id, so no sheet shows it",
+            expected: { hm: 'HJOURNEY', label: 'no HUID line' },
             database: { staged: await staged(ctx) },
-            downstream: { label: 'HJOURNEY' },
+            downstream: { label: 'no HUID line' },
+          };
+        }),
+    ),
+    // ---- N249 / G261: the PRINT_MAST label-file choice and the SubTagPrint sub-report (cases.md) ----
+    C(
+      'entry.combo-leading-empty',
+      'T01',
+      'read-only',
+      'UT_TAG_PRINT.cs:4936 cboPrintfile.Items.Add(""), :4954 cboPrintfile.Text = text: the list is the empty item then the files, the marked file selected',
+      async (ctx) =>
+        withCase(ctx, async () => {
+          await putFiles(ctx, [
+            ['TAG', 'BarPrint10', 'N'],
+            ['TAG', 'BarPrint13', 'Y'],
+          ]);
+          const { page } = await ctx.session();
+          await openScreen(page);
+          assert.deepEqual(await options(page), ['', 'BarPrint10', 'BarPrint13']);
+          assert.equal(await label(page, 'Print file Name').inputValue(), 'BarPrint13');
+          return {
+            observation: 'options "", BarPrint10, BarPrint13; BarPrint13 selected',
+            expected: { options: ['', 'BarPrint10', 'BarPrint13'], selected: 'BarPrint13' },
+          };
+        }),
+    ),
+    C(
+      'entry.no-files-only-empty',
+      'T01',
+      'read-only',
+      'UT_TAG_PRINT.cs:4952 with no PRINT_MAST row the combo holds only the empty item, :4954 its text stays empty',
+      async (ctx) =>
+        withCase(ctx, async () => {
+          await putFiles(ctx, []);
+          const { page } = await ctx.session();
+          await openScreen(page);
+          assert.deepEqual(await options(page), ['']);
+          assert.equal(await label(page, 'Print file Name').inputValue(), '');
+          return {
+            observation: 'only the empty item, empty selection',
+            expected: { options: [''] },
+          };
+        }),
+    ),
+    C(
+      'set.no-default-marked',
+      'T01',
+      'read-only',
+      'UT_TAG_PRINT.cs:4942 only a row marked PRINT_SET_A Y assigns the text, :4954 so with files but none marked the combo stays empty (the web used to pick the first file)',
+      async (ctx) =>
+        withCase(ctx, async () => {
+          await putFiles(
+            ctx,
+            ['BarPrint10', 'BarPrint13', 'GhatTagPrnt'].map((f) => ['TAG', f, 'N']),
+          );
+          const { page } = await ctx.session();
+          await openScreen(page);
+          assert.equal(await label(page, 'Print file Name').inputValue(), '');
+          assert.deepEqual(await options(page), ['', 'BarPrint10', 'BarPrint13', 'GhatTagPrnt']);
+          return { observation: 'selected value is empty', expected: { selected: '' } };
+        }),
+    ),
+    C(
+      'entry.two-marked-last-wins',
+      'T01',
+      'read-only',
+      'UT_TAG_PRINT.cs:4942-4954 the Load loop has no break: with two files marked Y the last in PRINT_FILE order is selected',
+      async (ctx) =>
+        withCase(ctx, async () => {
+          await putFiles(ctx, [
+            ['TAG', 'BarPrint10', 'Y'],
+            ['TAG', 'BarPrint13', 'Y'],
+            ['TAG', 'GhatTagPrnt', 'N'],
+          ]);
+          const { page } = await ctx.session();
+          await openScreen(page);
+          assert.equal(await label(page, 'Print file Name').inputValue(), 'BarPrint13');
+          return { observation: 'BarPrint13 selected', expected: { selected: 'BarPrint13' } };
+        }),
+    ),
+    C(
+      'entry.tag-vs-qr-type',
+      'T01',
+      'read-only',
+      'UT_TAG_PRINT.cs:4926 PRINT_TYPE = QR (with QR generation on) versus :4930 PRINT_TYPE = TAG, each with its own marked default',
+      async (ctx) =>
+        withCase(ctx, async () => {
+          await putFiles(ctx, [
+            ['TAG', 'BarPrint10', 'N'],
+            ['TAG', 'QrPrint10', 'Y'],
+            ['QR', 'QrPrint10', 'N'],
+            ['QR', 'QrPrint10-ALT', 'Y'],
+          ]);
+          const { page } = await ctx.session();
+          await openScreen(page);
+          assert.deepEqual(await options(page), ['', 'BarPrint10', 'QrPrint10']);
+          assert.equal(await label(page, 'Print file Name').inputValue(), 'QrPrint10');
+          return withQr(ctx, async () => {
+            await openScreen(page);
+            assert.deepEqual(await options(page), ['', 'QrPrint10', 'QrPrint10-ALT']);
+            assert.equal(await label(page, 'Print file Name').inputValue(), 'QrPrint10-ALT');
+            return {
+              observation: 'TAG files with QR off, QR files with QR on',
+              expected: { off: 'QrPrint10', on: 'QrPrint10-ALT' },
+            };
+          });
+        }),
+    ),
+    C(
+      'field.file-reaches-print',
+      'T02',
+      'output',
+      "UT_TAG_PRINT.cs:5200 string text = cboPrintfile.Text and :5209 Cr.ReportFileName: the combo text selects the template, so the print request carries the chosen file and the sheet is that file's layout",
+      async (ctx) =>
+        withCase(ctx, async () => {
+          await putFiles(ctx, fourFiles('BarPrint10'));
+          await seedIdtl(ctx);
+          const { page } = await ctx.session();
+          await openScreen(page);
+          await loadVoucher(page);
+          await label(page, 'Print file Name').selectOption('BarPrint13');
+          const response = await printNow(page);
+          assert.equal(response.status(), 200, await response.text());
+          assert.equal(response.request().postDataJSON().file, 'BarPrint13');
+          const html = await (await page.request.get(`/api${API}/labels?file=BarPrint13`)).text();
+          assert.ok(html.includes('L.0.500') && html.includes('*TP0001*'));
+          assert.ok(!html.includes('GLD1 / 1235'), 'BarPrint13 has no sub-report');
+          return sheetResult(
+            'the print request carried BarPrint13 and the sheet is its layout',
+            { file: 'BarPrint13' },
+            html,
+          );
+        }),
+    ),
+    C(
+      'field.set-persists-default',
+      'T02',
+      'mutation',
+      'BtnTagSet_Click :5641 clears PRINT_SET_A, :5643 marks the chosen file, :5653 says "Tag Print Report Default Set"; the reopened combo shows it',
+      async (ctx) =>
+        withCase(ctx, async () => {
+          await putFiles(ctx, [
+            ['TAG', 'BarPrint10', 'Y'],
+            ['TAG', 'BarPrint13', 'N'],
+          ]);
+          const { page } = await ctx.session();
+          await openScreen(page);
+          await label(page, 'Print file Name').selectOption('BarPrint13');
+          const [set] = await Promise.all([
+            page.waitForResponse((r) => isApi(r, 'POST', `${API}/default-file`)),
+            button(page, 'Set').click(),
+          ]);
+          assert.equal(set.status(), 200);
+          await message(page, 'Tag Print Report Default Set');
+          assert.deepEqual(await marks(ctx), ['TAG/BarPrint10/N', 'TAG/BarPrint13/Y']);
+          await openScreen(page);
+          assert.equal(await label(page, 'Print file Name').inputValue(), 'BarPrint13');
+          return {
+            observation: 'BarPrint13 is Y, BarPrint10 N, message shown, default kept on reopen',
+            expected: { default: 'BarPrint13', message: 'Tag Print Report Default Set' },
+            database: { marks: await marks(ctx) },
+            downstream: { reopened: 'BarPrint13' },
+          };
+        }),
+    ),
+    C(
+      'field.qr-set-separate',
+      'T02',
+      'mutation',
+      'BtnTagSet_Click :5639-5650 the QR branch updates PRINT_TYPE QR rows, the TAG branch the TAG rows, each separately',
+      async (ctx) =>
+        withCase(ctx, async () => {
+          await putFiles(ctx, [
+            ['TAG', 'BarPrint10', 'Y'],
+            ['QR', 'QrPrint10', 'Y'],
+            ['QR', 'QrPrint10-ALT', 'N'],
+          ]);
+          return withQr(ctx, async () => {
+            const { page } = await ctx.session();
+            await openScreen(page);
+            await label(page, 'Print file Name').selectOption('QrPrint10-ALT');
+            await Promise.all([
+              page.waitForResponse((r) => isApi(r, 'POST', `${API}/default-file`)),
+              button(page, 'Set').click(),
+            ]);
+            await message(page, 'Tag Print Report Default Set');
+            assert.deepEqual(await marks(ctx), [
+              'QR/QrPrint10-ALT/Y',
+              'QR/QrPrint10/N',
+              'TAG/BarPrint10/Y',
+            ]);
+            return {
+              observation: 'only the QR rows changed; the TAG default is still BarPrint10',
+              expected: { qr: 'QrPrint10-ALT', tag: 'BarPrint10' },
+              database: { marks: await marks(ctx) },
+              downstream: { tagDefault: 'BarPrint10' },
+            };
+          });
+        }),
+    ),
+    C(
+      'lookup.files-scoped-ordered',
+      'T04',
+      'read-only',
+      "UT_TAG_PRINT.cs:4930 PRINT_TYPE = TAG ORDER BY PRINT_FILE: the combo lists the company's TAG files in file order after the empty item; QR rows are left out",
+      async (ctx) =>
+        withCase(ctx, async () => {
+          await putFiles(ctx, [
+            ['TAG', 'QrPrint10', 'N'],
+            ['TAG', 'GhatTagPrnt', 'N'],
+            ['TAG', 'BarPrint13', 'N'],
+            ['TAG', 'BarPrint10', 'Y'],
+            ['QR', 'QrPrint10-QR', 'N'],
+          ]);
+          const { page } = await ctx.session();
+          await openScreen(page);
+          assert.deepEqual(await options(page), [
+            '',
+            'BarPrint10',
+            'BarPrint13',
+            'GhatTagPrnt',
+            'QrPrint10',
+          ]);
+          return { observation: 'sorted TAG files, no QR row', expected: 'BarPrint10..QrPrint10' };
+        }),
+    ),
+    C(
+      'lookup.loaded-once',
+      'T04',
+      'read-only',
+      'UT_TAG_PRINT.cs:4930 the combo is filled once in Load: a file added while the screen is open appears after a reload only',
+      async (ctx) =>
+        withCase(ctx, async () => {
+          await putFiles(ctx, [['TAG', 'BarPrint10', 'Y']]);
+          const { page } = await ctx.session();
+          await openScreen(page);
+          await exec(
+            ctx,
+            `INSERT INTO "PRINT_MAST"(tenant_id,"CO_CODE","PRINT_TYPE","PRINT_FILE","PRINT_SET_A") VALUES ($1,'01','TAG','GhatTagPrnt','N')`,
+          );
+          assert.deepEqual(await options(page), ['', 'BarPrint10']);
+          await openScreen(page);
+          assert.deepEqual(await options(page), ['', 'BarPrint10', 'GhatTagPrnt']);
+          return { observation: 'added after reload only', expected: 'no live refresh' };
+        }),
+    ),
+    C(
+      'children.subtagprint-rows-per-parent',
+      'T05',
+      'output',
+      'BarPrint10.xml:100-101 links the sub-report by TAG_NO and VCH_SRNO, QrPrint10.xml:119 by the voucher row incl. SR_NO: no child line moves to the other tag',
+      async (ctx) =>
+        withCase(ctx, async () => {
+          await putFiles(ctx, fourFiles());
+          await seedIdtl(ctx);
+          const { page } = await ctx.session();
+          await openScreen(page);
+          const bar = labelParts(await sheetFor(page, 'BarPrint10'));
+          assert.deepEqual(subLines(labelFor(bar, 'TP0001')), ['GLD1 / 1235']);
+          assert.deepEqual(subLines(labelFor(bar, 'TP0002')), ['GLD2 / 99']);
+          const html = await sheetFor(page, 'QrPrint10');
+          const qr = labelParts(html);
+          assert.deepEqual(subLines(qr[0]), ['GLD1 / 1000']);
+          assert.deepEqual(subLines(qr[1]), ['GLD2 / 56']);
+          return sheetResult(
+            'each tag shows only its own line',
+            { TP0001: 'GLD1 / 1235', TP0002: 'GLD2 / 99', QR: 'GLD1 / 1000, GLD2 / 56' },
+            html,
+          );
+        }),
+    ),
+    C(
+      'children.barprint13-no-subreport',
+      'T05',
+      'output',
+      'BarPrint13.xml:10 <SubReports />: BarPrint13 declares no sub-report, so no BAR_IDTL line prints',
+      async (ctx) =>
+        withCase(ctx, async () => {
+          await putFiles(ctx, fourFiles());
+          await seedIdtl(ctx);
+          const { page } = await ctx.session();
+          await openScreen(page);
+          const html = await sheetFor(page, 'BarPrint13');
+          assert.ok(!/GLD\d/.test(html) && !html.includes(' / '));
+          return sheetResult('no sub-report line', 'none', html);
+        }),
+    ),
+    blockedCase(
+      'print.empty-file',
+      'T06',
+      "what message should the web show when Print file Name is empty? The desktop passes the empty name to Crystal (UT_TAG_PRINT.cs:5209) and fails with Crystal's own error; no desktop text exists (study Gap 8). Until the owner fixes the text the web prints an empty choice in the BarPrint10 layout. Unblocks when the owner fixes the text.",
+    ),
+    C(
+      'required.unknown-file',
+      'T06',
+      'refusal',
+      'UT_TAG_PRINT.cs:5209 the desktop hands any name to Crystal; the web refuses a name PRINT_MAST lacks (400 "Unknown print file: X") and stages nothing',
+      async (ctx) =>
+        withCase(ctx, async () => {
+          await putFiles(ctx, [['TAG', 'BarPrint10', 'Y']]);
+          const { page } = await ctx.session();
+          await openScreen(page);
+          await sheetFor(page, 'BarPrint10');
+          await putFiles(ctx, []);
+          const before = await staged(ctx);
+          const response = await page.request.post(`/api${API}/print`, {
+            data: { bookCode: BOOK, file: 'BarPrint10', tags: TWO_TAGS },
+          });
+          assert.equal(response.status(), 400);
+          assert.ok((await response.text()).includes('Unknown print file: BarPrint10'));
+          assert.deepEqual(await staged(ctx), before);
+          return {
+            observation: '400 Unknown print file: BarPrint10; the staging is untouched',
+            expected: '400',
+            database: { staged: before.length },
+          };
+        }),
+    ),
+    C(
+      'reopen.default-preserved',
+      'T08',
+      'read-only',
+      'Load :4954 reads the default, Set :5643 writes it: the reopened combo shows the set file and PRINT_MAST has one Y',
+      async (ctx) =>
+        withCase(ctx, async () => {
+          await putFiles(ctx, fourFiles('BarPrint10'));
+          const { page } = await ctx.session();
+          await openScreen(page);
+          await label(page, 'Print file Name').selectOption('BarPrint13');
+          await Promise.all([
+            page.waitForResponse((r) => isApi(r, 'POST', `${API}/default-file`)),
+            button(page, 'Set').click(),
+          ]);
+          await openScreen(page);
+          assert.equal(await label(page, 'Print file Name').inputValue(), 'BarPrint13');
+          assert.equal((await marks(ctx)).filter((m) => m.endsWith('/Y')).length, 1);
+          return { observation: 'BarPrint13, one Y row', expected: { default: 'BarPrint13' } };
+        }),
+    ),
+    C(
+      'set.default-message-text',
+      'T09',
+      'read-only',
+      'BtnTagSet_Click :5653 MsgBox "Tag Print Report Default Set": no file name, no period',
+      async (ctx) =>
+        withCase(ctx, async () => {
+          await putFiles(ctx, [
+            ['TAG', 'BarPrint10', 'Y'],
+            ['TAG', 'BarPrint13', 'N'],
+          ]);
+          const { page } = await ctx.session();
+          await openScreen(page);
+          await label(page, 'Print file Name').selectOption('BarPrint13');
+          await button(page, 'Set').click();
+          await message(page, 'Tag Print Report Default Set');
+          return { observation: 'the desktop text', expected: 'Tag Print Report Default Set' };
+        }),
+    ),
+    C(
+      'edit.switch-default-and-reprint',
+      'T09',
+      'output',
+      "The template is the combo text at print time (:5200): printing the same voucher after Set shows the new file's layout and leaves BAR_DETL alone",
+      async (ctx) =>
+        withCase(ctx, async () => {
+          await putFiles(ctx, fourFiles('BarPrint10'));
+          await seedIdtl(ctx);
+          const { page } = await ctx.session();
+          await openScreen(page);
+          const barBefore = await ctx.rows(
+            `SELECT count(*)::int n, sum("ITM_GWT")::float g FROM "BAR_DETL" WHERE tenant_id=$1 AND "VCH_NO"='88001'`,
+          );
+          const first = await sheetFor(page, 'BarPrint10');
+          assert.ok(first.includes('GLD1 / 1235') && !first.includes('L.0.500'));
+          await label(page, 'Print file Name').selectOption('BarPrint13');
+          await Promise.all([
+            page.waitForResponse((r) => isApi(r, 'POST', `${API}/default-file`)),
+            button(page, 'Set').click(),
+          ]);
+          const second = await sheetFor(page, 'BarPrint13');
+          assert.ok(second.includes('L.0.500') && !second.includes('GLD1'));
+          assert.deepEqual(
+            await ctx.rows(
+              `SELECT count(*)::int n, sum("ITM_GWT")::float g FROM "BAR_DETL" WHERE tenant_id=$1 AND "VCH_NO"='88001'`,
+            ),
+            barBefore,
+          );
+          return sheetResult(
+            'BarPrint10 then BarPrint13 layouts; BAR_DETL unchanged',
+            'two layouts',
+            second,
+          );
+        }),
+    ),
+    C(
+      'cancel.print-dialog',
+      'T10',
+      'output',
+      'BtnPrint_Click :5143 clears and :5151 copies before the dialog; :5192 Cancel only returns: the staging and the sheet are still there',
+      async (ctx) =>
+        withCase(ctx, async () => {
+          await putFiles(ctx, fourFiles());
+          const { page } = await ctx.session();
+          await openScreen(page);
+          await loadVoucher(page);
+          assert.equal((await printNow(page)).status(), 200);
+          const rows = await staged(ctx);
+          assert.equal(rows.length, 3);
+          const html = await (await page.request.get(`/api${API}/labels?file=BarPrint10`)).text();
+          assert.equal(labelParts(html).length, 3);
+          return sheetResult('three rows staged and shown after the sheet was closed', 3, html);
+        }),
+    ),
+    C(
+      'rights.set-needs-update',
+      'T11',
+      'refusal',
+      'BtnTagSet_Click :5636 has no right test on the desktop; the web keeps the update right because Set changes a company-wide default (architect decision, owner may override)',
+      async (ctx) =>
+        withCase(ctx, async () => {
+          await putFiles(ctx, [
+            ['TAG', 'BarPrint10', 'Y'],
+            ['TAG', 'BarPrint13', 'N'],
+          ]);
+          await exec(
+            ctx,
+            `INSERT INTO "USER_SET"(tenant_id,"CO_CODE","LC_CODE","USER_NAME","MAIN_MENU","SUB_MENU","FRM_VIEW","FRM_EDIT","FRM_DELETE","FRM_PRINT")
+             VALUES ($1,'01','01',$2,'Other','Tag Print','Y','N','N','N')`,
+            USERS.clerk.user,
+          );
+          try {
+            const { page } = await ctx.session(as(USERS.clerk.user));
+            await openScreen(page);
+            await label(page, 'Print file Name').selectOption('BarPrint13');
+            await button(page, 'Set').click();
+            await message(page, 'You Have No Rights.....');
+            const direct = await page.request.post(`/api${API}/default-file`, {
+              data: { file: 'BarPrint13' },
+            });
+            assert.equal(direct.status(), 403);
+            assert.deepEqual(await marks(ctx), ['TAG/BarPrint10/Y', 'TAG/BarPrint13/N']);
+            return {
+              observation: 'refused on screen and 403 direct; PRINT_MAST unchanged',
+              expected: '403',
+              database: { marks: await marks(ctx) },
+            };
+          } finally {
+            await exec(
+              ctx,
+              `DELETE FROM "USER_SET" WHERE tenant_id=$1 AND "USER_NAME"=$2 AND "SUB_MENU"='Tag Print'`,
+              USERS.clerk.user,
+            );
+          }
+        }),
+    ),
+    C(
+      'retry.replayed-print-with-file',
+      'T13',
+      'mutation',
+      "BtnPrint_Click :5143 clears before it copies, so a replayed print with the same file stages the same rows and the sheet keeps the file's layout",
+      async (ctx) =>
+        withCase(ctx, async () => {
+          await putFiles(ctx, fourFiles('BarPrint13'));
+          const { page } = await ctx.session();
+          await openScreen(page);
+          await loadVoucher(page);
+          await label(page, 'Print file Name').selectOption('BarPrint13');
+          const first = await printNow(page);
+          assert.equal(first.status(), 200);
+          const rows = await staged(ctx);
+          const replay = await page.request.fetch(first.request());
+          assert.equal(replay.status(), 200);
+          assert.deepEqual(await staged(ctx), rows);
+          const html = await (await page.request.get(`/api${API}/labels?file=BarPrint13`)).text();
+          assert.ok(html.includes('L.0.500'));
+          return {
+            observation: 'same rows, BarPrint13 layout',
+            expected: 'idempotent',
+            database: { staged: rows.length },
+            downstream: { layout: 'BarPrint13' },
+          };
+        }),
+    ),
+    C(
+      'config.file-is-print-time-snapshot',
+      'T15',
+      'output',
+      'The template is the combo text at print (:5200), not a column of TAG_PRINT_DATA: a later Set does not change a sheet requested for the earlier file; a new print after the Set shows the new file',
+      async (ctx) =>
+        withCase(ctx, async () => {
+          await putFiles(ctx, fourFiles('BarPrint10'));
+          await seedIdtl(ctx);
+          const { page } = await ctx.session();
+          await openScreen(page);
+          await sheetFor(page, 'BarPrint10');
+          await page.request.post(`/api${API}/default-file`, { data: { file: 'BarPrint13' } });
+          const again = await (await page.request.get(`/api${API}/labels?file=BarPrint10`)).text();
+          assert.ok(again.includes('GLD1 / 1235') && !again.includes('L.0.500'));
+          const next = await sheetFor(page, 'BarPrint13');
+          assert.ok(next.includes('L.0.500'));
+          return sheetResult('BarPrint10 kept; a new print is BarPrint13', 'snapshot', again);
+        }),
+    ),
+    C(
+      'config.qr-mode-files',
+      'T15',
+      'read-only',
+      'UT_TAG_PRINT.cs:4924-4926 with QR generation on the combo lists the QR files and the QR default; no TAG row changes',
+      async (ctx) =>
+        withCase(ctx, async () => {
+          await putFiles(ctx, [
+            ['TAG', 'BarPrint10', 'Y'],
+            ['QR', 'QrPrint10', 'N'],
+            ['QR', 'QrPrint10-ALT', 'Y'],
+          ]);
+          const before = await marks(ctx);
+          const { page } = await ctx.session();
+          await openScreen(page);
+          assert.deepEqual(await options(page), ['', 'BarPrint10']);
+          return withQr(ctx, async () => {
+            await openScreen(page);
+            assert.deepEqual(await options(page), ['', 'QrPrint10', 'QrPrint10-ALT']);
+            assert.equal(await label(page, 'Print file Name').inputValue(), 'QrPrint10-ALT');
+            assert.deepEqual(await marks(ctx), before);
+            return { observation: 'QR files with QR on; PRINT_MAST unchanged', expected: before };
+          });
+        }),
+    ),
+    C(
+      'output.file-choice-per-template',
+      'T16',
+      'output',
+      'Cr.ReportFileName :5209 = the combo text: each of the four files prints its own layout (BarPrint13.xml:10, :217; QrPrint10.xml:386; BarPrint10.xml:72)',
+      async (ctx) =>
+        withCase(ctx, async () => {
+          await putFiles(ctx, fourFiles('BarPrint10'));
+          await seedIdtl(ctx);
+          const { page } = await ctx.session();
+          await openScreen(page);
+          const htmls = {};
+          for (const file of LABEL_FILES) htmls[file] = await sheetFor(page, file);
+          const q = labelFor(labelParts(htmls.QrPrint10), 'TP0001');
+          assert.ok(
+            q.includes('data-qr="TP0001"') && !q.includes('*TP0001*') && q.includes('GLD1 / 1000'),
+          );
+          const b10 = labelFor(labelParts(htmls.BarPrint10), 'TP0001');
+          assert.ok(
+            b10.includes('*TP0001*') && b10.includes('GLD1 / 1235') && !b10.includes('L.0.500'),
+          );
+          const b13 = labelFor(labelParts(htmls.BarPrint13), 'TP0001');
+          assert.ok(b13.includes('*TP0001*') && b13.includes('L.0.500') && !b13.includes('GLD1'));
+          const g = labelFor(labelParts(htmls.GhatTagPrnt), 'TP0001');
+          assert.ok(g.includes('*TP0001*') && g.includes('GLD1 / 1235') && g.includes('GLD2 / 99'));
+          return sheetResult(
+            'four different layouts',
+            LABEL_FILES,
+            Object.values(htmls).join('\n'),
+          );
+        }),
+    ),
+    C(
+      'output.layout-per-file',
+      'T16',
+      'output',
+      'The four files place different fields: QrPrint10 a QR picture and no barcode text, BarPrint13 the L. line and no sub-report, BarPrint10 and GhatTagPrnt the sub-report and *tag*; all place G., N., MRP, karigar, shop, group, item and tag',
+      async (ctx) =>
+        withCase(ctx, async () => {
+          await putFiles(ctx, fourFiles('BarPrint10'));
+          await seedIdtl(ctx);
+          const { page } = await ctx.session();
+          await openScreen(page);
+          const htmls = {};
+          for (const file of LABEL_FILES) {
+            htmls[file] = await sheetFor(page, file);
+            const one = labelFor(labelParts(htmls[file]), 'TP0001');
+            for (const t of [
+              'G.10.500',
+              'N.10.000',
+              'MRP: 55000',
+              'KARI1',
+              'E2E SHOP',
+              '>E1<',
+              'TPG1',
+              'TP0001',
+            ])
+              assert.ok(one.includes(t), `${file} ${t}`);
+          }
+          assert.equal(new Set(Object.values(htmls)).size, 4, 'four different sheets');
+          return sheetResult(
+            'common fields on all four, file fields differ',
+            'differ',
+            Object.values(htmls).join('\n'),
+          );
+        }),
+    ),
+    C(
+      'output.subtagprint-lines',
+      'T16',
+      'output',
+      'BarPrint10.xml:72 {BAR_IDTL.IT_CODE} & " / " & totext(IT_AMT,0) per row in BarPrint10 and GhatTagPrnt, QrPrint10.xml:72 totext(IT_NET_AMT,0); BarPrint13.xml:10 has none',
+      async (ctx) =>
+        withCase(ctx, async () => {
+          await putFiles(ctx, fourFiles());
+          await seedIdtl(ctx);
+          const { page } = await ctx.session();
+          await openScreen(page);
+          for (const file of ['BarPrint10', 'QrPrint10', 'GhatTagPrnt']) {
+            const html = await sheetFor(page, file);
+            const [l1, l2] = file === 'QrPrint10' ? ['1000', '56'] : ['1235', '99'];
+            assert.ok(html.includes(`GLD1 / ${l1}`) && html.includes(`GLD2 / ${l2}`), file);
+          }
+          const none = await sheetFor(page, 'BarPrint13');
+          assert.ok(!/GLD\d/.test(none));
+          return sheetResult(
+            'GLD1 / 1235 and GLD2 / 99 (IT_AMT) on BarPrint10 and GhatTagPrnt, GLD1 / 1000 and GLD2 / 56 (IT_NET_AMT) on QrPrint10, none on BarPrint13',
+            'lines',
+            none,
+          );
+        }),
+    ),
+    C(
+      'output.subtagprint-link-per-file',
+      'T16',
+      'output',
+      'The link differs per file: BarPrint10.xml:100-101 TAG_NO + VCH_SRNO, QrPrint10.xml:119 voucher row incl. SR_NO, GhatTagPrnt.xml:102 VCH_NO only (the whole voucher on every label), BarPrint13 none',
+      async (ctx) =>
+        withCase(ctx, async () => {
+          await putFiles(ctx, fourFiles());
+          await seedIdtl(ctx);
+          const { page } = await ctx.session();
+          await openScreen(page);
+          const bar = labelParts(await sheetFor(page, 'BarPrint10'));
+          assert.deepEqual(subLines(labelFor(bar, 'TP0001')), ['GLD1 / 1235']);
+          assert.deepEqual(subLines(labelFor(bar, 'TP0002')), ['GLD2 / 99']);
+          const qr = labelParts(await sheetFor(page, 'QrPrint10'));
+          assert.deepEqual(subLines(qr[0]), ['GLD1 / 1000']);
+          const html = await sheetFor(page, 'GhatTagPrnt');
+          for (const part of labelParts(html))
+            assert.deepEqual(subLines(part), ['GLD1 / 1235', 'GLD2 / 99']);
+          const none = labelParts(await sheetFor(page, 'BarPrint13'));
+          for (const part of none) assert.deepEqual(subLines(part), []);
+          return sheetResult('tag link, row link, voucher link, none', 'per file', html);
+        }),
+    ),
+    C(
+      'output.lable-skip-no-subreport-lines',
+      'T16',
+      'output',
+      "The Lable Skip blanks are staged with VCH_NO 00000 (:5151), which GhatTagPrnt.xml:102 matches to no BAR_IDTL row: blanks print no line, the real labels all of the voucher's",
+      async (ctx) =>
+        withCase(ctx, async () => {
+          await putFiles(ctx, fourFiles());
+          await seedIdtl(ctx);
+          const { page } = await ctx.session();
+          await openScreen(page);
+          const html = await sheetFor(page, 'GhatTagPrnt', {
+            labelSkip: 2,
+            tags: [...TWO_TAGS, { tagNo: 'TP0003', vchSrno: 3 }],
+          });
+          const parts = labelParts(html);
+          assert.equal(parts.length, 5);
+          for (const blank of parts.slice(0, 2))
+            assert.ok(blank.includes('blank') && !blank.includes('GLD'));
+          for (const real of parts.slice(2))
+            assert.deepEqual(subLines(real), ['GLD1 / 1235', 'GLD2 / 99']);
+          return sheetResult(
+            'two blanks without lines, three labels with both',
+            'blanks empty',
+            html,
+          );
+        }),
+    ),
+    C(
+      'output.huid-line-removed',
+      'T16',
+      'output',
+      "None of the four label files places an HM id (BarPrint13.xml:205-225 and the placed-field lists), so the web's HUID: line is dropped (architect decision, owner may override)",
+      async (ctx) =>
+        withCase(ctx, async () => {
+          await putFiles(ctx, fourFiles());
+          await exec(
+            ctx,
+            `UPDATE "BAR_DETL" SET "HM_ID"='HJOURNEY' WHERE tenant_id=$1 AND "TAG_NO"='TP0001'`,
+          );
+          const { page } = await ctx.session();
+          await openScreen(page);
+          let last = '';
+          for (const file of ['BarPrint10', 'GhatTagPrnt']) {
+            last = await sheetFor(page, file);
+            assert.ok(!last.includes('HUID') && !last.includes('HJOURNEY'), file);
+          }
+          return sheetResult('no HUID text on any sheet', 'none', last);
+        }),
+    ),
+    C(
+      'output.qr-picture',
+      'T16',
+      'output',
+      'QrPrint10.xml:386 prints IMAGE_DATA.TAG_IMAGE built from the tag (:5181); the web generates the picture into the sheet from the tag number and writes no IMAGE_DATA; the blanks carry none',
+      async (ctx) =>
+        withCase(ctx, async () => {
+          await putFiles(ctx, [['QR', 'QrPrint10', 'Y']]);
+          return withQr(ctx, async () => {
+            const { page } = await ctx.session();
+            await openScreen(page);
+            const html = await sheetFor(page, 'QrPrint10', {
+              labelSkip: 2,
+              tags: [...TWO_TAGS, { tagNo: 'TP0003', vchSrno: 3 }],
+            });
+            const parts = labelParts(html);
+            assert.equal(parts.length, 5);
+            for (const blank of parts.slice(0, 2)) assert.ok(!blank.includes('data-qr'));
+            ['TP0001', 'TP0002', 'TP0003'].forEach((t, i) => {
+              assert.ok(
+                parts[i + 2].includes(`data-qr="${t}"`) && parts[i + 2].includes('<svg'),
+                t,
+              );
+              assert.equal((parts[i + 2].match(/data-qr=/g) ?? []).length, 1);
+            });
+            const [images] = await ctx.rows(
+              `SELECT count(*)::int n FROM "IMAGE_DATA" WHERE tenant_id=$1`,
+            );
+            assert.equal(images.n, 0);
+            return sheetResult(
+              'three QR pictures keyed by tag, no IMAGE_DATA row',
+              'one QR per real label',
+              html,
+              { database: { imageData: images.n } },
+            );
+          });
+        }),
+    ),
+    C(
+      'output.master-fields',
+      'T16',
+      'output',
+      'BarPrint13.xml:205 {TAG_PRINT_DATA.KR_NAME} and the placed CO_MAST.CO_NAME, ITEM_MAST.GR_CODE, IT_CODE, TAG_NO: every sheet shows karigar, shop, purity group, item and tag',
+      async (ctx) =>
+        withCase(ctx, async () => {
+          await putFiles(ctx, fourFiles());
+          const { page } = await ctx.session();
+          await openScreen(page);
+          let last = '';
+          for (const file of LABEL_FILES) {
+            last = await sheetFor(page, file);
+            const one = labelFor(labelParts(last), 'TP0001');
+            for (const t of ['KARI1', 'E2E SHOP', '>E1<', 'TPG1', 'TP0001'])
+              assert.ok(one.includes(t), `${file} ${t}`);
+          }
+          return sheetResult('karigar, shop and group on every file', 'present', last);
+        }),
+    ),
+    C(
+      'output.less-weight-line',
+      'T16',
+      'output',
+      "BarPrint13.xml:217 'L.'+totext(ITM_GWT-ITM_NWT,3): gross 10.500 less net 10.000 is L.0.500 on BarPrint13 only",
+      async (ctx) =>
+        withCase(ctx, async () => {
+          await putFiles(ctx, fourFiles());
+          const { page } = await ctx.session();
+          await openScreen(page);
+          const b13 = await sheetFor(page, 'BarPrint13');
+          const b10 = await sheetFor(page, 'BarPrint10');
+          assert.ok(b13.includes('L.0.500'));
+          assert.ok(!b10.includes('L.0.500'));
+          return sheetResult('L.0.500 on BarPrint13 only', 'L.0.500', b13);
+        }),
+    ),
+    C(
+      'output.barcode-text',
+      'T16',
+      'output',
+      "BarPrint13.xml:225 '*' + TAG_NO + '*' on BarPrint10, BarPrint13 and GhatTagPrnt; QrPrint10.xml:386 prints the QR picture instead",
+      async (ctx) =>
+        withCase(ctx, async () => {
+          await putFiles(ctx, fourFiles());
+          const { page } = await ctx.session();
+          await openScreen(page);
+          let last = '';
+          for (const file of ['BarPrint10', 'BarPrint13', 'GhatTagPrnt']) {
+            last = await sheetFor(page, file);
+            assert.ok(last.includes('*TP0001*') && last.includes('<svg'), file);
+          }
+          const qr = await sheetFor(page, 'QrPrint10');
+          assert.ok(!qr.includes('*TP0001*') && qr.includes('data-qr="TP0001"'));
+          return sheetResult('*TP0001* on three files, a QR on QrPrint10', 'barcode text', last);
+        }),
+    ),
+    C(
+      'keyboard.combo-set',
+      'T17',
+      'mutation',
+      'The combo has no key handler of its own (:4936): standard select keys change it, Tab lands on Set, Enter activates it (:1650 caption Set)',
+      async (ctx) =>
+        withCase(ctx, async () => {
+          await putFiles(ctx, fourFiles('BarPrint10'));
+          const { page } = await ctx.session();
+          await openScreen(page);
+          const box = label(page, 'Print file Name');
+          await box.focus();
+          await page.keyboard.press('End');
+          assert.equal(await box.inputValue(), 'QrPrint10');
+          await box.selectOption('BarPrint13');
+          await page.keyboard.press('Tab');
+          assert.equal(
+            await page.evaluate(() => document.activeElement?.textContent?.trim()),
+            'Set',
+          );
+          const [set] = await Promise.all([
+            page.waitForResponse((r) => isApi(r, 'POST', `${API}/default-file`)),
+            page.keyboard.press('Enter'),
+          ]);
+          assert.equal(set.status(), 200);
+          assert.ok((await marks(ctx)).includes('TAG/BarPrint13/Y'));
+          return {
+            observation: 'End/select, Tab to Set, Enter set BarPrint13',
+            expected: 'BarPrint13 Y',
+            database: { marks: await marks(ctx) },
+            downstream: { set: 'BarPrint13' },
+          };
+        }),
+    ),
+    C(
+      'keyboard.alt-p',
+      'T17',
+      'mutation',
+      '&Print (:1422): Alt+P activates Print and the print runs',
+      async (ctx) =>
+        withCase(ctx, async () => {
+          await putFiles(ctx, fourFiles());
+          const { page } = await ctx.session();
+          await openScreen(page);
+          await loadVoucher(page);
+          const [response] = await Promise.all([
+            page.waitForResponse((r) => isApi(r, 'POST', `${API}/print`)),
+            page
+              .context()
+              .waitForEvent('page', { timeout: 8000 })
+              .then((p) => p.close())
+              .catch(() => {}),
+            page.keyboard.press('Alt+p'),
+          ]);
+          assert.equal(response.status(), 200);
+          assert.equal((await staged(ctx)).length, 3);
+          return {
+            observation: 'Alt+P printed three labels',
+            expected: 'print runs',
+            database: { staged: 3 },
+            downstream: { print: 200 },
+          };
+        }),
+    ),
+    C(
+      'journey.chosen-file-to-label',
+      'T18',
+      'mutation',
+      'combo -> print request -> staged rows -> chosen template -> sheet (:5200, :5209): BarPrint13 then, after Set, GhatTagPrnt',
+      async (ctx) =>
+        withCase(ctx, async () => {
+          await putFiles(ctx, fourFiles('BarPrint10'));
+          await seedIdtl(ctx);
+          const { page } = await ctx.session();
+          await openScreen(page);
+          await loadVoucher(page);
+          await label(page, 'Print file Name').selectOption('BarPrint13');
+          assert.equal((await printNow(page)).status(), 200);
+          const first = await (await page.request.get(`/api${API}/labels?file=BarPrint13`)).text();
+          assert.ok(first.includes('L.0.500') && !first.includes('GLD1'));
+          await label(page, 'Print file Name').selectOption('GhatTagPrnt');
+          await Promise.all([
+            page.waitForResponse((r) => isApi(r, 'POST', `${API}/default-file`)),
+            button(page, 'Set').click(),
+          ]);
+          await openScreen(page);
+          assert.equal(await label(page, 'Print file Name').inputValue(), 'GhatTagPrnt');
+          await loadVoucher(page);
+          assert.equal((await printNow(page)).status(), 200);
+          const second = await (
+            await page.request.get(`/api${API}/labels?file=GhatTagPrnt`)
+          ).text();
+          assert.ok(
+            second.includes('GLD1 / 1235') &&
+              second.includes('GLD2 / 99') &&
+              second.includes('*TP0001*'),
+          );
+          assert.deepEqual(await marks(ctx), [
+            'TAG/BarPrint10/N',
+            'TAG/BarPrint13/N',
+            'TAG/GhatTagPrnt/Y',
+            'TAG/QrPrint10/N',
+          ]);
+          return {
+            observation: 'BarPrint13 sheet, then the GhatTagPrnt sheet after Set',
+            expected: 'two layouts',
+            database: { marks: await marks(ctx) },
+            downstream: { first: 'BarPrint13', second: 'GhatTagPrnt' },
           };
         }),
     ),

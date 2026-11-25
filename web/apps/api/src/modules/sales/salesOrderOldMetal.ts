@@ -15,10 +15,8 @@ import { SaleValidationError } from './sales.js';
  *   (any other type), and the advance, `MSG2_TOTAL[9,3]`, includes both amounts (`:11368`).
  * - Order_Rojmel keys a valued row `04 + STR(SR_NO)` and an unvalued row with fine `06 + STR(SR_NO)`
  *   (`Ac_Rojmel.cs:17-21`); the shared builder (`buildOrderRojmel`) writes them.
- * - Order_Ledr legs 07-10 (`Ac_Ledr.cs:42-50`) join BOOK_DATA with `BOOK_INOUT = 'I'`. A Sales Order book here is
- *   always 'O' (`resolveOrderBookTx`), so those legs are built only when the book is 'I' and the screen's book never
- *   posts them. They are kept separate and tested so a book that is 'I' posts exactly what the desktop posts.
- *
+ * - Order_Ledr legs 07-10 (`Ac_Ledr.cs:42-50`) join BOOK_DATA with `BOOK_INOUT = 'I'`, so only an 'I' book posts them;
+ *   an 'I' book also posts each row to MAIN_STOCK (Order_Stk, `salesOrderStock.ts`).
  * - The SL_ORD_ADJ 'O' row (`:9475-9516`, TR_TOUR_ORD.cs:7560-7600) carries the unvalued old gold and silver fine in
  *   ORD_GOLD / ORD_SILVER beside the advance (`orderAdvanceAdjRow`).
  *
@@ -258,7 +256,9 @@ export function orderOldMetalWrites(
  * Order_Ledr legs 07-10 (`Ac_Ledr.cs:42-50`), only for a book whose BOOK_INOUT is 'I'. Keys are
  * `...VCH_NO + STR(SR_NO) + leg`: the line comes before the leg type, the reverse of the UPI legs. A valued row posts
  * 07 (party Cr, purchase account as contra) and 08 (purchase account Dr). A row with fine and no amount posts the
- * money-free fine pair 09 (SIGN +) and 10 (SIGN -), carrying ITM_FINE as FINE_WT. BILL_NO is blank on these legs.
+ * money-free fine pair 09 (SIGN +) and 10 (SIGN -), carrying ITM_FINE as FINE_WT — 09 unconditionally but 10 only
+ * when the company's `CO_SET.TRAD_FINE` is 'Y' (`Ac_Ledr.cs:46`, `:48-50`; blank is 'N', MS_OPNCOMP.cs:813-816), so
+ * the purchase account's fine balance moves only for a trading-fine company. BILL_NO is blank on these legs.
  */
 export function orderOldMetalLedger(
   key: Record<string, unknown>,
@@ -266,6 +266,7 @@ export function orderOldMetalLedger(
   partyAc: string,
   rows: readonly OrderOldMetalRow[],
   bookInout: string,
+  tradeFine = false,
 ): LedgerLine[] {
   if (bookInout !== 'I') return [];
   const legs: LedgerLine[] = [];
@@ -300,20 +301,21 @@ export function orderOldMetalLedger(
         },
       );
     } else if (row.fine) {
-      legs.push(
-        {
-          ...base,
-          legKeySuffix: suffix(row, '09'),
-          AC_CODE: partyAc,
-          LD_CODE: row.purchaseAc,
-          CR_AMT: 0,
-          DR_AMT: 0,
-          IT_TYPE: row.itType,
-          SIGN: '+',
-          FINE_WT: row.fine,
-          PARTY_AC_CODE: partyAc,
-        },
-        {
+      legs.push({
+        ...base,
+        legKeySuffix: suffix(row, '09'),
+        AC_CODE: partyAc,
+        LD_CODE: row.purchaseAc,
+        CR_AMT: 0,
+        DR_AMT: 0,
+        IT_TYPE: row.itType,
+        SIGN: '+',
+        FINE_WT: row.fine,
+        PARTY_AC_CODE: partyAc,
+      });
+      // Ac_Ledr.cs:48-50: the purchase account's -fine mirror only for a trading-fine company.
+      if (tradeFine)
+        legs.push({
           ...base,
           legKeySuffix: suffix(row, '10'),
           AC_CODE: row.purchaseAc,
@@ -324,8 +326,7 @@ export function orderOldMetalLedger(
           SIGN: '-',
           FINE_WT: row.fine,
           PARTY_AC_CODE: '',
-        },
-      );
+        });
     }
   }
   if (legs.length) assertBalanced(legs);
@@ -387,8 +388,8 @@ export function orderOldMetalView(saved: ReadonlyArray<Record<string, any>>) {
  * - The save deletes the voucher's SL_ORD_ADJ rows and writes this one row, SR_NO 1, when
  *   `MSG2_TOTAL[9,3] + OrdGold + OrdSilver != 0` (`:9481`).
  * - `MSG2_TOTAL[9,3]` is the advance, the tender total (`:11368`). With a rate-cut rate (`MSG2_TOTAL[9,1]`) the desktop
- *   saves it as RCUT_AMT and ADV_AMT 0, otherwise as ADV_AMT (`:9124-9133`); the web header always holds it in ADV_AMT.
- *   The row's ORD_AMT is that advance only when there is no rate-cut rate (`:9504`).
+ *   saves it as RCUT_AMT and ADV_AMT 0, otherwise as ADV_AMT (`:9124-9133`); the web header does the same
+ *   (`orderAdvanceColumns`). The row's ORD_AMT is that advance only when there is no rate-cut rate (`:9504`).
  * - OrdGold / OrdSilver sum the fine of the saved old metal rows of type G / S that carry no amount (`:9458-9465`).
  *   ORD_GOLD adds the rate-cut fine (`:9509`).
  * - ENTRY_TYPE 'O'; the ORD_* key is the order itself; PAID_AC '', PAID_AMT, KASAR_AMT and ORD_BAL_AMT 0; DATA_TRFR 'N';
@@ -412,9 +413,8 @@ export function orderAdvanceAdjRow(
   const ordGold = unvalued('G');
   const ordSilver = unvalued('S');
   const rateCutRate = num(header.RCUT_RATE);
-  // MSG2_TOTAL[9,3] is always the tender total (`:11368`); the desktop only files it under RCUT_AMT when there is a
-  // rate-cut rate. The web header keeps that total in ADV_AMT and takes RCUT_AMT as typed, so ADV_AMT is the source.
-  const advance = round(num(header.ADV_AMT), 2);
+  // MSG2_TOTAL[9,3] is always the tender total (`:11368`), filed under RCUT_AMT when there is a rate-cut rate.
+  const advance = round(num(rateCutRate === 0 ? header.ADV_AMT : header.RCUT_AMT), 2);
   if (round(advance + ordGold + ordSilver, 3) === 0) return null;
   const trimmed = (value: unknown, len: number) =>
     String(value ?? '')

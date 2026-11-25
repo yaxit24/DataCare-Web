@@ -221,6 +221,11 @@ import {
   scaleCaptureEnabled,
 } from '../modules/integrations/scaleProtocol.js';
 import { registerTagPrintScreenRoutes } from './tagPrintScreen.js';
+import {
+  tagOpeningPrint,
+  tagOpeningSetDefaultLabelFile,
+  tagOpeningSetup,
+} from '../modules/stock/tagOpeningPrint.js';
 import { registerVoucherNavigationRoutes } from './voucherNavigation.js';
 import { getContra } from '../modules/finance/contra.js';
 import { registerContraRoutes } from './contra.js';
@@ -238,13 +243,14 @@ import { registerEmployeeMasterRoutes } from './employeeMaster.js';
 import { registerTaxMasterRoutes } from './taxMaster.js';
 import { registerAutoItemRoutes } from './autoItem.js';
 import { registerGroupMasterRoutes } from './groupMaster.js';
+import { registerCompanyIdentityRoutes } from './companyIdentity.js';
 import { registerProductMasterRoutes } from './productMaster.js';
 import { registerMasterScreenRoutes } from './masterScreens.js';
 import { registerWholesaleSaleRoutes } from './wholesaleSale.js';
 import { registerAccountLedgerRoutes } from './accountLedger.js';
 import { registerTagStockRoutes } from './tagStock.js';
 import { registerApprovalRoutes } from './approval.js';
-import { VoucherVersionConflictError } from '../modules/vouchers/version.js';
+import { VoucherVersionConflictError, requiredVersion } from '../modules/vouchers/version.js';
 import { listYears, createYear, carryForwardOpenings } from '../modules/masters/year.js';
 import { reminders } from '../modules/finance/reminders.js';
 import { getPartyPhoto, setPartyPhoto, familyMembers } from '../modules/masters/party.js';
@@ -672,6 +678,12 @@ import { gstLauncherReport } from '../modules/reports/gstLauncherReport.js';
 import { registerGstReportRoutes } from './gstReport.js';
 import { registerRpAllReportRoutes } from './rpAllReport.js';
 import { registerStockReportRoutes } from './stockReport.js';
+import { registerPurchaseReportRoutes } from './purchaseReport.js';
+import {
+  approvalReport as rpAllApprovalReport,
+  RpAllRequestError,
+} from '../modules/reports/rpAll/index.js';
+import { exportTable } from '../modules/reports/rpAll/exportRows.js';
 import {
   approvalReport,
   bullionReport,
@@ -1092,6 +1104,7 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
   registerAutoItemRoutes(app, extraRouteHelpers, formCapabilities);
   registerGroupMasterRoutes(app, extraRouteHelpers, formCapabilities);
   registerProductMasterRoutes(app, extraRouteHelpers, formCapabilities);
+  registerCompanyIdentityRoutes(app, extraRouteHelpers);
   registerTagPrintScreenRoutes(app, extraRouteHelpers, formCapabilities);
   registerMasterScreenRoutes(app, extraRouteHelpers, formCapabilities);
   registerWholesaleSaleRoutes(app, extraRouteHelpers);
@@ -1187,6 +1200,10 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
     settleCrAmt: b.settleCrAmt,
     settleDrFine: b.settleDrFine,
     settleCrFine: b.settleCrFine,
+    // Wh Sales (WP-30): fine kasar and the version token of an edit.
+    ksrFineDr: b.ksrFineDr,
+    ksrFineCr: b.ksrFineCr,
+    expectedVersion: b.expectedVersion,
     // Party contact snapshot (RATE_CUT_DATA carries its own copy, as the desktop form does).
     add1: b.add1,
     add2: b.add2,
@@ -4145,6 +4162,38 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
   const isReportFamilySlug = (slug: ReportSlug): slug is keyof typeof REPORT_FAMILY_BUILDERS =>
     Object.prototype.hasOwnProperty.call(REPORT_FAMILY_BUILDERS, slug);
   /**
+   * WP-13: Report → Approval Rpt runs on the shared RP_ALL engine (rpAll/index.ts). The screen and every
+   * export (CSV, XLSX, PDF) are built from that one result and flattened exactly like the Sales Report export
+   * (rpAll/exportRows.ts: rows in report order, each printed band subtotal as its own line, the grand total
+   * last), so an export can never show figures the screen does not (AprPartyWise / AprInOut / AprPan,
+   * RP_ALL.cs:8199, 8274, 8349). The band lines already carry the totals, so no separate totals row is added.
+   */
+  const runApprovalReport = (req: FastifyRequest) => {
+    const s = readScope(req);
+    return rpAllApprovalReport(
+      prisma,
+      {
+        tenantId: s.tenantId,
+        coCode: s.coCode,
+        lcCode: s.lcCode ?? '',
+        coYear: s.coYear ?? '',
+        fromDate: s.fromDate,
+        toDate: s.toDate,
+        filters: s.filters,
+      },
+      (req.query ?? {}) as Record<string, unknown>,
+    );
+  };
+  const resolveApprovalReport = async (req: FastifyRequest) => {
+    const result = await runApprovalReport(req);
+    const table = exportTable(result);
+    const rows = table.lines.map((line) =>
+      Object.fromEntries(table.columns.map((c) => [c.caption, line[c.key] ?? ''])),
+    );
+    return { rows, totals: undefined, result: { title: result.title, rows } };
+  };
+
+  /**
    * Resolve a report to its rows and totals. Shared by the XLSX and CSV exports so the two cannot
    * disagree about what a report contains, and so the filter handling below (which the shared builder
    * signature cannot express) is applied identically to both formats.
@@ -4158,6 +4207,7 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
     /** The builder's own result, as the report screen receives it. */
     result: unknown;
   }> => {
+    if (slug === 'approval-report') return resolveApprovalReport(req);
     const build = REPORT_BUILDERS[slug]!;
     const scope = readScope(req);
     const q = (req.query ?? {}) as Record<string, string | undefined>;
@@ -4369,6 +4419,13 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
   // one path. Registered here (not with the other plugins above) because it needs `sendReportPdf`.
   registerAccountLedgerRoutes(app, { prisma, auth, guard, readScope, sendReportPdf });
   registerRpAllReportRoutes(app, { prisma, auth, guard, readScope }); // WP-11 Sales Report (RP_ALL)
+  registerPurchaseReportRoutes(app, {
+    prisma,
+    auth,
+    guard,
+    readScope,
+    pdfRenderer: deps.pdfRenderer,
+  }); // WP-12 Purchase Rpt (RP_ALL)
   registerTagStockRoutes(app, { prisma, auth, guard, scopeOf });
   registerStockReportRoutes(app, { prisma, auth, guard, readScope }); // WP-16 Stock Report (RP_STOCK)
 
@@ -4723,18 +4780,35 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
     const s = readScope(req);
     return listTags(prisma, s.tenantId, { CO_CODE: s.coCode, LC_CODE: s.lcCode });
   });
+  // The lot header fields the karigar block draws from (TR_TAG_OPBL.cs:10990-10996).
+  const tagOpeningInput = (req: FastifyRequest, b: any) => ({
+    scope: scopeOf(req),
+    mainUser: sess(req).sub,
+    vchDate: b.vchDate,
+    stockItCode: b.stockItCode,
+    lotNo: b.lotNo,
+    lotTouch: b.lotTouch,
+    lotWestPrc: b.lotWestPrc,
+    lines: b.lines ?? [],
+  });
+  // The screen's chooser, Set and grid settings (TR_TAG_OPBL.cs:10086-10090, :5156, :5395-5402).
+  app.get('/stock/tag-opening/setup', auth, async (req, reply) => {
+    if (!guard(req, reply, 'view')) return;
+    const s = scopeOf(req);
+    const { isAdmin } = await loadPrincipal(prisma, {
+      tenantId: s.tenantId,
+      coCode: s.coCode,
+      loginCoCode: sess(req).loginCoCode,
+      loginName: sess(req).sub,
+    });
+    return run(reply, 200, () =>
+      tagOpeningSetup(prisma, s, isAdmin).then((setup) => ({ ...setup, isAdmin })),
+    );
+  });
   app.post('/stock/tag-opening', auth, async (req, reply) => {
     if (!guard(req, reply, 'create')) return;
     const b = body(req);
-    return run(reply, 201, () =>
-      tagOpening(prisma, {
-        scope: scopeOf(req),
-        mainUser: sess(req).sub,
-        vchDate: b.vchDate,
-        stockItCode: b.stockItCode,
-        lines: b.lines ?? [],
-      }),
-    );
+    return run(reply, 201, () => tagOpening(prisma, tagOpeningInput(req, b)));
   });
   app.get('/stock/tag-opening/:vchNo', auth, async (req, reply) => {
     if (!guard(req, reply, 'view')) return;
@@ -4749,14 +4823,10 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
     return run(reply, 200, () =>
       editTagOpening(
         prisma,
-        {
-          scope: scopeOf(req),
-          mainUser: sess(req).sub,
-          vchDate: b.vchDate,
-          stockItCode: b.stockItCode,
-          lines: b.lines ?? [],
-        },
+        tagOpeningInput(req, b),
         (req.params as any).vchNo,
+        // N51 (D17): the read's `version`; a stale one is 409 voucher-version-conflict.
+        requiredVersion(b.expectedVersion),
       ),
     );
   });
@@ -4767,7 +4837,51 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
         scope: scopeOf(req),
         vchNo: (req.params as any).vchNo,
         deleteUser: sess(req).sub,
+        expectedVersion: requiredVersion((req.query as any)?.expectedVersion),
       }),
+    );
+  });
+  // BtnPrint_Click (TR_TAG_OPBL.cs:11477-11551): the print right guards the route; label skip, staging
+  // and the rendered sheet answer in one response.
+  app.post('/stock/tag-opening/:vchNo/print', auth, async (req, reply) => {
+    if (!guard(req, reply, 'print')) return;
+    const b = body(req);
+    const s = scopeOf(req);
+    if (!s.coBook || !s.coYear) {
+      return reply.code(400).send({ error: 'invalid-request', message: 'coBook is required' });
+    }
+    const scope = {
+      tenantId: s.tenantId,
+      coCode: s.coCode,
+      lcCode: s.lcCode,
+      coYear: s.coYear,
+      coBook: s.coBook,
+    };
+    try {
+      const out = await tagOpeningPrint(prisma, scope, String((req.params as any).vchNo ?? ''), {
+        labelSkip: b.labelSkip,
+        labelFile: b.labelFile,
+        srNo: b.srNo,
+      });
+      return reply.code(200).type('text/html; charset=utf-8').send(out.html);
+    } catch (e: any) {
+      if (/(ValidationError|NumberingConfigurationError)$/.test(e?.name ?? ''))
+        return reply.code(400).send({ error: e.name, message: e.message });
+      throw e;
+    }
+  });
+  // BtnTagSet_Click (TR_TAG_OPBL.cs:12345-12364): the chosen label file becomes the family default.
+  app.post('/stock/tag-opening/default-file', auth, async (req, reply) => {
+    if (!guard(req, reply, 'update')) return;
+    const s = scopeOf(req);
+    const scope = {
+      tenantId: s.tenantId,
+      coCode: s.coCode,
+      lcCode: s.lcCode,
+      coYear: s.coYear ?? '',
+    };
+    return run(reply, 200, () =>
+      tagOpeningSetDefaultLabelFile(prisma, scope, String(body(req).file ?? '')),
     );
   });
   // Item (non-tag) opening balance (desktop TR_ITM_OPBL → ITM_OPBL + MAIN_STOCK 'ITOBL').
@@ -5089,7 +5203,14 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
   app.delete('/stock/tag-adjust/:vchNo', auth, async (req, reply) => {
     if (!guard(req, reply, 'delete')) return;
     return run(reply, 200, () =>
-      deleteTagAdjust(prisma, scopeOf(req), (req.params as any).vchNo, body(req).book),
+      deleteTagAdjust(
+        prisma,
+        scopeOf(req),
+        (req.params as any).vchNo,
+        body(req).book,
+        // N51 (D17): the delete sends the version its GET returned in the query (as the edit does in the body).
+        (req.query as any)?.expectedVersion,
+      ),
     );
   });
   app.post('/stock/tag-weight-diff', auth, async (req, reply) => {
@@ -5997,8 +6118,15 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
     );
   });
   app.get('/reports/approval-report', auth, async (req, reply) => {
-    const q = (req.query ?? {}) as Record<string, string | undefined>;
-    return run(reply, 200, () => approvalReport(prisma, readScope(req), { mode: q.mode }));
+    try {
+      return reply.send(await runApprovalReport(req));
+    } catch (error) {
+      if (error instanceof RpAllRequestError)
+        return reply
+          .code(error.statusCode)
+          .send({ error: error.code, message: error.message, ...error.details });
+      throw error;
+    }
   });
   app.get('/reports/vp-report', auth, async (req, reply) => {
     const q = (req.query ?? {}) as Record<string, string | undefined>;
@@ -6134,6 +6262,7 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
     const q = (req.query ?? {}) as Record<string, string | undefined>;
     return run(reply, 200, () => consiDetailReport(prisma, readScope(req), q.acCode));
   });
+  app.get('/years/print', auth, async () => ({ message: '' })); // MS_YEAR.cs:961-968: rights check only, no report.
   app.get('/years', auth, async (req) => {
     const s = readScope(req);
     return listYears(prisma, { tenantId: s.tenantId, coCode: s.coCode });
@@ -6926,6 +7055,8 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
         book: body(req).book,
         // DELETE_DATA.DELETE_USER is the signed-in user (TR_WH_SALE.cs:13569 `MCo_User`).
         deleteUser: sess(req).sub,
+        // N51 (D17): the delete sends the version its GET returned in the query (as the saved sale does).
+        expectedVersion: (req.query as any)?.expectedVersion,
       }),
     );
   });
@@ -6937,6 +7068,7 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
         vchNo: (req.params as any).vchNo,
         book: body(req).book,
         deleteUser: sess(req).sub,
+        expectedVersion: (req.query as any)?.expectedVersion,
       }),
     );
   });
@@ -6965,6 +7097,7 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
         vchNo: (req.params as any).vchNo,
         book: body(req).book,
         deleteUser: sess(req).sub,
+        expectedVersion: (req.query as any)?.expectedVersion,
       }),
     );
   });
@@ -7024,6 +7157,7 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
         vchNo: (req.params as any).vchNo,
         book: body(req).book,
         deleteUser: sess(req).sub,
+        expectedVersion: (req.query as any)?.expectedVersion,
       }),
     );
   });

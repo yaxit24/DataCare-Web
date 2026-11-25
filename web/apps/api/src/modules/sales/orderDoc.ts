@@ -110,6 +110,8 @@ export interface OrderCtx {
   copy?: string;
   fallbackName?: string;
   title?: string;
+  /** 'TOUR ORDER' keeps its money advance in ADV_AMT alone. */
+  family?: string;
 }
 const dt = (v: any): string => formatDesktopDate(v); // N56 (D19): dd/MM/yyyy
 
@@ -148,7 +150,15 @@ export function orderHtml(header: any, lines: any[], ctx: OrderCtx = {}): string
     `<tfoot><tr><td class="c" colspan="2">Total</td><td class="r">${sPcs || ''}</td><td class="r">${wt(sGwt)}</td><td class="r">${wt(sNwt)}</td><td></td><td></td><td class="r">${money(sMaking)}</td><td class="r">${money(sAmt)}</td></tr></tfoot></table>`;
 
   const total = num(h.TOT_AMT) || num(h.NET_AMT) + num(h.TAX_AMT);
-  const adv = num(h.ADV_AMT);
+  // TR_SALE_ORD.cs:11368 sums ADV_AMT from every tender INCLUDING the old-metal amounts and the scheme, so
+  // subtracting ADV_AMT and then the old-gold and scheme rows again counts those twice. The desktop's balance
+  // cell (BILL_TOTAL, TR_SALE_ORD.cs:11373-11375) subtracts each tender exactly once:
+  // TOT − SCHM − UPI − CASH − CHQ − CARD − OLD_GL_AMT − OLD_SL_AMT, and N197 saves those tenders in their own
+  // header columns. A Tour Order keeps its money advance in ADV_AMT alone, outside its old metal and scheme.
+  const moneyTenders = num(h.CASH_AMT) + num(h.CHQ_AMT) + num(h.CARD_AMT) + num(h.UPI_AMT);
+  // A Tour Order is named by the caller and keeps its cash advance in ADV_AMT. Every Sales Order follows the
+  // desktop columns (desktop-migrated rows and N197 web rows alike), so no amount comparison guesses the writer.
+  const adv = ctx.family === 'TOUR ORDER' ? num(h.ADV_AMT) : moneyTenders;
   const oldGold = num(h.OLD_GL_AMT) + num(h.OLD_SL_AMT);
   const balance = total - adv - oldGold - num(h.SCHM_AMT);
   const t: string[] = [`<tr><td>Order Value</td><td class="r">${money(total)}</td></tr>`];
