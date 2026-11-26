@@ -44,10 +44,14 @@ const auditRows = (ctx) =>
   );
 
 /** The next voucher number of a book: what the failed attempts must not have taken. */
-export async function nextVoucherNo(ctx, headerTable, book) {
+export async function nextVoucherNo(ctx, headerTable, book, scope) {
+  // The web numbers per company, location, year and book (numbering.ts currentMaxVoucherNo). Without a scope the
+  // prediction spans every year, which is wrong once another module has written the same book in another year.
+  const where = scope ? ` AND "CO_CODE"=$3 AND "LC_CODE"=$4 AND "CO_YEAR"=$5` : '';
+  const args = scope ? [book, scope.coCode, scope.lcCode, scope.coYear] : [book];
   const [{ n }] = await ctx.rows(
-    `SELECT (coalesce(max("VCH_NO"::int),0)+1)::int n FROM "${headerTable}" WHERE tenant_id=$1 AND "CO_BOOK"=$2`,
-    book,
+    `SELECT (coalesce(max("VCH_NO"::int),0)+1)::int n FROM "${headerTable}" WHERE tenant_id=$1 AND "CO_BOOK"=$2${where}`,
+    ...args,
   );
   return n;
 }
@@ -61,13 +65,15 @@ export async function nextVoucherNo(ctx, headerTable, book) {
  * @param {() => Promise<any>} o.submit  click Save on the filled screen and return the response
  * @param {string[]} [o.updatedTables] tables a real save changes by UPDATE (a counter row such as SRNO_MAST); a fault on
  *   an UPDATE of each is injected as well, and they count as written in the final comparison
+ * @param {{coCode: string, lcCode: string, coYear: string}} [o.scope] the session's company, location and year, to
+ *   predict the number in the same scope the web numbers in
  * @param {boolean} [o.fixedVoucherNo=false] Skip numbering for replacements and fixed opening keys.
  * @param {(response: any) => Promise<string>} [o.voucherNoOf]
  */
 export async function rollbackMatrix(ctx, o) {
   const { tables, book, headerTable, submit } = o;
   const voucherNoOf = o.voucherNoOf ?? (async (response) => String((await response.json()).vchNo));
-  const expectedNo = o.fixedVoucherNo ? null : await nextVoucherNo(ctx, headerTable, book);
+  const expectedNo = o.fixedVoucherNo ? null : await nextVoucherNo(ctx, headerTable, book, o.scope);
   const before = await tenantFingerprint(ctx);
   const auditBefore = await auditRows(ctx);
 

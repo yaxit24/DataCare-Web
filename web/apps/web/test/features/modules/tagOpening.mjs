@@ -871,6 +871,7 @@ export const tagOpening = {
           updatedTables,
           book: OPEN_BOOK,
           headerTable: 'BAR_DETL',
+          scope: await (await page.request.get('/api/me')).json(),
           submit: () => save(page),
         });
         const saved = pad(result.vchNo);
