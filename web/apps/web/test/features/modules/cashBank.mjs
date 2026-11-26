@@ -236,9 +236,18 @@ export const cashBank = {
           ['05', PARTIES.local.code, 3000, 0],
           ['06', 'CASH', 0, 3000],
         ]);
+        // TR_CASH saves a payment into CASH_DATA, never PAY_DATA (TR_CASH.cs:3005-3069), with the book's MAIN_BOOK as
+        // BOOK_NAME (:3033), and numbers it from CASH_DATA (:2674).
+        const [{ cash, pay, name }] = await ctx.rows(
+          `SELECT (SELECT count(*) FROM "CASH_DATA" WHERE tenant_id=$1 AND "CO_BOOK"='${PAYMENT_BOOK}' AND "VCH_NO"=$2 AND "INOUT_TYPE"='O')::int cash,
+                  (SELECT count(*) FROM "PAY_DATA" WHERE tenant_id=$1 AND "CO_BOOK"='${PAYMENT_BOOK}' AND "VCH_NO"=$2)::int pay,
+                  (SELECT string_agg(DISTINCT "BOOK_NAME",',') FROM "ROJ_MEL_DATA" WHERE tenant_id=$1 AND "CO_BOOK"='${PAYMENT_BOOK}' AND "VCH_NO"=$2) name`,
+          vchNo,
+        );
+        assert.deepEqual([cash, pay, name], [1, 0, 'PAYMENT']);
         return {
           observation: `voucher ${vchNo}: ${JSON.stringify(shape)}`,
-          expected: 'legs 05-06 as Cash_Ledr',
+          expected: 'legs 05-06 as Cash_Ledr, the header in CASH_DATA',
           database: { legs: rows },
           downstream: { legs: shape.length },
         };
@@ -774,7 +783,7 @@ export const cashBank = {
         const seen = {};
         for (const [path, label, table, book] of [
           ['/txn/receipt', 'Save Receipt', 'CASH_DATA', RECEIPT_BOOK],
-          ['/txn/payment', 'Save Payment', 'PAY_DATA', PAYMENT_BOOK],
+          ['/txn/payment', 'Save Payment', 'CASH_DATA', PAYMENT_BOOK],
         ]) {
           const count = async () =>
             (

@@ -110,10 +110,11 @@ async function main() {
     chqNo: '11',
   });
   const [pc, pb] = await withTenant(prisma, T, async (tx) => [
-    await cnt(tx, 'PAY_DATA', p.vchNo),
+    // TR_CASH keeps payments in CASH_DATA like receipts (TR_CASH.cs:3005).
+    await cnt(tx, 'CASH_DATA', p.vchNo),
     await bal(tx, p.vchNo),
   ]);
-  check('payment PAY_DATA(1)', pc === 1);
+  check('payment CASH_DATA(1)', pc === 1);
   check('payment AC_DATA balanced (dr=cr=3000)', pb.dr === 3000 && pb.cr === 3000);
 
   // contra: cash -> bank

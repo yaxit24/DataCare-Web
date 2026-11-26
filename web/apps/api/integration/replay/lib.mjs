@@ -218,7 +218,17 @@ export function cashRequest(v) {
   const chqNo = opt(rows.find((r) => str(r.CHQ_NO))?.CHQ_NO);
   const mode = main.startsWith('CASH') ? 'cash' : chqNo ? 'cheque' : 'bank';
   const head = rows[0];
-  const single = rows.length === 1 && !str(head.IT_DESC);
+  // The grid cells beyond party and amount (TR_CASH.cs:3034-3047): Remark, Charges, Clearing Dt (the voucher date
+  // when empty, :3022-3029), and the Chq Ac Name and Bank Name boxes. Only a cell the operator filled is sent.
+  const cells = (r) => ({
+    itDesc: opt(r.IT_DESC),
+    bankCharges: nz(r.BANK_CHARGES),
+    clrDate: isoDay(r.CLR_DATE) !== isoDay(r.VCH_DATE) ? isoDay(r.CLR_DATE) : undefined,
+    chqPrintName: opt(r.CHQ_PRINT_NAME),
+    bankName: opt(r.BANK_NAME),
+  });
+  const grid = (r) => Boolean(str(r.IT_DESC) || nz(r.BANK_CHARGES) || cells(r).clrDate);
+  const single = rows.length === 1 && !grid(head);
   if (single) {
     return {
       method: 'POST',
@@ -233,6 +243,8 @@ export function cashRequest(v) {
         chqNo,
         kasar: nz(head.KASAR_AMT),
         empCode: opt(head.EMP_CODE),
+        chqPrintName: cells(head).chqPrintName,
+        bankName: cells(head).bankName,
       }),
     };
   }
@@ -253,7 +265,7 @@ export function cashRequest(v) {
           partyName: opt(r.AC_NAME),
           amount: num(r.REC_AMT),
           kasar: nz(r.KASAR_AMT),
-          itDesc: opt(r.IT_DESC),
+          ...cells(r),
         })),
     }),
   };

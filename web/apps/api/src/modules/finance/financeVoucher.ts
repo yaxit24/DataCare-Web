@@ -1,5 +1,6 @@
 import { formatDesktopDate, round } from '@datacare/core';
 import { withTxBudget } from '../shared/txBudget.js';
+import { resolveBookSlotAccountTx } from '../shared/postingAccounts.js';
 import {
   docShell,
   esc,
@@ -18,8 +19,9 @@ import {
   type VoucherDocumentScope,
 } from '../documents/voucherDocument.js';
 
-/** Receipt / Payment voucher documents. Receipts live in CASH_DATA (VCH_TYPE CREC/BREC), payments in
- *  PAY_DATA (CPAY/BPAY); both keep per-party allocations in PAY_DETL (AC_CODE, IT_NAME, NET/TOT, IT_REMARK).
+/** Receipt / Payment voucher documents. Both live in CASH_DATA, one row per grid line (TR_CASH.cs:3005-3069); a
+ *  payment the web saved in PAY_DATA before that, and an Other Expenses voucher, keep their per-party
+ *  allocations in PAY_DETL (AC_CODE, IT_NAME, NET/TOT, IT_REMARK).
  *  Mirrors desktop CashBankBill.rpt (receipt) / PaymentVch.rpt (payment): received-from/paid-to party,
  *  on-account allocation table, mode/tender (cash/cheque/bank), amount in words, signatory. */
 export type VoucherKind = 'receipt' | 'payment';
@@ -30,21 +32,30 @@ export async function financeVoucherData(
   kind: VoucherKind,
   scope: FinanceVoucherScope,
 ): Promise<{ header: any; lines: any[]; company: any; party: any } | null> {
-  const headTable = kind === 'receipt' ? 'CASH_DATA' : 'PAY_DATA';
   const s = requireVoucherDocumentScope(scope);
   return withTxBudget(prisma, s.tenantId, 'read', async (tx: any) => {
     const params = voucherKeyParams(s);
-    // TR_CASH prints every CASH_DATA row of the voucher in SR_NO order (TR_CASH.cs:3151, :3288, :3333): a
-    // multi-line receipt is one row per grid line (:2995-3060), so the header carries the summed amount and
-    // kasar and each row becomes an allocation line. Older web multi-line receipts kept one aggregate row
-    // plus PAY_DETL lines; those still print from PAY_DETL.
-    const h: any[] = await tx.$queryRawUnsafe(
-      `SELECT * FROM "${headTable}" WHERE ${voucherKeyWhere()}${
-        kind === 'receipt' ? ' ORDER BY "SR_NO" NULLS FIRST' : ' LIMIT 1'
-      }`,
+    // TR_CASH prints every CASH_DATA row of the voucher in SR_NO order, receipts AND payments, through
+    // CashBankBill(.Ac).RPT (TR_CASH.cs:3151, :3288, :3327-3333): a multi-line voucher is one row per grid line
+    // (:2995-3060), so the header carries the summed amount and kasar and each row becomes an allocation line.
+    // A payment book holds payments only; a CASH_DATA row flagged as received money is never a payment's header.
+    let h: any[] = await tx.$queryRawUnsafe(
+      `SELECT * FROM "CASH_DATA" WHERE ${voucherKeyWhere()}${
+        kind === 'payment' ? ` AND coalesce("INOUT_TYPE",'') <> 'I'` : ''
+      } ORDER BY "SR_NO" NULLS FIRST`,
       ...params,
     );
+    // A payment the web saved in PAY_DATA before payments moved to CASH_DATA, and the Other Expenses / Other
+    // Income vouchers (TR_OTH_PURC prints PaymentVch.RPT from PAY_DATA), keep printing from there.
+    const fromCashData = h.length > 0;
+    if (!fromCashData && kind === 'payment')
+      h = await tx.$queryRawUnsafe(
+        `SELECT * FROM "PAY_DATA" WHERE ${voucherKeyWhere()} LIMIT 1`,
+        ...params,
+      );
     if (!h.length) return null;
+    // Older web multi-line receipts kept one aggregate CASH_DATA row plus PAY_DETL lines; those still print from
+    // PAY_DETL. A voucher written as TR_CASH writes it has none.
     const detail: any[] = await tx.$queryRawUnsafe(
       `SELECT * FROM "PAY_DETL" WHERE ${voucherKeyWhere()} ORDER BY "SR_NO"`,
       ...params,
@@ -54,12 +65,43 @@ export async function financeVoucherData(
         h.reduce((t, r) => t + num(r[col]), 0),
         2,
       );
-    const header =
-      kind === 'receipt' && h.length > 1
-        ? { ...h[0], REC_AMT: sum('REC_AMT'), KASAR_AMT: sum('KASAR_AMT') }
-        : h[0];
+    let header = h[0];
+    if (fromCashData) {
+      const amount = sum('REC_AMT');
+      // Cash or bank: the book's own layout (BANK REC / BANK PAY are the bank forms, TR_CASH.cs:3073); a generic
+      // book is a bank movement when it names a settlement account other than its slot 1.
+      const book: any[] = await tx.$queryRawUnsafe(
+        `SELECT upper(btrim(coalesce("MAIN_BOOK"::text,''))) m FROM "BOOK_DATA"
+          WHERE tenant_id=$1 AND "CO_CODE"=$2 AND "LC_CODE"=$3 AND "CO_BOOK"=$4 ORDER BY row_id LIMIT 1`,
+        s.tenantId,
+        s.coCode,
+        s.lcCode,
+        s.coBook,
+      );
+      const main = String(book[0]?.m ?? '');
+      const slotOne = await resolveBookSlotAccountTx(tx, s, 'cash-settlement', 1).catch(() => '');
+      const named = String(h[0].REC_AC_CODE ?? '').trim();
+      const bank = main.startsWith('BANK')
+        ? true
+        : main.startsWith('CASH')
+          ? false
+          : named !== '' && named !== slotOne;
+      header = {
+        ...h[0],
+        REC_AMT: amount,
+        KASAR_AMT: sum('KASAR_AMT'),
+        // The page's view model: the print reads the amount, the mode and the settlement account from these.
+        NET_AMT: amount,
+        TOT_AMT: amount,
+        VCH_TYPE: `${bank ? 'B' : 'C'}${kind === 'receipt' ? 'REC' : 'PAY'}`,
+        CASH_AMT: bank ? 0 : amount,
+        BANK_AC: bank ? named || slotOne : null,
+      };
+    } else if (kind === 'receipt' && h.length > 1) {
+      header = { ...h[0], REC_AMT: sum('REC_AMT'), KASAR_AMT: sum('KASAR_AMT') };
+    }
     const lines =
-      detail.length || kind !== 'receipt' || h.length < 2
+      detail.length || !fromCashData || h.length < 2
         ? detail
         : h.map((r) => ({
             AC_CODE: r.AC_CODE,

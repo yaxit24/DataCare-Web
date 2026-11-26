@@ -26,7 +26,6 @@
     "rounding:modules/finance/cardReceipt.ts#r2",
     "rounding:modules/finance/chequePrint.ts#amountInWords",
     "rounding:modules/finance/employeeJv.ts#r2",
-    "rounding:modules/finance/finance.ts#round2",
     "rounding:modules/finance/goldBook.ts#money",
     "rounding:modules/finance/ledgerAdjust.ts#r2",
     "rounding:modules/finance/locationAmount.ts#money",

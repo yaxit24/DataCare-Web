@@ -138,8 +138,9 @@ const DAY = `${startYear}-06-15`;
       `SELECT "CO_BOOK","VCH_NO","REC_AMT"::float rec,"KASAR_AMT"::float kasar,"REC_AC_CODE" FROM "CASH_DATA" WHERE tenant_id=$1`,
       tenantId,
     );
+    // REC_AC_CODE is not a TR_CASH column (TR_CASH.cs:3016-3062): the settlement account here is the book's slot 1.
     expect(cash).toEqual([
-      { CO_BOOK: 'RCT', VCH_NO: '00001', rec: 1000, kasar: 15, REC_AC_CODE: 'CASH' },
+      { CO_BOOK: 'RCT', VCH_NO: '00001', rec: 1000, kasar: 15, REC_AC_CODE: null },
     ]);
     const legs = await query<Array<{ ac: string; dr: number; cr: number }>>(
       `SELECT "AC_CODE" ac,"DR_AMT"::float dr,"CR_AMT"::float cr FROM "AC_DATA"
@@ -161,7 +162,7 @@ const DAY = `${startYear}-06-15`;
     expect(print.body).toContain('1,000');
   });
 
-  it('D1-2: a cash payment is saved in the PAY book', async () => {
+  it('D1-2: a cash payment is saved in the PAY book, in CASH_DATA', async () => {
     const saved = await request('POST', '/payments', {
       coBook: 'PAY',
       partyAc: 'CUST01',
@@ -169,11 +170,17 @@ const DAY = `${startYear}-06-15`;
       mode: 'cash',
     });
     expect(saved.statusCode, saved.body).toBe(201);
+    // A payment is a CASH_DATA row like a receipt (TR_CASH.cs:3005); PAY_DATA is Other Expenses / Other Income.
     const pay = await query<Array<Record<string, unknown>>>(
-      `SELECT "CO_BOOK","VCH_NO","NET_AMT"::float net,"CASH_AMT"::float cash FROM "PAY_DATA" WHERE tenant_id=$1`,
+      `SELECT "CO_BOOK","VCH_NO","REC_AMT"::float rec,"INOUT_TYPE" inout FROM "CASH_DATA" WHERE tenant_id=$1 AND "CO_BOOK"='PAY'`,
       tenantId,
     );
-    expect(pay).toEqual([{ CO_BOOK: 'PAY', VCH_NO: '00001', net: 750, cash: 750 }]);
+    expect(pay).toEqual([{ CO_BOOK: 'PAY', VCH_NO: '00001', rec: 750, inout: 'O' }]);
+    const old = await query<Array<{ n: number }>>(
+      `SELECT count(*)::int n FROM "PAY_DATA" WHERE tenant_id=$1`,
+      tenantId,
+    );
+    expect(old[0]!.n).toBe(0);
   });
 
   it('D1-5 over HTTP: a receipt into the SALES book is refused and writes nothing', async () => {
