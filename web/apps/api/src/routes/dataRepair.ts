@@ -189,6 +189,7 @@ export function registerDataRepairRoutes(app: FastifyInstance, deps: DataRepairR
         error?.code === 'P2010' ||
         /Raw query failed|violates|not-null|duplicate key/i.test(text)
       ) {
+        req.log.warn({ err: error }, 'data refresh apply failed on invalid data');
         return reply.code(400).send({
           error: 'invalid-data',
           detail: 'Data Refresh could not be applied because the data is invalid.',

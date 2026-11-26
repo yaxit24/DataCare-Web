@@ -200,6 +200,9 @@ export async function editIdentityTx(
     requestedDate: Date;
     checkRequestedDate?: boolean;
     extraColumns?: readonly string[];
+    /** Refuse with this text when the saved voucher has no hidden number (a legacy cash payment grid). Only the
+     * cash/bank payment edit opts in: Other Income/Expense/Commission also live in PAY_DATA and may be blank. */
+    blankHiddenRefusal?: string;
   },
 ): Promise<{ identity: VoucherIdentity; persisted: Record<string, unknown> }> {
   const complete = completeFinanceScope(options.scope);
@@ -232,13 +235,9 @@ export async function editIdentityTx(
       ledger: { table: 'AC_DATA', lines: [{ CO_CODE: options.scope.coCode, VCH_DATE: date }] },
     });
   }
-  // TR_CASH.cs:2976-3004 allocates a hidden identity for a NEW cash voucher. Legacy PAY_DATA grids
-  // have no such identity and this single-party edit cannot safely reconstruct their PAY_DETL lines.
-  // Refuse before replaceWriteSetTx deletes anything rather than silently collapsing the old grid.
-  if (options.table === 'PAY_DATA' && !text(persisted.HD_VCH_NO)) {
-    throw new FinanceLifecycleValidationError(
-      'Cannot edit this legacy payment: it has no hidden voucher number. Its saved payment lines must be migrated before editing.',
-    );
+  // Refused before replaceWriteSetTx deletes anything, for callers that cannot rebuild a voucher without its identity.
+  if (options.blankHiddenRefusal && !text(persisted.HD_VCH_NO)) {
+    throw new FinanceLifecycleValidationError(options.blankHiddenRefusal);
   }
   const hiddenVoucherNo = formatVoucherNo(text(persisted.HD_VCH_NO));
   return {
