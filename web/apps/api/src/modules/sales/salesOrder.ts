@@ -869,8 +869,7 @@ function prepareSalesOrderCreate(input: SalesOrderInput, lifecycle?: OrderWriteC
         throw new SaleValidationError(
           'Changing an order tag identity is not supported in this editor.',
         );
-      // A new line may name a tag: the grid's Tag cell (mSG col 1, TR_SALE_ORD.cs:7490-7690). It takes only a tag
-      // in stock at this location and not issued to an employee; the save stores it (:9208-9215).
+      // A new line's Tag cell (TR_SALE_ORD.cs:7490-7690, saved :9208-9215): salesOrderTags.ts pickOrderTagTx.
       if (!previous && tagIdentity(line.tagNo)) {
         if (!salesOrderForm)
           throw new SaleValidationError(
@@ -910,12 +909,9 @@ function prepareSalesOrderCreate(input: SalesOrderInput, lifecycle?: OrderWriteC
       );
     }
     const linesNet = round2(computed.reduce((s, c) => s + c.net, 0));
-    // Neither order form refuses an order without an amount: the save checks the party, the voucher number, the
-    // dates, the salesperson and the tender accounts only (TR_SALE_ORD.cs:8925-9047, TR_TOUR_ORD.cs:7140-7230). An
-    // order taken by weight before the rate is fixed is saved with its advance alone.
+    // No refusal of a zero amount (the saves check no amount, TR_SALE_ORD.cs:8925-9047, TR_TOUR_ORD.cs:7140-7230);
+    // a negative one is refused, as the grid cells take none.
     const baseNet = linesNet > 0 ? linesNet : Number(input.netAmount || 0);
-    // The order's amount is the grid's total (BILL_TOTAL, MSG2_TOTAL[0,3]); the grid cells do not take a negative
-    // weight, rate or amount, so neither does the API.
     if (Number(input.netAmount ?? 0) < 0 || linesNet < 0)
       throw new SaleValidationError('The order amount cannot be negative.');
     let totals = pricing.orderTotals(policy, {
@@ -1017,8 +1013,7 @@ function prepareSalesOrderCreate(input: SalesOrderInput, lifecycle?: OrderWriteC
       {
         ...key,
         VCH_DATE: vchDate,
-        // tBillNo is only ever the typed box (TR_SALE_ORD.cs:9115, TR_TOUR_ORD.cs:7286): blank on a new order, and the
-        // saved value on a reopened one (:8543) unless the request sends the box.
+        // The typed box (TR_SALE_ORD.cs:9115, TR_TOUR_ORD.cs:7286): blank when new, reloaded on edit (:8543).
         BILL_NO: input.billNo ?? lifecycle?.previousHeader?.BILL_NO ?? '',
         AC_CODE: input.acCode,
         AC_NAME: input.acName ?? null,
@@ -1116,8 +1111,7 @@ function prepareSalesOrderCreate(input: SalesOrderInput, lifecycle?: OrderWriteC
           TAG_GEN: 'N',
           DESIGN_ISU: 'N',
           // Desktop SL_ORD_DETL grid columns (TR_SALE_ORD.cs:9205-9306).
-          // mSG[i,3] :9216. A picked tag fills the counter from BAR_DETL (:7596); a typed counter moves the tag
-          // there on save (:9554).
+          // mSG[i,3] :9216: typed, else the picked tag's (:7596); the save moves the tag there (:9554).
           TBL_CODE: txt(c.in.tblCode, 3) ?? (newTags.get(i)?.tblCode || null),
           ITM_COLOR: txt(c.in.itmColor, 15), // mSG[i,5]  :9218
           ITM_SIZE: designText(c.in, c.in.itmSize, 20), // selected blank is a copied cell :7342
@@ -1153,18 +1147,14 @@ function prepareSalesOrderCreate(input: SalesOrderInput, lifecycle?: OrderWriteC
           OLD_TBL_CODE: newTags.has(i)
             ? newTags.get(i)!.tblCode.slice(0, 3) || null
             : txt(c.in.oldTblCode ?? previousLines.get(parentNumbers[i]!)?.OLD_TBL_CODE, 3),
-          // mSG[i,70] :9267. An edit that omits it keeps the saved value, so it cannot drop the tag reservation.
-          // The Sales Order saves anything but a 'Y' as 'N' (:9268-9286); the Tour Order keeps the cell
-          // (TR_TOUR_ORD.cs:7430-7442).
-          // A new row's cell is CO_SET_NEW.ORD_TAG_STK_LESS (:5557, :7290; MS_OPNCOMP.cs:996-1203) and stays 'Y' only
-          // on a tagged line.
-          TAG_STK_LESS: (() => {
-            const previous = previousLines.get(parentNumbers[i]!);
-            if (!salesOrderForm) return txt(c.in.tagStockLess ?? previous?.TAG_STK_LESS, 1);
-            if (!previous) return newTags.has(i) && tagStockLessSetting === 'Y' ? 'Y' : 'N';
-            const cell = txt(c.in.tagStockLess ?? previous.TAG_STK_LESS, 1);
-            return cell === 'Y' && tagIdentity(previous.TAG_NO) ? 'Y' : 'N';
-          })(),
+          // mSG[i,70] :9267, salesOrderTags.ts orderLineTagStockLess.
+          TAG_STK_LESS: orderTags.orderLineTagStockLess({
+            salesOrderForm,
+            previous: previousLines.get(parentNumbers[i]!),
+            requested: c.in.tagStockLess,
+            picked: newTags.has(i),
+            setting: tagStockLessSetting,
+          }),
           DESIGN_IMG_ID:
             c.in.designImageId === undefined
               ? previousLines.has(parentNumbers[i]!)

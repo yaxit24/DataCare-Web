@@ -135,6 +135,27 @@ export async function pickOrderTagTx(
   return { tagNo: tagNo.slice(0, 15), vchSrno, tblCode: String(bar?.tbl ?? '') };
 }
 
+/**
+ * SL_ORD_DETL.TAG_STK_LESS (mSG col 70). On a Sales Order a new row's cell is CO_SET_NEW.ORD_TAG_STK_LESS (:5557,
+ * :7290) and the save keeps 'Y' only on a tagged line (:9268-9286); an edit keeps the saved cell unless the request
+ * sends one. The Tour Order keeps the cell as it is (TR_TOUR_ORD.cs:7430-7442).
+ */
+export function orderLineTagStockLess(a: {
+  salesOrderForm: boolean;
+  previous?: Record<string, any>;
+  requested?: string;
+  picked: boolean;
+  setting: 'Y' | 'N';
+}): string | null {
+  const cell = String(a.requested ?? a.previous?.TAG_STK_LESS ?? '')
+    .trim()
+    .slice(0, 1);
+  if (!a.salesOrderForm) return cell || null;
+  if (!a.previous) return a.picked && a.setting === 'Y' ? 'Y' : 'N';
+  const tag = String(a.previous.TAG_NO ?? '').trim();
+  return cell === 'Y' && tag !== '' && tag !== 'N' ? 'Y' : 'N';
+}
+
 const TAG_JOIN = `b.tenant_id=t.tenant_id AND b."CO_CODE"=t."CO_CODE" AND b."TAG_NO"=t."TAG_NO" AND b."VCH_SRNO"=t."VCH_SRNO"`;
 
 /**
