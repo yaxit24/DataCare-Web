@@ -4,6 +4,7 @@ import {
   DRILL_COLUMNS,
   type Column,
   type MovementResult,
+  type MovementRow,
   type StockResult,
   type StockRow,
 } from './types';
@@ -20,11 +21,14 @@ export function SummaryGrid({
   rows,
   onDrill,
   gridRef,
+  showTotal = true,
 }: {
   result: StockResult;
   rows: StockRow[];
   onDrill: (row: StockRow, column: Column) => void;
   gridRef: React.RefObject<HTMLTableElement | null>;
+  /** The "Total :" row exists only on the full grid: a name search binds the filtered rows as they are (RP_STOCK.cs:3837-3905). */
+  showTotal?: boolean;
 }) {
   const t = result.totals;
   return (
@@ -77,7 +81,7 @@ export function SummaryGrid({
               ])}
             </tr>
           ))}
-          {result.rows.length > 0 && (
+          {showTotal && result.rows.length > 0 && (
             <tr data-total="1" style={{ fontWeight: 600 }}>
               <td />
               <td>Total :</td>
@@ -97,7 +101,16 @@ export function SummaryGrid({
   );
 }
 
-export function MovementGrid({ data, lotCaption }: { data: MovementResult; lotCaption: boolean }) {
+export function MovementGrid({
+  data,
+  lotCaption,
+  onZoom,
+}: {
+  data: MovementResult;
+  lotCaption: boolean;
+  /** Double click on a row opens its voucher (RP_STOCK.cs:5218). */
+  onZoom?: (row: MovementRow) => void;
+}) {
   const t = data.totals;
   return (
     <div className="panel" style={{ overflow: 'auto', maxHeight: '60vh' }}>
@@ -120,7 +133,7 @@ export function MovementGrid({ data, lotCaption }: { data: MovementResult; lotCa
         </thead>
         <tbody>
           {data.rows.map((r, i) => (
-            <tr key={i}>
+            <tr key={i} data-vch={r.vchNo ?? ''} onDoubleClick={() => onZoom?.(r)}>
               <td>{i + 1}</td>
               <td>{r.vchType ?? ''}</td>
               <td>{r.partyName}</td>

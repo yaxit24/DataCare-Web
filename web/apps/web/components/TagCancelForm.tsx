@@ -49,6 +49,7 @@ import { EntityImagePanel } from './EntityImagePanel';
 import { useGridKeyboard } from './GridKeyboard';
 import { LookupPicker, type LookupRow } from './LookupPicker';
 import SubDetailGrid, { type SubDetailField, type SubDetailRow } from './SubDetailGrid';
+import { useVoucherZoom } from '../lib/voucherZoom';
 
 /**
  * TR_TAG_CAN — Tag Cancel and Tag Transfer on one form (contract K15), as the desktop opens one form from both
@@ -441,6 +442,13 @@ export function TagCancelForm({ mode }: { mode: TagCancelMode }) {
       setBusy(false);
     }
   }
+
+  useVoucherZoom({
+    ready: !!coBook,
+    book: coBook,
+    setBook: setCoBook,
+    load: (vchNo) => load(vchNo),
+  });
 
   async function step(direction: 'previous' | 'next') {
     const numbers = (listing?.vouchers ?? []).map((voucher) => voucher.vchNo);

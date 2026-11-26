@@ -26,6 +26,7 @@ import {
   GridModeToggle,
 } from '../../../../components/ExtendedGrid';
 import { openDocument } from '../../../../lib/openDocument';
+import { useVoucherZoom } from '../../../../lib/voucherZoom';
 
 interface Line {
   itCode: string;
@@ -323,8 +324,18 @@ function LegacySaleReturnForm() {
     }
   }
 
-  async function openSaved() {
-    const vch = openVch.trim();
+  useVoucherZoom({
+    ready: !!coBook,
+    book: coBook,
+    setBook: setCoBook,
+    load: (vchNo) => {
+      setOpenVch(vchNo);
+      return openSaved(vchNo);
+    },
+  });
+
+  async function openSaved(requested?: string) {
+    const vch = (requested ?? openVch).trim();
     if (!coBook || !vch) return;
     setErr('');
     setResult(null);
@@ -494,7 +505,7 @@ function LegacySaleReturnForm() {
                 <button
                   type="button"
                   className="ghost"
-                  onClick={openSaved}
+                  onClick={() => void openSaved()}
                   style={{ flex: 'none' }}
                 >
                   Open

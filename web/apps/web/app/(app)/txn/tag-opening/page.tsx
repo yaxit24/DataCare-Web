@@ -24,6 +24,7 @@ import { ParityContainmentFieldset } from '../../../../components/ParityContainm
 import { parityContainmentMessage, parityContainmentRule } from '@datacare/core/containment';
 import { fineFor, tagKarigarBlock } from '@datacare/core';
 import { todayLocal } from '../../../../lib/localDate';
+import { useVoucherZoom } from '../../../../lib/voucherZoom';
 
 /** Tag Opening and Only Tag Entry (TR_TAG_OPBL): load opening barcoded stock. Tag No auto-generates (SRNO_MAST.TAG_SRNO)
  *  when left blank. Rich per-tag fields → BAR_DETL (Counter/Design/Size/LsWt/Lbr%/LbrRate/OthAmt).
@@ -480,6 +481,13 @@ export default function TagOpeningPage() {
       setBusy(false);
     }
   }
+
+  useVoucherZoom({
+    ready: !!coBook,
+    book: coBook,
+    setBook: setCoBook,
+    load: (vchNo) => openVoucher(vchNo),
+  });
 
   async function loadVoucher() {
     await openVoucher(voucherLookup);
