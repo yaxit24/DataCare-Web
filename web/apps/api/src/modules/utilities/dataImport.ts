@@ -2,7 +2,6 @@ import { createHash } from 'node:crypto';
 import { withTxBudget } from '../shared/txBudget.js';
 import { DESKTOP_COLUMN_DEFAULTS } from '../posting/desktopColumnDefaults.js';
 import { writePartyOpeningTx } from '../finance/partyOpening.js';
-import { SYSTEM_ACCOUNT_CODES } from '../ops/seedCompany.js';
 import {
   type ImportIssue,
   type LitePlan,
@@ -29,6 +28,48 @@ import { SOURCE_TABLES, type SourceReader, openImportSource } from './dataImport
  * imported rows (Ac_Stock.cs:11-34 Itm_Opbl_Stk / Tag_Opbl_Stk; Ac_Ledr.cs:9-28 AcOp_Ledr). The web has no
  * deferred refresh, so the same rows are posted in the same transaction, exactly as those routines build them.
  */
+
+/**
+ * The named system accounts a provisioned web company carries (seedCompany.ts SYSTEM_ACCOUNTS). Lite_AcMast's delete of
+ * `AC_CODE >= '00101'` keeps them, as the desktop keeps its installer accounts 00001-00100. dataImport.db.test.ts checks
+ * that every account a fresh company is provisioned with is in this list.
+ */
+export const SYSTEM_ACCOUNT_CODES: readonly string[] = Object.freeze([
+  'WALKIN',
+  'CASH',
+  'BANK',
+  'SALES',
+  'PURCHASE',
+  'GST',
+  'GSTINPUT',
+  'ROUNDOFF',
+  'KASAR',
+  'TCS',
+  'TDS',
+  'HMCHRG',
+  'OLDGOLD',
+  'OG',
+  'OS',
+  'INTINC',
+  'BULLION',
+  'FINESALE',
+  'FINEPURC',
+  'OTHSALE',
+  'OLDSLVPR',
+  'OTHPURC',
+  'DHRN',
+  'CAPITAL',
+  'ORDADV',
+  'LBRINC',
+  'LBREXP',
+  'SLVSALE',
+  'SLVPURC',
+  'OTHCHRG',
+  'CARDCOMM',
+  'FINEKSR',
+  'DISCOUNT',
+  'BRANCH',
+]);
 
 export const DATA_IMPORT_MESSAGES = {
   QUESTION: 'Are You Sure To Import Old Software Data In Next Software ?', // UT_IMPORT.cs:8422

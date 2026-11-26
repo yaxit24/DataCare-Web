@@ -3,6 +3,7 @@ import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest';
 import { seedCompany } from '../src/modules/ops/seedCompany.js';
 import {
   DATA_IMPORT_MESSAGES,
+  SYSTEM_ACCOUNT_CODES,
   applyLiteImport,
   businessToday,
   previewLiteImport,
@@ -107,6 +108,14 @@ describe.skipIf(!RUN)('Data Import (Lite Soft) write set', () => {
       ['WH_ItOpbl', { ITM_OPBL: 2, MAIN_STOCK: 2 }],
     ]);
     expect(p.steps[0]!.replaces.AC_MAST).toBe(1); // OLDPTY only; CASH, SALES, … stay
+    // Every account seedCompany provisions is kept: it is either an installer code below 00101 or a listed system code.
+    const seeded = await rows(
+      `SELECT "AC_CODE" c FROM "AC_MAST" WHERE tenant_id=$1 AND "CO_CODE"=$2 AND "AC_CODE"<>'OLDPTY'`,
+      CO,
+    );
+    expect(seeded.length).toBeGreaterThan(0);
+    for (const { c } of seeded)
+      expect(c < '00101' || SYSTEM_ACCOUNT_CODES.includes(c), `seeded account ${c}`).toBe(true);
     expect(p.ignoredTables).toEqual(['MSYS_SOMETHING']);
     expect(await fingerprint(TENANT)).toEqual(before);
   });

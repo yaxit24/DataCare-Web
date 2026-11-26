@@ -2092,10 +2092,10 @@
    "formReferencedInWeb": true,
    "state": "implemented-unverified",
    "evidence": null,
-   "note": "master import subset only.",
+   "note": "Lite Soft importer only (D-IMP-1): /utilities/data-import previews and imports the five UT_IMPORT Lite steps in one transaction; a real Lite .mdb is not yet proven.",
    "webSurface": {
     "kind": "route",
-    "surface": "POST /masters/:name/import"
+    "surface": "POST /utilities/data-import/lite/apply"
    },
    "sharedSurfaceWith": []
   },
