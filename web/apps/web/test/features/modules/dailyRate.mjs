@@ -93,13 +93,20 @@ async function ensureGroups(ctx) {
     );
 }
 
+/**
+ * The screen has shown the day it read: the form is busy (rates and grid read-only) from the request until the
+ * answer is on screen. The response alone is not enough, it reaches the test before the page has rendered it.
+ */
+const dayShown = (page) => page.locator('form[aria-busy="false"]').waitFor();
+
 /** Type the day; the screen reads it only when it differs from the day it already shows. */
 async function selectDay(page, date) {
-  if ((await label(page, 'Vch Date').inputValue()) === date) return;
+  if ((await label(page, 'Vch Date').inputValue()) === date) return dayShown(page);
   await Promise.all([
     page.waitForResponse((r) => r.url().includes(`/api/daily-rate?date=${date}`)),
     label(page, 'Vch Date').fill(date),
   ]);
+  await dayShown(page);
 }
 
 async function open(ctx, date, who) {
@@ -109,6 +116,7 @@ async function open(ctx, date, who) {
   await page.getByRole('heading', { name: 'Rate Master', exact: true }).waitFor();
   await label(page, 'Touch R22').waitFor();
   if (date) await selectDay(page, date);
+  else await dayShown(page);
   return page;
 }
 
@@ -157,6 +165,7 @@ async function reopen(page, date) {
     page.waitForResponse((r) => r.url().includes(`/api/daily-rate?date=${date}`)),
     input.focus().then(() => input.blur()),
   ]);
+  await dayShown(page);
   await label(page, 'Touch R22').waitFor();
 }
 
@@ -729,10 +738,7 @@ export const dailyRate = {
         await b.goto('/txn/daily-rate');
         await b.getByRole('heading', { name: 'Rate Master', exact: true }).waitFor();
         await label(b, 'Touch R22').waitFor();
-        await Promise.all([
-          b.waitForResponse((r) => r.url().includes(`/api/daily-rate?date=${date}`)),
-          label(b, 'Vch Date').fill(date),
-        ]);
+        await selectDay(b, date);
         await priceDay(a);
         await label(b, 'Gold Rate 10gm').fill('73000');
         await label(b, 'Silver Rate 1Kg').fill('86000');
