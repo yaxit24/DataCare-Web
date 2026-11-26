@@ -218,7 +218,6 @@ export async function exerciseTourOrder(page, options = {}) {
     for (const [label, value] of Object.entries({
       'Bill No': 'WEB-TOUR/01',
       Description: 'Tour order with two stones',
-      'Cash A/c': 'CASH',
       'Order time': '15:42:31.123',
       'Address 3': 'Browser third road',
       Mobile: '09876543210',
@@ -324,7 +323,6 @@ export async function exerciseTourOrder(page, options = {}) {
     await openDetails();
     for (const [label, value] of [
       ['Bill No', 'WEB-TOUR/01'],
-      ['Cash A/c', 'CASH'],
       ['Address 3', 'Browser third road'],
       ['Delivery Date', '2024-07-20'],
       ['Advance ₹', '123.45'],
@@ -557,6 +555,15 @@ async function exerciseTourOrderExactValues(page, { owner, tenantId, fixture, ch
     scope.lcCode,
     scope.coBook,
   );
+  // The cash contra is BOOK_DETL slot 1 (Ac_Ledr.cs:30-40), not a request field.
+  await owner.$executeRawUnsafe(
+    `INSERT INTO "BOOK_DETL"(tenant_id,"CO_CODE","LC_CODE","CO_BOOK","SR_NO","AC_CODE","BOOK_SNAME","MAIN_BOOK","BOOK_INOUT","DATA_TYPE")
+     VALUES($1,$2,$3,$4,1,'CASH','TUROD','TOUR ORDER','I','A')`,
+    tenantId,
+    scope.coCode,
+    scope.lcCode,
+    scope.coBook,
+  );
   // Create ordinary calculable bases through the real API. SQL below represents imported
   // exact auxiliary values; it does not replace or intercept any HTTP response.
   const base = {
@@ -579,7 +586,6 @@ async function exerciseTourOrderExactValues(page, { owner, tenantId, fixture, ch
       vchDesc: 'Exact imported values',
       taxRatePct: 0,
       advanceAmount: 25,
-      cashAc: 'CASH',
       netAmount: 260,
       lines: [
         {
