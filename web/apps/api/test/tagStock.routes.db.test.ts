@@ -162,17 +162,16 @@ const YEAR = '2026-2027';
   });
 
   it('an unknown mode, view or date is a 400, never a silent stock report', async () => {
-    for (const q of [
-      'tab=bogus',
-      'tab=STOCK%20;%20DROP',
-      'view=sideways',
-      'toDate=2026-02-30',
-      'dataType=Z',
-    ]) {
+    for (const q of ['tab=bogus', 'tab=STOCK%20;%20DROP', 'view=sideways', 'toDate=2026-02-30']) {
       const res = await get('tsprint', `/reports/tag-stock?${q}`);
       expect(res.statusCode, q).toBe(400);
       expect(res.json()).toMatchObject({ error: 'invalid-request' });
     }
+  });
+
+  it('a client-sent dataType is ignored, never a filter or a refusal (session decides)', async () => {
+    const res = await get('tsprint', '/reports/tag-stock?tab=stock&dataType=Z');
+    expect(res.statusCode).toBe(200);
   });
 
   it('hostile filter text is a value: zero rows, status 200', async () => {

@@ -1,4 +1,5 @@
 'use client';
+import { BookDataTypeControl } from '../../../../components/DataTypeControls';
 import { useCallback, useEffect, useMemo, useRef, useState, type KeyboardEvent } from 'react';
 import { useRouter } from 'next/navigation';
 import { del, get, post, put, ApiError } from '../../../../lib/api';
@@ -156,6 +157,7 @@ export default function BooksPage() {
       );
       if (mine !== requestNo.current) return;
       setHeader({
+        dataType: found.dataType ?? 'A',
         code: found.code,
         name: found.name,
         short: found.short,
@@ -503,6 +505,10 @@ export default function BooksPage() {
             {box('trfrBook', 'Trfr Book', 5, 70, {
               onKeyDown: enterTo(() => refs.vchSeries.current?.focus()),
             })}
+            <BookDataTypeControl
+              value={header.dataType}
+              onChange={(value) => set('dataType', value)}
+            />
             {box('mobileEntry', 'With Mobile Entry', 1, 40, {
               readOnly: locked,
               onKeyDown: enterTo(() => saveRef.current?.focus()),

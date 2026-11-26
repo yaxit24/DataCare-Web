@@ -1,3 +1,4 @@
+import { dataTypeAccessTx } from './dataTypeAccess.js';
 import { createHash, randomBytes, randomUUID } from 'node:crypto';
 import { withTxBudget, READ_COMMITTED_VOUCHER, type TxBudgetPrisma } from '../shared/txBudget.js';
 import { authenticate, AuthError, type AuthInput, type LoginMastRow } from './auth.service.js';
@@ -208,12 +209,19 @@ export async function loginSessionContext(
     ) {
       throw new Error('invalid-server-clock');
     }
+    const access = await dataTypeAccessTx(
+      tx,
+      request.tenantId,
+      authenticated.coCode,
+      authenticated.userId,
+    );
+    const dataType = access.enabled ? access.defaultType : 'C';
     const inserted = await tx.$queryRawUnsafe<Array<{ expiresAt: string }>>(
       `WITH instant AS MATERIALIZED (SELECT COALESCE($1::timestamptz,clock_timestamp()) AS value)
        INSERT INTO "auth_session" (
          "tenant_id","session_id","login_name","login_co_code","co_code","lc_code","co_year",
-         "refresh_jti_hash","created_at","last_used_at","expires_at","context_epoch","ledger_context"
-       ) SELECT $2,$3,$4,$5,$6,$7,$8,$9,value,value,value+interval '168 hours',1,$10::jsonb FROM instant
+         "refresh_jti_hash","created_at","last_used_at","expires_at","context_epoch","ledger_context","data_type"
+       ) SELECT $2,$3,$4,$5,$6,$7,$8,$9,value,value,value+interval '168 hours',1,$10::jsonb,$11 FROM instant
        RETURNING "expires_at"::text AS "expiresAt"`,
       supplied?.toISOString() ?? null,
       request.tenantId,
@@ -225,6 +233,7 @@ export async function loginSessionContext(
       scope.coYear ?? null,
       createHash('sha256').update(refreshJti).digest('hex'),
       JSON.stringify(ledgerContext),
+      dataType,
     );
     const saved = inserted[0];
     if (inserted.length !== 1 || !saved?.expiresAt) throw new Error('session-insert-failure');
@@ -239,6 +248,9 @@ export async function loginSessionContext(
       contextEpoch: epoch.value,
       ledgerContext,
       expiresAt: saved.expiresAt,
+      dataType,
+      allowedDataTypes: access.allowed.split(''),
+      features: { dataTypes: access.enabled },
       lastContextSelectionId: null,
       lastContextRequestSha256: null,
       lastContextFromEpoch: null,

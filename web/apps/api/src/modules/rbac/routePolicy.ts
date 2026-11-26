@@ -30,6 +30,7 @@ const PUBLIC = new Set([
 
 const SYSTEM = new Set([
   'GET /me',
+  'POST /auth/data-type',
   'POST /auth/password/change',
   'GET /context/companies',
   'GET /context/locations',

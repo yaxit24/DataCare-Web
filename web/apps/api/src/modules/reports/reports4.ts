@@ -1,4 +1,7 @@
 import { toIsoDate } from '@datacare/core';
+// SL_DETL_RTN.DATA_TYPE is not stamped from the book (posting/dataType.ts), so the book's type decides, as the
+// desktop's {BOOK_DATA.DATA_TYPE} formulas do (RP_ALL.cs:7653-7659).
+import { bookDataTypeSql } from './reportDataType.js';
 import { dateWhere } from './reports.js';
 import { withTxBudget } from '../shared/txBudget.js';
 import type { ReportScope, ListReport } from './reports.js';
@@ -52,7 +55,7 @@ export async function salesReturnRegister(prisma: any, s: ReportScope): Promise<
                        ELSE ${NN('r."NET_AMT"')} + ${NN('r."RTN_IT_TAX_AMT"')} END) AS total
        FROM "SL_DETL_RTN" r
        LEFT JOIN "AC_MAST" m ON m."AC_CODE"::text=r."AC_CODE"::text AND m."CO_CODE"::text=r."CO_CODE"::text
-       WHERE r."CO_CODE"=$1${yr}${dt}${fl} AND (r."CO_BOOK"='SRT' OR r."VCH_TYPE"='SRTN'
+       WHERE r."CO_CODE"=$1${yr}${dt}${fl}${bookDataTypeSql(s.dataType, 'r')} AND (r."CO_BOOK"='SRT' OR r."VCH_TYPE"='SRTN'
          OR EXISTS (SELECT 1 FROM "SL_DATA" h
                      WHERE h.tenant_id=r.tenant_id AND h."CO_CODE"=r."CO_CODE" AND h."LC_CODE"=r."LC_CODE"
                        AND h."CO_YEAR"=r."CO_YEAR" AND h."CO_BOOK"=r."CO_BOOK" AND h."VCH_NO"=r."VCH_NO"

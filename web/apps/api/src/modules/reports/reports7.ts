@@ -1,4 +1,5 @@
 import { dateWhere } from './reports.js';
+import { bookDataTypeSql } from './reportDataType.js';
 import { withTxBudget } from '../shared/txBudget.js';
 import type { ReportScope, ListReport } from './reports.js';
 import { barTagAvailableSql } from '../shared/stockSql.js';
@@ -32,7 +33,7 @@ export async function salesGstMonthly(prisma: any, s: ReportScope): Promise<List
       `SELECT to_char("VCH_DATE"::timestamp,'YYYY-MM') AS month,
               sum(${NN('"NET_AMT"')}) AS taxable, sum(${NN('"CGST_TAX"')}) AS cgst,
               sum(${NN('"SGST_TAX"')}) AS sgst, sum(${NN('"IGST_TAX"')}) AS igst, sum(${NN('"TAX_AMT"')}) AS tax
-       FROM "SL_DATA" WHERE "CO_CODE"=$1${yr}${dt} AND "CO_BOOK" IN (SELECT b."CO_BOOK" FROM "BOOK_DATA" b WHERE b."CO_CODE"=$1 AND b."MAIN_BOOK"='SALES') AND "VCH_DATE" IS NOT NULL
+       FROM "SL_DATA" WHERE "CO_CODE"=$1${yr}${dt} AND "CO_BOOK" IN (SELECT b."CO_BOOK" FROM "BOOK_DATA" b WHERE b."CO_CODE"=$1 AND b."MAIN_BOOK"='SALES')${bookDataTypeSql(s.dataType, '"SL_DATA"')} AND "VCH_DATE" IS NOT NULL
        GROUP BY 1 ORDER BY 1`,
       ...params,
     );
@@ -65,7 +66,7 @@ export async function billAging(prisma: any, s: ReportScope): Promise<ListReport
       `SELECT CASE WHEN age<=30 THEN '0-30' WHEN age<=60 THEN '31-60' WHEN age<=90 THEN '61-90' ELSE '90+' END AS bucket,
               count(*)::int AS bills, sum(balance) AS balance
        FROM (SELECT (CURRENT_DATE - "VCH_DATE") AS age, ${NN('"BILL_AMT"')} - ${NN('"REC_AMT"')} AS balance
-             FROM "BILL_OS_DATA" WHERE "CO_CODE"=$1${yr} AND "VCH_DATE" IS NOT NULL) t
+             FROM "BILL_OS_DATA" WHERE "CO_CODE"=$1${yr}${bookDataTypeSql(s.dataType, '"BILL_OS_DATA"')} AND "VCH_DATE" IS NOT NULL) t
        WHERE abs(balance) > 0.005 GROUP BY 1`,
       ...params,
     );

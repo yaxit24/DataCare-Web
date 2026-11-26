@@ -99,7 +99,7 @@ function where(scope: StockScope, f: StockFilters, values: unknown[]): string {
   c.push(`a."CO_YEAR" = ${bind(scope.coYear)}`);
   // Items marked "not displayed in stock" are left out (RP_STOCK.cs:4284 `B.STK_DISPLAY <> 'N'`); NULL is shown.
   c.push(`COALESCE(b."STK_DISPLAY", 'Y') <> 'N'`);
-  if (f.dataType) c.push(`a."DATA_TYPE" = ${bind(f.dataType)}`);
+  if (f.dataType && f.dataType !== 'C') c.push(`a."DATA_TYPE" = ${bind(f.dataType)}`);
   if (f.stockType === 'tag') c.push(`COALESCE(a."TAG_NO", 'N') <> 'N'`);
   if (f.stockType === 'item') c.push(`COALESCE(a."TAG_NO", 'N') = 'N'`);
   if (f.acCode !== undefined) c.push(`a."AC_CODE" = ${bind(f.acCode)}`);

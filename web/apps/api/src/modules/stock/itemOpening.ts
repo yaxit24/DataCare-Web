@@ -1,3 +1,4 @@
+import { openingDataType, rowDataTypeSql } from '../auth/dataTypePolicy.js';
 import {
   isItemOpeningType,
   itemOpeningRowSaved,
@@ -42,7 +43,6 @@ const VCH_TYPE = 'ITOBL';
 const STOCK_BOOK_NAME = 'ITM OPBL';
 const OPENING_AC_CODE = '00000';
 /** The desktop data type for a single-book company (MsDataType 'A'); the A/B split is an Advance-edition feature. */
-const DATA_TYPE = 'A';
 /** The rows a save or delete of one type replaces; the version token is computed over them. */
 const WRITE_SET = ['ITM_OPBL', 'MAIN_STOCK', 'DM_DATA'] as const;
 
@@ -54,6 +54,7 @@ export class ItemOpeningValidationError extends Error {
 }
 
 export interface ItemOpeningScope {
+  dataType?: string;
   tenantId: string;
   coCode: string;
   lcCode?: string;
@@ -225,13 +226,13 @@ export async function getItemOpening(
               coalesce("LBR_RATE",0)::float lr, coalesce("LBR_AMT",0)::float la, coalesce("OTH_AMT",0)::float oa,
               coalesce("NET_AMT",0)::float na
          FROM "ITM_OPBL"
-        WHERE "CO_CODE"=$1 AND "LC_CODE"=$2 AND "CO_YEAR"=$3 AND "CO_BOOK"=$4 AND "DATA_TYPE"=$5
+        WHERE "CO_CODE"=$1 AND "LC_CODE"=$2 AND "CO_YEAR"=$3 AND "CO_BOOK"=$4 AND ${rowDataTypeSql()}=$5
         ORDER BY "IT_CODE", "SR_NO", row_id`,
       coCode,
       lcCode,
       coYear,
       ITEM_OPENING_BOOK,
-      DATA_TYPE,
+      openingDataType(scope.dataType),
     );
     const byCode = new Map(saved.map((r) => [String(r.code), r]));
     const rows = items.map((item, index): ItemOpeningGridRow => {
@@ -268,7 +269,11 @@ export async function getItemOpening(
   });
 }
 
-/** The type's rows carried by Balance TrFr (ITM_OPBL.CARRIED_FROM), with the figures the screen must not change. */
+/**
+ * The type's rows carried by Balance TrFr (ITM_OPBL.CARRIED_FROM), with the figures the screen must not change. Only
+ * the session's opening data type: Balance TrFr carries item stock as 'A' (BtmSchm.cs:2921-3002), so a B session's
+ * own opening is neither refused nor marked carried because of A's carried rows.
+ */
 async function carriedRowsTx(
   tx: any,
   scope: ItemOpeningScope,
@@ -281,12 +286,14 @@ async function carriedRowsTx(
     `SELECT "IT_CODE" it, "CARRIED_FROM" cf, coalesce("ITM_PCS",0)::float pcs, coalesce("ITM_GWT",0)::float gwt,
             coalesce("ITM_NWT",0)::float nwt, coalesce("ITM_FINE",0)::float fine, coalesce("ITM_AMT",0)::float amt
        FROM "ITM_OPBL"
-      WHERE "CO_CODE"=$1 AND "LC_CODE"=$2 AND "CO_YEAR"=$3 AND "CO_BOOK"=$4 AND "VCH_NO"=$5 AND "CARRIED_FROM" IS NOT NULL`,
+      WHERE "CO_CODE"=$1 AND "LC_CODE"=$2 AND "CO_YEAR"=$3 AND "CO_BOOK"=$4 AND "VCH_NO"=$5 AND "CARRIED_FROM" IS NOT NULL
+        AND ${rowDataTypeSql()}=$6`,
     coCode,
     lcCode,
     coYear,
     ITEM_OPENING_BOOK,
     type,
+    openingDataType(scope.dataType),
   );
   return new Map(
     rows.map((r) => [
@@ -298,8 +305,12 @@ async function carriedRowsTx(
 
 async function deleteTypeTx(tx: any, scope: ItemOpeningScope, type: string): Promise<number> {
   const { coCode, lcCode, coYear } = scopeOf(scope);
-  const where = `"CO_CODE"=$1 AND "LC_CODE"=$2 AND "CO_YEAR"=$3 AND "CO_BOOK"=$4 AND "VCH_NO"=$5`;
-  const args = [coCode, lcCode, coYear, ITEM_OPENING_BOOK, type];
+  const base = `"CO_CODE"=$1 AND "LC_CODE"=$2 AND "CO_YEAR"=$3 AND "CO_BOOK"=$4 AND "VCH_NO"=$5`;
+  // Every table is scoped to the session's opening type, blank or NULL read as 'A'. DM_DATA's DATA_TYPE is web-only
+  // (migration 20261126100000): the desktop deletes these rows by book and type letter alone (TR_ITM_OPBL.cs:1456,
+  // :1511), which would let one data type destroy the other's other-detail rows.
+  const where = `${base} AND ${rowDataTypeSql()}=$6`;
+  const args = [coCode, lcCode, coYear, ITEM_OPENING_BOOK, type, openingDataType(scope.dataType)];
   await tx.$executeRawUnsafe(
     `DELETE FROM "MAIN_STOCK" WHERE ${where} AND "VCH_TYPE"='${VCH_TYPE}'`,
     ...args,
@@ -390,7 +401,7 @@ export async function saveItemOpening(
         OTH_AMT: row.othAmt,
         NET_AMT: row.netAmt,
         MAIN_USER: mainUser,
-        DATA_TYPE,
+        DATA_TYPE: openingDataType(input.scope.dataType),
         // The save leaves DATA_TRFR to the column default 'Y' (MS_UPDATE.cs:21658); the migrated rows all hold 'Y'.
         DATA_TRFR: 'Y',
         ...(carried.has(itCode) ? { CARRIED_FROM: carried.get(itCode)!.from } : {}),
@@ -439,7 +450,7 @@ export async function saveItemOpening(
         EMP_CODE: '',
         ENTRY_TIME: stockDate,
         MAIN_USER: mainUser,
-        DATA_TYPE,
+        DATA_TYPE: openingDataType(input.scope.dataType),
         DESIGN_NO: '',
         ITM_SIZE: '',
         ITM_DESC: '',
@@ -451,7 +462,9 @@ export async function saveItemOpening(
         ...key,
         MAIN_SRNO: 1,
         SR_NO: srNo,
-        ISR_NO: 1,
+        // DM_DATA's key ends in MAIN_SRNO, SR_NO, ISR_NO, so A's and B's row for the same grid row would collide. A keeps
+        // the desktop's ISR_NO 1 (Ac_Stock.cs:734-741); B writes 2 (web-only, so both types can hold an opening).
+        ISR_NO: openingDataType(input.scope.dataType) === 'B' ? 2 : 1,
         VCH_DATE: stockDate,
         ENTRY_TYPE: 'L',
         BOOK_NAME: VCH_TYPE,
@@ -474,6 +487,7 @@ export async function saveItemOpening(
         MAIN_IT_CODE: '',
         INOUT_TYPE: 'P',
         TBL_CODE: '',
+        DATA_TYPE: openingDataType(input.scope.dataType),
       });
     }
   });

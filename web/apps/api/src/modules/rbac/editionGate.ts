@@ -97,3 +97,8 @@ export function editionDescriptor(
 ): { code: EditionCode; name: string; beta: boolean } | null {
   return policy ? { code: policy.code, name: EDITION_NAMES[policy.code], beta: policy.beta } : null;
 }
+
+/** Owner decision 2026-11-25: available in every edition, including Lite. */
+export function dataTypesEnabled(policy?: { features?: { dataTypes?: boolean } } | null): boolean {
+  return policy?.features?.dataTypes !== false;
+}

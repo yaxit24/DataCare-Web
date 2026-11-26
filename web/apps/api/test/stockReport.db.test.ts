@@ -746,17 +746,23 @@ const W3 = { from: D(10), to: D(14) };
       await insertMove(TENANT, extra, 99);
       try {
         const all = [...MOVES, extra];
+        // The session decides; the contradicting client dataType is ignored (owner decision 2026-11-25).
+        const setSession = (type: string) =>
+          exec(`UPDATE auth_session SET data_type=$2 WHERE tenant_id=$1`, TENANT, type);
         for (const dt of ['A', 'C']) {
-          const body = await summary('item', W1, { dataType: dt });
+          await setSession(dt);
+          const body = await summary('item', W1, { dataType: dt === 'A' ? 'C' : 'A' });
           expect(norm(body.rows), dt).toEqual(
             norm(expected('item', all, W1.from, W1.to, false, { dataType: dt }).rows),
           );
         }
-        const c = (await summary('item', W1, { dataType: 'C' })).rows.find(
+        await setSession('C');
+        const c = (await summary('item', W1, { dataType: 'A' })).rows.find(
           (r: any) => r.code === 'GRNG',
         );
         expect([c.prPcs, c.prWt, c.clPcs, c.clWt]).toEqual([12, 113, 21, 208]);
       } finally {
+        await exec(`UPDATE auth_session SET data_type='C' WHERE tenant_id=$1`, TENANT);
         await exec(`DELETE FROM "MAIN_STOCK" WHERE tenant_id=$1 AND "VCH_NO"='MDT'`, TENANT);
       }
     });
