@@ -59,10 +59,21 @@ export function renderReport(s) {
     for (const [k, n] of s.numberingCollisions) L.push(`| ${cell(k)} | ${n} |`);
     L.push('');
   }
+  const known = s.groups.filter((g) => g.buildDifference);
+  if (known.length) {
+    L.push('## Desktop build differences (expected, not defects)', '');
+    L.push('| Family | Table | Column | Kind | Vouchers | Build difference |');
+    L.push('|---|---|---|---|---:|---|');
+    for (const g of known)
+      L.push(
+        `| ${g.family} | ${g.table} | ${g.column} | ${g.kind} | ${g.cases} | ${cell(g.buildDifference)} |`,
+      );
+    L.push('');
+  }
   L.push('## Column-level differences (identical differences grouped)', '');
   L.push('| Family | Table | Column | Kind | Vouchers | Examples (desktop → web) |');
   L.push('|---|---|---|---|---:|---|');
-  for (const g of s.groups) {
+  for (const g of s.groups.filter((x) => !x.buildDifference)) {
     const ex = g.examples
       .map((e) => (e.desktop !== undefined ? `${e.caseId}: ${e.desktop} → ${e.web}` : e.caseId))
       .join('; ');
