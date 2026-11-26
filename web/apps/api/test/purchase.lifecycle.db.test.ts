@@ -28,16 +28,14 @@ const BOOK = 'PUR';
 /**
  * Established empirically by posting a purchase and enumerating every VCH_NO table that received rows.
  *
- * Richer than a sale's because a purchase CREATES stock: it registers tags (BAR_DETL, BAR_IDTL) and the lot
- * they belong to (LOT_DETL) as well as posting the ledger and tax. Those three are the tables a silent
- * regression would be most costly in — stock that exists on the bill but not in the tag ledger.
+ * Richer than a sale's because a purchase CREATES stock: it registers tags (BAR_DETL, BAR_IDTL) as well as
+ * posting the ledger and tax. No BILL_OS_DATA (the purchase save has no such write) and no LOT_DETL, because these
+ * lines name no lot (Ac_Stock.cs:624 copies only `LOT_NO <> ''`).
  */
 const FOOTPRINT_PURCHASE: string[] = [
   'AC_DATA',
   'BAR_DETL',
   'BAR_IDTL',
-  'BILL_OS_DATA',
-  'LOT_DETL',
   'MAIN_STOCK',
   'PR_DATA',
   'PR_DETL',
@@ -150,6 +148,7 @@ databaseDescribe('database-backed purchase voucher lifecycle', () => {
       'AC_MAST',
       'CO_SET',
       'CO_SET_NEW',
+      'CO_MAST',
     ]) {
       await owner.$executeRawUnsafe(`DELETE FROM "${table}" WHERE tenant_id=$1`, TENANT);
     }
@@ -925,7 +924,8 @@ databaseDescribe('database-backed purchase voucher lifecycle', () => {
               "IT_GWT"::float it_gwt,"IT_CON_PRC"::float con_prc,"IT_RATE_TYPE",
               "IT_RATE"::float it_rate,"IT_AMT"::float it_amt,"IT_LBR_RATE"::float lbr_rate,
               "IT_LBR_AMT"::float lbr_amt,"IT_NET_AMT"::float net_amt,"IT_CON_WT"::float con_wt,
-              "IT_TYPE","AC_CODE","VCH_TYPE","ENTRY_TYPE","INOUT_TYPE","MAIN_USER"
+              "IT_TYPE","AC_CODE","VCH_TYPE","ENTRY_TYPE","INOUT_TYPE","MAIN_USER",
+              "VCH_SRNO"::float vch_srno
          FROM "PR_IDTL" WHERE tenant_id=$1 AND "VCH_NO"=$2 ORDER BY "ISR_NO"`,
       TENANT,
       vchNo,
@@ -954,6 +954,8 @@ databaseDescribe('database-backed purchase voucher lifecycle', () => {
     expect(first.net_amt).toBeCloseTo(20_550, 2);
     expect(first.con_wt).toBeCloseTo(0.05, 3);
     expect(String(first.IT_TYPE).trim()).toBe('D');
+    // Oracle defect B7: VCH_SRNO is not set by TR_PURC.cs:13213-13244, so the desktop column default 0 applies.
+    expect(rows.map((r) => r.vch_srno)).toEqual([0, 0]);
     // Header-derived columns come from the book/scope, never from the request body.
     expect(String(first.AC_CODE).trim()).toBe('SUPP');
     expect(String(first.ENTRY_TYPE).trim()).toBe('P');
@@ -1133,7 +1135,11 @@ databaseDescribe('database-backed purchase voucher lifecycle', () => {
       expect(String(row.DATA_TRFR).trim()).toBe('N');
       expect(String(row.BILL_NO ?? '').trim()).toBe('');
       expect(String(row.CHQ_NO ?? '').trim()).toBe('');
-      expect(String(row.LDR_NAME ?? '').trim()).toBe('');
+      // LDR_NAME: the supplier's name on its bill leg (01) and on the cash credit (Ac_Ledr.cs:377, :454), '' elsewhere.
+      const leg = String(row.LEDR_KEY).trim().slice(-2);
+      expect(String(row.LDR_NAME ?? '').trim()).toBe(
+        leg === '01' || leg === '17' ? 'Lifecycle Supplier' : '',
+      );
       expect(row.fine_rate).toBe(0);
       expect(String(row.HD_VCH_NO).trim()).toBe('00000');
       expect(row.bill_date).toBeNull();
@@ -1162,6 +1168,120 @@ databaseDescribe('database-backed purchase voucher lifecycle', () => {
       expect(String(row.BOOK_NAME).trim()).toBe('PURCHASE');
       expect(String(row.LEDR_KEY).trim().length).toBeGreaterThan(10);
     }
+  }, 30_000);
+
+  /**
+   * Oracle defect A18. PR_DATA.IT_TYPE is the hidden header Item Type combo (TR_PURC.cs:12972, TR_PURC_HM.cs:7832),
+   * which a new voucher sets from the company metal type, CO_MAST.METAL_TYPE (TR_PURC.cs:11880-11889; blank is 'G',
+   * MS_OPNCOMP.cs:481-485), and a reopened voucher keeps (TR_PURC.cs:12144-12149). It is not the first line's metal.
+   */
+  it('writes the header item type from the company metal type and keeps it on edit', async () => {
+    await owner.$executeRawUnsafe(
+      `INSERT INTO "ITEM_MAST"(tenant_id,"CO_CODE","IT_CODE","IT_NAME","IT_TYPE","GR_CODE")
+       VALUES ($1,$2,'SILV','Silver Bar','S','G01')`,
+      TENANT,
+      CO,
+    );
+    const silverLine = [
+      {
+        itCode: 'SILV',
+        pcs: 1,
+        grossWt: 50,
+        netWt: 50,
+        touch: 99,
+        metalAmount: 4000,
+        metal: 'S' as const,
+      },
+    ];
+    const headerType = async (vchNo: number) =>
+      (
+        (await owner.$queryRawUnsafe(
+          `SELECT "IT_TYPE" FROM "PR_DATA" WHERE tenant_id=$1 AND "CO_BOOK"='PUR' AND "VCH_NO"=lpad($2::text,5,'0')`,
+          TENANT,
+          vchNo,
+        )) as Array<{ IT_TYPE: string }>
+      )[0]?.IT_TYPE;
+
+    // No CO_MAST row / blank METAL_TYPE reads as Gold, even for a silver-only bill.
+    const gold = await createPurchase(runtime, purchaseInput(), silverLine);
+    expect(await headerType(gold.vchNo)).toBe('G');
+
+    // A silver company writes 'S', even for a gold-only bill.
+    await owner.$executeRawUnsafe(
+      `INSERT INTO "CO_MAST"(tenant_id,"CO_CODE","METAL_TYPE") VALUES ($1,$2,'S')`,
+      TENANT,
+      CO,
+    );
+    const silver = await createPurchase(runtime, purchaseInput(), firstLines);
+    expect(await headerType(silver.vchNo)).toBe('S');
+
+    // The edit keeps the stored type although the company is now silver.
+    await editPurchase(
+      runtime,
+      purchaseInput(),
+      silverLine,
+      gold.vchNo,
+      await versionOfPurchase(runtime, scope, gold.vchNo),
+    );
+    expect(await headerType(gold.vchNo)).toBe('G');
+  }, 30_000);
+
+  /**
+   * Oracle defects B5 and B6. The save ends with PrKr_Lot (TR_PURC.cs:13685-13687), which copies only lines with a
+   * lot number (Ac_Stock.cs:624 `AND A.LOT_NO <> ''`), and it writes no BILL_OS_DATA at all: the unpaid amount is
+   * PR_DATA.BILL_OS (TR_PURC.cs:12773-13688).
+   */
+  it('writes LOT_DETL only for lot lines and no BILL_OS_DATA, even when the bill is unpaid', async () => {
+    const created = await createPurchase(
+      runtime,
+      purchaseInput({ cashAmt: 0, cardAmt: 0, chequeAmt: 0 }),
+      [
+        {
+          itCode: 'LOOSE',
+          pcs: 1,
+          grossWt: 4,
+          netWt: 4,
+          touch: 91.6,
+          metalAmount: 400,
+          metal: 'G' as const,
+        },
+        {
+          itCode: 'LOOSE',
+          pcs: 1,
+          grossWt: 3,
+          netWt: 3,
+          touch: 91.6,
+          metalAmount: 300,
+          metal: 'G' as const,
+          lotNo: 'L-9',
+        },
+        {
+          itCode: 'LOOSE',
+          pcs: 1,
+          grossWt: 2,
+          netWt: 2,
+          touch: 91.6,
+          metalAmount: 200,
+          metal: 'G' as const,
+          lotNo: '   ',
+        },
+      ],
+    );
+    const vchNo = String(created.vchNo).padStart(5, '0');
+    const counts = (
+      (await owner.$queryRawUnsafe(
+        `SELECT (SELECT count(*)::int FROM "BILL_OS_DATA" WHERE tenant_id=$1 AND "VCH_NO"=$2) bill_os,
+                (SELECT coalesce(json_agg("SR_NO"::int),'[]'::json) FROM "LOT_DETL"
+                  WHERE tenant_id=$1 AND "VCH_NO"=$2) lot_lines,
+                (SELECT "BILL_OS"::float FROM "PR_DATA"
+                  WHERE tenant_id=$1 AND "CO_BOOK"='PUR' AND "VCH_NO"=$2) header_os`,
+        TENANT,
+        vchNo,
+      )) as Array<{ bill_os: number; lot_lines: number[]; header_os: number }>
+    )[0]!;
+    expect(counts.bill_os).toBe(0);
+    expect(counts.header_os).toBeGreaterThan(0);
+    expect(counts.lot_lines).toEqual([2]);
   }, 30_000);
 
   it('projects the purchase into an INWARD Rojmel (metal in, party credited)', async () => {
@@ -1438,4 +1558,74 @@ databaseDescribe('database-backed purchase voucher lifecycle', () => {
       ]),
     ).rejects.toThrow(/numeric taxRatePct/);
   });
+
+  /**
+   * TR_PURC_HM.cs:8185-8197: a Tag Wise Purchase edit rewrites a tag's BAR_DETL row only when that line's weights
+   * or text columns changed, so an unchanged tag keeps its STK_DATE when only the voucher date moves. The plain
+   * TR_PURC deletes every tag and rewrites it with the voucher date (TR_PURC.cs:13298, :13347).
+   */
+  it('a TAG PURCHASE edit keeps an unchanged tag STK_DATE; a changed tag and a plain purchase take the new date', async () => {
+    await owner.$executeRawUnsafe(
+      `INSERT INTO "BOOK_DATA"(tenant_id,"CO_CODE","LC_CODE","CO_BOOK","BOOK_NAME","BOOK_SNAME","MAIN_BOOK",
+         "BOOK_INOUT","CUR_USE","BOOK_TBL_NAME")
+       VALUES ($1,$2,$3,'TPS','Tag Wise Purchase S','CPS','TAG PURCHASE','I','Y','PR_DATA')`,
+      TENANT,
+      CO,
+      LC,
+    );
+    await owner.$executeRawUnsafe(
+      `INSERT INTO "BOOK_DETL"(tenant_id,"CO_CODE","LC_CODE","CO_BOOK","SR_NO","AC_CODE","MAIN_BOOK","BOOK_INOUT")
+       VALUES ($1,$2,$3,'TPS',1,'CTRL','TAG PURCHASE','I'),($1,$2,$3,'TPS',2,'CASH','TAG PURCHASE','I'),
+              ($1,$2,$3,'TPS',3,'ROUND','TAG PURCHASE','I')`,
+      TENANT,
+      CO,
+      LC,
+    );
+    const later = '2024-04-20';
+    const lines = [
+      { ...firstLines[0]!, tagNo: 'TSK001' },
+      { ...firstLines[0]!, tagNo: 'TSK002', grossWt: 5, netWt: 5, metalAmount: 500 },
+    ];
+    const stkDates = async (book: string, vchNo: number) =>
+      (await owner.$queryRawUnsafe(
+        `SELECT "TAG_NO" tag,"STK_DATE" stk,"VCH_DATE"::text vch FROM "BAR_DETL"
+          WHERE tenant_id=$1 AND "CO_BOOK"=$2 AND "VCH_NO"=$3 ORDER BY "SR_NO"`,
+        TENANT,
+        book,
+        String(vchNo).padStart(5, '0'),
+      )) as Array<{ tag: string; stk: string; vch: string }>;
+    const editDated = async (book: string, vchNo: number, change: boolean) => {
+      const bookScope = { ...scope, coBook: book };
+      const reopened = (await getPurchase(runtime, bookScope, vchNo)) as {
+        lines: Array<Record<string, unknown>>;
+      };
+      const edited = reopened.lines.map((line, i) =>
+        change && i === 1 ? { ...line, grossWt: 6, netWt: 6 } : line,
+      );
+      await editPurchase(
+        runtime,
+        purchaseInput({ scope: bookScope, vchDate: later }),
+        edited as never,
+        vchNo,
+        await versionOfPurchase(runtime, bookScope, vchNo),
+      );
+    };
+    const tagged = await createPurchase(
+      runtime,
+      purchaseInput({ scope: { ...scope, coBook: 'TPS' } }),
+      lines,
+    );
+    expect((await stkDates('TPS', tagged.vchNo)).map((r) => r.stk)).toEqual([DAY, DAY]);
+    await editDated('TPS', tagged.vchNo, true);
+    expect(await stkDates('TPS', tagged.vchNo)).toEqual([
+      { tag: 'TSK001', stk: DAY, vch: later },
+      { tag: 'TSK002', stk: later, vch: later },
+    ]);
+
+    const plain = await createPurchase(runtime, purchaseInput(), [
+      { ...firstLines[0]!, tagNo: 'TSK003' },
+    ]);
+    await editDated(BOOK, plain.vchNo, false);
+    expect(await stkDates(BOOK, plain.vchNo)).toEqual([{ tag: 'TSK003', stk: later, vch: later }]);
+  }, 30_000);
 });

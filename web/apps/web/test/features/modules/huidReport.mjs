@@ -1,54 +1,23 @@
+import { huidResidualCases } from './huidReportResiduals.mjs';
 import { USERS } from '../fixtures/catalogue.mjs';
 import { huidUser } from './huidSeed.mjs';
 import { filterCases } from './huidReportFilters.mjs';
 import { outputCases } from './huidReportOutput.mjs';
+import { huidJourneyCases } from './huidReportJourney.mjs';
 
 /**
  * Feature: Report → HuId Report (RP_HUID.cs, web /reports/huid). This module combines the case arrays of
  * huidReportFilters.mjs (T01, T02, T03, T06, T04, T05, T11, T12) and huidReportOutput.mjs (T15, T16, T17) with
  * the T18 journey and the blocked and not-applicable entries recorded from orchestration/work/WP-18/cases.md.
  *
- * Every `### huid-report.` heading of cases.md appears once in `cases`. Blocked entries carry the Status text of
- * the case as their reason. Journey stages 1 to 3 are executable in the case list; they are recorded here as
- * `blocked` because the web screens cannot yet carry out their steps (see the MISSING notes below), so they are
- * not run and no shared setup is created.
+ * Every `### huid-report.` heading of cases.md appears once in `cases`. The T18 journey (stages 1 to 4) and the
+ * voucher zoom (T05) are in huidReportJourney.mjs: they build their tags through the real screens. The entries below
+ * are the cases recorded as not applicable, each with the Status text of cases.md as its reason.
  */
 
 const as = huidUser;
 
 const SOURCE = 'orchestration/work/WP-18/cases.md';
-
-/** T18 journey stage that cannot run through the web screens today. Each stage depends on the same missing step. */
-const JOURNEY_MISSING_HUID =
-  'blocked: MISSING: the Purchase screen has no HUID (hallmark slot) input on its item lines. The line columns in ' +
-  'web/apps/web/test/features/modules/purchaseInvoice.mjs:136-138 are item, tag, pcs, gross, net, touch, rate and making only. ' +
-  'JT-3 (hallmarked purchase with HUID HUJ003) cannot be created through the screen the journey names.';
-const JOURNEY_MISSING_SALE_TAG =
-  'blocked: MISSING: the Sales screen sells by item and has no tag selection and no HUID entry (web/apps/web/app/(app)/txn/sales/page.tsx:77 ' +
-  'says the operator cannot enter HUID). The sale of JT-1 as a specific tag (stage 2) therefore cannot be made through the screen, ' +
-  'and the Sales Return of that tag (stage 3) depends on it.';
-
-const journeyBlocked = (id, reason) => ({
-  id,
-  group: 'T18',
-  kind: 'read-only',
-  source: `${SOURCE} (T18 journey)`,
-  applicable: true,
-  requiredEvidence: ['browser', 'expected'],
-  blocked: reason,
-});
-
-const journeyCases = [
-  journeyBlocked(
-    'huid-report.journey.stage-1-tags-and-purchase-in-view',
-    `${JOURNEY_MISSING_HUID} Tag Opening (JT-1, JT-2, JT-4) is driveable through tagOpening.mjs. The hallmark slot of JT-3 is the blocker.`,
-  ),
-  journeyBlocked('huid-report.journey.stage-2-sale-out-and-stock', JOURNEY_MISSING_SALE_TAG),
-  journeyBlocked(
-    'huid-report.journey.stage-3-return-views-agree',
-    `${JOURNEY_MISSING_SALE_TAG} The return of a tag through the Sales Return screen (salesReturn.mjs fillLine column 2 is the tag) is driveable only once stage 2 has a sale.`,
-  ),
-];
 
 /** One entry per blocked or N/A case id of cases.md, reason copied from its Status line. */
 const notRun = (id, group, reason) => ({
@@ -56,7 +25,8 @@ const notRun = (id, group, reason) => ({
   group,
   kind: 'read-only',
   source: SOURCE,
-  applicable: false,
+  applicable: !reason.startsWith('N/A:') && !reason.startsWith('db layer:'),
+  ...(reason.startsWith('blocked:') ? { blocked: reason } : {}),
   requiredEvidence: ['browser', 'expected'],
   reason,
 });
@@ -110,7 +80,7 @@ const blockedCases = [
   notRun(
     'huid-report.output.print-formula-totals',
     'T16',
-    'blocked: the Crystal formula bodies `@TagQty`, `@TagGwt`, `@TagNwt`, `@TagPcs`, `@NewBal`, `@VchSrno` were not extracted (study Open question 5, marked MISSING). It unblocks when the formula bodies are extracted from `extraction_output/rpt_xml/TagHuIdRpt.xml`.',
+    'db layer: the formula bodies are now read (TagHuIdRpt.xml: @TagQty = ITM_PCS, @TagGwt = ITM_GWT, @TagNwt = ITM_NWT; groups PR_CODE > GR_CODE, records by TAG_NO; sums per group, product and report). The printed sections and sums are built by printResultOf (web/apps/api/src/routes/huidReport.ts) and checked in web/apps/api/test/inventoryReportResiduals.test.ts; the browser harness cannot read text out of the rendered PDF, and Print through the screen is covered by huid-report.rights.print-refused-without-print-right and the PDF export cases.',
   ),
   notRun(
     'huid-report.labels.title-desktop-text',
@@ -126,11 +96,6 @@ const blockedCases = [
     'huid-report.keys.tab-order-ties-blocked',
     'T17',
     'blocked: the tie order is not in the source (study Open question 12). It unblocks when the owner accepts a tie-break rule, or a desktop run records the order.',
-  ),
-  notRun(
-    'huid-report.journey.stage-4-cancel-views-agree',
-    'T18',
-    'blocked: the MAIN_STOCK and BAR_DETL rows that Tag Cancel writes are not in this study. The Stock result for JT-2 depends on them. It unblocks when the Tag Cancel desktop form is read and its rows traced (the form is outside this menu).',
   ),
   notRun(
     'huid-report.lifecycle.create-not-applicable',
@@ -181,9 +146,19 @@ export const huidReport = {
     'web/apps/web/test/features/modules/huidReport.mjs',
     'web/apps/web/test/features/modules/huidReportFilters.mjs',
     'web/apps/web/test/features/modules/huidReportOutput.mjs',
+    'web/apps/web/test/features/modules/huidReportJourney.mjs',
+    'web/apps/web/test/features/modules/huidReportResiduals.mjs',
     'web/apps/web/test/features/modules/huidSeed.mjs',
   ],
   fixtureManifest: { base: 'huidSeed.mjs seedHuid per case; cleanHuid after each case' },
   settingsManifest: { companySettings: 'catalogue defaults; no setting is changed' },
-  cases: [...filterCases, ...outputCases, ...journeyCases, ...blockedCases],
+  cases: [
+    ...filterCases,
+    ...outputCases,
+    ...huidJourneyCases,
+    ...huidResidualCases,
+    ...blockedCases.filter(
+      (c) => ![...huidResidualCases, ...huidJourneyCases].some((r) => r.id === c.id),
+    ),
+  ],
 };

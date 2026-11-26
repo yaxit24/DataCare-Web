@@ -65,6 +65,7 @@ export function tagStockColumns(
   tab: TagStockTab,
   view: TagStockView = 'tag',
   aprKind: 'party' | 'employee' = 'party',
+  otherItems = false,
 ): TagStockColumn[] {
   if (view === 'item') return [c('name', 'Item'), COL.qty, COL.pcs, COL.grossWt, COL.netWt];
   if (view === 'product') return [c('name', 'Product'), COL.qty, COL.pcs, COL.grossWt, COL.netWt];
@@ -147,6 +148,22 @@ export function tagStockColumns(
       k.krName,
       k.tagId,
       k.safeName,
+    ];
+  if (tab === 'apr' && otherItems)
+    // ItemSub_Detl (RP_TAG.cs:3890) appends, after TagId, the five other-detail items with their pieces and weight
+    // (summed in the footer, :5341-5400), the four HM ids and the item group.
+    return [
+      ...tagStockColumns(tab, view, aprKind),
+      ...[1, 2, 3, 4, 5].flatMap((n) => [
+        c(`it${n}`, `It${n}`),
+        c(`it${n}P`, `It${n}P`, 'int', true),
+        c(`it${n}Wt`, `It${n}Wt`, 'wt', true),
+      ]),
+      c('hmId', 'HM_ID'),
+      c('hmId2', 'HM_ID2'),
+      c('hmId3', 'HM_ID3'),
+      c('hmId4', 'HM_ID4'),
+      c('grCode', 'GR_CODE'),
     ];
   if (tab === 'apr')
     return [

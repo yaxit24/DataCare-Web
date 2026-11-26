@@ -114,7 +114,26 @@ export function useHuidReport(
   const latest = useRef(filters);
   latest.current = filters;
 
+  /** Set once the operator picks an item type, so a late defaults answer never overrides the choice. */
+  const itemTypeTouched = useRef(false);
+  // RP_HUID.cs:1562-1570: the form opens on Gold, or Silver when the company metal (MS_OPNCOMP.cs:481-484) is not G.
+  useEffect(() => {
+    let active = true;
+    void get<{ itemType: HuidFilters['itemType'] }>('/reports/huid/defaults').then(
+      ({ itemType }) => {
+        if (active && !itemTypeTouched.current) setFiltersState((f) => ({ ...f, itemType }));
+      },
+      () => {
+        if (active) setError('Unable to load report defaults.');
+      },
+    );
+    return () => {
+      active = false;
+    };
+  }, []);
+
   const setFilters = useCallback((patch: Partial<HuidFilters>) => {
+    if (patch.itemType !== undefined) itemTypeTouched.current = true;
     setFiltersState((prev) => ({ ...prev, ...patch }));
   }, []);
 

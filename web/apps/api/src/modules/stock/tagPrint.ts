@@ -275,12 +275,16 @@ export async function stageTagPrintRowsTx(
     params.push(srNos.map((n) => Number(n)));
   }
 
+  // TR_TAG_OPBL.cs:11485-11523 stages blanks first, then the voucher rows. Its INSERT SELECT has no
+  // ORDER BY, so SQL Server's physical order is not an authority. Use voucher SR_NO as an explicit,
+  // deterministic web ordering (inferred from the grid sequence), independent of heap updates.
   return (await tx.$executeRawUnsafe(
     `INSERT INTO "TAG_PRINT_DATA"(tenant_id,${cols})
        SELECT $1::text,${cols}
          FROM "BAR_DETL"
         WHERE tenant_id=$1
-          AND "CO_CODE"=$2 AND "LC_CODE"=$3 AND "CO_YEAR"=$4 AND "CO_BOOK"=$5 AND "VCH_NO"=$6${filter}`,
+          AND "CO_CODE"=$2 AND "LC_CODE"=$3 AND "CO_YEAR"=$4 AND "CO_BOOK"=$5 AND "VCH_NO"=$6${filter}
+        ORDER BY "SR_NO"`,
     ...params,
   )) as number;
 }

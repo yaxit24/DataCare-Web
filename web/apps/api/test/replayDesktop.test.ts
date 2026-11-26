@@ -370,6 +370,22 @@ describe('replay oracle: request rebuild', () => {
     ]);
   });
 
+  // TR_PURC.cs:7312 computes the Fine cell, :7138-7146 and :7225-7231 let the operator type over it, :13122 saves it.
+  it('sends a purchase fine only when the stored cell is not the grid formula (the operator typed it)', () => {
+    const base = { ITM_NWT: 2, ITM_TOUCH: 85, ITM_WEST_PRC: 0 };
+    // 2 x 85 % = 1.700: computed, so not sent.
+    expect(lib.typedFineOf({ ...base, ITM_FINE: 1.7 })).toEqual({});
+    // A rounded-up fine was typed.
+    expect(lib.typedFineOf({ ...base, ITM_FINE: 1.75 })).toEqual({ fineWt: 1.75 });
+    // Wastage and ghat join the touch: (2 + 0.1) x (85 + 5) % = 1.890.
+    expect(lib.typedFineOf({ ...base, ITM_GHT_WT: 0.1, ITM_WEST_PRC: 5, ITM_FINE: 1.89 })).toEqual(
+      {},
+    );
+    // No touch or wastage: the cell is net + ghat (TR_PURC.cs:7358).
+    expect(lib.typedFineOf({ ITM_NWT: 3, ITM_FINE: 3 })).toEqual({});
+    expect(lib.typedFineOf({ ITM_NWT: 3, ITM_FINE: 2.9 })).toEqual({ fineWt: 2.9 });
+  });
+
   it('maps books to families by MAIN_BOOK, with the blank-family URD book replayed as a purchase', () => {
     expect(lib.familyOf({ MAIN_BOOK: 'BANK PAY' })).toBe('CASH/BANK');
     expect(lib.familyOf({ MAIN_BOOK: '', BOOK_SNAME: 'GLURD' })).toBe('PURCHASE');
