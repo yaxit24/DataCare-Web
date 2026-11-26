@@ -309,6 +309,35 @@ describe('replay oracle: request rebuild', () => {
     expect(c).not.toHaveProperty('metal');
   });
 
+  it('tells a computed labour amount from a typed one, ghat included, and sends a typed Tax%', () => {
+    const line = (o: Record<string, unknown>) => ({
+      SR_NO: 1,
+      IT_CODE: 'GLD',
+      TAG_NO: 'N',
+      ITM_PCS: 1,
+      ITM_NWT: 10.65,
+      ITM_RATE: 6000,
+      LBR_TYPE: 'N',
+      ...o,
+    });
+    const h = { AC_CODE: 'C9', VCH_DATE: '2024-07-03T00:00:00.000Z', TAX_PRC: 3 };
+    const send = (o: Record<string, unknown>) =>
+      lib.saleRequest(voucher('SALES', '029', { SL_DATA: [h], SL_DETL: [line(o)] })).body.lines[0];
+    // (10.65 + 0.3) x 550 = 6022.5 rounds to the stored 6023: computed with ghat (TR_SALE.cs:11084-11127).
+    expect(send({ ITM_GHT_WT: 0.3, LBR_RATE: 550, LBR_AMT: 6023 })).toMatchObject({
+      labourType: 'per_gram',
+      labourRate: 550,
+    });
+    // 107 x 6.79 = 726.53, which rounds to 727: the stored 726 was typed, so it goes as the amount with its rate.
+    expect(send({ ITM_NWT: 107, LBR_RATE: 6.79, LBR_AMT: 726 })).toMatchObject({
+      labourType: 'fixed',
+      labourFixed: 726,
+      labourRate: 6.79,
+    });
+    expect(send({ TAX_PRC: 3 })).toMatchObject({ taxPct: 3 });
+    expect(send({ TAX_PRC: 0 })).not.toHaveProperty('taxPct');
+  });
+
   it('rebuilds a purchase with its stone sub-grid and the sale link of a URD book', () => {
     const h = {
       AC_CODE: 'S1',
@@ -582,6 +611,22 @@ describe('replay oracle: request rebuild', () => {
     expect(lib.buildRequest({ ...voucher('WH SALES', '034', { RATE_CUT_DATA: [h] }) }).path).toBe(
       '/wholesale-sales',
     );
+  });
+
+  // TR_PURC.cs:7312 computes the Fine cell, :7138-7146 and :7225-7231 let the operator type over it, :13122 saves it.
+  it('sends a purchase fine only when the stored cell is not the grid formula (the operator typed it)', () => {
+    const base = { ITM_NWT: 2, ITM_TOUCH: 85, ITM_WEST_PRC: 0 };
+    // 2 x 85 % = 1.700: computed, so not sent.
+    expect(lib.typedFineOf({ ...base, ITM_FINE: 1.7 })).toEqual({});
+    // A rounded-up fine was typed.
+    expect(lib.typedFineOf({ ...base, ITM_FINE: 1.75 })).toEqual({ fineWt: 1.75 });
+    // Wastage and ghat join the touch: (2 + 0.1) x (85 + 5) % = 1.890.
+    expect(lib.typedFineOf({ ...base, ITM_GHT_WT: 0.1, ITM_WEST_PRC: 5, ITM_FINE: 1.89 })).toEqual(
+      {},
+    );
+    // No touch or wastage: the cell is net + ghat (TR_PURC.cs:7358).
+    expect(lib.typedFineOf({ ITM_NWT: 3, ITM_FINE: 3 })).toEqual({});
+    expect(lib.typedFineOf({ ITM_NWT: 3, ITM_FINE: 2.9 })).toEqual({ fineWt: 2.9 });
   });
 
   it('maps books to families by MAIN_BOOK, with the blank-family URD book replayed as a purchase', () => {
@@ -866,13 +911,55 @@ describe('replay oracle: normalisation and grouping', () => {
 });
 
 describe('known desktop build differences', () => {
-  it('marks the sale ledger keys and stock sections as build differences, and nothing else', () => {
-    const group = (family: string, table: string, column: string, kind: string) =>
-      lib.buildDifferenceOf({ family, table, column, kind });
-    expect(group('SALES', 'AC_DATA', '*', 'rows-unpaired')).toMatch(/Ac_Ledr\.cs/);
-    expect(group('SALES', 'AC_DATA', 'LEDR_KEY', 'value')).toMatch(/LEDR_KEY/);
-    expect(group('SALES', 'MAIN_STOCK', '*', 'rows-unpaired')).toMatch(/Ac_Stock\.cs:114/);
-    expect(group('SALES', 'AC_DATA', 'DR_AMT', 'value')).toBeUndefined();
-    expect(group('CONTRA', 'AC_DATA', '*', 'rows-unpaired')).toBeUndefined();
+  const head = '01002024-2025026' + '00001';
+  const diff = (table: string, column: string, desktop: unknown, web: unknown) =>
+    lib.buildDifferenceOf({ family: 'SALES', table, column, desktop, web });
+  it('passes a renumbered key only when both builds name the same role on the same line', () => {
+    expect(diff('AC_DATA', 'LEDR_KEY', `${head}19`, `${head}25`)).toMatch(/same role cash.party/);
+    expect(diff('AC_DATA', 'LEDR_KEY', `${head}03`, `${head}08`)).toMatch(/item.book/);
+    expect(diff('AC_DATA', 'LEDR_KEY', `${head}         102`, `${head}         107`)).toMatch(
+      /item.line#1/,
+    );
+    // Colliding codes: data 09 is the bank pair, source 09 the tax leg; data 25 kasar, source 25 cash.
+    expect(diff('AC_DATA', 'LEDR_KEY', `${head}09`, `${head}09`)).toBeUndefined();
+    expect(diff('AC_DATA', 'LEDR_KEY', `${head}25`, `${head}25`)).toBeUndefined();
+    // Same role, different line: a real difference.
+    expect(
+      diff('AC_DATA', 'LEDR_KEY', `${head}         102`, `${head}         207`),
+    ).toBeUndefined();
+    expect(diff('MAIN_STOCK', 'SR_NO', 1, 3)).toMatch(/Ac_Stock\.cs:114/);
+    expect(diff('MAIN_STOCK', 'SR_NO', 1, 4)).toBeUndefined();
+  });
+
+  it('keeps unpaired ledger rows and amount differences as defects', () => {
+    const report = {
+      cases: [
+        {
+          caseId: 'SALES:026/00001',
+          tables: [
+            {
+              table: 'AC_DATA',
+              presentOn: 'both',
+              desktopRows: 3,
+              webRows: 4,
+              missingRows: [],
+              extraRows: ['x'],
+              missingColumns: [],
+              differences: [
+                { column: 'LEDR_KEY', rowKey: 'k', desktop: `${head}04`, web: `${head}09` },
+                { column: 'LEDR_KEY', rowKey: 'k2', desktop: `${head}09`, web: `${head}09` },
+              ],
+            },
+          ],
+        },
+      ],
+    };
+    const groups = lib.groupDifferences(report as any, () => 'SALES');
+    const kinds = groups.map((g: any) => [g.kind, g.cases, Boolean(g.buildDifference)]).sort();
+    expect(kinds).toEqual([
+      ['build-difference', 1, true],
+      ['row-count', 1, false],
+      ['value', 1, false],
+    ]);
   });
 });

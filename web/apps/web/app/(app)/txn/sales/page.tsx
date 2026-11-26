@@ -28,6 +28,8 @@ import {
   saleGridRowLabour,
 } from '../../../../lib/lineRecalc';
 import { billTotals, lineNet as lineNetAmount } from '@datacare/core';
+import { saleBillTotal } from '../../../../lib/saleBillTotal';
+import { SaleTdsAmount } from '../../../../components/SaleTdsAmount';
 import { todayLocal } from '../../../../lib/localDate';
 import { openDocument } from '../../../../lib/openDocument';
 import {
@@ -323,7 +325,6 @@ export default function SalesEntryPage() {
   const [tcsCode, setTcsCode] = useState('');
   const [tdsCode, setTdsCode] = useState('');
   const [tdsPct, setTdsPct] = useState('');
-  const [tdsAmount, setTdsAmount] = useState('');
   const [cardAc, setCardAc] = useState('');
   const [bankAc, setBankAc] = useState('');
   const [chequeNo, setChequeNo] = useState('');
@@ -435,10 +436,15 @@ export default function SalesEntryPage() {
     setOgRows((rs) => rs.map((r, j) => (j === i ? { ...r, [k]: v } : r)));
   const oldGoldVal = r2(ogRows.reduce((s, o) => s + ogAmt(o), 0));
   const hmAmt = n(hmCharge);
-  const hmTax = r2((hmAmt * n(taxRatePct)) / 100);
-  const itemTotal = itemTotals.total;
-  const tcsAmt = r2((itemTotal * n(tcsPct)) / 100);
-  const totalPrev = r2(itemTotal + hmAmt + hmTax + tcsAmt);
+  const tdsOn = companyFlag(companySettings, 'SL_TDS_TAX', 'N');
+  const bill = saleBillTotal(
+    itemTotals,
+    hmAmt,
+    [tdsPct, taxRatePct, tcsPct].map(n),
+    tdsOn,
+    roundingPolicy.roundBillTotal,
+  );
+  const totalPrev = bill.total;
   const kasarAmt = n(kasar);
   const paid = r2(n(cashAmt) + n(cardAmt) + n(upiAmt) + n(chequeAmt) + oldGoldVal);
   const balanceDue = r2(totalPrev - paid - kasarAmt - n(ordAmt) - n(currentAdjustmentAmount)); // TR_SALE.cs:19390
@@ -471,7 +477,6 @@ export default function SalesEntryPage() {
     setTcsCode('');
     setTdsCode('');
     setTdsPct('');
-    setTdsAmount('');
     setCardAc('');
     setBankAc('');
     setChequeNo('');
@@ -555,7 +560,6 @@ export default function SalesEntryPage() {
       setTcsCode(String(view.tcsCode ?? ''));
       setTdsCode(String(view.tdsCode ?? ''));
       setTdsPct(str(view.tdsPct));
-      setTdsAmount(str(view.tdsAmount));
       setCardAc(String(view.cardAc ?? ''));
       setBankAc(String(view.bankAc ?? ''));
       setChequeNo(String(view.chequeNo ?? ''));
@@ -673,7 +677,6 @@ export default function SalesEntryPage() {
         tcsCode: tcsCode || undefined,
         tdsCode: tdsCode || undefined,
         tdsPct: tdsPct ? n(tdsPct) : undefined,
-        tdsAmount: tdsAmount ? n(tdsAmount) : undefined,
         hallmarkAmount: hmAmt > 0 ? hmAmt : undefined,
         tcsPct: n(tcsPct) > 0 ? n(tcsPct) : undefined,
         kasarAmount: kasarAmt > 0 ? kasarAmt : undefined,
@@ -1002,7 +1005,6 @@ export default function SalesEntryPage() {
                 ['TCS Code', tcsCode, setTcsCode],
                 ['TDS Code', tdsCode, setTdsCode],
                 ['TDS %', tdsPct, setTdsPct],
-                ['TDS Amount', tdsAmount, setTdsAmount],
                 ['Cheque Bank A/c', bankAc, setBankAc],
                 ['Card A/c', cardAc, setCardAc],
                 ['Cheque No', chequeNo, setChequeNo],
@@ -1031,6 +1033,7 @@ export default function SalesEntryPage() {
                   />
                 </div>
               ))}
+              <SaleTdsAmount amount={bill.tdsAmt} />
               <div className="field">
                 <label>Ornament Issued</label>
                 <select
@@ -1204,8 +1207,8 @@ export default function SalesEntryPage() {
               ['Discount', n(discountAmount)],
               ['Taxable', taxable],
               [`Tax ${taxRatePct}%`, taxPrev],
-              ['Hallmark', hmAmt + hmTax],
-              ['TCS', tcsAmt],
+              ['Hallmark', hmAmt + bill.hmTax],
+              ['TCS', bill.tcsAmt],
               ['Total', totalPrev],
               ['Cash', n(cashAmt)],
               ['Card', n(cardAmt)],

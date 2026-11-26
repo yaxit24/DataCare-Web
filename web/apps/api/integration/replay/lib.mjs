@@ -284,18 +284,38 @@ export function labourOf(line) {
   const type = str(line.LBR_TYPE).toUpperCase();
   if (type === 'P')
     return { labourType: 'percentage', labourRate: nz(line.LBR_PRC ?? line.LBR_RATE) };
-  // The labour-amount cell is typed over the rate x weight product on the desktop grid; when the stored amount is
-  // not rate x net weight to the rupee, the operator typed the amount, and that amount is the input.
-  const perGram = num(line.LBR_RATE) * num(line.ITM_NWT);
+  // The labour-amount cell is computed as Math.Round((net + ghat) x rate) (net x rate when LBR_WITH_GHT is 'N';
+  // TR_SALE.cs:11084-11127) but open for typing. A stored amount that neither product rounds to was typed: it is sent
+  // as the amount, with the rate the grid showed beside it, as the page posts a typed amount.
+  const rate = num(line.LBR_RATE);
+  const amount = num(line.LBR_AMT);
+  const rounds = (weight) => Math.abs(rate * weight - amount) <= 0.5 + 1e-9;
   if (
-    num(line.LBR_RATE) !== 0 &&
-    num(line.LBR_AMT) !== 0 &&
-    Math.abs(perGram - num(line.LBR_AMT)) > 1
+    rate !== 0 &&
+    amount !== 0 &&
+    !rounds(num(line.ITM_NWT) + num(line.ITM_GHT_WT)) &&
+    !rounds(num(line.ITM_NWT))
   )
-    return { labourType: 'fixed', labourFixed: num(line.LBR_AMT) };
+    return { labourType: 'fixed', labourFixed: amount, labourRate: rate };
   if (num(line.LBR_RATE) !== 0) return { labourType: 'per_gram', labourRate: num(line.LBR_RATE) };
   if (num(line.LBR_AMT) !== 0) return { labourType: 'fixed', labourFixed: num(line.LBR_AMT) };
   return {};
+}
+
+/**
+ * The purchase Fine cell, sent only when the operator typed over it. The grid computes it as
+ * Format((net + ghat) x (touch + wastage - less touch) / 100 + kundan fine, "0.000") (TR_PURC.cs:7312), but the cell
+ * stays open for typing (TR_PURC.cs:7138-7146, stored as typed at :7225-7231) and the save takes the cell (:13122).
+ * The web screen posts a typed fine as `fineWt`; a stored fine that is not the formula's was typed.
+ */
+export function typedFineOf(line) {
+  const net = num(line.ITM_NWT) + num(line.ITM_GHT_WT);
+  const touch = num(line.ITM_TOUCH) + num(line.ITM_WEST_PRC);
+  // With no touch and wastage the cell is net + ghat + kundan fine (TR_PURC.cs:7358).
+  const formula =
+    (touch && net ? (net * (touch - num(line.ITM_LESS_TCH))) / 100 : net) + num(line.KUNDAN_FINE);
+  const computed = Math.round((formula + Number.EPSILON) * 1000) / 1000;
+  return Math.abs(computed - num(line.ITM_FINE)) > 0.0005 ? { fineWt: num(line.ITM_FINE) } : {};
 }
 
 const metalOf = (v) => {
@@ -390,6 +410,8 @@ export function saleRequest(v, ctx = {}) {
         tblCode: opt(l.TBL_CODE),
         remark: opt(l.ITM_REMARK),
         otherAmount: nz(l.OTH_AMT),
+        // The line's own Tax% cell, typed on the desktop grid (TR_SALE.cs:11588, saved at :15437).
+        taxPct: nz(l.TAX_PRC),
         rateType: opt(l.RATE_TYPE),
         rateWith: opt(l.RATE_WITH),
         prCode: opt(l.PR_CODE),
@@ -485,6 +507,7 @@ export function purchaseRequest(v) {
       touch: num(l.ITM_TOUCH),
       westPct: nz(l.ITM_WEST_PRC),
       ghtWt: nz(l.ITM_GHT_WT),
+      ...typedFineOf(l),
       rate: num(l.ITM_RATE),
       otherAmount: nz(l.OTH_AMT),
       withStock: opt(l.WITH_STOCK),
@@ -939,24 +962,11 @@ export function maskValue(column, value) {
 /**
  * Differences the replay is EXPECTED to report because the web follows the current desktop source while the replayed
  * year was written by an older build (owner decision: copy the current DataCareNext source). They are grouped apart
- * in the report as "desktop build difference" rather than as defects. A row whose key holds the code (AC_DATA
- * LEDR_KEY, MAIN_STOCK SR_NO) cannot pair, so those tables' unpaired rows and row counts are listed here too; a real
- * defect in the same table still shows in its column-level value differences.
+ * in the report as "desktop build difference" rather than as defects. These are the Sales Order and Wh Sales
+ * entries, matched per group by table and column (a tolerance or row-key entry only for its own kind); the SALES key
+ * renumbering is matched per field by saleKeyRole below.
  */
 export const KNOWN_BUILD_DIFFERENCES = [
-  {
-    family: 'SALES',
-    table: 'AC_DATA',
-    note:
-      'sale LEDR_KEY codes: data 01/03/04/02, bank 09/10, cash 19/20, kasar 25/26; source (Ac_Ledr.cs:61-172) ' +
-      '01/08/09/STR+07, cheque 15/16, card 17/18, cash 25/26, kasar 31/32, discount 33/34, old metal STR+23/24, ' +
-      'UPI 36/37+STR',
-  },
-  {
-    family: 'SALES',
-    table: 'MAIN_STOCK',
-    note: 'sale stock section SR_NO: data 1/2, source 3/4 (Ac_Stock.cs:114, :116)',
-  },
   {
     family: 'SALES ORDER',
     table: 'SL_ORD_DETL',
@@ -1017,9 +1027,9 @@ export const KNOWN_BUILD_DIFFERENCES = [
   },
 ];
 
-/** The build-difference note of a grouped difference, or undefined for a genuine one. */
-export function buildDifferenceOf(group) {
-  // An entry naming columns covers the value differences of those columns; one without covers the keyed ones.
+/** The note of a KNOWN_BUILD_DIFFERENCES entry covering a grouped difference, or undefined. */
+function knownBuildDifferenceOf(group) {
+  // An entry naming columns covers the value differences of those columns; one without covers its known rows.
   // A tolerance entry covers only the 'value-within-tolerance' kind; a row-key entry only the 'known rows' kinds.
   const columnEntry = KNOWN_BUILD_DIFFERENCES.find(
     (k) =>
@@ -1034,16 +1044,103 @@ export function buildDifferenceOf(group) {
     (k) => !k.columns && k.family === group.family && k.table === group.table,
   );
   if (!known) return undefined;
-  if (known.rowKeys)
-    return group.kind === 'row-count (known rows)' || group.kind === 'rows-unpaired (known rows)'
-      ? known.note
+  return known.rowKeys &&
+    (group.kind === 'row-count (known rows)' || group.kind === 'rows-unpaired (known rows)')
+    ? known.note
+    : undefined;
+}
+
+/**
+ * SALES: only the key TEXT is a build difference. AC_DATA rows pair on (AC_CODE, DR_AMT, CR_AMT) (bundleDiff.ts ROW_KEYS),
+ * so an unpaired row or a row-count difference is a real posting difference and stays a defect. A paired row's
+ * LEDR_KEY difference is a build difference only when the old code and the source code name the SAME role on the
+ * same line: each key's code is translated to its role first, so the colliding codes (data 09 bank against source 09
+ * tax, data 25 kasar against source 25 cash) cannot pass as a renumbering.
+ */
+const SALE_KEY_ROLES = {
+  // The 2024-25 data's build.
+  desktop: {
+    '01': 'party',
+    '02': 'item.line',
+    '03': 'item.book',
+    '04': 'tax',
+    '09': 'bank.party',
+    10: 'bank.account',
+    17: 'oldmetal.party',
+    18: 'oldmetal.account',
+    19: 'cash.party',
+    20: 'cash.account',
+    21: 'cashpaid.party',
+    22: 'cashpaid.account',
+    23: 'cashpaid.party',
+    24: 'cashpaid.account',
+    25: 'kasar.party',
+    26: 'kasar.account',
+  },
+  // The current source, Sales_Ledr (Ac_Ledr.cs:61-172); the web writes these.
+  web: {
+    '01': 'party',
+    '07': 'item.line',
+    '08': 'item.book',
+    '09': 'tax',
+    15: 'bank.party',
+    16: 'bank.account',
+    17: 'bank.party',
+    18: 'bank.account',
+    23: 'oldmetal.party',
+    24: 'oldmetal.account',
+    25: 'cash.party',
+    26: 'cash.account',
+    27: 'cashpaid.party',
+    28: 'cashpaid.account',
+    29: 'cashpaid.party',
+    30: 'cashpaid.account',
+    31: 'kasar.party',
+    32: 'kasar.account',
+  },
+};
+
+/**
+ * The role and line of a sale LEDR_KEY as one side's build numbers it, or undefined for a code that side does not
+ * map. A plain key ends in the 2-character code; a line key ends in STR(SR_NO)+code (line legs) or code+STR(SR_NO)
+ * (settlement rows such as UPI), 12 characters with the line right-aligned in 10.
+ */
+export function saleKeyRole(key, side) {
+  const k = String(key ?? '');
+  const roles = SALE_KEY_ROLES[side];
+  if (!roles) return undefined;
+  const tail = k.slice(-12);
+  if (/^\s+\d+$/.test(tail) || /^\d\d\s+\d+$/.test(tail)) {
+    const codeFirst = /^\d\d\s/.test(tail);
+    const code = codeFirst ? tail.slice(0, 2) : tail.slice(-2);
+    const line = (codeFirst ? tail.slice(2) : tail.slice(0, 10)).trim();
+    const role = roles[code];
+    return role ? `${role}#${line}` : undefined;
+  }
+  const role = roles[k.slice(-2)];
+  return role ? `${role}#` : undefined;
+}
+
+/**
+ * The build-difference note of a difference, or undefined for a genuine one. SALES is judged per field (desktop and
+ * web values); the other families per group (kind) against KNOWN_BUILD_DIFFERENCES.
+ */
+export function buildDifferenceOf(difference) {
+  const { family, table, column, desktop, web } = difference;
+  if (family !== 'SALES') return knownBuildDifferenceOf(difference);
+  if (table === 'AC_DATA' && column === 'LEDR_KEY') {
+    const before = saleKeyRole(desktop, 'desktop');
+    return before && before === saleKeyRole(web, 'web')
+      ? `sale LEDR_KEY renumbered, same role ${before.replace(/#$/, '')} (Ac_Ledr.cs:61-172)`
       : undefined;
-  const keyed =
-    group.kind === 'rows-unpaired' ||
-    group.kind === 'row-count' ||
-    (group.table === 'AC_DATA' && group.column === 'LEDR_KEY') ||
-    (group.table === 'MAIN_STOCK' && group.column === 'SR_NO');
-  return keyed ? known.note : undefined;
+  }
+  if (table === 'MAIN_STOCK' && column === 'SR_NO') {
+    const pair = `${Number(desktop)}>${Number(web)}`;
+    return pair === '1>3' || pair === '2>4'
+      ? 'sale stock section SR_NO: data 1/2, source 3/4 (Ac_Stock.cs:114, :116)'
+      : undefined;
+  }
+  return undefined;
 }
 
 /**
@@ -1067,6 +1164,7 @@ function valueKind(family, table, d) {
 
 export function groupDifferences(report, familyOfCase) {
   const groups = new Map();
+  const builds = new Map();
   const add = (fam, table, column, kind, caseId, example) => {
     const key = `${fam}|${table}|${column}|${kind}`;
     const g = groups.get(key) ?? {
@@ -1106,17 +1204,42 @@ export function groupDifferences(report, familyOfCase) {
         else if (unpaired.length) add(fam, t.table, '*', `rows-unpaired${known}`, c.caseId);
         for (const col of t.missingColumns)
           add(fam, t.table, col, 'column-missing-in-web', c.caseId);
-        for (const d of t.differences)
-          add(fam, t.table, d.column, valueKind(fam, t.table, d), c.caseId, {
-            rowKey: d.rowKey.startsWith('content:') ? '(content key)' : maskValue('key', d.rowKey),
-            desktop: maskValue(d.column, d.desktop),
-            web: maskValue(d.column, d.web),
-          });
+        for (const d of t.differences) {
+          const build =
+            fam === 'SALES' &&
+            buildDifferenceOf({
+              family: fam,
+              table: t.table,
+              column: d.column,
+              desktop: d.desktop,
+              web: d.web,
+            });
+          add(
+            fam,
+            t.table,
+            d.column,
+            build ? 'build-difference' : valueKind(fam, t.table, d),
+            c.caseId,
+            {
+              rowKey: d.rowKey.startsWith('content:')
+                ? '(content key)'
+                : maskValue('key', d.rowKey),
+              desktop: maskValue(d.column, d.desktop),
+              web: maskValue(d.column, d.web),
+            },
+          );
+          if (build) builds.set(`${fam}|${t.table}|${d.column}|build-difference`, build);
+        }
       }
     }
   }
   return [...groups.values()]
-    .map((g) => ({ ...g, cases: g.cases.size, buildDifference: buildDifferenceOf(g) }))
+    .map((g) => ({
+      ...g,
+      cases: g.cases.size,
+      buildDifference:
+        builds.get(`${g.family}|${g.table}|${g.column}|${g.kind}`) ?? knownBuildDifferenceOf(g),
+    }))
     .sort((a, b) => b.cases - a.cases || a.table.localeCompare(b.table));
 }
 

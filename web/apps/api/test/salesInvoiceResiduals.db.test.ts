@@ -534,7 +534,9 @@ d('WP-26 Sales Invoice residuals (database)', () => {
     const h = await header(r.vchNo);
     const pr = await voucherRows('SL_PR_DETL', no);
     const leg = await rows(
-      `SELECT sum("DR_AMT")::float dr FROM "AC_DATA" WHERE "CO_BOOK"='SL' AND "VCH_NO"=$1 AND "AC_CODE"='OLDGOLD'`,
+      // The old-metal pair STR(SR_NO)+23/24, the debit on the item group's PURC_AC (Ac_Ledr.cs:135-137).
+      `SELECT sum("DR_AMT")::float dr FROM "AC_DATA" WHERE "CO_BOOK"='SL' AND "VCH_NO"=$1
+          AND right(btrim("LEDR_KEY"),12)='         124'`,
       no,
     );
     expect([Number(pr[0].NET_AMT), Number(h.OLD_GL_AMT), leg[0].dr, Number(h.BILL_OS)]).toEqual([

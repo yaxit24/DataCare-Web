@@ -58,6 +58,9 @@ const SYSTEM_ACCOUNTS: { code: string; name: string; gr: string; gstType?: strin
   { code: 'ROUNDOFF', name: 'ROUND OFF', gr: '45' },
   { code: 'KASAR', name: 'KASAR / WRITE-OFF', gr: '45' },
   { code: 'TCS', name: 'TCS PAYABLE', gr: '12' },
+  // The TDS a customer deducts, a current asset as the template's TDS ledger (group 18); the sale's 13/14 pair posts
+  // to it when the TDS code's TAX_MAST.TAX_AC is unset (Ac_Ledr.cs:112-114).
+  { code: 'TDS', name: 'TDS RECEIVABLE', gr: '18' },
   { code: 'HMCHRG', name: 'HALLMARK CHARGES', gr: '41' },
   { code: 'OLDGOLD', name: 'OLD GOLD EXCHANGE', gr: '30' },
   { code: 'OG', name: 'OLD GOLD', gr: '25' },
@@ -189,6 +192,8 @@ const SALE_BOOK_SLOTS: Array<{ srNo: number; acCode: string }> = [
   { srNo: 2, acCode: 'CASH' },
   { srNo: 3, acCode: 'ROUNDOFF' },
   { srNo: 4, acCode: 'ORDADV' },
+  // Sales_Ledr posts the bill discount pair 33/34 to slot 5 (Ac_Ledr.cs:155-157 `B.SR_NO = 5`).
+  { srNo: 5, acCode: 'DISCOUNT' },
 ];
 
 /**
@@ -228,8 +233,22 @@ const BOOKS: {
   shortName?: string;
   /** BOOK_TBL_NAME, for the families that route by it. */
   table?: string;
+  /** BOOK_DATA.BOOK_TYPE ('T' tax invoice, 'M' estimate) and ITM_TYPE ('A' item side per line), when the book has them. */
+  bookType?: string;
+  itmType?: string;
 }[] = [
-  { book: 'SL', name: 'Sales', workflow: 'SALES', acCode: 'SALES', slots: SALE_BOOK_SLOTS },
+  // A GST tax-invoice book over every item type, the desktop's 'Sales Invoice' book (MS_UPDATE.cs:7320 inserts it
+  // with BOOK_TYPE 'T', ITM_TYPE 'A'): Sales_GST writes TAX_DATA only for type 'T' (Ac_Tax.cs:92-98), and 'A' posts
+  // each line to its group's sale account (Ac_Ledr.cs:90).
+  {
+    book: 'SL',
+    name: 'Sales',
+    workflow: 'SALES',
+    acCode: 'SALES',
+    slots: SALE_BOOK_SLOTS,
+    bookType: 'T',
+    itmType: 'A',
+  },
   {
     book: 'PR',
     name: 'Purchase',
@@ -854,8 +873,8 @@ export async function seedCompany(
       ) {
         await tx.$executeRawUnsafe(
           `INSERT INTO "BOOK_DATA"(tenant_id,"CO_CODE","LC_CODE","CO_BOOK","BOOK_NAME","BOOK_SNAME",
-             "MAIN_BOOK","BOOK_INOUT","CUR_USE","BOOK_TBL_NAME","BOOK_TBL_DETL","DATA_TYPE")
-           VALUES ($1,$2,$3,$4,$5,$6,$7,$8,'Y',$9,$10,'A')`,
+             "MAIN_BOOK","BOOK_INOUT","CUR_USE","BOOK_TBL_NAME","BOOK_TBL_DETL","DATA_TYPE","BOOK_TYPE","ITM_TYPE")
+           VALUES ($1,$2,$3,$4,$5,$6,$7,$8,'Y',$9,$10,'A',$11,$12)`,
           tenantId,
           coCode,
           lcCode,
@@ -866,6 +885,8 @@ export async function seedCompany(
           inout,
           b.table ?? desktopTables?.table ?? null,
           b.table ? null : (desktopTables?.detail ?? null),
+          b.bookType ?? null,
+          b.itmType ?? null,
         );
         // BOOK_DETL carries ONE ROW PER POSTING LEG, and `bookPolicy.resolveBookAccountTx` asks for a
         // specific SR_NO. The sale path alone resolves three: 1 = the control/sales account, 2 = the
