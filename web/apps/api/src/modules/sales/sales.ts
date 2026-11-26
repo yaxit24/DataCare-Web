@@ -62,7 +62,7 @@ import {
   type SaleResidualInput,
 } from './saleResiduals.js';
 import { getSale } from './saleRead.js';
-import { saleOldMetalStockRow, saleStockRow } from './saleStockRows.js';
+import { saleApprovalStockRow, saleOldMetalStockRow, saleStockRow } from './saleStockRows.js';
 export { getSale };
 import { fineWt } from '../shared/fine.js';
 import { resolveBookAccountTx, resolveBookPolicyTx } from '../shared/bookPolicy.js';
@@ -1885,6 +1885,17 @@ async function writeSaleTx(
       { key, vchDate: voucherDate, bookPolicy, acCode: input.acCode, mainUser: ctx.mainUser },
     ),
   );
+  // Ac_Stock.cs:118-121: a line billed from an Approval Isu first comes back in from the approval.
+  for (const d of detailRows.filter((row) => text(row.ISU_NO) !== ''))
+    mainStock.push(
+      saleApprovalStockRow(d, {
+        key,
+        vchDate: voucherDate,
+        bookPolicy,
+        acCode: input.acCode,
+        mainUser: ctx.mainUser,
+      }),
+    );
 
   // TR_SALE.cs:14209,15151: hidden book numbering is a separate TEMP_BOOK_DATA sequence.
   await insertRowTx(tx, 'TEMP_BOOK_DATA', tenantId, {

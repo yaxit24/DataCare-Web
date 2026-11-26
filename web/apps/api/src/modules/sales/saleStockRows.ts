@@ -133,3 +133,24 @@ export function saleOldMetalStockRow(g: Row, ctx: SaleStockContext): Row {
     ITM_DISC: '0',
   };
 }
+
+/**
+ * The approval stock-back row of a line billed from an Approval Isu (Ac_Stock.cs:118-121, Sale_Stk). The APR ISU
+ * voucher already took the tag out (Apr_Isu_Stk, Ac_Stock.cs:60-71), so for every SL_DETL line with an ISU_NO the sale
+ * puts it back in before its own OUT row takes it out: SR_NO 5, ISR_NO = the line, TR_TYPE 'I', '+', ITM_QTY 1, the
+ * line's stored ITM_GWT / ITM_NWT (no stock-report view switch), ITM_WEST 0, ITM_FINE, rate and amounts, NET_AMT, the
+ * karigar columns, KR_LBR_AMT / KR_OTH_AMT / KR_COST 0, EMP_CODE '', DESIGN_NO, ITM_SIZE, GHT_PRC = ITM_GHT_PRC,
+ * ITM_LOT '' and ITM_DISC 0. The desktop skips it only for two named registrations (VS344NEBU, VS357NEBU).
+ */
+export function saleApprovalStockRow(d: Row, ctx: SaleStockContext): Row {
+  return {
+    ...saleStockRow(d, { grossWt: num(d.ITM_GWT), netWt: num(d.ITM_NWT) }, ctx),
+    SR_NO: 5,
+    TR_TYPE: 'I',
+    ITM_SIGN: '+',
+    KR_COST: 0,
+    EMP_CODE: '',
+    ITM_LOT: '',
+    ITM_DISC: '0',
+  };
+}
