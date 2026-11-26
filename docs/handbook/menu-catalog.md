@@ -2155,7 +2155,7 @@ None. Slice N85 (gap G71) corrected the register to this catalog; `pnpm register
 | Counter Trfr | `TR_PHYSTK` | `/txn/counter-transfer` | `C - - D - -` | PARTIAL | P1-core |
 | Daily Rate | `MS_RATE` | `/txn/daily-rate` | `C R E D P L` | PARTIAL | P1-core |
 | Data Export | `UT_EXPORT` | `/utilities/data-export` | `- - E - P L` | PARTIAL | P1-core |
-| Data Import | `UT_IMPORT` | `/masters/accounts` | `C - - - - -` | PARTIAL | P1-core |
+| Data Import | `UT_IMPORT` | `/utilities/data-import` | `C - - - - -` | PARTIAL | P1-core |
 | E-Excel | `UT_E_INVOICE` | `/utilities/e-invoice` | `- - - - P -` | PARTIAL | P1-edition |
 | Estimate Reset | `UT_IMPORT` | `/utilities/estimate-reset` | `- - - D - L` | PARTIAL | P1-core |
 | Labour Update | `MS_AUTO_ITEM` | `/masters/labour-update` | `- - E - - L` | PARTIAL | P1-core |
@@ -2225,11 +2225,11 @@ None. Slice N85 (gap G71) corrected the register to this catalog; `pnpm register
 - **Desktop:** `UT_IMPORT` — constructor caption 'Data Import' ([MDI_FORM.cs:8606-8615](../../unified/src/csharp/DataCareNext/MDI_FORM.cs#L8606-L8615)).
 - **Does:** Imports an old company's masters, openings, vouchers, stock, schemes and loan datasets.
 - **Looks:** Dense maintenance dashboard of source/company/year/date selectors and import/reset buttons.
-- **Writes:** AC_MAST, ITEM_MAST, BAR_DATA, BAR_DETL, SL_DATA, PR_DATA.
-- **Web:** `/masters/accounts`; `POST /masters/:name/import`. Can: create.
-- **Remaining:** Only generic master-row import exists; historical vouchers, openings, tag/stock, scheme/loan and restartable conversion are absent.
+- **Writes:** AC_MAST, AC_MAST_SRNO, PRODUCT_MAST, GROUP_MAST, TABLE_MAST, ITEM_MAST, OP_DATA, AC_DATA, BAR_DATA, BAR_DETL, BAR_IDTL, ITM_OPBL, MAIN_STOCK, YEAR_MAST, CO_SET.
+- **Web:** `/utilities/data-import`; `POST /utilities/data-import/lite/preview`, `POST /utilities/data-import/lite/apply`. Can: create.
+- **Remaining:** Lite Soft only (D-IMP-1): the five steps run atomically after a preview and refuse a company with data (D-IMP-2). Not yet proven: a real Lite .mdb (no sample file; owner to supply one), desktop-runtime comparison. The other ~34 legacy importers are out of scope (Phase 2 migration service).
 - **Owners:** N26, X27, P11-01, X10, P03-05.
-- **Evidence:** [UT_IMPORT.cs:3457-4363](../../unified/src/csharp/DataCareNext/UT_IMPORT.cs#L3457-L4363).
+- **Evidence:** [UT_IMPORT.cs:8413-8445](../../unified/src/csharp/DataCareNext/UT_IMPORT.cs#L8413-L8445), [UT_IMPORT.cs:8447-8780](../../unified/src/csharp/DataCareNext/UT_IMPORT.cs#L8447-L8780), [UT_IMPORT.cs:3887-3965](../../unified/src/csharp/DataCareNext/UT_IMPORT.cs#L3887-L3965), [UT_IMPORT.cs:4241-4363](../../unified/src/csharp/DataCareNext/UT_IMPORT.cs#L4241-L4363).
 
 ### E-Excel
 
