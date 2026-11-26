@@ -19,7 +19,10 @@ const FORM = 'Inventory/Item Opening (non-tag)';
  */
 export function registerItemOpeningRoutes(
   app: FastifyInstance,
-  h: Pick<CrmRouteHelpers, 'prisma' | 'auth' | 'guard' | 'scopeOf' | 'run' | 'body' | 'mainUserOf'>,
+  h: Pick<
+    CrmRouteHelpers,
+    'prisma' | 'auth' | 'guard' | 'scopeOf' | 'run' | 'body' | 'mainUserOf' | 'dataTypeOf'
+  >,
   capabilities: (
     req: FastifyRequest,
     form: string,
@@ -28,7 +31,13 @@ export function registerItemOpeningRoutes(
   const { prisma, auth, guard, scopeOf, run, body, mainUserOf } = h;
   const scope = (req: FastifyRequest) => {
     const s = scopeOf(req);
-    return { tenantId: s.tenantId, coCode: s.coCode, lcCode: s.lcCode, coYear: s.coYear ?? '' };
+    return {
+      dataType: h.dataTypeOf(req),
+      tenantId: s.tenantId,
+      coCode: s.coCode,
+      lcCode: s.lcCode,
+      coYear: s.coYear ?? '',
+    };
   };
   const typeOf = (req: FastifyRequest) => String((req.params as any).type ?? '');
 

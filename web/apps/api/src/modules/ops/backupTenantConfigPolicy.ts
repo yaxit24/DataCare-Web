@@ -144,6 +144,10 @@ export const TENANT_CONFIG_EXCLUDED_TABLES: readonly TenantConfigExcludedTablePo
     table: 'daily_rate_copy_entitlement',
     reason: 'operator-provisioned entitlement; a restored archive must not grant it',
   },
+  {
+    table: 'tenant_feature',
+    reason: 'operator-provisioned plan feature flags; a restored archive must not switch them',
+  },
 ];
 
 export const UNREVIEWED_TENANT_TABLE_REASON =

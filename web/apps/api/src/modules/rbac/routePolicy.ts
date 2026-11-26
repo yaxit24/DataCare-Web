@@ -30,6 +30,7 @@ const PUBLIC = new Set([
 
 const SYSTEM = new Set([
   'GET /me',
+  'POST /auth/data-type',
   'POST /auth/password/change',
   'GET /context/companies',
   'GET /context/locations',
@@ -114,7 +115,16 @@ route('Utilities/Voucher Renumber', [
   'GET /utilities/vch-renumber/preview',
   'POST /utilities/vch-renumber/apply',
 ]);
-route('Utilities/Data Refresh', ['POST /utilities/data-refresh']);
+route('Utilities/Data Refresh', [
+  'POST /utilities/data-refresh',
+  // MS_UPDATE.cs:2042-2050, :2338, :2675: the six Data Refresh actions read USER_SET under the caption Data Refresh and
+  // need its Print right ("You Have No Print Rights....."). The owner chose one Print boundary for all six (G225).
+  // They run the same registered repairs as the admin-only Data Repair console, restricted to those six.
+  'GET /utilities/data-refresh/operations',
+  'POST /utilities/data-refresh/:id/preview',
+  'POST /utilities/data-refresh/:id/apply',
+  'GET /utilities/data-refresh/runs',
+]);
 // Desktop MS_UPDATE maintenance console. Preview and apply rewrite historical data, so the whole console is
 // admin-only in the registry rather than by handler comment, and the actions are classified for what they do:
 // preview reads, apply deletes/rewrites. See SCOPED_ADMIN_ONLY — unlike the other admin routes these must
@@ -1076,8 +1086,13 @@ route('Reports/Stock Report', [
   'GET /reports/stock-report',
   'GET /reports/stock-report/defaults',
   'GET /reports/stock-report/movements',
+  'GET /reports/stock-report/zoom',
+  'GET /reports/stock-report/item-ledger/items',
   'GET /reports/stock-report/export.csv',
   'GET /reports/stock-report/export.xlsx',
+  'GET /reports/stock-report/export.pdf',
+  'GET /reports/stock-report/item-ledger',
+  'GET /reports/stock-report/item-ledger.pdf',
 ]);
 // WP-18: the RP_HUID screen, its exports and their print gate live in routes/huidReport.ts. The export
 // paths are classified read here; the handler itself re-checks the print right (USER_SET.FRM_PRINT) and
@@ -1148,6 +1163,13 @@ route('Reports/Mfg Ledger', ['GET /reports/mfg-ledger', 'GET /reports/mfg-ledger
 route('Reports/Scheme Monthly Report', ['GET /reports/scheme-monthly']);
 
 const PRINT_ROUTES = new Set([
+  'GET /utilities/data-refresh/operations',
+  'POST /utilities/data-refresh/:id/preview',
+  'POST /utilities/data-refresh/:id/apply',
+  'GET /utilities/data-refresh/runs',
+  // UT_BKP.cs:942-965, :1203-1210: Backup reads USER_SET FRM_PRINT under the caption Data Backup and answers "You Have
+  // No Print Rights....." without it (G225). Restore stays admin-only and contained.
+  'GET /backup',
   'GET /years/print',
   'GET /masters/party-master/print',
   'GET /masters/employee-master/print',
@@ -1208,6 +1230,7 @@ const PRINT_ROUTES = new Set([
   'GET /reports/gst-report/workbook.xlsx',
   'GET /reports/stock-report/export.csv',
   'GET /reports/stock-report/export.xlsx',
+  'GET /reports/stock-report/export.pdf',
   'GET /reports/purchase-report/export.csv',
   'GET /reports/purchase-report/export.xlsx',
   'GET /reports/purchase-report/export.pdf',
@@ -1303,7 +1326,6 @@ const ADMIN_ONLY = new Set([
   'GET /audit',
   'GET /ops/metrics',
   'GET /ops/invariants',
-  'GET /backup',
   'POST /backup/restore',
   'GET /admin/users',
   'POST /admin/users',

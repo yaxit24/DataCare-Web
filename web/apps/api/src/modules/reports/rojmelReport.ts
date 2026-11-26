@@ -1,4 +1,5 @@
 import { withTxBudget } from '../shared/txBudget.js';
+import { dataTypeSql } from './reportDataType.js';
 import { dateWhere, type ReportScope } from './reports.js';
 
 /** `Conversion.Val`-equivalent numeric read; the desktop tolerates junk in these columns. */
@@ -111,7 +112,9 @@ export async function rojmel(prisma: any, s: ReportScope): Promise<Rojmel> {
     const params: unknown[] = [s.tenantId, s.coCode, s.lcCode, s.coYear];
     const where =
       `tenant_id=$1 AND "CO_CODE"=$2 AND "LC_CODE"=$3 AND "CO_YEAR"=$4` +
-      dateWhere(s, '"VCH_DATE"', params);
+      dateWhere(s, '"VCH_DATE"', params) +
+      // RP_ROJMEL.cs:3048-3069 ({ROJ_MEL_DATA.DATA_TYPE}, A.DATA_TYPE): the session type's rows only.
+      dataTypeSql(s.dataType);
     const rows: any[] = await tx.$queryRawUnsafe(
       `SELECT "VCH_NO" AS "vchNo", "CO_BOOK" AS "coBook", "VCH_TYPE" AS "vchType",
               "BOOK_NAME" AS "bookName", "AC_CODE" AS "acCode", "AC_NAME" AS "acName",

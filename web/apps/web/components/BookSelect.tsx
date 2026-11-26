@@ -83,6 +83,19 @@ export function BookSelect({
         setBooks(active);
         setLoaded(true);
         if (active.some((row) => row.CO_BOOK === valueRef.current)) return;
+        // A zoom from a report names the voucher's book in the address (`?vchNo=&coBook=`, RP_STOCK.cs:5240-5600);
+        // that book is the one shown, not the screen's first pick.
+        const zoomBook =
+          typeof window === 'undefined'
+            ? ''
+            : new URLSearchParams(window.location.search).get('vchNo')
+              ? (new URLSearchParams(window.location.search).get('coBook') ?? '')
+              : '';
+        const zoomed = active.find((row) => row.CO_BOOK === zoomBook)?.CO_BOOK;
+        if (zoomed) {
+          onChangeRef.current(zoomed);
+          return;
+        }
         const configuredPreferred = active.find((row) => row.CO_BOOK === preferred)?.CO_BOOK;
         onChangeRef.current(configuredPreferred ?? (active.length === 1 ? active[0]!.CO_BOOK : ''));
       })

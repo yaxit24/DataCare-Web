@@ -50,7 +50,7 @@ const DAY = `${startYear}-06-15`;
     );
     await exec(
       `INSERT INTO "ITEM_MAST"(tenant_id,"CO_CODE","IT_CODE","IT_NAME","IT_TYPE","PR_CODE","RATE_TYPE")
-       VALUES ($1,'01','LR916','L RING 916','G','LR','G'),($1,'01','999','999 GOLD','G','FN','G')`,
+       VALUES ($1,'01','LR916','L RING 916','G','LR','G'),($1,'01','T999','999 GOLD','G','FN','G')`,
       tenantId,
     );
     await exec(
@@ -112,7 +112,7 @@ const DAY = `${startYear}-06-15`;
     acName: 'Tour Customer',
     itType: 'G',
     lines: [{ tagNo: 'LRG00001' }],
-    receivedLines: [{ itCode: '999', grossWt: 10, netWt: 10, touch: 100 }],
+    receivedLines: [{ itCode: 'T999', grossWt: 10, netWt: 10, touch: 100 }],
     fineRate: 6400,
     settleCrFine: 1.931,
     pay: { cash: 12000 },

@@ -138,8 +138,8 @@ db('WP-24 Field Update class-a repairs', () => {
     const preview = await previewRepair(runtime, 'data-refresh-field-update', scope, 'admin');
     expect(preview.diffs).toEqual([{ table: 'AC_MAST', insert: 0, update: 3, delete: 0 }]);
     expect([...preview.samples].sort()).toEqual([
-      'AC_MAST 010001: main group Z -> A',
-      'AC_MAST 010002: main group Z -> L; defaulter blank -> N',
+      'AC_MAST 010001: main group Z -> 2',
+      'AC_MAST 010002: main group Z -> 1; defaulter blank -> N',
       'AC_MAST CASH: defaulter blank -> N',
     ]);
     expect(await snapshot(tenantId)).toEqual({
@@ -164,7 +164,7 @@ db('WP-24 Field Update class-a repairs', () => {
     const changed = after.AC_MAST!.filter((r) => !before.AC_MAST!.includes(r)).map(key);
     expect(changed.map((r) => r.AC_CODE).sort()).toEqual(['010001', '010002', 'CASH']);
     const byCode = Object.fromEntries(changed.map((r) => [r.AC_CODE, r]));
-    expect([byCode['010001'].AC_MAIN_GR, byCode['010002'].AC_MAIN_GR]).toEqual(['A', 'L']);
+    expect([byCode['010001'].AC_MAIN_GR, byCode['010002'].AC_MAIN_GR]).toEqual(['2', '1']);
     expect([byCode['010002'].DEFAULTER_AC, byCode.CASH.DEFAULTER_AC]).toEqual(['N', 'N']);
     expect(after.AC_MAST).toHaveLength(before.AC_MAST!.length);
     expect(await snapshot(other)).toEqual(otherBefore);

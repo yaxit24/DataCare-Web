@@ -7,7 +7,7 @@ import { withTxBudget } from '../shared/txBudget.js';
  * The desktop reads the row's book from BOOK_DATA (MAIN_BOOK, MENU_NAME), refuses with "You Have No Rights..." when the
  * user's rights row for that menu says View = N, then opens the form of the book family on the row's voucher number.
  * Here the answer names the web screen and the query that opens the voucher; the target screen reads it
- * (`useZoomOpen`). The right is checked on the target form by the caller; unlike the desktop, which refuses only an
+ * (`useVoucherZoom`, web lib/voucherZoom.ts). The right is checked on the target form by the caller; unlike the desktop, which refuses only an
  * explicit N, a missing rights row also refuses (the web is fail-closed, decision 4 of WP-15).
  */
 export interface ZoomTarget {

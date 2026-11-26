@@ -462,17 +462,25 @@ export async function applyRepair(
 /** Append-only run history for the console. */
 export async function repairHistory(
   prisma: any,
-  scope: { tenantId: string; coCode?: string },
+  scope: { tenantId: string; coCode?: string; operationIds?: string[] },
   limit = 50,
 ): Promise<Record<string, unknown>[]> {
   return withTxBudget(prisma, scope.tenantId, 'read', async (tx: any) => {
-    const co = scope.coCode ? ' AND co_code=$2' : '';
     const params: unknown[] = [scope.tenantId];
-    if (scope.coCode) params.push(scope.coCode);
+    let where = '';
+    if (scope.coCode) {
+      params.push(scope.coCode);
+      where += ` AND co_code=$${params.length}`;
+    }
+    // Filtered in SQL so the limit counts only the asked operations (Data Refresh lists its six).
+    if (scope.operationIds) {
+      params.push(scope.operationIds);
+      where += ` AND operation_id = ANY($${params.length}::text[])`;
+    }
     return tx.$queryRawUnsafe(
       `SELECT operation_id, co_code, state, preview_hash, counts, applied_counts, operator, reason,
               backup_reference, reauthenticated_at, error, created_at, applied_at
-         FROM "data_repair_run" WHERE tenant_id=$1${co}
+         FROM "data_repair_run" WHERE tenant_id=$1${where}
         ORDER BY created_at DESC LIMIT ${Math.min(Math.max(1, limit), 200)}`,
       ...params,
     );

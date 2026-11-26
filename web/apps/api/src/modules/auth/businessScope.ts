@@ -255,7 +255,13 @@ export function bookFamilyMainBooks(family: unknown): readonly string[] | undefi
 
 export async function listScopeBooks(
   prisma: any,
-  input: { tenantId: string; coCode: string; lcCode: string; mainBooks?: readonly string[] },
+  input: {
+    tenantId: string;
+    coCode: string;
+    lcCode: string;
+    mainBooks?: readonly string[];
+    dataType?: string;
+  },
 ): Promise<
   Array<{
     CO_BOOK: string;
@@ -269,11 +275,13 @@ export async function listScopeBooks(
       `SELECT "CO_BOOK","BOOK_NAME","BOOK_SNAME","MAIN_BOOK" FROM "BOOK_DATA"
         WHERE "CO_CODE"=$1 AND ("LC_CODE"=$2 OR "LC_CODE"='00' OR "LC_CODE" IS NULL)
           AND "CO_BOOK" IS NOT NULL AND COALESCE(UPPER("CUR_USE"),'Y')<>'N'
+          AND ($4::text IS NULL OR $4='C' OR COALESCE(NULLIF(btrim("DATA_TYPE"),''),'A')=$4)
           AND ($3::text[] IS NULL OR UPPER(btrim(COALESCE("MAIN_BOOK",''))) = ANY($3::text[]))
         ORDER BY CASE WHEN $3::text[] IS NULL THEN "CO_BOOK" ELSE "BOOK_NAME" END, "CO_BOOK"`,
       input.coCode,
       input.lcCode,
       input.mainBooks ? [...input.mainBooks] : null,
+      input.dataType ?? 'C',
     ),
   );
 }

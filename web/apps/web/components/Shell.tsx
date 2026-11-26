@@ -1,5 +1,6 @@
 'use client';
 import Link from 'next/link';
+import { DataTypesFeature, DataTypeBadge } from './DataTypeControls';
 import { usePathname } from 'next/navigation';
 import { useEffect, useRef, useState } from 'react';
 import { NAV } from '../lib/nav';
@@ -17,6 +18,9 @@ import {
 } from '../lib/contextSelection';
 
 export interface Session {
+  dataType?: string;
+  allowedDataTypes?: string[];
+  features?: { dataTypes: boolean };
   user: string;
   context: BrowserSessionContext;
   coCode: string;
@@ -174,182 +178,185 @@ export default function Shell({
   }
 
   return (
-    <div className="app">
-      <header className="topbar">
-        <span className="brand">DataCareNext</span>
-        {session.edition && (
-          <span className="chip" data-testid="edition">
-            {session.edition.name}
-            {session.edition.beta ? ' + Beta' : ''}
-          </span>
-        )}
-        {ready ? (
-          <>
-            <select
-              aria-label="Company"
-              title="Switch company"
-              value={coCode}
-              disabled={switching || !!pending || contextStale || !!selectionError}
-              onChange={(e) => switchContext(e.target.value, lcCode, coYear, true)}
-              style={{ color: 'var(--ink)', padding: '3px 6px', fontSize: 12, maxWidth: 220 }}
-            >
-              {companies.map((c) => (
-                <option key={c.CO_CODE} value={c.CO_CODE}>
-                  {c.CO_CODE} — {c.CO_NAME}
-                </option>
-              ))}
-            </select>
-            <select
-              aria-label="Location"
-              title="Switch location"
-              value={lcCode}
-              disabled={switching || !!pending || contextStale || !!selectionError}
-              onChange={(e) => switchContext(coCode, e.target.value, coYear)}
-              style={{ color: 'var(--ink)', padding: '3px 6px', fontSize: 12, maxWidth: 180 }}
-            >
-              {locations.map((location) => (
-                <option key={location.LC_CODE} value={location.LC_CODE}>
-                  {location.LC_CODE} — {location.LC_NAME}
-                </option>
-              ))}
-            </select>
-            <select
-              aria-label="Financial year"
-              title="Switch financial year"
-              value={coYear}
-              disabled={switching || !!pending || contextStale || !!selectionError}
-              onChange={(e) => switchContext(coCode, lcCode, e.target.value)}
-              style={{ color: 'var(--ink)', padding: '3px 6px', fontSize: 12 }}
-            >
-              {years.map((y) => (
-                <option key={y} value={y}>
-                  {y}
-                </option>
-              ))}
-            </select>
-          </>
-        ) : (
-          <>
-            <span className="chip">Co {session.coCode}</span>
-            <span className="chip">Loc {session.lcCode}</span>
-            {session.coYear && <span className="chip">FY {session.coYear}</span>}
-          </>
-        )}
-        <span className="spacer" />
-        <span className="chip">👤 {session.user}</span>
-        <button disabled={switching} onClick={logout}>
-          Logout
-        </button>
-      </header>
-      <nav
-        className="sidebar"
-        onClickCapture={(event) => {
-          if (switching) {
-            event.preventDefault();
-            event.stopPropagation();
-          }
-        }}
-      >
-        {editionMenus.groups.map((g) => {
-          // Only explicit null (server-verified admin) means show all; [] hides every form.
-          const allowed = session.allowedForms;
-          const items =
-            allowed === null
-              ? g.items
-              : g.items.filter((it) => allowed.includes(it.form ?? `${g.label}/${it.label}`));
-          if (!items.length) return null;
-          return (
-            <div key={g.label}>
-              <div className="group">{g.label}</div>
-              {items.map((it) => {
-                const active = pathname === it.href.split('?')[0];
-                // G182: no prefetch. Each page drew about 240 route prefetches, one per navigation link.
-                return (
-                  <Link
-                    key={it.label + it.href}
-                    href={it.href}
-                    prefetch={false}
-                    className={active ? 'active' : ''}
-                  >
-                    {it.label}
-                    {!it.ready && <span className="soon">soon</span>}
-                  </Link>
-                );
-              })}
-            </div>
-          );
-        })}
-        {(() => {
-          const allowed = session.allowedForms;
-          const betaItems = editionMenus.beta.filter(
-            (it) => allowed === null || allowed.includes(navItemForm(it.group, it)),
-          );
-          if (!betaItems.length) return null;
-          return (
-            <div key="beta" data-testid="beta-menus">
-              <div className="group">Beta</div>
-              {betaItems.map((it) => (
-                <Link
-                  key={`beta-${it.label}-${it.href}`}
-                  href={it.href}
-                  prefetch={false}
-                  className={pathname === it.href.split('?')[0] ? 'active' : ''}
-                >
-                  {it.label} <span className="soon">beta</span>
-                </Link>
-              ))}
-            </div>
-          );
-        })()}
-      </nav>
-      <main className="content">
-        {(pending || selectionError) && (
-          <div className="msg err" role="alert" data-testid="pending-context-recovery">
-            {pending && (
-              <p>A company change to {pending.request.coCode} is awaiting confirmation.</p>
-            )}
-            {selectionError && <p>{selectionError}</p>}
-            {pending && (
-              <button
-                disabled={switching}
-                onClick={() => {
-                  if (
-                    window.confirm(
-                      'Company selection will close this page. Copy any unsaved work first. Continue?',
-                    )
-                  )
-                    window.location.assign('/select');
-                }}
+    <DataTypesFeature.Provider value={session.features?.dataTypes !== false}>
+      <div className="app">
+        <header className="topbar">
+          <span className="brand">DataCareNext</span>
+          <DataTypeBadge type={session.dataType} allowed={session.allowedDataTypes} />
+          {session.edition && (
+            <span className="chip" data-testid="edition">
+              {session.edition.name}
+              {session.edition.beta ? ' + Beta' : ''}
+            </span>
+          )}
+          {ready ? (
+            <>
+              <select
+                aria-label="Company"
+                title="Switch company"
+                value={coCode}
+                disabled={switching || !!pending || contextStale || !!selectionError}
+                onChange={(e) => switchContext(e.target.value, lcCode, coYear, true)}
+                style={{ color: 'var(--ink)', padding: '3px 6px', fontSize: 12, maxWidth: 220 }}
               >
-                Check company change
-              </button>
-            )}
-          </div>
-        )}
-        <fieldset
-          disabled={switching}
-          style={{ border: 0, padding: 0, margin: 0, minWidth: 0 }}
-          aria-busy={switching}
-        >
-          {pageAvailability === 'unavailable' ? (
-            <div className="msg err" role="alert" data-testid="edition-unavailable">
-              <p>This screen is not part of the {session.edition?.name} edition.</p>
-            </div>
+                {companies.map((c) => (
+                  <option key={c.CO_CODE} value={c.CO_CODE}>
+                    {c.CO_CODE} — {c.CO_NAME}
+                  </option>
+                ))}
+              </select>
+              <select
+                aria-label="Location"
+                title="Switch location"
+                value={lcCode}
+                disabled={switching || !!pending || contextStale || !!selectionError}
+                onChange={(e) => switchContext(coCode, e.target.value, coYear)}
+                style={{ color: 'var(--ink)', padding: '3px 6px', fontSize: 12, maxWidth: 180 }}
+              >
+                {locations.map((location) => (
+                  <option key={location.LC_CODE} value={location.LC_CODE}>
+                    {location.LC_CODE} — {location.LC_NAME}
+                  </option>
+                ))}
+              </select>
+              <select
+                aria-label="Financial year"
+                title="Switch financial year"
+                value={coYear}
+                disabled={switching || !!pending || contextStale || !!selectionError}
+                onChange={(e) => switchContext(coCode, lcCode, e.target.value)}
+                style={{ color: 'var(--ink)', padding: '3px 6px', fontSize: 12 }}
+              >
+                {years.map((y) => (
+                  <option key={y} value={y}>
+                    {y}
+                  </option>
+                ))}
+              </select>
+            </>
           ) : (
             <>
-              {pageAvailability === 'beta' && (
-                <div className="msg" role="status" data-testid="edition-beta">
-                  <p>
-                    Beta: this screen belongs to a higher edition than {session.edition?.name} and
-                    is not part of its release.
-                  </p>
-                </div>
-              )}
-              {children}
+              <span className="chip">Co {session.coCode}</span>
+              <span className="chip">Loc {session.lcCode}</span>
+              {session.coYear && <span className="chip">FY {session.coYear}</span>}
             </>
           )}
-        </fieldset>
-      </main>
-    </div>
+          <span className="spacer" />
+          <span className="chip">👤 {session.user}</span>
+          <button disabled={switching} onClick={logout}>
+            Logout
+          </button>
+        </header>
+        <nav
+          className="sidebar"
+          onClickCapture={(event) => {
+            if (switching) {
+              event.preventDefault();
+              event.stopPropagation();
+            }
+          }}
+        >
+          {editionMenus.groups.map((g) => {
+            // Only explicit null (server-verified admin) means show all; [] hides every form.
+            const allowed = session.allowedForms;
+            const items =
+              allowed === null
+                ? g.items
+                : g.items.filter((it) => allowed.includes(it.form ?? `${g.label}/${it.label}`));
+            if (!items.length) return null;
+            return (
+              <div key={g.label}>
+                <div className="group">{g.label}</div>
+                {items.map((it) => {
+                  const active = pathname === it.href.split('?')[0];
+                  // G182: no prefetch. Each page drew about 240 route prefetches, one per navigation link.
+                  return (
+                    <Link
+                      key={it.label + it.href}
+                      href={it.href}
+                      prefetch={false}
+                      className={active ? 'active' : ''}
+                    >
+                      {it.label}
+                      {!it.ready && <span className="soon">soon</span>}
+                    </Link>
+                  );
+                })}
+              </div>
+            );
+          })}
+          {(() => {
+            const allowed = session.allowedForms;
+            const betaItems = editionMenus.beta.filter(
+              (it) => allowed === null || allowed.includes(navItemForm(it.group, it)),
+            );
+            if (!betaItems.length) return null;
+            return (
+              <div key="beta" data-testid="beta-menus">
+                <div className="group">Beta</div>
+                {betaItems.map((it) => (
+                  <Link
+                    key={`beta-${it.label}-${it.href}`}
+                    href={it.href}
+                    prefetch={false}
+                    className={pathname === it.href.split('?')[0] ? 'active' : ''}
+                  >
+                    {it.label} <span className="soon">beta</span>
+                  </Link>
+                ))}
+              </div>
+            );
+          })()}
+        </nav>
+        <main className="content">
+          {(pending || selectionError) && (
+            <div className="msg err" role="alert" data-testid="pending-context-recovery">
+              {pending && (
+                <p>A company change to {pending.request.coCode} is awaiting confirmation.</p>
+              )}
+              {selectionError && <p>{selectionError}</p>}
+              {pending && (
+                <button
+                  disabled={switching}
+                  onClick={() => {
+                    if (
+                      window.confirm(
+                        'Company selection will close this page. Copy any unsaved work first. Continue?',
+                      )
+                    )
+                      window.location.assign('/select');
+                  }}
+                >
+                  Check company change
+                </button>
+              )}
+            </div>
+          )}
+          <fieldset
+            disabled={switching}
+            style={{ border: 0, padding: 0, margin: 0, minWidth: 0 }}
+            aria-busy={switching}
+          >
+            {pageAvailability === 'unavailable' ? (
+              <div className="msg err" role="alert" data-testid="edition-unavailable">
+                <p>This screen is not part of the {session.edition?.name} edition.</p>
+              </div>
+            ) : (
+              <>
+                {pageAvailability === 'beta' && (
+                  <div className="msg" role="status" data-testid="edition-beta">
+                    <p>
+                      Beta: this screen belongs to a higher edition than {session.edition?.name} and
+                      is not part of its release.
+                    </p>
+                  </div>
+                )}
+                {children}
+              </>
+            )}
+          </fieldset>
+        </main>
+      </div>
+    </DataTypesFeature.Provider>
   );
 }

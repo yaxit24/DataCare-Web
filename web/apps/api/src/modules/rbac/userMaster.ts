@@ -1,3 +1,4 @@
+import { validateDataTypeAccess } from '../auth/dataTypePolicy.js';
 import { withTxBudget, type Tx } from '../shared/txBudget.js';
 import { assertStrongPassword, hashPassword, verifyWithMigration } from '../auth/password.js';
 import { FORM_CATALOG } from './formCatalog.js';
@@ -100,12 +101,14 @@ interface LoginRow {
   LOGIN_PWD: string | null;
   LOGIN_CATG: string | null;
   LOGIN_ACTIVE: string;
+  DATA_TYPE_ALLOW: string;
+  DATA_TYPE_DEFAULT: string;
 }
 
 /** The company's row for a name, matched without regard to case as the desktop's DataView filter does. */
 async function findLogin(tx: Tx, scope: UserMasterScope, loginName: string): Promise<LoginRow[]> {
   return tx.$queryRawUnsafe<LoginRow[]>(
-    `SELECT "row_id"::text AS "rowId","LOGIN_NAME","LOGIN_PWD","LOGIN_CATG","LOGIN_ACTIVE"
+    `SELECT "row_id"::text AS "rowId","LOGIN_NAME","LOGIN_PWD","LOGIN_CATG","LOGIN_ACTIVE","DATA_TYPE_ALLOW","DATA_TYPE_DEFAULT"
        FROM "LOGIN_MAST" WHERE "CO_CODE"=$1 AND upper("LOGIN_NAME")=upper($2)
       ORDER BY "row_id" FOR UPDATE`,
     scope.coCode,
@@ -155,6 +158,8 @@ export interface CreateDesktopUserInput {
   /** Omitted only by callers that confirm elsewhere; the screen always sends it. */
   confirmPassword?: string;
   userType: string;
+  allowedDataTypes?: string;
+  defaultDataType?: string;
   /** MAIN_USER: the operator saving the user (MainUser = MCo_User, :1569). */
   mainUser: string;
 }
@@ -211,6 +216,18 @@ export async function createDesktopUser(
         mainUser,
       );
     }
+    const access = validateDataTypeAccess(
+      input.allowedDataTypes ?? 'ABC',
+      input.defaultDataType ?? 'C',
+    );
+    await tx.$executeRawUnsafe(
+      `UPDATE "LOGIN_MAST" SET "DATA_TYPE_ALLOW"=$1,"DATA_TYPE_DEFAULT"=$2
+      WHERE "CO_CODE"=$3 AND "LOGIN_NAME"=$4`,
+      access.allowed,
+      access.defaultType,
+      scope.coCode,
+      storedName,
+    );
     for (const lcCode of seededLocations(scope)) await seedRights(tx, scope, lcCode, storedName);
     return { created: true as const, loginName: storedName, userType, message: USER_TEXT.CREATED };
   });
@@ -222,6 +239,8 @@ export interface UpdateDesktopUserInput {
   newPassword?: string;
   confirmPassword?: string;
   userType: string;
+  allowedDataTypes?: string;
+  defaultDataType?: string;
 }
 
 /**
@@ -259,6 +278,26 @@ export async function updateDesktopUser(
       throw new UserMasterValidationError(USER_TEXT.OLD_PASSWORD_WRONG, 'oldPassword');
     if (isAdminRole(row.LOGIN_CATG) && userType !== 'A')
       await assertAnotherAdministrator(tx, scope, row.LOGIN_NAME);
+    const access = validateDataTypeAccess(
+      input.allowedDataTypes ?? row.DATA_TYPE_ALLOW,
+      input.defaultDataType ?? row.DATA_TYPE_DEFAULT,
+    );
+    const accessChanged =
+      access.allowed !== row.DATA_TYPE_ALLOW || access.defaultType !== row.DATA_TYPE_DEFAULT;
+    if (accessChanged) {
+      await tx.$executeRawUnsafe(
+        `UPDATE "LOGIN_MAST" SET "DATA_TYPE_ALLOW"=$1,"DATA_TYPE_DEFAULT"=$2 WHERE "row_id"=$3::bigint`,
+        access.allowed,
+        access.defaultType,
+        row.rowId,
+      );
+      await tx.$executeRawUnsafe(
+        `UPDATE auth_session SET revoked_at=clock_timestamp(),revoke_reason='data-type-access-changed'
+        WHERE login_name=$1 AND login_co_code=$2 AND revoked_at IS NULL`,
+        row.LOGIN_NAME,
+        scope.coCode,
+      );
+    }
     const sameType = desktopUserType(row.LOGIN_CATG) === userType;
     // An unchanged save writes nothing: the footprint stays as it was (T08).
     if (!nextHash && sameType)

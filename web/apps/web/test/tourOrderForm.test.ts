@@ -19,7 +19,6 @@ describe('Tour Order editor values and scope', () => {
     vchDate: '2024-07-10',
     taxRatePct: 3,
     advanceAmount: 12.34,
-    cashAc: 'CASH2',
     billNo: 'TOUR/17',
     vchDesc: 'ring details',
     address3: 'Third road',
@@ -76,7 +75,6 @@ describe('Tour Order editor values and scope', () => {
     expect(payload).toMatchObject({
       acCode: '000015',
       advanceAmount: 12.34,
-      cashAc: 'CASH2',
       expectedVersion: stored.version,
       billNo: 'TOUR/17',
       vchDesc: 'ring details',

@@ -180,8 +180,9 @@ const savedLogins = new Map();
  */
 const SAVED_LOGIN_MAX_AGE_MS = 10 * 60 * 1000;
 
-async function savedLogin(stack, { user, password, slot, location }) {
-  const key = slot ?? (location ? `${user}@${location}` : user);
+async function savedLogin(stack, { user, password, slot, location, year }) {
+  // A session that opens the company in another financial year is its own login: the year is part of the key.
+  const key = `${slot ?? (location ? `${user}@${location}` : user)}${year ? `@year:${year}` : ''}`;
   const saved = savedLogins.get(key);
   if (saved && Date.now() - saved.at < SAVED_LOGIN_MAX_AGE_MS) return saved.state;
   const context = await stack.browser.newContext({ baseURL: stack.target.webOrigin });
@@ -227,6 +228,12 @@ async function savedLogin(stack, { user, password, slot, location }) {
     if (location) {
       await page.locator('#context-location').selectOption(location);
       assert.equal(await page.locator('#context-location').inputValue(), location);
+    }
+    // Likewise a session that works in another financial year picks it on the real Open Company screen
+    // (select/page.tsx #context-year, the desktop's year selector), never by editing a request.
+    if (year) {
+      await page.locator('#context-year').selectOption(year);
+      assert.equal(await page.locator('#context-year').inputValue(), year);
     }
     await page.getByRole('button', { name: 'Open', exact: true }).click();
     await page.waitForURL('**/dashboard', { timeout: 20_000 });
@@ -558,4 +565,125 @@ export async function escLeavesWithNoFocus(page, { heading, path }) {
     page.keyboard.press('Escape'),
   ]);
   return { focusOnBody: true, leftTo: new URL(page.url()).pathname };
+}
+
+/**
+ * The header's "Financial year" switch, as an operator uses it (Shell.tsx switchContext): choose the year, accept the
+ * "Changing company, branch or year closes this page" confirmation, the page posts /context/select and reloads.
+ * The session's server-side context moves to the new year, so the saved login of that slot is spent: a case that
+ * switches the year uses a slot of its own and never shares it.
+ */
+export async function switchYear(page, year) {
+  const select = page.getByLabel('Financial year', { exact: true });
+  await select.waitFor();
+  assert.notEqual(await select.inputValue(), year, `the session is already in ${year}`);
+  await Promise.all([
+    page.waitForResponse(
+      (r) => r.request().method() === 'POST' && new URL(r.url()).pathname === '/api/context/select',
+    ),
+    page.waitForEvent('load'),
+    select.selectOption(year),
+  ]);
+  const shown = page.getByLabel('Financial year', { exact: true });
+  await shown.waitFor();
+  assert.equal(await shown.inputValue(), year, 'the header shows the new year');
+  const me = await (await page.request.get('/api/me')).json();
+  assert.equal(me.coYear, year, 'the server session is in the new year');
+}
+
+/**
+ * Remove every row a financial year holds for one tenant, in every table that has a CO_YEAR column except YEAR_MAST.
+ * For a year a case created itself (a Transfer Year seeded in YEAR_MAST), so nothing it posted there leaks into the
+ * modules that run afterwards in the shared CI database.
+ */
+export async function purgeYear(owner, tenantId, year) {
+  const tables = await owner.$queryRawUnsafe(
+    `SELECT DISTINCT c.table_name FROM information_schema.columns c
+      WHERE c.table_schema='public' AND c.column_name='CO_YEAR' AND c.table_name<>'YEAR_MAST'
+        AND EXISTS (SELECT 1 FROM information_schema.columns t
+                     WHERE t.table_schema='public' AND t.table_name=c.table_name AND t.column_name='tenant_id')`,
+  );
+  for (const { table_name } of tables)
+    await owner.$executeRawUnsafe(
+      `DELETE FROM "${table_name}" WHERE tenant_id=$1 AND "CO_YEAR"=$2`,
+      tenantId,
+      year,
+    );
+}
+
+/**
+ * Test-only barrier on a lock the application itself takes. The test holds the same transaction-level advisory lock
+ * from a separate owner connection, so the requests under test queue behind it, and `release()` lets them all go at
+ * once. Nothing in the application changes and production has no such switch: the lock key is the one the writer
+ * already uses (balanceTransfer.ts lockTx, dataRepair.ts applyRepair).
+ *
+ * @param {object} owner  the owner Prisma client (ctx.owner)
+ * @param {'hashtext'|'hashtextextended'} hash  the hash function the writer applies to its key
+ * @param {string} key  the writer's lock key text
+ */
+export async function holdAdvisoryLock(owner, hash, key) {
+  assert(hash === 'hashtext' || hash === 'hashtextextended', 'unknown lock hash');
+  let release;
+  const gate = new Promise((resolveGate) => (release = resolveGate));
+  let acquired;
+  const held = new Promise((resolveHeld) => (acquired = resolveHeld));
+  const done = owner.$transaction(
+    async (tx) => {
+      await tx.$executeRawUnsafe(
+        hash === 'hashtext'
+          ? 'SELECT pg_advisory_xact_lock(hashtext($1))'
+          : 'SELECT pg_advisory_xact_lock(hashtextextended($1, 0))',
+        key,
+      );
+      acquired();
+      await gate;
+    },
+    { timeout: 120_000, maxWait: 20_000 },
+  );
+  // A transaction that cannot start must fail the case, not hang it.
+  await Promise.race([held, done]);
+  return {
+    release: async () => {
+      release();
+      await done;
+    },
+  };
+}
+
+/**
+ * The header's Company switch (Shell.tsx switchContext with the company defaults): choose the company, accept the
+ * confirmation, wait for /context/select and the reload. The session's server-side context moves to that company, so
+ * a case that switches uses a login slot of its own.
+ */
+export async function switchCompany(page, coCode) {
+  const select = page.getByLabel('Company', { exact: true });
+  await select.waitFor();
+  assert.notEqual(await select.inputValue(), coCode, `the session is already in company ${coCode}`);
+  await Promise.all([
+    page.waitForResponse(
+      (r) => r.request().method() === 'POST' && new URL(r.url()).pathname === '/api/context/select',
+    ),
+    page.waitForEvent('load'),
+    select.selectOption(coCode),
+  ]);
+  await page.getByLabel('Company', { exact: true }).waitFor();
+  const me = await (await page.request.get('/api/me')).json();
+  assert.equal(me.coCode, coCode, 'the server session is in the new company');
+}
+
+/** Remove every row one company holds for one tenant, in every table that has tenant_id and CO_CODE. */
+export async function purgeCompany(owner, tenantId, coCode) {
+  const tables = await owner.$queryRawUnsafe(
+    `SELECT c.table_name FROM information_schema.columns c
+      WHERE c.table_schema='public' AND c.column_name='CO_CODE'
+        AND EXISTS (SELECT 1 FROM information_schema.columns t
+                     WHERE t.table_schema='public' AND t.table_name=c.table_name AND t.column_name='tenant_id')
+      GROUP BY c.table_name`,
+  );
+  for (const { table_name } of tables)
+    await owner.$executeRawUnsafe(
+      `DELETE FROM "${table_name}" WHERE tenant_id=$1 AND "CO_CODE"=$2`,
+      tenantId,
+      coCode,
+    );
 }

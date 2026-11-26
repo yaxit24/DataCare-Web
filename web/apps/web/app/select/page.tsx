@@ -49,6 +49,9 @@ export default function SelectPage() {
   const homeChoices = useRef<{ locations: Location[]; years: string[] } | null>(null);
   const [choicesLoading, setChoicesLoading] = useState(false);
   const focusAfterLoad = useRef(false);
+  // The first load already chose the home location and year; re-applying them once the boxes are enabled would
+  // overwrite a choice made in between.
+  const lastChoicesCo = useRef<string | null>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -94,7 +97,10 @@ export default function SelectPage() {
   // MS_OPNCOMP.cs:487-493: choosing a company loads its own locations and years (newest year first).
   useEffect(() => {
     if (!ready || !current) return;
+    const firstRun = lastChoicesCo.current === null;
+    lastChoicesCo.current = coCode;
     if (coCode === current.coCode) {
+      if (firstRun) return;
       const home = homeChoices.current;
       if (home) {
         setLocations(home.locations);

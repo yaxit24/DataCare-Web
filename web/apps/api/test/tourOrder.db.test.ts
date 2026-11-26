@@ -38,6 +38,7 @@ databaseDescribe('TR_SALE_ORD Tour Order lifecycle parity', () => {
     'SL_ORD_DETL',
     'SL_ORD_DATA',
     'TEMP_BOOK_DATA',
+    'BOOK_DETL',
     'BOOK_DATA',
     'ITEM_MAST',
     'AC_MAST',
@@ -70,6 +71,11 @@ databaseDescribe('TR_SALE_ORD Tour Order lifecycle parity', () => {
       tenantId,
       CO,
       LC,
+    );
+    // Desktop legs 01-06 join BOOK_DETL slot 1 for the cash account and book columns (Ac_Ledr.cs:30-40, Ac_Rojmel.cs:11-21).
+    await exec(
+      `INSERT INTO "BOOK_DETL"(tenant_id,"CO_CODE","LC_CODE","CO_BOOK","SR_NO","AC_CODE","BOOK_SNAME","MAIN_BOOK","BOOK_INOUT","DATA_TYPE") VALUES($1,'01','01','510',1,'CASH','TUROD','TOUR ORDER','I','A')`,
+      tenantId,
     );
     await exec(
       `INSERT INTO "AC_MAST"(tenant_id,"CO_CODE","LC_CODE","AC_CODE","AC_NAME")

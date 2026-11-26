@@ -34,8 +34,8 @@ import {
 import { todayLocal } from '../../../../lib/localDate';
 import { carryPurchaseHeader, carryUnmanaged } from '../../../../lib/purchaseCarry';
 import HallmarkPurchasePage from '../purchase-hm/page';
-import { useZoomOpen } from '../../../../lib/useZoomOpen';
 import { openDocument } from '../../../../lib/openDocument';
+import { useVoucherZoom } from '../../../../lib/voucherZoom';
 
 interface Line {
   itCode: string;
@@ -441,13 +441,18 @@ function PlainPurchasePage() {
     setTender({});
   }
 
+  useVoucherZoom({
+    ready: Boolean(coBook && coYear && lcCode),
+    book: coBook,
+    setBook: setCoBook,
+    load: (vchNo, book) => openPurchase(vchNo, book),
+  });
+
   async function loadPurchase() {
     await openPurchase(voucherLookup);
   }
 
   /** Open a saved purchase of the selected book; resolves whether it loaded. */
-  useZoomOpen({ coBook, setCoBook, ready: Boolean(coYear && lcCode), open: openPurchase });
-
   async function openPurchase(requested: string, book = coBook): Promise<boolean> {
     const vchNo = requested.trim();
     if (!vchNo || !book) return false;

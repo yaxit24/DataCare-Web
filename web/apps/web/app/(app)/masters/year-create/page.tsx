@@ -1,7 +1,9 @@
 'use client';
 import { useCallback, useEffect, useId, useMemo, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { fiscalYearDates, formatDesktopDate } from '@datacare/core';
 import { get, post, ApiError } from '../../../../lib/api';
+import { useScreenEscape, type ScreenKeyEvent } from '../../../../lib/screenEscape';
 
 /** Year Create (desktop MS_YEAR, YEAR_MAST): create a financial year.
  *
@@ -24,6 +26,7 @@ const errorText = (e: unknown): string =>
 
 export default function YearCreatePage() {
   const id = useId();
+  const router = useRouter();
   const [years, setYears] = useState<Year[]>([]);
   const [coYear, setCoYear] = useState('');
   const [opDate, setOpDate] = useState('');
@@ -63,8 +66,27 @@ export default function YearCreatePage() {
     }
   }
 
+  // Keys of MS_YEAR: Esc closes the form (MS_YEAR_KeyDown, MS_YEAR.cs:951-957); Enter on a field goes to the next one
+  // (SendKeys "{tab}", :1069-1137), and on the year code only when it is not blank (:1083). The order is the tab order
+  // Year Code 0, Start Month 1, Opening Date 2, Closing Date 3, then the buttons.
+  const order = [`${id}-year`, `${id}-month`, `${id}-op`, `${id}-cl`, `${id}-create`];
+  const onScreenKeyDown = (event: ScreenKeyEvent) => {
+    if (event.defaultPrevented) return;
+    if (event.key === 'Escape') {
+      event.preventDefault();
+      router.back();
+      return;
+    }
+    const at = order.indexOf((event.target as HTMLElement | null)?.id ?? '');
+    if (event.key !== 'Enter' || at < 0 || at === order.length - 1) return;
+    if (at === 0 && !coYear.trim()) return;
+    event.preventDefault();
+    document.getElementById(order[at + 1]!)?.focus();
+  };
+  const screenRef = useScreenEscape<HTMLDivElement>(onScreenKeyDown);
+
   return (
-    <div>
+    <div ref={screenRef} onKeyDown={(event) => onScreenKeyDown(event as unknown as ScreenKeyEvent)}>
       <h1>
         Year Create <span className="muted">— financial year</span>
       </h1>
@@ -95,6 +117,7 @@ export default function YearCreatePage() {
               onChange={(e) => setCoYear(e.target.value)}
               placeholder="e.g. 2027-2028"
               maxLength={9}
+              autoFocus
             />
           </div>
           <div className="field">
@@ -128,6 +151,7 @@ export default function YearCreatePage() {
           </div>
           <div className="field" style={{ alignSelf: 'end' }}>
             <button
+              id={`${id}-create`}
               type="button"
               className="primary"
               disabled={busy || !coYear.trim() || !!preview.error}

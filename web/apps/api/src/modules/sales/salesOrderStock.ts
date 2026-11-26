@@ -113,6 +113,9 @@ export function orderStockWrites(
   return rows.length ? [{ table: 'MAIN_STOCK', rows }] : [];
 }
 
-/** The old metal '+' rows (SR_NO 1, TR_TYPE 'P') are rebuilt by every save, so they never block an edit. */
+/** Order_Stk rows are deleted and rebuilt on save and deleted with the voucher (TR_SALE_ORD.cs:9564-9566, :9728). */
 export const isRebuiltOrderStockRow = (row: Row): boolean =>
-  Number(row.SR_NO) === 1 && String(row.TR_TYPE ?? '').trim() === 'P';
+  (Number(row.SR_NO) === 1 && String(row.TR_TYPE ?? '').trim() === 'P') ||
+  (Number(row.SR_NO) === 2 &&
+    String(row.TR_TYPE ?? '').trim() === 'O' &&
+    String(row.ITM_SIGN ?? '').trim() === '-');

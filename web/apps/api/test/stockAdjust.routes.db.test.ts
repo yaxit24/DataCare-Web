@@ -265,7 +265,7 @@ const SRNO = 100312000011;
 
   it('runs the whole lifecycle: signed register, I/O stock rows, the tag lot, reopen, edit, print, delete', async () => {
     await exec(
-      `INSERT INTO "CO_SET_NEW"(tenant_id,"CO_CODE","PURC_LOT") VALUES ($1,'01','Y')`,
+      `UPDATE "CO_SET_NEW" SET "PURC_LOT"='Y' WHERE tenant_id=$1 AND "CO_CODE"='01'`,
       tenantId,
     );
     const created = await request('adjuster', 'POST', '/stock/stock-adjust', {
@@ -458,7 +458,10 @@ const SRNO = 100312000011;
       OTHER,
     );
     expect(sentinel).toEqual([{ VCH_DESC: 'SENTINEL' }]);
-    await exec(`DELETE FROM "CO_SET_NEW" WHERE tenant_id=$1`, tenantId);
+    await exec(
+      `UPDATE "CO_SET_NEW" SET "PURC_LOT"='N' WHERE tenant_id=$1 AND "CO_CODE"='01'`,
+      tenantId,
+    );
   });
 
   it('a + tag line adds the tag’s stock without taking the instance out, and its delete gives nothing back', async () => {

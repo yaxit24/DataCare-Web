@@ -27,8 +27,6 @@ const blocked = {
     'Full Account apply is unavailable: the complete Ac_Ledr, Ac_Rojmel and Ac_Tax builder graph after AcRefresh is not yet proved.',
   stock:
     'Full Stock apply is unavailable: the remaining Ac_Stock builder graph after StockRefresh is not yet proved.',
-  image:
-    'Image Data apply is unavailable: TAG_IMAGE_DATA is committed schema, while legacy MOB_IMAGE, IMG_IMPORT and CONV_IMAGE semantics are unproved and runtime schema mutation is forbidden.',
   oldField:
     'Old Field is classification-pending; its legacy statements must be classified as web repair, historical anomaly, or migration-loader work before apply is safe.',
 } as const;
@@ -259,27 +257,47 @@ registerRepair({
   },
 });
 
+/**
+ * Image Data (`BtnImgData_Click`, `MS_UPDATE.cs:8825-9038`), class (b) of D-REF-3. Every statement of the desktop
+ * handler is schema work in a side database: it creates NextImage when its file is missing (:8941-8955), creates
+ * TAG_IMAGE_DATA (:8966, key CO_CODE/LC_CODE/TAG_NO/VCH_SRNO, IMAGE_TYPE) and adds the MOB_IMAGE, IMG_IMPORT and
+ * CONV_IMAGE columns (:8972, :8986, :9006), then defaults the two flags to 'N' (:8998, :9033). It copies no image bytes
+ * and touches no business row. The web keeps tag image metadata in the committed, tenant-scoped TAG_IMAGE_DATA and
+ * the bytes in ENTITY_IMAGE; its schema belongs to the migrations and runtime DDL is forbidden, so there is nothing
+ * for the button to build. The preview proves that on the live database (the committed table has the key columns the
+ * desktop creates) and reports no row change, which is the desktop's own outcome on a database that is already
+ * current ("No records need adjustment").
+ */
+const IMAGE_KEY_COLUMNS = ['CO_CODE', 'LC_CODE', 'TAG_NO', 'VCH_SRNO', 'IMAGE_TYPE'] as const;
+
 registerRepair({
   id: 'data-refresh-image-data',
   title: 'Image Data',
   description:
-    'Classifies the committed web image architecture. It performs no runtime DDL and copies no bytes.',
+    'The desktop action only creates the image table and its flag columns; the web schema is owned by the migrations, so this verifies that the committed tag image table is in place and changes no row.',
   desktopSource: 'MS_UPDATE.cs:8825-9038',
-  risk: 'danger',
-  applyAvailable: false,
-  blockedReason: blocked.image,
+  risk: 'low',
+  applyAvailable: true,
   completionText: 'Image Data Carete Process Complete.',
-  tables: ['TAG_IMAGE_DATA', 'ENTITY_IMAGE'],
-  async preview() {
+  tables: ['TAG_IMAGE_DATA'],
+  async preview(tx) {
+    const present: Array<{ column_name: string }> = await tx.$queryRawUnsafe(
+      `SELECT column_name FROM information_schema.columns
+        WHERE table_schema='public' AND table_name='TAG_IMAGE_DATA'`,
+    );
+    const have = new Set(present.map((row) => row.column_name));
+    const missing = IMAGE_KEY_COLUMNS.filter((column) => !have.has(column));
     const samples = [
-      'TAG_IMAGE_DATA keeps committed tenant/company/location/tag/serial metadata identity.',
-      'ENTITY_IMAGE keeps committed tenant/company/location/entity/key/instance bytes and metadata.',
-      'Legacy MOB_IMAGE, IMG_IMPORT and CONV_IMAGE flags have no proven web semantics.',
-      blocked.image,
+      missing.length
+        ? `TAG_IMAGE_DATA is missing ${missing.join(', ')}: a migration must add it (runtime DDL is not run)`
+        : `TAG_IMAGE_DATA has ${IMAGE_KEY_COLUMNS.join(', ')} (the desktop table of MS_UPDATE.cs:8966): nothing to create`,
+      'MOB_IMAGE, IMG_IMPORT and CONV_IMAGE are desktop side-database flags; the web has no column or reader for them.',
     ];
-    return { diffs: [], samples, candidateFingerprint: fingerprint(samples) };
+    return { diffs: [], samples, candidateFingerprint: fingerprint({ missing, samples }) };
   },
-  apply: refuseApply(blocked.image),
+  async apply() {
+    return [];
+  },
 });
 
 registerRepair({

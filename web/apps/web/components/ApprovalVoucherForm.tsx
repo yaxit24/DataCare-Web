@@ -6,7 +6,6 @@ import { ApiError, del, get, postCommand, put } from '../lib/api';
 import { useIdempotencyKey } from '../lib/idempotencyKey';
 import { todayLocal } from '../lib/localDate';
 import { useBusinessScope } from './BusinessScope';
-import { useZoomOpen } from '../lib/useZoomOpen';
 import { BookSelect } from './BookSelect';
 import { LookupPicker } from './LookupPicker';
 import { useSubDetail } from './SubDetailGrid';
@@ -20,6 +19,7 @@ import {
   type ApprovalExtendedField,
   type ApprovalLine,
 } from './ApprovalGrid';
+import { useVoucherZoom } from '../lib/voucherZoom';
 
 interface ApprovalView {
   voucherNo: string;
@@ -126,17 +126,18 @@ export default function ApprovalVoucherForm({
     setStatus({ kind: 'ok', text: `Loaded voucher ${view.voucherNo}` });
   };
 
-  // Zoom from a report row: ?vchNo=&coBook= opens that voucher in that book.
-  useZoomOpen({
-    coBook,
-    setCoBook,
+  useVoucherZoom({
     ready: Boolean(coYear && coBook),
-    open: (no) => loadVoucher(String(no)),
+    book: coBook,
+    setBook: setCoBook,
+    load: (vchNo) => {
+      setVoucherNo(vchNo);
+      return loadVoucher(vchNo);
+    },
   });
 
   async function loadVoucher(requested?: string) {
     const number = (requested ?? voucherNo).trim();
-    if (requested !== undefined) setVoucherNo(number);
     if (!number) {
       setStatus({ kind: 'err', text: 'Please Insert VchNo and try' });
       return;

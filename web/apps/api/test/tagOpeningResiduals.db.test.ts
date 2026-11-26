@@ -125,9 +125,7 @@ describe.runIf(RUN)('WP-32 tag opening residual HTTP contracts', () => {
   };
   const seed = async (tenant: string) => {
     await seedCompany(runtime, tenant, '01');
-    // CO_SET_NEW is the desktop's second configuration surface (MS_OPNCOMP.cs:949); only tenant_id and
-    // CO_CODE are NOT NULL, so a blank row is the honest "installer never opened the settings" state.
-    await exec(`INSERT INTO "CO_SET_NEW"(tenant_id,"CO_CODE") VALUES ($1,'01')`, tenant);
+    // seedCompany now supplies the installer CO_SET_NEW row.
     // Same item and book fixture structure as tagOpeningRoundTrip/tagOpeningStock.
     await exec(
       `UPDATE "CO_SET" SET "LBR_TYPE"='N',"LBR_ROF"=2,"TAX_ROF"=2,"ITM_RATE_ROF"=2

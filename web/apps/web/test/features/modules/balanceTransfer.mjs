@@ -1,6 +1,29 @@
 import assert from 'node:assert/strict';
 import { FIXTURE_MANIFEST, USERS } from '../fixtures/catalogue.mjs';
 import { escLeavesWithNoFocus } from '../harness.mjs';
+import {
+  as,
+  C,
+  notApplicable,
+  PATH,
+  CONFIRM,
+  COMPLETE,
+  NO_YEAR,
+  LITE,
+  NON_LITE,
+  PARTY,
+  ITEM,
+  button,
+  exec,
+  sessionYear,
+  withNextYears,
+  openScreen,
+  runDataset,
+  seedParty,
+  dropParty,
+} from './balanceTransferShared.mjs';
+import { nextYearCases } from './balanceTransferNextYear.mjs';
+import { faultCases } from './balanceTransferFaults.mjs';
 
 /**
  * Feature: Company → Balance TrFr (desktop BtmSchm, web /company/balance-transfer). Case ids follow the frozen list
@@ -19,194 +42,6 @@ import { escLeavesWithNoFocus } from '../harness.mjs';
  * Web differences on purpose (gap G248): the Transfer Year is not typed; with no later year the buttons are disabled;
  * Cancel keeps the Transfer Year; Tag Stock, Sales Order and Approval are refused pending owner decisions Q1/Q8.
  */
-const as = (user, slot) => ({
-  user,
-  slot,
-  get password() {
-    return process.env.FEATURE_E2E_PASSWORD;
-  },
-});
-const C = (id, group, kind, source, run, extra = {}) => ({
-  id: `balance-transfer.${id}`,
-  group,
-  kind,
-  source,
-  applicable: true,
-  requiredEvidence:
-    kind === 'mutation'
-      ? ['browser', 'expected', 'database', 'downstream']
-      : kind === 'refusal'
-        ? ['browser', 'expected', 'database']
-        : kind === 'output'
-          ? ['browser', 'expected', 'output']
-          : ['browser', 'expected'],
-  run,
-  ...extra,
-});
-const blockedCase = (name, group, reason) => ({
-  ...C(name, group, 'read-only', `cases.md ${name}`, async () => ({})),
-  blocked: reason,
-});
-const notApplicable = (name, group, source, reason) => ({
-  ...C(`${name}.not-applicable`, group, 'read-only', source, async () => ({})),
-  applicable: false,
-  reason,
-});
-
-const PATH = '/company/balance-transfer';
-const CONFIRM = 'Are You Sure To Data Transfer to Next Year ?';
-const COMPLETE = 'Process Are Complete....';
-const NO_YEAR = 'There Are Not Found New Year Please Creat New Year And Try....';
-const LITE = ['Ac Balance', 'Item Stock', 'Tag Stock', 'Sales Order', 'Approval'];
-const NON_LITE = [
-  'Scheme',
-  'Dhiran',
-  'Loan',
-  'Bill Os Trfr',
-  'Time Ldr Trfr',
-  'Jadtar Trfr',
-  'Bill Orna Isu',
-  'Vp Trfr',
-  'Bullion Trfr',
-  'Order Traking',
-  'Reparing Trfr',
-  'Item Lot Trfr',
-  'Tag Idtl Trfr',
-  'Mfg Trfr',
-];
-const PARTY = { code: 'E2EBT1', name: 'E2E BALANCE TRFR PARTY' };
-const ITEM = { code: 'E2EBI', name: 'E2E BT ITEM' };
-
-const isApi = (r, method, prefix) =>
-  r.request().method() === method && new URL(r.url()).pathname.startsWith(`/api${prefix}`);
-const button = (page, name) => page.getByRole('button', { name, exact: true });
-const exec = (ctx, sql, ...params) => ctx.owner.$executeRawUnsafe(sql, ctx.tenantId, ...params);
-const sessionYear = async (page) => (await (await page.request.get('/api/me')).json()).coYear;
-
-/** The year after `coYear` in the same spelling ('2026-2027' → '2027-2028', '2026-27' → '2027-28'). */
-function followingYear(coYear) {
-  const [a, b] = String(coYear).split('-');
-  const bump = (s) =>
-    String(Number(s) + 1)
-      .padStart(s.length, '0')
-      .slice(-s.length);
-  return `${bump(a)}-${bump(b)}`;
-}
-
-/**
- * Seeds the Transfer Year (and optionally the one after) in YEAR_MAST for the case and removes it, and every row the
- * carry wrote into it, afterwards. YEAR_MAST is a master: the carry under test is always run through the screen.
- */
-async function withNextYears(ctx, page, count, body) {
-  const current = await sessionYear(page);
-  const [cur] = await ctx.rows(
-    `SELECT "CL_DATE"::date::text cl FROM "YEAR_MAST" WHERE tenant_id=$1 AND "CO_CODE"='01' AND "CO_YEAR"=$2`,
-    current,
-  );
-  const years = [];
-  let year = current;
-  let op = new Date(`${cur.cl}T00:00:00Z`);
-  for (let i = 0; i < count; i += 1) {
-    year = followingYear(year);
-    op = new Date(op.getTime() + 86_400_000);
-    const cl = new Date(op);
-    cl.setUTCFullYear(cl.getUTCFullYear() + 1);
-    cl.setUTCDate(cl.getUTCDate() - 1);
-    const opIso = op.toISOString().slice(0, 10);
-    await exec(
-      ctx,
-      `INSERT INTO "YEAR_MAST"(tenant_id,"CO_CODE","CO_YEAR","OP_DATE","CL_DATE") VALUES ($1,'01',$2,$3,$4::timestamp)`,
-      year,
-      opIso,
-      cl.toISOString().slice(0, 10),
-    );
-    years.push({ year, opDate: opIso });
-    op = cl;
-  }
-  try {
-    return await body({ current, clDate: cur.cl, next: years });
-  } finally {
-    for (const y of years) {
-      for (const table of ['OP_DATA', 'ITM_OPBL'])
-        await exec(ctx, `DELETE FROM "${table}" WHERE tenant_id=$1 AND "CO_YEAR"=$2`, y.year);
-      await exec(
-        ctx,
-        `DELETE FROM "AC_DATA" WHERE tenant_id=$1 AND "CO_YEAR"=$2 AND "CO_BOOK"='000'`,
-        y.year,
-      );
-      await exec(ctx, `DELETE FROM "YEAR_MAST" WHERE tenant_id=$1 AND "CO_YEAR"=$2`, y.year);
-    }
-  }
-}
-
-async function openScreen(page) {
-  await Promise.all([
-    page.waitForResponse((r) => isApi(r, 'GET', '/balance-transfer')),
-    page.goto(PATH),
-  ]);
-  await page.getByRole('heading', { name: 'Balance TrFr', exact: true }).waitFor();
-}
-
-/** Click a dataset button, answer the confirmation, return the dialog text and the response. */
-async function runDataset(page, label, accept = true) {
-  const dialogs = [];
-  page.removeAllListeners('dialog');
-  page.on('dialog', (dialog) => {
-    dialogs.push(dialog.message());
-    void (accept ? dialog.accept() : dialog.dismiss());
-  });
-  try {
-    if (!accept) {
-      await button(page, label).click();
-      await page.waitForTimeout(750);
-      return { dialogs, response: null };
-    }
-    const [response] = await Promise.all([
-      page.waitForResponse((r) => isApi(r, 'POST', '/balance-transfer/')),
-      button(page, label).click(),
-    ]);
-    return { dialogs, response };
-  } finally {
-    page.removeAllListeners('dialog');
-    page.on('dialog', (dialog) => void dialog.accept());
-  }
-}
-
-/** A party with two year-N vouchers before the closing date and one after it (cases.md ac.create.footprint). */
-async function seedParty(ctx, current, clDate) {
-  await exec(
-    ctx,
-    `INSERT INTO "AC_MAST"(tenant_id,"CO_CODE","LC_CODE","AC_CODE","AC_NAME","AC_MAIN_GR") VALUES ($1,'01','01',$2,$3,'1')`,
-    PARTY.code,
-    PARTY.name,
-  );
-  const after = new Date(`${clDate}T00:00:00Z`);
-  after.setUTCDate(after.getUTCDate() + 1);
-  for (const [i, cr, dr, date] of [
-    [1, 5000, 0, `${current.slice(0, 4)}-06-01`],
-    [2, 0, 1200.5, `${current.slice(0, 4)}-07-10`],
-    [3, 0, 300.25, clDate],
-    [4, 999, 0, after.toISOString().slice(0, 10)],
-  ])
-    await exec(
-      ctx,
-      `INSERT INTO "AC_DATA"(tenant_id,"CO_CODE","LC_CODE","CO_YEAR","CO_BOOK","VCH_NO","VCH_DATE","AC_CODE","CR_AMT","DR_AMT","IT_TYPE","DATA_TYPE","VCH_TYPE","LEDR_KEY")
-       VALUES ($1,'01','01',$2,'JV',$3,$4::date,$5,$6,$7,'A','A','JV',$8)`,
-      current,
-      `BT${i}`,
-      date,
-      PARTY.code,
-      cr,
-      dr,
-      `E2E-BT-${i}`,
-    );
-}
-async function dropParty(ctx) {
-  await exec(ctx, `DELETE FROM "AC_DATA" WHERE tenant_id=$1 AND "AC_CODE"=$2`, PARTY.code);
-  await exec(ctx, `DELETE FROM "OP_DATA" WHERE tenant_id=$1 AND "AC_CODE"=$2`, PARTY.code);
-  await exec(ctx, `DELETE FROM "AC_MAST" WHERE tenant_id=$1 AND "AC_CODE"=$2`, PARTY.code);
-}
-
 export const balanceTransfer = {
   feature: 'balance-transfer',
   title: 'Company → Balance TrFr (BtmSchm)',
@@ -218,6 +53,9 @@ export const balanceTransfer = {
     'web/apps/api/src/modules/ops/balanceTransferRules.ts',
     'web/apps/api/src/routes/balanceTransfer.ts',
     'web/apps/web/test/features/modules/balanceTransfer.mjs',
+    'web/apps/web/test/features/modules/balanceTransferShared.mjs',
+    'web/apps/web/test/features/modules/balanceTransferNextYear.mjs',
+    'web/apps/web/test/features/modules/balanceTransferFaults.mjs',
   ],
   fixtureManifest: FIXTURE_MANIFEST,
   settingsManifest: {
@@ -763,52 +601,6 @@ export const balanceTransfer = {
         return { observation: `left to ${left.leftTo}`, expected: 'the page closes' };
       },
     ),
-    // Executed at the database layer (api/test/balanceTransfer.db.test.ts) and not repeated through the screen:
-    blockedCase(
-      'reopen.party-opening-screen-shows-carry',
-      'T08',
-      'Needs a browser switch of the session year to the Transfer Year; the read of the carried row by the Party Opening module (getPartyOpening) passes in balanceTransfer.db.test.ts.',
-    ),
-    blockedCase(
-      'reopen.item-opening-screen-shows-carry',
-      'T08',
-      'Needs a browser switch of the session year to the Transfer Year; ITM_OPBL of that year is what the Item Opening module reads (balanceTransfer.db.test.ts item.create.footprint).',
-    ),
-    blockedCase(
-      'identity.ledger-opening-line-party',
-      'T16',
-      'Needs a browser switch of the session year; the opening leg (3499.25 Cr, counted once) is asserted in ac.create.footprint and balanceTransfer.db.test.ts.',
-    ),
-    blockedCase(
-      'identity.trial-balance-opening-column',
-      'T16',
-      'Needs a browser switch of the session year; the carried totals are asserted in balanceTransfer.db.test.ts identity.party-closing-equals-opening.',
-    ),
-    blockedCase(
-      'journey.party-carry-then-year-n1-business',
-      'T18',
-      'Needs vouchers posted in the Transfer Year through the screens after a session-year switch; not built in this change.',
-    ),
-    blockedCase(
-      'journey.item-carry-then-issue',
-      'T18',
-      'Not built: needs an issue posted in the Transfer Year after a session-year switch. Q9 is decided (stock reads MAIN_STOCK of every year, the carry changes no balance: balanceTransfer.db.test.ts).',
-    ),
-    blockedCase(
-      'rights.create-right-required',
-      'T11',
-      'No fixture user holds the menu with view-only or update-only rights; the route policy (every write = Create, catalog C-----) is pinned by routePolicy.test.ts.',
-    ),
-    blockedCase(
-      'retry.lost-ack-after-commit',
-      'T13',
-      'A run replaces its dataset, so a replay is the same rows (balanceTransfer.db.test.ts rerun-unchanged-is-identical); the dropped-response browser fault is not built.',
-    ),
-    blockedCase(
-      'config.new-year-created-after-load',
-      'T15',
-      'Needs Year Create (WP-22, another machine) in a second tab.',
-    ),
     notApplicable(
       'children',
       'T05',
@@ -820,16 +612,6 @@ export const balanceTransfer = {
       'T10',
       'BtmSchm.cs:2720-2723 BtnDelete_Click has an empty body',
       'the desktop form deletes nothing; a re-run replaces (rerun.ac-balance-replaces)',
-    ),
-    blockedCase(
-      'concurrency.same-button-twice',
-      'T12',
-      'Two simultaneous runs need two browser sessions released at the same instant; run at the database layer (20 rounds, balanceTransfer.db.test.ts): one row per account and type, no error.',
-    ),
-    blockedCase(
-      'rollback.ac-balance-after-first-table',
-      'T14',
-      'The fault is injected by a database trigger in balanceTransfer.db.test.ts (Ac Balance and Item Stock roll back whole); the browser fault hook is not built.',
     ),
     notApplicable(
       'lookup',
@@ -849,5 +631,7 @@ export const balanceTransfer = {
       'BtmSchm.cs:2840 copies missing AC_MAST / item masters into the next-year database',
       'the web keeps one database across years (D7); the masters already exist',
     ),
+    ...nextYearCases,
+    ...faultCases,
   ],
 };

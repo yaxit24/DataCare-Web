@@ -170,8 +170,15 @@ type Cookie = string;
         response.json().rows.map((r: { prCode: string; yn: string }) => `${r.prCode}${r.yn}`),
       ).toEqual(['BGY', 'CHN', 'RGN']);
       response = await request(adminCookie, 'GET', '/masters/auto-item/groups?q=gold');
+      // The group help lists every GROUP_MAST row whose name has the text, by name (MS_AUTO_ITEM.cs:3432-3493),
+      // so the installer groups seeded into the company (MS_YEAR.cs:1555-1592) appear beside the test's G22.
       expect(response.json()).toEqual([
+        { code: '916', name: '916 GOLD ORNA', type: 'G', trade: 'GO', hsn: '' },
+        { code: 'FGL', name: 'FINE GOLD', type: 'G', trade: 'GO', hsn: '' },
         { code: 'G22', name: 'GOLD 22K', type: 'G', trade: 'GO', hsn: '7113' },
+        { code: 'GO', name: 'GOLD ORNAMENTS', type: 'G', trade: 'GO', hsn: '' },
+        { code: 'OG', name: 'OLD GOLD', type: 'G', trade: 'OG', hsn: '' },
+        { code: 'ORD', name: 'ORDER GOLD', type: 'G', trade: 'GO', hsn: '' },
       ]);
     });
 

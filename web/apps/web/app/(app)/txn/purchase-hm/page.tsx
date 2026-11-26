@@ -1,5 +1,5 @@
 'use client';
-import { useZoomOpen } from '../../../../lib/useZoomOpen';
+import { useVoucherZoom } from '../../../../lib/voucherZoom';
 import { useEffect, useState } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
 import { del, get, post, put, ApiError } from '../../../../lib/api';
@@ -439,7 +439,13 @@ export default function HallmarkPurchasePage() {
     sub.reset();
   }
 
-  useZoomOpen({ coBook, setCoBook, ready: Boolean(coYear && lcCode), open: loadVoucher });
+  // Zoom from a report row (Tag Stock, HuId Report): ?vchNo=&coBook= opens that voucher in that book.
+  useVoucherZoom({
+    ready: Boolean(coBook && coYear && lcCode),
+    book: coBook,
+    setBook: setCoBook,
+    load: (vchNo) => loadVoucher(vchNo),
+  });
 
   async function loadVoucher(requested?: string) {
     const number = (requested ?? voucherLookup).trim();

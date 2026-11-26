@@ -7,6 +7,7 @@ const ISSUER = 'datacare-api';
 const AUDIENCE = 'datacare-web';
 
 export interface SessionClaims extends JWTPayload {
+  dataType?: string;
   sub: string;
   tenantId: string;
   /** Company against which credentials were verified. */
@@ -24,6 +25,7 @@ export interface SessionClaims extends JWTPayload {
 }
 
 export interface RefreshClaims extends JWTPayload {
+  dataType?: string;
   sub: string;
   tenantId: string;
   sid: string;

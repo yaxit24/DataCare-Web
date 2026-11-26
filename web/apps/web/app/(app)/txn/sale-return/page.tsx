@@ -26,7 +26,7 @@ import {
   GridModeToggle,
 } from '../../../../components/ExtendedGrid';
 import { openDocument } from '../../../../lib/openDocument';
-import { useZoomOpen } from '../../../../lib/useZoomOpen';
+import { useVoucherZoom } from '../../../../lib/voucherZoom';
 
 interface Line {
   itCode: string;
@@ -324,12 +324,14 @@ function LegacySaleReturnForm() {
     }
   }
 
-  // Zoom from a report row: ?vchNo=&coBook= opens that return in that book.
-  useZoomOpen({
-    coBook,
-    setCoBook,
+  useVoucherZoom({
     ready: Boolean(coYear && coBook),
-    open: (no) => openSaved(String(no)),
+    book: coBook,
+    setBook: setCoBook,
+    load: (vchNo) => {
+      setOpenVch(vchNo);
+      return openSaved(vchNo);
+    },
   });
 
   async function openSaved(requested?: string) {

@@ -14,7 +14,6 @@ import { useRouter } from 'next/navigation';
 import { desktopGlobalFormKeyActions, FormKeyHints } from '../../../../components/FormKeys';
 import { del, get, post, postCommand, put, ApiError } from '../../../../lib/api';
 import { useIdempotencyKey } from '../../../../lib/idempotencyKey';
-import { useZoomOpen } from '../../../../lib/useZoomOpen';
 import { LookupPicker } from '../../../../components/LookupPicker';
 import { VoucherList } from '../../../../components/VoucherList';
 import { useVoucherNumberKeys, VoucherNumberNote } from '../../../../components/VoucherNumberKeys';
@@ -25,6 +24,7 @@ import { ParityContainmentFieldset } from '../../../../components/ParityContainm
 import { parityContainmentMessage, parityContainmentRule } from '@datacare/core/containment';
 import { fineFor, tagKarigarBlock } from '@datacare/core';
 import { todayLocal } from '../../../../lib/localDate';
+import { useVoucherZoom } from '../../../../lib/voucherZoom';
 
 /** Tag Opening and Only Tag Entry (TR_TAG_OPBL): load opening barcoded stock. Tag No auto-generates (SRNO_MAST.TAG_SRNO)
  *  when left blank. Rich per-tag fields → BAR_DETL (Counter/Design/Size/LsWt/Lbr%/LbrRate/OthAmt).
@@ -482,17 +482,16 @@ export default function TagOpeningPage() {
     }
   }
 
+  useVoucherZoom({
+    ready: Boolean(coBook && coYear && lcCode),
+    book: coBook,
+    setBook: setCoBook,
+    load: (vchNo) => openVoucher(vchNo),
+  });
+
   async function loadVoucher() {
     await openVoucher(voucherLookup);
   }
-
-  // Zoom from a report row (Tag Stock, HuId Report): ?vchNo=&coBook= opens that voucher in that book.
-  useZoomOpen({
-    coBook,
-    setCoBook,
-    ready: Boolean(coYear && lcCode),
-    open: openVoucher,
-  });
 
   // N172 (G179): the voucher number box's F1, Up, Down and Enter (tVchNo_KeyDown, TR_TAG_OPBL.cs:11879).
   const numberKeys = useVoucherNumberKeys({
@@ -628,7 +627,7 @@ export default function TagOpeningPage() {
       setVoucherLookup(savedNo);
       setVersion(saved.version);
       setRes(saved);
-      command.renew();
+      if (!loadedVchNo) command.renew();
     } catch (error) {
       const message = errorText(error);
       setErr(message);

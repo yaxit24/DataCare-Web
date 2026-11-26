@@ -165,11 +165,15 @@ describe('route policy registry', () => {
     // (TR_TAG_OPBL.cs:11477-11551) and its Set default-file: 816 + 3 = 819.
     // WP-18 replaces the HuId Report's three-line builder screen with its own plugin and adds the three
     // export paths (CSV, XLSX, PDF) under the same Reports/HuId Report caption: 819 + 3 = 822.
-    // The Tag Stock Print window (RP_TAG.cs:8578, :8755) adds GET /reports/tag-stock/print: 822 + 1 = 823. The voucher
-    // zoom of Tag Stock and of the HuId Report (RP_TAG.cs:8917 DGV_DoubleClick) adds GET /reports/tag-stock/zoom and
-    // GET /reports/huid/zoom: 823 + 2 = 825; report metal defaults adds one = 826.
-    expect(routes).toHaveLength(826);
-    expect(new Set(routes.map((route) => `${route.method} ${route.path}`)).size).toBe(826);
+    // The Stock Report voucher zoom (GET /reports/stock-report/zoom, RP_STOCK.cs:5218): 822 + 5 = 827 (the zoom, the InOut picker list, the item ledger and its PDF, the printed summary).
+    // export paths (CSV, XLSX, PDF) under the same Reports/HuId Report caption: 819 + 3 = 822, + POST /auth/data-type = 823.
+    // Owner data-type decision adds POST /auth/data-type. [827 on main + 1 here = 828]
+    // Data Refresh (MS_UPDATE) adds its four Print-right routes under the caption: 828 + 4 = 832.
+    // Inventory residuals: the Tag Stock Print window (RP_TAG.cs:8578, :8755) adds GET /reports/tag-stock/print; the
+    // voucher zoom of Tag Stock and of the HuId Report (RP_TAG.cs:8917 DGV_DoubleClick) adds GET /reports/tag-stock/zoom
+    // and GET /reports/huid/zoom; report metal defaults adds one: 832 + 4 = 836.
+    expect(routes).toHaveLength(836);
+    expect(new Set(routes.map((route) => `${route.method} ${route.path}`)).size).toBe(836);
 
     const policies = routes.map((route) => ({
       ...route,
@@ -1153,5 +1157,45 @@ describe('device settings route policy', () => {
       adminOnly: false,
       businessScope: true,
     });
+  });
+});
+
+describe('desktop Print-right boundary of the Company utilities (G225)', () => {
+  it('reads Data Backup on the caption Print right, restore stays administrator-only (UT_BKP.cs:942-965, :1203)', () => {
+    expect(routePolicyFor('GET', '/backup')).toMatchObject({
+      form: 'Utilities/Backup',
+      action: 'print',
+      adminOnly: false,
+    });
+    expect(routePolicyFor('POST', '/backup/restore')).toMatchObject({
+      form: 'Utilities/Backup',
+      adminOnly: true,
+    });
+  });
+
+  it('puts the six Data Refresh actions on the caption Print right and leaves Data Repair administrator-only (MS_UPDATE.cs:2042-2050)', () => {
+    for (const [method, path] of [
+      ['GET', '/utilities/data-refresh/operations'],
+      ['POST', '/utilities/data-refresh/:id/preview'],
+      ['POST', '/utilities/data-refresh/:id/apply'],
+      ['GET', '/utilities/data-refresh/runs'],
+    ] as const)
+      expect(routePolicyFor(method, path), `${method} ${path}`).toMatchObject({
+        form: 'Utilities/Data Refresh',
+        action: 'print',
+        adminOnly: false,
+        businessScope: true,
+      });
+    expect(routePolicyFor('POST', '/utilities/data-repair/:id/apply')).toMatchObject({
+      adminOnly: true,
+    });
+  });
+
+  it('keeps Balance TrFr a create-right menu: every write is a create on Company/Balance TrFr (BtmSchm.cs:1944-1953)', () => {
+    for (const dataset of ['ac-balance', 'item-stock', 'tag-stock', 'sales-order', 'approval'])
+      expect(routePolicyFor('POST', `/balance-transfer/${dataset}`)).toMatchObject({
+        form: 'Company/Balance TrFr',
+        action: 'create',
+      });
   });
 });

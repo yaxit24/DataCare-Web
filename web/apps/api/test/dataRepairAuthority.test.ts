@@ -73,13 +73,8 @@ describe('data repair route policy', () => {
 describe('data repair preview authority metadata', () => {
   const scope = { tenantId: TENANT_ID, coCode: COMPANY, lcCode: LOCATION, coYear: YEAR };
 
-  it('publishes neutral confirmation and authority for the four preview-only operations', () => {
-    for (const id of [
-      'data-refresh-account',
-      'data-refresh-stock',
-      'data-refresh-image-data',
-      'data-refresh-old-field',
-    ]) {
+  it('publishes neutral confirmation and authority for the three preview-only operations', () => {
+    for (const id of ['data-refresh-account', 'data-refresh-stock', 'data-refresh-old-field']) {
       const operation = getRepair(id);
       expect(operation.applyAvailable, id).toBe(false);
       expect(confirmationFor(operation, scope), id).toBeNull();
@@ -112,10 +107,12 @@ function harness() {
     $executeRawUnsafe: vi.fn(async () => 1),
     $queryRawUnsafe: vi.fn(async (sqlValue: unknown, ...params: unknown[]) => {
       const sql = String(sqlValue);
+      if (sql.includes('"tenant_feature"')) return []; // dataTypes flag: default on
       if (sql.includes('FROM "auth_session"')) {
         return [
           {
             tenantId: TENANT_ID,
+            dataType: 'C',
             sessionId: SESSION_ID,
             loginName: LOGIN_NAME,
             loginCoCode: COMPANY,
@@ -149,6 +146,8 @@ function harness() {
             USER_DELETE: 'Y',
             USER_PRINT: 'Y',
             PASSWORD_RESET_REQUIRED: 'N',
+            allowed: 'ABC',
+            defaultType: 'C',
           },
         ];
       }

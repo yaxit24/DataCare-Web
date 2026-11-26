@@ -3,6 +3,7 @@ import { tableColumnsTx, tablesWithColumnsTx } from '../shared/schemaCatalog.js'
 
 /** Desktop voucher identity: tenant + company + location + fiscal year + book. */
 export interface VoucherScope {
+  dataType?: string;
   tenantId: string;
   coCode: string;
   lcCode: string;

@@ -1,3 +1,4 @@
+import { readFileSync } from 'node:fs';
 import { PrismaClient } from '@datacare/db';
 import type { FastifyInstance } from 'fastify';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
@@ -23,6 +24,12 @@ import { assertIsolatedTestDatabase } from './support/isolatedDatabase.js';
  * Web rules on purpose (gap G236): one transaction, versions, read-only opening on an opened party.
  */
 const enabled = process.env.RUN_DB_INTEGRITY_TESTS === '1';
+/** The installer's AC_GROUP rows in the order the group help returns them (AC_GR ascending). */
+const desktopGroupFixture = (
+  JSON.parse(
+    readFileSync(new URL('./fixtures/desktop-template/AC_GROUP.json', import.meta.url), 'utf8'),
+  ) as Array<{ AC_GR: string; AC_GR_NAME: string; AC_SUB_GR: string; AC_MAIN_GR: string }>
+).sort((a, b) => (a.AC_GR < b.AC_GR ? -1 : a.AC_GR > b.AC_GR ? 1 : 0));
 const tenantId = 'party-master-db';
 const otherTenant = 'party-master-db-other';
 const PASSWORD = 'Party-Master-Routes!2026';
@@ -117,7 +124,7 @@ type Cookie = string;
     };
     const full = (extra: Record<string, unknown> = {}) => ({
       name: "r'amesh shah",
-      group: '10',
+      group: '20',
       acType: 'B',
       mobile: '9876543210',
       phone: '0261-2345678',
@@ -170,11 +177,7 @@ type Cookie = string;
         `UPDATE "CO_MAST" SET "CO_STATE"='GUJARAT',"CO_STATE_CODE"='24' WHERE tenant_id=$1 AND "CO_CODE"='01'`,
         tenantId,
       );
-      await exec(
-        `INSERT INTO "AC_GROUP"(tenant_id,"CO_CODE","AC_GR","AC_GR_NAME","AC_SUB_GR","AC_MAIN_GR") VALUES
-         ($1,'01','10','SUNDRY DEBTORS','CURRENT ASSETS','A'),($1,'01','11','SUNDRY CREDITORS','CURRENT LIAB','L')`,
-        tenantId,
-      );
+      // seedCompany provides the 35 desktop installer account groups (Next24 AC_GROUP); 20 = SUNDRY DEBTORS.
       await exec(
         `INSERT INTO "STATE_MAST"(tenant_id,"STATE_CODE","STATE_NAME") VALUES ($1,'24','GUJARAT'),($1,'27','MAHARASHTRA')`,
         tenantId,
@@ -183,9 +186,9 @@ type Cookie = string;
       // an address to copy and a party of another tenant.
       await exec(
         `INSERT INTO "AC_MAST"(tenant_id,"CO_CODE","LC_CODE","AC_CODE","AC_NAME","AC_GR","AC_MOBILE","AC_SHORT") VALUES
-         ($1,'01','00','05','CASH IN HAND','10','',''),
-         ($1,'01','01','150','HIDDEN LOCATION CODE','10','',''),
-         ($1,'01','02','200201','OTHER LOCATION PARTY','10','9000000002','OLP')`,
+         ($1,'01','00','05','CASH IN HAND','20','',''),
+         ($1,'01','01','150','HIDDEN LOCATION CODE','20','',''),
+         ($1,'01','02','200201','OTHER LOCATION PARTY','20','9000000002','OLP')`,
         tenantId,
       );
       await exec(
@@ -261,8 +264,8 @@ type Cookie = string;
           lc: '01',
           code: '100201',
           name: 'RAMESH SHAH',
-          grp: '10',
-          main_gr: 'A',
+          grp: '20',
+          main_gr: '2',
           typ: 'B',
           mobile: '9876543210',
           phone: '0261-2345678',
@@ -338,7 +341,7 @@ type Cookie = string;
           `SELECT "LC_CODE" lc,"AC_NAME" name,"AC_GR" grp,"MAIN_USER" u FROM "AC_MAST_SRNO" WHERE tenant_id=$1 AND "AC_CODE"='100201'`,
           tenantId,
         ),
-      ).toEqual([{ lc: '01', name: 'RAMESH SHAH', grp: '10', u: ADMIN }]);
+      ).toEqual([{ lc: '01', name: 'RAMESH SHAH', grp: '20', u: ADMIN }]);
       const list = (await request(adminCookie, 'GET', '/masters/party-master')).json();
       expect(list.nextCode).toBe('100202');
       expect(list.rows).toContainEqual({
@@ -430,7 +433,7 @@ type Cookie = string;
       }
       // With BRANCH_ALL_AC_SHOW the mobile is required (:7671-7676).
       await exec(
-        `INSERT INTO "CO_SET_NEW"(tenant_id,"CO_CODE","BRANCH_ALL_AC_SHOW") VALUES ($1,'01','Y')`,
+        `UPDATE "CO_SET_NEW" SET "BRANCH_ALL_AC_SHOW"='Y' WHERE tenant_id=$1 AND "CO_CODE"='01'`,
         tenantId,
       );
       try {
@@ -448,7 +451,10 @@ type Cookie = string;
         expect(list.rows.map((r: { code: string }) => r.code)).toContain('200201');
         expect(list.rows[0].lc).toBe('00');
       } finally {
-        await exec(`DELETE FROM "CO_SET_NEW" WHERE tenant_id=$1`, tenantId);
+        await exec(
+          `UPDATE "CO_SET_NEW" SET "BRANCH_ALL_AC_SHOW"='N' WHERE tenant_id=$1 AND "CO_CODE"='01'`,
+          tenantId,
+        );
       }
       expect(await snapshot()).toEqual(before);
     });
@@ -534,10 +540,15 @@ type Cookie = string;
         account: { code: '200201', name: 'OTHER LOCATION PARTY' },
       });
       response = await request(adminCookie, 'GET', '/masters/party-master/help/groups');
-      expect(response.json().rows).toEqual([
-        { code: '10', name: 'SUNDRY DEBTORS', subGroup: 'CURRENT ASSETS', mainGroup: 'A' },
-        { code: '11', name: 'SUNDRY CREDITORS', subGroup: 'CURRENT LIAB', mainGroup: 'L' },
-      ]);
+      const groups = response.json().rows;
+      expect(groups).toEqual(
+        desktopGroupFixture.map((row) => ({
+          code: row.AC_GR,
+          name: row.AC_GR_NAME,
+          subGroup: row.AC_SUB_GR,
+          mainGroup: row.AC_MAIN_GR,
+        })),
+      );
       response = await request(adminCookie, 'GET', '/masters/party-master/help/names');
       const names = response.json().rows.map((r: { name: string }) => r.name);
       expect(names).toContain('RAMESH SHAH');
@@ -654,6 +665,71 @@ type Cookie = string;
       const printed = response.json().rows.map((r: { code: string }) => r.code);
       expect(printed).toContain('100202');
       expect(printed).not.toContain('100201');
+    });
+
+    it('a B session writes and shows its own inline opening; A keeps its own (MS_ACCT.cs:6522, :7861-7888)', async () => {
+      const switched = await app.inject({
+        method: 'POST',
+        url: '/auth/data-type',
+        headers: { cookie: adminCookie },
+        payload: { type: 'B' },
+      });
+      expect(switched.statusCode, switched.body).toBe(200);
+      const fresh = switched.headers['set-cookie'];
+      const jar = new Map(
+        adminCookie.split('; ').map((c) => [c.split('=', 1)[0]!, c] as [string, string]),
+      );
+      for (const part of Array.isArray(fresh) ? fresh : fresh ? [fresh] : []) {
+        const c = part.split(';', 1)[0]!;
+        jar.set(c.split('=', 1)[0]!, c);
+      }
+      const bCookie = [...jar.values()].join('; ');
+      const response = await request(bCookie, 'POST', '/masters/party-master', {
+        code: '100230',
+        ...full({ name: 'b party', short: 'bpt', mobile: '9876500030', gstNo: '' }),
+        opening: { amount: '700', sign: 'D', gold: '', goldSign: 'C', silver: '', silverSign: 'C' },
+      });
+      expect(response.statusCode, response.body).toBe(201);
+      const code = response.json().code as string;
+      const typed = (table: string) =>
+        query<Array<{ t: string }>>(
+          `SELECT DISTINCT "DATA_TYPE" t FROM "${table}" WHERE tenant_id=$1 AND "AC_CODE"=$2 AND "CO_BOOK"='000'`,
+          tenantId,
+          code,
+        );
+      expect(await typed('OP_DATA')).toEqual([{ t: 'B' }]);
+      expect(await typed('AC_DATA')).toEqual([{ t: 'B' }]);
+      // An A opening of the same party (Party Opening screen) is a separate row.
+      await exec(
+        `INSERT INTO "OP_DATA"(tenant_id,"CO_CODE","LC_CODE","CO_YEAR","CO_BOOK","VCH_NO","AC_CODE","OP_AMT","OP_SIGN","DATA_TYPE")
+         VALUES ($1,'01','01',$2,'000','00000',$3,55,'C','A')`,
+        tenantId,
+        YEAR,
+        code,
+      );
+      const asB = await request(bCookie, 'GET', `/masters/party-master/${code}`);
+      expect(asB.json().opening).toMatchObject({ amount: '700.00', sign: 'D' });
+      const asA = await request(
+        (await (async () => {
+          const back = await app.inject({
+            method: 'POST',
+            url: '/auth/data-type',
+            headers: { cookie: bCookie },
+            payload: { type: 'A' },
+          });
+          expect(back.statusCode, back.body).toBe(200);
+          const set = back.headers['set-cookie'];
+          for (const part of Array.isArray(set) ? set : set ? [set] : []) {
+            const c = part.split(';', 1)[0]!;
+            jar.set(c.split('=', 1)[0]!, c);
+          }
+          return [...jar.values()].join('; ');
+        })()) as string,
+        'GET',
+        `/masters/party-master/${code}`,
+      );
+      expect(asA.json().opening).toMatchObject({ amount: '55.00', sign: 'C' });
+      expect(await typed('OP_DATA')).toHaveLength(2);
     });
   },
 );
