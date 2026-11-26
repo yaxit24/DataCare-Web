@@ -408,6 +408,8 @@ export const tagOpening = {
         try {
           await openScreen(page);
           const chooser = page.getByLabel('Print file Name', { exact: true });
+          // The file list arrives with the screen's setup answer: wait for it before reading.
+          await chooser.locator('option').first().waitFor({ state: 'attached' });
           assert.deepEqual(await chooser.locator('option').allTextContents(), ['A32', 'Z32']);
           await chooser.selectOption('Z32');
           await page.getByRole('button', { name: 'Set', exact: true }).click();
