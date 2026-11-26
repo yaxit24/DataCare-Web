@@ -73,13 +73,8 @@ describe('data repair route policy', () => {
 describe('data repair preview authority metadata', () => {
   const scope = { tenantId: TENANT_ID, coCode: COMPANY, lcCode: LOCATION, coYear: YEAR };
 
-  it('publishes neutral confirmation and authority for the four preview-only operations', () => {
-    for (const id of [
-      'data-refresh-account',
-      'data-refresh-stock',
-      'data-refresh-image-data',
-      'data-refresh-old-field',
-    ]) {
+  it('publishes neutral confirmation and authority for the three preview-only operations', () => {
+    for (const id of ['data-refresh-account', 'data-refresh-stock', 'data-refresh-old-field']) {
       const operation = getRepair(id);
       expect(operation.applyAvailable, id).toBe(false);
       expect(confirmationFor(operation, scope), id).toBeNull();

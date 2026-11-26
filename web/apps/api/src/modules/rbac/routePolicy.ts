@@ -114,7 +114,16 @@ route('Utilities/Voucher Renumber', [
   'GET /utilities/vch-renumber/preview',
   'POST /utilities/vch-renumber/apply',
 ]);
-route('Utilities/Data Refresh', ['POST /utilities/data-refresh']);
+route('Utilities/Data Refresh', [
+  'POST /utilities/data-refresh',
+  // MS_UPDATE.cs:2042-2050, :2338, :2675: the six Data Refresh actions read USER_SET under the caption Data Refresh and
+  // need its Print right ("You Have No Print Rights....."). The owner chose one Print boundary for all six (G225).
+  // They run the same registered repairs as the admin-only Data Repair console, restricted to those six.
+  'GET /utilities/data-refresh/operations',
+  'POST /utilities/data-refresh/:id/preview',
+  'POST /utilities/data-refresh/:id/apply',
+  'GET /utilities/data-refresh/runs',
+]);
 // Desktop MS_UPDATE maintenance console. Preview and apply rewrite historical data, so the whole console is
 // admin-only in the registry rather than by handler comment, and the actions are classified for what they do:
 // preview reads, apply deletes/rewrites. See SCOPED_ADMIN_ONLY — unlike the other admin routes these must
@@ -1144,6 +1153,13 @@ route('Reports/Mfg Ledger', ['GET /reports/mfg-ledger', 'GET /reports/mfg-ledger
 route('Reports/Scheme Monthly Report', ['GET /reports/scheme-monthly']);
 
 const PRINT_ROUTES = new Set([
+  'GET /utilities/data-refresh/operations',
+  'POST /utilities/data-refresh/:id/preview',
+  'POST /utilities/data-refresh/:id/apply',
+  'GET /utilities/data-refresh/runs',
+  // UT_BKP.cs:942-965, :1203-1210: Backup reads USER_SET FRM_PRINT under the caption Data Backup and answers "You Have
+  // No Print Rights....." without it (G225). Restore stays admin-only and contained.
+  'GET /backup',
   'GET /years/print',
   'GET /masters/party-master/print',
   'GET /masters/employee-master/print',
@@ -1298,7 +1314,6 @@ const ADMIN_ONLY = new Set([
   'GET /audit',
   'GET /ops/metrics',
   'GET /ops/invariants',
-  'GET /backup',
   'POST /backup/restore',
   'GET /admin/users',
   'POST /admin/users',

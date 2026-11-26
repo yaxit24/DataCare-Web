@@ -45,17 +45,16 @@ describe('Data Refresh operator surface', () => {
   });
 
   it('pins preview-only classifications and the exact Approval completion message', () => {
-    for (const id of [
-      'data-refresh-account',
-      'data-refresh-stock',
-      'data-refresh-image-data',
-      'data-refresh-old-field',
-    ]) {
+    for (const id of ['data-refresh-account', 'data-refresh-stock', 'data-refresh-old-field']) {
       const start = operations.indexOf(`id: '${id}'`);
       expect(start, id).toBeGreaterThan(-1);
       expect(operations.slice(start, start + 900), id).toContain('applyAvailable: false');
     }
     expect(operations).toContain("completionText: 'Approval Refersh Process Complete.'");
+    // Image Data (D-REF-3 class b) verifies the committed schema and applies as a clean no-op.
+    const image = operations.indexOf("id: 'data-refresh-image-data'");
+    expect(image).toBeGreaterThan(-1);
+    expect(operations.slice(image, image + 900)).toContain('applyAvailable: true');
     // Field Update runs its two class-a repairs (N247) from dataRefreshFieldUpdate.ts.
     expect(operations).toContain("import './dataRefreshFieldUpdate.js'");
     expect(page).toContain('Preview only: {preview.blockedReason}');
