@@ -942,7 +942,8 @@ databaseDescribe('database-backed sales voucher lifecycle', () => {
          (SELECT min("APP_TRFR") FROM "BAR_DETL" WHERE tenant_id=$1 AND "TAG_NO"='TAG001') app_trfr`,
       TENANT,
     )) as Array<Record<string, unknown>>;
-    expect(state[0]).toEqual({ audits: 0, issues: 1, apr_isu: 'N', app_trfr: 'Y' });
+    // TR_SALE.cs:16114 sets only APR_ISU on save; APP_TRFR keeps the tag's own value (blank here).
+    expect(state[0]).toEqual({ audits: 0, issues: 1, apr_isu: 'N', app_trfr: null });
   }, 30_000);
 
   it('persists configured whole-rupee sale totals in both the header and party ledger', async () => {

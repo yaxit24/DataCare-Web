@@ -219,9 +219,14 @@ export async function exerciseSalesOrder(page, { checkpoint } = {}) {
     assert.equal(await specs().getByLabel('Labour amount', { exact: true }).inputValue(), '77.37');
     await save('PUT');
     const retained = await load('00001');
+    // TR_SALE_ORD.cs:9268-9286 writes TAG_STK_LESS on every saved line ('N' unless a tagged line under
+    // ORD_TAG_STK_LESS), so an imported NULL becomes 'N' on re-save; everything else survives unchanged.
     assertReplacementSnapshot(
       retained,
-      imported,
+      {
+        ...imported,
+        lines: imported.lines.map((line) => ({ ...line, tagStockLess: line.tagStockLess ?? 'N' })),
+      },
       'imported manual amounts, nulls and noncontiguous identity survive an unchanged edit',
     );
     await details();
