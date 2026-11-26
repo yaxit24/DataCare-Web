@@ -27,7 +27,7 @@ import {
   recalcSaleGridRow,
   saleGridRowLabour,
 } from '../../../../lib/lineRecalc';
-import { billTotals, lineNet as lineNetAmount } from '@datacare/core';
+import { billTotals, dotNetRoundDouble, lineNet as lineNetAmount } from '@datacare/core';
 import { todayLocal } from '../../../../lib/localDate';
 import { openDocument } from '../../../../lib/openDocument';
 import {
@@ -323,7 +323,6 @@ export default function SalesEntryPage() {
   const [tcsCode, setTcsCode] = useState('');
   const [tdsCode, setTdsCode] = useState('');
   const [tdsPct, setTdsPct] = useState('');
-  const [tdsAmount, setTdsAmount] = useState('');
   const [cardAc, setCardAc] = useState('');
   const [bankAc, setBankAc] = useState('');
   const [chequeNo, setChequeNo] = useState('');
@@ -438,7 +437,19 @@ export default function SalesEntryPage() {
   const hmTax = r2((hmAmt * n(taxRatePct)) / 100);
   const itemTotal = itemTotals.total;
   const tcsAmt = r2((itemTotal * n(tcsPct)) / 100);
-  const totalPrev = r2(itemTotal + hmAmt + hmTax + tcsAmt);
+  // SL_TDS_TAX 'Y': the totals grid's TDS cell is computed, never typed (BILL_TOTAL overwrites it on leaving the cell,
+  // TR_SALE.cs:19261-19275): Math.Round((net - discount) x TDS% / 100, 0), and the bill total takes it off before
+  // its TOT_AMT_ROF rounding, as the server does.
+  const tdsOn = companyFlag(companySettings, 'SL_TDS_TAX', 'N');
+  const tdsAmt =
+    tdsOn && n(tdsPct) !== 0 && itemTotals.net !== 0
+      ? dotNetRoundDouble(((itemTotals.net - itemTotals.discount) * n(tdsPct)) / 100, 0)
+      : 0;
+  const totalPrev = tdsOn
+    ? roundingPolicy.roundBillTotal(
+        itemTotals.net + itemTotals.tax + hmAmt + hmTax + tcsAmt - tdsAmt - itemTotals.discount,
+      )
+    : r2(itemTotal + hmAmt + hmTax + tcsAmt);
   const kasarAmt = n(kasar);
   const paid = r2(n(cashAmt) + n(cardAmt) + n(upiAmt) + n(chequeAmt) + oldGoldVal);
   const balanceDue = r2(totalPrev - paid - kasarAmt - n(ordAmt) - n(currentAdjustmentAmount)); // TR_SALE.cs:19390
@@ -471,7 +482,6 @@ export default function SalesEntryPage() {
     setTcsCode('');
     setTdsCode('');
     setTdsPct('');
-    setTdsAmount('');
     setCardAc('');
     setBankAc('');
     setChequeNo('');
@@ -555,7 +565,6 @@ export default function SalesEntryPage() {
       setTcsCode(String(view.tcsCode ?? ''));
       setTdsCode(String(view.tdsCode ?? ''));
       setTdsPct(str(view.tdsPct));
-      setTdsAmount(str(view.tdsAmount));
       setCardAc(String(view.cardAc ?? ''));
       setBankAc(String(view.bankAc ?? ''));
       setChequeNo(String(view.chequeNo ?? ''));
@@ -673,7 +682,6 @@ export default function SalesEntryPage() {
         tcsCode: tcsCode || undefined,
         tdsCode: tdsCode || undefined,
         tdsPct: tdsPct ? n(tdsPct) : undefined,
-        tdsAmount: tdsAmount ? n(tdsAmount) : undefined,
         hallmarkAmount: hmAmt > 0 ? hmAmt : undefined,
         tcsPct: n(tcsPct) > 0 ? n(tcsPct) : undefined,
         kasarAmount: kasarAmt > 0 ? kasarAmt : undefined,
@@ -1002,7 +1010,6 @@ export default function SalesEntryPage() {
                 ['TCS Code', tcsCode, setTcsCode],
                 ['TDS Code', tdsCode, setTdsCode],
                 ['TDS %', tdsPct, setTdsPct],
-                ['TDS Amount', tdsAmount, setTdsAmount],
                 ['Cheque Bank A/c', bankAc, setBankAc],
                 ['Card A/c', cardAc, setCardAc],
                 ['Cheque No', chequeNo, setChequeNo],
@@ -1031,6 +1038,10 @@ export default function SalesEntryPage() {
                   />
                 </div>
               ))}
+              <div className="field">
+                <label htmlFor="saleTdsAmount">TDS Amount</label>
+                <input id="saleTdsAmount" value={tdsAmt ? tdsAmt.toFixed(2) : ''} readOnly />
+              </div>
               <div className="field">
                 <label>Ornament Issued</label>
                 <select
