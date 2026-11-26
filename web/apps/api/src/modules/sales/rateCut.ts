@@ -38,6 +38,7 @@ import { assertVoucherVersionTx, requiredVersion, voucherVersionTx } from '../vo
 import { formatVoucherNo, nextVoucherNoTx, type VoucherScope } from '../vouchers/numbering.js';
 import { nextHiddenVoucherNoTx, voucherTimestamp } from '../vouchers/lifecycle.js';
 import { assertSavedRateCutTx, persistedHeaderTx } from './rateCutHeader.js';
+import { DESKTOP_COLUMN_DEFAULTS } from '../posting/desktopColumnDefaults.js';
 import {
   insertRowTx,
   postVoucherTx,
@@ -1279,6 +1280,18 @@ interface RowCtx {
   companyLabourType: string;
 }
 
+/**
+ * Col 47 KrNwt of a loose line: the GROSS weight less the rolled-up karigar stone weight, set whenever the gross
+ * cell changes (TR_WH_SALE.cs:9194, :14085) and saved as KR_NET_WT (:13128). A net weight typed afterwards does not
+ * move it (Next24M 034/7: net typed above gross, KR_NET_WT the gross). KR_FINE (col 52, saved at :13131) carries the
+ * same figure on every captured row. A tag line keeps the earlier rule (the net weight) until its tag figures are
+ * replayed.
+ */
+function krNet(l: RateCutLine, c: RateCutLineResult): number {
+  if (l.krNetWt != null) return l.krNetWt;
+  return isTagged(l.tagNo) ? c.netWt : round3(num(l.grossWt));
+}
+
 const isTagged = (tagNo: unknown): boolean => {
   const t = String(tagNo ?? '').trim();
   return t !== '' && t.toUpperCase() !== 'N';
@@ -1316,8 +1329,8 @@ function buildLineRows(
        * The karigar valuation columns, which on these rows track NET WEIGHT rather than fine — measured
        * `KR_NET_WT == ITM_NWT` and `KR_FINE == ITM_NWT` on 19 of 20 rows, the exception being a weightless line.
        */
-      KR_NET_WT: l.krNetWt ?? c.netWt,
-      KR_FINE: c.netWt,
+      KR_NET_WT: krNet(l, c),
+      KR_FINE: krNet(l, c),
       BOOK_NAME: cls.bookName,
       AC_CODE: input.acCode,
       TAG_NO: isTagged(l.tagNo) ? String(l.tagNo).trim() : 'N',
@@ -1424,10 +1437,8 @@ function buildLineRows(
        * Derived rather than required from the caller, measured across the 20 captured rate-cut lines:
        *
        *   `TAG_GWT`  == `ITM_GWT`   20/20        `TAG_NWT`  == `ITM_NWT`   20/20
-       *   `KR_NET_WT` == `ITM_NWT`  19/20        `KR_FINE`  == `ITM_NWT`   19/20
        *
-       * `KR_FINE` tracking NET WEIGHT rather than fine weight is not a transcription slip — it is what the rows
-       * hold, on every line that carries weight. The exception in each pair is a line with no weight at all.
+       * `KR_NET_WT` and `KR_FINE` are the grid's gross-based KrNwt (`krNet` above).
        *
        * These were all zero before, because the builder only wrote what the caller passed and no caller passes a
        * tag weight for a loose line.
@@ -1559,13 +1570,26 @@ function buildReceivedLineRows(
  * The web wrote no stock at all, so a sold tag stayed in stock and could be sold again, and received metal never
  * reached the stock register. SR_NO 7 (approval return), 4 (tour) and 5/6 (tag weight difference) are deferred.
  */
+/**
+ * A line row as the table stores it: insertRowTx fills a null column the desktop never leaves NULL with its default
+ * (posting.ts), and Wh_Sale_Stk's `INSERT … SELECT` copies the STORED cells, so the stock row must see the same.
+ */
+function asStored(table: string, row: Record<string, unknown>): Record<string, unknown> {
+  const defaults = DESKTOP_COLUMN_DEFAULTS[table] ?? {};
+  const out = { ...row };
+  for (const [col, fallback] of Object.entries(defaults)) if (out[col] == null) out[col] = fallback;
+  return out;
+}
+
 function buildStockRows(
   ctx: RowCtx,
-  issuedRows: Record<string, unknown>[],
-  receivedRows: Record<string, unknown>[],
+  issuedLines: Record<string, unknown>[],
+  receivedLines: Record<string, unknown>[],
   oldGoldType: string,
 ): Record<string, unknown>[] {
   const { key, cls } = ctx;
+  const issuedRows = issuedLines.map((row) => asStored('RATE_CUT_ISU', row));
+  const receivedRows = receivedLines.map((row) => asStored('RATE_CUT_REC', row));
   const stockDate = ctx.vchDate.toISOString().slice(0, 10);
   const netFor = (row: Record<string, unknown>): number => {
     const itCode = String(row.IT_CODE ?? '')
@@ -1605,7 +1629,8 @@ function buildStockRows(
     MAIN_USER: txt(row.MAIN_USER, 15),
     DATA_TYPE: txt(cls.dataType, 1) ?? 'A',
     DESIGN_NO: row.DESIGN_NO ?? null,
-    ITM_SIZE: txt(row.ITM_SIZE, 20),
+    // A.ITM_SIZE as stored, blank included (Ac_Stock.cs:153, :155).
+    ITM_SIZE: row.ITM_SIZE == null ? null : String(row.ITM_SIZE).slice(0, 20),
     ITM_DESC: txt(row.ITM_REMARK, 255),
     GHT_PRC: 0,
     ITM_DISC: '0',
@@ -1624,7 +1649,8 @@ function buildStockRows(
       KR_WEST: num(row.KR_WEST_PRC),
       KR_FINE: num(row.KR_FINE),
       KR_COST: num(row.TAG_COST),
-      ITM_LOT: txt(row.ITM_LOT, 255),
+      // A.ITM_LOT as stored: RATE_CUT_ISU.ITM_LOT is NOT NULL DEFAULT '' (Ac_Stock.cs:153).
+      ITM_LOT: String(row.ITM_LOT ?? '').slice(0, 255),
     })),
     ...receivedRows.map((row) => ({
       ...common(row),

@@ -1343,4 +1343,30 @@ d('wholesale sale / rate cut: stock movement and desktop ledger legs (X16)', () 
     ]);
     expect(await find()).toEqual([['LRG00002', 100312000010, false, 'LR916 · L RING 916']]);
   });
+  it('a loose line keeps the karigar net and fine on its gross, and its stock row copies the stored size and lot', async () => {
+    // Col 47 KrNwt is the gross less the karigar stone weight, set when the gross is entered (TR_WH_SALE.cs:9194);
+    // a net weight typed afterwards (here above the gross) does not move it, and col 52 carries the same figure.
+    await postWholesaleSale(runtime, {
+      ...base(WH),
+      lines: [{ itCode: '999', grossWt: 7.5, netWt: 7.513, touch: 0 }],
+      receivedLines: [{ itCode: '999', grossWt: 2, touch: 100 }],
+    });
+    expect(
+      await rows(
+        `SELECT "KR_NET_WT"::float8 AS kr,"KR_FINE"::float8 AS krf,"ITM_NWT"::float8 AS net,"ITM_SIZE" AS size,
+                "ITM_LOT" AS lot FROM "RATE_CUT_ISU" WHERE tenant_id=$1`,
+      ),
+    ).toEqual([{ kr: 7.5, krf: 7.5, net: 7.513, size: '', lot: '' }]);
+    // Wh_Sale_Stk copies A.ITM_SIZE and A.ITM_LOT as stored for the issue row; the receive row's lot is '' and its
+    // size the RATE_CUT_REC row's (Ac_Stock.cs:153, :155).
+    expect(
+      await rows(
+        `SELECT "SR_NO"::int AS sr,"KR_NWT"::float8 AS kr,"KR_FINE"::float8 AS krf,"ITM_SIZE" AS size,
+                "ITM_LOT" AS lot FROM "MAIN_STOCK" WHERE tenant_id=$1 AND "CO_BOOK"='034' ORDER BY "SR_NO"`,
+      ),
+    ).toEqual([
+      { sr: 1, kr: 7.5, krf: 7.5, size: '', lot: '' },
+      { sr: 2, kr: 2, krf: 2, size: null, lot: '' },
+    ]);
+  });
 });
