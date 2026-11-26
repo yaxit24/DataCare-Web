@@ -7,8 +7,14 @@ import {
   type TagStockColumn,
   type TagStockReport,
 } from '../modules/reports/tagStock.js';
+import { zoomHandler, zoomQuerySchema } from '../modules/reports/voucherZoom.js';
 import { withTxBudget } from '../modules/shared/txBudget.js';
 import { renderXlsx, type XlsxColumn } from '../modules/reports/xlsx.js';
+import {
+  tagStockPrintHtml,
+  tagStockPrintTitle,
+  type TagStockPrintKind,
+} from '../modules/reports/tagStockPrint.js';
 
 /**
  * Report → Tag Stock (desktop RP_TAG, MDI_FORM.cs:8891-8900). The resolver is read-only; the screen, the CSV and
@@ -18,6 +24,8 @@ import { renderXlsx, type XlsxColumn } from '../modules/reports/xlsx.js';
  *   GET /reports/tag-stock        List right
  *   GET /reports/tag-stock.csv    Print right (the desktop Excel button, RP_TAG.cs:3257-3263)
  *   GET /reports/tag-stock.xlsx   Print right
+ *   GET /reports/tag-stock/print  Print right: the Print window (BtnPrint_Click) and, with kind=summ-product or
+ *                                 summ-item, the Summ print (BtnSumm_Click), as an HTML page
  */
 export interface TagStockRouteHelpers {
   prisma: any;
@@ -33,6 +41,10 @@ export interface TagStockRouteHelpers {
     lcCode: string;
     coYear?: string;
   };
+  /** The company name of the session, for the print window's heading. */
+  companyName: (req: FastifyRequest) => Promise<string>;
+  /** Whether the user may open the form (the voucher zoom checks the target menu's View right). */
+  mayRead: (req: FastifyRequest, form: string) => Promise<boolean>;
 }
 
 const xlsxColumn = (c: TagStockColumn): XlsxColumn => ({
@@ -44,7 +56,7 @@ const xlsxColumn = (c: TagStockColumn): XlsxColumn => ({
 });
 
 export function registerTagStockRoutes(app: FastifyInstance, h: TagStockRouteHelpers): void {
-  const { prisma, auth, guard, scopeOf } = h;
+  const { prisma, auth, guard, scopeOf, companyName, mayRead } = h;
 
   const resolve = async (req: FastifyRequest): Promise<TagStockReport> => {
     const s = scopeOf(req);
@@ -105,6 +117,56 @@ export function registerTagStockRoutes(app: FastifyInstance, h: TagStockRouteHel
             totals: rep.totals as unknown as Record<string, number>,
           }),
         );
+    } catch (error) {
+      if (fail(reply, error)) return reply;
+      throw error;
+    }
+  });
+
+  // DGV_DoubleClick (RP_TAG.cs:8917): the screen that opens the voucher of the row.
+  app.get(
+    '/reports/tag-stock/zoom',
+    { ...auth, schema: zoomQuerySchema } as any,
+    zoomHandler({ prisma, scopeOf, mayRead }),
+  );
+
+  app.get('/reports/tag-stock/print', auth as any, async (req, reply) => {
+    if (!guard(req, reply, 'print')) return;
+    try {
+      const { kind: kindRaw, ...query } = (req.query ?? {}) as Record<string, unknown>;
+      const kind: TagStockPrintKind =
+        kindRaw === 'summ-product' || kindRaw === 'summ-item' ? kindRaw : 'print';
+      // Summ prints the stock summary of the same filters, grouped by product or by item (RP_TAG.cs:8847-8851).
+      const asked =
+        kind === 'print'
+          ? query
+          : { ...query, tab: 'stock', view: kind === 'summ-product' ? 'product' : 'item' };
+      const s = scopeOf(req);
+      const { tab, filters } = parseTagStockQuery(asked);
+      const rep = await tagStockReport(
+        prisma,
+        s.tenantId,
+        { CO_CODE: s.coCode, LC_CODE: s.lcCode, CO_YEAR: s.coYear },
+        tab,
+        filters,
+      );
+      const { title, template } = tagStockPrintTitle({
+        kind,
+        view: rep.view,
+        lcCode: filters.lcCode,
+        fromDate: filters.fromDate,
+        toDate: filters.toDate,
+      });
+      return reply.type('text/html; charset=utf-8').send(
+        tagStockPrintHtml({
+          company: await companyName(req),
+          title,
+          template,
+          columns: rep.columns,
+          rows: rep.rows as unknown as Array<Record<string, unknown>>,
+          totals: rep.totals as unknown as Record<string, number>,
+        }),
+      );
     } catch (error) {
       if (fail(reply, error)) return reply;
       throw error;

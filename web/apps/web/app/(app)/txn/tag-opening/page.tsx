@@ -14,6 +14,7 @@ import { useRouter } from 'next/navigation';
 import { desktopGlobalFormKeyActions, FormKeyHints } from '../../../../components/FormKeys';
 import { del, get, post, postCommand, put, ApiError } from '../../../../lib/api';
 import { useIdempotencyKey } from '../../../../lib/idempotencyKey';
+import { useZoomOpen } from '../../../../lib/useZoomOpen';
 import { LookupPicker } from '../../../../components/LookupPicker';
 import { VoucherList } from '../../../../components/VoucherList';
 import { useVoucherNumberKeys, VoucherNumberNote } from '../../../../components/VoucherNumberKeys';
@@ -484,6 +485,14 @@ export default function TagOpeningPage() {
   async function loadVoucher() {
     await openVoucher(voucherLookup);
   }
+
+  // Zoom from a report row (Tag Stock, HuId Report): ?vchNo=&coBook= opens that voucher in that book.
+  useZoomOpen({
+    coBook,
+    setCoBook,
+    ready: Boolean(coYear && lcCode),
+    open: openVoucher,
+  });
 
   // N172 (G179): the voucher number box's F1, Up, Down and Enter (tVchNo_KeyDown, TR_TAG_OPBL.cs:11879).
   const numberKeys = useVoucherNumberKeys({

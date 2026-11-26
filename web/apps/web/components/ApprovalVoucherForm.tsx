@@ -6,6 +6,7 @@ import { ApiError, del, get, postCommand, put } from '../lib/api';
 import { useIdempotencyKey } from '../lib/idempotencyKey';
 import { todayLocal } from '../lib/localDate';
 import { useBusinessScope } from './BusinessScope';
+import { useZoomOpen } from '../lib/useZoomOpen';
 import { BookSelect } from './BookSelect';
 import { LookupPicker } from './LookupPicker';
 import { useSubDetail } from './SubDetailGrid';
@@ -125,8 +126,17 @@ export default function ApprovalVoucherForm({
     setStatus({ kind: 'ok', text: `Loaded voucher ${view.voucherNo}` });
   };
 
-  async function loadVoucher() {
-    const number = voucherNo.trim();
+  // Zoom from a report row: ?vchNo=&coBook= opens that voucher in that book.
+  useZoomOpen({
+    coBook,
+    setCoBook,
+    ready: Boolean(coYear && coBook),
+    open: (no) => loadVoucher(String(no)),
+  });
+
+  async function loadVoucher(requested?: string) {
+    const number = (requested ?? voucherNo).trim();
+    if (requested !== undefined) setVoucherNo(number);
     if (!number) {
       setStatus({ kind: 'err', text: 'Please Insert VchNo and try' });
       return;

@@ -165,8 +165,11 @@ describe('route policy registry', () => {
     // (TR_TAG_OPBL.cs:11477-11551) and its Set default-file: 816 + 3 = 819.
     // WP-18 replaces the HuId Report's three-line builder screen with its own plugin and adds the three
     // export paths (CSV, XLSX, PDF) under the same Reports/HuId Report caption: 819 + 3 = 822.
-    expect(routes).toHaveLength(822);
-    expect(new Set(routes.map((route) => `${route.method} ${route.path}`)).size).toBe(822);
+    // The Tag Stock Print window (RP_TAG.cs:8578, :8755) adds GET /reports/tag-stock/print: 822 + 1 = 823. The voucher
+    // zoom of Tag Stock and of the HuId Report (RP_TAG.cs:8917 DGV_DoubleClick) adds GET /reports/tag-stock/zoom and
+    // GET /reports/huid/zoom: 823 + 2 = 825; report metal defaults adds one = 826.
+    expect(routes).toHaveLength(826);
+    expect(new Set(routes.map((route) => `${route.method} ${route.path}`)).size).toBe(826);
 
     const policies = routes.map((route) => ({
       ...route,

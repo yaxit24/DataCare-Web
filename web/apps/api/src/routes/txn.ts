@@ -1,3 +1,4 @@
+import { voucherZoomAuthorizer } from '../modules/reports/voucherZoom.js';
 import { saleResidualInput } from '../modules/sales/saleResiduals.js';
 import { chooseSaleTemplate } from '../modules/sales/salePrintChoice.js';
 import { SessionReadSnapshotError } from '../modules/auth/sessionContextReadSnapshot.js';
@@ -1078,6 +1079,7 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
     ]);
     return { canUpdate, canDelete, canPrint };
   };
+  const mayReadForm = voucherZoomAuthorizer(prisma, sess);
   const body = (req: FastifyRequest) => (req.body ?? {}) as Record<string, any>;
   const extraRouteHelpers = {
     prisma,
@@ -4419,10 +4421,15 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
   // debit ageing, and its Excel/CSV/PDF outputs. The resolver feeds the screen and every export from
   // one path. Registered here (not with the other plugins above) because it needs `sendReportPdf`.
   registerAccountLedgerRoutes(app, { prisma, auth, guard, readScope, sendReportPdf });
-  // WP-18 HuId Report (RP_HUID): its own plugin owns /reports/huid and its three exports, fed by the
-  // dedicated resolver in modules/reports/huidTagReport.ts. The three-line builder screen it replaces is
-  // gone; REPORT_BUILDERS.huid above stays only so the old builder map and p9Reports keep compiling.
-  registerHuidReportRoutes(app, { prisma, auth, guard, readScope, sendReportPdf });
+  // RP_HUID report, exports, defaults and voucher zoom.
+  registerHuidReportRoutes(app, {
+    prisma,
+    auth,
+    guard,
+    readScope,
+    sendReportPdf,
+    mayRead: mayReadForm,
+  });
   registerRpAllReportRoutes(app, { prisma, auth, guard, readScope }); // WP-11 Sales Report (RP_ALL)
   registerPurchaseReportRoutes(app, {
     prisma,
@@ -4431,7 +4438,8 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
     readScope,
     pdfRenderer: deps.pdfRenderer,
   }); // WP-12 Purchase Rpt (RP_ALL)
-  registerTagStockRoutes(app, { prisma, auth, guard, scopeOf });
+  const tagStockHelpers = { companyName: sessionCompanyName, mayRead: mayReadForm };
+  registerTagStockRoutes(app, { prisma, auth, guard, scopeOf, ...tagStockHelpers });
   registerStockReportRoutes(app, { prisma, auth, guard, readScope }); // WP-16 Stock Report (RP_STOCK)
 
   // Screens for four reports registered only in REPORT_BUILDERS (exports worked, screens 404'd —

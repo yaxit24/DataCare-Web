@@ -644,7 +644,8 @@ describe.runIf(RUN)('WP-32 tag opening residual HTTP contracts', () => {
         const expected = [projection(book, no, 1), projection(book, no, 2)];
         // Freeze source values independently of the current writer before printing.
         // TR_TAG_OPBL.cs:11523 {{ITM_COLOR,LBR_CODE,ITM_STYLE  FROM BAR_DETL WHERE CO_CODE}}
-        for (const row of expected) {
+        // Reverse the physical update order; label order must still follow voucher SR_NO.
+        for (const row of [...expected].reverse()) {
           const entries = Object.entries(row);
           await exec(
             `UPDATE "BAR_DETL" SET ${entries.map(([key], i) => `"${key}"=$${i + 5}`).join(',')}

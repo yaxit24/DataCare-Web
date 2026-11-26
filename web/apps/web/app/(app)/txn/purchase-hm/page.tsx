@@ -1,4 +1,5 @@
 'use client';
+import { useZoomOpen } from '../../../../lib/useZoomOpen';
 import { useEffect, useState } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
 import { del, get, post, put, ApiError } from '../../../../lib/api';
@@ -438,14 +439,16 @@ export default function HallmarkPurchasePage() {
     sub.reset();
   }
 
-  async function loadVoucher() {
-    if (!coBook || !voucherLookup.trim()) return;
+  useZoomOpen({ coBook, setCoBook, ready: Boolean(coYear && lcCode), open: loadVoucher });
+
+  async function loadVoucher(requested?: string) {
+    const number = (requested ?? voucherLookup).trim();
+    if (!coBook || !number) return;
+    if (requested !== undefined) setVoucherLookup(number);
     setBusy(true);
     setMsg(null);
     try {
-      const view = await get<any>(
-        `/purchases/${encodeURIComponent(voucherLookup.trim())}?${scopeQuery()}`,
-      );
+      const view = await get<any>(`/purchases/${encodeURIComponent(number)}?${scopeQuery()}`);
       setLoadedVchNo(String(view.voucherNo));
       setLoadedVersion(String(view.version ?? ''));
       setLoadedView(view);
@@ -687,7 +690,7 @@ export default function HallmarkPurchasePage() {
               type="button"
               className="ghost"
               disabled={busy || !coBook}
-              onClick={loadVoucher}
+              onClick={() => void loadVoucher()}
             >
               Load
             </button>

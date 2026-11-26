@@ -1,4 +1,5 @@
 import assert from 'node:assert/strict';
+import { changedTables, rollbackMatrix, tenantFingerprint, withWriteFault } from '../faults.mjs';
 import { FIXTURE_MANIFEST, ITEMS, PARTIES, USERS } from '../fixtures/catalogue.mjs';
 import { TENANT } from '../harness.mjs';
 
@@ -47,11 +48,6 @@ const C = (id, group, kind, source, run, extra = {}) => ({
   run,
   ...extra,
 });
-const pending = (name, group, reason) => ({
-  ...C(`${name}.pending`, group, 'read-only', `Playbook ${group}`, async () => ({})),
-  blocked: reason,
-});
-
 const isApi = (r, method, prefix) =>
   r.request().method() === method && new URL(r.url()).pathname.startsWith(`/api${prefix}`);
 const pad = (vchNo) => String(vchNo).padStart(5, '0');
@@ -399,6 +395,16 @@ export const tagOpening = {
       'mutation',
       'TR_TAG_OPBL.cs:10090 and :12345-12362: TAG files are ordered and Set leaves exactly the selected TAG file marked PRINT_SET_A=Y',
       async (ctx) => {
+        // Other modules may leave TAG files of company 01 behind (CI shares one database): set them aside so the
+        // list holds only this case's files, and put them back afterwards.
+        const kept = await ctx.rows(
+          `SELECT to_jsonb(p) AS row FROM "PRINT_MAST" p
+             WHERE tenant_id=$1 AND "CO_CODE"='01' AND "PRINT_TYPE"='TAG'`,
+        );
+        await ctx.owner.$executeRawUnsafe(
+          `DELETE FROM "PRINT_MAST" WHERE tenant_id=$1 AND "CO_CODE"='01' AND "PRINT_TYPE"='TAG'`,
+          TENANT,
+        );
         await ctx.owner.$executeRawUnsafe(
           `INSERT INTO "PRINT_MAST"(tenant_id,"CO_CODE","PRINT_TYPE","PRINT_FILE","PRINT_SET_A") VALUES
              ($1,'01','TAG','Z32','N'),($1,'01','TAG','A32','Y')`,
@@ -408,6 +414,8 @@ export const tagOpening = {
         try {
           await openScreen(page);
           const chooser = page.getByLabel('Print file Name', { exact: true });
+          // The files load after the screen opens.
+          await chooser.locator('option', { hasText: 'Z32' }).waitFor({ state: 'attached' });
           assert.deepEqual(await chooser.locator('option').allTextContents(), ['A32', 'Z32']);
           await chooser.selectOption('Z32');
           await page.getByRole('button', { name: 'Set', exact: true }).click();
@@ -428,9 +436,14 @@ export const tagOpening = {
           };
         } finally {
           await ctx.owner.$executeRawUnsafe(
-            `DELETE FROM "PRINT_MAST" WHERE tenant_id=$1 AND "CO_CODE"='01' AND "PRINT_FILE" IN ('A32','Z32')`,
+            `DELETE FROM "PRINT_MAST" WHERE tenant_id=$1 AND "CO_CODE"='01' AND "PRINT_TYPE"='TAG'`,
             TENANT,
           );
+          for (const { row } of kept)
+            await ctx.owner.$executeRawUnsafe(
+              `INSERT INTO "PRINT_MAST" SELECT * FROM jsonb_populate_record(NULL::"PRINT_MAST", $1::jsonb)`,
+              JSON.stringify(row),
+            );
         }
       },
     ),
@@ -705,18 +718,262 @@ export const tagOpening = {
         };
       },
     ),
-    pending('rights', 'T11', 'The catalogue clerk has no Tag Opening rights row yet.'),
-    pending(
-      'concurrency',
-      'T12',
-      'Two-session edit of one voucher needs a second operator slot and a version token.',
+    C(
+      'rights.clerk-view-only',
+      'T11',
+      'refusal',
+      'TR_TAG_OPBL.cs:10787 (save of an existing voucher without FRM_EDIT), :11374 (delete without FRM_DELETE) and :11479 (print without FRM_PRINT) answer "You Have No Rights....." and "You Have No Print Rights....."; the server refuses the same calls',
+      async (ctx) => {
+        const admin = (await ctx.session()).page;
+        const saved = await enter(admin, [{ gross: '10.5', net: '10', touch: '91.6' }]);
+        await ctx.owner.$executeRawUnsafe(
+          `INSERT INTO "USER_SET"(tenant_id,"CO_CODE","LC_CODE","USER_NAME","MAIN_MENU","SUB_MENU","FRM_VIEW","FRM_EDIT","FRM_DELETE","FRM_PRINT")
+           VALUES ($1,'01','01',$2,'Inventory','Tag Opening Balance','Y','N','N','N')`,
+          TENANT,
+          USERS.clerk.user,
+        );
+        try {
+          const { page } = await ctx.session(as(USERS.clerk.user));
+          await reopen(page, saved.vchNo);
+          await grid(page, 'grossWt', 1).fill('12');
+          const update = await save(page);
+          assert.equal(update.status(), 403);
+          await page.getByText('You Have No Rights.....', { exact: true }).waitFor();
+          const remove = await removeVoucher(page, saved.vchNo);
+          assert.equal(remove.status(), 403);
+          await page.getByText('You Have No Rights.....', { exact: true }).first().waitFor();
+          const print = await page.request.post(
+            `/api/stock/tag-opening/${saved.vchNo}/print?coBook=${OPEN_BOOK}`,
+            { data: {} },
+          );
+          assert.equal(print.status(), 403);
+          assert.match(await print.text(), /You Have No Print Rights\.\.\.\.\./);
+          const rows = await detl(ctx, OPEN_BOOK, saved.vchNo);
+          const posted = await stock(ctx, OPEN_BOOK, saved.vchNo);
+          assert.deepEqual([rows.map((r) => r.gwt), posted.map((r) => r.gwt)], [[10.5], [10.5]]);
+          return {
+            observation: `clerk: update ${update.status()}, delete ${remove.status()}, print ${print.status()}; the voucher is unchanged`,
+            expected: 'the desktop texts and 403s; gross stays 10.5',
+            database: { detail: rows, stock: posted },
+          };
+        } finally {
+          await ctx.owner.$executeRawUnsafe(
+            `DELETE FROM "USER_SET" WHERE tenant_id=$1 AND "USER_NAME"=$2 AND "SUB_MENU"='Tag Opening Balance'`,
+            TENANT,
+            USERS.clerk.user,
+          );
+          await removeVoucher(admin, saved.vchNo);
+        }
+      },
     ),
-    pending('retry', 'T13', 'Idempotency (N52) is not on the stock vouchers yet.'),
-    pending('rollback', 'T14', 'No fault injector in the harness yet (G173 / N166).'),
-    pending(
-      'settings',
+    C(
+      'concurrency.two-operators',
+      'T12',
+      'mutation',
+      'N51 version token (D17): two operators open one voucher; the first update wins and the second is refused with 409 instead of silently replacing it (the desktop lets the later save win)',
+      async (ctx) => {
+        const a = (await ctx.session()).page;
+        const b = (await ctx.session(as(USERS.admin.user, `${USERS.admin.user}#2`))).page;
+        const saved = await enter(a, [{ gross: '10.5', net: '10', touch: '91.6' }]);
+        try {
+          await reopen(a, saved.vchNo);
+          await reopen(b, saved.vchNo);
+          await grid(a, 'grossWt', 1).fill('12');
+          await grid(a, 'netWt', 1).fill('11.5');
+          const first = await save(a);
+          assert.equal(first.status(), 200, await first.text());
+          await grid(b, 'grossWt', 1).fill('13');
+          await grid(b, 'netWt', 1).fill('12.5');
+          const second = await save(b);
+          assert.equal(second.status(), 409);
+          await b.locator('.msg[role="alert"]').waitFor();
+          const rows = await detl(ctx, OPEN_BOOK, saved.vchNo);
+          assert.deepEqual(
+            rows.map((r) => [r.gwt, r.nwt]),
+            [[12, 11.5]],
+          );
+          return {
+            observation: `first update ${first.status()}, second ${second.status()}; stored ${JSON.stringify(rows.map((r) => [r.gwt, r.nwt]))}`,
+            expected: 'one result (12 / 11.5) and a defined conflict',
+            database: { detail: rows },
+            downstream: { secondStatus: second.status() },
+          };
+        } finally {
+          await removeVoucher(a, saved.vchNo);
+        }
+      },
+    ),
+    C(
+      'retry.same-key-replayed',
+      'T13',
+      'mutation',
+      'D18 / N52: a create sent again with the same Idempotency-Key (a lost acknowledgement, a double click) replays the first answer and writes the voucher once',
+      async (ctx) => {
+        const { page } = await ctx.session();
+        const before = await ctx.rows(
+          `SELECT count(*)::int n FROM "BAR_DETL" WHERE tenant_id=$1 AND "CO_BOOK"=$2`,
+          OPEN_BOOK,
+        );
+        await openScreen(page);
+        await fillTag(page, 1, { gross: '10.5', net: '10', touch: '91.6' });
+        const first = await save(page, () =>
+          page.getByRole('button', { name: 'Load Opening Stock', exact: true }).dblclick(),
+        );
+        assert.equal(first.status(), 201, await first.text());
+        const saved = await first.json();
+        await page
+          .getByText(/Saved — voucher #/)
+          .first()
+          .waitFor();
+        const replay = await page.request.fetch(first.request());
+        const after = await ctx.rows(
+          `SELECT count(*)::int n FROM "BAR_DETL" WHERE tenant_id=$1 AND "CO_BOOK"=$2`,
+          OPEN_BOOK,
+        );
+        const posted = await stock(ctx, OPEN_BOOK, pad(saved.vchNo));
+        try {
+          assert.equal(replay.status(), 201, await replay.text());
+          assert.equal(replay.headers()['idempotency-replayed'], 'true');
+          assert.deepEqual((await replay.json()).vchNo, saved.vchNo);
+          assert.equal(after[0].n - before[0].n, 1, 'one tag row was written');
+          assert.equal(posted.length, 1, 'one stock row was written');
+          return {
+            observation: `replay ${replay.status()} (Idempotency-Replayed ${replay.headers()['idempotency-replayed']}); tag rows +${after[0].n - before[0].n}, stock rows ${posted.length}`,
+            expected: 'one voucher',
+            database: { tags: after[0].n - before[0].n, stock: posted },
+            downstream: { replayed: true },
+          };
+        } finally {
+          await removeVoucher(page, pad(saved.vchNo));
+        }
+      },
+    ),
+    C(
+      'rollback.save-and-delete',
+      'T14',
+      'refusal',
+      'The desktop writes the voucher table by table (TR_TAG_OPBL.cs:11100-11300); the web writes it in one transaction: a fault on any one table leaves the whole tenant unchanged, and a faulted delete leaves the voucher intact',
+      async (ctx) => {
+        const { page } = await ctx.session();
+        const initial = await tenantFingerprint(ctx);
+        const probe = await enter(page, [{ gross: '10.5', net: '10', touch: '91.6' }]);
+        const tables = changedTables(initial, await tenantFingerprint(ctx)).filter(
+          (t) => t !== 'api_command_receipt',
+        );
+        assert.ok(tables.includes('BAR_DETL') && tables.includes('MAIN_STOCK'), tables.join());
+        await removeVoucher(page, probe.vchNo);
+        await openScreen(page);
+        await fillTag(page, 1, { gross: '10.5', net: '10', touch: '91.6' });
+        // SRNO_MAST holds the tag-number counter and is updated in place, so its fault is an UPDATE fault.
+        const updatedTables = tables.filter((t) => t === 'SRNO_MAST');
+        const result = await rollbackMatrix(ctx, {
+          tables: tables.filter((t) => !updatedTables.includes(t)),
+          updatedTables,
+          book: OPEN_BOOK,
+          headerTable: 'BAR_DETL',
+          submit: () => save(page),
+        });
+        const saved = pad(result.vchNo);
+        // Delete faults: the voucher must survive each failed delete.
+        await reopen(page, saved);
+        const before = await tenantFingerprint(ctx);
+        for (const table of tables.filter((t) => !updatedTables.includes(t)))
+          await withWriteFault(ctx, table, 'DELETE', async () => {
+            const [response] = await Promise.all([
+              page.waitForResponse((r) => isApi(r, 'DELETE', `/stock/tag-opening/${saved}`)),
+              deleteButton(page).click(),
+            ]);
+            assert.ok(response.status() >= 400, `delete with a fault on ${table}`);
+            assert.deepEqual(
+              changedTables(before, await tenantFingerprint(ctx)),
+              [],
+              `fault on ${table}: nothing changed`,
+            );
+          });
+        const gone = await removeVoucher(page, saved);
+        assert.equal(gone.status(), 200, await gone.text());
+        return {
+          observation: `save faults on ${tables.join(', ')}: ${JSON.stringify(result.attempts)}; delete faults checked on the same tables`,
+          expected: 'the whole tenant unchanged on each failed write',
+          database: { tables, attempts: result.attempts },
+        };
+      },
+    ),
+    C(
+      'settings.counter-mandatory',
       'T15',
-      'The counter-mandatory setting (CNTR_STK, "Please Insert Counter Code and Try Because It is Mandatory...") needs a settings-variant fixture (N166).',
+      'refusal',
+      'TR_TAG_OPBL.cs:10791-10803: with MsCntrStk (CO_SET_NEW.COUNTER_STK) = Y a row with an item and no counter answers "Please Insert Counter Code and Try Because It is Mandatory..." and the voucher is not saved; with it off the same row saves',
+      async (ctx) => {
+        const { page } = await ctx.session();
+        const [before] = await ctx.rows(
+          `SELECT count(*)::int n, max("COUNTER_STK") v FROM "CO_SET_NEW" WHERE tenant_id=$1 AND "CO_CODE"='01'`,
+        );
+        const setting = (value) =>
+          before.n
+            ? ctx.owner.$executeRawUnsafe(
+                `UPDATE "CO_SET_NEW" SET "COUNTER_STK"=$2 WHERE tenant_id=$1 AND "CO_CODE"='01'`,
+                TENANT,
+                value,
+              )
+            : ctx.owner.$executeRawUnsafe(
+                `INSERT INTO "CO_SET_NEW"(tenant_id,"CO_CODE","COUNTER_STK") VALUES ($1,'01',$2)`,
+                TENANT,
+                value,
+              );
+        const count = async () =>
+          (
+            await ctx.rows(
+              `SELECT count(*)::int n FROM "BAR_DETL" WHERE tenant_id=$1 AND "CO_BOOK"=$2`,
+              OPEN_BOOK,
+            )
+          )[0].n;
+        await setting('Y');
+        let saved;
+        try {
+          const rows = await count();
+          await openScreen(page);
+          await fillTag(page, 1, { gross: '10.5', net: '10', touch: '91.6' });
+          // The desktop's counter column is filled by the user, not by the item; clear anything the screen preset.
+          await grid(page, 'tblCode', 1).fill('');
+          const refused = await save(page);
+          assert.equal(refused.status(), 400);
+          await page
+            .getByText('Please Insert Counter Code and Try Because It is Mandatory...', {
+              exact: true,
+            })
+            .waitFor();
+          assert.equal(await count(), rows, 'nothing was written');
+          await page.waitForFunction(
+            () =>
+              document.activeElement?.getAttribute('aria-label') === 'Tag opening tblCode row 1',
+          );
+          // With the counter filled the same screen saves.
+          await grid(page, 'tblCode', 1).fill('001');
+          const ok = await save(page);
+          assert.equal(ok.status(), 201, await ok.text());
+          saved = pad((await ok.json()).vchNo);
+          assert.equal(await count(), rows + 1);
+          return {
+            observation: `no counter: ${refused.status()} with the desktop text; counter 001: ${ok.status()}`,
+            expected: 'refused without a counter, saved with one',
+            database: { rows, after: rows + 1 },
+          };
+        } finally {
+          if (before.n)
+            await ctx.owner.$executeRawUnsafe(
+              `UPDATE "CO_SET_NEW" SET "COUNTER_STK"=$2 WHERE tenant_id=$1 AND "CO_CODE"='01'`,
+              TENANT,
+              before.v,
+            );
+          else
+            await ctx.owner.$executeRawUnsafe(
+              `DELETE FROM "CO_SET_NEW" WHERE tenant_id=$1 AND "CO_CODE"='01'`,
+              TENANT,
+            );
+          if (saved) await removeVoucher(page, saved);
+        }
+      },
     ),
     C(
       'output.tag-stock-report',
@@ -853,6 +1110,9 @@ export const tagOpening = {
         // Delete the sale through Sales Invoice; the tag is back in stock and the opening can go.
         await page.goto('/txn/sales');
         await page.getByRole('heading', { name: 'Sales Invoice', exact: true }).waitFor();
+        // The Load button does nothing until the configured sales book has been read.
+        const book = page.getByRole('combobox', { name: 'Configured book', exact: true });
+        for (let i = 0; i < 50 && !(await book.inputValue()); i++) await page.waitForTimeout(100);
         await page.getByLabel('Voucher No', { exact: true }).fill(saleNo);
         await page.getByRole('button', { name: 'Load', exact: true }).click();
         await page

@@ -59,6 +59,8 @@ export async function nextVoucherNo(ctx, headerTable, book) {
  * @param {string}   o.book      CO_BOOK of the voucher; the trigger fires only for this tenant and book
  * @param {string}   o.headerTable  the voucher header table, to predict the next number
  * @param {() => Promise<any>} o.submit  click Save on the filled screen and return the response
+ * @param {string[]} [o.updatedTables] tables a real save changes by UPDATE (a counter row such as SRNO_MAST); a fault on
+ *   an UPDATE of each is injected as well, and they count as written in the final comparison
  * @param {boolean} [o.fixedVoucherNo=false] Skip numbering for replacements and fixed opening keys.
  * @param {(response: any) => Promise<string>} [o.voucherNoOf]
  */
@@ -118,7 +120,28 @@ export async function rollbackMatrix(ctx, o) {
     }
   }
 
-  const pending = attempts.map((a) => a.pendingElsewhere);
+  // Counter rows are updated in place: an INSERT trigger cannot reach them, so fault their UPDATE.
+  for (const table of o.updatedTables ?? []) {
+    const response = await withWriteFault(ctx, table, 'UPDATE', submit);
+    assert.ok(
+      response.status() >= 400,
+      `fault on the update of ${table}: the save answered ${response.status()}`,
+    );
+    assert.deepEqual(
+      changedTables(before, await tenantFingerprint(ctx)),
+      [],
+      `fault on the update of ${table}: every table of the tenant is unchanged`,
+    );
+    attempts.push({
+      table: `${table} (update)`,
+      status: response.status(),
+      pendingElsewhere: null,
+    });
+  }
+
+  const pending = attempts
+    .filter((a) => a.pendingElsewhere !== null)
+    .map((a) => a.pendingElsewhere);
   assert.equal(
     Math.max(...pending),
     tables.length - 1,
@@ -145,7 +168,7 @@ export async function rollbackMatrix(ctx, o) {
   );
   assert.deepEqual(
     [...written].sort(),
-    [...tables].sort(),
+    [...tables, ...(o.updatedTables ?? [])].sort(),
     'the faulted tables are exactly the tables a real save writes',
   );
 

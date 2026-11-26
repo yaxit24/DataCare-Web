@@ -1135,6 +1135,11 @@ async function writePurchaseTx(
             SR_NO: idx + 1,
             OLD_SRNO: idx + 1,
             VCH_DATE: vchDate,
+            // The tag's stock date is the voucher date (TR_PURC.cs:13347, TR_PURC_HM.cs:8212
+            // `dataRow["STK_DATE"] = mVchDate.Text`). BAR_DETL.STK_DATE is varchar here, written as the
+            // 10-character day like the MAIN_STOCK row below; without it the tag never passes a report's
+            // `STK_DATE <= To` (HuId Stock, RP_HUID.cs:1838).
+            STK_DATE: vchDate.toISOString().slice(0, 10),
             VCH_TIME: sharedVoucherTime,
             VCH_TYPE: bookPolicy.vchType,
             INOUT_TYPE: 'I',

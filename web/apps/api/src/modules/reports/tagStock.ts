@@ -73,6 +73,11 @@ export interface TagStockFilters {
   aprKind?: 'party' | 'employee';
   /** MsDesignHelp = Y: design order instead of tag order. */
   designHelp?: boolean;
+  /**
+   * Apr only: the answer Yes to "Report With Other Detail Item Name..." (RP_TAG.cs:4221, ItemSub_Detl :3890). The rows
+   * also carry the BAR_IDTL items 1 to 5 of each tag (It1..It5, with pieces and weight), the four HM ids and GrCode.
+   */
+  otherItems?: boolean;
   view?: TagStockView;
 }
 export interface TagStockRow {
@@ -116,6 +121,8 @@ export interface TagStockRow {
   /** Compatibility names kept for earlier callers. */
   designNo: string | null;
   tblCode: string | null;
+  /** Apr with other detail items (RP_TAG.cs:3890): BAR_IDTL item n of the tag, its pieces and gross weight, and the HM ids. */
+  [otherItem: string]: unknown;
 }
 export interface TagStockSummaryRow {
   key: string;
@@ -189,6 +196,7 @@ const QUERY_KEYS = new Set([
   'search',
   'empIsuLess',
   'designHelp',
+  'otherItems',
   'lcCode',
 ]);
 
@@ -229,6 +237,7 @@ export function parseTagStockQuery(q: Record<string, unknown>): {
     empIsuLess: flag(q.empIsuLess),
     aprKind: aprRaw,
     designHelp: flag(q.designHelp),
+    otherItems: flag(q.otherItems),
     view: viewRaw as TagStockView,
   };
   // The location selector is present-but-blank for "every location".
@@ -492,7 +501,26 @@ export async function tagStockReport(
             ? `(SELECT d."EMP_NAME" FROM "EMP_MAST" d WHERE d."CO_CODE"=a."CO_CODE" AND d."EMP_CODE"=a."AC_CODE" LIMIT 1)`
             : 'NULL::text',
       });
-      sql = `SELECT ${selectList(k)}
+      const idtl = (n: number, expr: string, alias: string, filter = '') =>
+        `(SELECT ${expr} FROM "BAR_IDTL" l WHERE c."CO_CODE"=l."CO_CODE" AND c."LC_CODE"=l."LC_CODE"
+            AND c."TAG_NO"=l."TAG_NO" AND c."VCH_SRNO"=l."VCH_SRNO" AND l."ISR_NO"=${n}${filter}) AS "${alias}"`;
+      // ItemSub_Detl (RP_TAG.cs:3890): per tag, the item of ISR_NO n and the sums of its pieces and weight (zero rows
+      // are left out of the sums); the sums are not rounded.
+      const otherItems =
+        f.otherItems && aprKind === 'party'
+          ? `, ${[1, 2, 3, 4, 5]
+              .map((n) =>
+                [
+                  idtl(n, 'min(l."IT_CODE")', `it${n}`),
+                  idtl(n, 'sum(l."IT_PCS")', `it${n}P`, ` AND l."IT_PCS"<>0`),
+                  idtl(n, 'sum(l."IT_GWT")', `it${n}Wt`, ` AND l."IT_GWT"<>0`),
+                ].join(', '),
+              )
+              .join(', ')},
+            c."HM_ID" AS "hmId", c."HM_ID2" AS "hmId2", c."HM_ID3" AS "hmId3", c."HM_ID4" AS "hmId4",
+            b."GR_CODE" AS "grCode"`
+          : '';
+      sql = `SELECT ${selectList(k)}${otherItems}
         FROM "APR_DETL" a
         JOIN "BAR_DETL" c ON a."CO_CODE"=c."CO_CODE" AND a."LC_CODE"=c."LC_CODE" AND a."TAG_NO"=c."TAG_NO"
           AND a."VCH_SRNO"=c."VCH_SRNO" AND a."IT_CODE"=c."IT_CODE"
@@ -532,11 +560,39 @@ export async function tagStockReport(
         `m."CO_YEAR"=c."CO_YEAR"`,
         `m."TAG_NO"<>'N'`,
       ];
-      if (year) mv.push(`m."CO_YEAR"=${p.add(year)}`);
-      if (f.toDate) mv.push(`m."VCH_DATE"<=${p.add(f.toDate)}::date`);
-      if (dataType) mv.push(`m."DATA_TYPE"=${p.add(dataType)}`);
-      if (f.bookCode) mv.push(`m."CO_BOOK"=${p.add(f.bookCode)}`);
-      where.push(`(SELECT sum(${SIGNED_SUM}) FROM "MAIN_STOCK" m WHERE ${mv.join(' AND ')}) > 0`);
+      const yearParam = year ? p.add(year) : undefined;
+      const shared: string[] = [];
+      if (f.toDate) shared.push(`m."VCH_DATE"<=${p.add(f.toDate)}::date`);
+      if (dataType) shared.push(`m."DATA_TYPE"=${p.add(dataType)}`);
+      if (f.bookCode) shared.push(`m."CO_BOOK"=${p.add(f.bookCode)}`);
+      if (yearParam) mv.push(`m."CO_YEAR"=${yearParam}`);
+      mv.push(...shared);
+      const own = `(SELECT sum(${SIGNED_SUM}) FROM "MAIN_STOCK" m WHERE ${mv.join(' AND ')}) > 0`;
+      if (!yearParam) where.push(own);
+      else {
+        // Year rollover (BtmSchm.cs:2362-2470, Balance TrFr "Tag Stock"): the desktop copies every tag still in stock at
+        // the closing date into the new year (a BAR_DETL row of the new CO_YEAR with its opening movement), so the new
+        // year's Tag Stock lists it. The web keeps every year in one database and does not copy (Balance TrFr carries
+        // tag stock implicitly), so the report reads it: a tag with no BAR_DETL row in this year, whose latest earlier
+        // row is c, is in stock when its movements of this and the earlier years, dated up to To, sum above zero.
+        const same = (a: string, b: string) =>
+          `${a}."CO_CODE"=${b}."CO_CODE" AND ${a}."LC_CODE"=${b}."LC_CODE" AND ${a}."TAG_NO"=${b}."TAG_NO"
+           AND ${a}."VCH_SRNO"=${b}."VCH_SRNO" AND ${a}."IT_CODE"=${b}."IT_CODE"`;
+        const carried = [
+          same('m', 'c'),
+          `m."TAG_NO"<>'N'`,
+          // If an imported desktop year already contains a copied opening, start there: summing still
+          // earlier openings would count the same tag twice and keep a sold tag falsely in stock.
+          `m."CO_YEAR">=c."CO_YEAR"`,
+          `m."CO_YEAR"<=${yearParam}`,
+          ...shared,
+        ];
+        where.push(`(${own} OR (
+          c."CO_YEAR"<${yearParam}
+          AND c."CO_YEAR"=(SELECT max(y2."CO_YEAR") FROM "BAR_DETL" y2 WHERE ${same('y2', 'c')} AND y2."CO_YEAR"<${yearParam})
+          AND NOT EXISTS (SELECT 1 FROM "BAR_DETL" y3 WHERE ${same('y3', 'c')} AND y3."CO_YEAR"=${yearParam})
+          AND (SELECT sum(${SIGNED_SUM}) FROM "MAIN_STOCK" m WHERE ${carried.join(' AND ')}) > 0))`);
+      }
       sql += ` WHERE ${where.join(' AND ')} ORDER BY ${order('c', designOrder('c."DESIGN_NO"'), 'c."TAG_NO"')}, c."VCH_SRNO", c.row_id`;
     }
 
@@ -581,9 +637,36 @@ export async function tagStockReport(
       prName: S(r.prName),
       designNo: S(r.design),
       tblCode: S(r.counter),
+      ...(f.otherItems && tab === 'apr' && aprKind === 'party'
+        ? Object.fromEntries(
+            [1, 2, 3, 4, 5].flatMap((n) => [
+              [`it${n}`, S(r[`it${n}`])],
+              [`it${n}P`, r[`it${n}P`] === null ? null : N(r[`it${n}P`])],
+              [`it${n}Wt`, r[`it${n}Wt`] === null ? null : N(r[`it${n}Wt`])],
+            ]),
+          )
+        : {}),
+      ...(f.otherItems && tab === 'apr' && aprKind === 'party'
+        ? {
+            hmId: S(r.hmId),
+            hmId2: S(r.hmId2),
+            hmId3: S(r.hmId3),
+            hmId4: S(r.hmId4),
+            grCode: S(r.grCode),
+          }
+        : {}),
     }));
 
     const totals = totalsOf(rows);
+    const withOther =
+      f.otherItems === true && tab === 'apr' && aprKind === 'party' && view === 'tag';
+    if (withOther)
+      for (const n of [1, 2, 3, 4, 5])
+        for (const key of [`it${n}P`, `it${n}Wt`])
+          (totals as unknown as Record<string, number>)[key] = rows.reduce(
+            (sum, row) => sum + Number(row[key] ?? 0),
+            0,
+          );
     let hasEmpIssue: boolean | undefined;
     if (tab === 'apr') {
       const q: any[] = await tx.$queryRawUnsafe(
@@ -593,7 +676,8 @@ export async function tagStockReport(
       hasEmpIssue = q.length > 0;
     }
     const base = { tab, view, totals, ...(hasEmpIssue === undefined ? {} : { hasEmpIssue }) };
-    if (view === 'tag') return { ...base, columns: tagStockColumns(tab, view, aprKind), rows };
+    if (view === 'tag')
+      return { ...base, columns: tagStockColumns(tab, view, aprKind, withOther), rows };
     return { ...base, columns: tagStockColumns(tab, view, aprKind), rows: summarise(rows, view) };
   });
 }

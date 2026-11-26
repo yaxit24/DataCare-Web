@@ -34,6 +34,7 @@ import {
 import { todayLocal } from '../../../../lib/localDate';
 import { carryPurchaseHeader, carryUnmanaged } from '../../../../lib/purchaseCarry';
 import HallmarkPurchasePage from '../purchase-hm/page';
+import { useZoomOpen } from '../../../../lib/useZoomOpen';
 import { openDocument } from '../../../../lib/openDocument';
 
 interface Line {
@@ -140,6 +141,7 @@ const blank = (): Line => ({
   urdRateType: '',
 });
 const extendedLineFields: Array<[keyof Line, string]> = [
+  ['huid', 'HuId'], // TR_PURC.cs:8741, tag grid column 8
   ['tblCode', 'Counter'],
   ['designNo', 'Design'],
   ['itDesc', 'Item Desc'],
@@ -444,6 +446,8 @@ function PlainPurchasePage() {
   }
 
   /** Open a saved purchase of the selected book; resolves whether it loaded. */
+  useZoomOpen({ coBook, setCoBook, ready: Boolean(coYear && lcCode), open: openPurchase });
+
   async function openPurchase(requested: string, book = coBook): Promise<boolean> {
     const vchNo = requested.trim();
     if (!vchNo || !book) return false;

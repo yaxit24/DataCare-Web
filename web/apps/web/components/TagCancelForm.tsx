@@ -45,6 +45,7 @@ import {
 } from '../lib/tagCancelVoucher';
 import { BookSelect } from './BookSelect';
 import { useBusinessScope } from './BusinessScope';
+import { useZoomOpen } from '../lib/useZoomOpen';
 import { EntityImagePanel } from './EntityImagePanel';
 import { useGridKeyboard } from './GridKeyboard';
 import { LookupPicker, type LookupRow } from './LookupPicker';
@@ -441,6 +442,9 @@ export function TagCancelForm({ mode }: { mode: TagCancelMode }) {
       setBusy(false);
     }
   }
+
+  // Zoom from a report row (Tag Stock): ?vchNo=&coBook= opens that voucher in that book.
+  useZoomOpen({ coBook, setCoBook, ready: Boolean(coYear && lcCode), open: (no) => load(no) });
 
   async function step(direction: 'previous' | 'next') {
     const numbers = (listing?.vouchers ?? []).map((voucher) => voucher.vchNo);

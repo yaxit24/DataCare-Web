@@ -600,18 +600,55 @@ d('Tag Stock report (RP_TAG) selections, stock state and totals', () => {
       ).not.toContain('N');
   });
 
-  it('only the session year and data type count (movements of another year or type never balance a tag)', async () => {
-    const ay1 = T('AY1', 501, 'GR', 1, 1, 1, 100, 80, 5, 1, '7', 'C1', '2025-06-05');
-    await seedWith(ay1, [{ ...open(ay1) }], { year: '2025-2026' });
+  it('a data type never balances another type: Stock, Out and All of type A show no type B tag', async () => {
     const ad1 = T('AD1', 502, 'GR', 1, 1, 1, 100, 80, 5, 1, '7', 'C1', '2026-04-05');
     await seedWith(ad1, [open(ad1)], { dataType: 'B' });
     for (const tab of ['stock', 'out', 'all'])
-      for (const t of tagsOf(await run(tab, { fromDate: '2026-04-01', dataType: 'A' })))
-        expect(['AY1', 'AD1']).not.toContain(t);
-    // Without a data type (type 'C' = all) the type-B tag is visible again; the other year still is not.
-    const c = tagsOf(await run('stock', { dataType: 'C' }));
-    expect(c).toContain('AD1');
-    expect(c).not.toContain('AY1');
+      expect(tagsOf(await run(tab, { fromDate: '2026-04-01', dataType: 'A' })), tab).not.toContain(
+        'AD1',
+      );
+    // Without a data type (type 'C' = all) the type-B tag is visible again.
+    expect(tagsOf(await run('stock', { dataType: 'C' }))).toContain('AD1');
+  });
+
+  it('year rollover: a tag still in stock at the end of an earlier year is in this year, and one sold last year is not', async () => {
+    // BtmSchm.cs:2362-2470 copies the tags in stock at the closing date into the new year; the web reads them.
+    const kept = T('AY1', 501, 'GR', 1, 1, 1, 100, 80, 5, 1, '7', 'C1', '2025-06-05');
+    await seedWith(kept, [{ ...open(kept) }], { year: '2025-2026' });
+    const sold = T('AY4', 503, 'GR', 1, 1, 1, 100, 80, 5, 1, '7', 'C1', '2025-06-05');
+    await seedWith(
+      sold,
+      [{ ...open(sold) }, { sign: '-', date: '2025-12-20', type: 'SL', book: 'SL', vchNo: '0009' }],
+      { year: '2025-2026' },
+    );
+    const soldNow = T('AY5', 504, 'GR', 1, 1, 1, 100, 80, 5, 1, '7', 'C1', '2025-06-05');
+    await seedWith(soldNow, [{ ...open(soldNow) }], { year: '2025-2026' });
+    await seedMove(
+      soldNow,
+      { tag: 'AY5', sign: '-', date: '2026-05-10', type: 'SL', book: 'SL', vchNo: '0010' },
+      {},
+    );
+    // An imported copied opening in the latest earlier year supersedes earlier copies of the same tag.
+    await seedWith(soldNow, [open(soldNow)], { year: '2024-2025' });
+    const stock = tagsOf(await run('stock', { toDate: '2026-05-31' }));
+    expect(stock).toContain('AY1');
+    expect(stock).not.toContain('AY4');
+    expect(stock).not.toContain('AY5');
+    // Before the sale of this year the carried tag is still there; the movements of other tabs stay in the year.
+    expect(tagsOf(await run('stock', { toDate: '2026-05-09' }))).toContain('AY5');
+    expect(tagsOf(await run('in', { fromDate: '2026-04-01', toDate: '2026-05-31' }))).not.toContain(
+      'AY1',
+    );
+    expect(
+      tagsOf(await run('all', { fromDate: '2026-04-01', toDate: '2026-05-31' })),
+    ).not.toContain('AY1');
+    // The year it was opened in still lists it, as before.
+    const previous = await run(
+      'stock',
+      { toDate: '2025-07-01' },
+      { ...scope, CO_YEAR: '2025-2026' },
+    );
+    expect(tagsOf(previous)).toContain('AY1');
   });
 
   // ---------------------------------------------------------------- Apr (approval pending)

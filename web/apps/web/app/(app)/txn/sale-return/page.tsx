@@ -26,6 +26,7 @@ import {
   GridModeToggle,
 } from '../../../../components/ExtendedGrid';
 import { openDocument } from '../../../../lib/openDocument';
+import { useZoomOpen } from '../../../../lib/useZoomOpen';
 
 interface Line {
   itCode: string;
@@ -323,9 +324,18 @@ function LegacySaleReturnForm() {
     }
   }
 
-  async function openSaved() {
-    const vch = openVch.trim();
+  // Zoom from a report row: ?vchNo=&coBook= opens that return in that book.
+  useZoomOpen({
+    coBook,
+    setCoBook,
+    ready: Boolean(coYear && coBook),
+    open: (no) => openSaved(String(no)),
+  });
+
+  async function openSaved(requested?: string) {
+    const vch = (requested ?? openVch).trim();
     if (!coBook || !vch) return;
+    if (requested !== undefined) setOpenVch(vch);
     setErr('');
     setResult(null);
     try {
@@ -494,7 +504,7 @@ function LegacySaleReturnForm() {
                 <button
                   type="button"
                   className="ghost"
-                  onClick={openSaved}
+                  onClick={() => void openSaved()}
                   style={{ flex: 'none' }}
                 >
                   Open
