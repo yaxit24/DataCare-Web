@@ -443,6 +443,12 @@ const W3 = { from: D(10), to: D(14) };
       await wipe(OTHER_TENANT);
       await seedCompany(runtime, TENANT, '01', { coName: 'Stock Report Jewellers', lcCode: '01' });
       await seedCompany(runtime, OTHER_TENANT, '01', { coName: 'Other Tenant', lcCode: '01' });
+      // seedCompany copies the installer masters into company 01 (MS_YEAR.cs:1555-1592). The oracle below models this
+      // suite's own items, groups, products, trade types and counters (counter 001 CNT-ONE), so the installer rows of
+      // those five masters are cleared before the suite's own are inserted.
+      for (const tenant of [TENANT, OTHER_TENANT])
+        for (const table of ['ITEM_MAST', 'GROUP_MAST', 'PRODUCT_MAST', 'BAL_GR', 'TABLE_MAST'])
+          await exec(`DELETE FROM "${table}" WHERE tenant_id=$1`, tenant);
       for (const tenant of [TENANT, OTHER_TENANT]) {
         for (const co of ['01', '02']) {
           for (const it of Object.values(ITEMS))

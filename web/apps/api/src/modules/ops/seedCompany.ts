@@ -1,7 +1,7 @@
 import { round } from '@datacare/core';
 import { withTxBudget } from '../shared/txBudget.js';
 import { type BookWorkflow, workflowPolicy } from '../shared/bookPolicy.js';
-import { seedDesktopAccountGroups } from './desktopTemplateMasters.js';
+import { seedDesktopAccountGroups, seedDesktopCompanyMasters } from './desktopTemplateMasters.js';
 
 /**
  * Company provisioning seed. A brand-new web company needs the system accounts that the posting engine
@@ -66,6 +66,12 @@ const SYSTEM_ACCOUNTS: { code: string; name: string; gr: string; gstType?: strin
   { code: 'BULLION', name: 'BULLION TRADING', gr: '07' },
   { code: 'FINESALE', name: 'FINE METAL SALE', gr: '25' },
   { code: 'FINEPURC', name: 'FINE METAL PURCHASE', gr: '30' },
+  // The installer's sales-other, purchase-old-silver and purchase-other accounts (00007, 00011, 00012; groups 25/30 in
+  // AC_MAST.json), which GROUP_MAST/BAL_GR of the seeded groups name (desktopTemplateMasters.ts DESKTOP_ACCOUNT_ROLES).
+  // The desktop posts an old-silver purchase, other-type sale and purchase to them (Ac_Ledr.cs:44/50, :308).
+  { code: 'OTHSALE', name: 'SALES OTHER A/C', gr: '25' },
+  { code: 'OLDSLVPR', name: 'PURCHASE OLD SILVER A/C', gr: '30' },
+  { code: 'OTHPURC', name: 'PURCHASE OTHER A/C', gr: '30' },
   { code: 'DHRN', name: 'DHIRAN / LOAN', gr: '15' },
   { code: 'CAPITAL', name: 'CAPITAL A/C', gr: '01' },
   // N198 (G208): the sale books' slot 4 is the order-advance account the sale day book names for an adjusted
@@ -761,7 +767,13 @@ export async function seedCompany(
       coMast ||
       ((await absent('AC_GROUP', '"CO_CODE"=$2', coCode)) &&
         (await absent('AC_MAST', '"CO_CODE"=$2 AND "AC_CODE"=$3', coCode, 'CASH')));
-    if (freshChart) await seedDesktopAccountGroups(tx, absent, tenantId, coCode);
+    if (freshChart) {
+      await seedDesktopAccountGroups(tx, absent, tenantId, coCode);
+      const coSetMissing = await absent('CO_SET', '"CO_CODE"=$2', coCode);
+      await seedDesktopCompanyMasters(tx, absent, tenantId, coCode, lcCode);
+      // The desktop copies company 01's whole CO_SET row (MS_YEAR.cs:1568), so a fresh company's row comes from there.
+      if (coSetMissing && !(await absent('CO_SET', '"CO_CODE"=$2', coCode))) coSet = true;
+    }
     for (const a of SYSTEM_ACCOUNTS) {
       if (await absent('AC_MAST', '"CO_CODE"=$2 AND "AC_CODE"=$3', coCode, a.code)) {
         await tx.$executeRawUnsafe(

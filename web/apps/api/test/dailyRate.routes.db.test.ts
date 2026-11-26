@@ -54,6 +54,22 @@ const savedGrid = [
 
 type Cookie = string;
 
+// MS_RATE lists every GROUP_MAST group with GR_TOUCH <> 0 ORDER BY GR_TYPE, GR_NAME (MS_RATE.cs, see the header).
+// seedCompany copies the installer groups (MS_YEAR.cs:1555-1592) into the company, so five of them with a touch
+// (916, FGL, GO of type G; FSL, SL of type S) sit in the day grid beside this suite's DIA, G18, G22 and SLV. SR_NO is
+// the grid row, so the suite's own rows keep their order but not their numbers.
+const SEEDED_TOUCH_GROUPS = ['916', 'FGL', 'GO', 'FSL', 'SL'];
+const OWN_GROUPS = ['DIA', 'G18', 'G22', 'SLV', 'NIL'];
+const seededRow = (grCode: string, grName: string, grType: string, touch: number) => ({
+  grCode,
+  grName,
+  grType,
+  touch,
+  taxPct: 0,
+  prTouch: 0,
+  rate: 0,
+});
+
 (enabled ? describe : describe.skip)('N208 Daily Rate is the desktop MS_RATE through HTTP', () => {
   let owner: PrismaClient;
   let runtime: PrismaClient;
@@ -196,6 +212,9 @@ type Cookie = string;
           prTouch: 0,
           rate: 0,
         },
+        seededRow('916', '916 GOLD ORNA', 'G', 92),
+        seededRow('FGL', 'FINE GOLD', 'G', 100),
+        seededRow('GO', 'GOLD ORNAMENTS', 'G', 92),
         {
           grCode: 'G18',
           grName: 'Gold 18K',
@@ -214,6 +233,8 @@ type Cookie = string;
           prTouch: 92,
           rate: 0,
         },
+        seededRow('FSL', 'FINE SILVER', 'S', 100),
+        seededRow('SL', 'SILVER ORNAMENTS', 'S', 80),
         {
           grCode: 'SLV',
           grName: 'Silver 925',
@@ -225,7 +246,7 @@ type Cookie = string;
         },
       ],
     });
-    expect(response.json().groups).toHaveLength(4);
+    expect(response.json().groups).toHaveLength(4 + SEEDED_TOUCH_GROUPS.length);
   });
 
   it('saves one row per priced group with the desktop columns, scoped to this location and year', async () => {
@@ -256,9 +277,9 @@ type Cookie = string;
     });
     expect(await rateRows('01', DAY)).toEqual([
       row(1, 'DIA', 'D', 0, { touch: 100, tax: 0, rate: 5000, taxrate: 5000, prrate: 0 }),
-      row(2, 'G18', 'G', 76, { touch: 75, tax: 0, rate: 54000, taxrate: 54000, prrate: 54720 }),
-      row(3, 'G22', 'G', 92, { touch: 91.6, tax: 3, rate: 64031, taxrate: 65952, prrate: 66240 }),
-      row(4, 'SLV', 'S', 90, { touch: 92.5, tax: 3, rate: 763, taxrate: 786, prrate: 765 }),
+      row(5, 'G18', 'G', 76, { touch: 75, tax: 0, rate: 54000, taxrate: 54000, prrate: 54720 }),
+      row(6, 'G22', 'G', 92, { touch: 91.6, tax: 3, rate: 64031, taxrate: 65952, prrate: 66240 }),
+      row(9, 'SLV', 'S', 90, { touch: 92.5, tax: 3, rate: 763, taxrate: 786, prrate: 765 }),
     ]);
     // The other location's day is untouched, and GROUP_MAST.GR_RATE changes only at location '00'.
     expect((await rateRows('02', DAY)).map((r) => [r.gr, r.rate, r.user])).toEqual([
@@ -268,7 +289,12 @@ type Cookie = string;
       `SELECT "GR_CODE" gr,"GR_RATE"::float rate FROM "GROUP_MAST" WHERE tenant_id=$1 ORDER BY "GR_CODE"`,
       tenantId,
     );
-    expect(groupRates.every((g) => g.rate === 11)).toBe(true);
+    expect(groupRates.filter((g) => OWN_GROUPS.includes(g.gr)).every((g) => g.rate === 11)).toBe(
+      true,
+    );
+    expect(groupRates.filter((g) => !OWN_GROUPS.includes(g.gr)).every((g) => g.rate === 0)).toBe(
+      true,
+    );
 
     const reopened = await request(adminCookie, 'GET', `/daily-rate?date=${DAY}`);
     expect(reopened.json()).toMatchObject({
@@ -280,8 +306,13 @@ type Cookie = string;
       mainUser: ADMIN,
       groups: [
         { grCode: 'DIA', rate: 5000, taxRate: 5000, prRate: 0 },
+        { grCode: '916', rate: 0 },
+        { grCode: 'FGL', rate: 0 },
+        { grCode: 'GO', rate: 0 },
         { grCode: 'G18', rate: 54000, taxRate: 54000, prRate: 54720 },
         { grCode: 'G22', rate: 64031, taxRate: 65952, prRate: 66240 },
+        { grCode: 'FSL', rate: 0 },
+        { grCode: 'SL', rate: 0 },
         { grCode: 'SLV', rate: 763, taxRate: 786, prRate: 765 },
       ],
     });
@@ -307,8 +338,8 @@ type Cookie = string;
     expect(resaved.statusCode, resaved.body).toBe(201);
     expect((await rateRows('01', DAY2)).map((r) => [r.sr, r.gr, r.user])).toEqual([
       [1, 'DIA', CLERK],
-      [3, 'G22', CLERK],
-      [4, 'SLV', CLERK],
+      [6, 'G22', CLERK],
+      [9, 'SLV', CLERK],
     ]);
   });
 
@@ -389,7 +420,10 @@ type Cookie = string;
       `SELECT "GR_CODE" gr,"GR_RATE"::float rate FROM "GROUP_MAST" WHERE tenant_id=$1 ORDER BY "GR_CODE"`,
       tenantId,
     );
-    expect(groupRates).toEqual([
+    expect(groupRates.filter((g) => !OWN_GROUPS.includes(g.gr)).every((g) => g.rate === 0)).toBe(
+      true,
+    );
+    expect(groupRates.filter((g) => OWN_GROUPS.includes(g.gr))).toEqual([
       { gr: 'DIA', rate: 5000 },
       { gr: 'G18', rate: 54000 },
       { gr: 'G22', rate: 64031 },
