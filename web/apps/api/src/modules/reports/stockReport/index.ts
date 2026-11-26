@@ -351,12 +351,13 @@ export function exportCsv(result: StockResult): string {
 
 /** The entry screen of each stock-moving book of the Lite edition; the other books' menus are not in Lite. */
 const OPENING = { path: '/txn/tag-opening', form: 'Inventory/Tag Opening' };
-const ZOOM_TARGETS: Record<string, { path: string; form: string }> = {
+const ZOOM_TARGETS: Record<string, { path: string; form: string; mode?: string }> = {
   OPSTK: OPENING, // RP_STOCK.cs:5265
   'TAG OPENING': OPENING, // the web's Tag Opening book (seedCompany.ts, book TOP)
-  'TAG GEN': OPENING, // RP_STOCK.cs:5272
-  'JDTR TAG': OPENING,
-  'MFG TAG': OPENING,
+  // RP_STOCK.cs:5272 opens TR_TAG_OPBL for TAG GEN, JDTR TAG and MFG TAG alike. The web's Tag Opening screen shows
+  // OPSTK and TAG GEN books only (`?mode=TAG GEN` for the latter); JDTR TAG and MFG TAG books exist in no Lite
+  // book list, so they open nothing here.
+  'TAG GEN': { ...OPENING, mode: 'TAG GEN' },
   'TAG CANCEL': { path: '/txn/tag-cancel', form: 'Inventory/Tag Cancel' }, // RP_STOCK.cs:5281
   'STOCK ADJUST': { path: '/txn/stock-adjust', form: 'Inventory/Stock Adjust' }, // RP_STOCK.cs:5288
   'APR ISU': { path: '/txn/tour', form: 'Sales/Tour / Approval Sale' }, // RP_STOCK.cs:5295
@@ -372,7 +373,16 @@ export const ZOOM_ITEM_OPENING = 'This Is a Item Wise Opening Stock Voucher You 
 export type ZoomAnswer =
   | { action: 'none' }
   | { action: 'refuse'; message: string }
-  | { action: 'open'; path: string; vchNo: string; coBook: string; coYear: string; lcCode: string };
+  | {
+      action: 'open';
+      path: string;
+      vchNo: string;
+      coBook: string;
+      coYear: string;
+      lcCode: string;
+      /** The screen's mode, where one screen serves two books (Tag Opening: `TAG GEN`). */
+      mode?: string;
+    };
 
 /**
  * What a double click on a movement row does. Nothing opens while the companies' stock is merged. The target menu's
@@ -402,12 +412,9 @@ export async function stockZoom(
   });
   if (book.merged) return { action: 'none' };
   const wanted = vchNo.trim();
-  // A book the location does not define opens nothing, except the Item Opening rows (a short voucher number), whose
-  // refusal does not depend on the book's entry screen.
-  if (book.main === null)
-    return wanted.length < 3
-      ? { action: 'refuse', message: ZOOM_ITEM_OPENING }
-      : { action: 'none' };
+  // The desktop's order (RP_STOCK.cs:5228-5263): a book BOOK_DATA does not hold opens nothing and says nothing; then
+  // the book's menu View right (an explicit N); only then the short voucher number (Item Opening) refusal.
+  if (book.main === null) return { action: 'none' };
   const target = ZOOM_TARGETS[book.main];
   if (target && !(await canView(target.form))) return { action: 'refuse', message: ZOOM_NO_RIGHTS };
   if (wanted.length < 3) return { action: 'refuse', message: ZOOM_ITEM_OPENING };
@@ -419,6 +426,7 @@ export async function stockZoom(
     coBook,
     coYear: session.coYear,
     lcCode: session.lcCode,
+    ...(target.mode ? { mode: target.mode } : {}),
   };
 }
 

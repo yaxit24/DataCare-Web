@@ -19,7 +19,6 @@ export const NO_PRINT_RIGHTS = 'You Have No Print Rights.....';
 
 /** MDI_FORM.cs:7047: the menu refuses a user without the View right with this text and the screen stays closed. */
 export const NO_RIGHTS = 'You Have No Rights.....';
-const ITEM_OPENING_REFUSAL = 'This Is a Item Wise Opening Stock Voucher You Cant Zoom ....';
 
 const BASE = '/reports/stock-report';
 
@@ -145,12 +144,8 @@ export function useStockReport() {
     // Nothing opens while the companies' stock is merged (RP_STOCK.cs:5225).
     if (merged.current) return { action: 'none' };
     setMessage('');
-    // A voucher number shorter than three characters is an Item Opening row (RP_STOCK.cs:5263): its book is not one an
-    // entry screen opens, so the refusal does not need the server.
-    if ((row.vchNo ?? '').trim().length < 3) {
-      setMessage(ITEM_OPENING_REFUSAL);
-      return { action: 'refuse', message: ITEM_OPENING_REFUSAL };
-    }
+    // The server answers in the desktop's order: unknown book, then View right, then the Item Opening refusal
+    // (RP_STOCK.cs:5228-5263).
     if (!row.coBook) return null;
     try {
       const answer = await get<ZoomAnswer>(

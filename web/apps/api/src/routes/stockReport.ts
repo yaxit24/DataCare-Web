@@ -147,9 +147,11 @@ export function registerStockReportRoutes(app: FastifyInstance, h: StockReportRo
     return reply.send(await itemLedgerItems(prisma, session(req), String(q.itemType ?? '')));
   });
 
-  /** The item ledger of the ticked items (RP_STOCK.cs:5946-5976), as data and as a PDF (Print right). */
+  /**
+   * The item ledger of the ticked items (RP_STOCK.cs:5946-5976), as data and as a PDF. The InOut button
+   * (BtnDelete_Click :5855) and its Ok (btnOk_Click :5924) never read UserPrint, so View is the only right.
+   */
   app.get('/reports/stock-report/item-ledger', auth as any, async (req, reply) => {
-    if (!guard(req, reply, 'print')) return;
     try {
       return reply.send(await itemLedger(prisma, session(req), query(req)));
     } catch (error) {
@@ -158,7 +160,6 @@ export function registerStockReportRoutes(app: FastifyInstance, h: StockReportRo
     }
   });
   app.get('/reports/stock-report/item-ledger.pdf', auth as any, async (req, reply) => {
-    if (!guard(req, reply, 'print')) return;
     try {
       const table = itemLedgerTable(await itemLedger(prisma, session(req), query(req)));
       if (!sendReportPdf) return reply.code(501).send({ error: 'pdf-unavailable' });

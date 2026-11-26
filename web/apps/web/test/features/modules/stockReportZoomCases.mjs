@@ -151,6 +151,79 @@ export const zoomCases = [
       }),
   ),
   C(
+    'zoom.screen-with-two-books',
+    'T05',
+    'read-only',
+    'RP_STOCK.cs:5240-5600: the zoom names the voucher\'s book (CurBook); a screen that has two books of the family still opens that voucher',
+    async (ctx) =>
+      onData(ctx, async () => {
+        const { page } = await ctx.session();
+        const stockAdjust = TARGETS[5];
+        // A second STOCK ADJUST book in this location: the screen has two books and no single default.
+        await data.exec(
+          ctx,
+          `INSERT INTO "BOOK_DATA" SELECT (jsonb_populate_record(NULL::"BOOK_DATA", to_jsonb(b) || '{"CO_BOOK":"SJ2","BOOK_SNAME":"SJ2"}'::jsonb)).*
+             FROM "BOOK_DATA" b WHERE b.tenant_id=$1 AND b."CO_CODE"='01' AND b."LC_CODE"=$2 AND b."CO_BOOK"='SAJ'`,
+          data.LC,
+        );
+        try {
+          const row = await zoomRow(page, stockAdjust[1], stockAdjust[2]);
+          await page.waitForURL((url) => url.pathname === stockAdjust[3], { timeout: 15_000 });
+          await page.getByText(stockAdjust[4](row[M.vch])).first().waitFor({ timeout: 15_000 });
+          const book = page.getByRole('combobox', { name: 'Configured book', exact: true });
+          assert.equal(await book.inputValue(), 'SAJ', 'the voucher\'s own book is selected');
+          assert.equal(await book.locator('option[value]:not([value=""])').count(), 2);
+        } finally {
+          await data.exec(
+            ctx,
+            `DELETE FROM "BOOK_DATA" WHERE tenant_id=$1 AND "CO_CODE"='01' AND "LC_CODE"=$2 AND "CO_BOOK"='SJ2'`,
+            data.LC,
+          );
+        }
+        return {
+          observation: 'with two Stock Adjust books the zoom still loaded the voucher in book SAJ',
+          expected: { book: 'SAJ' },
+        };
+      }),
+  ),
+  C(
+    'zoom.tag-gen-opens-only-tag-entry',
+    'T05',
+    'read-only',
+    'RP_STOCK.cs:5272: a TAG GEN voucher opens TR_TAG_OPBL, which the web shows as Only Tag Entry (?mode=TAG GEN)',
+    async (ctx) =>
+      onData(ctx, async () => {
+        const { page } = await ctx.session();
+        // The report's answer for a TAG GEN row (the API case in stockReport.db.test.ts proves the server side); the
+        // browser must carry the mode into the address.
+        await page.route('**/api/reports/stock-report/zoom*', (route) =>
+          route.fulfill({
+            json: {
+              action: 'open',
+              path: '/txn/tag-opening',
+              vchNo: 'T10',
+              coBook: 'TGN',
+              coYear: data.YEAR,
+              lcCode: data.LC,
+              mode: 'TAG GEN',
+            },
+          }),
+        );
+        try {
+          await zoomRow(page, 'opening-pcs', (r) => r[M.tag] === T.T1);
+          await page.waitForURL((url) => url.pathname === '/txn/tag-opening', { timeout: 15_000 });
+          assert.equal(new URL(page.url()).searchParams.get('mode'), 'TAG GEN');
+          await page.getByRole('heading', { name: /^Only Tag Entry/ }).waitFor({ timeout: 15_000 });
+        } finally {
+          await page.unroute('**/api/reports/stock-report/zoom*');
+        }
+        return {
+          observation: 'the zoom address carried mode=TAG GEN and Tag Opening showed Only Tag Entry',
+          expected: { mode: 'TAG GEN' },
+        };
+      }),
+  ),
+  C(
     'zoom.needs-target-read-right',
     'T05',
     'refusal',

@@ -1209,8 +1209,6 @@ const PRINT_ROUTES = new Set([
   'GET /reports/stock-report/export.csv',
   'GET /reports/stock-report/export.xlsx',
   'GET /reports/stock-report/export.pdf',
-  'GET /reports/stock-report/item-ledger',
-  'GET /reports/stock-report/item-ledger.pdf',
   'GET /reports/purchase-report/export.csv',
   'GET /reports/purchase-report/export.xlsx',
   'GET /reports/purchase-report/export.pdf',

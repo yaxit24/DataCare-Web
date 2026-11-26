@@ -146,4 +146,12 @@ export const DRILL_COLUMNS: Array<{
 export type ZoomAnswer =
   | { action: 'none' }
   | { action: 'refuse'; message: string }
-  | { action: 'open'; path: string; vchNo: string; coBook: string; coYear: string; lcCode: string };
+  | {
+      action: 'open';
+      path: string;
+      vchNo: string;
+      coBook: string;
+      coYear: string;
+      lcCode: string;
+      mode?: string;
+    };

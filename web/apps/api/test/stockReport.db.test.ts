@@ -110,6 +110,8 @@ const BOOKS: Array<[string, string, string, string]> = [
   ['TCN', 'Tag Cancel', 'TCN', 'TAG CANCEL'],
   ['AIS', 'Approval Issue', 'AIS', 'APR ISU'],
   ['TRF', 'Tag Transfer', 'TRF', 'TAG TRFR'],
+  ['TGN', 'Only Tag Entry', 'TGN', 'TAG GEN'],
+  ['JDT', 'Jobwork Tag', 'JDT', 'JDTR TAG'],
 ];
 
 interface Item {
@@ -1143,6 +1145,29 @@ const W3 = { from: D(10), to: D(14) };
           message: 'This Is a Item Wise Opening Stock Voucher You Cant Zoom ....',
         });
         expect(await zoom('printer', 'NOPE', 'M10')).toEqual({ error: 'book-unavailable' });
+        // TAG GEN opens Tag Opening in its Only Tag Entry mode (RP_STOCK.cs:5272, mode=TAG GEN); JDTR TAG has no Lite book list.
+        await exec(
+          `INSERT INTO "USER_SET"(tenant_id,"CO_CODE","LC_CODE","USER_NAME","MAIN_MENU","SUB_MENU","FRM_VIEW","FRM_EDIT","FRM_DELETE","FRM_PRINT")
+           VALUES($1,'01','01','printer','Inventory','Tag Opening','Y','N','N','N')`,
+          TENANT,
+        );
+        try {
+          expect(await zoom('printer', 'TGN', 'T10')).toEqual({
+            action: 'open',
+            path: '/txn/tag-opening',
+            vchNo: 'T10',
+            coBook: 'TGN',
+            coYear: YEAR,
+            lcCode: '01',
+            mode: 'TAG GEN',
+          });
+          expect(await zoom('printer', 'JDT', 'T10')).toEqual({ action: 'none' });
+        } finally {
+          await exec(
+            `DELETE FROM "USER_SET" WHERE tenant_id=$1 AND "USER_NAME"='printer' AND "SUB_MENU"='Tag Opening'`,
+            TENANT,
+          );
+        }
         // The Tag Transfer book has no Lite screen.
         expect(await zoom('printer', 'TRF', 'M12')).toEqual({ action: 'none' });
         // No View right on the Stock Report: the route itself is refused.
@@ -1156,7 +1181,7 @@ const W3 = { from: D(10), to: D(14) };
         ).toBe(403);
       });
 
-      it('the InOut item ledger covers the ticked items up to To, needs the Print right and a selection (RP_STOCK.cs:5927-5976)', async () => {
+      it('the InOut item ledger covers the ticked items up to To, needs a selection and no Print right (RP_STOCK.cs:5927-5976)', async () => {
         const url = (extra: Record<string, string>) =>
           `/reports/stock-report/item-ledger?${qs({ fromDate: W1.from, toDate: W1.to, ...extra })}`;
         const a = ITEMS.A.code;
@@ -1191,7 +1216,8 @@ const W3 = { from: D(10), to: D(14) };
         expect((await get('printer', url({ items: '' }))).json().message).toBe(
           'Item Selection Not Done...',
         );
-        expect((await get('viewer', url({ items: a }))).statusCode).toBe(403);
+        // InOut never reads UserPrint (RP_STOCK.cs:5855-5976): View is enough.
+        expect((await get('viewer', url({ items: a }))).statusCode).toBe(200);
         const pdf = await get(
           'printer',
           url({ items: a }).replace('item-ledger?', 'item-ledger.pdf?'),

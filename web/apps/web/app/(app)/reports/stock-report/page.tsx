@@ -380,6 +380,7 @@ export default function StockReportPage() {
             void s.zoom(row).then((a) => {
               if (a?.action !== 'open') return;
               const q = new URLSearchParams({ vchNo: a.vchNo, coBook: a.coBook, lcCode: a.lcCode });
+              if (a.mode) q.set('mode', a.mode);
               router.push(`${a.path}?${q.toString()}`);
             });
           }}

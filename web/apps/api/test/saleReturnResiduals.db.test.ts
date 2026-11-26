@@ -334,6 +334,20 @@ databaseDescribe('WP-27 Sales Return residuals (writer)', () => {
     expect(none.lines).toEqual([]);
   });
 
+  it('sales-return.stock.karigar-columns: MAIN_STOCK KR_* carry the returned line at the SL_DETL_RTN scales (Ac_Stock.cs:247)', async () => {
+    const saved = await createSaleReturn(runtime, input(), [
+      { ...LINE_R, netWt: 10.12345, westPct: 1.234567, tagCost: 12.3456 },
+    ]);
+    const [m] = await rows<Record<string, number>>(
+      `SELECT "KR_NWT"::float nwt,"KR_TOUCH"::float touch,"KR_WEST"::float west,"KR_FINE"::float fine,"KR_COST"::float cost
+         FROM "MAIN_STOCK" WHERE tenant_id=$1 AND "CO_BOOK"='SRT' AND "VCH_NO"=$2 AND "TR_TYPE" IS NOT NULL LIMIT 1`,
+      TENANT,
+      String(saved.vchNo).padStart(5, '0'),
+    );
+    expect(m).toMatchObject({ nwt: 10.123, touch: 91.6, west: 1.2346, cost: 12.35 });
+    expect(m?.fine).toBeGreaterThan(0);
+  });
+
   it('sales-return.refusal.employee-mandatory and field.employee-route', async () => {
     await sql(`UPDATE "CO_SET" SET "EMP_CODE_MANDATORY"='Y' WHERE tenant_id=$1`, TENANT);
     await expectRefusedWithoutWrite(
