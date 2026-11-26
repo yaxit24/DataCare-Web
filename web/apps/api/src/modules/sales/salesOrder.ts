@@ -1143,8 +1143,7 @@ function prepareSalesOrderCreate(input: SalesOrderInput, lifecycle?: OrderWriteC
           IT_TYPE: txt(c.in.itType, 1), // mSG[i,49] :9260
           PR_CODE: txt(c.in.prCode, 2), // mSG[i,51] :9261
           // mSG[i,69] :9266. An edit that omits it keeps the saved line's value: the delete path restores BAR_DETL.TBL_CODE from it.
-          // A picked tag's own counter (:7597), never the request's.
-          OLD_TBL_CODE: newTags.has(i)
+          OLD_TBL_CODE: newTags.has(i) // a picked tag's own counter (:7597), never the request's
             ? newTags.get(i)!.tblCode.slice(0, 3) || null
             : txt(c.in.oldTblCode ?? previousLines.get(parentNumbers[i]!)?.OLD_TBL_CODE, 3),
           // mSG[i,70] :9267, salesOrderTags.ts orderLineTagStockLess.
