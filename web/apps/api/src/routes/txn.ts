@@ -4432,7 +4432,7 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
     pdfRenderer: deps.pdfRenderer,
   }); // WP-12 Purchase Rpt (RP_ALL)
   registerTagStockRoutes(app, { prisma, auth, guard, scopeOf });
-  registerStockReportRoutes(app, { prisma, auth, guard, readScope }); // WP-16 Stock Report (RP_STOCK)
+  registerStockReportRoutes(app, { prisma, auth, guard, readScope, sendReportPdf }); // WP-16 Stock Report (RP_STOCK)
 
   // Screens for four reports registered only in REPORT_BUILDERS (exports worked, screens 404'd —
   // PARITY-EVALUATION-2026-09-28 D3; the HuId Report moved to its own plugin above). Each calls the

@@ -19,6 +19,7 @@ import {
   type ApprovalExtendedField,
   type ApprovalLine,
 } from './ApprovalGrid';
+import { useVoucherZoom } from '../lib/voucherZoom';
 
 interface ApprovalView {
   voucherNo: string;
@@ -125,8 +126,18 @@ export default function ApprovalVoucherForm({
     setStatus({ kind: 'ok', text: `Loaded voucher ${view.voucherNo}` });
   };
 
-  async function loadVoucher() {
-    const number = voucherNo.trim();
+  useVoucherZoom({
+    ready: !!coBook,
+    book: coBook,
+    setBook: setCoBook,
+    load: (vchNo) => {
+      setVoucherNo(vchNo);
+      return loadVoucher(vchNo);
+    },
+  });
+
+  async function loadVoucher(requested?: string) {
+    const number = (requested ?? voucherNo).trim();
     if (!number) {
       setStatus({ kind: 'err', text: 'Please Insert VchNo and try' });
       return;

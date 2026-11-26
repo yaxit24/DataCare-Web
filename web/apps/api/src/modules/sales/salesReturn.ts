@@ -85,6 +85,10 @@ type VoucherKey = {
 const num = (v: unknown): number => (v == null ? 0 : Number(v));
 const str = (v: unknown): string => String(v ?? '').trim();
 const round2 = (n: number): number => Math.round((n + Number.EPSILON) * 100) / 100;
+const roundTo = (n: number, scale: number): number => {
+  const f = 10 ** scale;
+  return Math.round((n + Number.EPSILON) * f) / f;
+};
 
 function keyOf(s: VoucherScope, vchNo: number): VoucherKey {
   return {
@@ -634,6 +638,14 @@ export async function createSaleReturn(
       LBR_AMT: line.calc.labour,
       OTH_AMT: num(line.in.otherAmount),
       NET_AMT: line.calc.net,
+      // Ac_Stock.cs:247 copies the returned line into the karigar columns (KR_NWT, KR_TOUCH, KR_WEST, KR_FINE and
+      // KR_COST = TAG_COST). Stock Report's movement grid shows KR_FINE for a '+' row (RP_STOCK.cs:2896), so a return
+      // must carry its fine there or the report shows 0.000.
+      KR_NWT: roundTo(num(line.in.netWt), 3), // the SL_DETL_RTN column scales: NET_WT 3, WEST 4, TAG_COST 2
+      KR_TOUCH: num(line.in.touch),
+      KR_WEST: roundTo(num(line.in.westPct), 4),
+      KR_FINE: line.calc.fine,
+      KR_COST: roundTo(num(line.in.tagCost), 2),
     }));
 
     await insertRowTx(tx, 'TEMP_BOOK_DATA', tenantId, {
