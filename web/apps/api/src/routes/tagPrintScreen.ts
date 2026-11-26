@@ -118,7 +118,7 @@ export function registerTagPrintScreenRoutes(
       tagPrintStage(prisma, scope(req), {
         book: String(b.bookCode ?? ''),
         labelSkip: b.labelSkip,
-        file: String(b.file ?? ''),
+        file: b.file === undefined || b.file === null ? undefined : String(b.file),
         tags: Array.isArray(b.tags) ? b.tags : [],
       }),
     );

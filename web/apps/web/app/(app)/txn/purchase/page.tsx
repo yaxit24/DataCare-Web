@@ -141,6 +141,7 @@ const blank = (): Line => ({
   urdRateType: '',
 });
 const extendedLineFields: Array<[keyof Line, string]> = [
+  ['huid', 'HuId'], // TR_PURC.cs:8741, tag grid column 8
   ['tblCode', 'Counter'],
   ['designNo', 'Design'],
   ['itDesc', 'Item Desc'],

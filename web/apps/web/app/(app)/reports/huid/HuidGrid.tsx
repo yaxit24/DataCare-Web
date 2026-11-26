@@ -27,10 +27,14 @@ export function cellText(row: HuidRow, key: string): string {
   return String(value);
 }
 
-export const HuidGrid = forwardRef<HTMLDivElement, { result: HuidResult | null }>(function HuidGrid(
-  { result },
-  ref,
-) {
+export const HuidGrid = forwardRef<
+  HTMLDivElement,
+  {
+    result: HuidResult | null;
+    /** Double click on a row: the desktop opens the row's voucher (RP_HUID.cs:2252 DGV_DoubleClick). */
+    onOpen?: (row: HuidRow) => void;
+  }
+>(function HuidGrid({ result, onOpen }, ref) {
   const visible = (result?.columns ?? []).filter((column) => !column.hidden);
   const rows = result?.rows ?? [];
   return (
@@ -67,7 +71,11 @@ export const HuidGrid = forwardRef<HTMLDivElement, { result: HuidResult | null }
         </thead>
         <tbody>
           {rows.map((row, index) => (
-            <tr role="row" key={`${row.tagNo}-${row.tagId ?? index}-${index}`}>
+            <tr
+              role="row"
+              key={`${row.tagNo}-${row.tagId ?? index}-${index}`}
+              onDoubleClick={() => onOpen?.(row)}
+            >
               {visible.map((column) => (
                 <td
                   data-col={column.key}

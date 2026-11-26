@@ -44,10 +44,14 @@ const auditRows = (ctx) =>
   );
 
 /** The next voucher number of a book: what the failed attempts must not have taken. */
-export async function nextVoucherNo(ctx, headerTable, book) {
+export async function nextVoucherNo(ctx, headerTable, book, scope) {
+  // The web numbers per company, location, year and book (numbering.ts currentMaxVoucherNo). Without a scope the
+  // prediction spans every year, which is wrong once another module has written the same book in another year.
+  const where = scope ? ` AND "CO_CODE"=$3 AND "LC_CODE"=$4 AND "CO_YEAR"=$5` : '';
+  const args = scope ? [book, scope.coCode, scope.lcCode, scope.coYear] : [book];
   const [{ n }] = await ctx.rows(
-    `SELECT (coalesce(max("VCH_NO"::int),0)+1)::int n FROM "${headerTable}" WHERE tenant_id=$1 AND "CO_BOOK"=$2`,
-    book,
+    `SELECT (coalesce(max("VCH_NO"::int),0)+1)::int n FROM "${headerTable}" WHERE tenant_id=$1 AND "CO_BOOK"=$2${where}`,
+    ...args,
   );
   return n;
 }
@@ -59,13 +63,21 @@ export async function nextVoucherNo(ctx, headerTable, book) {
  * @param {string}   o.book      CO_BOOK of the voucher; the trigger fires only for this tenant and book
  * @param {string}   o.headerTable  the voucher header table, to predict the next number
  * @param {() => Promise<any>} o.submit  click Save on the filled screen and return the response
+ * @param {string[]} [o.updatedTables] tables a real save changes by UPDATE (a counter row such as SRNO_MAST); a fault on
+ *   an UPDATE of each is injected as well, and they count as written in the final comparison
+ * @param {{coCode: string, lcCode: string, coYear: string}} [o.scope] the session's company, location and year, to
+ *   predict the number in the same scope the web numbers in
+ * @param {number} [o.expectedNo] the number the web itself just gave this scope (a probe saved and deleted again: MAX+1
+ *   reuses it), when the prediction cannot see every table the book is numbered from
  * @param {boolean} [o.fixedVoucherNo=false] Skip numbering for replacements and fixed opening keys.
  * @param {(response: any) => Promise<string>} [o.voucherNoOf]
  */
 export async function rollbackMatrix(ctx, o) {
   const { tables, book, headerTable, submit } = o;
   const voucherNoOf = o.voucherNoOf ?? (async (response) => String((await response.json()).vchNo));
-  const expectedNo = o.fixedVoucherNo ? null : await nextVoucherNo(ctx, headerTable, book);
+  const expectedNo = o.fixedVoucherNo
+    ? null
+    : (o.expectedNo ?? (await nextVoucherNo(ctx, headerTable, book, o.scope)));
   const before = await tenantFingerprint(ctx);
   const auditBefore = await auditRows(ctx);
 
@@ -118,7 +130,28 @@ export async function rollbackMatrix(ctx, o) {
     }
   }
 
-  const pending = attempts.map((a) => a.pendingElsewhere);
+  // Counter rows are updated in place: an INSERT trigger cannot reach them, so fault their UPDATE.
+  for (const table of o.updatedTables ?? []) {
+    const response = await withWriteFault(ctx, table, 'UPDATE', submit);
+    assert.ok(
+      response.status() >= 400,
+      `fault on the update of ${table}: the save answered ${response.status()}`,
+    );
+    assert.deepEqual(
+      changedTables(before, await tenantFingerprint(ctx)),
+      [],
+      `fault on the update of ${table}: every table of the tenant is unchanged`,
+    );
+    attempts.push({
+      table: `${table} (update)`,
+      status: response.status(),
+      pendingElsewhere: null,
+    });
+  }
+
+  const pending = attempts
+    .filter((a) => a.pendingElsewhere !== null)
+    .map((a) => a.pendingElsewhere);
   assert.equal(
     Math.max(...pending),
     tables.length - 1,
@@ -136,7 +169,11 @@ export async function rollbackMatrix(ctx, o) {
   const rawNo = await voucherNoOf(response);
   const vchNo = o.fixedVoucherNo ? rawNo : rawNo.padStart(5, '0');
   if (!o.fixedVoucherNo)
-    assert.equal(vchNo, String(expectedNo).padStart(5, '0'), 'no voucher number was consumed');
+    assert.equal(
+      vchNo,
+      String(expectedNo).padStart(5, '0'),
+      `no voucher number was consumed: saved ${vchNo}, expected ${expectedNo}`,
+    );
 
   // The Idempotency-Key guard (N52) records its receipt beside the voucher in the same transaction. It is not part of
   // the voucher's write set, so it is left out here; a faulted save still had to leave it unchanged (checked above).
@@ -145,7 +182,7 @@ export async function rollbackMatrix(ctx, o) {
   );
   assert.deepEqual(
     [...written].sort(),
-    [...tables].sort(),
+    [...tables, ...(o.updatedTables ?? [])].sort(),
     'the faulted tables are exactly the tables a real save writes',
   );
 

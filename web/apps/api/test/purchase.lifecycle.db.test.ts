@@ -1558,4 +1558,74 @@ databaseDescribe('database-backed purchase voucher lifecycle', () => {
       ]),
     ).rejects.toThrow(/numeric taxRatePct/);
   });
+
+  /**
+   * TR_PURC_HM.cs:8185-8197: a Tag Wise Purchase edit rewrites a tag's BAR_DETL row only when that line's weights
+   * or text columns changed, so an unchanged tag keeps its STK_DATE when only the voucher date moves. The plain
+   * TR_PURC deletes every tag and rewrites it with the voucher date (TR_PURC.cs:13298, :13347).
+   */
+  it('a TAG PURCHASE edit keeps an unchanged tag STK_DATE; a changed tag and a plain purchase take the new date', async () => {
+    await owner.$executeRawUnsafe(
+      `INSERT INTO "BOOK_DATA"(tenant_id,"CO_CODE","LC_CODE","CO_BOOK","BOOK_NAME","BOOK_SNAME","MAIN_BOOK",
+         "BOOK_INOUT","CUR_USE","BOOK_TBL_NAME")
+       VALUES ($1,$2,$3,'TPS','Tag Wise Purchase S','CPS','TAG PURCHASE','I','Y','PR_DATA')`,
+      TENANT,
+      CO,
+      LC,
+    );
+    await owner.$executeRawUnsafe(
+      `INSERT INTO "BOOK_DETL"(tenant_id,"CO_CODE","LC_CODE","CO_BOOK","SR_NO","AC_CODE","MAIN_BOOK","BOOK_INOUT")
+       VALUES ($1,$2,$3,'TPS',1,'CTRL','TAG PURCHASE','I'),($1,$2,$3,'TPS',2,'CASH','TAG PURCHASE','I'),
+              ($1,$2,$3,'TPS',3,'ROUND','TAG PURCHASE','I')`,
+      TENANT,
+      CO,
+      LC,
+    );
+    const later = '2024-04-20';
+    const lines = [
+      { ...firstLines[0]!, tagNo: 'TSK001' },
+      { ...firstLines[0]!, tagNo: 'TSK002', grossWt: 5, netWt: 5, metalAmount: 500 },
+    ];
+    const stkDates = async (book: string, vchNo: number) =>
+      (await owner.$queryRawUnsafe(
+        `SELECT "TAG_NO" tag,"STK_DATE" stk,"VCH_DATE"::text vch FROM "BAR_DETL"
+          WHERE tenant_id=$1 AND "CO_BOOK"=$2 AND "VCH_NO"=$3 ORDER BY "SR_NO"`,
+        TENANT,
+        book,
+        String(vchNo).padStart(5, '0'),
+      )) as Array<{ tag: string; stk: string; vch: string }>;
+    const editDated = async (book: string, vchNo: number, change: boolean) => {
+      const bookScope = { ...scope, coBook: book };
+      const reopened = (await getPurchase(runtime, bookScope, vchNo)) as {
+        lines: Array<Record<string, unknown>>;
+      };
+      const edited = reopened.lines.map((line, i) =>
+        change && i === 1 ? { ...line, grossWt: 6, netWt: 6 } : line,
+      );
+      await editPurchase(
+        runtime,
+        purchaseInput({ scope: bookScope, vchDate: later }),
+        edited as never,
+        vchNo,
+        await versionOfPurchase(runtime, bookScope, vchNo),
+      );
+    };
+    const tagged = await createPurchase(
+      runtime,
+      purchaseInput({ scope: { ...scope, coBook: 'TPS' } }),
+      lines,
+    );
+    expect((await stkDates('TPS', tagged.vchNo)).map((r) => r.stk)).toEqual([DAY, DAY]);
+    await editDated('TPS', tagged.vchNo, true);
+    expect(await stkDates('TPS', tagged.vchNo)).toEqual([
+      { tag: 'TSK001', stk: DAY, vch: later },
+      { tag: 'TSK002', stk: later, vch: later },
+    ]);
+
+    const plain = await createPurchase(runtime, purchaseInput(), [
+      { ...firstLines[0]!, tagNo: 'TSK003' },
+    ]);
+    await editDated(BOOK, plain.vchNo, false);
+    expect(await stkDates(BOOK, plain.vchNo)).toEqual([{ tag: 'TSK003', stk: later, vch: later }]);
+  }, 30_000);
 });

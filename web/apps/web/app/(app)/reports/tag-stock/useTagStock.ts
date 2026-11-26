@@ -1,10 +1,13 @@
 'use client';
 import { useCallback, useRef, useState } from 'react';
-import { ApiError, get, getPageContextState } from '../../../../lib/api';
+import { ApiError, get, getDownload, getPageContextState } from '../../../../lib/api';
 import { openDocument } from '../../../../lib/openDocument';
 import { todayLocal } from '../../../../lib/localDate';
 import { isoToDesktop, parseDesktopDate } from './dateText';
 import type { TagStockFilters, TagStockReport, TagStockTab, TagStockView } from './types';
+
+/** The desktop text when the print right is missing (RP_TAG.cs:3259). */
+export const NO_PRINT_RIGHTS = 'You Have No Print Rights.....';
 
 const blankFilters = (lcCode: string): TagStockFilters => {
   const today = isoToDesktop(todayLocal());
@@ -92,6 +95,14 @@ export function useTagStock() {
         if (tab === 'apr' && data.hasEmpIssue && window.confirm('Tour Outword Stock Show....?')) {
           query = queryFor(tab, view, { aprKind: 'employee' }) ?? query;
           data = await get<TagStockReport>(`/reports/tag-stock?${query}`);
+        } else if (
+          // RP_TAG.cs:4210, :4221: otherwise Apr asks whether to show the other detail items of each tag.
+          tab === 'apr' &&
+          view === 'tag' &&
+          window.confirm('Report With Other Detail Item Name...')
+        ) {
+          query = queryFor(tab, view, { otherItems: '1' }) ?? query;
+          data = await get<TagStockReport>(`/reports/tag-stock?${query}`);
         }
         if (ticket !== seq.current) return;
         setReport(data);
@@ -125,12 +136,41 @@ export function useTagStock() {
     clearGrid();
   }, [clearGrid]);
 
-  const exportAs = useCallback((ext: 'csv' | 'xlsx', search: string) => {
-    if (!ran.current) return;
-    const q = new URLSearchParams(ran.current);
-    if (search.trim()) q.set('search', search.trim());
-    openDocument(`/api/reports/tag-stock.${ext}?${q.toString()}`);
-  }, []);
+  /**
+   * Excel and CSV download the file; Print and Summ open the print window. Each first asks for the document, so a user
+   * without the print right sees the desktop text (RP_TAG.cs:3257-3260 BtnSave_Click) instead of a window holding a
+   * JSON error, and the window opens only for a document that exists.
+   */
+  const exportAs = useCallback(
+    async (
+      ext: 'csv' | 'xlsx' | 'print' | 'summ-product' | 'summ-item',
+      search: string,
+    ): Promise<void> => {
+      if (!ran.current) return;
+      const q = new URLSearchParams(ran.current);
+      if (search.trim()) q.set('search', search.trim());
+      let path = `/reports/tag-stock.${ext}?${q.toString()}`;
+      if (ext !== 'csv' && ext !== 'xlsx') {
+        if (ext !== 'print') q.set('kind', ext);
+        path = `/reports/tag-stock/print?${q.toString()}`;
+      }
+      try {
+        await getDownload(path);
+      } catch (e) {
+        setError(
+          e instanceof ApiError && e.status === 403
+            ? NO_PRINT_RIGHTS
+            : e instanceof ApiError
+              ? (e.body?.message ?? e.body?.error ?? e.message)
+              : 'failed',
+        );
+        return;
+      }
+      setError('');
+      openDocument(`/api${path}`);
+    },
+    [],
+  );
 
   return { filters, setFilters, report, error, setError, busy, run, clearGrid, reset, exportAs };
 }

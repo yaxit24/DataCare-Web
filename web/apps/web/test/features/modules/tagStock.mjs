@@ -1,5 +1,18 @@
 import assert from 'node:assert/strict';
 import { FIXTURE_MANIFEST, USERS } from '../fixtures/catalogue.mjs';
+import { reopenApproval } from './approvalHelpers.mjs';
+import {
+  cancelTag,
+  deleteCancel,
+  deleteOpening,
+  deleteReturn,
+  deleteSale,
+  issueApproval,
+  openTags,
+  returnTag,
+  sellTag,
+  today,
+} from './inventoryFlows.mjs';
 
 /**
  * Feature: Report → Tag Stock (desktop RP_TAG, MDI_FORM.cs:8891-8900; web /reports/tag-stock). WP-15.
@@ -17,7 +30,7 @@ import { FIXTURE_MANIFEST, USERS } from '../fixtures/catalogue.mjs';
  *
  * The cases seed their tags as rows (BAR_DETL + MAIN_STOCK + APR_DETL, as a tag opening, sale, cancel, return and
  * approval issue would write them) and isolate them from every other module's tags with the Search box (TagNo
- * contains the case prefix). Journeys through the real voucher screens are listed as pending below.
+ * contains the case prefix). Journeys below operate the real voucher screens.
  */
 const TENANT = 'feature-e2e';
 const as = (user, slot) => ({
@@ -34,19 +47,16 @@ const C = (id, group, kind, source, run, extra = {}) => ({
   source,
   applicable: true,
   requiredEvidence:
-    kind === 'output'
-      ? ['browser', 'expected', 'output']
-      : kind === 'refusal'
-        ? ['browser', 'expected', 'database']
-        : ['browser', 'expected'],
+    kind === 'mutation'
+      ? ['browser', 'expected', 'database', 'downstream']
+      : kind === 'output'
+        ? ['browser', 'expected', 'output']
+        : kind === 'refusal'
+          ? ['browser', 'expected', 'database']
+          : ['browser', 'expected'],
   run,
   ...extra,
 });
-const blocked = (name, group, reason) => ({
-  ...C(`${name}.pending`, group, 'read-only', `Playbook ${group}`, async () => ({})),
-  blocked: reason,
-});
-
 const notApplicable = (name, group, source, reason) => ({
   ...C(`${name}.not-applicable`, group, 'read-only', source, async () => ({})),
   applicable: false,
@@ -110,6 +120,14 @@ async function ensureMasters(ctx) {
       type,
       pr,
       gr,
+    );
+    await x(
+      `INSERT INTO "GROUP_MAST"(tenant_id,"CO_CODE","GR_CODE","GR_NAME","GR_TYPE","TRAD_TYPE","SALE_AC","PURC_AC","HSN_CODE")
+       SELECT $1::text,'01',$2::text,$3::text,$4::text,'GO','SALES','PURCHASE','7113' WHERE NOT EXISTS
+         (SELECT 1 FROM "GROUP_MAST" WHERE tenant_id=$1::text AND "CO_CODE"='01' AND "GR_CODE"=$2::text)`,
+      gr,
+      `TS Group ${gr}`,
+      type,
     );
     await x(
       `INSERT INTO "PRODUCT_MAST"(tenant_id,"CO_CODE","PR_CODE","PR_NAME")
@@ -246,9 +264,26 @@ const totalsOf = (rows) => ({
 
 // ───────────── the screen ─────────────
 const num = (text) => Number(String(text).replaceAll(',', '') || 0);
-async function openScreen(page) {
+/**
+ * The harness accepts every dialog. The desktop asks "Report With Other Detail Item Name..." on every Apr run
+ * (RP_TAG.cs:4221), and "Yes" adds columns, so the screen's cases answer No unless a case asks for the columns.
+ */
+function answerDialogs(page, { otherItems = false } = {}) {
+  page.removeAllListeners('dialog');
+  const seen = [];
+  page.on('dialog', async (dialog) => {
+    seen.push(dialog.message());
+    if (/^Report With Other Detail Item Name/.test(dialog.message()) && !otherItems)
+      await dialog.dismiss();
+    else await dialog.accept();
+  });
+  return seen;
+}
+async function openScreen(page, options) {
+  const seen = answerDialogs(page, options);
   await page.goto('/reports/tag-stock');
   await page.getByRole('heading', { name: 'Tag Stock', exact: true }).waitFor();
+  return seen;
 }
 const setDates = async (page, from, to) => {
   await page.getByLabel('From', { exact: true }).fill(ui(from));
@@ -303,6 +338,101 @@ function assertFooter(footer, rows) {
   for (const k of Object.keys(FOOT)) close(num(footer[k]), want[k], `footer ${k}`);
 }
 const tagsOf = (grid) => grid.rows.map((r) => r.TagNo);
+const tagsFrom = (report) => report.rows.map((r) => r.tagNo);
+
+// ───────────── the lifecycle journey: vouchers made through the screens ─────────────
+const tagStockRead = async (page, query) => {
+  const q = new URLSearchParams({ view: 'tag', ...query });
+  const response = await page.request.get(`/api/reports/tag-stock?${q.toString()}`);
+  assert.equal(response.status(), 200, await response.text());
+  return response.json();
+};
+const inStockNow = async (page, tags) => {
+  const found = [];
+  for (const tag of tags) {
+    const report = await tagStockRead(page, {
+      tab: 'stock',
+      tagNo: tag,
+      fromDate: `${startYear}-04-01`,
+      toDate: today().iso,
+    });
+    if (report.rows.length) found.push(tag);
+  }
+  return found;
+};
+const movementsOf = (ctx, tags) =>
+  ctx.rows(
+    `SELECT "TAG_NO" tag,"VCH_TYPE" vt,"BOOK_NAME" bn,"ITM_SIGN" sg,"VCH_NO" vch FROM "MAIN_STOCK"
+      WHERE tenant_id=$1 AND "TAG_NO"=ANY($2::text[]) ORDER BY "TAG_NO",row_id`,
+    tags,
+  );
+const newLife = () => ({ tags: [], steps: [], vouchers: { sales: [] } });
+/**
+ * Five tags opened through Tag Opening: tag 1 stays, tags 2 and 3 are sold (Sales Invoice), tag 4 is cancelled (Tag
+ * Cancel), tag 3 comes back (Sales Return) and tag 5 goes out on approval (Approval Issue). The Stock of the five after
+ * each step is recorded as indexes into the tag list.
+ */
+async function lifecycle(ctx, page, life) {
+  const steps = life.steps;
+  const record = async (name, tags) => {
+    const live = await inStockNow(page, tags);
+    steps.push({ name, inStock: live.map((t) => tags.indexOf(t)).sort() });
+  };
+  const opened = await openTags(
+    page,
+    Array.from({ length: 5 }, () => ({ gross: '10.5', net: '10', touch: '91.6' })),
+  );
+  const tags = opened.tagNos;
+  life.tags = tags;
+  life.vouchers.opening = opened.vchNo;
+  await record('opened', tags);
+  life.vouchers.sales.push(await sellTag(page, tags[1]));
+  life.vouchers.sales.push(await sellTag(page, tags[2]));
+  await record('sold', tags);
+  life.vouchers.cancel = await cancelTag(page, tags[3]);
+  await record('cancelled', tags);
+  life.vouchers.returned = await returnTag(page, life.vouchers.sales[1]);
+  await record('returned', tags);
+  const issue = await issueApproval(ctx, tags[4], { page });
+  life.vouchers.issue = issue.voucherNo;
+  await record('approval issued', tags);
+  return life;
+}
+/**
+ * The journey cases leave nothing behind: the vouchers are deleted through their screens, last first (an approval
+ * issue through its own Delete), and the rows of the tags are swept for what a failed run left.
+ */
+async function purge(ctx, life, page) {
+  const tags = life.tags;
+  const attempt = async (work) => {
+    try {
+      await work();
+    } catch {
+      // already deleted by the case, or never created
+    }
+  };
+  if (page) {
+    const { vouchers } = life;
+    if (vouchers.issue)
+      await attempt(async () => {
+        await reopenApproval(page, 'issue', vouchers.issue);
+        await Promise.all([
+          page.waitForResponse((r) => r.request().method() === 'DELETE'),
+          page.getByTestId('approval-issue-delete').click(),
+        ]);
+      });
+    if (vouchers.returned) await attempt(() => deleteReturn(page, vouchers.returned));
+    if (vouchers.cancel) await attempt(() => deleteCancel(page, vouchers.cancel));
+    for (const no of vouchers.sales ?? []) await attempt(() => deleteSale(page, no));
+    if (vouchers.opening) await attempt(() => deleteOpening(page, vouchers.opening));
+  }
+  for (const table of ['APR_DETL', 'MAIN_STOCK', 'BAR_IDTL', 'BAR_DETL'])
+    await ctx.owner.$executeRawUnsafe(
+      `DELETE FROM "${table}" WHERE tenant_id=$1 AND "TAG_NO"=ANY($2::text[])`,
+      TENANT,
+      tags,
+    );
+}
 
 const tagStockCases = [
   C(
@@ -649,18 +779,13 @@ const tagStockCases = [
     'RP_TAG.cs:4777 an empty bound set shows an empty grid with no message box.',
     async (ctx) => {
       const { page } = await ctx.session();
-      let dialogs = 0;
-      page.on('dialog', async (d) => {
-        dialogs += 1;
-        await d.dismiss();
-      });
-      await openScreen(page);
+      const dialogs = await openScreen(page);
       await page.getByLabel('TagNo', { exact: true }).fill(`NOSUCH${RUN}`);
       await runMode(page, 'Stock Tag', 'stock');
       const grid = await readGrid(page);
       assert.equal(grid.rows.length, 0);
       assert.equal(num(grid.footer.qty), 0);
-      assert.equal(dialogs, 0);
+      assert.deepEqual(dialogs, []);
       return {
         observation: 'empty grid, zero footer, no popup',
         expected: 'empty result without a message',
@@ -841,30 +966,717 @@ const tagStockCases = [
       };
     },
   ),
-  blocked(
+  C(
     'drill.voucher-zoom',
     'T05',
-    'Voucher double-click zoom (gap 10, cases drill.*) is not built: the voucher screens have no open-by-number entry from a report.',
+    'read-only',
+    'RP_TAG.cs:8917-9140 DGV_DoubleClick: a double click opens the voucher of the row in its own screen on the row VchNo (Tag Opening, Sale, Sale Return, Tag Cancel, Approval Issue); nothing opens in Tag Summ or for another location (:8920); a target without the View right answers "You Have No Rights..." (:8943), also when the rights row is missing (WP-15 decision 4)',
+    async (ctx) => {
+      const { page } = await ctx.session();
+      const life = newLife();
+      const rights = [];
+      const arrive = async (target, pattern) => {
+        try {
+          await target.waitForURL(pattern, { timeout: 15000 });
+        } catch {
+          throw new Error(`expected ${pattern}, the page is ${target.url()}`);
+        }
+      };
+      try {
+        await lifecycle(ctx, page, life);
+        const { tags, vouchers } = life;
+        const range = [`${startYear}-04-01`, today().iso];
+        const run = async (target, tab, tag) => {
+          await openScreen(target);
+          await setDates(target, ...range);
+          await target.getByLabel('TagNo', { exact: true }).fill(tag);
+          await runMode(
+            target,
+            tab === 'stock' ? 'Stock Tag' : tab === 'out' ? 'Out Tag' : 'All Tag',
+            tab,
+          );
+          return readGrid(target);
+        };
+        const zoomed = async (target, tab, tag, rowText) => {
+          const grid = await run(target, tab, tag);
+          const row = target
+            .getByTestId('tag-stock-grid')
+            .locator('tbody tr')
+            .filter({ hasText: rowText });
+          const index = grid.rows.findIndex((r) => rowText.test(Object.values(r).join(' ')));
+          assert.ok(index >= 0, `${tag}: no ${tab} row ${rowText}`);
+          await row.first().dblclick();
+          return grid.rows[index];
+        };
+        const same = (shown, wanted) => assert.equal(Number(shown), Number(wanted));
+        // Tag Opening: the Stock row of tag 1 is its opening voucher.
+        let row = await zoomed(page, 'stock', tags[0], /./);
+        await arrive(page, /\/txn\/tag-opening/);
+        await page.getByTestId('tag-opening-loaded').waitFor();
+        same(await page.getByLabel('Voucher No', { exact: true }).inputValue(), row.VchNo);
+        same(vouchers.opening, row.VchNo);
+        // Sale: the Out row of tag 2.
+        row = await zoomed(page, 'out', tags[1], /./);
+        await arrive(page, /\/txn\/sales/);
+        await page
+          .getByTestId('sales-loaded')
+          .filter({ hasText: `Loaded #${row.VchNo}` })
+          .waitFor();
+        same(vouchers.sales[0], row.VchNo);
+        // Sale Return: the last "+" row of the returned tag 3 in All (the first "+" is its opening).
+        const all = await run(page, 'all', tags[2]);
+        const returned = all.rows.filter((r) => r.Sign === '+').at(-1);
+        await page
+          .getByTestId('tag-stock-grid')
+          .locator('tbody tr')
+          .filter({ hasText: /\+/ })
+          .last()
+          .dblclick();
+        await arrive(page, /\/txn\/sale-return/);
+        await page
+          .getByText(`Editing return #${Number(returned.VchNo)}`, { exact: false })
+          .waitFor();
+        same(vouchers.returned, returned.VchNo);
+        // Tag Cancel: the Out row of tag 4.
+        row = await zoomed(page, 'out', tags[3], /./);
+        await arrive(page, /\/txn\/tag-cancel/);
+        await page
+          .getByTestId('tag-cancel-status')
+          .filter({ hasText: `Loaded voucher ${row.VchNo}` })
+          .waitFor();
+        same(vouchers.cancel, row.VchNo);
+        // Approval Issue: the Out row of tag 5.
+        row = await zoomed(page, 'out', tags[4], /./);
+        await arrive(page, /\/txn\/tour/);
+        await page.getByText(`Loaded voucher ${row.VchNo}`, { exact: true }).waitFor();
+        same(vouchers.issue, row.VchNo);
+        rights.push('five screens opened on the row voucher number');
+
+        // No Tag Summ zoom, and none for another location.
+        await openScreen(page);
+        await setDates(page, ...range);
+        await page.getByLabel('RptType', { exact: true }).selectOption('summ');
+        await runMode(page, 'Stock Tag', 'stock');
+        await page.getByTestId('tag-stock-grid').locator('tbody tr').first().dblclick();
+        await page.waitForTimeout(800);
+        assert.match(new URL(page.url()).pathname, /\/reports\/tag-stock/);
+        await page.getByLabel('RptType', { exact: true }).selectOption('tag');
+        await page.getByLabel('TagNo', { exact: true }).fill(tags[0]);
+        await runMode(page, 'Stock Tag', 'stock');
+        // The Location box now names another location than the session's (RP_TAG.cs:8920 tLcCode.Text != MLc_code).
+        await page.locator('#ts-location').fill('L2');
+        await page.getByTestId('tag-stock-grid').locator('tbody tr').first().dblclick();
+        await page.waitForTimeout(800);
+        assert.match(new URL(page.url()).pathname, /\/reports\/tag-stock/);
+        rights.push('Tag Summ and a second location open nothing');
+
+        // Rights: the clerk may run Tag Stock; the Sale menu is denied (explicit N), then Tag Cancel has no row.
+        const sub = async (menu, view) =>
+          ctx.owner.$executeRawUnsafe(
+            `UPDATE "USER_SET" SET "FRM_VIEW"=$3 WHERE tenant_id=$1 AND "USER_NAME"=$2 AND "SUB_MENU"=$4`,
+            TENANT,
+            USERS.clerk.user,
+            view,
+            menu,
+          );
+        await ctx.owner.$executeRawUnsafe(
+          `INSERT INTO "USER_SET"(tenant_id,"CO_CODE","LC_CODE","USER_NAME","MAIN_MENU","SUB_MENU","FRM_VIEW","FRM_EDIT","FRM_DELETE","FRM_PRINT")
+           VALUES ($1,'01','01',$2,'Inventory','Tag Stock','Y','N','N','N')`,
+          TENANT,
+          USERS.clerk.user,
+        );
+        try {
+          const clerk = (await ctx.session(as(USERS.clerk.user))).page;
+          await sub('Sales Invoice', 'N');
+          await run(clerk, 'out', tags[1]);
+          await clerk.getByTestId('tag-stock-grid').locator('tbody tr').first().dblclick();
+          await clerk
+            .locator('.msg[role="alert"]')
+            .filter({ hasText: 'You Have No Rights...' })
+            .waitFor();
+          assert.match(new URL(clerk.url()).pathname, /\/reports\/tag-stock/);
+          await run(clerk, 'out', tags[3]);
+          await clerk.getByTestId('tag-stock-grid').locator('tbody tr').first().dblclick();
+          await clerk
+            .locator('.msg[role="alert"]')
+            .filter({ hasText: 'You Have No Rights...' })
+            .waitFor();
+          assert.match(new URL(clerk.url()).pathname, /\/reports\/tag-stock/);
+          const zoom = await clerk.request.get(
+            `/api/reports/tag-stock/zoom?bookCode=TGC&vchNo=${vouchers.cancel}`,
+          );
+          assert.equal(zoom.status(), 403);
+          rights.push('explicit N and a missing rights row both refused');
+        } finally {
+          await sub('Sales Invoice', 'Y');
+          await ctx.owner.$executeRawUnsafe(
+            `DELETE FROM "USER_SET" WHERE tenant_id=$1 AND "USER_NAME"=$2 AND "SUB_MENU"='Tag Stock'`,
+            TENANT,
+            USERS.clerk.user,
+          );
+        }
+        return {
+          observation: rights.join('; '),
+          expected: 'the voucher screens open on the row voucher; the refusals open nothing',
+        };
+      } finally {
+        await purge(ctx, life, page);
+      }
+    },
   ),
-  blocked(
+  C(
     'drill.approval-other-items',
     'T05',
-    'The Apr other-item columns (BAR_IDTL It1..It5, gap 13) are not built.',
+    'read-only',
+    'RP_TAG.cs:4221 "Report With Other Detail Item Name..." then ItemSub_Detl (:3890, :3892): Apr rows also carry It1..It5 with pieces and weight from BAR_IDTL (ISR_NO 1 to 5, summed per tag), HM_ID, HM_ID2..4 and GR_CODE; the footer sums the pieces and weights',
+    async (ctx) => {
+      const { page } = await ctx.session();
+      const seed = await seedB(ctx, { only: ['6'] });
+      const six = seed.byN['6'];
+      await ctx.owner.$executeRawUnsafe(
+        `UPDATE "BAR_DETL" SET "HM_ID"='HU6A',"HM_ID2"='HU6B' WHERE tenant_id=$1 AND "TAG_NO"=$2`,
+        TENANT,
+        six.tag,
+      );
+      for (const [isr, item, pcs, gwt] of [
+        [1, 'ST1', 2, 0.5],
+        [2, 'ST2', 1, 0.25],
+      ])
+        await ctx.owner.$executeRawUnsafe(
+          `INSERT INTO "BAR_IDTL"(tenant_id,"CO_CODE","LC_CODE","CO_YEAR","CO_BOOK","VCH_NO","SR_NO","ISR_NO","TAG_NO","VCH_SRNO","IT_CODE","IT_PCS","IT_GWT")
+           VALUES ($1,'01','01',$2,'TOP','0000',$3,$3,$4,$5,$6,$7,$8)`,
+          TENANT,
+          YEAR,
+          isr,
+          six.tag,
+          six.id,
+          item,
+          pcs,
+          gwt,
+        );
+      const dialogs = await openScreen(page, { otherItems: true });
+      await setDates(page, iso(4, 1), iso(5, 31));
+      await filterRows(page, seed.prefix);
+      await runMode(page, 'Apr Pending', 'apr');
+      await page.waitForFunction(() =>
+        [...document.querySelectorAll('[data-testid="tag-stock-grid"] thead th')].some(
+          (th) => th.textContent.trim() === 'It1',
+        ),
+      );
+      const grid = await readGrid(page);
+      assert.deepEqual(dialogs, ['Report With Other Detail Item Name...']);
+      assert.deepEqual(tagsOf(grid), [six.tag]);
+      const row = grid.rows[0];
+      assert.deepEqual(
+        ['It1', 'It1P', 'It1Wt', 'It2', 'It2P', 'It2Wt', 'It3', 'It3P', 'It3Wt'].map((h) => row[h]),
+        ['ST1', '2', '0.500', 'ST2', '1', '0.250', '', '', ''],
+      );
+      assert.deepEqual(
+        ['It4', 'It5', 'HM_ID', 'HM_ID2', 'HM_ID3', 'GR_CODE'].map((h) => row[h]),
+        ['', '', 'HU6A', 'HU6B', '', 'T1'],
+      );
+      assert.equal(num(grid.footer.it1P), 2);
+      close(num(grid.footer.it2Wt), 0.25, 'footer It2Wt');
+      // Answering No keeps the plain Apr columns.
+      const plain = await ctx.session();
+      const noDialogs = await openScreen(plain.page);
+      await filterRows(plain.page, seed.prefix);
+      await runMode(plain.page, 'Apr Pending', 'apr');
+      const without = await readGrid(plain.page);
+      assert.deepEqual(noDialogs, ['Report With Other Detail Item Name...']);
+      assert.ok(!without.heads.includes('It1'));
+      return {
+        observation: `Apr row ${six.tag}: ${['It1', 'It1P', 'It1Wt', 'It2', 'It2P', 'It2Wt'].map((h) => `${h}=${row[h]}`).join(' ')}`,
+        expected: 'It1 ST1 2 0.500, It2 ST2 1 0.250, It3 to It5 blank; No keeps the plain columns',
+      };
+    },
   ),
-  blocked(
+  C(
     'output.print-window',
     'T16',
-    'The Print window and Crystal templates TagStkRpt/TagStkSummRpt (gap 11) are not built; only CSV and Excel exports exist.',
+    'output',
+    'RP_TAG.cs:8578-8754 BtnPrint_Click and :8755-8897 BtnSumm_Click: the print window is titled "Tag Wise Stock As on Date " + From + " To " + To (:8696, :8626-8635, branch prefix with the location), lists the grid columns and the footer totals; Summ asks "Product Wise Group Report" and prints TagStkSummRpt (Yes) or TagStkItemSumRpt (No)',
+    async (ctx) => {
+      const { page } = await ctx.session();
+      const seed = await seedB(ctx);
+      await openScreen(page);
+      await setDates(page, iso(4, 1), iso(5, 31));
+      await filterRows(page, seed.prefix);
+      await runMode(page, 'Stock Tag', 'stock');
+      const grid = await readGrid(page);
+      const read = async (popup) => {
+        await popup.waitForURL(/\/api\/reports\/tag-stock\/print/);
+        await popup.getByTestId('print-title').waitFor();
+        return popup.evaluate(() => ({
+          template: document.body.dataset.template,
+          title: document.querySelector('[data-testid="print-title"]').textContent,
+          heads: [...document.querySelectorAll('thead th')].map((th) => th.textContent.trim()),
+          rows: [...document.querySelectorAll('tbody tr')].map((tr) =>
+            [...tr.querySelectorAll('td')].map((td) => td.textContent.trim()),
+          ),
+          footer: Object.fromEntries(
+            [...document.querySelectorAll('[data-testid="print-footer"] td[data-col]')].map(
+              (td) => [td.dataset.col, td.textContent.trim()],
+            ),
+          ),
+        }));
+      };
+      const [popup] = await Promise.all([
+        page.waitForEvent('popup'),
+        page.getByRole('button', { name: 'Print', exact: true }).click(),
+      ]);
+      const printed = await read(popup);
+      assert.equal(
+        printed.title,
+        `Branch - 01 Tag Wise Stock As on Date ${ui(iso(4, 1))} To ${ui(iso(5, 31))}`,
+      );
+      assert.equal(printed.template, 'TagStkRpt');
+      assert.deepEqual(printed.heads, grid.heads);
+      assert.equal(printed.rows.length, grid.rows.length);
+      assert.deepEqual(
+        printed.rows.map((r) => r[printed.heads.indexOf('TagNo')]).sort(),
+        tagsOf(grid).sort(),
+      );
+      for (const key of Object.keys(FOOT))
+        close(num(printed.footer[key]), num(grid.footer[key]), key);
+      assertFooter(printed.footer, inStock(seed, iso(5, 31)));
+      await popup.close();
+      // Summ: the confirm answers pick the template.
+      const answers = [];
+      page.removeAllListeners('dialog');
+      page.on('dialog', async (dialog) => {
+        answers.push(dialog.message());
+        await dialog.accept();
+      });
+      const [yes] = await Promise.all([
+        page.waitForEvent('popup'),
+        page.getByRole('button', { name: 'Summ', exact: true }).click(),
+      ]);
+      const product = await read(yes);
+      assert.equal(product.template, 'TagStkSummRpt');
+      assert.match(product.title, /^Branch - 01 Tag Wise Stock Summary As on Date /);
+      assert.equal(product.heads[0], 'Product');
+      await yes.close();
+      page.removeAllListeners('dialog');
+      page.on('dialog', async (dialog) => {
+        answers.push(dialog.message());
+        await dialog.dismiss();
+      });
+      const [no] = await Promise.all([
+        page.waitForEvent('popup'),
+        page.getByRole('button', { name: 'Summ', exact: true }).click(),
+      ]);
+      const item = await read(no);
+      assert.equal(item.template, 'TagStkItemSumRpt');
+      assert.equal(item.heads[0], 'Item');
+      assert.deepEqual(answers, ['Product Wise Group Report', 'Product Wise Group Report']);
+      await no.close();
+      return {
+        observation: `${printed.title} | ${printed.heads.length} columns, ${printed.rows.length} rows | Summ ${product.template} / ${item.template}`,
+        expected: 'the desktop titles, the grid columns and the footer totals',
+        output: Buffer.from(
+          [printed.title, printed.heads.join(','), ...printed.rows.map((r) => r.join(','))].join(
+            '\n',
+          ),
+        ),
+      };
+    },
   ),
-  blocked(
+  C(
     'rights.print-user',
     'T11',
-    'A List-only browser user is not in the fixture catalogue; the Print right on CSV and Excel is covered at the API by tagStock.routes.db.test.ts.',
+    'refusal',
+    'RP_TAG.cs:3257-3260 Excel (BtnSave_Click) answers "You Have No Print Rights....." without FRM_PRINT; Print and Summ are guarded the same way here; the List right still runs the report',
+    async (ctx) => {
+      await ctx.owner.$executeRawUnsafe(
+        `INSERT INTO "USER_SET"(tenant_id,"CO_CODE","LC_CODE","USER_NAME","MAIN_MENU","SUB_MENU","FRM_VIEW","FRM_EDIT","FRM_DELETE","FRM_PRINT")
+         VALUES ($1,'01','01',$2,'Inventory','Tag Stock','Y','N','N','N')`,
+        TENANT,
+        USERS.clerk.user,
+      );
+      try {
+        const seed = await seedB(ctx, { only: ['1', '2'] });
+        const { page } = await ctx.session(as(USERS.clerk.user));
+        await openScreen(page);
+        await setDates(page, iso(4, 1), iso(5, 31));
+        await filterRows(page, seed.prefix);
+        const response = await runMode(page, 'Stock Tag', 'stock');
+        const grid = await readGrid(page);
+        assert.equal(grid.rows.length, 2, 'the List right runs the report');
+        const popups = [];
+        page.on('popup', (popup) => popups.push(popup));
+        const refused = [];
+        for (const name of ['Excel', 'CSV', 'Print', 'Summ']) {
+          await page.getByRole('button', { name, exact: true }).click();
+          await page
+            .locator('.msg[role="alert"]')
+            .filter({ hasText: 'You Have No Print Rights.....' })
+            .waitFor();
+          refused.push(name);
+          await page.getByLabel('Search', { exact: true }).fill(seed.prefix);
+        }
+        assert.equal(popups.length, 0, 'no window or file opened');
+        const url = new URL(response.url());
+        for (const path of ['tag-stock.csv', 'tag-stock.xlsx', 'tag-stock/print']) {
+          const direct = await page.request.get(`/api/reports/${path}${url.search}`);
+          assert.equal(direct.status(), 403, path);
+        }
+        return {
+          observation: `buttons ${refused.join(', ')} refused with the desktop text; the three routes answered 403`,
+          expected: 'You Have No Print Rights..... and no document',
+          database: {
+            rights: await ctx.rows(
+              `SELECT "FRM_VIEW" v,"FRM_PRINT" p FROM "USER_SET" WHERE tenant_id=$1 AND "USER_NAME"=$2 AND "SUB_MENU"='Tag Stock'`,
+              USERS.clerk.user,
+            ),
+          },
+        };
+      } finally {
+        await ctx.owner.$executeRawUnsafe(
+          `DELETE FROM "USER_SET" WHERE tenant_id=$1 AND "USER_NAME"=$2 AND "SUB_MENU"='Tag Stock'`,
+          TENANT,
+          USERS.clerk.user,
+        );
+      }
+    },
   ),
-  blocked(
+  C(
+    'concurrent.read-during-write',
+    'T12',
+    'read-only',
+    'One report read is one snapshot: while a sale of a tag commits, each Stock answer is either the state before (the tag listed, Qty n) or after (the tag gone, Qty n-1), never a mix; the totals always equal their rows',
+    async (ctx) => {
+      const { page } = await ctx.session();
+      const seed = await seedB(ctx, { only: ['1', '2', '7'] });
+      const url = `/api/reports/tag-stock?tab=stock&view=tag&fromDate=${iso(4, 1)}&toDate=${iso(5, 31)}&search=${seed.prefix}`;
+      const read = async () => {
+        const response = await page.request.get(url);
+        assert.equal(response.status(), 200);
+        return response.json();
+      };
+      const log = [];
+      const sold = [];
+      for (const t of seed.tags) {
+        const before = tagsFrom(await read());
+        assert.ok(before.includes(t.tag));
+        const [, ...answers] = await Promise.all([
+          ctx.owner.$executeRawUnsafe(
+            `INSERT INTO "MAIN_STOCK"(tenant_id,"CO_CODE","LC_CODE","CO_YEAR","CO_BOOK","VCH_NO","VCH_DATE","STK_DATE","VCH_TYPE",
+               "BOOK_NAME","IT_CODE","TAG_NO","TBL_CODE","ITM_SIGN","ITM_PCS","ITM_GWT","ITM_NWT","VCH_SRNO")
+             VALUES ($1::text,'01','01',$2::text,'SL',$3::text,$4::date,$5::text,'SL','SL',$6::text,$7::text,$8::text,'-',$9::numeric,$10::numeric,$11::numeric,$12::float8)`,
+            TENANT,
+            YEAR,
+            `9${t.n}00`,
+            iso(5, 20),
+            t.stk,
+            t.it,
+            t.tag,
+            t.ctr,
+            t.pcs,
+            t.gwt,
+            t.nwt,
+            t.id,
+          ),
+          ...Array.from({ length: 6 }, () => read()),
+        ]);
+        sold.push(t.tag);
+        for (const answer of answers) {
+          const tags = tagsFrom(answer);
+          const isBefore = tags.includes(t.tag);
+          const expected = before.filter((x) => isBefore || x !== t.tag);
+          assert.deepEqual(tags, expected, `${t.tag}: before or after, never a mix`);
+          assert.equal(answer.totals.qty, answer.rows.length);
+          close(
+            answer.totals.grossWt,
+            answer.rows.reduce((a, r) => a + r.grossWt, 0),
+            'totals follow the rows',
+          );
+          log.push(isBefore ? 'before' : 'after');
+        }
+        assert.ok(!tagsFrom(await read()).includes(t.tag), 'after the commit the tag is gone');
+      }
+      assert.deepEqual(tagsFrom(await read()), []);
+      return {
+        observation: `${log.length} reads while ${sold.length} sales committed: ${log.filter((x) => x === 'before').length} before, ${log.filter((x) => x === 'after').length} after, none mixed`,
+        expected: 'each answer is a whole before or after state',
+      };
+    },
+  ),
+  C(
+    'history.item-master-rename',
+    'T15',
+    'mutation',
+    'RP_TAG.cs:7866 and :4009 join ITEM_MAST on every run: renaming an item through Master -> Items shows the new name in the summary and the Stock grid follows the master',
+    async (ctx) => {
+      const { page } = await ctx.session();
+      const seed = await seedB(ctx, { only: ['1', '2'] });
+      const summary = async () => {
+        await openScreen(page);
+        await setDates(page, iso(4, 1), iso(5, 31));
+        await page.getByLabel('RptType', { exact: true }).selectOption('summ');
+        await runMode(page, 'Stock Tag', 'stock');
+        return (await readGrid(page)).rows.map((r) => r.Item);
+      };
+      assert.ok((await summary()).includes('TS Ring'));
+      try {
+        await page.goto('/masters/items');
+        await page.getByRole('heading', { name: 'Item Master', exact: true }).waitFor();
+        const row = page.getByTestId('item-list').locator('tr[data-code="TS1"]');
+        await row.dblclick();
+        await page.waitForFunction(
+          () =>
+            document.querySelector('#item-code')?.value === 'TS1' &&
+            document.activeElement?.id === 'item-name',
+        );
+        await page.getByLabel('Item Name', { exact: true }).fill('TS Band');
+        const [saved] = await Promise.all([
+          page.waitForResponse(
+            (r) =>
+              ['POST', 'PUT'].includes(r.request().method()) &&
+              new URL(r.url()).pathname.startsWith('/api/masters/item-master'),
+          ),
+          page.getByRole('button', { name: 'Save', exact: true }).click(),
+        ]);
+        assert.equal(saved.status(), 200, await saved.text());
+        await page.getByText('Data Are Saved.', { exact: true }).waitFor();
+        const names = await summary();
+        // The Item Master upper-cases the name it saves (desktop MS_ITEM).
+        assert.ok(names.includes('TS BAND') && !names.includes('TS Ring'), names.join());
+        await page.getByLabel('RptType', { exact: true }).selectOption('tag');
+        await filterRows(page, seed.prefix);
+        await runMode(page, 'Stock Tag', 'stock');
+        const grid = await readGrid(page);
+        assert.ok(grid.rows.length >= 2);
+        return {
+          observation: `summary groups: ${names.join(', ')}`,
+          expected: 'the live master name: TS BAND replaces TS Ring',
+          downstream: { summaryGroups: names, stockRows: grid.rows.length },
+          database: {
+            item: await ctx.rows(
+              `SELECT "IT_NAME" n FROM "ITEM_MAST" WHERE tenant_id=$1 AND "IT_CODE"='TS1'`,
+            ),
+          },
+        };
+      } finally {
+        await ctx.owner.$executeRawUnsafe(
+          `UPDATE "ITEM_MAST" SET "IT_NAME"='TS Ring' WHERE tenant_id=$1 AND "CO_CODE"='01' AND "IT_CODE"='TS1'`,
+          TENANT,
+        );
+      }
+    },
+  ),
+  C(
+    'history.older-year-carry',
+    'T15',
+    'read-only',
+    'BtmSchm.cs:2362-2470 (Balance TrFr, Tag Stock): a tag still in stock at the end of the closed year is copied into the new year, so the new year lists it; one sold last year is not carried. The web reads the earlier year instead of copying',
+    async (ctx) => {
+      await ensureMasters(ctx);
+      const previous = `${startYear - 1}-${startYear}`;
+      const tag = `T${RUN}OY`;
+      const seedOld = async (suffix, sold) => {
+        const t = `${tag}${suffix}`;
+        const id = 930000000000 + Math.floor(Math.random() * 1e6);
+        await ctx.owner.$executeRawUnsafe(
+          `INSERT INTO "BAR_DETL"(tenant_id,"CO_CODE","LC_CODE","CO_YEAR","CO_BOOK","VCH_NO","VCH_DATE","STK_DATE","VCH_TYPE","BOOK_NAME",
+             "IT_CODE","TAG_NO","DESIGN_NO","TBL_CODE","ITM_SIZE","ITM_PCS","ITM_GWT","ITM_NWT","VCH_SRNO","EMP_ISU")
+           VALUES ($1::text,'01','01',$2::text,'TOP','0000',$3::date,$4::text,'TO','TAG OPENING','TS1',$5::text,'DO','C1','7',1,2,1.9,$6::float8,'N')`,
+          TENANT,
+          previous,
+          `${startYear - 1}-06-05`,
+          `${startYear - 1}-06-05`,
+          t,
+          id,
+        );
+        for (const [sign, date, type, book, no] of [
+          ['+', `${startYear - 1}-06-05`, 'TO', 'TOP', '0000'],
+          ...(sold ? [['-', `${startYear - 1}-12-20`, 'SL', 'SL', '0008']] : []),
+        ])
+          await ctx.owner.$executeRawUnsafe(
+            `INSERT INTO "MAIN_STOCK"(tenant_id,"CO_CODE","LC_CODE","CO_YEAR","CO_BOOK","VCH_NO","VCH_DATE","STK_DATE","VCH_TYPE","BOOK_NAME",
+               "IT_CODE","TAG_NO","TBL_CODE","ITM_SIGN","ITM_PCS","ITM_GWT","ITM_NWT","VCH_SRNO")
+             VALUES ($1::text,'01','01',$2::text,$3::text,$4::text,$5::date,$6::text,$7::text,$3::text,'TS1',$8::text,'C1',$9::text,1,2,1.9,$10::float8)`,
+            TENANT,
+            previous,
+            book,
+            no,
+            date,
+            `${startYear - 1}-06-05`,
+            type,
+            t,
+            sign,
+            id,
+          );
+        return t;
+      };
+      const kept = await seedOld('K', false);
+      const gone = await seedOld('S', true);
+      const { page } = await ctx.session();
+      await openScreen(page);
+      await setDates(page, iso(4, 1), iso(5, 31));
+      await filterRows(page, tag);
+      await runMode(page, 'Stock Tag', 'stock');
+      const stock = await readGrid(page);
+      assert.deepEqual(
+        tagsOf(stock),
+        [kept],
+        'carried into this year; the one sold last year is not',
+      );
+      assert.equal(stock.rows[0].Qty, '1');
+      // The carried row opens nothing: the desktop's copy sits in book 000, which BOOK_DATA does not hold
+      // (BtmSchm.cs:2378, RP_TAG.cs:8924); the web row is last year's voucher, whose number must not open this year.
+      const zoomCalls = [];
+      const onRequest = (request) => {
+        if (request.url().includes('/reports/tag-stock/zoom')) zoomCalls.push(request.url());
+      };
+      page.on('request', onRequest);
+      await page.getByTestId('tag-stock-grid').locator('tbody tr').first().dblclick();
+      await page.waitForTimeout(800);
+      page.off('request', onRequest);
+      assert.match(new URL(page.url()).pathname, /\/reports\/tag-stock/);
+      assert.deepEqual(zoomCalls, [], 'no zoom is asked for a carried row');
+      // The movements of the year stay the year's own: In and All of this year do not list it.
+      await runMode(page, 'In Tag', 'in');
+      assert.deepEqual(tagsOf(await readGrid(page)), []);
+      await runMode(page, 'All Tag', 'all');
+      assert.deepEqual(tagsOf(await readGrid(page)), []);
+      for (const table of ['MAIN_STOCK', 'BAR_DETL'])
+        await ctx.owner.$executeRawUnsafe(
+          `DELETE FROM "${table}" WHERE tenant_id=$1 AND "TAG_NO" = ANY($2::text[])`,
+          TENANT,
+          [kept, gone],
+        );
+      return {
+        observation: `${previous} tags: ${kept} (in stock) listed, ${gone} (sold) not`,
+        expected: 'the carried tag is in this year Stock',
+      };
+    },
+  ),
+  C(
     'journey.lifecycle-through-screens',
     'T18',
-    "Creating the Tag Opening, Sale, Tag Cancel, Sale Return and Approval Issue vouchers through their screens and running Stock after each step needs those modules' helpers; the stock rule is proven on seeded movements by stock.signed-movement-states and tagStock.db.test.ts.",
+    'mutation',
+    'WP-15 tag-stock.journey.lifecycle-reconcile: the tags are made by Tag Opening and moved by a Sale, a Tag Cancel, a Sale Return and an Approval Issue through their screens; Stock after each step is the signed sum of the tag movements (RP_TAG.cs:4187), and In, Out and All follow',
+    async (ctx) => {
+      const { page } = await ctx.session();
+      const life = newLife();
+      try {
+        await lifecycle(ctx, page, life);
+        const { tags, steps } = life;
+        assert.deepEqual(
+          steps.map((x) => x.inStock),
+          [
+            [0, 1, 2, 3, 4], // five tags opened
+            [0, 3, 4], // tags 1 and 2 sold
+            [0, 4], // tag 3 cancelled
+            [0, 2, 4], // tag 2 returned
+            [0, 2], // tag 4 issued on approval
+          ],
+        );
+        const range = { from: `${startYear}-04-01`, to: today().iso };
+        const read = async (tab, tag) =>
+          (await tagStockRead(page, { tab, tagNo: tag, fromDate: range.from, toDate: range.to }))
+            .rows;
+        const inRows = (await Promise.all(tags.map((t) => read('in', t)))).flat();
+        const outRows = (await Promise.all(tags.map((t) => read('out', t)))).flat();
+        const allRows = await read('all', tags[2]);
+        assert.deepEqual(
+          inRows.map((r) => r.tagNo).sort(),
+          [...tags].sort(),
+          'In: one creation row per tag',
+        );
+        assert.deepEqual(
+          outRows.map((r) => r.tagNo).sort(),
+          [tags[1], tags[2], tags[3], tags[4]].sort(),
+          'Out: sale, sale, cancel, approval issue',
+        );
+        assert.deepEqual(
+          allRows.map((r) => r.sign),
+          ['+', '-', '+'],
+          'All of the returned tag: open, sold, returned',
+        );
+        // The screen shows the same final state.
+        await openScreen(page);
+        await setDates(page, range.from, range.to);
+        await filterRows(page, tags[0].slice(0, -2));
+        await runMode(page, 'Stock Tag', 'stock');
+        const grid = await readGrid(page);
+        const shown = tagsOf(grid)
+          .filter((t) => tags.includes(t))
+          .sort();
+        assert.deepEqual(shown, [tags[0], tags[2]].sort());
+        return {
+          observation: steps
+            .map((x) => `${x.name}: ${x.inStock.map((i) => tags[i]).join(' ')}`)
+            .join(' | '),
+          expected: 'Stock after each voucher follows the signed sum of the tag movements',
+          database: { movements: await movementsOf(ctx, tags) },
+          downstream: {
+            in: inRows.length,
+            out: outRows.length,
+            all: allRows.length,
+            screen: shown,
+          },
+        };
+      } finally {
+        await purge(ctx, life, page);
+      }
+    },
+  ),
+  C(
+    'reverse.delete-source-vouchers',
+    'T10',
+    'mutation',
+    'WP-15 tag-stock.reverse.*: deleting the Tag Cancel, the Sale and the Sale Return through their screens removes their stock movement, so the tag is back (cancel, sale) or gone again (return) in Stock',
+    async (ctx) => {
+      const { page } = await ctx.session();
+      const life = newLife();
+      try {
+        await lifecycle(ctx, page, life);
+        const { tags, vouchers } = life;
+        const now = async () => (await inStockNow(page, tags)).sort();
+        assert.deepEqual(await now(), [tags[0], tags[2]].sort());
+        await deleteCancel(page, vouchers.cancel);
+        assert.deepEqual(
+          await now(),
+          [tags[0], tags[2], tags[3]].sort(),
+          'tag 4 back after the Tag Cancel delete',
+        );
+        await deleteReturn(page, vouchers.returned);
+        assert.deepEqual(
+          await now(),
+          [tags[0], tags[3]].sort(),
+          'tag 3 leaves again with the Sale Return delete',
+        );
+        await deleteSale(page, vouchers.sales[0]);
+        assert.deepEqual(
+          await now(),
+          [tags[0], tags[1], tags[3]].sort(),
+          'tag 2 back after its Sale delete',
+        );
+        const all = (
+          await tagStockRead(page, {
+            tab: 'all',
+            tagNo: tags[2],
+            fromDate: `${startYear}-04-01`,
+            toDate: today().iso,
+          })
+        ).rows.map((r) => r.sign);
+        assert.deepEqual(
+          all,
+          ['+', '-'],
+          'All of the returned tag shows the opening and the sale again',
+        );
+        return {
+          observation: 'cancel, sale return and sale deleted one by one; Stock followed each',
+          expected: 'the movement of each deleted voucher is gone',
+          database: { movements: await movementsOf(ctx, tags) },
+          downstream: { final: await now() },
+        };
+      } finally {
+        await purge(ctx, life, page);
+      }
+    },
   ),
   notApplicable(
     'create',
@@ -884,16 +1696,6 @@ const tagStockCases = [
     'WP-15 cases tag-stock.na.edit',
     'Read-only grid (RP_TAG.cs:2475 Editable = false); the effect of editing a source voucher is a T18 journey.',
   ),
-  blocked(
-    'reverse.delete-source-vouchers',
-    'T10',
-    "Deleting a Tag Cancel, Sale or Sale Return through its screen and re-running Stock needs those modules' helpers; the signed sum after cancel, sale and return is proven by tagStock.db.test.ts (cancelled, sold, returned-sale and approval-pending tags follow the signed sum).",
-  ),
-  blocked(
-    'concurrent.read-during-write',
-    'T12',
-    'A browser cannot time a report read against a committing sale; the single-snapshot rule is proven by tagStock.db.test.ts (totals never disagree with the rows), and the web stages nothing in shared tables.',
-  ),
   notApplicable(
     'retry',
     'T13',
@@ -906,18 +1708,13 @@ const tagStockCases = [
     'WP-15 cases tag-stock.na.rollback',
     'Read-only report: there is no write to roll back.',
   ),
-  blocked(
-    'history.master-rename-and-older-year',
-    'T15',
-    'Item-master rename through the screen and the older-year carry (gap 3, needs a desktop year-rollover study) are not built in this module; the year scope is proven by tagStock.db.test.ts (only the session year and data type count).',
-  ),
   C(
     'scope.leaves-no-rows-for-other-modules',
     'T11',
     'read-only',
     'Fixture hygiene: the seeded gold and silver items and tags would otherwise show up in Item Opening and other screens that list by item type.',
     async (ctx) => {
-      for (const table of ['APR_DETL', 'MAIN_STOCK', 'BAR_DETL'])
+      for (const table of ['APR_DETL', 'MAIN_STOCK', 'BAR_IDTL', 'BAR_DETL'])
         await ctx.owner.$executeRawUnsafe(
           `DELETE FROM "${table}" WHERE tenant_id=$1 AND "TAG_NO" LIKE $2`,
           TENANT,
@@ -929,6 +1726,10 @@ const tagStockCases = [
       );
       await ctx.owner.$executeRawUnsafe(
         `DELETE FROM "PRODUCT_MAST" WHERE tenant_id=$1 AND "CO_CODE"='01' AND "PR_CODE" IN ('T1','T2')`,
+        TENANT,
+      );
+      await ctx.owner.$executeRawUnsafe(
+        `DELETE FROM "GROUP_MAST" WHERE tenant_id=$1 AND "CO_CODE"='01' AND "GR_CODE" IN ('T1','T2')`,
         TENANT,
       );
       mastersReady = false;
