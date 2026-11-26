@@ -31,6 +31,7 @@ import { connectDesktop } from './replay/desktop.mjs';
 import { connectWeb } from './replay/web.mjs';
 import {
   FAMILIES,
+  withHiddenBookRows,
   REPLAYABLE,
   ReplayBuildError,
   buildRequest,
@@ -167,9 +168,14 @@ async function main() {
     );
 
     const desktopVoucherTables = desktop.voucherTables().filter((t) => web.meta.has(t) || true);
+    let desktopTempRows = [];
     const golden = new Map(); // "book|vch" -> { TABLE: rows[] }
     for (const t of desktopVoucherTables) {
       const rows = await desktop.rowsForBooks(desktop.meta.get(t).name, replayBooks, scope);
+      if (t === 'TEMP_BOOK_DATA') {
+        desktopTempRows = rows;
+        continue;
+      }
       for (const r of rows) {
         const k = `${String(r.CO_BOOK).trim()}|${String(r.VCH_NO).trim()}`;
         if (!wanted.has(k)) continue;
@@ -400,9 +406,15 @@ async function main() {
     /* ---- 5. compare ---------------------------------------------------------------------------- */
     const desktopTables = new Set(desktop.meta.keys());
     const replayed = results.filter((r) => r.status === 'REPLAYED');
+    let webTempRows = [];
     const webRows = new Map();
     for (const t of web.voucherTables()) {
-      for (const r of await web.rowsForBooks(t, tenant, replayBooks, scope)) {
+      const rows = await web.rowsForBooks(t, tenant, replayBooks, scope);
+      if (t === 'TEMP_BOOK_DATA') {
+        webTempRows = rows;
+        continue;
+      }
+      for (const r of rows) {
         const k = `${String(r.CO_BOOK).trim()}|${String(r.VCH_NO).trim()}`;
         const g = webRows.get(k) ?? {};
         (g[t.toUpperCase()] ??= []).push(r);
@@ -415,7 +427,11 @@ async function main() {
     });
     const mkCase = (side, r) => {
       const key = side === 'desktop' ? `${r.book}|${r.desktopVchNo}` : `${r.book}|${r.webVchNo}`;
-      const src = side === 'desktop' ? (golden.get(key) ?? {}) : (webRows.get(key) ?? {});
+      const src = withHiddenBookRows(
+        side === 'desktop' ? (golden.get(key) ?? {}) : (webRows.get(key) ?? {}),
+        FAMILIES[r.family].header,
+        side === 'desktop' ? desktopTempRows : webTempRows,
+      );
       const tables = {};
       for (const [t, rows] of Object.entries(src)) {
         const columns = side === 'desktop' ? desktop.meta.get(t).columns : web.cols(t);
