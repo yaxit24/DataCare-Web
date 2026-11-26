@@ -1,5 +1,16 @@
 import assert from 'node:assert/strict';
 import { PARTIES } from '../fixtures/catalogue.mjs';
+import {
+  APPROVAL_IMPORT_PROMPT,
+  ISSUE_BOOK as APPROVAL_BOOK,
+  YEAR as APPROVAL_YEAR,
+  approvalRows,
+  billApprovalInSales,
+  createIssue as createApprovalIssue,
+  saleApprovalRows,
+  seedApprovalTag,
+  tagState,
+} from './approvalHelpers.mjs';
 
 /**
  * WP-26 (N243, G255): Sales Invoice residual cases (orchestration/work/WP-26/cases.md). Expected values are worked by
@@ -73,17 +84,53 @@ export function salesInvoiceResidualCases(h) {
     page.getByText(`Exchange row ${i + 1} desktop fields`, { exact: true }).click();
 
   return [
-    {
-      ...C(
-        'source.approval-no-import',
-        'T04',
-        'mutation',
-        'TR_SALE.cs:20050 "All Approval Tag In This Voucher Import?" (the "A" button)',
-        async () => ({}),
-      ),
-      blocked:
-        'D5: the master plan\'s "Sales Apr No import" (LITE-MASTER-PLAN.md line 309) needs the WP-01 approval-issue import service; question to the supervisor: has it landed, and which approval numbers belong in the Test data?',
-    },
+    C(
+      'source.approval-no-import',
+      'T04',
+      'mutation',
+      'TR_SALE.cs:5449-5450 "A" Approval Help; :20565 open APR ISU vouchers; :20008 open lines; :20050 "All Approval Tag In This Voucher Import?"; :15451-15455 ISU_NO/ISU_SRNO; :16112-16114 closure; Ac_Stock.cs:118-121 stock back from approval',
+      async (ctx) => {
+        const source = await seedApprovalTag(ctx, 'SAI');
+        const issue = await createApprovalIssue(ctx, source.tag, 'sales apr no import');
+        const sale = await billApprovalInSales(issue.page, issue);
+        assert.equal(sale.prompt, APPROVAL_IMPORT_PROMPT);
+        const rows = await saleApprovalRows(ctx, sale.vchNo);
+        // The approval party, Apr No, year and book go on the header; the line keeps the source key (OLD_SRNO 1).
+        assert.deepEqual(rows.header, {
+          ac: PARTIES.local.code,
+          no: issue.voucherNo,
+          yr: APPROVAL_YEAR,
+          book: APPROVAL_BOOK,
+        });
+        assert.deepEqual(rows.lines, [
+          { tag: source.tag, no: issue.voucherNo, book: APPROVAL_BOOK, sr: 1 },
+        ]);
+        // Sale OUT (SR_NO 3) and the approval stock-back IN (SR_NO 5).
+        assert.deepEqual(rows.stock, [
+          { sr: 3, tr: 'S', sign: '-', tag: source.tag },
+          { sr: 5, tr: 'I', sign: '+', tag: source.tag },
+        ]);
+        const approval = await approvalRows(ctx, APPROVAL_BOOK, issue.voucherNo);
+        assert.equal(approval[0].received, 'Y');
+        const tag = await tagState(ctx, source.tag);
+        assert.equal(tag.apr, 'N');
+        assert.equal(tag.balance, 0, 'opening +1, approval -1, back +1, sale -1');
+        const offered = await issue.page.evaluate(async () =>
+          (await fetch('/api/sales/approval-help', { credentials: 'include' })).json(),
+        );
+        assert(
+          !offered.some((r) => r.vchNo === issue.voucherNo && r.book === APPROVAL_BOOK),
+          'a billed approval leaves the help',
+        );
+        await ctx.shot(issue.page, 'sales-approval-import');
+        return {
+          observation: `approval ${issue.voucherNo} imported into sale ${sale.vchNo} after "${sale.prompt}"`,
+          expected: 'party, Apr No and line from the approval; ISU_REC Y; tag sold once',
+          database: { ...rows, approval, tag },
+          downstream: { helpStillOffers: false },
+        };
+      },
+    ),
     C(
       'refusal.negative-weight',
       'T06',
