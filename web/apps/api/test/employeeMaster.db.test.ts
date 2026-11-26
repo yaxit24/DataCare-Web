@@ -168,15 +168,22 @@ type EmpRow = {
       if (owner) await owner.$disconnect();
     });
 
-    it("opens a company without employees with code '001', the company-01 login names and the admin's rights", async () => {
+    it("opens a new company with the installer employee '001' SELF, the next code '002', the company-01 login names and the admin's rights", async () => {
+      // MS_YEAR.cs:1555-1592 copies the installer EMP_MAST row (code 001, SELF) into every new company, and MS_EMP
+      // numbers the next employee from the highest code, so a new company opens with 001 listed and 002 offered.
       const response = await request(adminCookie, 'GET', '/masters/employee-master');
       expect(response.statusCode, response.body).toBe(200);
       expect(response.json()).toEqual({
-        rows: [],
-        nextCode: '001',
+        rows: [{ code: '001', name: 'SELF' }],
+        nextCode: '002',
         users: ['', ADMIN, CLERK, NOBODY],
         rights: { canUpdate: true, canDelete: true, canPrint: true },
       });
+      // The rest of this suite measures MS_EMP over its own rows from code 001, as for a company with no
+      // employees, so the installer row is removed here (the default-employee refusal is tested on 001 below).
+      await exec(`DELETE FROM "EMP_MAST" WHERE tenant_id=$1 AND "CO_CODE"='01'`, tenantId);
+      const empty = await request(adminCookie, 'GET', '/masters/employee-master');
+      expect(empty.json()).toMatchObject({ rows: [], nextCode: '001' });
     });
 
     it("saves a new employee upper-cased, with Val of the boxes, 'ABC' for a blank user and the operator as creator", async () => {

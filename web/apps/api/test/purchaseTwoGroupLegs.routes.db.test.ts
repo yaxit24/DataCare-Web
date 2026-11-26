@@ -96,6 +96,12 @@ const SILVER = { itCode: 'SLV01', pcs: 3, grossWt: 100.4, netWt: 100, touch: 92.
     runtime = new PrismaClient();
     await wipe();
     await seedCompany(runtime, tenantId, '01');
+    // The installer CO_SET_NEW seeded into the company has TOT_AMT_ROF 0 (whole-rupee totals, and so a round-off
+    // leg). This suite's measured totals have no round-off (2 dp policy), a setting the desktop offers (0/1/2).
+    await exec(
+      `UPDATE "CO_SET_NEW" SET "TOT_AMT_ROF"=2 WHERE tenant_id=$1 AND "CO_CODE"='01'`,
+      tenantId,
+    );
     // F02 sample data: each group names its own expense account (GROUP_MAST.PURC_AC).
     await exec(
       `INSERT INTO "GROUP_MAST"(tenant_id,"CO_CODE","GR_CODE","GR_NAME","SALE_AC","PURC_AC")

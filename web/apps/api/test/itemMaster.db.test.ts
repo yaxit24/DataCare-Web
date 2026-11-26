@@ -256,12 +256,37 @@ type Cookie = string;
 
   it('lists the product help by name and the group help with its type and trade type', async () => {
     let response = await request(adminCookie, 'GET', '/masters/item-master/products?q=');
+    // The product help is every PRODUCT_MAST row by name, so the installer products seeded into the company
+    // (MS_YEAR.cs:1555-1592) are listed beside this suite's CH and RG.
     expect(response.json()).toEqual([
       { code: 'CH', name: 'CHAIN' },
+      { code: 'DM', name: 'DIAMOND' },
+      { code: 'EM', name: 'EMITATION' },
+      { code: 'FN', name: 'FINE' },
+      { code: 'HM', name: 'HALL MARK CHARGES' },
+      { code: 'OG', name: 'OLD GOLD' },
+      { code: 'OS', name: 'OLD SILVER' },
+      { code: 'OD', name: 'ORDER GOLD' },
+      { code: 'OR', name: 'ORNAMENTS' },
+      { code: 'OT', name: 'OTHER' },
       { code: 'RG', name: 'RING' },
+      { code: 'RD', name: 'RODIAM CHARGES' },
+      { code: 'SN', name: 'STONE' },
     ]);
-    response = await request(adminCookie, 'GET', '/masters/item-master/groups?q=s');
-    expect(response.json()[0]).toEqual({ code: 'SLV', name: 'SILVER', type: 'S', trade: 'SL' });
+    // The installer silver groups (FINE SILVER, OLD SILVER, SILVER ORNAMENTS) are listed by name with this suite's SILVER.
+    response = await request(adminCookie, 'GET', '/masters/item-master/groups?q=silver');
+    expect(response.json().find((g: { code: string }) => g.code === 'SLV')).toEqual({
+      code: 'SLV',
+      name: 'SILVER',
+      type: 'S',
+      trade: 'SL',
+    });
+    expect(response.json().map((g: { code: string }) => g.code)).toEqual([
+      'FSL',
+      'OS',
+      'SLV',
+      'SL',
+    ]);
   });
 
   it('refuses what MS_ITEM refuses, in its order and with its texts, and writes nothing', async () => {

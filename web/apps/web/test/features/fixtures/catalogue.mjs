@@ -53,6 +53,11 @@ export async function seedCatalogue(stack, { password }) {
   });
   assert(created, 'seedCompany must provision the base company');
 
+  // The installer CO_SET_NEW that seedCompany now copies (MS_YEAR.cs:1555-1592) has TOT_AMT_ROF 0 (whole-rupee
+  // bill totals). The matrices' measured totals (65,517.27 ...) were taken with the setting blank, which the desktop
+  // reads as 2 decimals, so the fixture company leaves it blank. settingsEffects sets it explicitly where it matters.
+  await sql(`UPDATE "CO_SET_NEW" SET "TOT_AMT_ROF"=NULL WHERE tenant_id=$1 AND "CO_CODE"='01'`);
+
   // F06: a historic year next to the current one, so year scoping is exercised.
   await sql(
     `INSERT INTO "YEAR_MAST"(tenant_id,"CO_CODE","CO_YEAR","OP_DATE","CL_DATE")

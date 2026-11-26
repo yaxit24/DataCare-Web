@@ -545,54 +545,67 @@ export const productMaster = {
             ctx,
             `INSERT INTO "ITEM_MAST"(tenant_id,"CO_CODE","IT_CODE","IT_NAME","PR_CODE") VALUES ($1,'01','PRI01','E2E PRODUCT ITEM','PB')`,
           );
-          const { page } = await ctx.session();
-          let questions = answerQuestions(page);
-          await openScreen(page);
-          await button(page, 'Delete').click();
-          await message(page, 'Please Select Product For Delete.');
-          assert.deepEqual(questions, []);
-          await openProduct(page, 'PB');
-          await button(page, 'Delete').click();
-          await message(page, 'You Cant Delete Record This Product Use in Itme Master....');
-          await cancel(page);
-          await openProduct(page, 'OG');
-          await button(page, 'Delete').click();
-          await message(page, 'You Cant Delete Record, This Product Is Default Product....');
-          assert.deepEqual(
-            questions,
-            [QUESTION, QUESTION],
-            'the question comes before both refusals',
+          // The installer item OG (MS_YEAR.cs:1555-1592) uses product OG, and BtnDelete_Click checks the Item master
+          // use before the default products (:2706-2804). Move it off OG for this case and put it back after.
+          await exec(
+            ctx,
+            `UPDATE "ITEM_MAST" SET "PR_CODE"='ZZ' WHERE tenant_id=$1 AND "CO_CODE"='01' AND "PR_CODE"='OG'`,
           );
-          await cancel(page);
-          questions = answerQuestions(page, false);
-          await openProduct(page, 'PA');
-          await button(page, 'Delete').click();
-          await page.waitForTimeout(300);
-          assert.equal((await productRows(ctx, 'PA')).length, 1, 'No keeps the product');
-          questions = answerQuestions(page, true);
-          const [removed] = await Promise.all([
-            page.waitForResponse((r) => isApi(r, 'DELETE', `${API}/PA`)),
-            button(page, 'Delete').click(),
-          ]);
-          assert.equal(removed.status(), 200, await removed.text());
-          await message(page, 'Delete Success.');
-          await page.waitForFunction(
-            () => !document.querySelector('[data-testid="product-list"] tr[data-code="PA"]'),
-          );
-          const rows = {
-            PA: await productRows(ctx, 'PA'),
-            PB: await productRows(ctx, 'PB'),
-            OG: await productRows(ctx, 'OG'),
-          };
-          assert.deepEqual(rows.PA, []);
-          assert.equal(rows.PB.length + rows.OG.length, 2);
-          return {
-            observation:
-              'blank refused without asking; PB and OG refused after the question; No kept PA; Yes deleted it',
-            expected: 'the desktop order and texts',
-            database: { rows },
-            downstream: { list: await listed(page) },
-          };
+          try {
+            const { page } = await ctx.session();
+            let questions = answerQuestions(page);
+            await openScreen(page);
+            await button(page, 'Delete').click();
+            await message(page, 'Please Select Product For Delete.');
+            assert.deepEqual(questions, []);
+            await openProduct(page, 'PB');
+            await button(page, 'Delete').click();
+            await message(page, 'You Cant Delete Record This Product Use in Itme Master....');
+            await cancel(page);
+            await openProduct(page, 'OG');
+            await button(page, 'Delete').click();
+            await message(page, 'You Cant Delete Record, This Product Is Default Product....');
+            assert.deepEqual(
+              questions,
+              [QUESTION, QUESTION],
+              'the question comes before both refusals',
+            );
+            await cancel(page);
+            questions = answerQuestions(page, false);
+            await openProduct(page, 'PA');
+            await button(page, 'Delete').click();
+            await page.waitForTimeout(300);
+            assert.equal((await productRows(ctx, 'PA')).length, 1, 'No keeps the product');
+            questions = answerQuestions(page, true);
+            const [removed] = await Promise.all([
+              page.waitForResponse((r) => isApi(r, 'DELETE', `${API}/PA`)),
+              button(page, 'Delete').click(),
+            ]);
+            assert.equal(removed.status(), 200, await removed.text());
+            await message(page, 'Delete Success.');
+            await page.waitForFunction(
+              () => !document.querySelector('[data-testid="product-list"] tr[data-code="PA"]'),
+            );
+            const rows = {
+              PA: await productRows(ctx, 'PA'),
+              PB: await productRows(ctx, 'PB'),
+              OG: await productRows(ctx, 'OG'),
+            };
+            assert.deepEqual(rows.PA, []);
+            assert.equal(rows.PB.length + rows.OG.length, 2);
+            return {
+              observation:
+                'blank refused without asking; PB and OG refused after the question; No kept PA; Yes deleted it',
+              expected: 'the desktop order and texts',
+              database: { rows },
+              downstream: { list: await listed(page) },
+            };
+          } finally {
+            await exec(
+              ctx,
+              `UPDATE "ITEM_MAST" SET "PR_CODE"='OG' WHERE tenant_id=$1 AND "CO_CODE"='01' AND "PR_CODE"='ZZ'`,
+            );
+          }
         }),
     ),
     C(

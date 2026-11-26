@@ -113,6 +113,9 @@ type ProductRow = {
       await wipe();
       await seedCompany(runtime, tenantId, '01');
       await exec(`DELETE FROM "PRODUCT_MAST" WHERE tenant_id=$1`, tenantId);
+      // The installer items seeded into the company use OG and DM, and MS_PRODUCT.cs:2706-2804 checks the Item
+      // master use before the default products, so they are cleared for the default-product refusal below.
+      await exec(`DELETE FROM "ITEM_MAST" WHERE tenant_id=$1`, tenantId);
       // Two of the desktop template's default products, as the desktop writes them.
       await exec(
         `INSERT INTO "PRODUCT_MAST"(tenant_id,"CO_CODE","PR_CODE","PR_NAME","MAIN_USER","DATA_TRFR")
