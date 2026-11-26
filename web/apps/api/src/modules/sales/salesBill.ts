@@ -75,7 +75,8 @@ export function salesBillHtml(header: any, lines: any[], ctx: SalesBillCtx = {})
   const p = ctx.party ?? {};
   const vchDate = formatDesktopDate(h.VCH_DATE); // N56 (D19): dd/MM/yyyy, always with the year
   const meta: DocMeta[] = [
-    { k: 'Bill No', v: String(h.BILL_NO ?? h.VCH_NO ?? '') },
+    // SL_DATA.BILL_NO is the typed Bill No box, blank unless typed (TR_SALE.cs:15196): the voucher number then.
+    { k: 'Bill No', v: String(h.BILL_NO || h.VCH_NO || '') },
     { k: 'Date', v: vchDate },
     { k: 'Book / Vch', v: `${h.CO_BOOK ?? ''} / ${h.VCH_NO ?? ''}` },
     ...(ctx.balances

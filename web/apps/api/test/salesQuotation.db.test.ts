@@ -272,7 +272,8 @@ databaseDescribe('database-backed TR_SALE sales quotation mode', () => {
       book_name: 'SL QUOT',
       vch_type: 'QTPRN',
       temp: 1,
-      sl_idtl: 1,
+      // TAG-Q1 has no BAR_IDTL stone rows, so its stone grid is empty (TR_SALE.cs:12683-12715).
+      sl_idtl: 0,
       old_gold: 1,
       ac: 0,
       stock: 0,

@@ -1212,7 +1212,8 @@ databaseDescribe('database-backed sales voucher lifecycle', () => {
         'ROJ_MEL_DATA',
         'SL_DATA',
         'SL_DETL',
-        'SL_IDTL',
+        // No SL_IDTL: TAG001 has no BAR_IDTL stone rows, and the sale's stone grid holds only the tag's own
+        // (TR_SALE.cs:12683-12715, saved at :15546-15620).
         'TAX_DATA',
         'USER_DATA',
       ].sort(),

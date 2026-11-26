@@ -179,8 +179,8 @@ const headOf = (vchNo: string) => `0101${YEAR}${BOOK}${vchNo}`;
       // Tax leg: measured tail 04 (account: the documented GST default while TAX_MAST.TAX_AC is unset).
       { tail: '04', tailLength: 2, ac: 'GST', ld: 'CUST01', dr: 0, cr: 2036.52 },
       // Per-line revenue legs: STR(SR_NO) right-aligned in 10, then the revenue code 03 (12-character tail).
-      { tail: '         103', tailLength: 12, ac: 'SALES', ld: 'CUST01', dr: 0, cr: 63609 },
-      { tail: '         203', tailLength: 12, ac: 'SLVSALE', ld: 'CUST01', dr: 0, cr: 4275 },
+      { tail: '         102', tailLength: 12, ac: 'SALES', ld: 'CUST01', dr: 0, cr: 63609 },
+      { tail: '         202', tailLength: 12, ac: 'SLVSALE', ld: 'CUST01', dr: 0, cr: 4275 },
     ]);
     const dr = rows.reduce((s, r) => s + r.dr, 0);
     const cr = rows.reduce((s, r) => s + r.cr, 0);
@@ -227,8 +227,8 @@ const headOf = (vchNo: string) => `0101${YEAR}${BOOK}${vchNo}`;
     expect(rows.map((r) => [r.tail, r.ac, r.dr, r.cr])).toEqual([
       ['01', 'CUST01', 70152.27, 0],
       ['04', 'GST', 0, 2043.27],
-      ['         103', 'SALES', 0, 63609],
-      ['         203', 'SLVSALE', 0, 4500],
+      ['         102', 'SALES', 0, 63609],
+      ['         202', 'SLVSALE', 0, 4500],
     ]);
   });
 
@@ -242,8 +242,8 @@ const headOf = (vchNo: string) => `0101${YEAR}${BOOK}${vchNo}`;
     expect(rows.map((r) => [r.tail, r.ac, r.dr, r.cr])).toEqual([
       ['01', 'CUST01', 69010, 0],
       ['04', 'GST', 0, 2010],
-      ['         103', 'SALES', 0, 62780.67],
-      ['         203', 'SLVSALE', 0, 4219.33],
+      ['         102', 'SALES', 0, 62780.67],
+      ['         202', 'SLVSALE', 0, 4219.33],
     ]);
   });
 
@@ -266,8 +266,8 @@ const headOf = (vchNo: string) => `0101${YEAR}${BOOK}${vchNo}`;
       ['04', 'GST', 0, 2036.52],
       ['19', 'CUST01', 0, 10000],
       ['20', 'CASH', 10000, 0],
-      ['         103', 'SALES', 0, 63609],
-      ['         203', 'SLVSALE', 0, 4275],
+      ['         102', 'SALES', 0, 63609],
+      ['         202', 'SLVSALE', 0, 4275],
     ]);
   });
 
@@ -287,7 +287,7 @@ const headOf = (vchNo: string) => `0101${YEAR}${BOOK}${vchNo}`;
     );
     expect(
       removedLedger.map((row) => String(row.LEDR_KEY).slice(headOf(vchNo).length)).sort(),
-    ).toEqual(['01', '04', '         103', '         203'].sort());
+    ).toEqual(['01', '04', '         102', '         202'].sort());
     expect((diff.added.DELETE_DATA ?? []).length).toBeGreaterThan(0);
     expect(diff.added.AC_DATA ?? []).toEqual([]);
   });

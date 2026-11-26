@@ -46,6 +46,7 @@ import {
   saleItemAmountRounded,
   percentageLabourRate,
   roundSaleLineAmount,
+  dotNetRoundDouble,
   type LabourBasisRule,
 } from '@datacare/core';
 import { resolveTaxPolicyTx } from '../shared/taxPolicy.js';
@@ -61,6 +62,7 @@ import {
   type SaleResidualInput,
 } from './saleResiduals.js';
 import { getSale } from './saleRead.js';
+import { saleOldMetalStockRow, saleStockRow } from './saleStockRows.js';
 export { getSale };
 import { fineWt } from '../shared/fine.js';
 import { resolveBookAccountTx, resolveBookPolicyTx } from '../shared/bookPolicy.js';
@@ -178,6 +180,8 @@ export interface SaleLineInput {
   discountPct?: number;
   discountAmount?: number;
   ghatAmount?: number;
+  /** SL_DETL.TAX_PRC, the line grid's own Tax% cell (TR_SALE.cs:15437); 0 when not typed. */
+  taxPct?: number;
   rateWith?: string;
   rateType?: string;
   tagCost?: number;
@@ -412,6 +416,8 @@ export function computeLine(
 const SALE_LEG = {
   partyBill: 1,
   revenue: 3,
+  /** The per-line item leg of a line-path book (BOOK_DATA.ITM_TYPE = 'A'), keyed after STR(SR_NO). */
+  revenueLine: 2,
   tax: 4,
   partyBank: 9,
   bank: 10,
@@ -481,7 +487,9 @@ export function buildSaleLedger(p: {
       if (leg.amount !== 0)
         lines.push({
           ...base,
-          ...lineLegKey(leg, SALE_LEG.revenue), // G169: per-line key on a multi-account bill
+          // A line leg (srNo) is keyed `STR(SR_NO) + '02'`: the code this desktop build wrote on all 115 line-path
+          // legs of book 032 in 2024-25 (the decompiled source keys the same leg '07', Ac_Ledr.cs:90).
+          ...lineLegKey(leg, leg.srNo == null ? SALE_LEG.revenue : SALE_LEG.revenueLine),
           AC_CODE: leg.ac,
           LD_CODE: p.acCode,
           DR_AMT: 0,
@@ -574,7 +582,7 @@ export function buildSaleFineLedger(p: {
   acCode: string;
   vchType?: string;
   rateUnfix?: boolean;
-  lines: Array<{ metal: 'G' | 'S'; saleAc: string; fine: number }>;
+  lines: Array<{ metal: string; saleAc: string; fine: number }>;
 }): LedgerLine[] {
   if (!p.rateUnfix) return [];
   return p.lines
@@ -695,6 +703,30 @@ async function configuredSaleBookNameTx(
     throw new SaleValidationError(`sale book configuration is ambiguous: ${scope.coBook}`);
   }
   return String(rows[0]?.BOOK_NAME ?? '').trim();
+}
+
+/**
+ * BOOK_DATA.BOOK_TYPE ('T' tax invoice, 'M' estimate; Sales_GST reads it, Ac_Tax.cs:92-98) and ITM_TYPE ('A' posts
+ * the item side per line, Ac_Ledr.cs:90-92) of the sale book.
+ */
+async function saleBookTypesTx(
+  tx: any,
+  scope: CompleteSaleScope,
+): Promise<{ bookType: string; itmType: string }> {
+  const rows: Array<{ BOOK_TYPE: unknown; ITM_TYPE: unknown }> = await tx.$queryRawUnsafe(
+    `SELECT "BOOK_TYPE","ITM_TYPE" FROM "BOOK_DATA"
+      WHERE tenant_id=$1 AND "CO_CODE"=$2 AND "LC_CODE"=$3 AND "CO_BOOK"=$4
+        AND coalesce(nullif(btrim("CUR_USE"::text),''),'Y') <> 'N'
+      ORDER BY row_id`,
+    scope.tenantId,
+    scope.coCode,
+    scope.lcCode,
+    scope.coBook,
+  );
+  return {
+    bookType: text(rows[0]?.BOOK_TYPE).toUpperCase(),
+    itmType: text(rows[0]?.ITM_TYPE).toUpperCase(),
+  };
 }
 
 async function salesMainBookTx(tx: any, scope: CompleteSaleScope): Promise<string> {
@@ -897,7 +929,8 @@ async function writeSaleTx(
     new Set(lines.map((l) => String(l.itCode ?? '').trim()).filter(Boolean)),
   );
   const saleAcByItem: Record<string, string> = {};
-  const metalByItem: Record<string, 'G' | 'S'> = {};
+  /** ITEM_MAST.IT_TYPE as stored: G gold, S silver, O other (the line grid's cell 59, TR_SALE.cs:15466). */
+  const metalByItem: Record<string, string> = {};
   // The Rojmel's IT_DESC carries the item NAME (Ac_Rojmel.Sales_Rojmel selects C.IT_NAME); all 245 real
   // sale metal rows have it populated.
   const nameByItem: Record<string, string> = {};
@@ -920,7 +953,9 @@ async function writeSaleTx(
       if (!item) throw new SaleValidationError(`item not found or invalid: ${item || '?'}`);
       if (!isSalesQuotation && !account)
         throw new SaleValidationError(`missing GROUP_MAST.SALE_AC for item ${item || '?'}`);
-      if (metal !== 'G' && metal !== 'S') {
+      // The desktop sells any item type: TR_SALE has no metal check, and items of type 'O' (other) were sold in the
+      // 2024-25 year. Only an item without a type is refused, as a configuration gap.
+      if (!metal) {
         throw new SaleValidationError(`invalid ITEM_MAST.IT_TYPE for item ${item || '?'}`);
       }
       if (account) saleAcByItem[item] = account;
@@ -944,14 +979,27 @@ async function writeSaleTx(
         );
     }
   }
-  const incomeLegs = buildLineLegs(
-    computed.map((c) => ({
-      net: c.calc.net,
-      ac: saleAcByItem[String(c.in.itCode ?? '').trim()] ?? salesAc,
-    })),
-    totals.taxable,
-    lineNetTotal,
-  );
+  const lineAccounts = computed.map((c) => ({
+    net: c.calc.net,
+    ac: saleAcByItem[String(c.in.itCode ?? '').trim()] ?? salesAc,
+  }));
+  /**
+   * BOOK_DATA.ITM_TYPE picks the item side's path (Sales_Ledr): 'A' posts one leg PER LINE, the line's NET_AMT to its
+   * group's SALE_AC (Ac_Ledr.cs:90, `AND B.ITM_TYPE = 'A' ... AND A.NET_AMT <> 0`); any other type posts the bill net
+   * to the book's slot-1 account (:92). Without a bill discount the line legs are exactly the line amounts; with one
+   * the web keeps sharing the taxable out over the lines so the voucher balances.
+   */
+  const linePathBook =
+    (await saleBookTypesTx(tx, input.scope as CompleteSaleScope)).itmType === 'A';
+  const incomeLegs =
+    linePathBook && totals.discount === 0
+      ? lineAccounts.map((l, i) => ({ ac: l.ac, amount: l.net, srNo: i + 1 }))
+      : linePathBook
+        ? buildLineLegs(lineAccounts, totals.taxable, lineNetTotal).map((leg, i) => ({
+            ...leg,
+            srNo: leg.srNo ?? i + 1,
+          }))
+        : buildLineLegs(lineAccounts, totals.taxable, lineNetTotal);
 
   // Hallmark charge (TR_SALE_HM): an extra hallmarking fee + its own GST, billed to the customer.
   // 0/absent ⇒ a normal sale, identical to before (no HM legs, TOT_AMT = item total).
@@ -1258,7 +1306,14 @@ async function writeSaleTx(
       LBR_AMT: c.calc.labour,
       DISC_PRC: num(c.in.discountPct),
       DISC_AMT: num(c.in.discountAmount),
-      GHT_AMT: num(c.in.ghatAmount),
+      // Grid cell 28, Math.Round(ghat weight x item rate, 0) whenever both are non-zero (TR_SALE.cs:10647; reset to
+      // 0 when the ghat weight changes, :10600). A value the page sends is the cell as typed.
+      GHT_AMT:
+        c.in.ghatAmount != null
+          ? num(c.in.ghatAmount)
+          : num(c.in.ghtWt) !== 0 && !input.rateUnfix && num(c.in.rate) !== 0
+            ? dotNetRoundDouble(num(c.in.ghtWt) * num(c.in.rate), 0)
+            : 0,
       OTH_AMT: num(c.in.otherAmount),
       // The EFFECTIVE RtWith, as the desktop saves grid column 21 (TR_SALE.cs:15432), which a new
       // row copies from the company type (:9161). A new line therefore stores 'N', not ''.
@@ -1273,7 +1328,10 @@ async function writeSaleTx(
         labourAmount: c.calc.labour,
         otherAmount: num(c.in.otherAmount),
       }),
-      TAX_PRC: input.taxRatePct,
+      // Grid cell 36, the line's own Tax% (TR_SALE.cs:15437): a typed value is kept. The desktop leaves it 0 when not
+      // typed (CommPassAdd, :9128-9161); the web still writes the bill rate there because its e-invoice
+      // (einvoice.ts gstRt) and HSN summary (reports2.ts) read the line rate. Moving those readers is open work.
+      TAX_PRC: c.in.taxPct != null ? num(c.in.taxPct) : input.taxRatePct,
       // `c.calc.net` already sums the components and rounds them with the company's amount precision, so
       // `c.calc.net` is the same 2 dp sum of the components computeLine already rounded with the company's
       // line precision, so a customer configured to 2 keeps 428.21 and one configured to 0 keeps whole rupees.
@@ -1318,8 +1376,9 @@ async function writeSaleTx(
       ORD_YRCD: c.in.ordYrcd ?? '',
       ORD_DBCD: c.in.ordDbcd ?? '',
       ORD_SRNO: c.in.ordSrno ?? 0,
-      ORD_TAG_STK_ADD: c.in.orderTagStockAdd ?? '',
-      DESIGN_IMG_ID: c.in.designImageId ?? '',
+      // Cells 100 and 101 start as 'N' on every new row (CommPassAdd, TR_SALE.cs:9146, :9160).
+      ORD_TAG_STK_ADD: c.in.orderTagStockAdd || 'N',
+      DESIGN_IMG_ID: c.in.designImageId || 'N',
       EMP_CODE: c.in.employeeCode ?? input.empCode ?? '',
       MAIN_USER: ctx.mainUser,
       ITM_CGST_AMT: half,
@@ -1345,27 +1404,73 @@ async function writeSaleTx(
       TAX_TYPE: null,
     };
   };
-  const idtl = computed
-    .filter((c) => c.in.tagNo && !c.in.stones?.length)
-    .map((c, idx) => ({
-      ...key,
-      VCH_TYPE: bookPolicy.vchType,
-      INOUT_TYPE: bookPolicy.inout,
-      ENTRY_TYPE: 'S',
-      SR_NO: idx + 1,
-      ISR_NO: 1,
-      BOOK_NAME: bookPolicy.bookName,
-      AC_CODE: input.acCode,
-      TAG_NO: c.in.tagNo,
-      VCH_SRNO: issuedTags.get(computed.indexOf(c))?.VCH_SRNO ?? 0,
-      IT_CODE: c.in.itCode,
-      IT_PCS: num(c.in.pcs),
-      IT_GWT: num(c.in.grossWt),
-      IT_RATE: num(c.in.rate),
-      IT_AMT: c.calc.metal,
-      IT_LBR_AMT: c.calc.labour,
-      IT_NET_AMT: c.calc.net,
-    }));
+  /**
+   * SL_IDTL of a tagged line is the TAG'S OWN stone / hallmark rows. Picking a tag loads its BAR_IDTL rows into the
+   * line's stone grid (TR_SALE.cs:12683-12715: `SELECT A.* FROM BAR_IDTL WHERE CO_CODE, LC_CODE, TAG_NO, VCH_SRNO`),
+   * and the save writes that grid (TR_SALE.cs:15546-15620): SR_NO = the line, ISR_NO 1..n, the tag and its instance,
+   * and IT_CODE, DM_*, IT_PCS, IT_GWT, KR_WT, IT_CON_PRC, IT_RATE_TYPE, IT_RATE, IT_AMT, IT_LBR_RATE, IT_LBR_AMT,
+   * IT_NET_AMT, IT_CON_WT and IT_TYPE copied from the tag row; a row with IT_PCS + IT_GWT + IT_NET_AMT = 0 is
+   * skipped (:15563). A tag without BAR_IDTL rows writes none. A line that carries its stones back (an edit,
+   * WP-26) keeps them, below.
+   */
+  const idtl: Record<string, unknown>[] = [];
+  for (const [li, c] of computed.entries()) {
+    if (!c.in.tagNo || c.in.stones?.length) continue;
+    const tagSrno = issuedTags.get(li)?.VCH_SRNO ?? c.in.vchSrno ?? 0;
+    const tagStones: Array<Record<string, unknown>> = await tx.$queryRawUnsafe(
+      `SELECT "IT_CODE","IT_TYPE","DM_CODE","DM_NAME","DM_COLOR","DM_SIZE","DM_ORIGIN","DM_REMARK","DM_SFNO",
+              "IT_PCS","IT_GWT","KR_WT","IT_CON_PRC","IT_RATE_TYPE","IT_RATE","IT_AMT","IT_LBR_RATE","IT_LBR_AMT",
+              "IT_NET_AMT","IT_CON_WT"
+         FROM "BAR_IDTL"
+        WHERE tenant_id=$1 AND "CO_CODE"=$2 AND "LC_CODE"=$3 AND "TAG_NO"=$4 AND coalesce("VCH_SRNO",0)=$5
+        ORDER BY "SR_NO","ISR_NO",row_id`,
+      tenantId,
+      key.CO_CODE,
+      key.LC_CODE,
+      c.in.tagNo,
+      num(tagSrno),
+    );
+    let isr = 0;
+    for (const t of tagStones) {
+      if (num(t.IT_PCS) + num(t.IT_GWT) + num(t.IT_NET_AMT) === 0) continue;
+      isr += 1;
+      idtl.push({
+        ...key,
+        HD_VCH_NO: ctx.hdVchNo,
+        VCH_DATE: voucherDate,
+        AC_CODE: input.acCode,
+        VCH_TYPE: bookPolicy.vchType,
+        INOUT_TYPE: bookPolicy.inout,
+        ENTRY_TYPE: 'S',
+        BOOK_NAME: bookPolicy.bookName,
+        SR_NO: li + 1,
+        TAG_NO: c.in.tagNo,
+        VCH_SRNO: num(tagSrno),
+        ISR_NO: isr,
+        IT_CODE: t.IT_CODE ?? '',
+        DM_CODE: text(t.DM_CODE),
+        DM_NAME: text(t.DM_NAME),
+        DM_COLOR: text(t.DM_COLOR),
+        DM_SIZE: text(t.DM_SIZE),
+        DM_ORIGIN: text(t.DM_ORIGIN),
+        DM_REMARK: text(t.DM_REMARK),
+        DM_SFNO: text(t.DM_SFNO),
+        IT_PCS: num(t.IT_PCS),
+        IT_GWT: num(t.IT_GWT),
+        KR_WT: num(t.KR_WT),
+        IT_CON_PRC: num(t.IT_CON_PRC),
+        IT_RATE_TYPE: t.IT_RATE_TYPE ?? '',
+        IT_RATE: num(t.IT_RATE),
+        IT_AMT: num(t.IT_AMT),
+        IT_LBR_RATE: num(t.IT_LBR_RATE),
+        IT_LBR_AMT: num(t.IT_LBR_AMT),
+        IT_NET_AMT: num(t.IT_NET_AMT),
+        IT_CON_WT: num(t.IT_CON_WT),
+        IT_TYPE: t.IT_TYPE ?? '',
+        MAIN_USER: ctx.mainUser,
+      });
+    }
+  }
   // WP-26 (study gap 2): stone rows reopened from SL_IDTL go back as they were (TR_SALE.cs:15546-15620).
   computed.forEach((c, li) => {
     if (!c.in.stones?.length) return;
@@ -1379,46 +1484,6 @@ async function writeSaleTx(
       TAG_NO: c.in.tagNo ?? '',
     };
     idtl.push(...(stoneRowsFor(c.in.stones, row) as any[]));
-  });
-
-  // Every sale line moves stock: tagged rows carry their persisted identity; loose rows use N/0.
-  const mainStock = computed.map((c, idx) => {
-    const movementWeight = stockMovementWeights(
-      c.in,
-      issuedTags.get(idx)?.stock,
-      behavior.stockWeightSource,
-    );
-    return {
-      ...key,
-      SR_NO: idx + 1,
-      VCH_DATE: voucherDate,
-      VCH_TYPE: bookPolicy.vchType,
-      BOOK_NAME: bookPolicy.bookName,
-      AC_CODE: input.acCode,
-      IT_CODE: c.in.itCode,
-      TAG_NO: c.in.tagNo ?? 'N',
-      VCH_SRNO: issuedTags.get(idx)?.VCH_SRNO ?? 0,
-      TR_TYPE: 'S',
-      ITM_SIGN: '-',
-      // ITM_QTY is a stock-MOVEMENT count, not a weight. Measured on the real customer database: every one
-      // of the 267 MAIN_STOCK rows on the sale books (026/027/029/030/032) holds exactly 1, and across all
-      // 1856 rows it is an integer without exception - 1792 are 1, the rest small signed counts on other
-      // books. It coincides with ITM_PCS on 95% of rows only because most lines are a single piece; where
-      // pieces is 2 the desktop still writes 1.
-      //
-      // This previously wrote netWt, so a 10.360 g line put 10.360 in a column whose real domain is a small
-      // signed integer. Found by replaying a real voucher: desktop 1 against web 10.360.
-      ITM_QTY: 1,
-      ITM_PCS: num(c.in.pcs) || 1,
-      ITM_GWT: movementWeight.grossWt,
-      ITM_NWT: movementWeight.netWt,
-      ITM_TOUCH: num(c.in.touch),
-      ITM_FINE: c.calc.fine,
-      ITM_RATE: num(c.in.rate),
-      ITM_AMT: c.calc.metal,
-      LBR_AMT: c.calc.labour,
-      NET_AMT: c.calc.net,
-    };
   });
 
   // TR_SALE.cs:15636: a row is written only with a non-zero net or amount.
@@ -1453,7 +1518,8 @@ async function writeSaleTx(
 
   const header = {
     ...key,
-    BILL_NO: input.billNo ?? formatVoucherNo(vchNo),
+    // The operator's Bill No box, blank unless typed (TR_SALE.cs:15196; only an edit fills it, :14244).
+    BILL_NO: input.billNo ?? '',
     AC_CODE: input.acCode,
     AC_NAME: input.acName ?? '',
     VCH_DATE: voucherDate,
@@ -1539,10 +1605,11 @@ async function writeSaleTx(
     FX_RATE: 0,
     FX_CODE: '',
     MTL_RATE: 0,
-    // Written by other desktop forms, not TR_SALE.
+    // Written by other desktop forms (the e-invoice), not TR_SALE: the columns' defaults, 'N' for IRN_NO and ACK_NO
+    // (MS_UPDATE.cs:18686, :18701) and null for ACK_DATE (:18716).
     ACK_DATE: null,
-    ACK_NO: null,
-    IRN_NO: null,
+    ACK_NO: 'N',
+    IRN_NO: 'N',
     IT_TYPE: null,
     NEW_VCH_NO: null,
     OLD_VCH_NO: null,
@@ -1634,23 +1701,28 @@ async function writeSaleTx(
     });
   }
   if (!isSalesQuotation && kasar > 0) {
-    // Kasar write-off: Dr KASAR, reduces what the customer owes
+    // Kasar write-off, a settlement pair like cash: the party's credit first, then the kasar account's debit
+    // (Sales_Ledr, Ac_Ledr.cs:151-153 inserts the party leg before the account leg). Keyed 25/26, the codes the
+    // desktop wrote on all 100 kasar pairs of the 2024-25 year; the decompiled source numbers the same pair 31/32
+    // and its cash pair 25/26, a build difference reported with the round-off question (SALE_LEG above).
     const kb = { ...key, VCH_TYPE: bookPolicy.vchType };
     ledger.push({
       ...kb,
-      AC_CODE: kasarAc,
-      LD_CODE: input.acCode,
-      DR_AMT: kasar,
-      CR_AMT: 0,
-      SIGN: 'D',
-    });
-    ledger.push({
-      ...kb,
+      legType: SALE_LEG.partyKasar,
       AC_CODE: input.acCode,
       LD_CODE: kasarAc,
       DR_AMT: 0,
       CR_AMT: kasar,
       SIGN: 'C',
+    });
+    ledger.push({
+      ...kb,
+      legType: SALE_LEG.kasar,
+      AC_CODE: kasarAc,
+      LD_CODE: input.acCode,
+      DR_AMT: kasar,
+      CR_AMT: 0,
+      SIGN: 'D',
     });
   }
   if (!isSalesQuotation) {
@@ -1668,6 +1740,16 @@ async function writeSaleTx(
       }),
     );
     assertBalanced(ledger);
+    // BILL_NO on the voucher's money legs is SL_DATA.BILL_NO (Ac_Ledr.cs:64-163 select A.BILL_NO); the unfixed fine
+    // leg writes '' (:165).
+    for (const line of ledger) if (line.FINE_WT == null) line.BILL_NO = header.BILL_NO;
+    // LDR_NAME is SL_DATA.AC_NAME on the party's bill leg (Ac_Ledr.cs:64, leg 01) and on the cash account's debit
+    // (Ac_Ledr.cs:141); every other sale leg writes '' (Ac_Ledr.cs:13 default).
+    for (const line of ledger) {
+      if (line.legType === SALE_LEG.partyBill || line.legType === SALE_LEG.cash) {
+        line.LDR_NAME = input.acName ?? '';
+      }
+    }
   }
 
   const cashAmt = round2s(num(input.cashAmt));
@@ -1781,21 +1863,15 @@ async function writeSaleTx(
     };
   });
 
-  const oldGoldStock = oldMetalRows.map((g, i) => ({
-    ...key,
-    SR_NO: i + 1,
-    VCH_DATE: header.VCH_DATE,
-    VCH_TYPE: 'MIXSL',
-    BOOK_NAME: 'OLD GOLD',
-    AC_CODE: input.acCode,
-    IT_CODE: g.itCode ?? 'OG',
-    TR_TYPE: 'P',
-    ITM_SIGN: '+',
-    // Same rule as the sale line above - a movement count, not a weight. Old-metal inward rows on the sale
-    // books are inside the 267 measured and are also all 1.
-    ITM_QTY: 1,
-    ITM_PCS: num(g.pcs) || 1,
-  }));
+  const oldGoldStock = oldGoldDetl.map((g) =>
+    saleOldMetalStockRow(g, {
+      key,
+      vchDate: voucherDate,
+      bookPolicy,
+      acCode: input.acCode,
+      mainUser: ctx.mainUser,
+    }),
+  );
 
   // Satellite tables the desktop TR_SALE also writes: tax register + bill outstanding.
   const vchDate = header.VCH_DATE;
@@ -1851,6 +1927,21 @@ async function writeSaleTx(
       });
     }
   }
+  /**
+   * TAX_DATA is the GST register of TAX-INVOICE books only. Every non-UAE Sales_GST insert (Ac_Tax.cs:92-98) filters
+   * `B.BOOK_TYPE = 'T' AND A.CO_BOOK NOT IN ('099','199') AND A.NET_AMT <> 0`, so an estimate book ('M') writes no
+   * register row even when its bill carries tax; its tax leg still posts (Ac_Ledr.cs:94). The 2024-25 desktop year
+   * agrees: 89/89 tax-book sales have TAX_DATA, 0/100 estimate-book sales do.
+   *
+   * A blank BOOK_TYPE still writes the register: the desktop always stores a type, while books the web provisions
+   * (seedCompany) carry none yet, and treating those as non-tax books would empty their GST register.
+   */
+  const saleBookType = (await saleBookTypesTx(tx, input.scope as CompleteSaleScope)).bookType;
+  const writesTaxRegister =
+    (saleBookType === 'T' || saleBookType === '') &&
+    key.CO_BOOK !== '099' &&
+    key.CO_BOOK !== '199' &&
+    totals.net !== 0;
   const osRow = {
     ...key,
     VCH_TYPE: bookPolicy.vchType,
@@ -1883,6 +1974,9 @@ async function writeSaleTx(
     MAIN_USER: ctx.mainUser,
     DATA_TRFR: 'N',
     DATA_TYPE: 'A',
+    // Not set by the save, so the column defaults 'N' apply (MS_UPDATE.cs:25878).
+    USER_UPDATE: 'N',
+    USER_DELETE: 'N',
     // Written by other desktop forms, not TR_SALE.
     LD_CODE: null,
     NEW_VCH_NO: null,
@@ -1894,6 +1988,18 @@ async function writeSaleTx(
   // Built once and shared: the SL_DETL write set and the Rojmel projection must agree, and computing
   // them twice is how they drift.
   const detailRows = computed.map((c, idx) => buildSaleDetailRow(c, idx));
+
+  const mainStock = detailRows.map((d, idx) =>
+    saleStockRow(
+      d,
+      stockMovementWeights(
+        computed[idx]!.in,
+        issuedTags.get(idx)?.stock,
+        behavior.stockWeightSource,
+      ),
+      { key, vchDate: voucherDate, bookPolicy, acCode: input.acCode, mainUser: ctx.mainUser },
+    ),
+  );
 
   // TR_SALE.cs:14209,15151: hidden book numbering is a separate TEMP_BOOK_DATA sequence.
   await insertRowTx(tx, 'TEMP_BOOK_DATA', tenantId, {
@@ -2032,6 +2138,9 @@ async function writeSaleTx(
   await postVoucherTx(tx, tenantId, {
     ledger: { table: 'AC_DATA', lines: ledger },
     bookName: bookPolicy.bookName,
+    // PARTY_AC_CODE = SL_DATA.AC_CODE only on the customer's own legs (Ac_Ledr.cs:64, :139 and every party-credit
+    // leg); revenue, tax and the receiving account's debit write '' (Ac_Ledr.cs:76-94, :141).
+    partyAc: input.acCode,
     writes: [
       { table: 'SL_DATA', rows: [header] },
       { table: 'SL_DETL', rows: detailRows },
@@ -2039,8 +2148,12 @@ async function writeSaleTx(
       ...(mainStock.length ? [{ table: 'MAIN_STOCK', rows: mainStock }] : []),
       ...(oldGoldDetl.length ? [{ table: 'SL_PR_DETL', rows: oldGoldDetl }] : []),
       ...(oldGoldStock.length ? [{ table: 'MAIN_STOCK', rows: oldGoldStock }] : []),
-      { table: 'TAX_DATA', rows: taxRows },
-      { table: 'BILL_OS_DATA', rows: [osRow] },
+      ...(writesTaxRegister && taxRows.length ? [{ table: 'TAX_DATA', rows: taxRows }] : []),
+      // The receivable row is written for a named customer only: not for the counter-cash party 00045 and not for
+      // a zero bill (TR_SALE.cs:15736 `tAcCode <> '00045'`, :15744 `MSG2_TOTAL[5,3] <> 0`).
+      ...(input.acCode !== '00045' && grandWithTcs !== 0
+        ? [{ table: 'BILL_OS_DATA', rows: [osRow] }]
+        : []),
       ...(rojmelRows.length ? [{ table: 'ROJ_MEL_DATA', rows: rojmelRows }] : []),
       ...saleTenderWrites(
         {

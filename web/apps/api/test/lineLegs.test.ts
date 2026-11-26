@@ -130,15 +130,15 @@ describe('buildSaleLedger with a two-account bill (G169)', () => {
     }));
     expect(shape).toEqual([
       { ac: 'CUST', cr: 0, dr: 69921.04, legType: 1, legKeySuffix: undefined },
-      { ac: 'SALES', cr: 63609.5, dr: 0, legType: undefined, legKeySuffix: '         103' },
-      { ac: 'SLVSALE', cr: 4275, dr: 0, legType: undefined, legKeySuffix: '         203' },
+      { ac: 'SALES', cr: 63609.5, dr: 0, legType: undefined, legKeySuffix: '         102' },
+      { ac: 'SLVSALE', cr: 4275, dr: 0, legType: undefined, legKeySuffix: '         202' },
       { ac: 'GST', cr: 2036.54, dr: 0, legType: 4, legKeySuffix: undefined },
     ]);
   });
 
   it('gives every revenue leg its own key (the pre-G169 code gave both legType 3 and collided)', () => {
     const tails = ledger.filter((line) => line.AC_CODE !== 'CUST' && line.AC_CODE !== 'GST');
-    expect(tails.map((line) => line.legKeySuffix)).toEqual(['         103', '         203']);
+    expect(tails.map((line) => line.legKeySuffix)).toEqual(['         102', '         202']);
     expect(tails.every((line) => line.legType === undefined)).toBe(true);
   });
 });
