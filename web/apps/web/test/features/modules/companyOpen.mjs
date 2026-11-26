@@ -560,7 +560,11 @@ export const companyOpen = {
             { coCode: '02', lcCode: '02', coYear: '2025-2026' },
           );
           await page.unroute(selectUrl, abortOpen);
-          // The deliberately aborted open is logged by the browser once; it is not a defect.
+          // The deliberately aborted open is logged by the browser once, asynchronously; it is not a defect. Wait
+          // for that log (and any reaction to it) before clearing, or it lands after the clear on a slow runner.
+          for (let i = 0; i < 30 && !session.consoleErrors.some((t) => /ERR_FAILED/.test(t)); i++)
+            await page.waitForTimeout(100);
+          await page.waitForTimeout(300);
           session.consoleErrors.length = 0;
           await page.evaluate(() => sessionStorage.clear());
         });
