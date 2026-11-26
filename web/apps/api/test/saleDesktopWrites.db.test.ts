@@ -438,4 +438,29 @@ databaseDescribe('sale writes what the desktop writes', () => {
     expect(cancelled.irn).toBe(irn);
     expect(await irnOf()).toBeNull();
   }, 30_000);
+
+  /** A line-path book with paise on a line and the bill total rounded to rupees still saves, balanced. */
+  it('balances a line-path bill whose line nets carry paise under a rupee-rounded bill total', async () => {
+    await exec(
+      `INSERT INTO "CO_SET_NEW"(tenant_id,"CO_CODE","TOT_AMT_ROF") VALUES ($1,$2,'0')`,
+      CO,
+    );
+    const sale = await createSale(runtime, saleInput('ES'), [
+      looseLine({ otherAmount: 50.37 }),
+      looseLine({ itCode: 'OTH', ghtWt: 0, otherAmount: 10.41 }),
+    ]);
+    const legs = await ledger('ES', sale.vchNo);
+    const sum = (side: 'dr' | 'cr') =>
+      Math.round(legs.reduce((s, l) => s + Number(l[side]), 0) * 100) / 100;
+    expect(sum('dr')).toBe(sum('cr'));
+    const [detl] = await rows(
+      `SELECT array_agg("NET_AMT"::float ORDER BY "SR_NO") nets FROM "SL_DETL"
+        WHERE tenant_id=$1 AND "CO_BOOK"='ES' AND "VCH_NO"=lpad($2::text,5,'0')`,
+      sale.vchNo,
+    );
+    // Each line leg is its own line's NET_AMT (Ac_Ledr.cs:90), paise and all.
+    const lineLegs = legs.filter((l) => /^\s+\d+0[27]$/.test(String(l.k).slice(-12)));
+    expect(lineLegs.map((l) => l.cr)).toEqual(detl?.nets);
+    expect(detl?.nets.some((n: number) => !Number.isInteger(n))).toBe(true);
+  }, 30_000);
 });

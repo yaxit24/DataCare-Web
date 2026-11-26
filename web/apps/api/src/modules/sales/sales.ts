@@ -52,7 +52,7 @@ import {
 import { resolveTaxPolicyTx } from '../shared/taxPolicy.js';
 import { postedSaleLine, withSaleGhat } from './saleLinePosting.js';
 import { gstTaxRows } from '../shared/taxDataRows.js';
-import { oldMetalHeaderTotals } from '@datacare/core';
+import { oldMetalHeaderTotals, round as roundTo } from '@datacare/core';
 import {
   checkSaleOrdersTx,
   resolveSaleTenders,
@@ -443,6 +443,24 @@ const SALE_LEG = {
   webRoundOff: 99,
 } as const;
 
+/**
+ * The amount of the web's round-off leg (SALE_LEG.webRoundOff): whatever balances the party's bill debit against the
+ * item and tax credits.
+ *
+ * On the header path the item leg is the bill taxable, so this is the totals' round-off exactly. On the line path
+ * each item leg is its own line's NET_AMT (Ac_Ledr.cs:90), while the bill total is rounded from the ROUNDED net
+ * (calc.ts billTotals, TOT_AMT_ROF): with paise on a line and a rupee-rounded bill the two differ by the line nets'
+ * rounding, which the desktop leaves unposted (its ROF_AMT is 0, see webRoundOff). The web keeps the voucher balanced
+ * by carrying that residue in the same round-off leg; nothing else about the leg changes.
+ */
+export function saleLedgerRoundOff(
+  totals: Pick<BillTotals, 'total' | 'tax'>,
+  income: ReadonlyArray<{ amount: number }>,
+): number {
+  const credited = income.reduce((sum, leg) => sum + leg.amount, 0) + totals.tax;
+  return roundTo(totals.total - credited, 3);
+}
+
 export function buildSaleLedger(p: {
   key: VoucherKey;
   acCode: string;
@@ -506,23 +524,24 @@ export function buildSaleLedger(p: {
         CR_AMT: p.totals.tax,
         SIGN: 'C',
       });
-    if (p.totals.roundOff > 0)
+    const roundOff = saleLedgerRoundOff(p.totals, income);
+    if (roundOff > 0)
       lines.push({
         ...base,
         legType: SALE_LEG.webRoundOff,
         AC_CODE: p.roundAc,
         LD_CODE: p.acCode,
         DR_AMT: 0,
-        CR_AMT: p.totals.roundOff,
+        CR_AMT: roundOff,
         SIGN: 'C',
       });
-    else if (p.totals.roundOff < 0)
+    else if (roundOff < 0)
       lines.push({
         ...base,
         legType: SALE_LEG.webRoundOff,
         AC_CODE: p.roundAc,
         LD_CODE: p.acCode,
-        DR_AMT: Math.abs(p.totals.roundOff),
+        DR_AMT: Math.abs(roundOff),
         CR_AMT: 0,
         SIGN: 'D',
       });
@@ -1136,7 +1155,10 @@ async function writeSaleTx(
   // 6 labour income, 7 cash purchase, 8 scheme bonus. The Rojmel's advance row names slot 4.
   let advanceAc = '';
   let kasarAc = input.kasarAc ?? controlAc;
-  if (!isSalesQuotation && (totals.roundOff !== 0 || kasar !== 0)) {
+  if (
+    !isSalesQuotation &&
+    (totals.roundOff !== 0 || saleLedgerRoundOff(totals, incomeLegs) !== 0 || kasar !== 0)
+  ) {
     const configured = await resolveBookAccountTx(tx, input.scope, bookPolicy, 3);
     roundAc = validateConfiguredAccount('round account', requestedRoundAc, configured);
     kasarAc = validateConfiguredAccount('kasar account', input.kasarAc, configured);
