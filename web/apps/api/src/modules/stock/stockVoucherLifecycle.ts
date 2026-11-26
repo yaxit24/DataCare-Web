@@ -473,6 +473,14 @@ function itemLotBalanceLines(lines: ItemLotLine[], voucherNo: string): BalanceLi
   }));
 }
 
+/**
+ * The tag's counter code. The desktop counter cell (mSG column 6) is a 3-character entry box
+ * (TR_TAG_OPBL.cs:5712-5714, TEXT_ENTRY.MaxLength = 3) whose text BtnSave_Click writes as is (:10957), so
+ * the code never exceeds BAR_DETL.TBL_CODE varchar(3); a line without one takes the grid's '001'.
+ */
+const counterOf = (line: TagOpeningLine): string =>
+  line.tblCode == null ? '001' : text(line.tblCode).slice(0, 3);
+
 async function writeTagOpeningTx(
   tx: any,
   input: TagOpeningInput,
@@ -550,7 +558,7 @@ async function writeTagOpeningTx(
     BOOK_NAME: policy.bookName.slice(0, 20),
     INOUT_TYPE: 'I',
     ENTRY_TYPE: 'O',
-    TBL_CODE: line.tblCode ?? '001',
+    TBL_CODE: counterOf(line), // mSG[i,6] :10957, a 3-character cell (:5712-5714)
     TAG_NO: identities[index]!.tagNo,
     VCH_SRNO: identities[index]!.vchSrno,
     IT_CODE: text(line.itCode),
@@ -655,7 +663,7 @@ async function writeTagOpeningTx(
     VCH_TYPE: tagGen ? policy.vchType : 'TAGOP',
     BOOK_NAME: tagGen ? TAG_GEN : 'TAG OPBL',
     AC_CODE: '',
-    TBL_CODE: line.tblCode ?? '001',
+    TBL_CODE: counterOf(line),
     IT_CODE: text(line.itCode),
     TAG_NO: identities[index]!.tagNo,
     VCH_SRNO: identities[index]!.vchSrno,

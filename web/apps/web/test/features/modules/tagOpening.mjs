@@ -472,6 +472,67 @@ export const tagOpening = {
       },
     ),
     C(
+      'lookup.late-enter-keeps-focus',
+      'T04',
+      'mutation',
+      'TR_TAG_OPBL.cs:5712-5714 (the counter cell takes 3 characters) and :10957 (it is saved as typed): an item code resolved after the operator has moved on must not pull the focus back into the counter cell',
+      async (ctx) => {
+        const { page } = await ctx.session();
+        await openScreen(page);
+        const item = page.getByLabel('Item code row 1', { exact: true });
+        // The list the box opens on focus is for the empty text, so Enter on the typed code resolves it with one more
+        // lookup (LookupPicker resolveEnter). That answer is held until the operator is typing in the gross cell.
+        await item.click();
+        await page.locator('[data-lookup-open="true"]').first().waitFor();
+        let release;
+        const gate = new Promise((resolve) => (release = resolve));
+        const forCode = (url) =>
+          url.pathname === '/api/lookup/items' && url.searchParams.get('q') === GOLD;
+        const hold = async (route) => {
+          await gate;
+          await route.continue();
+        };
+        await page.route(forCode, hold);
+        try {
+          const resolved = page.waitForResponse((r) => forCode(new URL(r.url())));
+          await item.fill(GOLD);
+          await item.press('Enter');
+          await grid(page, 'grossWt', 1).click();
+          await page.keyboard.type('10');
+          release();
+          await resolved;
+          await page.waitForTimeout(100);
+          await page.keyboard.type('.5');
+        } finally {
+          release();
+          await page.unroute(forCode, hold);
+        }
+        await grid(page, 'netWt', 1).fill('10');
+        await grid(page, 'touch', 1).fill('91.6');
+        const cells = {
+          counter: await grid(page, 'tblCode', 1).inputValue(),
+          gross: await grid(page, 'grossWt', 1).inputValue(),
+        };
+        const response = await save(page);
+        const body = await response.json();
+        assert.equal(response.status(), 201, JSON.stringify(body));
+        const vchNo = pad(body.vchNo);
+        try {
+          const [d] = await detl(ctx, OPEN_BOOK, vchNo);
+          assert.deepEqual(cells, { counter: '001', gross: '10.5' });
+          assert.deepEqual([d.it, d.ctr, d.gwt], [GOLD, '001', 10.5]);
+          return {
+            observation: `cells ${JSON.stringify(cells)}; saved ${JSON.stringify(d)}`,
+            expected: 'counter 001, gross 10.5',
+            database: { detail: d },
+            downstream: { counter: d.ctr },
+          };
+        } finally {
+          await removeVoucher(page, vchNo);
+        }
+      },
+    ),
+    C(
       'children.two-tags-auto-numbers',
       'T05',
       'mutation',

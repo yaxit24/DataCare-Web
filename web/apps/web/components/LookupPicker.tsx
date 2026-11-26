@@ -111,7 +111,11 @@ export function LookupPicker({
     onChange(String(r.code));
     onPick?.(r);
     setOpen(false);
-    if (advanceOnPick && inputRef.current) focusNext(inputRef.current);
+    // Enter-advance moves on from THIS box only. A pick that lands after an awaited lookup (resolveEnter) finds the
+    // operator already in another cell; moving the focus then sent the keys being typed there into the cell after
+    // this box (a Tag Opening weight typed into the 3-character counter cell, 2026-11-27 browser run).
+    if (advanceOnPick && inputRef.current && document.activeElement === inputRef.current)
+      focusNext(inputRef.current);
   };
   /**
    * The desktop resolves a typed code on Enter: `tAcCode_KeyDown` looks the exact code up in AC_MAST and fills
