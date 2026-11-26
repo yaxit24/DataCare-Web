@@ -1,6 +1,6 @@
 import { PrismaClient } from '@datacare/db';
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest';
-import { createSale, type SaleLineInput } from '../src/modules/sales/sales.js';
+import { createSale, editSale, getSale, type SaleLineInput } from '../src/modules/sales/sales.js';
 import { openAdvanceOfOrderTx } from '../src/modules/sales/orderCancel.js';
 import { cancelIrnForSale } from '../src/modules/einvoice/einvoice.js';
 import { bankReconClear, bankReconList } from '../src/modules/finance/bankRecon.js';
@@ -665,5 +665,52 @@ databaseDescribe('sale writes what the desktop writes', () => {
       ['CUST', 0, 25],
       ['DISCAC', 25, 0],
     ]);
+  }, 30_000);
+
+  /** An edit keeps the bank clearing, and moves an older build's BANK_RECONCILE key (…10) to the new leg (…16). */
+  it('carries a cleared cheque leg across an edit, re-keying its BANK_RECONCILE row', async () => {
+    const sale = await createSale(
+      runtime,
+      saleInput('TX', { chequeAmt: 700, bankAc: 'BANKAC', chequeNo: '111' }),
+      [looseLine()],
+    );
+    const vch = String(sale.vchNo).padStart(5, '0');
+    const [bank] = await rows(
+      `SELECT "LEDR_KEY" k FROM "AC_DATA" WHERE tenant_id=$1 AND "CO_BOOK"='TX' AND "VCH_NO"=$2 AND "AC_CODE"='BANKAC'`,
+      vch,
+    );
+    const newKey = String(bank!.k);
+    const oldKey = `${newKey.slice(0, -2)}10`;
+    // The older build's key and a cleared reconciliation row, as an imported voucher carries them.
+    await exec(
+      `UPDATE "AC_DATA" SET "LEDR_KEY"=$2,"CLR_DATE"='2024-05-20' WHERE tenant_id=$1 AND "LEDR_KEY"=$3`,
+      oldKey,
+      newKey,
+    );
+    await exec(
+      `INSERT INTO "BANK_RECONCILE"(tenant_id,"CO_CODE","LC_CODE","LEDR_KEY","CLR_DATE") VALUES ($1,$2,$3,$4,'2024-05-20')`,
+      CO,
+      LC,
+      oldKey,
+    );
+    const view: any = await getSale(runtime, scopeOf('TX'), sale.vchNo);
+    await editSale(
+      runtime,
+      saleInput('TX', { chequeAmt: 700, bankAc: 'BANKAC', chequeNo: '111', description: 'edited' }),
+      [looseLine()],
+      sale.vchNo,
+      view.version,
+    );
+    const [after] = await rows(
+      `SELECT "LEDR_KEY" k, "CLR_DATE"::text clr FROM "AC_DATA"
+        WHERE tenant_id=$1 AND "CO_BOOK"='TX' AND "VCH_NO"=$2 AND "AC_CODE"='BANKAC'`,
+      vch,
+    );
+    expect(after).toEqual({ k: newKey, clr: '2024-05-20' });
+    expect(
+      await rows(
+        `SELECT "LEDR_KEY" k, "CLR_DATE"::text clr FROM "BANK_RECONCILE" WHERE tenant_id=$1`,
+      ),
+    ).toEqual([{ k: newKey, clr: '2024-05-20' }]);
   }, 30_000);
 });

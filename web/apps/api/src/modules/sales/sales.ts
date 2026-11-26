@@ -84,6 +84,7 @@ import {
 import { partyCashReceivedTx } from '../finance/finance.js';
 import { tenderThresholdDecision } from '../finance/tender.js';
 import type { LineLeg } from '../posting/lineLegs.js';
+import { clearedSaleLegsTx, restoreSaleClearingTx } from './saleBankClearing.js';
 import { SALE_LEG, buildSaleLedger, saleLedgerRoundOff } from './saleLedger.js';
 
 export { SALE_LEG, buildSaleLedger, saleLedgerRoundOff };
@@ -2426,6 +2427,8 @@ export async function editSale(
     });
 
     const hiddenVoucherNo = formatVoucherNo(text(persisted.HD_VCH_NO));
+    // A cleared bank leg keeps its clearing across the rewrite (saleBankClearing.ts).
+    const clearedLegs = await clearedSaleLegsTx(tx, scope.tenantId, keyOf(scope, voucherNo));
     const legacyRestores = await releaseSaleReferencesTx(tx, scope, voucherNo);
     // TR_SALE.cs:15167-15172 replaces the write set and TEMP_BOOK_DATA without DELETE_DATA.
     await deleteVoucherWriteSetTx(tx, {
@@ -2447,6 +2450,7 @@ export async function editSale(
       persistedHeader: priorHeaderRow,
       editingUser: input.mainUser ?? null,
     });
+    await restoreSaleClearingTx(tx, scope.tenantId, keyOf(scope, voucherNo), clearedLegs);
     // N51: the screen keeps the new version for its next save or delete.
     return {
       ...saved,
