@@ -1,5 +1,7 @@
 import assert from 'node:assert/strict';
 import { FIXTURE_MANIFEST, USERS } from '../fixtures/catalogue.mjs';
+import { holdAdvisoryLock } from '../harness.mjs';
+import { changedTables, tenantFingerprint } from '../faults.mjs';
 
 /**
  * Feature: Company → Data Refresh (desktop MS_UPDATE).
@@ -46,7 +48,6 @@ const captions = ['Account', 'Stock', 'Field Update', 'Approval Adj', 'Image Dat
 const previewOnlyOperations = [
   ['data-refresh-account', 'Account'],
   ['data-refresh-stock', 'Stock'],
-  ['data-refresh-image-data', 'Image Data'],
   ['data-refresh-old-field', 'Old Field'],
 ];
 const hidden = ['Crm Data', 'Problem Qry', 'TagDiff Set', 'Mfg Refresh', 'Scheme Data'];
@@ -320,7 +321,7 @@ function assertApprovalFixture(rows) {
 async function previewApproval(page) {
   const [response] = await Promise.all([
     page.waitForResponse((value) =>
-      isApi(value, '/utilities/data-repair/approval-reconcile/preview'),
+      isApi(value, '/utilities/data-refresh/approval-reconcile/preview'),
     ),
     page.getByRole('button', { name: 'Approval Adj', exact: true }).click(),
   ]);
@@ -331,7 +332,7 @@ async function previewApproval(page) {
 async function applyApproval(page) {
   const [response] = await Promise.all([
     page.waitForResponse((value) =>
-      isApi(value, '/utilities/data-repair/approval-reconcile/apply'),
+      isApi(value, '/utilities/data-refresh/approval-reconcile/apply'),
     ),
     page.getByRole('button', { name: 'Apply Approval Adj', exact: true }).click(),
   ]);
@@ -443,18 +444,13 @@ export const dataRefresh = {
       'refusal.preview-only-direct-apply',
       'T06',
       'refusal',
-      'D-REF-3 and MS_UPDATE.cs:2334-3047,8825-9038: unproved full graphs must not partially apply',
+      'D-REF-3 and MS_UPDATE.cs:2334-3047,9412-33074: unproved full graphs must not partially apply',
       async (ctx) => {
         const { page } = await ctx.session();
         await openScreen(page);
         const before = await flags(ctx);
-        for (const id of [
-          'data-refresh-account',
-          'data-refresh-stock',
-          'data-refresh-image-data',
-          'data-refresh-old-field',
-        ]) {
-          const response = await page.request.post(`/api/utilities/data-repair/${id}/apply`, {
+        for (const id of ['data-refresh-account', 'data-refresh-stock', 'data-refresh-old-field']) {
+          const response = await page.request.post(`/api/utilities/data-refresh/${id}/apply`, {
             data: { previewHash: '0'.repeat(64) },
           });
           assert.equal(response.status(), 400);
@@ -462,7 +458,7 @@ export const dataRefresh = {
         }
         assert.deepEqual(await flags(ctx), before);
         return {
-          observation: 'all direct applies refused with preview-only',
+          observation: 'the three direct applies refused with preview-only',
           expected: 'preview-only',
           database: before,
         };
@@ -505,7 +501,7 @@ export const dataRefresh = {
         await openScreen(page);
         for (const [id, caption] of previewOnlyOperations) {
           const [response] = await Promise.all([
-            page.waitForResponse((value) => isApi(value, `/utilities/data-repair/${id}/preview`)),
+            page.waitForResponse((value) => isApi(value, `/utilities/data-refresh/${id}/preview`)),
             page.getByRole('button', { name: caption, exact: true }).click(),
           ]);
           assert.equal(response.status(), 200, `${caption}: ${await response.text()}`);
@@ -529,11 +525,25 @@ export const dataRefresh = {
             0,
           );
         }
+        // Image Data (MS_UPDATE.cs:8825-9038) only builds schema the web migrations own: it verifies and is clean.
+        const [imageResponse] = await Promise.all([
+          page.waitForResponse((value) =>
+            isApi(value, '/utilities/data-refresh/data-refresh-image-data/preview'),
+          ),
+          page.getByRole('button', { name: 'Image Data', exact: true }).click(),
+        ]);
+        assert.equal(imageResponse.status(), 200, await imageResponse.text());
+        const image = await imageResponse.json();
+        assert.equal(image.applyAvailable, true);
+        assert.equal(image.clean, true);
+        assert.match(image.samples.join('\n'), /TAG_IMAGE_DATA has CO_CODE, LC_CODE, TAG_NO/);
+        await page.getByText('No records need adjustment.', { exact: true }).waitFor();
+        assert.equal(await page.getByText(/Preview only:/).count(), 0);
         // Field Update is no longer a preview-only classification: its two class-a repairs
         // (MS_UPDATE.cs:7214 AC_MAIN_GR, MS_UPDATE.cs:8608 DEFAULTER_AC) apply after a preview.
         const [fieldResponse] = await Promise.all([
           page.waitForResponse((value) =>
-            isApi(value, '/utilities/data-repair/data-refresh-field-update/preview'),
+            isApi(value, '/utilities/data-refresh/data-refresh-field-update/preview'),
           ),
           page.getByRole('button', { name: 'Field Update', exact: true }).click(),
         ]);
@@ -549,7 +559,7 @@ export const dataRefresh = {
         assert.equal(await page.getByText(/Preview only:/).count(), 0);
         return {
           observation:
-            'the four unproved classifications show no Apply or authority inputs; Field Update previews as an applicable repair',
+            'the three unproved classifications show no Apply or authority inputs; Image Data verifies and is clean; Field Update previews as an applicable repair',
           expected: { previewOnly: previewOnlyOperations.map(([id]) => id), field: true },
         };
       },
@@ -593,17 +603,160 @@ export const dataRefresh = {
           };
         }),
     ),
-    blocked(
+    C(
       'rights.caption-print-handoff',
       'T11',
-      'MS_UPDATE.cs:2042-2050,2334-2342,2671-2679; owner adaptation gates all six through Data Refresh Print',
-      'G225 remains open: existing Data Repair routes are admin-only, but the exact Data Refresh caption FRM_PRINT handoff requires active-owned route-policy/form-catalog work.',
+      'refusal',
+      'MS_UPDATE.cs:2042-2050 reads USER_SET FRM_PRINT under the caption Data Refresh; :2338-2342, :2675-2679 answer "You Have No Print Rights....."; the owner applies the Print boundary to all six actions (G225)',
+      async (ctx) =>
+        withApprovalFixtures(ctx, async () => {
+          const rights = (view, print) =>
+            exec(
+              ctx,
+              `INSERT INTO "USER_SET"(tenant_id,"CO_CODE","LC_CODE","USER_NAME","MAIN_MENU","SUB_MENU","FRM_VIEW","FRM_EDIT","FRM_DELETE","FRM_PRINT")
+               VALUES ($1,'01','01',$2,'Company','Data Refresh',$3,'N','N',$4)`,
+              USERS.clerk.user,
+              view,
+              print,
+            );
+          const drop = () =>
+            exec(
+              ctx,
+              `DELETE FROM "USER_SET" WHERE tenant_id=$1 AND "SUB_MENU"='Data Refresh' AND "USER_NAME"=$2`,
+              USERS.clerk.user,
+            );
+          await drop();
+          try {
+            const before = await flags(ctx);
+            const { page } = await ctx.session(as(USERS.clerk.user, 'data-refresh-rights'));
+            const attempt = async () => ({
+              operations: (
+                await page.request.get('/api/utilities/data-refresh/operations')
+              ).status(),
+              preview: (
+                await page.request.post('/api/utilities/data-refresh/approval-reconcile/preview', {
+                  data: {},
+                })
+              ).status(),
+              apply: (
+                await page.request.post('/api/utilities/data-refresh/approval-reconcile/apply', {
+                  data: { previewHash: '0'.repeat(64) },
+                })
+              ).status(),
+            });
+            const refusedNone = await attempt();
+            const message = (
+              await (await page.request.get('/api/utilities/data-refresh/operations')).json()
+            ).message;
+            await rights('Y', 'N');
+            const refusedViewOnly = await attempt();
+            for (const result of [refusedNone, refusedViewOnly])
+              assert.deepEqual(result, { operations: 403, preview: 403, apply: 403 });
+            assert.equal(message, 'You Have No Print Rights.....');
+            // The administrator-only advanced console is not opened by the Data Refresh right.
+            assert.equal(
+              (await page.request.get('/api/utilities/data-repair/operations')).status(),
+              403,
+            );
+            assert.deepEqual(await flags(ctx), before, 'a refused user changes nothing');
+            // With the Print right the same user runs Approval Adj through the screen.
+            await drop();
+            await rights('Y', 'Y');
+            await openScreen(page);
+            const preview = await previewApproval(page);
+            const result = await applyApproval(page);
+            assert.deepEqual(result.applied, preview.diffs);
+            await page.getByText('Approval Refersh Process Complete.', { exact: true }).waitFor();
+            assertApprovalFixture(await flags(ctx));
+            const [{ operator }] = await ctx.rows(
+              `SELECT operator FROM "data_repair_run" WHERE tenant_id=$1 AND operation_id='approval-reconcile'
+                 AND state='applied' ORDER BY row_id DESC LIMIT 1`,
+            );
+            assert.equal(operator, USERS.clerk.user);
+            return {
+              observation: `no row and View-only refused (${message}); View+Print previewed and applied, recorded under ${operator}`,
+              expected: { refused: 403, viewPrint: 'applied' },
+              database: { before, after: await flags(ctx), operator },
+              downstream: { advancedConsole: 403 },
+            };
+          } finally {
+            await drop();
+          }
+        }),
     ),
-    blocked(
+    C(
       'concurrency.voucher-save-during-apply',
       'T12',
-      'D-REF-2: a voucher saved while Approval Adj applies must invalidate the reviewed set without losing the voucher',
-      'X27/P11-01: the browser stack has no approved synchronization hook at the apply lock; parallel previews are not accepted as a substitute for the required save/apply race.',
+      'mutation',
+      'D-REF-2: a voucher saved while Approval Adj waits at the repair lock invalidates the reviewed set (stale-preview) and is not lost; MS_UPDATE.cs:8815-8820 selects what the voucher now consumes',
+      async (ctx) =>
+        withApprovalFixtures(ctx, async () => {
+          const { page } = await ctx.session(as(USERS.admin.user, 'data-refresh-race'));
+          await openScreen(page);
+          const preview = await previewApproval(page);
+          const lock = await holdAdvisoryLock(
+            ctx.owner,
+            'hashtext',
+            `repair:${ctx.tenantId}:approval-reconcile`,
+          );
+          let released = false;
+          try {
+            const answer = page.waitForResponse((value) =>
+              isApi(value, '/utilities/data-refresh/approval-reconcile/apply'),
+            );
+            await page.getByRole('button', { name: 'Apply Approval Adj', exact: true }).click();
+            let waiting = 0;
+            for (let i = 0; i < 100 && waiting < 1; i += 1) {
+              [{ n: waiting }] = await ctx.owner.$queryRawUnsafe(
+                `SELECT count(*)::int n FROM pg_locks WHERE locktype='advisory' AND NOT granted`,
+              );
+              if (waiting < 1) await page.waitForTimeout(100);
+            }
+            assert.equal(waiting, 1, 'the apply is waiting at the repair lock');
+            // The voucher save: a Sales row that consumes issue DRFI5 commits while the apply waits (SL_DETL is what
+            // the Sales save writes; the screen's own save is covered by the sales module).
+            await exec(
+              ctx,
+              `INSERT INTO "SL_DETL"
+                (tenant_id,"CO_CODE","LC_CODE","CO_YEAR","CO_BOOK","VCH_NO","SR_NO","BOOK_NAME","TAG_NO","ISU_YRCD","ISU_DBCD","ISU_NO","ISU_SRNO")
+               VALUES ($1,'01','01',$2::text,'SL','DRFS3',1,'SALES','N',$2::text,'AI','DRFI5',5)`,
+              YEAR,
+            );
+            await lock.release();
+            released = true;
+            const response = await answer;
+            assert.equal(response.status(), 400, await response.text());
+            assert.equal((await response.json()).code, 'stale-preview');
+            await page.locator('.msg[role="alert"]').waitFor();
+            assert.equal(
+              await page.getByText('Approval Refersh Process Complete.', { exact: true }).count(),
+              0,
+            );
+            const kept = await ctx.rows(
+              `SELECT "VCH_NO" FROM "SL_DETL" WHERE tenant_id=$1 AND "VCH_NO"='DRFS3'`,
+            );
+            assert.equal(kept.length, 1, 'the saved voucher is not lost');
+            // Nothing of the reviewed set was applied; the new preview shows the changed set and applies it.
+            const second = await previewApproval(page);
+            assert.notEqual(second.previewHash, preview.previewHash);
+            assert.deepEqual(second.diffs, await approvalOracle(ctx));
+            const applied = await applyApproval(page);
+            assert.deepEqual(applied.applied, second.diffs);
+            return {
+              observation:
+                'the voucher saved during the wait made the reviewed set stale; it was kept; a fresh review applied the new set',
+              expected: { first: 'stale-preview', second: second.diffs },
+              database: {
+                voucherKept: kept.length,
+                reviewed: preview.diffs,
+                current: second.diffs,
+              },
+              downstream: { applied: applied.applied },
+            };
+          } finally {
+            if (!released) await lock.release().catch(() => {});
+          }
+        }),
     ),
     C(
       'retry.replay-hash-deduplicates',
@@ -613,7 +766,7 @@ export const dataRefresh = {
       async (ctx) =>
         approvalLifecycle(ctx, async (result) => {
           const replay = await result.page.request.post(
-            '/api/utilities/data-repair/approval-reconcile/apply',
+            '/api/utilities/data-refresh/approval-reconcile/apply',
             {
               data: { previewHash: result.preview.previewHash },
             },
@@ -629,11 +782,70 @@ export const dataRefresh = {
           };
         }),
     ),
-    blocked(
+    C(
       'rollback.browser-fault-boundary',
       'T14',
-      'D-REF-2 and MS_UPDATE.cs:8815-8820',
-      'The APR_DETL-to-BAR_DETL rollback is covered by the real-transaction DB test; the browser harness has no approved production fault-injection control.',
+      'refusal',
+      'D-REF-2 and MS_UPDATE.cs:8815-8820: the APR_DETL update and the BAR_DETL update are one transaction',
+      async (ctx) =>
+        withApprovalFixtures(ctx, async () => {
+          const { page } = await ctx.session(as(USERS.admin.user, 'data-refresh-rollback'));
+          await openScreen(page);
+          const preview = await previewApproval(page);
+          const before = await flags(ctx);
+          // A BEFORE UPDATE trigger on BAR_DETL (the second write) fails for the fixture's tags only; the test
+          // installs it on its own connection and drops it again.
+          await ctx.owner.$executeRawUnsafe(
+            `CREATE OR REPLACE FUNCTION e2e_refresh_fault() RETURNS trigger LANGUAGE plpgsql SECURITY DEFINER AS $f$
+             BEGIN
+               IF NEW.tenant_id = '${ctx.tenantId}' AND NEW."TAG_NO" LIKE 'DRF%' THEN
+                 RAISE EXCEPTION 'e2e fault on BAR_DETL';
+               END IF;
+               RETURN NEW;
+             END $f$`,
+          );
+          await ctx.owner.$executeRawUnsafe(
+            `CREATE TRIGGER e2e_refresh_fault BEFORE UPDATE ON "BAR_DETL" FOR EACH ROW EXECUTE FUNCTION e2e_refresh_fault()`,
+          );
+          let faulted;
+          try {
+            const fingerprint = await tenantFingerprint(ctx);
+            const [response] = await Promise.all([
+              page.waitForResponse((value) =>
+                isApi(value, '/utilities/data-refresh/approval-reconcile/apply'),
+              ),
+              page.getByRole('button', { name: 'Apply Approval Adj', exact: true }).click(),
+            ]);
+            faulted = response.status();
+            assert.ok(faulted >= 400, `the faulted apply answered ${faulted}`);
+            await page.locator('.msg[role="alert"]').waitFor();
+            assert.equal(
+              await page.getByText('Approval Refersh Process Complete.', { exact: true }).count(),
+              0,
+            );
+            assert.deepEqual(
+              await flags(ctx),
+              before,
+              'the APR_DETL update was rolled back with the BAR_DETL one',
+            );
+            assert.deepEqual(changedTables(fingerprint, await tenantFingerprint(ctx)), []);
+          } finally {
+            await ctx.owner.$executeRawUnsafe(
+              `DROP TRIGGER IF EXISTS e2e_refresh_fault ON "BAR_DETL"`,
+            );
+            await ctx.owner.$executeRawUnsafe(`DROP FUNCTION IF EXISTS e2e_refresh_fault()`);
+          }
+          // The fault is gone: the reviewed set still applies, whole.
+          await page.getByRole('button', { name: 'Apply Approval Adj', exact: true }).click();
+          await page.getByText('Approval Refersh Process Complete.', { exact: true }).waitFor();
+          assertApprovalFixture(await flags(ctx));
+          return {
+            observation: `a failed BAR_DETL write (answer ${faulted}) left every tenant table as before; the retry applied the reviewed set`,
+            expected: { faulted: '>= 400', unchanged: true, retry: preview.diffs },
+            database: { before, after: await flags(ctx) },
+            downstream: { retried: preview.diffs },
+          };
+        }),
     ),
     C(
       'scope.location-sentinel',
@@ -703,7 +915,7 @@ export const dataRefresh = {
           await openScreen(page);
           const [previewResponse] = await Promise.all([
             page.waitForResponse((value) =>
-              isApi(value, '/utilities/data-repair/data-refresh-field-update/preview'),
+              isApi(value, '/utilities/data-refresh/data-refresh-field-update/preview'),
             ),
             page.getByRole('button', { name: 'Field Update', exact: true }).click(),
           ]);
@@ -723,7 +935,7 @@ export const dataRefresh = {
           await page.getByRole('heading', { name: 'Field Update preview', exact: true }).waitFor();
           const [applyResponse] = await Promise.all([
             page.waitForResponse((value) =>
-              isApi(value, '/utilities/data-repair/data-refresh-field-update/apply'),
+              isApi(value, '/utilities/data-refresh/data-refresh-field-update/apply'),
             ),
             page.getByRole('button', { name: 'Apply Field Update', exact: true }).click(),
           ]);
@@ -806,7 +1018,7 @@ export const dataRefresh = {
           await operation.focus();
           const [previewResponse] = await Promise.all([
             page.waitForResponse((value) =>
-              isApi(value, '/utilities/data-repair/approval-reconcile/preview'),
+              isApi(value, '/utilities/data-refresh/approval-reconcile/preview'),
             ),
             page.keyboard.press('Enter'),
           ]);
@@ -830,7 +1042,7 @@ export const dataRefresh = {
           assert.equal(await apply.evaluate((element) => document.activeElement === element), true);
           const [applyResponse] = await Promise.all([
             page.waitForResponse((value) =>
-              isApi(value, '/utilities/data-repair/approval-reconcile/apply'),
+              isApi(value, '/utilities/data-refresh/approval-reconcile/apply'),
             ),
             page.keyboard.press('Enter'),
           ]);
@@ -856,25 +1068,76 @@ export const dataRefresh = {
       'journey.account-full-builder',
       'T18',
       'MS_UPDATE.cs:2334-2669; playbook J23',
-      'X27/P11-01: the complete Ac_Ledr, Ac_Rojmel and Ac_Tax builder graph is not proved, so Account remains preview-only.',
+      'Not built, and not an external limit: the desktop Account button deletes AC_DATA, ROJ_MEL_DATA, TAX_DATA, DHRN_DATA and re-posts every voucher of the year through about 120 builder methods (Ac_Ledr 55, Ac_Rojmel 44, Ac_Tax 48; MS_UPDATE.cs:2401-2663). The web writes those rows inside each voucher save with its own posting rules, so an equal rebuild needs a per-voucher-type re-posting engine the web does not have. D-REF-3 (owner, 2 Nov 2026) says ship preview-only when the effect cannot be reproduced exactly. The proven prefix (book flags, clearing dates, bank reconciliation) is applied by the advanced operation ledger-normalise, covered by dataRepair.db.test.ts. Owner question: approve a re-posting engine, or accept preview-only for good.',
     ),
     blocked(
       'journey.stock-full-builder',
       'T18',
       'MS_UPDATE.cs:2671-3047; playbook J23',
-      'X27/P11-01: the remaining StockRefresh and Ac_Stock builder graph is not proved, so Stock remains preview-only.',
+      'Not built, and not an external limit: StockRefresh deletes MAIN_STOCK, LOT_DETL, DM_DATA and DM_KR_DATA and rebuilds them through about 70 Ac_Stock builder methods (MS_UPDATE.cs:2852-3047). The web writes stock rows in each voucher save, so an equal rebuild needs a re-posting engine for every voucher type. D-REF-3 says ship preview-only when the effect cannot be reproduced exactly. The proven prefix (missing tag fine weight) is applied by the advanced operation stock-fine-refresh. Owner question: approve a stock re-posting engine, or accept preview-only for good.',
     ),
     blocked(
       'journey.old-field-classification',
       'T18',
       'MS_UPDATE.cs:9412-33074; D-REF-3',
-      'X27/P11-01: Old Field awaits PR-2 statement-by-statement classification.',
+      'Not done, and not an external limit: Old Field is about 22,900 lines, 1,570 statements (826 ALTER, 493 INSERT, 429 UPDATE, 51 CREATE) that D-REF-3 requires to be classified one by one (a repair, b anomaly query returning 0, c migration loader) before anything is built. Field Update was classified this way in orchestration/work/WP-24/field-update.md (520 statements); Old Field has no such table yet. Until it exists the button stays a classification preview with no Apply.',
     ),
-    blocked(
+    C(
       'journey.image-semantic-migration',
       'T18',
-      'MS_UPDATE.cs:8825-9038; playbook J23',
-      'X27/P11-01: no source proves web semantics for MOB_IMAGE, IMG_IMPORT or CONV_IMAGE or a legacy byte migration.',
+      'mutation',
+      'MS_UPDATE.cs:8825-9038 (J23): the desktop action is schema work only (side database, TAG_IMAGE_DATA, flag columns); the web schema is migration-owned, so the action changes no business row and runs no DDL',
+      async (ctx) => {
+        const columns = () =>
+          ctx.rows(
+            `SELECT column_name FROM information_schema.columns
+              WHERE table_schema='public' AND table_name='TAG_IMAGE_DATA' AND $1::text IS NOT NULL ORDER BY ordinal_position`,
+          );
+        await exec(ctx, `DELETE FROM "TAG_IMAGE_DATA" WHERE tenant_id=$1 AND "TAG_NO"='DRF-IMG'`);
+        await exec(
+          ctx,
+          `INSERT INTO "TAG_IMAGE_DATA"(tenant_id,"CO_CODE","LC_CODE","TAG_NO","VCH_SRNO","IMAGE_TYPE") VALUES ($1,'01','01','DRF-IMG',1,'T')`,
+        );
+        try {
+          const { page } = await ctx.session(as(USERS.admin.user, 'data-refresh-image'));
+          await openScreen(page);
+          const schema = await columns();
+          const before = await tenantFingerprint(ctx);
+          const [response] = await Promise.all([
+            page.waitForResponse((value) =>
+              isApi(value, '/utilities/data-refresh/data-refresh-image-data/preview'),
+            ),
+            page.getByRole('button', { name: 'Image Data', exact: true }).click(),
+          ]);
+          assert.equal(response.status(), 200, await response.text());
+          const preview = await response.json();
+          assert.equal(preview.clean, true);
+          await page.getByText('No records need adjustment.', { exact: true }).waitFor();
+          // A direct apply of the reviewed hash is accepted, writes no business row and returns the audited run.
+          const apply = await page.request.post(
+            '/api/utilities/data-refresh/data-refresh-image-data/apply',
+            { data: { previewHash: preview.previewHash } },
+          );
+          assert.equal(apply.status(), 200, await apply.text());
+          assert.deepEqual((await apply.json()).applied, []);
+          const after = await tenantFingerprint(ctx);
+          assert.deepEqual(changedTables(before, after), ['data_repair_run']);
+          assert.deepEqual(await columns(), schema, 'no runtime DDL: the table keeps its columns');
+          const kept = await ctx.rows(
+            `SELECT "TAG_NO","VCH_SRNO"::int sr,"IMAGE_TYPE" FROM "TAG_IMAGE_DATA" WHERE tenant_id=$1 AND "TAG_NO"='DRF-IMG'`,
+          );
+          assert.equal(kept.length, 1);
+          return {
+            observation:
+              'Image Data verified the committed image table, reported nothing to adjust and changed no business row or column',
+            expected: { clean: true, changedTables: ['data_repair_run'] },
+            database: { kept, schema },
+            downstream: { auditOnly: changedTables(before, after) },
+          };
+        } finally {
+          await exec(ctx, `DELETE FROM "TAG_IMAGE_DATA" WHERE tenant_id=$1 AND "TAG_NO"='DRF-IMG'`);
+        }
+      },
     ),
   ],
 };

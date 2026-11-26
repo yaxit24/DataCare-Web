@@ -81,7 +81,7 @@ export default function DataRefreshPage() {
 
   const loadRuns = useCallback(async () => {
     try {
-      const result = await get<{ runs: RunRow[] }>('/utilities/data-repair/runs');
+      const result = await get<{ runs: RunRow[] }>('/utilities/data-refresh/runs');
       setRuns(result.runs);
     } catch {
       // History is useful evidence, but a history display failure must not change operation behavior.
@@ -90,8 +90,8 @@ export default function DataRefreshPage() {
 
   useEffect(() => {
     Promise.all([
-      get<{ operations: Operation[] }>('/utilities/data-repair/operations'),
-      get<{ runs: RunRow[] }>('/utilities/data-repair/runs').catch(() => ({ runs: [] })),
+      get<{ operations: Operation[] }>('/utilities/data-refresh/operations'),
+      get<{ runs: RunRow[] }>('/utilities/data-refresh/runs').catch(() => ({ runs: [] })),
     ])
       .then(([catalog, history]) => {
         setOperations(catalog.operations);
@@ -129,7 +129,7 @@ export default function DataRefreshPage() {
     setPreview(null);
     setMessage(null);
     try {
-      const result = await post<Preview>(`/utilities/data-repair/${operation.id}/preview`, {});
+      const result = await post<Preview>(`/utilities/data-refresh/${operation.id}/preview`, {});
       setPreview(result);
       if (result.applyAvailable && result.clean) {
         setMessage({ kind: 'ok', text: 'No records need adjustment.' });
@@ -148,7 +148,7 @@ export default function DataRefreshPage() {
     setMessage(null);
     try {
       const result = await post<{ applied: TableDiff[]; deduplicated: boolean }>(
-        `/utilities/data-repair/${active.id}/apply`,
+        `/utilities/data-refresh/${active.id}/apply`,
         { previewHash: preview.previewHash },
       );
       setMessage({
@@ -176,9 +176,9 @@ export default function DataRefreshPage() {
         transaction and records the completed run.
       </p>
       <p className="muted">
-        The web consistently gates all six actions through the existing admin-only Data Repair
-        boundary. The owner-approved Data Refresh caption Print handoff remains tracked as G225; the
-        desktop handlers themselves check Print only for Account and Stock.
+        All six actions need the Print right of the Data Refresh menu (the desktop handlers check it
+        for Account and Stock, MS_UPDATE.cs:2338, :2675; the owner applied one boundary to all six).
+        Without it the screen answers &quot;You Have No Print Rights.....&quot;.
       </p>
 
       {busy && (
