@@ -27,7 +27,9 @@ import {
   recalcSaleGridRow,
   saleGridRowLabour,
 } from '../../../../lib/lineRecalc';
-import { billTotals, dotNetRoundDouble, lineNet as lineNetAmount } from '@datacare/core';
+import { billTotals, lineNet as lineNetAmount } from '@datacare/core';
+import { saleBillTotal } from '../../../../lib/saleBillTotal';
+import { SaleTdsAmount } from '../../../../components/SaleTdsAmount';
 import { todayLocal } from '../../../../lib/localDate';
 import { openDocument } from '../../../../lib/openDocument';
 import {
@@ -434,22 +436,15 @@ export default function SalesEntryPage() {
     setOgRows((rs) => rs.map((r, j) => (j === i ? { ...r, [k]: v } : r)));
   const oldGoldVal = r2(ogRows.reduce((s, o) => s + ogAmt(o), 0));
   const hmAmt = n(hmCharge);
-  const hmTax = r2((hmAmt * n(taxRatePct)) / 100);
-  const itemTotal = itemTotals.total;
-  const tcsAmt = r2((itemTotal * n(tcsPct)) / 100);
-  // SL_TDS_TAX 'Y': the totals grid's TDS cell is computed, never typed (BILL_TOTAL overwrites it on leaving the cell,
-  // TR_SALE.cs:19261-19275): Math.Round((net - discount) x TDS% / 100, 0), and the bill total takes it off before
-  // its TOT_AMT_ROF rounding, as the server does.
   const tdsOn = companyFlag(companySettings, 'SL_TDS_TAX', 'N');
-  const tdsAmt =
-    tdsOn && n(tdsPct) !== 0 && itemTotals.net !== 0
-      ? dotNetRoundDouble(((itemTotals.net - itemTotals.discount) * n(tdsPct)) / 100, 0)
-      : 0;
-  const totalPrev = tdsOn
-    ? roundingPolicy.roundBillTotal(
-        itemTotals.net + itemTotals.tax + hmAmt + hmTax + tcsAmt - tdsAmt - itemTotals.discount,
-      )
-    : r2(itemTotal + hmAmt + hmTax + tcsAmt);
+  const bill = saleBillTotal(
+    itemTotals,
+    hmAmt,
+    [tdsPct, taxRatePct, tcsPct].map(n),
+    tdsOn,
+    roundingPolicy.roundBillTotal,
+  );
+  const totalPrev = bill.total;
   const kasarAmt = n(kasar);
   const paid = r2(n(cashAmt) + n(cardAmt) + n(upiAmt) + n(chequeAmt) + oldGoldVal);
   const balanceDue = r2(totalPrev - paid - kasarAmt - n(ordAmt) - n(currentAdjustmentAmount)); // TR_SALE.cs:19390
@@ -1038,10 +1033,7 @@ export default function SalesEntryPage() {
                   />
                 </div>
               ))}
-              <div className="field">
-                <label htmlFor="saleTdsAmount">TDS Amount</label>
-                <input id="saleTdsAmount" value={tdsAmt ? tdsAmt.toFixed(2) : ''} readOnly />
-              </div>
+              <SaleTdsAmount amount={bill.tdsAmt} />
               <div className="field">
                 <label>Ornament Issued</label>
                 <select
@@ -1215,8 +1207,8 @@ export default function SalesEntryPage() {
               ['Discount', n(discountAmount)],
               ['Taxable', taxable],
               [`Tax ${taxRatePct}%`, taxPrev],
-              ['Hallmark', hmAmt + hmTax],
-              ['TCS', tcsAmt],
+              ['Hallmark', hmAmt + bill.hmTax],
+              ['TCS', bill.tcsAmt],
               ['Total', totalPrev],
               ['Cash', n(cashAmt)],
               ['Card', n(cardAmt)],
