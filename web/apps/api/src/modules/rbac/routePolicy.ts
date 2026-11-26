@@ -963,6 +963,7 @@ route('Masters/Item Stock Limits', [
 ]);
 route('Masters/Companies', [
   'GET /company-identity/states',
+  'GET /company-identity/print',
   'GET /company-identity/:code',
   'POST /company-identity',
   'PUT /company-identity',
@@ -1171,6 +1172,7 @@ const PRINT_ROUTES = new Set([
   // No Print Rights....." without it (G225). Restore stays admin-only and contained.
   'GET /backup',
   'GET /years/print',
+  'GET /company-identity/print',
   'GET /masters/party-master/print',
   'GET /masters/employee-master/print',
   'GET /masters/tax-master/print',
