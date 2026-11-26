@@ -2,6 +2,7 @@ import { PrismaClient } from '@datacare/db';
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest';
 import { createSale, type SaleLineInput } from '../src/modules/sales/sales.js';
 import { openAdvanceOfOrderTx } from '../src/modules/sales/orderCancel.js';
+import { cancelIrnForSale } from '../src/modules/einvoice/einvoice.js';
 import type { VoucherScope } from '../src/modules/vouchers/numbering.js';
 
 /**
@@ -408,5 +409,33 @@ databaseDescribe('sale writes what the desktop writes', () => {
       });
     expect((await open('2024-2025'))?.openAmt).toBe(5000);
     expect((await open('2023-2024'))?.openAmt).toBe(1000);
+  }, 30_000);
+
+  /** A sale stores IRN_NO 'N' (MS_UPDATE.cs:18686): cancelling it is refused, as the e-bill writer's IRN > 10 rule. */
+  it("refuses to cancel the IRN of a bill that stores the default 'N'", async () => {
+    const sale = await createSale(runtime, saleInput('TX'), [looseLine()]);
+    const irnOf = async () =>
+      (
+        await rows(
+          `SELECT "IRN_NO" FROM "SL_DATA" WHERE tenant_id=$1 AND "CO_BOOK"='TX' AND "VCH_NO"=lpad($2::text,5,'0')`,
+          sale.vchNo,
+        )
+      )[0]?.IRN_NO;
+    await expect(
+      cancelIrnForSale(runtime, scopeOf('TX'), { coBook: 'TX', vchNo: sale.vchNo }),
+    ).rejects.toThrow(/no IRN/);
+    expect(await irnOf()).toBe('N');
+    const irn = 'a'.repeat(64);
+    await exec(
+      `UPDATE "SL_DATA" SET "IRN_NO"=$2 WHERE tenant_id=$1 AND "CO_BOOK"='TX' AND "VCH_NO"=lpad($3::text,5,'0')`,
+      irn,
+      sale.vchNo,
+    );
+    const cancelled = await cancelIrnForSale(runtime, scopeOf('TX'), {
+      coBook: 'TX',
+      vchNo: sale.vchNo,
+    });
+    expect(cancelled.irn).toBe(irn);
+    expect(await irnOf()).toBeNull();
   }, 30_000);
 });
