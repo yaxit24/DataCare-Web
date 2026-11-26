@@ -543,10 +543,11 @@ const splitAudit = (diff: TenantDiff) => {
     const put = (user: string, payload: unknown, voucher = vchNo) =>
       request(user, 'PUT', `/purchase-returns/${voucher}`, payload);
     // The seeded CO_SET carries the installer's old LOCK_DATE (MS_YEAR.cs:1568), which the test puts back at the end.
-    const [{ lock: originalLock }] = await query<Array<{ lock: string | null }>>(
+    const [original] = await query<Array<{ lock: string | null }>>(
       `SELECT "LOCK_DATE" lock FROM "CO_SET" WHERE tenant_id=$1 AND "CO_CODE"='01'`,
       tenantId,
     );
+    const originalLock = original?.lock ?? null;
     const setLock = (day: string | null) =>
       exec(
         `UPDATE "CO_SET" SET "LOCK_DATE"=$1 WHERE tenant_id=$2 AND "CO_CODE"='01'`,
