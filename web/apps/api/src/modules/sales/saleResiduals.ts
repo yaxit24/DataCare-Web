@@ -332,7 +332,7 @@ export function saleTenderWrites(
 }
 
 /** `SL_IDTL` columns a stone row carries beyond the voucher key (TR_SALE.cs:15583-15620). */
-const STONE_COLUMNS = [
+export const STONE_COLUMNS = [
   'TAG_NO',
   'VCH_SRNO',
   'ISR_NO',
