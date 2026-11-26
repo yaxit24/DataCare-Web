@@ -315,6 +315,45 @@ describe.skipIf(!RUN)('Item Opening = desktop TR_ITM_OPBL (N209, G222)', () => {
     ]);
   });
 
+  it('data types: a B session never deletes or rewrites the other-detail rows of an A opening', async () => {
+    const asB = { ...scope, dataType: 'B' };
+    const bver = async () => (await getItemOpening(runtime, asB, 'G')).version;
+    await saveItemOpening(runtime, {
+      scope,
+      type: 'G',
+      expectedVersion: await ver('G'),
+      rows: [{ itCode: 'BANG', pcs: 2, grossWt: 20, netWt: 20, rate: 10, amount: 200 }],
+    });
+    const dm = () => count('DM_DATA');
+    expect(await dm()).toBe(1);
+    // B saves another item: A's other-detail row stays, A's stock stays.
+    await saveItemOpening(runtime, {
+      scope: asB,
+      type: 'G',
+      expectedVersion: await bver(),
+      rows: [{ itCode: 'RING', pcs: 1, grossWt: 5, netWt: 5, rate: 0, amount: 0 }],
+    });
+    expect(await dm()).toBe(1);
+    // B cannot rewrite the detail of an item A owns.
+    await expect(
+      saveItemOpening(runtime, {
+        scope: asB,
+        type: 'G',
+        expectedVersion: await bver(),
+        rows: [{ itCode: 'BANG', pcs: 9, grossWt: 9, netWt: 9, rate: 1, amount: 9 }],
+      }),
+    ).rejects.toThrow(/another data type/);
+    expect(await dm()).toBe(1);
+    // B deletes its opening: A's rows (ITM_OPBL, MAIN_STOCK, DM_DATA) remain.
+    await deleteItemOpening(runtime, asB, 'G', await bver());
+    expect(await dm()).toBe(1);
+    expect(await count('ITM_OPBL', `"DATA_TYPE"='A'`)).toBe(1);
+    expect(await count('MAIN_STOCK', `"DATA_TYPE"='A' AND "VCH_TYPE"='ITOBL'`)).toBe(1);
+    // A deletes its own: the detail goes with it.
+    await deleteItemOpening(runtime, scope, 'G', await ver('G'));
+    expect(await dm()).toBe(0);
+  });
+
   it('keeps stored cells on an unchanged save, and replaces the type without duplicating it', async () => {
     // A stored fine that is not the formula's (touch 0 would give fine = net), as 18 of the migrated rows hold.
     const kept = { itCode: 'RING', pcs: 1, grossWt: 5, netWt: 5, fineWt: 4.5, rate: 0, netAmt: 0 };

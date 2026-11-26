@@ -1,4 +1,9 @@
 import { registerDataTypeRoute } from './routes/dataType.js';
+import {
+  assertBookMatchesSessionType,
+  BookDataTypeMismatchError,
+  requestedBook,
+} from './modules/auth/bookDataType.js';
 import { sessionDataType } from './modules/auth/dataTypeAccess.js';
 import { sessionReportQuery } from './modules/auth/dataTypePolicy.js';
 import type { EditionPolicy } from '@datacare/core';
@@ -541,9 +546,16 @@ export async function buildApp(opts: BuildOpts): Promise<FastifyInstance> {
           adminOnly: policy.adminOnly,
         });
       }
+      if (policy.kind === 'form' || policy.businessScope)
+        await assertBookMatchesSessionType(prisma, s as any, requestedBook(req));
       state.routeAuthorized = true;
       await enforceReportFilters(req, reply);
     } catch (error) {
+      if (error instanceof BookDataTypeMismatchError)
+        return reply.code(403).send({
+          error: 'book-data-type-mismatch',
+          message: 'This book belongs to another data type. Switch the data type to use it.',
+        });
       if (error instanceof ScopeError) {
         return reply.code(error.statusCode).send({ error: error.code });
       }

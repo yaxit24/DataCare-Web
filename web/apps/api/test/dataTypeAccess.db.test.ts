@@ -140,7 +140,7 @@ run('owner data-type decision: PostgreSQL and HTTP authority', () => {
     await owner.$executeRawUnsafe(`DELETE FROM "BOOK_DATA" WHERE tenant_id=$1`, tenant);
     await owner.$executeRawUnsafe(
       `INSERT INTO "BOOK_DATA"(tenant_id,"CO_CODE","LC_CODE","CO_BOOK","BOOK_NAME","BOOK_SNAME","MAIN_BOOK","CUR_USE","DATA_TYPE")
-       VALUES ($1,'01','01','PA1','Pick A','PA','SALES','Y','A'),($1,'01','01','PB1','Pick B','PB','SALES','Y','B')`,
+       VALUES ($1,'01','01','PA1','Pick A','PA','SALES','Y','A'),($1,'01','01','PB1','Pick B','PB','SALES','Y','B'),($1,'01','01','PN1','Pick Null','PN','SALES','Y',NULL)`,
       tenant,
     );
     await owner.$executeRawUnsafe(
@@ -153,7 +153,7 @@ run('owner data-type decision: PostgreSQL and HTTP authority', () => {
       (await app.inject({ method: 'GET', url: '/context/books', headers: { cookie: c } }))
         .json()
         .map((b: { CO_BOOK: string }) => b.CO_BOOK);
-    expect(await codes(cookie(signed))).toEqual(['PA1', 'PB1']); // All
+    expect(await codes(cookie(signed))).toEqual(['PA1', 'PB1', 'PN1']); // All
     const toB = await app.inject({
       method: 'POST',
       url: '/auth/data-type',
@@ -169,11 +169,37 @@ run('owner data-type decision: PostgreSQL and HTTP authority', () => {
       payload: { type: 'A' },
     });
     expect(toA.statusCode, toA.body).toBe(200);
-    expect(await codes(cookie(toA))).toEqual(['PA1']);
+    expect(await codes(cookie(toA))).toEqual(['PA1', 'PN1']); // a NULL data type reads as A
+    // The server also refuses a request that names a book of the other type (A session -> B book), and allows All.
+    const ask = (c: string, book: string) =>
+      app.inject({
+        method: 'GET',
+        url: `/reports/stock-report?dimension=item&coBook=${book}`,
+        headers: { cookie: c },
+      });
+    const mismatch = await ask(cookie(toA), 'PB1');
+    expect(mismatch.statusCode).toBe(403);
+    expect(mismatch.json().error).toBe('book-data-type-mismatch');
+    expect((await ask(cookie(toA), 'PA1')).statusCode).not.toBe(403);
+    expect((await ask(cookie(toA), 'PN1')).statusCode).not.toBe(403);
+    const toC = await app.inject({
+      method: 'POST',
+      url: '/auth/data-type',
+      headers: { cookie: cookie(toA) },
+      payload: { type: 'C' },
+    });
+    expect((await ask(cookie(toC), 'PB1')).json().error).not.toBe('book-data-type-mismatch');
+    const backA = await app.inject({
+      method: 'POST',
+      url: '/auth/data-type',
+      headers: { cookie: cookie(toC) },
+      payload: { type: 'A' },
+    });
+    expect(backA.statusCode, backA.body).toBe(200);
     const bad = await app.inject({
       method: 'POST',
       url: '/admin/users',
-      headers: { cookie: cookie(toA) },
+      headers: { cookie: cookie(backA) },
       payload: {
         loginName: 'TYPEBONLY',
         password: 'Strong-Pass-2026!x',
@@ -187,7 +213,7 @@ run('owner data-type decision: PostgreSQL and HTTP authority', () => {
     const made = await app.inject({
       method: 'POST',
       url: '/admin/users',
-      headers: { cookie: cookie(toA) },
+      headers: { cookie: cookie(backA) },
       payload: {
         loginName: 'TYPEBONLY',
         password: 'Strong-Pass-2026!x',

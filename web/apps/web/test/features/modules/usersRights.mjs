@@ -991,7 +991,7 @@ export const usersRights = {
     ),
     C(
       'data-type.user-controls',
-      'T19',
+      'T02',
       'mutation',
       'Owner decision 2026-11-25: User Create carries the data-type checkboxes (A, B, All) and a default; the row stores DATA_TYPE_ALLOW/DATA_TYPE_DEFAULT; an unticked default is moved to an allowed type',
       async (ctx) =>
@@ -1022,7 +1022,7 @@ export const usersRights = {
     ),
     C(
       'data-type.shell-switch',
-      'T20',
+      'T18',
       'mutation',
       'Owner decision 2026-11-25: Ctrl+B selects B, Ctrl+C selects All within the permission; the badge is red B / green All, is hidden for A, and the switch is audited; Ctrl+B is ignored while typing in a field',
       async (ctx) => {
@@ -1060,7 +1060,7 @@ export const usersRights = {
     ),
     C(
       'data-type.flag-off',
-      'T21',
+      'T18',
       'refusal',
       'Owner decision 2026-11-25: with tenant_feature dataTypes off the session is All, the badge and the User Create checkboxes are hidden and /auth/data-type answers 404',
       async (ctx) => {

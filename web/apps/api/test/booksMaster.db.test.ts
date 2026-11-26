@@ -961,6 +961,48 @@ interface DetlRow {
       expect(await footprint()).toEqual(before);
     });
 
+    it('data type: changing it is refused once the book has vouchers, allowed before', async () => {
+      const values = {
+        name: 'Zeta Lock Sales',
+        short: 'ZLS',
+        curUse: 'Y',
+        family: 'ITEM SALES',
+        itemType: 'A',
+        inout: 'O',
+        bookType: 'F',
+        vchSeries: '',
+        resetBook: '',
+        trfrBook: '',
+        mobileEntry: '',
+        slots: templateSlots('ITEM SALES'),
+      };
+      expect((await admin('POST', API, book({ code: 'Z3L', ...values }))).statusCode).toBe(201);
+      let opened = (await admin('GET', `${API}/Z3L`)).json();
+      const free = await admin('PUT', `${API}/Z3L`, {
+        ...opened,
+        dataType: 'B',
+        expectedVersion: opened.version,
+      });
+      expect(free.statusCode, free.body).toBe(200);
+      expect((await header('Z3L'))[0]!.DATA_TYPE).toBe('B');
+      await exec(
+        `INSERT INTO "AC_DATA"(tenant_id,"CO_CODE","LC_CODE","CO_YEAR","CO_BOOK","VCH_NO","AC_CODE","DR_AMT","CR_AMT")
+       VALUES ($1,'01','01',$2,'Z3L','00001','00001',10,0)`,
+        tenantId,
+        YEAR,
+      );
+      opened = (await admin('GET', `${API}/Z3L`)).json();
+      await expectRefused(
+        await admin('PUT', `${API}/Z3L`, {
+          ...opened,
+          dataType: 'A',
+          expectedVersion: opened.version,
+        }),
+        'This book already has vouchers, so its Data Type cannot be changed.',
+      );
+      expect((await header('Z3L'))[0]!.DATA_TYPE).toBe('B');
+    });
+
     it('T09/T06 the family changes on a book without vouchers and is refused on a book with vouchers (D4)', async () => {
       const opened = (await admin('GET', `${API}/Z05`)).json();
       const changed = await admin('PUT', `${API}/Z05`, {

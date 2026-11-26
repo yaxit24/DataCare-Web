@@ -3,18 +3,20 @@ import { createContext, useContext, useEffect, useState } from 'react';
 import { post } from '../lib/api';
 export const DataTypesFeature = createContext(true);
 export const useDataTypes = () => useContext(DataTypesFeature);
-export function DataTypeBadge({
-  type = 'C',
-  allowed = ['A', 'B', 'C'],
-}: {
-  type?: string;
-  allowed?: string[];
-}) {
-  const enabled = useDataTypes();
+export function DataTypeBadge({ type, allowed = [] }: { type?: string; allowed?: string[] }) {
+  // Disabled until /me has told us the session's type and permission: no guessed defaults.
+  const enabled = useDataTypes() && type !== undefined && allowed.length > 0;
   const [error, setError] = useState('');
   const [busy, setBusy] = useState(false);
   async function change(next: string) {
     if (busy || !enabled || !allowed.includes(next) || next === type) return;
+    // Same guard as the company switch: the page reloads, so unsaved work must be copied first.
+    if (
+      !window.confirm(
+        'Changing the data type closes this page. Save or copy any unsaved work first. Continue?',
+      )
+    )
+      return;
     setBusy(true);
     try {
       await post('/auth/data-type', { type: next });
@@ -34,6 +36,8 @@ export function DataTypeBadge({
         event.metaKey ||
         event.shiftKey ||
         event.repeat ||
+        // Ctrl+C with selected text is a copy, not a switch.
+        (event.key.toUpperCase() === 'C' && (window.getSelection()?.toString() ?? '') !== '') ||
         (target instanceof HTMLElement &&
           (target.isContentEditable || target.closest('input,textarea,select,[role="textbox"]')))
       )

@@ -34,3 +34,17 @@ it('treats an unconfigured book as A and refuses ambiguous slots', async () => {
     ).rejects.toThrow('book-data-type-unavailable');
   }
 });
+
+it('refuses with a typed 4xx, never a 500, and never defaults a row that names no book', async () => {
+  const tx = { $queryRawUnsafe: async () => [{ dataType: 'A' }, { dataType: 'B' }] };
+  const mixed = await postingDataTypeTx(tx, 'test', 'AC_DATA', {
+    CO_CODE: '01',
+    LC_CODE: '01',
+    CO_BOOK: '027',
+  }).catch((e) => e);
+  expect(mixed).toMatchObject({ name: 'BookDataTypeError', statusCode: 409 });
+  for (const row of [{ CO_CODE: '01', LC_CODE: '01' }, { CO_CODE: '01', CO_BOOK: '027' }, {}]) {
+    const missing = await postingDataTypeTx(tx, 'test', 'AC_DATA', row).catch((e) => e);
+    expect(missing).toMatchObject({ message: 'book-data-type-missing-key', statusCode: 400 });
+  }
+});

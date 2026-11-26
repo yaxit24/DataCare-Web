@@ -297,6 +297,34 @@ async function carriedRowsTx(
   );
 }
 
+/**
+ * DM_DATA carries no DATA_TYPE column, so its rows belong to the type of the item's first ITM_OPBL row (the desktop
+ * deletes them by book and type letter alone, TR_ITM_OPBL.cs:1456, :1511, which would let one data type destroy the
+ * other's rows). Item codes whose detail rows another type owns are never deleted or rewritten by this session.
+ */
+const DM_OWNER = `COALESCE((SELECT o."DATA_TYPE" FROM "ITM_OPBL" o WHERE o."CO_CODE"="DM_DATA"."CO_CODE"
+  AND o."LC_CODE"="DM_DATA"."LC_CODE" AND o."CO_YEAR"="DM_DATA"."CO_YEAR" AND o."CO_BOOK"="DM_DATA"."CO_BOOK"
+  AND o."VCH_NO"="DM_DATA"."VCH_NO" AND o."IT_CODE"="DM_DATA"."IT_CODE" ORDER BY o."row_id" LIMIT 1),$6)`;
+
+async function foreignDetailItemsTx(
+  tx: any,
+  scope: ItemOpeningScope,
+  type: string,
+): Promise<Set<string>> {
+  const { coCode, lcCode, coYear } = scopeOf(scope);
+  const rows: any[] = await tx.$queryRawUnsafe(
+    `SELECT DISTINCT "IT_CODE" it FROM "DM_DATA" WHERE "CO_CODE"=$1 AND "LC_CODE"=$2 AND "CO_YEAR"=$3 AND "CO_BOOK"=$4
+       AND "VCH_NO"=$5 AND "BOOK_NAME"='${VCH_TYPE}' AND ${DM_OWNER}<>$6`,
+    coCode,
+    lcCode,
+    coYear,
+    ITEM_OPENING_BOOK,
+    type,
+    openingDataType(scope.dataType),
+  );
+  return new Set(rows.map((r) => String(r.it)));
+}
+
 async function deleteTypeTx(tx: any, scope: ItemOpeningScope, type: string): Promise<number> {
   const { coCode, lcCode, coYear } = scopeOf(scope);
   const base = `"CO_CODE"=$1 AND "LC_CODE"=$2 AND "CO_YEAR"=$3 AND "CO_BOOK"=$4 AND "VCH_NO"=$5`;
@@ -308,8 +336,8 @@ async function deleteTypeTx(tx: any, scope: ItemOpeningScope, type: string): Pro
     ...args,
   );
   await tx.$executeRawUnsafe(
-    `DELETE FROM "DM_DATA" WHERE ${base} AND "BOOK_NAME"='${VCH_TYPE}'`,
-    ...args.slice(0, 5),
+    `DELETE FROM "DM_DATA" WHERE ${base} AND "BOOK_NAME"='${VCH_TYPE}' AND ${DM_OWNER}=$6`,
+    ...args,
   );
   return Number(await tx.$executeRawUnsafe(`DELETE FROM "ITM_OPBL" WHERE ${where}`, ...args));
 }
@@ -366,6 +394,7 @@ export async function saveItemOpening(
         line.row.amount === c.amt;
       if (!same) throw new ItemOpeningValidationError(carriedOpeningMessage(c.from));
     }
+    const foreignDetail = await foreignDetailItemsTx(tx, input.scope, type);
     await deleteTypeTx(tx, input.scope, type);
     const key = {
       CO_CODE: coCode,
@@ -449,6 +478,10 @@ export async function saveItemOpening(
         GHT_PRC: 0,
       });
       if (!oth) continue;
+      if (foreignDetail.has(itCode))
+        throw new ItemOpeningValidationError(
+          "This item's other-detail rows belong to another data type and cannot be changed from this one.",
+        );
       // Ac_Stock.Dm_Itm_Opbl_Detl (Ac_Stock.cs:734-741): only items posting other details (OTH_DETL_POSTING 'Y').
       await insertRowTx(tx, 'DM_DATA', input.scope.tenantId, {
         ...key,

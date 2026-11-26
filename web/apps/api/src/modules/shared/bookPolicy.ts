@@ -185,23 +185,41 @@ export async function resolveBookSlotRowTx(
   return rows[0] as Record<string, string | null>;
 }
 
-/** MS_BOOK.cs:2628-2671 stamps every slot with the book's type. */
+/** A client-visible refusal (never a 500): the book named by a posting row cannot give a data type. */
+export class BookDataTypeError extends Error {
+  readonly statusCode: number;
+  constructor(
+    code: 'book-data-type-unavailable' | 'book-data-type-missing-key',
+    statusCode: number,
+  ) {
+    super(code);
+    this.name = 'BookDataTypeError';
+    this.statusCode = statusCode;
+  }
+}
+
+/**
+ * MS_BOOK.cs:2628-2671 stamps every slot of a book with the book's type. BOOK_DETL is keyed by company, location and
+ * book (it has no year column). A row that names no book, location or company is refused, never defaulted.
+ */
 export async function resolveBookDataTypeTx(
   tx: any,
   tenantId: string,
   row: Record<string, unknown>,
 ): Promise<string> {
+  const key = [row.CO_CODE, row.LC_CODE, row.CO_BOOK].map((v) =>
+    typeof v === 'string' ? v.trim() : '',
+  );
+  if (key.some((v) => !v)) throw new BookDataTypeError('book-data-type-missing-key', 400);
   const rows: Array<{ dataType: string }> = await tx.$queryRawUnsafe(
     `SELECT DISTINCT coalesce(nullif(btrim("DATA_TYPE"),''),'A') AS "dataType" FROM "BOOK_DETL"
      WHERE tenant_id=$1 AND "CO_CODE"=$2 AND "LC_CODE"=$3 AND "CO_BOOK"=$4`,
     tenantId,
-    row.CO_CODE,
-    row.LC_CODE,
-    row.CO_BOOK,
+    ...key,
   );
+  if (rows.length === 0) return 'A'; // a book with no slots is unconfigured: blank -> 'A' (MS_BOOK.cs:2524)
   // MS_BOOK writes the same DATA_TYPE to every slot (:2628-2671). Refuse inconsistent configuration.
-  if (rows.length === 0) return 'A'; // blank/unconfigured book -> 'A' (MS_BOOK.cs:2524)
   if (rows.length !== 1 || !['A', 'B'].includes(rows[0]!.dataType))
-    throw new Error('book-data-type-unavailable');
+    throw new BookDataTypeError('book-data-type-unavailable', 409);
   return rows[0]!.dataType;
 }

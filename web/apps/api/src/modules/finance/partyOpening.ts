@@ -325,6 +325,27 @@ export function billHeads(bills: Required<PartyOpeningBillLine>[]): PartyOpening
 const opDataWhere = `"CO_CODE"=$1 AND "LC_CODE"=$2 AND "CO_YEAR"=$3 AND "CO_BOOK"='${OPENING_BOOK}' AND "AC_CODE"=$4`;
 
 /**
+ * OP_DETL carries no DATA_TYPE column, so its rows belong to the type of the party's first OP_DATA row (the desktop
+ * deletes and lists them by account alone, TR_AC_OPBL.cs:2584, :2696, :2877, which would let one type destroy the
+ * other's bill-wise rows). A session of another type neither reads, replaces nor deletes them.
+ */
+async function mayTouchDetailTx(
+  tx: any,
+  scope: PartyOpeningScope,
+  acCode: string,
+): Promise<boolean> {
+  const { coCode, lcCode, coYear } = scopeOf(scope);
+  const owner: any[] = await tx.$queryRawUnsafe(
+    `SELECT "DATA_TYPE" t FROM "OP_DATA" WHERE ${opDataWhere} ORDER BY "row_id" LIMIT 1`,
+    coCode,
+    lcCode,
+    coYear,
+    acCode,
+  );
+  return owner.length === 0 || String(owner[0].t ?? 'A') === openingDataType(scope.dataType);
+}
+
+/**
  * Write one party's opening and its ledger legs inside the caller's transaction (TR_AC_OPBL.cs:2694-2775). The previous
  * row's MAIN_USER and DATA_TRFR are kept on an edit, as the desktop reload does (:2545-2546).
  */
@@ -337,6 +358,7 @@ export async function writePartyOpeningTx(
   bills?: Required<PartyOpeningBillLine>[],
 ): Promise<void> {
   const { coCode, lcCode, coYear } = scopeOf(scope);
+  const mayTouchDetail = await mayTouchDetailTx(tx, scope, acCode);
   const previous: any[] = await tx.$queryRawUnsafe(
     `SELECT "MAIN_USER" mu, "DATA_TRFR" tr FROM "OP_DATA" WHERE ${opDataWhere} AND "DATA_TYPE"=$5 LIMIT 1`,
     coCode,
@@ -384,6 +406,13 @@ export async function writePartyOpeningTx(
   for (const leg of openingLegs(scope, acCode, heads, legDate, owner))
     await insertRowTx(tx, 'AC_DATA', scope.tenantId, leg);
   if (!bills) return;
+  if (!mayTouchDetail) {
+    if (bills.length)
+      throw new PartyOpeningValidationError(
+        "This party's bill-wise rows belong to another data type and cannot be changed from this one.",
+      );
+    return;
+  }
   // TR_AC_OPBL.cs:2696 and :2724-2760: the party's OP_DETL rows are replaced by the grid's rows.
   await tx.$executeRawUnsafe(
     `DELETE FROM "OP_DETL" WHERE ${opDataWhere}`,
@@ -597,6 +626,7 @@ async function billsTx(
   acCode: string,
 ): Promise<Required<PartyOpeningBillLine>[]> {
   const { coCode, lcCode, coYear } = scopeOf(scope);
+  if (!(await mayTouchDetailTx(tx, scope, acCode))) return [];
   const rows: any[] = await tx.$queryRawUnsafe(
     `SELECT "VCH_NO" vch, "VCH_DATE"::date::text dt, "BILL_NO" bill, coalesce("CR_DAYS",0)::float days, "ITM_DESC" descr,
             "ITM_TYPE" it, coalesce("ITM_GWT",0)::float gwt, coalesce("ITM_NWT",0)::float nwt, coalesce("ITM_GHTWT",0)::float ght,
@@ -791,6 +821,7 @@ export async function deletePartyOpening(
       openingDataType(scope.dataType),
     );
     if (!rows.length) return { deleted: false };
+    const mayTouchDetail = await mayTouchDetailTx(tx, scope, acCode);
     const legDate = await openingLegDateTx(tx, scope);
     const opDate = new Date(legDate);
     opDate.setUTCDate(opDate.getUTCDate() + 1);
@@ -849,13 +880,14 @@ export async function deletePartyOpening(
       acCode,
       openingDataType(scope.dataType),
     );
-    await tx.$executeRawUnsafe(
-      `DELETE FROM "OP_DETL" WHERE ${opDataWhere}`,
-      coCode,
-      lcCode,
-      coYear,
-      acCode,
-    );
+    if (mayTouchDetail)
+      await tx.$executeRawUnsafe(
+        `DELETE FROM "OP_DETL" WHERE ${opDataWhere}`,
+        coCode,
+        lcCode,
+        coYear,
+        acCode,
+      );
     await tx.$executeRawUnsafe(
       `DELETE FROM "AC_DATA" WHERE ${opDataWhere} AND "DATA_TYPE"=$5`,
       coCode,

@@ -335,6 +335,60 @@ describe.skipIf(!RUN)(
       expect(await rows(`SELECT 1 FROM "OP_DETL" WHERE tenant_id=$1`, TENANT)).toHaveLength(1);
     });
 
+    it('data types: a B session neither reads, replaces nor deletes the bill-wise rows of an A opening', async () => {
+      const bills = [
+        { vchNo: '00012', itType: 'A', amount: 30000, sign: 'D' as const },
+        { vchNo: '00015', itType: 'A', amount: 5000, sign: 'C' as const },
+      ];
+      await savePartyOpening(runtime, { scope, acCode: PARTY, mainUser: 'ADMIN', bills });
+      const detl = () =>
+        rows(
+          `SELECT "VCH_NO" vch FROM "OP_DETL" WHERE tenant_id=$1 AND "AC_CODE"=$2 ORDER BY 1`,
+          TENANT,
+          PARTY,
+        );
+      expect((await detl()).map((r: any) => r.vch)).toEqual(['00012', '00015']);
+      const asB = { ...scope, dataType: 'B' };
+      // B has no opening of its own: it cannot read A's bills.
+      expect((await getPartyOpening(runtime, asB, PARTY)).bills).toEqual([]);
+      // B writing bills over A's is refused; nothing changes.
+      await expect(
+        savePartyOpening(runtime, {
+          scope: asB,
+          acCode: PARTY,
+          mainUser: 'ADMIN',
+          bills: [{ vchNo: '9', itType: 'A', amount: 1, sign: 'C' as const }],
+        }),
+      ).rejects.toThrow(/another data type/);
+      expect(await detl()).toHaveLength(2);
+      // B's own head without bills, then an empty grid, then delete: A's rows stay.
+      await savePartyOpening(runtime, {
+        scope: asB,
+        acCode: PARTY,
+        mainUser: 'ADMIN',
+        amount: 10,
+        sign: 'C',
+      });
+      await savePartyOpening(runtime, {
+        scope: asB,
+        acCode: PARTY,
+        mainUser: 'ADMIN',
+        amount: 10,
+        sign: 'C',
+        bills: [],
+      });
+      expect(await detl()).toHaveLength(2);
+      expect((await getPartyOpening(runtime, asB, PARTY)).bills).toEqual([]);
+      await deletePartyOpening(runtime, asB, PARTY, 'CLERK');
+      expect(await detl()).toHaveLength(2);
+      expect(await opData(PARTY)).toHaveLength(1);
+      expect((await opData(PARTY))[0]).toMatchObject({ dt: 'A' });
+      // A still reads and may replace its own rows.
+      expect((await getPartyOpening(runtime, scope, PARTY)).bills).toHaveLength(2);
+      await savePartyOpening(runtime, { scope, acCode: PARTY, mainUser: 'ADMIN', bills: [] });
+      expect(await detl()).toHaveLength(0);
+    });
+
     it('bill rows set the heads from their signed totals and replace OP_DETL (MSG_TOT_FILL, TR_AC_OPBL.cs:2724-2760)', async () => {
       const saved = await savePartyOpening(runtime, {
         scope,

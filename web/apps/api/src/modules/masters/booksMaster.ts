@@ -70,6 +70,8 @@ export const BOOK_MESSAGES = {
   usedInAccounts: 'You Cant Delete Record This Book Code Use in Account Transection....',
   usedInStock: 'You Cant Delete Record This Book Code Use in Stock Transection....',
   familyLocked: 'This book already has vouchers, so its Transaction Name cannot be changed.',
+  // Owner decision 2026-11-25 (the desktop has no such rule; it follows the family lock, D4).
+  dataTypeLocked: 'This book already has vouchers, so its Data Type cannot be changed.',
 } as const;
 /** tBkCode_Validating (MS_BOOK.cs:2778) and tBkName_Validating (:2800). */
 export const bookCodeTakenMessage = (name: string): string =>
@@ -568,6 +570,10 @@ export async function saveBook(
     const dataType = text(input.values.dataType ?? stored?.DATA_TYPE) || 'A';
     if (!['A', 'B'].includes(dataType))
       throw new BooksMasterValidationError('Data Type must be A or B');
+    if (stored && dataType !== (text(stored.DATA_TYPE) || 'A')) {
+      const use = await voucherUseTx(tx, scope, h.code);
+      if (use.accounts || use.stock) fail(BOOK_MESSAGES.dataTypeLocked);
+    }
     const tables = DESKTOP_BOOK_TABLES[h.family];
     const header: Record<string, unknown> = {
       BOOK_NAME: h.name,
