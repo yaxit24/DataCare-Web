@@ -418,9 +418,9 @@ databaseDescribe('database-backed sales voucher lifecycle', () => {
     await owner.$executeRawUnsafe(
       `INSERT INTO "BOOK_DATA"(
          tenant_id,"CO_CODE","LC_CODE","CO_BOOK","BOOK_NAME","BOOK_SNAME","MAIN_BOOK",
-         "BOOK_INOUT","CUR_USE","BOOK_TBL_NAME")
-       VALUES ($1,$2,$3,$4,'Configured Sales Book','CSB','SALES','O','Y','SL_DATA'),
-              ($1,$2,$3,'APR','Approval Issue','APRI','APR ISU','O','Y','APR_DATA')`,
+         "BOOK_INOUT","CUR_USE","BOOK_TBL_NAME","BOOK_TYPE")
+       VALUES ($1,$2,$3,$4,'Configured Sales Book','CSB','SALES','O','Y','SL_DATA','T'),
+              ($1,$2,$3,'APR','Approval Issue','APRI','APR ISU','O','Y','APR_DATA',NULL)`,
       TENANT,
       CO,
       LC,

@@ -1955,15 +1955,12 @@ async function writeSaleTx(
    * register row even when its bill carries tax; its tax leg still posts (Ac_Ledr.cs:94). The 2024-25 desktop year
    * agrees: 89/89 tax-book sales have TAX_DATA, 0/100 estimate-book sales do.
    *
-   * A blank BOOK_TYPE still writes the register: the desktop always stores a type, while books the web provisions
-   * (seedCompany) carry none yet, and treating those as non-tax books would empty their GST register.
+   * The book the web provisions (seedCompany SL) carries 'T' like the desktop's; migration
+   * 20261126120000_web_sales_book_type gave it to the companies provisioned before.
    */
   const saleBookType = (await saleBookTypesTx(tx, input.scope as CompleteSaleScope)).bookType;
   const writesTaxRegister =
-    (saleBookType === 'T' || saleBookType === '') &&
-    key.CO_BOOK !== '099' &&
-    key.CO_BOOK !== '199' &&
-    totals.net !== 0;
+    saleBookType === 'T' && key.CO_BOOK !== '099' && key.CO_BOOK !== '199' && totals.net !== 0;
   const osRow = {
     ...key,
     VCH_TYPE: bookPolicy.vchType,

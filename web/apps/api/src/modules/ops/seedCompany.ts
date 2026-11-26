@@ -228,8 +228,22 @@ const BOOKS: {
   shortName?: string;
   /** BOOK_TBL_NAME, for the families that route by it. */
   table?: string;
+  /** BOOK_DATA.BOOK_TYPE ('T' tax invoice, 'M' estimate) and ITM_TYPE ('A' item side per line), when the book has them. */
+  bookType?: string;
+  itmType?: string;
 }[] = [
-  { book: 'SL', name: 'Sales', workflow: 'SALES', acCode: 'SALES', slots: SALE_BOOK_SLOTS },
+  // A GST tax-invoice book over every item type, the desktop's 'Sales Invoice' book (MS_UPDATE.cs:7320 inserts it
+  // with BOOK_TYPE 'T', ITM_TYPE 'A'): Sales_GST writes TAX_DATA only for type 'T' (Ac_Tax.cs:92-98), and 'A' posts
+  // each line to its group's sale account (Ac_Ledr.cs:90).
+  {
+    book: 'SL',
+    name: 'Sales',
+    workflow: 'SALES',
+    acCode: 'SALES',
+    slots: SALE_BOOK_SLOTS,
+    bookType: 'T',
+    itmType: 'A',
+  },
   {
     book: 'PR',
     name: 'Purchase',
@@ -854,8 +868,8 @@ export async function seedCompany(
       ) {
         await tx.$executeRawUnsafe(
           `INSERT INTO "BOOK_DATA"(tenant_id,"CO_CODE","LC_CODE","CO_BOOK","BOOK_NAME","BOOK_SNAME",
-             "MAIN_BOOK","BOOK_INOUT","CUR_USE","BOOK_TBL_NAME","BOOK_TBL_DETL","DATA_TYPE")
-           VALUES ($1,$2,$3,$4,$5,$6,$7,$8,'Y',$9,$10,'A')`,
+             "MAIN_BOOK","BOOK_INOUT","CUR_USE","BOOK_TBL_NAME","BOOK_TBL_DETL","DATA_TYPE","BOOK_TYPE","ITM_TYPE")
+           VALUES ($1,$2,$3,$4,$5,$6,$7,$8,'Y',$9,$10,'A',$11,$12)`,
           tenantId,
           coCode,
           lcCode,
@@ -866,6 +880,8 @@ export async function seedCompany(
           inout,
           b.table ?? desktopTables?.table ?? null,
           b.table ? null : (desktopTables?.detail ?? null),
+          b.bookType ?? null,
+          b.itmType ?? null,
         );
         // BOOK_DETL carries ONE ROW PER POSTING LEG, and `bookPolicy.resolveBookAccountTx` asks for a
         // specific SR_NO. The sale path alone resolves three: 1 = the control/sales account, 2 = the

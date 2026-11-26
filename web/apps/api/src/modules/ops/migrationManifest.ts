@@ -238,4 +238,9 @@ export const EXPECTED_MIGRATIONS: ReadonlyArray<{
     name: '20261126100000_opening_detail_data_type',
     checksum: 'bdfff53db903f05275a594331e1193e526c961d68a257083673e5b656069dfb2',
   },
+  {
+    // The web-provisioned sale book SL takes BOOK_TYPE 'T' / ITM_TYPE 'A' (MS_UPDATE.cs:7320; Ac_Tax.cs:92-98).
+    name: '20261126120000_web_sales_book_type',
+    checksum: 'fcc99b11a5ff2b354a4f732b9e33e2c24f9863c027d36235777a5f9621c43227',
+  },
 ];
