@@ -399,7 +399,7 @@ databaseDescribe('database-backed sales voucher lifecycle', () => {
     );
     await owner.$executeRawUnsafe(
       `INSERT INTO "TAX_MAST"(tenant_id,"CO_CODE","TAX_CODE","SR_NO","TAX_GROUP","TAX_NAME","TAX_PRC","TAX_AC")
-       VALUES ($1,$2,'10',1,'GST','GST 3%',3,'GSTLED'),($1,$2,'TC',0,'TCS','TCS',0.1,'TCSLED')`,
+       VALUES ($1,$2,'10',1,'GST','GST 3%',3,'GSTLED'),($1,$2,'TC',0,'TCS','TCS',0.1,'TCSLED'),($1,$2,'TD',0,'TDS','TDS',1,'TDSLED')`,
       TENANT,
       CO,
     );
@@ -674,6 +674,10 @@ databaseDescribe('database-backed sales voucher lifecycle', () => {
     expect(SALE_OLD_METAL_COLUMNS).toHaveLength(34);
     expect(SALE_BILL_OS_COLUMNS).toHaveLength(35);
 
+    // TDS is the totals grid's cell, not the typed 12.34: Math.Round((net - discount) x 1% , 0) (TR_SALE.cs:19261-19275).
+    expect(Number(header.TDS_AMT)).toBe(
+      Math.round(((Number(header.NET_AMT) - Number(header.DISC_AMT)) * 1) / 100),
+    );
     expect(header).toMatchObject({
       ADD1: 'Address 1',
       ADD2: 'Address 2',
@@ -684,7 +688,6 @@ databaseDescribe('database-backed sales voucher lifecycle', () => {
       TCS_CODE: 'TC',
       TDS_CODE: 'TD',
       TDS_PRC: 1,
-      TDS_AMT: 12.34,
       BANK_AC: 'BANK',
       CARD_AC: 'CARD',
       CHQ_NO: 'CHQ-8',

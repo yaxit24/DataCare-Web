@@ -23,6 +23,7 @@ type VoucherKey = {
  *     01 party Dr (TOT_AMT + DISC_AMT + TDS_AMT)        :64
  *     STR(SR_NO)+07 line item Cr (ITM_TYPE 'A' books)   :90       08 book item Cr (other books)   :92
  *     09 tax Cr :94     10 TCS Cr :96     11 hallmark Cr :107     12 hallmark tax Cr :109
+ *     13/14 TDS: party Cr / TDS tax account Dr :112-114 (leg 01 adds TDS_AMT back)
  *     15/16 cheque :116-118     17/18 card :120-122     21/22+STR order advance (ORD_AC_CODE 00020) :131-133
  *     STR(SR_NO)+23/24 old metal :135-137     25/26 cash :139-141     27/28 cash paid, 'M' books :143-145
  *     29/30 cash paid, 'T' books :147-149     31/32 kasar :151-153     33/34 discount :155-157
@@ -40,6 +41,8 @@ export const SALE_LEG = {
   tcs: 10,
   hallmark: 11,
   hallmarkTax: 12,
+  partyTds: 13,
+  tds: 14,
   partyCheque: 15,
   cheque: 16,
   partyCard: 17,
@@ -135,6 +138,8 @@ export function buildSaleLedger(p: {
   incomeLegs?: LineLeg[];
   charges?: Array<{ legType: number; ac: string; amount: number }>;
   discountAc?: string;
+  /** TDS (SL_DATA.TDS_AMT) and the TDS code's tax account: leg 01 adds it back, the 13/14 pair carries it. */
+  tds?: SaleSettlement;
   /**
    * The most the round-off leg may differ from the bill's own round-off (`totals.roundOff`). The difference is the
    * line nets' rounding into the bill total, so it is bounded; past the bound the save is refused.
@@ -162,7 +167,8 @@ export function buildSaleLedger(p: {
   const charges = (p.charges ?? []).filter((charge) => charge.amount !== 0);
 
   if (!p.rateUnfix) {
-    const partyDebit = roundTo(p.totals.total + discount, 3);
+    // TOT_AMT + DISC_AMT + TDS_AMT (Ac_Ledr.cs:64).
+    const partyDebit = roundTo(p.totals.total + discount + (p.tds?.amount ?? 0), 3);
     if (p.totals.total !== 0)
       lines.push({
         ...base,
@@ -260,6 +266,7 @@ export function buildSaleLedger(p: {
     keys: { party: Record<string, unknown>; account: Record<string, unknown> },
     dir: 'in' | 'out' = 'in',
     extra: Partial<LedgerLine> = {},
+    partyExtra: Partial<LedgerLine> = {},
   ): void => {
     if (!s || s.amount === 0) return;
     const value = s.amount;
@@ -267,6 +274,7 @@ export function buildSaleLedger(p: {
       ...base,
       ...keys.party,
       ...extra,
+      ...partyExtra,
       AC_CODE: p.acCode,
       LD_CODE: s.ac,
       DR_AMT: dir === 'out' ? value : 0,
@@ -286,6 +294,11 @@ export function buildSaleLedger(p: {
   };
   const leg = (code: number) => ({ legType: code });
   const pay = p.payments ?? {};
+  // TDS: 13 credits the party against the TDS tax account with PARTY_AC_CODE '' (:112), 14 debits that account
+  // (:114); both only when TDS_AMT <> 0.
+  pair(p.tds, { party: leg(SALE_LEG.partyTds), account: leg(SALE_LEG.tds) }, 'in', {}, {
+    PARTY_AC_CODE: '',
+  } as Partial<LedgerLine>);
   pair(pay.cheque, { party: leg(SALE_LEG.partyCheque), account: leg(SALE_LEG.cheque) });
   pair(pay.card, { party: leg(SALE_LEG.partyCard), account: leg(SALE_LEG.card) });
   (pay.orders ?? []).forEach((order, i) =>

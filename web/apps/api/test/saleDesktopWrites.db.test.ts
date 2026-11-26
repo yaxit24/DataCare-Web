@@ -112,7 +112,8 @@ databaseDescribe('sale writes what the desktop writes', () => {
       `INSERT INTO "TAX_MAST"(tenant_id,"CO_CODE","TAX_CODE","SR_NO","TAX_GROUP","TAX_NAME","TAX_PRC","TAX_AC")
        VALUES ($1,$2,'10',0,'GST','GST 3%',3,'GSTLED'),($1,$2,'10',1,'SGST','SGST',1.5,'GSTLED'),
               ($1,$2,'10',2,'CGST','CGST',1.5,'GSTLED'),($1,$2,'10',3,'IGST','IGST',3,'GSTLED'),
-              ($1,$2,'T1',0,'TCS','TCS 1%',1,'TCSLED'),($1,$2,'T2',0,'TCS','TCS no ledger',1,NULL)`,
+              ($1,$2,'T1',0,'TCS','TCS 1%',1,'TCSLED'),($1,$2,'T2',0,'TCS','TCS no ledger',1,NULL),
+              ($1,$2,'D1',0,'TDS','TDS 1%',1,'TDSLED')`,
       CO,
     );
     await exec(
@@ -716,5 +717,43 @@ databaseDescribe('sale writes what the desktop writes', () => {
         `SELECT "LEDR_KEY" k, "CLR_DATE"::text clr FROM "BANK_RECONCILE" WHERE tenant_id=$1`,
       ),
     ).toEqual([{ k: newKey, clr: '2024-05-20' }]);
+  }, 30_000);
+
+  /**
+   * SL_TDS_TAX 'Y' (TR_SALE.cs:19261-19275): TDS = Math.Round((net - discount) x 1% , 0) and TOT_AMT takes it off before
+   * the bill rounding; ROF_AMT 0. Leg 01 = TOT + DISC + TDS (Ac_Ledr.cs:64), 13 party Cr / 14 TDS account Dr (:112-114).
+   */
+  it('posts a TDS sale as Sales_Ledr does and balances', async () => {
+    await exec(`INSERT INTO "CO_SET_NEW"(tenant_id,"CO_CODE","SL_TDS_TAX") VALUES ($1,$2,'Y')`, CO);
+    const sale = await createSale(
+      runtime,
+      saleInput('TX', { tdsCode: 'D1', tdsPct: 1, discountAmount: 37.5 }),
+      [looseLine()],
+    );
+    const [h] = await rows(
+      `SELECT "NET_AMT"::float net,"DISC_AMT"::float disc,"TAX_AMT"::float tax,"TDS_AMT"::float tds,
+              "TOT_AMT"::float tot,"ROF_AMT"::float rof
+         FROM "SL_DATA" WHERE tenant_id=$1 AND "CO_BOOK"='TX' AND "VCH_NO"=lpad($2::text,5,'0')`,
+      sale.vchNo,
+    );
+    // Independently: net 10,760; TDS = Round((10,760 - 37.50) x 1 / 100, 0) = Round(107.225) = 107.
+    expect(h!.net).toBe(10760);
+    expect(h!.tds).toBe(107);
+    expect(h!.rof).toBe(0);
+    expect(h!.tot).toBe(Math.round((h!.net + h!.tax - h!.tds - h!.disc) * 100) / 100);
+    const vch = String(sale.vchNo).padStart(5, '0');
+    const legs = await ledger('TX', sale.vchNo);
+    const tail = (k: unknown) =>
+      String(k)
+        .slice(String(k).indexOf(`TX${vch}`) + 7)
+        .trim();
+    const byTail = new Map(legs.map((l) => [tail(l.k), l]));
+    expect(byTail.get('01')).toMatchObject({ AC_CODE: 'CUST', dr: h!.tot + h!.disc + h!.tds });
+    expect(byTail.get('13')).toMatchObject({ AC_CODE: 'CUST', PARTY_AC_CODE: '', cr: 107, dr: 0 });
+    expect(byTail.get('14')).toMatchObject({ AC_CODE: 'TDSLED', dr: 107, cr: 0 });
+    expect(byTail.has('99')).toBe(false);
+    const sum = (side: 'dr' | 'cr') =>
+      Math.round(legs.reduce((t, l) => t + Number(l[side]), 0) * 100) / 100;
+    expect(sum('dr')).toBe(sum('cr'));
   }, 30_000);
 });

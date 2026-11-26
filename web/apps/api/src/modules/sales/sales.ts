@@ -52,7 +52,7 @@ import {
 import { resolveTaxPolicyTx } from '../shared/taxPolicy.js';
 import { postedSaleLine, withSaleGhat } from './saleLinePosting.js';
 import { gstTaxRows } from '../shared/taxDataRows.js';
-import { oldMetalHeaderTotals } from '@datacare/core';
+import { oldMetalHeaderTotals, round as roundTo } from '@datacare/core';
 import {
   checkSaleOrdersTx,
   resolveSaleTenders,
@@ -842,7 +842,39 @@ async function writeSaleTx(
       : round2s((totals.total * tcsPct) / 100);
   const kasar = round2s(num(input.kasarAmount));
   const pointValue = round2s(num(input.pointValue));
-  const grandWithTcs = roundingPolicy.roundBillTotal(grandTotal + tcs);
+  /**
+   * SL_TDS_TAX = 'Y': the totals grid's row 4 is TDS, not round-off (TR_SALE.cs:19261-19275). TDS =
+   * Math.Round((net - discount) x TDS% / 100, 0), blank when the % or the net is 0, and the bill total takes it OFF
+   * before its TOT_AMT_ROF rounding: TOT = Round(net + tax + TCS - TDS - discount). ROF_AMT is stored 0 (:15218);
+   * leg 01 adds TDS back and the 13/14 pair carries it (Ac_Ledr.cs:64, :112-114).
+   */
+  const tdsPct = tdsEnabled ? num(input.tdsPct) : 0;
+  const tdsAmt =
+    tdsPct !== 0 && totals.net !== 0
+      ? dotNetRoundDouble(((totals.net - totals.discount) * tdsPct) / 100, 0)
+      : 0;
+  const tdsGross = totals.net + totals.tax + hmAmt + hmTax + tcs - tdsAmt - totals.discount;
+  const grandWithTcs = tdsEnabled
+    ? roundingPolicy.roundBillTotal(tdsGross)
+    : roundingPolicy.roundBillTotal(grandTotal + tcs);
+  // The bill's own round-off: the totals' one, or under TDS the TOT_AMT rounding the desktop leaves unposted.
+  const billRoundOff = tdsEnabled ? roundTo(grandWithTcs - tdsGross, 3) : totals.roundOff;
+  // TDS posts to the TDS code's TAX_MAST.TAX_AC (Ac_Ledr.cs:112-114 `D.TAX_AC` on `A.TDS_CODE`).
+  let tdsAc = '';
+  if (!isSalesQuotation && tdsAmt !== 0) {
+    const rows: Array<{ ac: unknown }> = await tx.$queryRawUnsafe(
+      `SELECT "TAX_AC" ac FROM "TAX_MAST" WHERE tenant_id=$1 AND "CO_CODE"=$2 AND "TAX_CODE"::text=$3::text
+        ORDER BY coalesce("SR_NO",0), row_id LIMIT 1`,
+      tenantId,
+      input.scope.coCode,
+      text(input.tdsCode),
+    );
+    tdsAc = text(rows[0]?.ac);
+    if (!tdsAc)
+      throw new SaleValidationError(
+        `the TDS code ${text(input.tdsCode) || '(blank)'} has no tax account (TAX_MAST.TAX_AC)`,
+      );
+  }
   /**
    * How far the round-off leg may stray from the bill's round-off. Beyond totals.roundOff it carries only the line
    * nets' rounding into the bill: the net (calc.ts billTotals), the taxable after a discount, the bill with hallmark
@@ -983,7 +1015,7 @@ async function writeSaleTx(
   let advanceAc = '';
   let kasarAc = input.kasarAc ?? controlAc;
   // The web's round-off leg balances the party's debit (TOT_AMT + DISC_AMT) against the item, tax and charge credits.
-  const ledgerRoundOff = saleLedgerRoundOff(round2s(grandWithTcs + totals.discount), [
+  const ledgerRoundOff = saleLedgerRoundOff(round2s(grandWithTcs + totals.discount + tdsAmt), [
     ...(incomeLegs ?? [{ amount: totals.net }]),
     { amount: totals.tax },
     { amount: hmAmt },
@@ -992,7 +1024,7 @@ async function writeSaleTx(
   ]);
   if (
     !isSalesQuotation &&
-    (totals.roundOff !== 0 || ledgerRoundOff !== 0 || kasar !== 0 || pointValue !== 0)
+    (billRoundOff !== 0 || ledgerRoundOff !== 0 || kasar !== 0 || pointValue !== 0)
   ) {
     const configured = await resolveBookAccountTx(tx, input.scope, bookPolicy, 3);
     roundAc = validateConfiguredAccount('round account', requestedRoundAc, configured);
@@ -1398,8 +1430,8 @@ async function writeSaleTx(
     TCS_PRC: tcsPct,
     TCS_AMT: tcs,
     TDS_CODE: tdsEnabled ? (input.tdsCode ?? '') : '',
-    TDS_PRC: tdsEnabled ? num(input.tdsPct) : 0,
-    TDS_AMT: tdsEnabled ? num(input.tdsAmount) : 0,
+    TDS_PRC: tdsPct,
+    TDS_AMT: tdsAmt,
     // The desktop does NOT total line labour onto the header. Measured: SL_DATA.LBR_AMT is 0.00 on all 190
     // real sale headers, while 100 of those vouchers carry labour on their SL_DETL lines - so the column is
     // not a roll-up, and summing into it was an interpretation rather than an observation.
@@ -1590,7 +1622,8 @@ async function writeSaleTx(
         controlAc,
         rateUnfix: input.rateUnfix,
         vchType: bookPolicy.vchType,
-        totals: { ...totals, total: grandWithTcs },
+        totals: { ...totals, total: grandWithTcs, roundOff: billRoundOff },
+        tds: { ac: tdsAc, amount: tdsAmt },
         incomeLegs,
         charges: [
           { legType: SALE_LEG.tcs, ac: tcsAc, amount: tcs },
