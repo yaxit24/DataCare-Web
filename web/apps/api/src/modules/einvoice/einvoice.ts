@@ -685,6 +685,16 @@ export async function testGspAuth(
   }
 }
 
+/**
+ * Whether a stored SL_DATA.IRN_NO is a registered IRN. A sale stores the column default 'N' until it is registered
+ * (MS_UPDATE.cs:18686), and an e-bill on a non-025 book stores 'N' as well (TR_SL_EBILL 7598-7605), so a non-empty
+ * value is not a registration. The rule is the one the e-bill writer (eBillWriter.ts registrationTx) and both e-bill
+ * screens use: an IRN longer than 10 characters.
+ */
+export function irnRegistered(value: unknown): boolean {
+  return String(value ?? '').trim().length > 10;
+}
+
 /** Cancel a previously-generated IRN for a stored sale: call the GSP cancel API, then clear IRN/ACK. */
 export async function cancelIrnForSale(
   prisma: any,
@@ -706,7 +716,8 @@ export async function cancelIrnForSale(
       ...scopedWhere(scope, coBook, args.vchNo),
     );
     const v = String(rows[0]?.IRN_NO ?? '').trim();
-    if (!v) throw new EInvoiceValidationError(`no IRN on ${coBook}/${args.vchNo} to cancel`);
+    if (!irnRegistered(v))
+      throw new EInvoiceValidationError(`no IRN on ${coBook}/${args.vchNo} to cancel`);
     return v;
   });
   const { transport, mode } = irnTransportFromEnv();

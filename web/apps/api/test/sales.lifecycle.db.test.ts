@@ -399,7 +399,7 @@ databaseDescribe('database-backed sales voucher lifecycle', () => {
     );
     await owner.$executeRawUnsafe(
       `INSERT INTO "TAX_MAST"(tenant_id,"CO_CODE","TAX_CODE","SR_NO","TAX_GROUP","TAX_NAME","TAX_PRC","TAX_AC")
-       VALUES ($1,$2,'10',1,'GST','GST 3%',3,'GSTLED')`,
+       VALUES ($1,$2,'10',1,'GST','GST 3%',3,'GSTLED'),($1,$2,'TC',0,'TCS','TCS',0.1,'TCSLED'),($1,$2,'TD',0,'TDS','TDS',1,'TDSLED')`,
       TENANT,
       CO,
     );
@@ -418,9 +418,9 @@ databaseDescribe('database-backed sales voucher lifecycle', () => {
     await owner.$executeRawUnsafe(
       `INSERT INTO "BOOK_DATA"(
          tenant_id,"CO_CODE","LC_CODE","CO_BOOK","BOOK_NAME","BOOK_SNAME","MAIN_BOOK",
-         "BOOK_INOUT","CUR_USE","BOOK_TBL_NAME")
-       VALUES ($1,$2,$3,$4,'Configured Sales Book','CSB','SALES','O','Y','SL_DATA'),
-              ($1,$2,$3,'APR','Approval Issue','APRI','APR ISU','O','Y','APR_DATA')`,
+         "BOOK_INOUT","CUR_USE","BOOK_TBL_NAME","BOOK_TYPE")
+       VALUES ($1,$2,$3,$4,'Configured Sales Book','CSB','SALES','O','Y','SL_DATA','T'),
+              ($1,$2,$3,'APR','Approval Issue','APRI','APR ISU','O','Y','APR_DATA',NULL)`,
       TENANT,
       CO,
       LC,
@@ -430,7 +430,8 @@ databaseDescribe('database-backed sales voucher lifecycle', () => {
       `INSERT INTO "BOOK_DETL"(tenant_id,"CO_CODE","LC_CODE","CO_BOOK","SR_NO","AC_CODE","MAIN_BOOK","BOOK_INOUT")
        VALUES ($1,$2,$3,$4,1,'CTRL','SALES','O'),
               ($1,$2,$3,$4,2,'CASH','SALES','O'),
-              ($1,$2,$3,$4,3,'ROUND','SALES','O')`,
+              ($1,$2,$3,$4,3,'ROUND','SALES','O'),
+              ($1,$2,$3,$4,5,'ROUND','SALES','O')`,
       TENANT,
       CO,
       LC,
@@ -537,6 +538,7 @@ databaseDescribe('database-backed sales voucher lifecycle', () => {
         cashAmt: 100,
         cardAmt: 50,
         upiAmt: 25,
+        upiRows: [{ acCode: 'UPI', amount: 25 }],
         chequeAmt: 20,
         bankAc: 'BANK',
         cardAc: 'CARD',
@@ -672,6 +674,10 @@ databaseDescribe('database-backed sales voucher lifecycle', () => {
     expect(SALE_OLD_METAL_COLUMNS).toHaveLength(34);
     expect(SALE_BILL_OS_COLUMNS).toHaveLength(35);
 
+    // TDS is the totals grid's cell, not the typed 12.34: Math.Round((net - discount) x 1% , 0) (TR_SALE.cs:19261-19275).
+    expect(Number(header.TDS_AMT)).toBe(
+      Math.round(((Number(header.NET_AMT) - Number(header.DISC_AMT)) * 1) / 100),
+    );
     expect(header).toMatchObject({
       ADD1: 'Address 1',
       ADD2: 'Address 2',
@@ -682,7 +688,6 @@ databaseDescribe('database-backed sales voucher lifecycle', () => {
       TCS_CODE: 'TC',
       TDS_CODE: 'TD',
       TDS_PRC: 1,
-      TDS_AMT: 12.34,
       BANK_AC: 'BANK',
       CARD_AC: 'CARD',
       CHQ_NO: 'CHQ-8',
@@ -1212,7 +1217,8 @@ databaseDescribe('database-backed sales voucher lifecycle', () => {
         'ROJ_MEL_DATA',
         'SL_DATA',
         'SL_DETL',
-        'SL_IDTL',
+        // No SL_IDTL: TAG001 has no BAR_IDTL stone rows, and the sale's stone grid holds only the tag's own
+        // (TR_SALE.cs:12683-12715, saved at :15546-15620).
         'TAX_DATA',
         'USER_DATA',
       ].sort(),

@@ -203,7 +203,13 @@ export async function checkSaleOrdersTx(
   await lockSaleOrdersTx(tx, scope, rows);
   for (const row of rows) {
     const ordNo = formatVoucherNo(text(row.ordNo));
-    const order = await openAdvanceOfOrderTx(tx, scope, ordNo, text(row.ordBook) || 'SOR');
+    const order = await openAdvanceOfOrderTx(
+      tx,
+      scope,
+      ordNo,
+      text(row.ordBook) || 'SOR',
+      text(row.ordYear),
+    );
     if (!order) throw fail(`sales order #${ordNo} not found`);
     const amount = r2(
       row.amount == null ? Math.max(0, Math.min(order.openAmt, left)) : num(row.amount),
@@ -314,6 +320,9 @@ export function saleTenderWrites(
     EMP_CODE: base.empCode,
     IT_DESC: '',
     MAIN_USER: base.mainUser,
+    // Not set by the save, so the column defaults 'N' apply (MS_UPDATE.cs:26133).
+    USER_UPDATE: 'N',
+    USER_DELETE: 'N',
   }));
   return [
     ...(upi.length ? [{ table: 'UPI_DATA', rows: upi }] : []),
@@ -412,7 +421,14 @@ const CARRIED = new Set([
 ]);
 /** Desktop-computed columns the web has no calculation for (member commission, TR_SALE.cs:15265-15266): an edit
  * keeps the stored value rather than writing 0. */
-const KEPT = ['AC_MEMB_COM_PRC', 'AC_MEMB_COM_VAL'];
+const KEPT = [
+  'AC_MEMB_COM_PRC',
+  'AC_MEMB_COM_VAL',
+  // The e-invoice registration (TR_SL_EBILL), which TR_SALE never writes: a re-saved bill keeps its IRN.
+  'IRN_NO',
+  'ACK_NO',
+  'ACK_DATE',
+];
 
 const same = (a: unknown, b: unknown): boolean => {
   const norm = (v: unknown): string => {
