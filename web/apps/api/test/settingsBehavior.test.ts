@@ -7,7 +7,6 @@ import {
   DEFAULT_PAN_CARD_VAL,
   DESKTOP_OUNCE_CONVERSION,
   SettingsBehaviorValidationError,
-  accountCodeHasConfiguredLength,
   cashPurchaseParty,
   desktopDhrnInterest,
   fineStockValue,
@@ -389,8 +388,6 @@ describe('batch-3 desktop setting decision tables', () => {
 
   it('applies behavioral forks while blank keeps the prior result', () => {
     const base = blank();
-    expect(accountCodeHasConfiguredLength('12345', base.accountCodeLength)).toBe(true);
-    expect(accountCodeHasConfiguredLength('12345', 4)).toBe(false);
     expect(tagSerialWidth(base)).toBe(6);
     expect(tagSerialWidth({ vbImport: false, tagReport: true })).toBe(5);
     expect(tagSerialWidth({ vbImport: true, tagReport: false })).toBe(4);

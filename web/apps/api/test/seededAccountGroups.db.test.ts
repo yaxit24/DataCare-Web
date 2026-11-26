@@ -52,6 +52,9 @@ const PROFIT_AND_LOSS = [
   'FINEPURC',
   'SLVSALE',
   'SLVPURC',
+  'OTHSALE',
+  'OLDSLVPR',
+  'OTHPURC',
 ];
 
 (enabled ? describe : describe.skip)('seeded account groups of a new company', () => {

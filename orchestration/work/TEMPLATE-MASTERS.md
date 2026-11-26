@@ -61,7 +61,7 @@ company does not have (its chart is the named role accounts of `SYSTEM_ACCOUNTS`
 post to `GROUP_MAST.SALE_AC` / `PURC_AC` without checking AC_MAST, so an unmapped code would post to a nameless
 account. `DESKTOP_ACCOUNT_ROLES` in `desktopTemplateMasters.ts` maps each code to the web account of the same meaning
 (the same roles `bookTemplates.ts` `DESKTOP_DEFAULT_ACCOUNT_ROLES` already uses for 00003-00006 and 00008-00009). A
-code with no web account of the same meaning is left blank (NULL) and none is invented.
+code with no web account of the same meaning is left blank (NULL) and none is invented. The three accounts the desktop posts old silver purchases and other-type sales/purchases to (00011, 00007, 00012; Ac_Ledr.cs:44/50, :308) did not exist in the web chart, so `OLDSLVPR` (AC_CODE is varchar(8)), `OTHSALE` and `OTHPURC` are added to `SYSTEM_ACCOUNTS` with the installer names and groups. They are insert-if-absent, so an established company only gains the rows when it is re-provisioned.
 
 | Installer code | Installer AC_MAST name                  | Web account | Used by                      |
 | -------------- | --------------------------------------- | ----------- | ---------------------------- |
@@ -69,12 +69,12 @@ code with no web account of the same meaning is left blank (NULL) and none is in
 | 00004          | SALES SILVER A/C                        | SLVSALE     | GROUP_MAST sale, BAL_GR SL   |
 | 00005          | SALES OLD GOLD A/C                      | OG          | GROUP_MAST sale, BAL_GR OG   |
 | 00006          | SALES OLD SILVER A/C                    | OS          | GROUP_MAST sale, BAL_GR OS   |
-| 00007          | SALES OTHER A/C                         | (blank)     | no web account               |
+| 00007          | SALES OTHER A/C                         | OTHSALE     | new web system account, group 25 |
 | 00008          | PURCHASE GOLD A/C                       | PURCHASE    | GROUP_MAST purchase, BAL_GR  |
 | 00009          | PURCHASE SILVER A/C                     | SLVPURC     | GROUP_MAST purchase, BAL_GR  |
 | 00010          | PURCHASE OLD GOLD A/C                   | OLDGOLD     | GROUP_MAST purchase, BAL_GR  |
-| 00011          | PURCHASE OLD SILVER A/C                 | (blank)     | no web account               |
-| 00012          | PURCHASE OTHER A/C                      | (blank)     | no web account               |
+| 00011          | PURCHASE OLD SILVER A/C                 | OLDSLVPR    | new web system account, group 30 |
+| 00012          | PURCHASE OTHER A/C                      | OTHPURC     | new web system account, group 30 |
 | 00021-00025    | CLG.STOCK ... A/C (gold, silver, old gold, old silver, other) | (blank) | BAL_GR CLG_AC; no closing-stock accounts in the web chart |
 | 00026-00030    | CLOSING STOCK - P & L - ...             | (blank)     | BAL_GR CLOSING_AC; same      |
 | 00031-00035    | OPNING STOCK- ...                       | (blank)     | BAL_GR OP_AC; same           |
@@ -94,6 +94,9 @@ the desktop does not write (`web/docs/FIRST-REAL-COMPARISON.md` section 3.4); it
 
 ## Known gaps
 
+- `CO_SET.AC_LC_CODE_LEN` ('1' in the installer row) is a code-GENERATION mode on the desktop (MS_ACCT.cs:6285, :7741, :8789-8800), never a length check on a typed code. The web Accounts master used to refuse every account save with a code of another length; that check is removed (`master.service.ts`), and `templateMastersPosting.db.test.ts` creates an account and edits CASH on a fresh company.
+- The installer CO_SET carries values the web settings catalog does not list as options (FINE_STK_TYPE 'F', DHRN_PRC 2). They are copied as the desktop has them and left as they are.
+- A fresh company has CASH_LIMIT 0 (no 2-lakh cash refusal), as on a fresh desktop company.
 - The seeded other-type items (DM, EM, HM, OT, RD, SN; IT_TYPE 'O') are refused by the current sale and purchase
   writers. That is an existing web limitation of those writers, not something the seed changes.
 

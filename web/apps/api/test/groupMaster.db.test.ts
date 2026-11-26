@@ -492,6 +492,7 @@ type GroupRow = {
         { code: 'OS', name: 'OLD SILVER', group: '25' },
         { code: 'SALES', name: 'SALES A/C', group: '25' },
         { code: '00025', name: 'SALES GOLD', group: '25' },
+        { code: 'OTHSALE', name: 'SALES OTHER A/C', group: '25' },
         { code: '00026', name: 'SALES SILVER', group: '25' },
         { code: 'SLVSALE', name: 'SALES SILVER A/C', group: '25' },
       ]);
@@ -517,6 +518,7 @@ type GroupRow = {
       expect(response.json().map((r: { code: string }) => r.code)).toEqual([
         'SALES',
         '00025',
+        'OTHSALE',
         '00026',
         'SLVSALE',
       ]);
@@ -531,6 +533,8 @@ type GroupRow = {
         'OLDGOLD',
         'PURCHASE',
         '00030',
+        'OLDSLVPR',
+        'OTHPURC',
         '00031',
         'SLVPURC',
       ]);

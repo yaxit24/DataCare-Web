@@ -1,5 +1,8 @@
 import { PrismaClient, withTenant } from '@datacare/db';
+import type { FastifyInstance } from 'fastify';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
+import { buildApp } from '../src/app.js';
+import { hashPassword } from '../src/modules/auth/password.js';
 import { seedCompany } from '../src/modules/ops/seedCompany.js';
 import { createPurchase } from '../src/modules/purchase/purchase.js';
 import { createSale } from '../src/modules/sales/sales.js';
@@ -28,6 +31,8 @@ d('fresh company: seeded masters name accounts the company has', () => {
     datasources: { db: { url: process.env.MIGRATE_DATABASE_URL ?? '' } },
   });
   const runtime = new PrismaClient();
+  let app: FastifyInstance;
+  let cookie = '';
   const rows = <T = Record<string, any>>(sql: string, ...p: unknown[]): Promise<T[]> =>
     withTenant(runtime, TENANT, (tx: any) => tx.$queryRawUnsafe(sql, ...p));
   const wipe = async () => {
@@ -57,8 +62,38 @@ d('fresh company: seeded masters name accounts the company has', () => {
         LC,
       ),
     );
+    await owner.$executeRawUnsafe(
+      `INSERT INTO "LOGIN_MAST"(tenant_id,"CO_CODE","LOGIN_NAME","LOGIN_PWD","LOGIN_CATG","USER_UPDATE","USER_DELETE","USER_PRINT","PASSWORD_RESET_REQUIRED")
+       VALUES ($1,$2,'freshadm',$3,'ADMIN','Y','Y','Y','N')`,
+      TENANT,
+      CO,
+      await hashPassword('Fresh-Masters!2026'),
+    );
+    app = await buildApp({
+      prisma: runtime,
+      secret: 'fresh-masters-posting-test-signing-secret-32',
+      secureCookies: false,
+    });
+    const login = await app.inject({
+      method: 'POST',
+      url: '/auth/login',
+      headers: { 'x-tenant-id': TENANT },
+      payload: {
+        coCode: CO,
+        lcCode: LC,
+        coYear: YEAR,
+        loginName: 'freshadm',
+        password: 'Fresh-Masters!2026',
+      },
+    });
+    expect(login.statusCode, login.body).toBe(200);
+    const setCookie = login.headers['set-cookie'];
+    cookie = (Array.isArray(setCookie) ? setCookie : [setCookie ?? ''])
+      .map((part) => part.split(';', 1)[0])
+      .join('; ');
   });
   afterAll(async () => {
+    await app?.close();
     await wipe();
     await runtime.$disconnect();
     await owner.$disconnect();
@@ -86,12 +121,19 @@ d('fresh company: seeded masters name accounts the company has', () => {
     ).toEqual([{ SALE_AC: 'SALES', PURC_AC: 'PURCHASE' }]);
   });
 
-  it('a sale of a seeded gold ornament posts only to accounts in AC_MAST, whole-rupee with a round-off leg', async () => {
-    const scope = { tenantId: TENANT, coCode: CO, lcCode: LC, coYear: YEAR, coBook: 'SL' };
-    const sold = await createSale(
+  const legsOf = (book: string, vchNo: number) =>
+    rows<{ ac: string; dr: number; cr: number }>(
+      `SELECT "AC_CODE" ac,"DR_AMT"::float dr,"CR_AMT"::float cr FROM "AC_DATA"
+        WHERE "CO_CODE"=$1 AND "CO_BOOK"=$2 AND "VCH_NO"=$3 ORDER BY "AC_CODE"`,
+      CO,
+      book,
+      String(vchNo).padStart(5, '0'),
+    );
+  const sell = (itCode: string, rate: number) =>
+    createSale(
       runtime,
       {
-        scope,
+        scope: { tenantId: TENANT, coCode: CO, lcCode: LC, coYear: YEAR, coBook: 'SL' },
         mainUser: 'fresh',
         acCode: 'FCUST',
         acName: 'FRESH CUSTOMER',
@@ -99,36 +141,15 @@ d('fresh company: seeded masters name accounts the company has', () => {
         taxRatePct: 3,
         taxCode: '10',
         interState: false,
-        cashAmt: 66000,
+        cashAmt: 63067,
       } as any,
-      [{ itCode: 'ORG', pcs: 1, grossWt: 10, netWt: 10, touch: 91.6, rate: 6123.45 }] as any,
+      [{ itCode, pcs: 1, grossWt: 10, netWt: 10, touch: 91.6, rate }] as any,
     );
-    const legs = await rows<{ ac: string; dr: number; cr: number }>(
-      `SELECT "AC_CODE" ac,"DR_AMT"::float dr,"CR_AMT"::float cr FROM "AC_DATA"
-        WHERE "CO_CODE"=$1 AND "CO_BOOK"='SL' AND "VCH_NO"=$2`,
-      CO,
-      String(sold.vchNo).padStart(5, '0'),
-    );
-    expect(legs.length).toBeGreaterThan(2);
-    expect(await missingAccounts(legs)).toEqual([]);
-    // 61,234.50 + GST 3% 1,837.035 = 63,071.535: whole rupee 63,072 (TOT_AMT_ROF 0), and the web's ROUNDOFF leg
-    // carries the difference (web/docs/FIRST-REAL-COMPARISON.md section 3.4; the desktop does not write that leg).
-    const head = await rows<{ net: number }>(
-      `SELECT "NET_AMT"::float net FROM "SL_DATA" WHERE "CO_CODE"=$1 AND "VCH_NO"=$2`,
-      CO,
-      String(sold.vchNo).padStart(5, '0'),
-    );
-    expect(Number.isInteger(head[0]!.net)).toBe(true);
-    expect(legs.map((l) => l.ac)).toContain('ROUNDOFF');
-    expect(legs.map((l) => l.ac)).toContain('SALES');
-  });
-
-  it('a purchase of a seeded gold ornament posts only to accounts in AC_MAST', async () => {
-    const scope = { tenantId: TENANT, coCode: CO, lcCode: LC, coYear: YEAR, coBook: 'PR' };
-    const bought = await createPurchase(
+  const buy = (itCode: string, rate: number) =>
+    createPurchase(
       runtime,
       {
-        scope,
+        scope: { tenantId: TENANT, coCode: CO, lcCode: LC, coYear: YEAR, coBook: 'PR' },
         mainUser: 'fresh',
         acCode: 'FSUPL',
         acName: 'FRESH SUPPLIER',
@@ -136,16 +157,93 @@ d('fresh company: seeded masters name accounts the company has', () => {
         taxRatePct: 3,
         interState: false,
       } as any,
-      [{ itCode: 'ORG', pcs: 1, grossWt: 10, netWt: 10, touch: 91.6, rate: 6050 }] as any,
+      [{ itCode, pcs: 1, grossWt: 10, netWt: 10, touch: 91.6, rate }] as any,
     );
-    const legs = await rows<{ ac: string }>(
-      `SELECT "AC_CODE" ac FROM "AC_DATA" WHERE "CO_CODE"=$1 AND "CO_BOOK"='PR' AND "VCH_NO"=$2`,
-      CO,
-      String(bought.vchNo).padStart(5, '0'),
-    );
-    expect(legs.length).toBeGreaterThan(1);
+
+  it('a sale of a seeded gold ornament posts only to accounts in AC_MAST, whole-rupee with a round-off leg', async () => {
+    // CO_SET.ITM_RATE_ROF 0 rounds the rate 6123.45 to 6123 (MS_YEAR.cs:1568): line 10 g x 6,123 = 61,230.00; GST 3% =
+    // 1,836.90; total 63,066.90; TOT_AMT_ROF 0 makes the bill 63,067 and the web's ROUNDOFF leg carries the 0.10
+    // (web/docs/FIRST-REAL-COMPARISON.md section 3.4: the desktop does not write that leg).
+    const sold = await sell('ORG', 6123.45);
+    const legs = await legsOf('SL', sold.vchNo);
     expect(await missingAccounts(legs)).toEqual([]);
-    expect(legs.map((l) => l.ac)).toContain('PURCHASE');
+    const byAc = Object.fromEntries(legs.map((l) => [l.ac, l]));
+    expect(byAc.SALES).toMatchObject({ cr: 61230, dr: 0 });
+    expect(byAc.GST).toMatchObject({ cr: 1836.9, dr: 0 });
+    expect(byAc.ROUNDOFF).toMatchObject({ cr: 0.1, dr: 0 });
+    // The party leg carries the whole-rupee total.
+    expect(legs.find((l) => l.ac === 'FCUST' && l.dr > 0)).toMatchObject({ dr: 63067 });
+    expect(legs.reduce((sum, l) => sum + l.dr - l.cr, 0)).toBeCloseTo(0, 2);
+  });
+
+  it('a sale of the old-gold group posts to the OG account', async () => {
+    const sold = await sell('OG', 6000);
+    const legs = await legsOf('SL', sold.vchNo);
+    expect(await missingAccounts(legs)).toEqual([]);
+    expect(legs.find((l) => l.ac === 'OG')).toMatchObject({ cr: 60000 });
+  });
+
+  it('a purchase of a seeded gold ornament posts only to accounts in AC_MAST', async () => {
+    const bought = await buy('ORG', 6050);
+    const legs = await legsOf('PR', bought.vchNo);
+    expect(await missingAccounts(legs)).toEqual([]);
+    // The purchase amount is on fine: 10 g x 91.6 % x 6,050 = 55,418 (TR_PURC rate-per-fine basis).
+    expect(legs.find((l) => l.ac === 'PURCHASE')).toMatchObject({ dr: 55418 });
+  });
+
+  it('a purchase of the old-gold group posts to OLDGOLD and of the old-silver group to the old-silver purchase account', async () => {
+    const gold = await legsOf('PR', (await buy('OG', 5500)).vchNo);
+    expect(await missingAccounts(gold)).toEqual([]);
+    expect(gold.find((l) => l.ac === 'OLDGOLD')).toMatchObject({ dr: 50380 });
+    const silver = await legsOf('PR', (await buy('OS', 80)).vchNo);
+    expect(await missingAccounts(silver)).toEqual([]);
+    expect(silver.find((l) => l.ac === 'OLDSLVPR')).toMatchObject({ dr: 733 }); // 10 g x 91.6 % x 80 = 732.8, whole rupee;
+  });
+
+  it('every other-type installer account the seeded groups name is a web account of the same group', async () => {
+    expect(
+      await rows(
+        `SELECT "AC_CODE","AC_NAME","AC_GR" FROM "AC_MAST" WHERE "CO_CODE"=$1 AND "AC_CODE" IN ('OTHSALE','OLDSLVPR','OTHPURC') ORDER BY 1`,
+        CO,
+      ),
+    ).toEqual([
+      { AC_CODE: 'OLDSLVPR', AC_NAME: 'PURCHASE OLD SILVER A/C', AC_GR: '30' },
+      { AC_CODE: 'OTHPURC', AC_NAME: 'PURCHASE OTHER A/C', AC_GR: '30' },
+      { AC_CODE: 'OTHSALE', AC_NAME: 'SALES OTHER A/C', AC_GR: '25' },
+    ]);
+    expect(
+      await rows(
+        `SELECT "GR_CODE","SALE_AC","PURC_AC" FROM "GROUP_MAST" WHERE "CO_CODE"=$1 AND "GR_CODE" IN ('OS','OT') ORDER BY 1`,
+        CO,
+      ),
+    ).toEqual([
+      { GR_CODE: 'OS', SALE_AC: 'OS', PURC_AC: 'OLDSLVPR' },
+      { GR_CODE: 'OT', SALE_AC: 'OTHSALE', PURC_AC: 'OTHPURC' },
+    ]);
+  });
+
+  it('the generic Accounts master creates an account and edits CASH on a fresh company (AC_LC_CODE_LEN is a numbering mode, not a length)', async () => {
+    expect(await rows(`SELECT "AC_LC_CODE_LEN" FROM "CO_SET" WHERE "CO_CODE"=$1`, CO)).toEqual([
+      { AC_LC_CODE_LEN: '1' },
+    ]);
+    const post = (method: 'POST' | 'PUT', payload: Record<string, unknown>) =>
+      app.inject({
+        method,
+        url: '/masters/accounts',
+        headers: { cookie },
+        payload: payload as never,
+      });
+    const created = await post('POST', {
+      AC_CODE: 'NEWACC1',
+      AC_NAME: 'NEW ACCOUNT',
+      AC_GR: '20',
+    });
+    expect(created.statusCode, created.body).toBe(201);
+    const edited = await post('PUT', { AC_CODE: 'CASH', AC_NAME: 'CASH ON HAND EDITED' });
+    expect(edited.statusCode, edited.body).toBe(200);
+    expect(
+      await rows(`SELECT "AC_NAME" FROM "AC_MAST" WHERE "CO_CODE"=$1 AND "AC_CODE"='CASH'`, CO),
+    ).toEqual([{ AC_NAME: 'CASH ON HAND EDITED' }]);
   });
 
   it('seeds the desktop CO_SET rounding (TAX_ROF 2, LBR_ROF 0, ITM_RATE_ROF 0), CONV_MAST and the counter at the location', async () => {

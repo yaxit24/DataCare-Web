@@ -66,6 +66,12 @@ const SYSTEM_ACCOUNTS: { code: string; name: string; gr: string; gstType?: strin
   { code: 'BULLION', name: 'BULLION TRADING', gr: '07' },
   { code: 'FINESALE', name: 'FINE METAL SALE', gr: '25' },
   { code: 'FINEPURC', name: 'FINE METAL PURCHASE', gr: '30' },
+  // The installer's sales-other, purchase-old-silver and purchase-other accounts (00007, 00011, 00012; groups 25/30 in
+  // AC_MAST.json), which GROUP_MAST/BAL_GR of the seeded groups name (desktopTemplateMasters.ts DESKTOP_ACCOUNT_ROLES).
+  // The desktop posts an old-silver purchase, other-type sale and purchase to them (Ac_Ledr.cs:44/50, :308).
+  { code: 'OTHSALE', name: 'SALES OTHER A/C', gr: '25' },
+  { code: 'OLDSLVPR', name: 'PURCHASE OLD SILVER A/C', gr: '30' },
+  { code: 'OTHPURC', name: 'PURCHASE OTHER A/C', gr: '30' },
   { code: 'DHRN', name: 'DHIRAN / LOAN', gr: '15' },
   { code: 'CAPITAL', name: 'CAPITAL A/C', gr: '01' },
   // N198 (G208): the sale books' slot 4 is the order-advance account the sale day book names for an adjusted
