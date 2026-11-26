@@ -309,6 +309,35 @@ describe('replay oracle: request rebuild', () => {
     expect(c).not.toHaveProperty('metal');
   });
 
+  it('tells a computed labour amount from a typed one, ghat included, and sends a typed Tax%', () => {
+    const line = (o: Record<string, unknown>) => ({
+      SR_NO: 1,
+      IT_CODE: 'GLD',
+      TAG_NO: 'N',
+      ITM_PCS: 1,
+      ITM_NWT: 10.65,
+      ITM_RATE: 6000,
+      LBR_TYPE: 'N',
+      ...o,
+    });
+    const h = { AC_CODE: 'C9', VCH_DATE: '2024-07-03T00:00:00.000Z', TAX_PRC: 3 };
+    const send = (o: Record<string, unknown>) =>
+      lib.saleRequest(voucher('SALES', '029', { SL_DATA: [h], SL_DETL: [line(o)] })).body.lines[0];
+    // (10.65 + 0.3) x 550 = 6022.5 rounds to the stored 6023: computed with ghat (TR_SALE.cs:11084-11127).
+    expect(send({ ITM_GHT_WT: 0.3, LBR_RATE: 550, LBR_AMT: 6023 })).toMatchObject({
+      labourType: 'per_gram',
+      labourRate: 550,
+    });
+    // 107 x 6.79 = 726.53, which rounds to 727: the stored 726 was typed, so it goes as the amount with its rate.
+    expect(send({ ITM_NWT: 107, LBR_RATE: 6.79, LBR_AMT: 726 })).toMatchObject({
+      labourType: 'fixed',
+      labourFixed: 726,
+      labourRate: 6.79,
+    });
+    expect(send({ TAX_PRC: 3 })).toMatchObject({ taxPct: 3 });
+    expect(send({ TAX_PRC: 0 })).not.toHaveProperty('taxPct');
+  });
+
   it('rebuilds a purchase with its stone sub-grid and the sale link of a URD book', () => {
     const h = {
       AC_CODE: 'S1',

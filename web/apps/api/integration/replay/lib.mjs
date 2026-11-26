@@ -276,15 +276,19 @@ export function labourOf(line) {
   const type = str(line.LBR_TYPE).toUpperCase();
   if (type === 'P')
     return { labourType: 'percentage', labourRate: nz(line.LBR_PRC ?? line.LBR_RATE) };
-  // The labour-amount cell is typed over the rate x weight product on the desktop grid; when the stored amount is
-  // not rate x net weight to the rupee, the operator typed the amount, and that amount is the input.
-  const perGram = num(line.LBR_RATE) * num(line.ITM_NWT);
+  // The labour-amount cell is computed as Math.Round((net + ghat) x rate) (net x rate when LBR_WITH_GHT is 'N';
+  // TR_SALE.cs:11084-11127) but open for typing. A stored amount that neither product rounds to was typed: it is sent
+  // as the amount, with the rate the grid showed beside it, as the page posts a typed amount.
+  const rate = num(line.LBR_RATE);
+  const amount = num(line.LBR_AMT);
+  const rounds = (weight) => Math.abs(rate * weight - amount) <= 0.5 + 1e-9;
   if (
-    num(line.LBR_RATE) !== 0 &&
-    num(line.LBR_AMT) !== 0 &&
-    Math.abs(perGram - num(line.LBR_AMT)) > 1
+    rate !== 0 &&
+    amount !== 0 &&
+    !rounds(num(line.ITM_NWT) + num(line.ITM_GHT_WT)) &&
+    !rounds(num(line.ITM_NWT))
   )
-    return { labourType: 'fixed', labourFixed: num(line.LBR_AMT) };
+    return { labourType: 'fixed', labourFixed: amount, labourRate: rate };
   if (num(line.LBR_RATE) !== 0) return { labourType: 'per_gram', labourRate: num(line.LBR_RATE) };
   if (num(line.LBR_AMT) !== 0) return { labourType: 'fixed', labourFixed: num(line.LBR_AMT) };
   return {};
@@ -382,6 +386,8 @@ export function saleRequest(v, ctx = {}) {
         tblCode: opt(l.TBL_CODE),
         remark: opt(l.ITM_REMARK),
         otherAmount: nz(l.OTH_AMT),
+        // The line's own Tax% cell, typed on the desktop grid (TR_SALE.cs:11588, saved at :15437).
+        taxPct: nz(l.TAX_PRC),
         rateType: opt(l.RATE_TYPE),
         rateWith: opt(l.RATE_WITH),
         prCode: opt(l.PR_CODE),
