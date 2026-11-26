@@ -63,6 +63,19 @@ function coerce(value, type) {
 
 export async function connectWeb(ownerUrl) {
   const prisma = new PrismaClient({ datasources: { db: { url: ownerUrl } } });
+  // Only the server scripts/parity-test-env.mjs started may be written to (the check test/globalSetup.ts makes).
+  const expected = String(process.env.PARITY_TEST_SYSTEM_IDENTIFIER ?? '').trim();
+  if (!expected)
+    throw new Error(
+      'run through scripts/parity-test-env.mjs (pnpm oracle:replay): no PARITY_TEST_SYSTEM_IDENTIFIER',
+    );
+  const [server] = await prisma.$queryRawUnsafe(
+    'SELECT system_identifier::text AS system FROM pg_control_system()',
+  );
+  if (String(server?.system) !== expected)
+    throw new Error(
+      'the database is not the disposable server scripts/parity-test-env.mjs started',
+    );
   const metaRows = await prisma.$queryRawUnsafe(
     `SELECT table_name AS t, column_name AS c, data_type AS ty, numeric_scale AS sc
        FROM information_schema.columns WHERE table_schema='public'
@@ -201,6 +214,19 @@ export async function connectWeb(ownerUrl) {
     },
     /** A throwaway row at `vchNo` so the web's next number is vchNo+1; returns a function that removes it. */
     async placeholder(table, tenant, scope, vchNo) {
+      // A real voucher already at that number (a forced retry after a numbering collision) needs no placeholder,
+      // and the cleanup below must never remove it.
+      const taken = await prisma.$queryRawUnsafe(
+        `SELECT 1 FROM ${qpg(table)} WHERE tenant_id=$1 AND "CO_CODE"=$2 AND "LC_CODE"=$3 AND "CO_YEAR"=$4
+           AND "CO_BOOK"=$5 AND "VCH_NO"=$6 LIMIT 1`,
+        tenant,
+        scope.coCode,
+        scope.lcCode,
+        scope.coYear,
+        scope.coBook,
+        vchNo,
+      );
+      if (taken.length) return undefined;
       const extra = has(table, 'SR_NO') ? ',"SR_NO"' : '';
       const extraV = has(table, 'SR_NO') ? ',9999' : '';
       await prisma.$executeRawUnsafe(
@@ -215,9 +241,11 @@ export async function connectWeb(ownerUrl) {
       );
       return () =>
         prisma.$executeRawUnsafe(
-          `DELETE FROM ${qpg(table)} WHERE tenant_id=$1 AND "CO_CODE"=$2 AND "CO_YEAR"=$3 AND "CO_BOOK"=$4 AND "VCH_NO"=$5`,
+          `DELETE FROM ${qpg(table)} WHERE tenant_id=$1 AND "CO_CODE"=$2 AND "LC_CODE"=$3 AND "CO_YEAR"=$4
+             AND "CO_BOOK"=$5 AND "VCH_NO"=$6${has(table, 'SR_NO') ? ' AND "SR_NO"=9999' : ''}`,
           tenant,
           scope.coCode,
+          scope.lcCode,
           scope.coYear,
           scope.coBook,
           vchNo,

@@ -123,6 +123,8 @@ async function main() {
     lcCode: env('ORACLE_LOCATION', '00'),
   };
   const tenant = env('ORACLE_TENANT', 'replay-oracle');
+  // Every row of this tenant is wiped before the load, so only a replay tenant may be named.
+  if (!/^replay-[a-z0-9-]+$/.test(tenant)) throw new Error('ORACLE_TENANT must start with replay-');
   const apiPort = Number(env('ORACLE_API_PORT', env('PARITY_API_PORT', '4497')));
   const passwordFile = String(process.env.ORACLE_MSSQL_PASSWORD_FILE ?? '').trim();
   const desktop = await connectDesktop({
@@ -354,7 +356,16 @@ async function main() {
           numberingCollision = scrub(`${r.status} ${r.json?.message ?? r.json?.detail ?? ''}`);
           r = await attempt(true);
         }
-        if (r.status >= 200 && r.status < 300) {
+        if (r.status >= 200 && r.status < 300 && !r.json?.vchNo) {
+          results.push({
+            ...base,
+            status: 'REFUSED',
+            route: `${request.method} ${request.path}`,
+            httpStatus: r.status,
+            numberingCollision,
+            reason: 'harness: the web response carried no vchNo, so its rows cannot be read back',
+          });
+        } else if (r.status >= 200 && r.status < 300) {
           const webVch = String(r.json?.vchNo ?? '').padStart(5, '0');
           lastWeb.set(v.book, Math.max(last, Number(webVch)));
           results.push({
