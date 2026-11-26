@@ -1365,7 +1365,6 @@ const NO_BUSINESS_SCOPE = new Set([
   'GET /audit',
   'GET /ops/metrics',
   'GET /ops/invariants',
-  'GET /backup',
   'POST /backup/restore',
   'POST /years',
   ...[...ADMIN_ONLY].filter((key) => !SCOPED_ADMIN_ONLY.has(key)),
