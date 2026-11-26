@@ -50,7 +50,6 @@ export function registerSaleVoucherRoutes(
         year: String(q.aprYear ?? ''),
         book: String(q.aprBook ?? ''),
         vchNo: String(q.aprNo ?? ''),
-        rateDate: q.rateDate,
       }),
     );
   });

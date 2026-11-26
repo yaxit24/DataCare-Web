@@ -71,13 +71,11 @@ function approvalLineExtras(line: Record<string, unknown>): Record<string, strin
 
 export function SaleApprovalImport<T>({
   apr,
-  vchDate,
   blank,
   party,
   onLines,
 }: {
   apr: ReturnType<typeof useSaleApprovalNo>;
-  vchDate: string;
   blank: () => T;
   /** The bill takes the approval's party (TR_SALE.cs:20042-20048) and, from it, the GST split. */
   party: {
@@ -111,7 +109,6 @@ export function SaleApprovalImport<T>({
         aprYear: issueYear,
         aprBook: issueBook,
         aprNo: issueNo,
-        rateDate: vchDate,
       });
       const got = await get<Imported>(`/sales/approval-import?${q}`);
       if (!got.found) return openHelp();

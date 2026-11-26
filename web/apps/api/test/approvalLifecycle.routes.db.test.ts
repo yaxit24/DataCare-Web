@@ -5,6 +5,8 @@ import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest';
 import { buildApp } from '../src/app.js';
 import { hashPassword } from '../src/modules/auth/password.js';
 import { seedCompany } from '../src/modules/ops/seedCompany.js';
+import { approvalSaleBill, systemDateIso } from '../src/modules/sales/approvalImport.js';
+import { createSale, deleteSale } from '../src/modules/sales/sales.js';
 import { assertIsolatedTestDatabase } from './support/isolatedDatabase.js';
 import { diffTenant, snapshotTenant } from './support/tenantSnapshot.js';
 
@@ -2164,14 +2166,18 @@ type Cookie = string;
       `DELETE FROM "RATE_MAST" WHERE tenant_id=$1 AND "CO_CODE"='01' AND "GR_CODE"='APR'`,
       tenantId,
     );
+    // The rate view is today's (MsSysDate, MS_OPNCOMP.cs:1366-1386), not the back-dated voucher's day.
+    const today = systemDateIso();
+    expect(today).not.toBe(DAY);
     await exec(
       `INSERT INTO "RATE_MAST"(tenant_id,"CO_CODE","LC_CODE","VCH_DATE","SR_NO","GR_CODE","GR_RATE")
-       VALUES ($1,'01','01',$2::date,1,'APR',61234.55)`,
+       VALUES ($1,'01','01',$2::date,1,'APR',59999.99),($1,'01','01',$3::date,1,'APR',61234.55)`,
       tenantId,
       DAY,
+      today,
     );
     const first = issueBody().lines[0]!;
-    // Line 1 is rate type G without MRP, so it is priced: round(61,234.55 / 10, 2) = 6,123.46 (half to even).
+    // Line 1 is rate type G without MRP, so it is priced from today: round(61,234.55 / 10, 2) = 6,123.46.
     // Line 2 keeps its MRP, so its rate stays blank (TR_SALE.cs:20300).
     const issue = await createIssue(
       issueBody({
@@ -2195,7 +2201,7 @@ type Cookie = string;
     ]);
     const imported = await admin(
       'GET',
-      `/sales/approval-import?coBook=SL&aprYear=${YEAR}&aprBook=${ISSUE_BOOK}&aprNo=${issue.voucherNo}&rateDate=${DAY}`,
+      `/sales/approval-import?coBook=SL&aprYear=${YEAR}&aprBook=${ISSUE_BOOK}&aprNo=${issue.voucherNo}`,
     );
     expect(imported.statusCode, imported.body).toBe(200);
     const body = imported.json();
@@ -2334,6 +2340,117 @@ type Cookie = string;
     });
     expect(wrongRights.statusCode, wrongRights.body).toBe(403);
     expect(await received()).toEqual([{ received: 'N' }, { received: 'N' }]);
+  });
+
+  it('bills a loose approval of the whole stock under NEGATIVE_STK_SALE=N and keeps the stock-back row type A', async () => {
+    // The approval's O/- row (Ac_Stock.cs:60-71) already took the 10 g; the sale's back-in row (:118-121) returns it
+    // before its own OUT row, so the desktop never refuses the import (TR_SALE.cs:10377 checks only typed rows).
+    // Ac_Stock.cs:119 writes that row's DATA_TYPE as the literal 'A' whatever the sale book's type.
+    const setting = await query<Array<{ v: string | null }>>(
+      `SELECT "NEGATIVE_STK_SALE" v FROM "CO_SET_NEW" WHERE tenant_id=$1 AND "CO_CODE"='01'`,
+      tenantId,
+    );
+    const bookTypes = await query<Array<{ t: string; v: string | null }>>(
+      `SELECT 'detl' t,min("DATA_TYPE") v FROM "BOOK_DETL" WHERE tenant_id=$1 AND "CO_BOOK"='SL'
+        UNION ALL SELECT 'data',min("DATA_TYPE") FROM "BOOK_DATA" WHERE tenant_id=$1 AND "CO_BOOK"='SL'`,
+      tenantId,
+    );
+    await exec(
+      `INSERT INTO "GROUP_MAST"(tenant_id,"CO_CODE","GR_CODE","GR_NAME","SALE_AC")
+       VALUES ($1,'01','APL','Loose approval items','SALES') ON CONFLICT DO NOTHING`,
+      tenantId,
+    );
+    await exec(
+      `UPDATE "ITEM_MAST" SET "GR_CODE"='APL' WHERE tenant_id=$1 AND "CO_CODE"='01' AND "IT_CODE"=$2`,
+      tenantId,
+      ITEM,
+    );
+    await exec(
+      `INSERT INTO "MAIN_STOCK"(tenant_id,"CO_CODE","LC_CODE","CO_YEAR","CO_BOOK","VCH_NO","SR_NO","ISR_NO",
+         "VCH_DATE","IT_CODE","TAG_NO","VCH_SRNO","TR_TYPE","ITM_SIGN","ITM_QTY","ITM_PCS","ITM_GWT","ITM_NWT")
+       VALUES ($1,'01','01',$2,'TOP','09009',1,1,$3::date,$4,'N',0,'P','+',1,1,10,10)`,
+      tenantId,
+      YEAR,
+      DAY,
+      ITEM,
+    );
+    const loose = async () =>
+      Number(
+        (
+          await query<Array<{ bal: number }>>(
+            `SELECT coalesce(sum(CASE WHEN "ITM_SIGN"='-' THEN -"ITM_NWT" ELSE "ITM_NWT" END),0)::float8 bal
+               FROM "MAIN_STOCK" WHERE tenant_id=$1 AND "IT_CODE"=$2 AND coalesce("TAG_NO",'N')='N'`,
+            tenantId,
+            ITEM,
+          )
+        )[0]!.bal,
+      );
+    const issue = await createIssue(
+      issueBody({
+        lines: [{ itCode: ITEM, pcs: 1, grossWt: 10, netWt: 10, touch: 91.6, amount: 1000 }],
+      }),
+    );
+    const before = await loose();
+    await exec(
+      `UPDATE "CO_SET_NEW" SET "NEGATIVE_STK_SALE"='N' WHERE tenant_id=$1 AND "CO_CODE"='01'`,
+      tenantId,
+    );
+    await exec(
+      `UPDATE "BOOK_DETL" SET "DATA_TYPE"='B' WHERE tenant_id=$1 AND "CO_BOOK"='SL'`,
+      tenantId,
+    );
+    await exec(
+      `UPDATE "BOOK_DATA" SET "DATA_TYPE"='B' WHERE tenant_id=$1 AND "CO_BOOK"='SL'`,
+      tenantId,
+    );
+    const scope = { tenantId, coCode: '01', lcCode: '01', coYear: YEAR, coBook: 'SL' };
+    const header = { scope, vchDate: DAY, taxRatePct: 0, interState: false, mainUser: ADMIN };
+    try {
+      // An ordinary sale of more loose metal than is left is still refused.
+      await expect(
+        createSale(runtime, { ...header, acCode: PARTY }, [
+          { itCode: ITEM, pcs: 1, grossWt: before + 1, netWt: before + 1, touch: 91.6, rate: 1000 },
+        ]),
+      ).rejects.toThrow(/negative stock is not allowed/);
+      const bill = await approvalSaleBill(runtime, { ...header, acCode: '' }, issue.voucherNo, {
+        lines: [{ rate: 1000 }],
+      });
+      const sold = await createSale(runtime, bill.input, bill.lines);
+      const saleNo = String(sold.vchNo).padStart(5, '0');
+      expect(
+        await query(
+          `SELECT "SR_NO"::int sr,"ITM_SIGN" sign,"DATA_TYPE" dt FROM "MAIN_STOCK"
+            WHERE tenant_id=$1 AND "CO_BOOK"='SL' AND "VCH_NO"=$2 ORDER BY "SR_NO"`,
+          tenantId,
+          saleNo,
+        ),
+      ).toEqual([
+        { sr: 3, sign: '-', dt: 'B' },
+        { sr: 5, sign: '+', dt: 'A' },
+      ]);
+      expect(await loose()).toBeCloseTo(before, 6);
+      await deleteSale(runtime, {
+        scope,
+        vchNo: saleNo,
+        expectedVersion: String((sold as { version?: string }).version),
+      });
+    } finally {
+      await exec(
+        `UPDATE "CO_SET_NEW" SET "NEGATIVE_STK_SALE"=$2 WHERE tenant_id=$1 AND "CO_CODE"='01'`,
+        tenantId,
+        setting[0]?.v ?? null,
+      );
+      await exec(
+        `UPDATE "BOOK_DETL" SET "DATA_TYPE"=$2 WHERE tenant_id=$1 AND "CO_BOOK"='SL'`,
+        tenantId,
+        bookTypes.find((b) => b.t === 'detl')?.v ?? null,
+      );
+      await exec(
+        `UPDATE "BOOK_DATA" SET "DATA_TYPE"=$2 WHERE tenant_id=$1 AND "CO_BOOK"='SL'`,
+        tenantId,
+        bookTypes.find((b) => b.t === 'data')?.v ?? null,
+      );
+    }
   });
 
   it('enforces the separate menu rights, including print rights, on both resources', async () => {

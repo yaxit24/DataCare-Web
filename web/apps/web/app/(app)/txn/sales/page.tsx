@@ -899,7 +899,6 @@ export default function SalesEntryPage() {
             </div>
             <SaleApprovalImport
               apr={apr}
-              vchDate={vchDate}
               party={{ setAcCode, setAcName, setInterState }}
               blank={blank}
               onLines={setLines}

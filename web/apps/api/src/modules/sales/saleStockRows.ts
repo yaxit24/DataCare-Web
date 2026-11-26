@@ -7,6 +7,7 @@
  */
 
 import { round } from '@datacare/core';
+import { FIXED_DATA_TYPE } from '../posting/dataType.js';
 
 type Row = Record<string, any>;
 
@@ -141,9 +142,11 @@ export function saleOldMetalStockRow(g: Row, ctx: SaleStockContext): Row {
  * line's stored ITM_GWT / ITM_NWT (no stock-report view switch), ITM_WEST 0, ITM_FINE, rate and amounts, NET_AMT, the
  * karigar columns, KR_LBR_AMT / KR_OTH_AMT / KR_COST 0, EMP_CODE '', DESIGN_NO, ITM_SIZE, GHT_PRC = ITM_GHT_PRC,
  * ITM_LOT '' and ITM_DISC 0. The desktop skips it only for two named registrations (VS344NEBU, VS357NEBU).
+ * Its DATA_TYPE is the literal 'A' (Ac_Stock.cs:119), not the sale book's type.
  */
 export function saleApprovalStockRow(d: Row, ctx: SaleStockContext): Row {
   return {
+    [FIXED_DATA_TYPE]: 'A',
     ...saleStockRow(d, { grossWt: num(d.ITM_GWT), netWt: num(d.ITM_NWT) }, ctx),
     SR_NO: 5,
     TR_TYPE: 'I',

@@ -18,6 +18,20 @@ type Row = Record<string, any>;
 const text = (value: unknown): string => String(value ?? '').trim();
 const num = (value: unknown): number => Number(value ?? 0) || 0;
 
+/**
+ * The desktop's MsSysDate: the working date the rate view was loaded for at login (MS_OPNCOMP.cs:1366-1386,
+ * MDI_FORM.cs:14297-14302), i.e. today, never the voucher date. The web has no separate session system date, so it
+ * is the server's today in the shop's zone (as the Stock Report's system date, stockReport/index.ts todayIso).
+ */
+export function systemDateIso(now: Date = new Date()): string {
+  const zone = process.env.PRINT_TIME_ZONE?.trim() || 'Asia/Kolkata';
+  try {
+    return new Intl.DateTimeFormat('en-CA', { timeZone: zone }).format(now);
+  } catch {
+    return now.toISOString().slice(0, 10);
+  }
+}
+
 /** One row of the Apr No help: VchNoL, VchDateL, PartyNameL, TagQtyM, YearL, BookL (TR_SALE.cs:20565). */
 export interface SaleApprovalHelpRow {
   vchNo: string;
@@ -78,7 +92,7 @@ export interface SaleApprovalImport {
 
 /**
  * The rate column of an imported line (TR_SALE.cs:20290-20330). Only a line with no rate and no MRP is priced, and only
- * from the day's RATE_MAST row of the item's group (DC_Main.RtView, MS_OPNCOMP.cs:1373): RATE_TYPE G is GR_RATE / 10 at
+ * from today's RATE_MAST row of the item's group (DC_Main.RtView, MS_OPNCOMP.cs:1373): RATE_TYPE G is GR_RATE / 10 at
  * two places, K is GR_RATE / 10 at none, 1 is GR_RATE at none (.NET Math.Round, half to even). Any other rate type
  * leaves the rate blank; a group without a rate that day blanks it.
  */
@@ -106,7 +120,7 @@ export function approvalImportRate(
 export async function saleApprovalImport(
   prisma: any,
   scope: Scope,
-  query: { year: string; book: string; vchNo: string; rateDate?: string },
+  query: { year: string; book: string; vchNo: string },
 ): Promise<SaleApprovalImport> {
   let voucherNo: string;
   try {
@@ -116,7 +130,7 @@ export async function saleApprovalImport(
   }
   const year = text(query.year);
   const book = text(query.book);
-  const rateDate = toIsoDate(query.rateDate || new Date());
+  const rateDate = systemDateIso();
   return withTxBudget(prisma, scope.tenantId, 'read', async (tx: any) => {
     const details: Row[] = await tx.$queryRawUnsafe(
       `SELECT a.*,i."IT_NAME" it_name,i."GR_CODE" rate_gr
@@ -277,7 +291,6 @@ export async function approvalSaleBill(
     year: issueYear,
     book: issueBook,
     vchNo: rawVoucherNo,
-    rateDate: input.vchDate ? toIsoDate(input.vchDate) : undefined,
   });
   if (!imported.found)
     throw new SaleValidationError(
