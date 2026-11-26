@@ -31,8 +31,9 @@ export function dataTypeSql(type: unknown, column = '"DATA_TYPE"'): string {
 export function bookDataTypeSql(type: unknown, alias: string): string {
   const t = reportDataType(type);
   if (!t) return '';
+  // A blank or NULL LC_CODE is company-wide, like '00' (BOOK_TYPE_SQL and resolveBookDataTypeTx in the same rule).
   return ` AND coalesce((SELECT nullif(btrim(bt."DATA_TYPE"),'') FROM "BOOK_DATA" bt
       WHERE bt.tenant_id=${alias}.tenant_id AND bt."CO_CODE"=${alias}."CO_CODE" AND bt."CO_BOOK"=${alias}."CO_BOOK"
-        AND (bt."LC_CODE"=${alias}."LC_CODE" OR bt."LC_CODE"='00' OR bt."LC_CODE" IS NULL)
-      ORDER BY CASE WHEN bt."LC_CODE"=${alias}."LC_CODE" THEN 0 ELSE 1 END LIMIT 1),'A')='${t}'`;
+        AND (bt."LC_CODE"=${alias}."LC_CODE" OR bt."LC_CODE"='00' OR bt."LC_CODE" IS NULL OR btrim(bt."LC_CODE")='')
+      ORDER BY CASE WHEN bt."LC_CODE"=${alias}."LC_CODE" THEN 0 ELSE 1 END, bt.row_id LIMIT 1),'A')='${t}'`;
 }

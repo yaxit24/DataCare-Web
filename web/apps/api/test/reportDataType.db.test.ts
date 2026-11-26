@@ -8,6 +8,7 @@ import {
   outstandingReport,
   profitAndLoss,
   salesRegister,
+  gstr3b,
   balanceSheet,
 } from '../src/modules/reports/reports.js';
 import { cashBook } from '../src/modules/reports/reports2.js';
@@ -203,9 +204,7 @@ describe.runIf(RUN)('reports filter by the session data type', () => {
     expect(book.totals.dr).toBe(EXPECTED[type]);
     expect(new Set(book.rows.map((r) => r.vchNo))).toEqual(
       new Set(
-        VOUCHERS.filter((v) =>
-          type === 'C' ? true : (v.type || 'A') === type,
-        ).map((v) => v.vch),
+        VOUCHERS.filter((v) => (type === 'C' ? true : (v.type || 'A') === type)).map((v) => v.vch),
       ),
     );
     const roj = await rojmel(runtime, scope(type));
@@ -241,4 +240,50 @@ describe.runIf(RUN)('reports filter by the session data type', () => {
       expect(bills.totals?.billed).toBe(EXPECTED[type]);
     },
   );
+
+  it('a blank or NULL BOOK_DATA.LC_CODE is company-wide and the exact location wins (PR #292 round 4)', async () => {
+    const base = async (t: string) => Number((await gstr3b(runtime, scope(t))).taxable);
+    const before = { A: await base('A'), B: await base('B'), C: await base('C') };
+    // SLZ: only a blank-location row, type B. SLY: blank-location type A, but its own location says B.
+    for (const [book, lc, type] of [
+      ['SLZ', '', 'B'],
+      ['SLY', '', 'A'],
+      ['SLY', LC, 'B'],
+    ] as const)
+      await exec(
+        `INSERT INTO "BOOK_DATA"(tenant_id,"CO_CODE","LC_CODE","CO_BOOK","BOOK_NAME","MAIN_BOOK","DATA_TYPE")
+         VALUES ($1,$2,$3,$4::text,$4::text,'SALES',$5)`,
+        TENANT,
+        CO,
+        lc,
+        book,
+        type,
+      );
+    for (const [book, vch, amount] of [
+      ['SLZ', '00091', 50000],
+      ['SLY', '00092', 700000],
+    ] as const)
+      await exec(
+        `INSERT INTO "SL_DATA"(tenant_id,"CO_CODE","LC_CODE","CO_YEAR","CO_BOOK","VCH_NO","VCH_DATE","AC_CODE","NET_AMT","TOT_AMT")
+         VALUES ($1,$2,$3,$4,$5,$6,'2024-04-10','00001',$7,$7)`,
+        TENANT,
+        CO,
+        LC,
+        YEAR,
+        book,
+        vch,
+        amount,
+      );
+    try {
+      expect(await base('A')).toBe(before.A);
+      expect(await base('B')).toBe(before.B + 750000);
+      expect(await base('C')).toBe(before.C + 750000);
+    } finally {
+      await exec(`DELETE FROM "SL_DATA" WHERE tenant_id=$1 AND "CO_BOOK" IN ('SLZ','SLY')`, TENANT);
+      await exec(
+        `DELETE FROM "BOOK_DATA" WHERE tenant_id=$1 AND "CO_BOOK" IN ('SLZ','SLY')`,
+        TENANT,
+      );
+    }
+  });
 });

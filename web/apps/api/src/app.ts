@@ -4,6 +4,7 @@ import {
   BOOK_DATA_TYPE_MISMATCH_BODY,
   BookDataTypeMismatchError,
   booksOfRequest,
+  requestedBooks,
   runWithSessionDataType,
 } from './modules/auth/bookDataType.js';
 import { sessionDataType } from './modules/auth/dataTypeAccess.js';
@@ -209,8 +210,10 @@ export async function buildApp(opts: BuildOpts): Promise<FastifyInstance> {
     // handler runs, after the preHandler hook has authenticated the request.
     const original = routeOptions.handler as (this: unknown, ...args: unknown[]) => unknown;
     routeOptions.handler = function (this: unknown, req: FastifyRequest, reply: FastifyReply) {
-      return runWithSessionDataType((req as RequestState).session as any, () =>
-        original.call(this, req, reply),
+      return runWithSessionDataType(
+        (req as RequestState).session as any,
+        () => original.call(this, req, reply),
+        requestedBooks(req),
       );
     } as any;
   });

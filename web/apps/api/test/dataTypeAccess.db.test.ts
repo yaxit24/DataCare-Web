@@ -250,14 +250,14 @@ run('owner data-type decision: PostgreSQL and HTTP authority', () => {
     expect(denied.statusCode).toBe(403);
   });
 
-  it('an A session is refused a B book chosen by the server, named as a second book, or as an import source', async () => {
+  it('an A session is refused a B book the client names (own, second or import source); server-chosen books are not refused', async () => {
     await owner.$executeRawUnsafe(
       `DELETE FROM "BOOK_DATA" WHERE tenant_id=$1 AND "CO_BOOK" IN ('FSL','FPR','SB2','SA2')`,
       tenant,
     );
     await owner.$executeRawUnsafe(
       `INSERT INTO "BOOK_DATA"(tenant_id,"CO_CODE","LC_CODE","CO_BOOK","BOOK_NAME","BOOK_SNAME","MAIN_BOOK","CUR_USE","DATA_TYPE")
-       VALUES ($1,'01','01','FSL','Fine Sale','FSL','FINE SALE','Y','B'),
+       VALUES ($1,'01','01','FSL','Fine Sale','FSL','FINE SALE','Y','A'),
               ($1,'01','01','SB2','Sale B','SB2','SALES','Y','B'),
               ($1,'01','01','SA2','Return A','SA2','SALES RETURNE','Y','A')`,
       tenant,
@@ -281,11 +281,10 @@ run('owner data-type decision: PostgreSQL and HTTP authority', () => {
       expect(r.statusCode, r.body).toBe(403);
       expect(r.json().error).toBe('book-data-type-mismatch');
     };
-    // Fine sale: the route always uses FSL (routes/txn.ts fineSaleInput), a B book here.
-    refused(await call('GET', '/fine-sale/00001'));
-    refused(await call('PUT', '/fine-sale/00001', { side: 'SALE', lines: [] }));
-    refused(await call('DELETE', '/fine-sale/00001', { side: 'SALE' }));
-    refused(await call('POST', '/fine-sale', { side: 'SALE', lines: [] }));
+    // Server-chosen books are never refused (TR_SALE.cs / TR_SL_ORD_ADJ.cs never read MsDataType); only a book the
+    // client names is. An A session naming a B book as its own book is refused.
+    refused(await call('POST', '/sales-returns', { coBook: 'SB2', lines: [] }));
+    // ordDbcd/isuDbcd on sale lines are deliberately unchecked: TR_SALE never reads MsDataType for them.
     // A sales return in an A book whose original sale (origBook) is in a B book.
     refused(
       await call('POST', '/sales-returns', {
@@ -316,5 +315,90 @@ run('owner data-type decision: PostgreSQL and HTTP authority', () => {
       '/sales-returns/source-items?sourceYear=2026&sourceBook=SA2&sourceVchNo=00001',
     );
     expect(own.json().error).not.toBe('book-data-type-mismatch');
+  });
+
+  it('a B session posts fine sale on the A-typed FSL (server-chosen book); the rows are stamped with the book type A', async () => {
+    await owner.$executeRawUnsafe(
+      `DELETE FROM "BOOK_DATA" WHERE tenant_id=$1 AND "CO_BOOK" IN ('FSL','SB2')`,
+      tenant,
+    );
+    await owner.$executeRawUnsafe(
+      `INSERT INTO "BOOK_DATA"(tenant_id,"CO_CODE","LC_CODE","CO_BOOK","BOOK_NAME","BOOK_SNAME","MAIN_BOOK","BOOK_INOUT","CUR_USE","DATA_TYPE")
+       VALUES ($1,'01','01','FSL','Fine Sale','FSL','FINE SALE','O','Y','A'),
+              ($1,'01','01','SB2','Sale B','SB2','SALES','O','Y','B')`,
+      tenant,
+    );
+    await owner.$executeRawUnsafe(
+      `DELETE FROM "BOOK_DETL" WHERE tenant_id=$1 AND "CO_BOOK"='FSL'`,
+      tenant,
+    );
+    await owner.$executeRawUnsafe(
+      `INSERT INTO "BOOK_DETL"(tenant_id,"CO_CODE","LC_CODE","CO_BOOK","SR_NO","AC_CODE","BOOK_NAME","MAIN_BOOK","BOOK_INOUT","DATA_TYPE")
+       VALUES ($1,'01','01','FSL',1,'FINESALE','Fine Sale','FINE SALE','O','A')`,
+      tenant,
+    );
+    for (const [code, name] of [
+      ['WALKIN', 'WALK-IN'],
+      ['FINESALE', 'FINE METAL SALE'],
+    ])
+      await owner.$executeRawUnsafe(
+        `INSERT INTO "AC_MAST"(tenant_id,"CO_CODE","LC_CODE","AC_CODE","AC_NAME","AC_GST_TYPE") VALUES ($1,'01','01',$2,$3,'L')
+         ON CONFLICT DO NOTHING`,
+        tenant,
+        code,
+        name,
+      );
+    await owner.$executeRawUnsafe(
+      `UPDATE "LOGIN_MAST" SET "DATA_TYPE_ALLOW"='ABC',"DATA_TYPE_DEFAULT"='B' WHERE tenant_id=$1 AND "LOGIN_NAME"='TYPEADMIN'`,
+      tenant,
+    );
+    const signed = await login();
+    expect(signed.statusCode, signed.body).toBe(200);
+    expect(signed.json().dataType).toBe('B');
+    const headers = { cookie: cookie(signed) };
+    const posted = await app.inject({
+      method: 'POST',
+      url: '/fine-sale',
+      headers,
+      payload: {
+        side: 'SALE',
+        partyAc: 'WALKIN',
+        taxPct: 0,
+        lines: [{ fineWt: 10, fineRate: 6000 }],
+      },
+    });
+    expect(posted.statusCode, posted.body).toBe(201);
+    const vchNo = String(posted.json().vchNo).padStart(5, '0');
+    const stamped = await owner.$queryRawUnsafe<Array<{ t: string; n: number }>>(
+      `SELECT coalesce(nullif(btrim("DATA_TYPE"),''),'A') t, count(*)::int n FROM "AC_DATA"
+        WHERE tenant_id=$1 AND "CO_BOOK"='FSL' AND "VCH_NO"=$2 GROUP BY 1`,
+      tenant,
+      vchNo,
+    );
+    expect(stamped.length).toBeGreaterThan(0);
+    expect(stamped.every((r) => r.t === 'A')).toBe(true);
+    // A book the client names is still refused when its type differs from the session's (B session, A book FSL).
+    const named = await app.inject({
+      method: 'POST',
+      url: '/fine-sale',
+      headers,
+      payload: { coBook: 'FSL', side: 'SALE', partyAc: 'WALKIN', lines: [] },
+    });
+    expect(named.statusCode).toBe(403);
+    expect(named.json().error).toBe('book-data-type-mismatch');
+    // Nor can a B session reach an A book through origBook / sourceBook / saleBillBook.
+    for (const payload of [
+      { coBook: 'SB2', origBook: 'FSL', lines: [] },
+      { coBook: 'SB2', lines: [{ saleBillBook: 'FSL' }] },
+    ]) {
+      const r = await app.inject({ method: 'POST', url: '/sales-returns', headers, payload });
+      expect(r.statusCode, r.body).toBe(403);
+    }
+    const src = await app.inject({
+      method: 'GET',
+      url: '/sales-returns/source-items?sourceYear=2026&sourceBook=FSL&sourceVchNo=00001',
+      headers,
+    });
+    expect(src.statusCode).toBe(403);
   });
 });

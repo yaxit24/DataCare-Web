@@ -236,6 +236,6 @@ export const EXPECTED_MIGRATIONS: ReadonlyArray<{
   },
   {
     name: '20261126100000_opening_detail_data_type',
-    checksum: 'cf550648045e5d4a29ed810a1ac9ab20facdcb6a81cdf4a163b7656d219be770',
+    checksum: 'bdfff53db903f05275a594331e1193e526c961d68a257083673e5b656069dfb2',
   },
 ];

@@ -175,14 +175,14 @@ async function registerFrom(
     const join = mainBook
       ? ` JOIN "BOOK_DATA" b ON b.tenant_id=v.tenant_id AND b."CO_CODE"=v."CO_CODE"
            AND b."LC_CODE"=v."LC_CODE" AND b."CO_BOOK"=v."CO_BOOK"
-           AND b."MAIN_BOOK"='${mainBook.replace(/[^A-Z0-9_ ]/g, '')}'${dataTypeSql(s.dataType, 'b."DATA_TYPE"')}`
+           AND b."MAIN_BOOK"='${mainBook.replace(/[^A-Z0-9_ ]/g, '')}'`
       : '';
     const rows: any[] = await tx.$queryRawUnsafe(
       `SELECT v."VCH_NO" AS "vchNo", v."CO_BOOK" AS "coBook", v."VCH_DATE" AS "vchDate", v."BILL_NO" AS "billNo", v."AC_CODE" AS "acCode", v."AC_NAME" AS party,
               ${NN('v."NET_AMT"')}-${NN('v."DISC_AMT"')} AS net, ${NN('v."TAX_AMT"')} AS tax,
               ${NN('v."CGST_TAX"')} AS cgst, ${NN('v."SGST_TAX"')} AS sgst, ${NN('v."IGST_TAX"')} AS igst,
               ${NN('v."TOT_AMT"')} AS tot, ${NN('v."BILL_OS"')} AS os
-       FROM ${quoteIdent(table)} v${join} WHERE ${w.sql} ORDER BY v."VCH_DATE",v."VCH_NO"`,
+       FROM ${quoteIdent(table)} v${join} WHERE ${w.sql}${mainBook ? bookDataTypeSql(s.dataType, 'v') : ''} ORDER BY v."VCH_DATE",v."VCH_NO"`,
       ...w.params,
     );
     return shapeRegister(
@@ -477,7 +477,7 @@ export async function gstr3b(prisma: any, s: ReportScope): Promise<Record<string
     const r: any[] = await tx.$queryRawUnsafe(
       `SELECT coalesce(sum(${NN('"NET_AMT"')}-${NN('"DISC_AMT"')}),0) AS taxable, coalesce(sum(${NN('"TAX_AMT"')}),0) AS tax,
               coalesce(sum(${NN('"CGST_TAX"')}),0) AS cgst, coalesce(sum(${NN('"SGST_TAX"')}),0) AS sgst, coalesce(sum(${NN('"IGST_TAX"')}),0) AS igst
-       FROM "SL_DATA" WHERE "CO_CODE"=$1${yr}${dt} AND "CO_BOOK" IN (SELECT b."CO_BOOK" FROM "BOOK_DATA" b WHERE b."CO_CODE"=$1 AND b."MAIN_BOOK"='SALES'${dataTypeSql(s.dataType, 'b."DATA_TYPE"')})`,
+       FROM "SL_DATA" WHERE "CO_CODE"=$1${yr}${dt} AND "CO_BOOK" IN (SELECT b."CO_BOOK" FROM "BOOK_DATA" b WHERE b."CO_CODE"=$1 AND b."MAIN_BOOK"='SALES')${bookDataTypeSql(s.dataType, '"SL_DATA"')}`,
       ...params,
     );
     // RP_TAX.cs:1941-1947: the GST reports keep the session type's books ({BOOK_DATA.DATA_TYPE}).

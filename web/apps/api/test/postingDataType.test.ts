@@ -78,13 +78,19 @@ it('inside an A request, posting into a B book is refused; All and unknown books
   const session = (dataType: string) => ({ tenantId: 't', coCode: '01', lcCode: '01', dataType });
   const bSlots = { $queryRawUnsafe: async () => [{ dataType: 'B' }] };
   await expect(
-    runWithSessionDataType(session('A'), () => postingDataTypeTx(bSlots, 't', 'AC_DATA', row)),
+    runWithSessionDataType(session('A'), () => postingDataTypeTx(bSlots, 't', 'AC_DATA', row), [
+      '027',
+    ]),
   ).rejects.toMatchObject({ name: 'BookDataTypeMismatchError', statusCode: 403 });
   expect(
-    await runWithSessionDataType(session('B'), () => postingDataTypeTx(bSlots, 't', 'AC_DATA', row)),
+    await runWithSessionDataType(session('B'), () =>
+      postingDataTypeTx(bSlots, 't', 'AC_DATA', row),
+    ),
   ).toBe('B');
   expect(
-    await runWithSessionDataType(session('C'), () => postingDataTypeTx(bSlots, 't', 'AC_DATA', row)),
+    await runWithSessionDataType(session('C'), () =>
+      postingDataTypeTx(bSlots, 't', 'AC_DATA', row),
+    ),
   ).toBe('B');
   // A book unknown to BOOK_DETL and BOOK_DATA is left to the writer.
   const none = { $queryRawUnsafe: async () => [] };
@@ -94,12 +100,21 @@ it('inside an A request, posting into a B book is refused; All and unknown books
   // The shared book resolver (load, post and delete of a voucher) refuses the other type before anything else.
   const bBook = { $queryRawUnsafe: async () => [{ book: 'FSL', dataType: 'B' }] };
   await expect(
-    runWithSessionDataType(session('A'), () =>
-      resolveBookPolicyTx(
-        bBook,
-        { tenantId: 't', coCode: '01', lcCode: '01', coYear: '2026', coBook: 'FSL' } as any,
-        'SALES',
-      ),
+    runWithSessionDataType(
+      session('A'),
+      () =>
+        resolveBookPolicyTx(
+          bBook,
+          { tenantId: 't', coCode: '01', lcCode: '01', coYear: '2026', coBook: 'FSL' } as any,
+          'SALES',
+        ),
+      ['FSL'],
     ),
   ).rejects.toMatchObject({ name: 'BookDataTypeMismatchError' });
+  // A book the server chose itself (not named by the client) is stamped with its own type, never refused.
+  expect(
+    await runWithSessionDataType(session('A'), () =>
+      postingDataTypeTx(bSlots, 't', 'AC_DATA', row),
+    ),
+  ).toBe('B');
 });

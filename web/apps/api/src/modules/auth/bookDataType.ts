@@ -3,19 +3,20 @@ import { withTxBudget } from '../shared/txBudget.js';
 
 /**
  * Owner decision 2026-11-25: an A or B session works only with books of its own data type. The desktop enforces this
- * only through the book picker (DC_Main.cs:1491-1502); the web refuses the request, so a typed, replayed or
- * server-chosen book cannot reach the other type's vouchers. All (C) allows every book.
+ * only through the book picker (DC_Main.cs:1491-1502); the web refuses a request whose client names a book of the
+ * other type, so a typed or replayed book cannot reach the other type's vouchers. A book the server chooses itself is
+ * not refused (the desktop's fixed-book forms never read MsDataType, TR_SALE.cs, TR_SL_ORD_ADJ.cs). All (C) allows
+ * every book. Book-like fields only: ordDbcd/isuDbcd on sale lines are deliberately unchecked.
  *
  * Three layers, so no single path is relied on:
- * 1. The route hook (app.ts) checks every book a request names, anywhere in its parameters, query or body (the
- *    voucher's own book and every second book: the original sale of a return, an import's source, an issue book, an
- *    image's book, a transfer's from/to book), and the book a route chooses on the server when none is named
- *    (SERVER_DEFAULT_BOOKS).
- * 2. Every route handler runs inside the session's data-type context (runWithSessionDataType, wrapped in app.ts), and
- *    the shared book resolvers that every voucher load, post and delete goes through (shared/bookPolicy.ts) refuse a
- *    book of the other type (assertBookTypeInContextTx).
- * 3. Posting stamps each ledger/stock row with its book's type (posting/dataType.ts); a row whose book is of the other
- *    type is refused there too, whichever route posted it.
+ * 1. The route hook (app.ts) checks every book-like field a request names, anywhere in its parameters, query or body
+ *    (the voucher's own book and every second book: the original sale of a return, an import's source, an issue book,
+ *    an image's book, a transfer's from/to book). A book the server chooses itself is not refused (see booksOfRequest).
+ * 2. Every route handler runs inside the session's data-type context (runWithSessionDataType, wrapped in app.ts) that
+ *    records the books the request named, and the shared book resolvers that every voucher load, post and delete goes
+ *    through (shared/bookPolicy.ts) refuse a NAMED book of the other type (assertBookTypeInContextTx).
+ * 3. Posting stamps each ledger/stock row with its book's own type (posting/dataType.ts); a named book of the other
+ *    type is refused there too, whichever route posted it. Server-chosen books are stamped with their own type.
  */
 
 /** A route parameter, query or body key that names a book (CO_BOOK) — the voucher's own or a second one. */
@@ -45,7 +46,11 @@ function collect(value: unknown, depth: number, out: Set<string>): void {
 }
 
 /** Every book code a request names: route parameters, query and body (nested objects and lines included). */
-export function requestedBooks(req: { params?: unknown; query?: unknown; body?: unknown }): string[] {
+export function requestedBooks(req: {
+  params?: unknown;
+  query?: unknown;
+  body?: unknown;
+}): string[] {
   const out = new Set<string>();
   for (const source of [req.params, req.query, req.body]) collect(source, 0, out);
   return [...out];
@@ -60,80 +65,19 @@ export function requestedBook(req: {
   return requestedBooks(req)[0];
 }
 
-type DefaultBook = (req: { query?: unknown; body?: unknown }) => string;
-const fineBook: DefaultBook = (req) => {
-  const side = (req.body as any)?.side ?? (req.query as any)?.side;
-  return String(side || 'SALE').toUpperCase() === 'PURC' ? 'FPR' : 'FSL';
-};
-const fixed =
-  (book: string): DefaultBook =>
-  () =>
-    book;
-
 /**
- * The book a route uses when the request names none: the server's choice, which the hook checks like a named one.
- * Keys are `METHOD url` as Fastify registers them.
- */
-export const SERVER_DEFAULT_BOOKS: Readonly<Record<string, DefaultBook>> = {
-  // Fine sale / purchase (routes/txn.ts fineSaleInput, fineBook): FSL or FPR by side.
-  'POST /fine-sale': fineBook,
-  'GET /fine-sale/:vchNo': fineBook,
-  'PUT /fine-sale/:vchNo': fineBook,
-  'DELETE /fine-sale/:vchNo': fineBook,
-  // Design issue against a sales order (TR_MFG_ORD_ISU): book DIS.
-  'POST /mfg/order-issue': fixed('DIS'),
-  'GET /mfg/order-issue/:vchNo': fixed('DIS'),
-  'PUT /mfg/order-issue/:vchNo': fixed('DIS'),
-  'DELETE /mfg/order-issue/:vchNo': fixed('DIS'),
-  // Purchase return (purchaseReturn.ts default PRT) and sales return (salesReturn.ts default SRT).
-  'POST /purchase-returns': fixed('PRT'),
-  'GET /purchase-returns/:vchNo': fixed('PRT'),
-  'GET /purchase-returns/:vchNo/print': fixed('PRT'),
-  'PUT /purchase-returns/:vchNo': fixed('PRT'),
-  'DELETE /purchase-returns/:vchNo': fixed('PRT'),
-  'POST /sales-returns': fixed('SRT'),
-  'GET /sales-returns/:vchNo': fixed('SRT'),
-  'GET /sales-returns/:vchNo/print': fixed('SRT'),
-  'PUT /sales-returns/:vchNo': fixed('SRT'),
-  'DELETE /sales-returns/:vchNo': fixed('SRT'),
-  // Labour invoice (labourInvoice.ts default LBR) and melting (melting.ts, always MLT).
-  'POST /labour-invoice': fixed('LBR'),
-  'GET /labour-invoice/:vchNo': fixed('LBR'),
-  'DELETE /labour-invoice/:vchNo': fixed('LBR'),
-  'POST /melting': fixed('MLT'),
-  'GET /melting/:vchNo': fixed('MLT'),
-  'PUT /melting/:vchNo': fixed('MLT'),
-  'DELETE /melting/:vchNo': fixed('MLT'),
-  // E-invoice: a sale defaults to SAL (einvoice.ts), a credit note to 146.
-  'POST /einvoice/:vchNo': fixed('SAL'),
-  'POST /einvoice/irn': fixed('SAL'),
-  'POST /einvoice/:vchNo/cancel': fixed('SAL'),
-  'POST /einvoice/credit-note/irn': fixed('146'),
-};
-
-/**
- * The books a request reaches: every book it names, and the route's server default when it names none of its own
- * book (melting always books to MLT, so its default is always included).
+ * The books a request reaches: every book the CLIENT names. A book the server chooses itself (fine sale FSL/FPR, DIS,
+ * PRT, SRT, LBR, MLT, SAL/146, ORC) is deliberately NOT checked: the desktop forms that hard-code their book never
+ * read MsDataType (TR_SALE.cs, TR_SL_ORD_ADJ.cs); they post with the book's own type (BOOK_DETL/BOOK_DATA), so a B
+ * session can use them although the book is seeded as type A. Likewise ordDbcd/isuDbcd on sale lines are not book
+ * fields here: TR_SALE never reads MsDataType for them.
  */
 export function booksOfRequest(req: {
-  method?: string;
-  routeOptions?: { url?: string };
   params?: unknown;
   query?: unknown;
   body?: unknown;
 }): string[] {
-  const named = requestedBooks(req);
-  const key = `${req.method ?? ''} ${req.routeOptions?.url ?? ''}`;
-  const fallback = SERVER_DEFAULT_BOOKS[key];
-  const body = (req.body ?? {}) as Record<string, unknown>;
-  const query = (req.query ?? {}) as Record<string, unknown>;
-  const ownBook = [body.coBook, body.CO_BOOK, body.book, query.coBook, query.CO_BOOK, query.book]
-    .map(text)
-    .find(Boolean);
-  // These routes ignore a named book and always use their own (fineSaleInput, the DIS routes, melting's MLT series).
-  const always = /^\/(?:melting|fine-sale|mfg\/order-issue)/.test(req.routeOptions?.url ?? '');
-  if (fallback && (!ownBook || always)) named.push(fallback(req));
-  return [...new Set(named)];
+  return requestedBooks(req);
 }
 
 export class BookDataTypeMismatchError extends Error {
@@ -201,6 +145,8 @@ export interface SessionDataTypeContext {
   dataType: 'A' | 'B';
   /** Book types already read in this request. */
   books: Map<string, string>;
+  /** The books the client named in this request; only these are refused (server-chosen books are not). */
+  requested: Set<string>;
 }
 
 const context = new AsyncLocalStorage<SessionDataTypeContext | undefined>();
@@ -208,6 +154,7 @@ const context = new AsyncLocalStorage<SessionDataTypeContext | undefined>();
 export function runWithSessionDataType<T>(
   session: { tenantId?: string; coCode?: string; lcCode?: string; dataType?: string } | undefined,
   fn: () => T,
+  requested: Iterable<string> = [],
 ): T {
   const type = session?.dataType;
   if (!session?.tenantId || !session.coCode || (type !== 'A' && type !== 'B'))
@@ -219,6 +166,7 @@ export function runWithSessionDataType<T>(
       lcCode: session.lcCode ?? '',
       dataType: type,
       books: new Map(),
+      requested: new Set(requested),
     },
     fn,
   );
@@ -241,13 +189,15 @@ export async function assertBookTypeInContextTx(
   const ctx = context.getStore();
   const book = text(scope.coBook);
   if (!ctx || !book) return;
+  // A book the server chose itself is stamped with its own type, not refused (TR_SALE.cs never reads MsDataType).
+  if (!ctx.requested.has(book)) return;
   if (scope.tenantId && scope.tenantId !== ctx.tenantId) return;
   if (scope.coCode && scope.coCode !== ctx.coCode) return;
   let type = knownType ?? ctx.books.get(book);
   if (!type) {
-    type = (await bookTypesTx(tx, scope.coCode ?? ctx.coCode, scope.lcCode ?? ctx.lcCode, [book])).get(
-      book,
-    );
+    type = (
+      await bookTypesTx(tx, scope.coCode ?? ctx.coCode, scope.lcCode ?? ctx.lcCode, [book])
+    ).get(book);
     if (!type) return; // an unknown book is the resolver's own refusal
     ctx.books.set(book, type);
   }
