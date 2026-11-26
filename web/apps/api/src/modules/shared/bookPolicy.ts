@@ -54,6 +54,13 @@ export const workflowPolicy: Record<BookWorkflow, { mainBook: string; inout: 'I'
   'VP PARCEL': { mainBook: 'VP PARCEL', inout: 'O' },
 };
 
+/**
+ * The desktop opens any SALES ORDER book whatever its BOOK_INOUT (CurBookHelp, DC_Main.cs:1495-1536) and its own standard
+ * Sales Order books are 'I' (MS_UPDATE.cs:31987, :17799-17831), so the direction is not a validity check for them.
+ * The order writer (salesOrder.ts resolveOrderBookTx) already accepts both.
+ */
+const ANY_DIRECTION: ReadonlySet<BookWorkflow> = new Set<BookWorkflow>(['SALES ORDER']);
+
 export async function resolveBookPolicyTx(
   tx: any,
   scope: VoucherScope,
@@ -102,7 +109,7 @@ export async function resolveBookPolicyTx(
   const configuredInout = String(row.BOOK_INOUT ?? '')
     .trim()
     .toUpperCase();
-  if (configuredInout && configuredInout !== expected.inout) {
+  if (configuredInout && configuredInout !== expected.inout && !ANY_DIRECTION.has(workflow)) {
     throw new BookPolicyValidationError(
       `book ${scope.coBook} direction is ${configuredInout}, expected ${expected.inout}`,
     );

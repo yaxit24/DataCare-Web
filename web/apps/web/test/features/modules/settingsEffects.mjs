@@ -1,4 +1,5 @@
 import assert from 'node:assert/strict';
+import { tenantFingerprint, withWriteFault } from '../faults.mjs';
 import { FIXTURE_MANIFEST, ITEMS, PARTIES, USERS } from '../fixtures/catalogue.mjs';
 import { salesScreen as S } from './salesInvoice.mjs';
 
@@ -20,6 +21,11 @@ const as = (user, slot) => ({
 async function setSetting(page, id, value) {
   await page.goto('/settings');
   await page.getByRole('heading', { name: 'Company Settings', exact: true }).waitFor();
+  await editSetting(page, id, value);
+  return saveSettingsScreen(page);
+}
+
+async function editSetting(page, id, value) {
   const control = page.locator(`[id="${id}"]`);
   const tabs = page.getByRole('tab');
   const n = await tabs.count();
@@ -27,6 +33,9 @@ async function setSetting(page, id, value) {
   assert(await control.count(), `setting ${id} is not on any Settings tab`);
   if ((await control.evaluate((el) => el.tagName)) === 'SELECT') await control.selectOption(value);
   else await control.fill(value);
+}
+
+async function saveSettingsScreen(page) {
   const [response] = await Promise.all([
     page.waitForResponse(
       (r) => new URL(r.url()).pathname === '/api/settings' && r.request().method() === 'POST',
@@ -97,6 +106,7 @@ export const settingsEffects = {
   title: 'Company Settings and their effect on a sale (UT_SETTING)',
   defaultUser: as(USERS.admin.user),
   inputs: [
+    'web/apps/web/test/features/faults.mjs',
     'web/apps/web/app/(app)/settings/page.tsx',
     'web/apps/api/src/modules/settings/settingsCatalog.ts',
     'web/apps/api/src/modules/shared/settingsBehavior.ts',
@@ -512,26 +522,91 @@ export const settingsEffects = {
     NA('reopen.n-a', 'T08', 'Reopen is the reload step of field.route-and-reload'),
     NA('edit.n-a', 'T09', 'Edit is field.route-and-reload'),
     NA('delete.n-a', 'T10', 'Settings cannot be deleted'),
-    {
-      ...C(
-        'concurrency.two-admins',
+
+    ...['different-settings', 'same-setting'].map((mode) =>
+      C(
+        `concurrency.two-admins.${mode}`,
         'T12',
         'mutation',
-        'Two administrators saving different settings at once',
-        async () => ({}),
+        'WP-35 cases.md D4; UT_SETTING.cs:5014, :4912 each button writes one column.',
+        async (ctx) => {
+          const { page: a } = await ctx.session();
+          const { page: b } = await ctx.session(as(USERS.admin.user, 'wp35-settings-second'));
+          const oldCash = await stored(ctx, 'CO_SET', 'CASH_LIMIT');
+          const oldRound = await stored(ctx, 'CO_SET_NEW', 'TOT_AMT_ROF');
+          try {
+            for (const page of [a, b]) {
+              await page.goto('/settings');
+              await page.getByRole('heading', { name: 'Company Settings', exact: true }).waitFor();
+            }
+            await editSetting(a, 'CO_SET.CASH_LIMIT', '50000');
+            await editSetting(
+              b,
+              mode === 'same-setting' ? 'CO_SET.CASH_LIMIT' : 'CO_SET_NEW.TOT_AMT_ROF',
+              mode === 'same-setting' ? '60000' : '1',
+            );
+            assert.equal((await saveSettingsScreen(a)).status(), 200);
+            assert.equal((await saveSettingsScreen(b)).status(), 200);
+            const cash = Number(await stored(ctx, 'CO_SET', 'CASH_LIMIT'));
+            const rounding = Number(await stored(ctx, 'CO_SET_NEW', 'TOT_AMT_ROF'));
+            assert.equal(cash, mode === 'same-setting' ? 60000 : 50000);
+            if (mode === 'different-settings') assert.equal(rounding, 1);
+            return {
+              observation: JSON.stringify({ cash, rounding }),
+              expected: mode,
+              database: { cash, rounding },
+              downstream: { cash, rounding },
+            };
+          } finally {
+            await mustSet(a, 'CO_SET.CASH_LIMIT', oldCash ?? '');
+            await mustSet(a, 'CO_SET_NEW.TOT_AMT_ROF', oldRound ?? '');
+          }
+        },
       ),
-      blocked:
-        'Desktop rule for concurrent settings saves is undecided (UT_SETTING writes the whole row); needs an original-Windows run.',
-    },
+    ),
     NA(
       'retry.n-a',
       'T13',
       'Saving the same setting twice is idempotent by design (same value written)',
     ),
-    {
-      ...C('rollback.n-a', 'T14', 'refusal', 'Playbook T14', async () => ({})),
-      blocked: 'No fault injector in the harness yet (G173 / N166).',
-    },
+
+    C(
+      'rollback.second-table-fault',
+      'T14',
+      'refusal',
+      'WP-35 cases.md; UT_SETTING.cs:5014 single-column desktop writes; web two-table patch is atomic.',
+      async (ctx) => {
+        const { page } = await ctx.session();
+        const oldCash = await stored(ctx, 'CO_SET', 'CASH_LIMIT');
+        const oldRound = await stored(ctx, 'CO_SET_NEW', 'TOT_AMT_ROF');
+        try {
+          await page.goto('/settings');
+          await page.getByRole('heading', { name: 'Company Settings', exact: true }).waitFor();
+          await editSetting(page, 'CO_SET.CASH_LIMIT', '50000');
+          await editSetting(page, 'CO_SET_NEW.TOT_AMT_ROF', '1');
+          const before = await tenantFingerprint(ctx);
+          await withWriteFault(ctx, 'CO_SET_NEW', 'UPDATE', async () => {
+            const response = await saveSettingsScreen(page);
+            assert.ok(response.status() >= 400);
+            await page.locator('.msg.err').waitFor();
+            assert.deepEqual(await tenantFingerprint(ctx), before);
+            assert.equal(await stored(ctx, 'CO_SET', 'CASH_LIMIT'), oldCash);
+            assert.equal(await stored(ctx, 'CO_SET_NEW', 'TOT_AMT_ROF'), oldRound);
+          });
+          assert.equal((await saveSettingsScreen(page)).status(), 200);
+          assert.equal(Number(await stored(ctx, 'CO_SET', 'CASH_LIMIT')), 50000);
+          assert.equal(Number(await stored(ctx, 'CO_SET_NEW', 'TOT_AMT_ROF')), 1);
+          return {
+            observation: 'Second-table fault preserves both values; retry saves both',
+            expected: 'Atomic settings patch',
+            database: { before, oldCash, oldRound },
+          };
+        } finally {
+          await mustSet(page, 'CO_SET.CASH_LIMIT', oldCash ?? '');
+          await mustSet(page, 'CO_SET_NEW.TOT_AMT_ROF', oldRound ?? '');
+        }
+      },
+    ),
     NA('output.n-a', 'T16', 'The settings screens have no print or export'),
     NA('keyboard.n-a', 'T17', 'Covered by the voucher modules; the settings form is a plain form'),
     NA(

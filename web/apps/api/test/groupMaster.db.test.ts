@@ -488,10 +488,11 @@ type GroupRow = {
       );
       expect(response.statusCode, response.body).toBe(200);
       // A web-provisioned company's sale ledgers sit in group 25 (seedCompany.ts, WP-36), so the help lists them. The
-      // web chart still keeps CAPITAL A/C in group 25 (the desktop chart's capital group is an open N58 question).
+      // web CAPITAL A/C sits in group 01 with the template's 00002, so it is not listed here.
       expect(response.json()).toEqual([
-        { code: 'CAPITAL', name: 'CAPITAL A/C', group: '25' },
         { code: 'FINESALE', name: 'FINE METAL SALE', group: '25' },
+        { code: 'OG', name: 'OLD GOLD', group: '25' },
+        { code: 'OS', name: 'OLD SILVER', group: '25' },
         { code: 'SALES', name: 'SALES A/C', group: '25' },
         { code: '00025', name: 'SALES GOLD', group: '25' },
         { code: '00026', name: 'SALES SILVER', group: '25' },
@@ -530,6 +531,7 @@ type GroupRow = {
       // The provisioned purchase ledgers are in group 30; the tax ledgers are in group 12, not here (WP-36).
       expect(response.json().map((r: { code: string }) => r.code)).toEqual([
         'FINEPURC',
+        'OLDGOLD',
         'PURCHASE',
         '00030',
         '00031',

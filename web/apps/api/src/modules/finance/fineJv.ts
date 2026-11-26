@@ -1,5 +1,11 @@
 import { formatDesktopDate, round, toIsoDate } from '@datacare/core';
-import { withTxBudget } from '../shared/txBudget.js';
+import {
+  requiredVersion,
+  versionKeyOf,
+  voucherVersionTx,
+  assertVoucherVersionTx,
+} from '../vouchers/version.js';
+import { SNAPSHOT_READ, withTxBudget } from '../shared/txBudget.js';
 import { buildFineJvRojmel, rojmelMetalFor } from '../shared/rojmel.js';
 import { DESKTOP_MESSAGES } from '../shared/desktopMessages.js';
 import { formatVoucherNo, type VoucherScope } from '../vouchers/numbering.js';
@@ -99,6 +105,7 @@ export interface FineJvInput {
   /** tEmpCode; omitted on an edit keeps the saved employee. */
   empCode?: string;
   mainUser?: string;
+  expectedVersion?: string;
 }
 export interface FineJvResult {
   vchNo: number;
@@ -122,6 +129,22 @@ const FINE_JV_MAIN_BOOK = 'FINE JV';
 // every save (Vch_Remark), and delete also clears it and APR_IDTL (TR_CONTRA.cs:2963-2968).
 const WRITE_TABLES = ['CONTRA_DATA', 'AC_DATA', 'ROJ_MEL_DATA'] as const;
 const DELETE_TABLES = [...WRITE_TABLES, 'REMARK_DATA', 'APR_IDTL'] as const;
+// The D17 token covers every table an edit or delete replaces (TR_CONTRA.cs:2884-2890, :2963-2968).
+const VERSION_TABLES = DELETE_TABLES;
+
+/** Lock the replaced rows outside CONTRA_DATA so the token check and the write see one state. */
+async function lockExtraRowsTx(tx: any, s: VoucherScope, no: string): Promise<void> {
+  for (const table of ['AC_DATA', 'ROJ_MEL_DATA', 'REMARK_DATA', 'APR_IDTL'])
+    await tx.$queryRawUnsafe(
+      `SELECT 1 FROM "${table}" WHERE tenant_id=$1 AND "CO_CODE"=$2 AND "LC_CODE"=$3 AND "CO_YEAR"=$4 AND "CO_BOOK"=$5 AND "VCH_NO"=$6 FOR UPDATE`,
+      s.tenantId,
+      s.coCode,
+      s.lcCode,
+      s.coYear,
+      s.coBook,
+      no,
+    );
+}
 
 /** Ac_Ledr.cs:846 joins `B.MAIN_BOOK = 'FINE JV' AND B.BOOK_INOUT = 'I'`; no other book posts fine legs. */
 function requireFineJvBook(book: { mainBook: string; inout: string }): void {
@@ -572,13 +595,14 @@ export function fineJvGridOfRows(rows: SourceRow[], voucherNo: string): FineJvGr
 export async function getFineJv(p: any, s: VoucherScope, x: number | string) {
   completeFinanceScope(s);
   const no = formatVoucherNo(x);
-  return withTxBudget(p, s.tenantId, 'read', async (tx) => {
+  return withTxBudget(p, s.tenantId, SNAPSHOT_READ, async (tx) => {
     const book = await fineJvBookTx(tx, s);
     const rows = await sourceRowsTx(tx, s, no);
     if (!rows.length) throw new FineJvNotFoundError(no);
     const header = rows[0]!;
     return {
       voucherNo: no,
+      version: await voucherVersionTx(tx, VERSION_TABLES, versionKeyOf(s, no)),
       hiddenVoucherNo: text(header.HD_VCH_NO),
       mainUser: text(header.MAIN_USER),
       vchDate: toIsoDate(header.VCH_DATE),
@@ -595,11 +619,19 @@ export async function editFineJv(p: any, i: FineJvInput, x: number | string) {
   completeFinanceScope(i.scope);
   const lines = fineJvLines(i.lines);
   const voucherNo = formatVoucherNo(x);
+  const expectedVersion = requiredVersion(i.expectedVersion);
   return withTxBudget(p, i.scope.tenantId, 'voucher', (tx) =>
     withDesktopLockText(async () => {
       const book = await fineJvBookTx(tx, i.scope);
       const saved = await sourceRowsTx(tx, i.scope, voucherNo, true);
       if (!saved.length) throw new FineJvNotFoundError(voucherNo);
+      await lockExtraRowsTx(tx, i.scope, voucherNo);
+      await assertVoucherVersionTx(
+        tx,
+        VERSION_TABLES,
+        versionKeyOf(i.scope, voucherNo),
+        expectedVersion,
+      );
       const savedGrid = fineJvGridOfRows(saved, voucherNo);
       const header = saved[0]!;
       const date = i.vchDate ? new Date(i.vchDate) : new Date(toIsoDate(header.VCH_DATE));
@@ -631,11 +663,13 @@ export async function deleteFineJv(
   i: {
     scope: VoucherScope;
     vchNo: number | string;
+    expectedVersion?: string;
     deleteUser?: string;
     book?: unknown;
   },
 ) {
   completeFinanceScope(i.scope);
+  const expectedVersion = requiredVersion(i.expectedVersion);
   const s = i.scope,
     no = formatVoucherNo(i.vchNo);
   return withTxBudget(p, s.tenantId, 'voucher', (tx) =>
@@ -651,6 +685,8 @@ export async function deleteFineJv(
         no,
       );
       if (!rows.length) throw new FineJvNotFoundError(no);
+      await lockExtraRowsTx(tx, s, no);
+      await assertVoucherVersionTx(tx, VERSION_TABLES, versionKeyOf(s, no), expectedVersion);
       // TR_CONTRA.cs:2951 checks the lock against the voucher's own date only.
       const { persisted: header, identity } = await editIdentityTx(tx, {
         table: 'CONTRA_DATA',

@@ -1,9 +1,12 @@
 'use client';
-import { useCallback, useEffect, useState } from 'react';
-import { del, get, post, ApiError } from '../../../../lib/api';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import { useRouter } from 'next/navigation';
+import { del, get, postCommand, ApiError } from '../../../../lib/api';
+import { useIdempotencyKey } from '../../../../lib/idempotencyKey';
 import { LookupPicker } from '../../../../components/LookupPicker';
 import { PartyBalance } from '../../../../components/PartyBalance';
 import { useGridKeyboard } from '../../../../components/GridKeyboard';
+import { useScreenEscape, type ScreenKeyEvent } from '../../../../lib/screenEscape';
 
 /**
  * Party Opening (desktop TR_AC_OPBL). One opening per party: the amount, gold fine and silver fine, each Cr or Dr
@@ -211,6 +214,7 @@ function SignSelect({
 }
 
 export default function PartyOpeningPage() {
+  const command = useIdempotencyKey();
   const [acCode, setAcCode] = useState('');
   const [loaded, setLoaded] = useState<Opening | null>(null);
   const [form, setForm] = useState<Form>(EMPTY);
@@ -221,6 +225,8 @@ export default function PartyOpeningPage() {
   // Bumped after a save or delete so the balance bar reads the party's new ledger balance.
   const [balanceKey, setBalanceKey] = useState(0);
   const [bills, setBills] = useState<Bill[]>([blankBill()]);
+  const router = useRouter();
+  const saveRef = useRef<HTMLButtonElement>(null);
   const [billDate, setBillDate] = useState('');
   // Desktop grids are keyboard-driven (TEXT_ENTRY_KeyDown, TR_AC_OPBL.cs:3034-3142): arrows move between cells,
   // Enter advances and adds a row after the last cell of the last row, Ctrl/Cmd+D removes a row.
@@ -237,8 +243,12 @@ export default function PartyOpeningPage() {
     },
     onEscape: () => {},
   });
-  const setBill = (i: number, field: BillField, value: string) =>
+  // TR_AC_OPBL.cs:2905-2916 (TR_AC_OPBL_KeyPress): every typed character is upper-cased and an apostrophe is swallowed.
+  const TEXT_FIELDS: BillField[] = ['vchNo', 'billNo', 'itemDesc'];
+  const setBill = (i: number, field: BillField, raw: string) => {
+    const value = TEXT_FIELDS.includes(field) ? raw.toUpperCase().replace(/'/g, '') : raw;
     setBills((rows) => rows.map((b, j) => (j === i ? recalc({ ...b, [field]: value }, field) : b)));
+  };
   const filledBills = bills.filter((b) => !isBlank(b));
   const totals = billTotals(filledBills);
   const fromBills = filledBills.length > 0;
@@ -287,31 +297,36 @@ export default function PartyOpeningPage() {
     setMsg(null);
     setBusy(true);
     try {
-      const saved = await post<Opening>('/ac-opbl', {
-        acCode: acCode.trim(),
-        amount: form.amount,
-        sign: form.sign,
-        gold: form.gold,
-        goldSign: form.goldSign,
-        silver: form.silver,
-        silverSign: form.silverSign,
-        bills: filledBills.map((b) => {
-          const row: Record<string, string | number | null> = {};
-          for (const c of BILL_COLUMNS)
-            row[c.field] =
-              c.num !== undefined
-                ? n(b[c.field])
-                : c.field === 'vchDate'
-                  ? b.vchDate || null
-                  : b[c.field];
-          return row;
-        }),
-      });
+      const saved = await postCommand<Opening>(
+        '/ac-opbl',
+        {
+          acCode: acCode.trim(),
+          amount: form.amount,
+          sign: form.sign,
+          gold: form.gold,
+          goldSign: form.goldSign,
+          silver: form.silver,
+          silverSign: form.silverSign,
+          bills: filledBills.map((b) => {
+            const row: Record<string, string | number | null> = {};
+            for (const c of BILL_COLUMNS)
+              row[c.field] =
+                c.num !== undefined
+                  ? n(b[c.field])
+                  : c.field === 'vchDate'
+                    ? b.vchDate || null
+                    : b[c.field];
+            return row;
+          }),
+        },
+        command.key,
+      );
       setLoaded(saved);
       setForm(asForm(saved));
       setBills([...(saved.bills ?? []).map(asBill), blankBill(saved.billDate ?? billDate)]);
       setMsg({ kind: 'ok', text: SAVED });
       setBalanceKey((k) => k + 1);
+      command.renew();
       await loadList(balanceType);
     } catch (e) {
       setMsg({ kind: 'err', text: messageOf(e) });
@@ -339,8 +354,26 @@ export default function PartyOpeningPage() {
   const fmt = (v: number) =>
     v.toLocaleString('en-IN', { minimumFractionDigits: places(balanceType) });
 
+  // TR_AC_OPBL.cs:2918-2944: Esc closes the form when nothing changed since it was loaded (OldValTot == NewValTot);
+  // otherwise it leaves the grid and puts the focus on Save.
+  const dirtyRef = useRef(false);
+  dirtyRef.current =
+    JSON.stringify(form) !== JSON.stringify(loaded ? asForm(loaded) : EMPTY) ||
+    JSON.stringify(filledBills) !==
+      JSON.stringify((loaded?.bills ?? []).map(asBill).filter((b) => !isBlank(b)));
+  function onScreenKeyDown(event: ScreenKeyEvent) {
+    if (event.key !== 'Escape' || event.defaultPrevented) return;
+    // Esc that closes a native dropdown or a lookup list must not also close the screen.
+    if ((event.target as HTMLElement).closest?.('select, [data-lookup-open]')) return;
+    if (document.querySelector('[data-lookup-open]')) return;
+    event.preventDefault();
+    if (!dirtyRef.current) return router.back();
+    saveRef.current?.focus();
+  }
+  const screenRef = useScreenEscape<HTMLDivElement>(onScreenKeyDown);
+
   return (
-    <div>
+    <div ref={screenRef} onKeyDown={onScreenKeyDown}>
       <h1>Party Opening</h1>
       {msg && (
         <div className={`msg ${msg.kind}`} role={msg.kind === 'err' ? 'alert' : 'status'}>
@@ -362,7 +395,7 @@ export default function PartyOpeningPage() {
                 ariaLabel="Party Code"
                 resolveTypedCode
                 value={acCode}
-                onChange={setAcCode}
+                onChange={(v) => setAcCode(v.toUpperCase().replace(/'/g, ''))}
                 onPick={(r) => void open(String(r.code))}
               />
             </div>
@@ -440,7 +473,7 @@ export default function PartyOpeningPage() {
             </div>
           </div>
           <div className="toolbar" style={{ marginTop: 10 }}>
-            <button className="primary" data-save-mnemonic disabled={busy}>
+            <button ref={saveRef} className="primary" data-save-mnemonic disabled={busy}>
               {busy ? 'Saving…' : 'Save'}
             </button>
             <button

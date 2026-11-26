@@ -33,6 +33,29 @@ const ORDER_WRITE_SET = [
   'TEMP_BOOK_DATA',
 ];
 const CASH = 'CASH';
+/**
+ * These cases assert the 'O' book branch of Order_Ledr: legs 07-10 (old metal) and key 11 (rate cut) post only on a
+ * BOOK_INOUT 'I' book (Ac_Ledr.cs:42-53). A newly provisioned company's SOR is 'I' like the desktop's standard book
+ * (MS_UPDATE.cs:31987, :17799-17831), so the case sets its book to 'O' for its own run and restores it.
+ */
+const onOBook = (run) => async (ctx) => {
+  const where = `tenant_id=$1 AND "CO_BOOK"='${BOOK}'`;
+  const [saved] = await ctx.rows(`SELECT "BOOK_INOUT" io FROM "BOOK_DATA" WHERE ${where}`);
+  await ctx.owner.$executeRawUnsafe(
+    `UPDATE "BOOK_DATA" SET "BOOK_INOUT"='O' WHERE ${where}`,
+    ctx.tenantId,
+  );
+  try {
+    return await run(ctx);
+  } finally {
+    await ctx.owner.$executeRawUnsafe(
+      `UPDATE "BOOK_DATA" SET "BOOK_INOUT"=$2 WHERE ${where}`,
+      ctx.tenantId,
+      saved?.io ?? 'I',
+    );
+  }
+};
+
 const as = (user, slot) => ({
   user,
   slot,
@@ -656,7 +679,6 @@ export const salesOrder = {
         const id = upiId('A');
         await enterOrder(page, { advance: 3000 });
         await openDetails(page);
-        await page.getByLabel('Cash A/c', { exact: true }).fill(CASH);
         await fillUpi(page, 1, { ac: PARTIES.bank.code, type: 'GPAY', id, amount: '2000' });
         assert.equal(
           await page.locator('#sales-header-upiAmount').inputValue(),
@@ -725,7 +747,6 @@ export const salesOrder = {
         const bankBefore = await balance(ctx, bank);
         await enterOrder(page, { advance: 1000 });
         await openDetails(page);
-        await page.getByLabel('Cash A/c', { exact: true }).fill(CASH);
         await fillUpi(page, 1, { ac: bank, type: 'PHONEPE', id: upiId('B'), amount: '2000' });
         const created = await save(page);
         assert.equal(created.status(), 201, await created.text());
@@ -794,7 +815,6 @@ export const salesOrder = {
         const id = upiId('C');
         await enterOrder(page, { advance: 500 });
         await openDetails(page);
-        await page.getByLabel('Cash A/c', { exact: true }).fill(CASH);
         await fillUpi(page, 1, { ac: bank, type: 'GPAY', id, amount: '700' });
         const first = await save(page);
         assert.equal(first.status(), 201, await first.text());
@@ -802,7 +822,6 @@ export const salesOrder = {
         const before = await counts(ctx);
         await enterOrder(page, { advance: 500 });
         await openDetails(page);
-        await page.getByLabel('Cash A/c', { exact: true }).fill(CASH);
         await fillUpi(page, 1, { ac: bank, type: 'GPAY', id, amount: '900' });
         const { response, blocked } = await trySave(page);
         assert.equal(response?.status(), 400, `answered ${response?.status()} ${blocked ?? ''}`);
@@ -824,12 +843,11 @@ export const salesOrder = {
       'T02',
       'mutation',
       'TR_SALE_ORD MSG_OLD (:3957-4020, :4427-4500), :9421-9475, :11345-11368, Order_Rojmel types 01/04 (Ac_Rojmel.cs:11, :17): old gold and old silver taken in are stored in SL_PR_DETL (net weight = gross - other, fine = net x touch / 100, rate back-calculated from the typed amount), summed into OLD_GL_AMT / OLD_SL_AMT / OLD_GL / OLD_SL and into ADV_AMT with the cash, and each valued row is a day-book debit keyed 04 + STR(SR_NO)',
-      async (ctx) => {
+      onOBook(async (ctx) => {
         const { page } = await ctx.session();
         const party = PARTIES.local.code;
         await enterOrder(page, { advance: 3000 });
         await openDetails(page);
-        await page.getByLabel('Cash A/c', { exact: true }).fill(CASH);
         await fillOldMetal(page, 1, {
           item: ITEMS.gold.code,
           pcs: '1',
@@ -957,7 +975,7 @@ export const salesOrder = {
           database: { header: h, detail: d, dayBook: day, ledger: g },
           downstream: { reopened },
         };
-      },
+      }),
     ),
 
     C(
@@ -970,7 +988,6 @@ export const salesOrder = {
         const party = PARTIES.local.code;
         await enterOrder(page, { advance: 1000 });
         await openDetails(page);
-        await page.getByLabel('Cash A/c', { exact: true }).fill(CASH);
         await fillOldMetal(page, 1, {
           item: ITEMS.silver.code,
           pcs: '2',
@@ -1018,7 +1035,6 @@ export const salesOrder = {
         const { page } = await ctx.session();
         await enterOrder(page, { advance: 1000 });
         await openDetails(page);
-        await page.getByLabel('Cash A/c', { exact: true }).fill(CASH);
         await fillOldMetal(page, 1, {
           item: ITEMS.gold.code,
           pcs: '1',
@@ -1179,11 +1195,10 @@ export const salesOrder = {
       'T02',
       'mutation',
       'Ac_Rojmel.cs:23 (Order_Rojmel type 07) and :11, Ac_Ledr.cs:53 (Order_Ledr key 11), TR_SALE_ORD.cs:9124-9128, :9558-9563, :9729-9730: a rate-cut order saves ADV_AMT 0, so the day book has no type 01; type 07 debits the party with CASH+CARD+CHQ+OLD_GL_AMT+OLD_SL_AMT+SCHM_AMT (3,000) against 00008, IT_TYPE G, SIGN +, the RCUT_FINE as gross, net and fine and RCUT_RATE as rate. The ledger key 11 needs BOOK_INOUT I, so this O book posts only the balanced cash pair 01/02. An intentional one-sided desktop entry; delete removes it with the voucher',
-      async (ctx) => {
+      onOBook(async (ctx) => {
         const { page } = await ctx.session();
         await enterOrder(page, { advance: 3000 });
         await openDetails(page);
-        await page.getByLabel('Cash A/c', { exact: true }).fill(CASH);
         // The rate is read-only on the web screen; the request carries the desktop's rate-cut cells.
         await page.route(
           (url) => url.pathname === '/api/sales-orders',
@@ -1246,7 +1261,7 @@ export const salesOrder = {
           database: { dayBook, row07, ledger: ledgerLegs, afterDelete: left },
           downstream: { dayBookDebit: dayBook[0].dr },
         };
-      },
+      }),
     ),
 
     C(
@@ -1347,7 +1362,6 @@ export const salesOrder = {
         await enterOrder(page, { advance: 3000 });
         await openDetails(page);
         for (const [label, value] of [
-          ['Cash A/c', CASH],
           ['Cheque Amt', '2000'],
           ['Bank A/c', PARTIES.bank.code],
           ['Cheque No', '123456'],
