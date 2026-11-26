@@ -910,6 +910,31 @@ describe('replay oracle: normalisation and grouping', () => {
   });
 });
 
+describe('TEMP_BOOK_DATA hidden identity', () => {
+  const key = { CO_CODE: '01', LC_CODE: '01', CO_BOOK: '026' };
+  const temp = (v: string, extra = {}) => ({ ...key, VCH_NO: v, ...extra });
+  it('ignores visible-number collisions from other years and uses each side’s own hidden number', () => {
+    const rows = [temp('00007'), temp('00123'), temp('00456'), temp('00123', { LC_CODE: '02' })];
+    for (const hidden of ['00123', '00456']) {
+      const tables = {
+        CASH_DATA: [{ ...key, CO_YEAR: '2024', VCH_NO: '00007', HD_VCH_NO: hidden }],
+      };
+      expect(lib.withHiddenBookRows(tables, 'CASH_DATA', rows).TEMP_BOOK_DATA).toEqual([
+        temp(hidden),
+      ]);
+    }
+  });
+  it('omits TEMP_BOOK_DATA when the header has no hidden number, or no matching row', () => {
+    for (const hidden of [undefined, null, '', '99999']) {
+      const tables = { CASH_DATA: [{ ...key, VCH_NO: '00007', HD_VCH_NO: hidden }] };
+      expect(lib.withHiddenBookRows(tables, 'CASH_DATA', [temp('00007')])).toEqual(tables);
+    }
+    expect(
+      lib.withHiddenBookRows({ CONTRA_DATA: [key] }, 'CONTRA_DATA', [temp('00007')]),
+    ).not.toHaveProperty('TEMP_BOOK_DATA');
+  });
+});
+
 describe('known desktop build differences', () => {
   const head = '01002024-2025026' + '00001';
   const diff = (table: string, column: string, desktop: unknown, web: unknown) =>
