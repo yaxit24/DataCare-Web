@@ -686,6 +686,22 @@ describe('replay oracle: normalisation and grouping', () => {
     expect(lib.normaliseCase(c, known, 'web').tables.SL_ORD_DETL.rows).toEqual([['RNG', 5000]]);
   });
 
+  it('marks a named column of a known build difference, and only that column', () => {
+    const g = (family: string, table: string, column: string, kind = 'value') => ({
+      family,
+      table,
+      column,
+      kind,
+    });
+    expect(lib.buildDifferenceOf(g('SALES ORDER', 'SL_ORD_DETL', 'TAG_NO'))).toMatch(/:9208-9215/);
+    expect(lib.buildDifferenceOf(g('SALES ORDER', 'SL_ORD_DETL', 'ITM_FINE'))).toBeUndefined();
+    expect(lib.buildDifferenceOf(g('WH SALES', 'RATE_CUT_ISU', 'ITM_FINE'))).toMatch(/0\.000/);
+    expect(lib.buildDifferenceOf(g('WH SALES', 'RATE_CUT_ISU', 'ITM_AMT'))).toBeUndefined();
+    expect(lib.buildDifferenceOf(g('SALES ORDER', 'ROJ_MEL_DATA', '*', 'row-count'))).toMatch(
+      /:19/,
+    );
+  });
+
   it('pairs rows that share a declared key by content, whatever order each database returned them in', () => {
     const leg = (key: string, fine: number) => ['P1', 0, 0, key, fine];
     const ac = (rows: unknown[][]) =>

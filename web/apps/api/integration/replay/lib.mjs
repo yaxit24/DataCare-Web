@@ -957,12 +957,75 @@ export const KNOWN_BUILD_DIFFERENCES = [
     table: 'MAIN_STOCK',
     note: 'sale stock section SR_NO: data 1/2, source 3/4 (Ac_Stock.cs:114, :116)',
   },
+  {
+    family: 'SALES ORDER',
+    table: 'SL_ORD_DETL',
+    columns: ['TAG_NO'],
+    note: "untagged order line TAG_NO: data '', source 'N' (TR_SALE_ORD.cs:9208-9215)",
+  },
+  {
+    family: 'SALES ORDER',
+    table: 'ROJ_MEL_DATA',
+    note:
+      "scheme adjustment day-book row 05 (account 00079, 'MADJ - party'): source writes it whenever SCHM_AMT <> 0 " +
+      '(Ac_Rojmel.cs:19), the data has none',
+  },
+  ...[
+    ['RATE_CUT_ISU', ['ITM_FINE']],
+    ['MAIN_STOCK', ['ITM_FINE']],
+    ['ROJ_MEL_DATA', ['ITM_FINE']],
+    ['AC_DATA', ['FINE_WT']],
+    ['RATE_CUT_DATA', ['SL_FINE', 'TOT_FINE_DR']],
+  ].map(([table, columns]) => ({
+    family: 'WH SALES',
+    table,
+    columns,
+    note:
+      'loose-line fine net x (touch + wastage) / 100: data rounded to 2 decimals on the vouchers up to July 2024 and ' +
+      'to 3 after, source Strings.Format(..., "0.000") (TR_WH_SALE.cs:10692, :10799)',
+  })),
+  {
+    family: 'WH SALES',
+    table: 'MAIN_STOCK',
+    columns: ['TBL_CODE'],
+    note: "loose-line issue stock TBL_CODE: data '001', source the line's own blank A.TBL_CODE (Ac_Stock.cs:153)",
+  },
+  ...['SALES ORDER', 'WH SALES'].map((family) => ({
+    family,
+    table: 'MAIN_STOCK',
+    columns: ['ITM_LOT'],
+    note:
+      "stock ITM_LOT: data NULL up to July 2024 and '' from March 2025; source '' (Order_Stk, Ac_Stock.cs:86-97) " +
+      "or the line's NOT NULL ITM_LOT (Wh_Sale_Stk, :153)",
+  })),
+  {
+    family: 'WH SALES',
+    table: 'MAIN_STOCK',
+    columns: ['ITM_SIZE'],
+    note: "received-line stock ITM_SIZE: data '', source the RATE_CUT_REC row's NULL A.ITM_SIZE (Ac_Stock.cs:155)",
+  },
+  {
+    family: 'WH SALES',
+    table: 'ROJ_MEL_DATA',
+    columns: ['IT_TYPE', 'SIGN'],
+    note: "purchase bill outstanding day-book row 13: data IT_TYPE 'G', SIGN '-'; source 'A', '' (Ac_Rojmel.cs:247)",
+  },
 ];
 
 /** The build-difference note of a grouped difference, or undefined for a genuine one. */
 export function buildDifferenceOf(group) {
+  // An entry naming columns covers the value differences of those columns; one without covers the keyed ones.
+  const columnEntry = KNOWN_BUILD_DIFFERENCES.find(
+    (k) =>
+      k.columns &&
+      k.family === group.family &&
+      k.table === group.table &&
+      group.kind === 'value' &&
+      k.columns.includes(group.column),
+  );
+  if (columnEntry) return columnEntry.note;
   const known = KNOWN_BUILD_DIFFERENCES.find(
-    (k) => k.family === group.family && k.table === group.table,
+    (k) => !k.columns && k.family === group.family && k.table === group.table,
   );
   if (!known) return undefined;
   const keyed =
