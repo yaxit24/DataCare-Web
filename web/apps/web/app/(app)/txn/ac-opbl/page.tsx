@@ -1,7 +1,8 @@
 'use client';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { del, get, post, ApiError } from '../../../../lib/api';
+import { del, get, postCommand, ApiError } from '../../../../lib/api';
+import { useIdempotencyKey } from '../../../../lib/idempotencyKey';
 import { LookupPicker } from '../../../../components/LookupPicker';
 import { PartyBalance } from '../../../../components/PartyBalance';
 import { useGridKeyboard } from '../../../../components/GridKeyboard';
@@ -213,6 +214,7 @@ function SignSelect({
 }
 
 export default function PartyOpeningPage() {
+  const command = useIdempotencyKey();
   const [acCode, setAcCode] = useState('');
   const [loaded, setLoaded] = useState<Opening | null>(null);
   const [form, setForm] = useState<Form>(EMPTY);
@@ -295,31 +297,36 @@ export default function PartyOpeningPage() {
     setMsg(null);
     setBusy(true);
     try {
-      const saved = await post<Opening>('/ac-opbl', {
-        acCode: acCode.trim(),
-        amount: form.amount,
-        sign: form.sign,
-        gold: form.gold,
-        goldSign: form.goldSign,
-        silver: form.silver,
-        silverSign: form.silverSign,
-        bills: filledBills.map((b) => {
-          const row: Record<string, string | number | null> = {};
-          for (const c of BILL_COLUMNS)
-            row[c.field] =
-              c.num !== undefined
-                ? n(b[c.field])
-                : c.field === 'vchDate'
-                  ? b.vchDate || null
-                  : b[c.field];
-          return row;
-        }),
-      });
+      const saved = await postCommand<Opening>(
+        '/ac-opbl',
+        {
+          acCode: acCode.trim(),
+          amount: form.amount,
+          sign: form.sign,
+          gold: form.gold,
+          goldSign: form.goldSign,
+          silver: form.silver,
+          silverSign: form.silverSign,
+          bills: filledBills.map((b) => {
+            const row: Record<string, string | number | null> = {};
+            for (const c of BILL_COLUMNS)
+              row[c.field] =
+                c.num !== undefined
+                  ? n(b[c.field])
+                  : c.field === 'vchDate'
+                    ? b.vchDate || null
+                    : b[c.field];
+            return row;
+          }),
+        },
+        command.key,
+      );
       setLoaded(saved);
       setForm(asForm(saved));
       setBills([...(saved.bills ?? []).map(asBill), blankBill(saved.billDate ?? billDate)]);
       setMsg({ kind: 'ok', text: SAVED });
       setBalanceKey((k) => k + 1);
+      command.renew();
       await loadList(balanceType);
     } catch (e) {
       setMsg({ kind: 'err', text: messageOf(e) });

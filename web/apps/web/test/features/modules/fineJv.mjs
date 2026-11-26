@@ -897,10 +897,34 @@ export const fineJv = {
     C(
       'retry.idempotent-replay',
       'T13',
-      'read-only',
-      'WP-35 cases.md D1; TR_CONTRA.cs:2723; hosted replay safety D18.',
-      async () => ({}),
-      { blocked: 'WP-04 batch B (agent/wp04-idem-lite) must merge first' },
+      'mutation',
+      'WP-35 cases.md D1; TR_CONTRA.cs:2723; hosted replay safety D18. A replayed Fine JV save answers with the first result and leaves exactly one voucher.',
+      async (ctx) => {
+        const { page } = await ctx.session();
+        await openFineJv(page);
+        await fillGrid(page, twoRows());
+        const first = await save(page);
+        assert.equal(first.status(), 201, await first.text());
+        assert.match(first.request().headers()['idempotency-key'] ?? '', /^[0-9a-f-]{36}$/);
+        const firstBody = await first.text();
+        const result = JSON.parse(firstBody);
+        const replay = await page.request.fetch(first.request());
+        assert.equal(replay.status(), 201, await replay.text());
+        assert.equal(replay.headers()['idempotency-replayed'], 'true');
+        assert.equal(await replay.text(), firstBody);
+        const rows = await ctx.rows(
+          `SELECT "VCH_NO" vch FROM "CONTRA_DATA" WHERE tenant_id=$1 AND "CO_BOOK"=$2 AND "VCH_NO"=$3`,
+          BOOK,
+          String(result.vchNo).padStart(5, '0'),
+        );
+        assert.equal(rows.length, 2, JSON.stringify(rows));
+        return {
+          observation: 'replay answered the first Fine JV result',
+          expected: 'one Fine JV voucher',
+          database: { rows },
+          downstream: { replay: 'idempotency-replayed true', rows: rows.length },
+        };
+      },
     ),
     ...['save', 'edit'].map((mode) =>
       C(

@@ -39,6 +39,7 @@ dbDescribe('Tour Order configured-book and complete editor round trip', () => {
     'UPI_DATA',
     'MAIN_STOCK',
     'TEMP_BOOK_DATA',
+    'BOOK_DETL',
     'BOOK_DATA',
     'ITEM_MAST',
     'AC_MAST',
@@ -62,6 +63,11 @@ dbDescribe('Tour Order configured-book and complete editor round trip', () => {
     );
     await exec(
       `INSERT INTO "BOOK_DATA"(tenant_id,"CO_CODE","LC_CODE","CO_BOOK","BOOK_NAME","BOOK_SNAME","MAIN_BOOK","BOOK_INOUT","CUR_USE","BOOK_TBL_NAME") VALUES ($1,'01','01','510','Tour A','TUROD','TOUR ORDER','I','Y','SL_ORD_DATA'),($1,'01','01','511','Tour B','TUROD','TOUR ORDER','I','Y','SL_ORD_DATA'),($1,'01','01','Z09','Custom Tour','TUROD','TOUR ORDER','I','Y','SL_ORD_DATA'),($1,'01','02','511','Branch Tour','TUROD','TOUR ORDER','I','Y','SL_ORD_DATA'),($1,'01','01','SOR','Sales Order','SORD','SALES ORDER','O','Y','SL_ORD_DATA')`,
+      tenantId,
+    );
+    // Desktop legs 01-06 join BOOK_DETL slot 1 for the cash account and book columns (Ac_Ledr.cs:30-40, Ac_Rojmel.cs:11-21).
+    await exec(
+      `INSERT INTO "BOOK_DETL"(tenant_id,"CO_CODE","LC_CODE","CO_BOOK","SR_NO","AC_CODE","BOOK_SNAME","MAIN_BOOK","BOOK_INOUT","DATA_TYPE") VALUES($1,'01','01','510',1,'CASH2','TUROD','TOUR ORDER','I','A'),($1,'01','01','511',1,'CASH2','TUROD','TOUR ORDER','I','A'),($1,'01','01','Z09',1,'CASH2','TUROD','TOUR ORDER','I','A'),($1,'01','01','SOR',1,'CASH2','SORD','SALES ORDER','O','A')`,
       tenantId,
     );
     await exec(
@@ -88,7 +94,6 @@ dbDescribe('Tour Order configured-book and complete editor round trip', () => {
     acCode: 'PARTY',
     acName: 'Customer',
     advanceAmount: 123.45,
-    cashAc: 'CASH2',
     taxRatePct: 3,
     taxCode: '03',
     address1: 'First road',
@@ -389,8 +394,8 @@ dbDescribe('Tour Order configured-book and complete editor round trip', () => {
     expect(document).toMatchObject({
       vchDesc: 'Tour ring specifications',
       bankAc: 'BANK1',
+      cashAc: 'CASH2', // read-only: the book's BOOK_DETL slot-1 account
       chequeNo: '000076',
-      cashAc: 'CASH2',
       deliveryDate: '2024-07-20',
       functionDate: '2024-07-22',
       empCode: 'EMP1',

@@ -231,6 +231,9 @@ async function seed() {
   await sql(`INSERT INTO "CO_SET" (tenant_id,"CO_CODE") VALUES ($1,'01')`);
   await sql(`INSERT INTO "BOOK_DATA" (tenant_id,"CO_CODE","LC_CODE","CO_BOOK","BOOK_NAME","BOOK_SNAME","MAIN_BOOK","BOOK_INOUT","CUR_USE","BOOK_TBL_NAME","BOOK_TBL_DETL")
     VALUES ($1,'01','01','Z09','Tour Order','TUROD','TOUR ORDER','I','Y','SL_ORD_DATA','SL_ORD_DETL')`);
+  // The Tour Order cash contra is BOOK_DETL slot 1 (Ac_Ledr.cs:30-40); the order form has no Cash A/c.
+  await sql(`INSERT INTO "BOOK_DETL"(tenant_id,"CO_CODE","LC_CODE","CO_BOOK","SR_NO","AC_CODE","BOOK_SNAME","MAIN_BOOK","BOOK_INOUT","DATA_TYPE")
+    VALUES($1,'01','01','Z09',1,'CASH','TUROD','TOUR ORDER','I','A')`);
   await sql(`INSERT INTO "BOOK_DATA"(tenant_id,"CO_CODE","LC_CODE","CO_BOOK","BOOK_NAME","BOOK_SNAME","MAIN_BOOK","BOOK_INOUT","CUR_USE","BOOK_TBL_NAME","BOOK_TBL_DETL")
     VALUES($1,'01','01','146','E Credit Note','ECRNT','E CRNT','I','Y','SL_DATA','SL_DETL'),
           ($1,'01','01','147','E Credit Note 2','ECRNT','E CRNT','I','Y','SL_DATA','SL_DETL')`);

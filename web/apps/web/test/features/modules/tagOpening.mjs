@@ -711,7 +711,47 @@ export const tagOpening = {
       'T12',
       'Two-session edit of one voucher needs a second operator slot and a version token.',
     ),
-    pending('retry', 'T13', 'Idempotency (N52) is not on the stock vouchers yet.'),
+    C(
+      'retry.replayed-save',
+      'T13',
+      'mutation',
+      'A replayed Tag Opening save answers with the first result and creates its tags once.',
+      async (ctx) => {
+        const { page } = await ctx.session();
+        let vchNo;
+        try {
+          await openScreen(page);
+          await fillTag(page, 1, { gross: '10.5', net: '10', touch: '91.6' });
+          const first = await save(page);
+          assert.equal(first.status(), 201, await first.text());
+          assert.match(first.request().headers()['idempotency-key'] ?? '', /^[0-9a-f-]{36}$/);
+          const firstBody = await first.text();
+          const saved = JSON.parse(firstBody);
+          vchNo = pad(saved.vchNo);
+          const replay = await page.request.fetch(first.request());
+          assert.equal(replay.status(), 201, await replay.text());
+          assert.equal(replay.headers()['idempotency-replayed'], 'true');
+          assert.equal(await replay.text(), firstBody);
+          const tags = await ctx.rows(
+            `SELECT "TAG_NO" tag FROM "BAR_DETL" WHERE tenant_id=$1 AND "CO_BOOK"=$2 AND "VCH_NO"=$3 ORDER BY "SR_NO"`,
+            OPEN_BOOK,
+            pad(saved.vchNo),
+          );
+          assert.deepEqual(
+            tags.map((row) => row.tag),
+            saved.tagNos,
+          );
+          return {
+            observation: 'replay answered the first Tag Opening result',
+            expected: 'one set of tags',
+            database: { tags },
+            downstream: { replay: 'idempotency-replayed true', tags: tags.length },
+          };
+        } finally {
+          if (vchNo) await removeVoucher(page, vchNo);
+        }
+      },
+    ),
     pending('rollback', 'T14', 'No fault injector in the harness yet (G173 / N166).'),
     pending(
       'settings',
