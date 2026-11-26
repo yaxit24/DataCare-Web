@@ -4428,14 +4428,8 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
   // one path. Registered here (not with the other plugins above) because it needs `sendReportPdf`.
   registerAccountLedgerRoutes(app, { prisma, auth, guard, readScope, sendReportPdf });
   // RP_HUID report, exports, defaults and voucher zoom.
-  registerHuidReportRoutes(app, {
-    prisma,
-    auth,
-    guard,
-    readScope,
-    sendReportPdf,
-    mayRead: mayReadForm,
-  });
+  const huidHelpers = { readScope, sendReportPdf, mayRead: mayReadForm };
+  registerHuidReportRoutes(app, { prisma, auth, guard, ...huidHelpers });
   registerRpAllReportRoutes(app, { prisma, auth, guard, readScope }); // WP-11 Sales Report (RP_ALL)
   registerPurchaseReportRoutes(app, {
     prisma,

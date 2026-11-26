@@ -325,7 +325,7 @@ function LegacySaleReturnForm() {
   }
 
   useVoucherZoom({
-    ready: Boolean(coYear && coBook),
+    ready: !!coBook,
     book: coBook,
     setBook: setCoBook,
     load: (vchNo) => {
@@ -337,7 +337,6 @@ function LegacySaleReturnForm() {
   async function openSaved(requested?: string) {
     const vch = (requested ?? openVch).trim();
     if (!coBook || !vch) return;
-    if (requested !== undefined) setOpenVch(vch);
     setErr('');
     setResult(null);
     try {

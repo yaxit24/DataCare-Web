@@ -444,7 +444,7 @@ export function TagCancelForm({ mode }: { mode: TagCancelMode }) {
   }
 
   useVoucherZoom({
-    ready: Boolean(coBook && coYear && lcCode),
+    ready: !!coBook,
     book: coBook,
     setBook: setCoBook,
     load: (vchNo) => load(vchNo),

@@ -127,7 +127,7 @@ export default function ApprovalVoucherForm({
   };
 
   useVoucherZoom({
-    ready: Boolean(coYear && coBook),
+    ready: !!coBook,
     book: coBook,
     setBook: setCoBook,
     load: (vchNo) => {

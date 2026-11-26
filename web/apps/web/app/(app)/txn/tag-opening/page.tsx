@@ -483,7 +483,7 @@ export default function TagOpeningPage() {
   }
 
   useVoucherZoom({
-    ready: Boolean(coBook && coYear && lcCode),
+    ready: !!coBook,
     book: coBook,
     setBook: setCoBook,
     load: (vchNo) => openVoucher(vchNo),

@@ -442,7 +442,7 @@ function PlainPurchasePage() {
   }
 
   useVoucherZoom({
-    ready: Boolean(coBook && coYear && lcCode),
+    ready: !!coBook,
     book: coBook,
     setBook: setCoBook,
     load: (vchNo, book) => openPurchase(vchNo, book),
