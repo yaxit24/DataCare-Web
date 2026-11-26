@@ -264,7 +264,9 @@ const DAY = `${startYear}-06-15`;
       acCode: 'WHCUST',
       acName: 'Wholesale Customer',
       itType: 'G',
-      lines: [{ itCode: 'T999', itemName: '999 GOLD', grossWt: 5, netWt: 5, touch: 92, rate: 6400 }],
+      lines: [
+        { itCode: 'T999', itemName: '999 GOLD', grossWt: 5, netWt: 5, touch: 92, rate: 6400 },
+      ],
       receivedLines: [
         { itCode: 'T999', itemName: 'OLD GOLD', grossWt: 1, netWt: 1, touch: 90, rate: 6000 },
       ],

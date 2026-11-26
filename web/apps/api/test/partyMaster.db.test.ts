@@ -451,7 +451,10 @@ type Cookie = string;
         expect(list.rows.map((r: { code: string }) => r.code)).toContain('200201');
         expect(list.rows[0].lc).toBe('00');
       } finally {
-        await exec(`UPDATE "CO_SET_NEW" SET "BRANCH_ALL_AC_SHOW"='N' WHERE tenant_id=$1 AND "CO_CODE"='01'`, tenantId);
+        await exec(
+          `UPDATE "CO_SET_NEW" SET "BRANCH_ALL_AC_SHOW"='N' WHERE tenant_id=$1 AND "CO_CODE"='01'`,
+          tenantId,
+        );
       }
       expect(await snapshot()).toEqual(before);
     });
