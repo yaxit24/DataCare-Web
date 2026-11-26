@@ -8,6 +8,11 @@
       "source": "unified/src/csharp/DataCareNext/UT_HDD.cs:765 \u2014 the desktop saves with no field validation and answers \"Hdd Is Update...\"; the web does the same"
     },
     {
+      "key": "/txn/daily-rate | empty-form-accepted | submit-empty-form | Save | ",
+      "mode": "probe",
+      "source": "unified/src/csharp/DataCareNext/MS_RATE.cs:1867-1920 \u2014 BtnSave_Click has no refusal: it deletes the day's RATE_MAST rows and inserts only groups with a touch and a rate, so an all-zero grid saves nothing and is accepted. A new company now carries the installer's touch groups (MS_YEAR.cs:1555-1592), so the grid is no longer empty"
+    },
+    {
       "key": "/txn/reminders | no-feedback | submit-empty-form | Receivables (n) | ",
       "mode": "probe",
       "source": "The highlighted button is the Receivables tab with a count of 0 (web/apps/web/app/(app)/txn/reminders/page.tsx); there is nothing to list"

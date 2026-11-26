@@ -1,3 +1,14 @@
+import { registerDataTypeRoute } from './routes/dataType.js';
+import {
+  assertBooksMatchSessionType,
+  BOOK_DATA_TYPE_MISMATCH_BODY,
+  BookDataTypeMismatchError,
+  booksOfRequest,
+  requestedBooks,
+  runWithSessionDataType,
+} from './modules/auth/bookDataType.js';
+import { sessionDataType } from './modules/auth/dataTypeAccess.js';
+import { sessionReportQuery } from './modules/auth/dataTypePolicy.js';
 import type { EditionPolicy } from '@datacare/core';
 import {
   assertFormClassified,
@@ -194,6 +205,17 @@ export async function buildApp(opts: BuildOpts): Promise<FastifyInstance> {
       ...(routeOptions.config ?? {}),
       authorizationPolicy: policy,
     } as any;
+    // The handler runs inside the session's data-type context, so the shared book resolvers and posting refuse a
+    // book of the other type whichever route chose it (modules/auth/bookDataType.ts). The session is read when the
+    // handler runs, after the preHandler hook has authenticated the request.
+    const original = routeOptions.handler as (this: unknown, ...args: unknown[]) => unknown;
+    routeOptions.handler = function (this: unknown, req: FastifyRequest, reply: FastifyReply) {
+      return runWithSessionDataType(
+        (req as RequestState).session as any,
+        () => original.call(this, req, reply),
+        requestedBooks(req),
+      );
+    } as any;
   });
 
   app.addHook('onSend', async (_req: FastifyRequest, reply: FastifyReply, payload: unknown) => {
@@ -215,6 +237,8 @@ export async function buildApp(opts: BuildOpts): Promise<FastifyInstance> {
         .header('Retry-After', '1')
         .send({ error: 'transaction-timeout', retryable: true });
     }
+    if (error instanceof BookDataTypeMismatchError)
+      return reply.code(403).send(BOOK_DATA_TYPE_MISMATCH_BODY);
     if (error instanceof RpAllRequestError) {
       return reply
         .code(error.statusCode)
@@ -315,6 +339,7 @@ export async function buildApp(opts: BuildOpts): Promise<FastifyInstance> {
   }) => {
     const accessToken = await issueAccess(
       {
+        dataType: session.dataType,
         sub: session.loginName,
         tenantId: session.tenantId,
         sid: session.sessionId,
@@ -381,9 +406,16 @@ export async function buildApp(opts: BuildOpts): Promise<FastifyInstance> {
         coCode: stored.coCode,
         loginCoCode: stored.loginCoCode,
       });
+      const dataTypes = await sessionDataType(prisma, claims);
+      if (route.startsWith('/reports/'))
+        req.query = sessionReportQuery(
+          (req.query ?? {}) as Record<string, unknown>,
+          dataTypes.dataType,
+        );
       state.principal = principal;
       state.session = {
         ...claims,
+        ...dataTypes,
         contextEpoch: stored.contextEpoch,
         ledgerContext: stored.ledgerContext,
         coCode: stored.coCode,
@@ -530,9 +562,13 @@ export async function buildApp(opts: BuildOpts): Promise<FastifyInstance> {
           adminOnly: policy.adminOnly,
         });
       }
+      if (policy.kind === 'form' || policy.businessScope)
+        await assertBooksMatchSessionType(prisma, s as any, booksOfRequest(req));
       state.routeAuthorized = true;
       await enforceReportFilters(req, reply);
     } catch (error) {
+      if (error instanceof BookDataTypeMismatchError)
+        return reply.code(403).send(BOOK_DATA_TYPE_MISMATCH_BODY);
       if (error instanceof ScopeError) {
         return reply.code(error.statusCode).send({ error: error.code });
       }
@@ -613,6 +649,9 @@ export async function buildApp(opts: BuildOpts): Promise<FastifyInstance> {
           .setCookie('access', created.accessToken, accessCookie)
           .setCookie('refresh', created.refreshToken, refreshCookie);
         return {
+          dataType: created.session.dataType,
+          allowedDataTypes: created.session.allowedDataTypes,
+          features: created.session.features,
           user: created.session.loginName,
           rights: created.principal.rights,
           forcedReset: created.principal.passwordResetRequired,
@@ -710,6 +749,13 @@ export async function buildApp(opts: BuildOpts): Promise<FastifyInstance> {
     },
   );
 
+  registerDataTypeRoute(app, {
+    prisma,
+    requireAuth,
+    session: sess,
+    sign: (s) => issueAccess(s, secret),
+    cookie: accessCookie,
+  });
   app.get('/me', { preHandler: requireAuth }, async (req: FastifyRequest, reply: FastifyReply) => {
     reply.header('Cache-Control', 'no-store');
     const s = sess(req);
@@ -724,6 +770,7 @@ export async function buildApp(opts: BuildOpts): Promise<FastifyInstance> {
     // server posts (G102/G84). Null when no company is selected yet or settings are ambiguous.
     const roundingFlags = s.coCode ? await loadRoundingFlags(prisma, s.tenantId, s.coCode) : null;
     return {
+      ...(await sessionDataType(prisma, s)),
       user: s.sub,
       context: contextDescriptor({
         sessionId: s.sid,
@@ -781,15 +828,41 @@ export async function buildApp(opts: BuildOpts): Promise<FastifyInstance> {
     });
   });
 
-  app.get('/context/locations', { preHandler: requireAuth }, async (req: FastifyRequest) => {
+  // MS_OPNCOMP.cs:487-493, :4391-4454: the Location and Year boxes list the company just chosen, so the select page
+  // may ask for another company's choices; only companies this login may open are answered.
+  const choiceCompany = async (req: FastifyRequest, reply: FastifyReply) => {
     const s = sess(req);
-    return listScopeLocations(prisma, { tenantId: s.tenantId, coCode: s.coCode });
-  });
+    const asked = (req.query as Record<string, unknown>)?.coCode;
+    if (asked === undefined || asked === '' || asked === s.coCode) return s.coCode;
+    const allowed = await listScopeCompanies(prisma, {
+      tenantId: s.tenantId,
+      loginName: s.sub,
+      isAdmin: principalOf(req).isAdmin,
+    });
+    if (typeof asked === 'string' && allowed.some((row) => row.CO_CODE === asked)) return asked;
+    reply.code(404).send({ error: 'company-unavailable' });
+    return null;
+  };
 
-  app.get('/context/years', { preHandler: requireAuth }, async (req: FastifyRequest) => {
-    const s = sess(req);
-    return listScopeYears(prisma, { tenantId: s.tenantId, coCode: s.coCode });
-  });
+  app.get(
+    '/context/locations',
+    { preHandler: requireAuth },
+    async (req: FastifyRequest, reply: FastifyReply) => {
+      const coCode = await choiceCompany(req, reply);
+      if (coCode === null) return reply;
+      return listScopeLocations(prisma, { tenantId: sess(req).tenantId, coCode });
+    },
+  );
+
+  app.get(
+    '/context/years',
+    { preHandler: requireAuth },
+    async (req: FastifyRequest, reply: FastifyReply) => {
+      const coCode = await choiceCompany(req, reply);
+      if (coCode === null) return reply;
+      return listScopeYears(prisma, { tenantId: sess(req).tenantId, coCode });
+    },
+  );
 
   app.get('/context/books', { preHandler: requireAuth }, async (req: FastifyRequest, reply) => {
     const s = sess(req);
@@ -801,6 +874,7 @@ export async function buildApp(opts: BuildOpts): Promise<FastifyInstance> {
       coCode: s.coCode,
       lcCode: s.lcCode,
       mainBooks,
+      dataType: s.dataType,
     });
   });
 
@@ -826,7 +900,10 @@ export async function buildApp(opts: BuildOpts): Promise<FastifyInstance> {
             },
             request: req.body,
           },
-          { signAccess: (descriptor) => issueAccess({ ...descriptor }, secret) },
+          {
+            signAccess: (descriptor) =>
+              issueAccess({ ...descriptor, dataType: s.dataType }, secret),
+          },
         );
         reply.setCookie('access', selected.accessToken, accessCookie);
         return {
@@ -835,6 +912,8 @@ export async function buildApp(opts: BuildOpts): Promise<FastifyInstance> {
           coYear: selected.session.coYear,
           scoped: true,
           replayed: selected.replayed,
+          // MS_OPNCOMP.cs:1503-1505: whether opening this company just set yesterday's lock (null on a replay).
+          lastDayLock: selected.lastDayLock,
           ledgerContext: selected.session.ledgerContext,
           context: contextDescriptor(selected.session),
         };

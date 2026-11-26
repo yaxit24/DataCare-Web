@@ -984,6 +984,7 @@ export interface OrderOldMetalLine {
   lineNo: number;
   /** The group's purchase account (`GROUP_MAST.PURC_AC`). */
   purchaseAc: string;
+  purchaseAcName?: string;
   /** Non-zero routes the line to type 04; zero with fine routes it to type 06. */
   netAmount: number;
   metal: Exclude<RojmelMetal, 'A'>;
@@ -995,7 +996,6 @@ export interface OrderOldMetalLine {
   itemCode?: string;
   itemName?: string;
 }
-
 export interface OrderRojmelLegs {
   /** `BOOK_DETL` slot 1 — the contra on the advance row. Book 020: `00001`. Resolve, never hardcode. */
   advanceContraAc: string;
@@ -1070,6 +1070,7 @@ export function buildOrderRojmel(ctx: RojmelContext, legs: OrderRojmelLegs): Roj
       rows.push({
         ...blank(ctx, key(ROJMEL_ORDER_ROW_TYPE.OLD_METAL_VALUED, l.lineNo)),
         AC_CODE: l.purchaseAc,
+        AC_NAME: l.purchaseAcName ?? '',
         LD_CODE: ctx.partyCode,
         DR_AMT: l.netAmount,
         ITM_PCS: l.pcs ?? 0,

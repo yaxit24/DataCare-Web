@@ -1,4 +1,5 @@
 import { carriedOpeningFilter } from '../shared/carriedOpening.js';
+import { bookDataTypeSql } from './reportDataType.js';
 import { dateWhere } from './reports.js';
 import { withTxBudget } from '../shared/txBudget.js';
 import type { ReportScope, ListReport } from './reports.js';
@@ -136,7 +137,7 @@ export async function gstr2Purchase(prisma: any, s: ReportScope): Promise<ListRe
       `SELECT coalesce(sum(${NN('"NET_AMT"')}),0) AS taxable, coalesce(sum(${NN('"TAX_AMT"')}),0) AS tax,
               coalesce(sum(${NN('"CGST_TAX"')}),0) AS cgst, coalesce(sum(${NN('"SGST_TAX"')}),0) AS sgst,
               coalesce(sum(${NN('"IGST_TAX"')}),0) AS igst
-       FROM "PR_DATA" WHERE "CO_CODE"=$1${yr}${dt}`,
+       FROM "PR_DATA" WHERE "CO_CODE"=$1${yr}${dt}${bookDataTypeSql(s.dataType, '"PR_DATA"')}`,
       ...params,
     );
     const x = r[0];

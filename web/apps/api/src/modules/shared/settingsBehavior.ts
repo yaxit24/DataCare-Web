@@ -726,10 +726,13 @@ export function ounceRatePerGram(ounceRate: number, fxRate: number, conversion: 
   return (ounceRate * fxRate) / conversion;
 }
 
-/** MS_ACCT.cs:6285,7741,8800 and MS_ADD_MAST.cs:3519: configured account-code length. */
-export function accountCodeHasConfiguredLength(code: unknown, length: number | null): boolean {
-  return length == null || String(code ?? '').length === length;
-}
+/*
+ * CO_SET.AC_LC_CODE_LEN is a code-GENERATION mode, not a length: mode 1 numbers a new account as the location's second
+ * character plus five digits, otherwise the location code plus five digits (MS_ACCT.cs:6285, :7741, :8789-8800 and
+ * MS_ADD_MAST.cs:3519, :4653). The desktop never checks a typed code's length against it, so the web does not either
+ * (an earlier web check refused every account save on a company whose setting is the installer's '1'). Party master
+ * reads it as the mode (partyMaster.ts).
+ */
 
 /** TR_TAG_OPBL.cs:13372 and TR_PURC.cs:11190: legacy imports use four digits; tag-report mode five. */
 export function tagSerialWidth(settings: Pick<SettingsBehavior, 'vbImport' | 'tagReport'>): number {

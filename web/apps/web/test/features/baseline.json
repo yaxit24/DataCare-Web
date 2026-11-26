@@ -3,13 +3,7 @@
   "sales-invoice": [],
   "purchase-invoice": [],
   "settings": [],
-  "company-master": [
-    {
-      "case": "company-master.fields.complete-round-trip",
-      "gap": "G38",
-      "reason": "Identity implementation is present; baseline retained until the real browser round-trip passes. Docker access blocked the worker verification."
-    }
-  ],
+  "company-master": [],
   "sales-return": [],
   "purchase-return": [],
   "sales-order": [],

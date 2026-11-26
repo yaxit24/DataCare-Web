@@ -45,6 +45,13 @@ export default function SelectPage() {
   const [needsReload, setNeedsReload] = useState(false);
   const { beginOperation } = useOperationLease();
   const busyRef = useRef(false);
+  // The signed-in company's own choices, kept so choosing it again restores them.
+  const homeChoices = useRef<{ locations: Location[]; years: string[] } | null>(null);
+  const [choicesLoading, setChoicesLoading] = useState(false);
+  const focusAfterLoad = useRef(false);
+  // The first load already chose the home location and year; re-applying them once the boxes are enabled would
+  // overwrite a choice made in between.
+  const lastChoicesCo = useRef<string | null>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -69,6 +76,7 @@ export default function SelectPage() {
         setCompanies(companyRows);
         setLocations(locationRows);
         setYears(yearValues);
+        homeChoices.current = { locations: locationRows, years: yearValues };
         setCoCode(me.coCode);
         setLcCode(me.lcCode || locationRows[0]?.LC_CODE || '');
         setCoYear(me.coYear || yearValues[0] || '');
@@ -86,6 +94,64 @@ export default function SelectPage() {
     };
   }, [router]);
 
+  // MS_OPNCOMP.cs:487-493: choosing a company loads its own locations and years (newest year first).
+  useEffect(() => {
+    if (!ready || !current) return;
+    const firstRun = lastChoicesCo.current === null;
+    lastChoicesCo.current = coCode;
+    if (coCode === current.coCode) {
+      if (firstRun) return;
+      const home = homeChoices.current;
+      if (home) {
+        setLocations(home.locations);
+        setYears(home.years);
+        setLcCode(current.lcCode || home.locations[0]?.LC_CODE || '');
+        setCoYear(current.coYear || home.years[0] || '');
+      }
+      return;
+    }
+    let cancelled = false;
+    setChoicesLoading(true);
+    (async () => {
+      try {
+        const q = `?coCode=${encodeURIComponent(coCode)}`;
+        const [locationRows, yearRows] = await Promise.all([
+          get<Location[]>(`/context/locations${q}`),
+          get<Array<{ year: string }>>(`/context/years${q}`),
+        ]);
+        if (cancelled) return;
+        const yearValues = yearRows.map((row) => row.year).filter(Boolean);
+        setLocations(locationRows);
+        setYears(yearValues);
+        // MS_OPNCOMP.cs:487-493 changes only the year on a company change; the Location box keeps its text.
+        setLcCode((typed) =>
+          locationRows.some((row) => row.LC_CODE === typed)
+            ? typed
+            : locationRows[0]?.LC_CODE || '',
+        );
+        setCoYear(yearValues[0] || '');
+      } catch (error) {
+        if (cancelled) return;
+        setLocations([]);
+        setYears([]);
+        setLcCode('');
+        setCoYear('');
+        setErr(error instanceof Error ? error.message : 'Failed to load company choices.');
+      } finally {
+        if (!cancelled) setChoicesLoading(false);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [coCode, current, ready]);
+
+  useEffect(() => {
+    if (choicesLoading || !focusAfterLoad.current) return;
+    focusAfterLoad.current = false;
+    document.getElementById('context-location')?.focus();
+  }, [choicesLoading]);
+
   async function go(event: React.FormEvent) {
     event.preventDefault();
     if (!current || busyRef.current || !ready || needsReload) return;
@@ -95,12 +161,7 @@ export default function SelectPage() {
     setBusy(true);
     setErr('');
     try {
-      const saved =
-        pending ??
-        createPendingContextSelection(
-          current,
-          coCode !== current.coCode ? { coCode } : { coCode, lcCode, coYear },
-        );
+      const saved = pending ?? createPendingContextSelection(current, { coCode, lcCode, coYear });
       savePendingContextSelection(saved);
       setPending(saved);
       await submitPendingContextSelection(saved, { isCurrent });
@@ -156,6 +217,18 @@ export default function SelectPage() {
     }
   }
 
+  // MS_OPNCOMP.cs:487-493, :509-520, :4391-4454: Enter moves Company -> Location -> Year, whether or not the company
+  // changed (the changed company's choices load first); Enter on the year opens.
+  function enterAdvances(nextId: string | null) {
+    return (event: React.KeyboardEvent<HTMLSelectElement>) => {
+      if (event.key !== 'Enter') return;
+      event.preventDefault();
+      if (nextId === 'context-location' && choicesLoading) focusAfterLoad.current = true;
+      else if (nextId) document.getElementById(nextId)?.focus();
+      else event.currentTarget.form?.requestSubmit();
+    };
+  }
+
   const changingCompany = current !== null && coCode !== current.coCode;
   return (
     <div className="login-wrap">
@@ -192,6 +265,7 @@ export default function SelectPage() {
             value={coCode}
             disabled={!ready || busy || needsReload || !!pending}
             onChange={(event) => setCoCode(event.target.value)}
+            onKeyDown={enterAdvances('context-location')}
           >
             {companies.map((company) => (
               <option key={company.CO_CODE} value={company.CO_CODE}>
@@ -205,8 +279,9 @@ export default function SelectPage() {
           <select
             id="context-location"
             value={lcCode}
-            disabled={!ready || busy || needsReload || changingCompany || !!pending}
+            disabled={!ready || busy || needsReload || choicesLoading || !!pending}
             onChange={(event) => setLcCode(event.target.value)}
+            onKeyDown={enterAdvances('context-year')}
           >
             {locations.map((location) => (
               <option key={location.LC_CODE} value={location.LC_CODE}>
@@ -220,8 +295,9 @@ export default function SelectPage() {
           <select
             id="context-year"
             value={coYear}
-            disabled={!ready || busy || needsReload || changingCompany || !!pending}
+            disabled={!ready || busy || needsReload || choicesLoading || !!pending}
             onChange={(event) => setCoYear(event.target.value)}
+            onKeyDown={enterAdvances(null)}
           >
             {years.map((year) => (
               <option key={year} value={year}>
@@ -232,7 +308,7 @@ export default function SelectPage() {
         </div>
         {changingCompany && !pending && (
           <p className="muted">
-            The target company’s default location and latest year will be selected.
+            Showing the target company’s locations and years; the newest year is selected.
           </p>
         )}
         <button
@@ -242,7 +318,8 @@ export default function SelectPage() {
             !ready ||
             busy ||
             needsReload ||
-            (!pending && (!coCode || (!changingCompany && (!lcCode || !coYear))))
+            choicesLoading ||
+            (!pending && (!coCode || !lcCode || !coYear))
           }
         >
           {busy ? 'Opening…' : pending ? 'Retry saved company change' : 'Open'}

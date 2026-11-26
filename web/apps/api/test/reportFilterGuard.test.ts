@@ -30,10 +30,12 @@ describe('global report filter guard', () => {
             $executeRawUnsafe: async () => 1,
             $queryRawUnsafe: async (sqlValue: unknown) => {
               const sql = String(sqlValue);
+              if (sql.includes('"tenant_feature"')) return []; // dataTypes flag: default on
               if (sql.includes('FROM "auth_session"')) {
                 return [
                   {
                     tenantId: 'tenant-a',
+                    dataType: 'C',
                     sessionId: SESSION_ID,
                     loginName: 'ADMIN',
                     loginCoCode: '01',
@@ -67,6 +69,8 @@ describe('global report filter guard', () => {
                     USER_DELETE: 'Y',
                     USER_PRINT: 'Y',
                     PASSWORD_RESET_REQUIRED: 'N',
+                    allowed: 'ABC',
+                    defaultType: 'C',
                   },
                 ];
               }

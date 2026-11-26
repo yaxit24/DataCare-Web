@@ -1,6 +1,8 @@
 import { round } from '@datacare/core';
 import { withTxBudget } from '../shared/txBudget.js';
 import { applyFilters } from './reportFilters.js';
+import { ITEM_OPENING_BOOK } from '../stock/itemOpening.js';
+import { bookDataTypeSql, dataTypeSql } from './reportDataType.js';
 import type { ListReport, ReportScope } from './reports.js';
 
 export type OtherItemMode =
@@ -78,6 +80,12 @@ export async function otherItemReport(
       where.push(`d."VCH_DATE"<=$${params.length}::date`);
     }
     const filterSql = applyFilters('other-item-report', s.filters, params);
+    // RP_OTH_DETL.cs:3857-3863 keeps the session type's rows ({BOOK_DATA.DATA_TYPE}; All = no filter, blank/NULL = A).
+    // The item opening's rows (book 000) have no BOOK_DATA book: they use their own web-only DM_DATA.DATA_TYPE.
+    const typeSql = dataTypeSql(s.dataType)
+      ? ` AND ((d."CO_BOOK"='${ITEM_OPENING_BOOK}'${dataTypeSql(s.dataType, 'd."DATA_TYPE"')})
+              OR (d."CO_BOOK"<>'${ITEM_OPENING_BOOK}'${bookDataTypeSql(s.dataType, 'd')}))`
+      : '';
     if (itemCode) {
       params.push(itemCode);
       where.push(`i."IT_CODE"=$${params.length}`);
@@ -103,7 +111,7 @@ export async function otherItemReport(
            ON a.tenant_id=d.tenant_id
           AND a."CO_CODE"=d."CO_CODE"
           AND a."AC_CODE"::text=d."AC_CODE"::text
-        WHERE ${where.join(' AND ')}${filterSql}
+        WHERE ${where.join(' AND ')}${filterSql}${typeSql}
         ORDER BY d."VCH_DATE", d."CO_BOOK", d."VCH_NO", d."MAIN_SRNO", d."SR_NO", d."ISR_NO"`,
       ...params,
     );

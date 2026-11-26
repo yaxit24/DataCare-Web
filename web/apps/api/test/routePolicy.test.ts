@@ -164,9 +164,13 @@ describe('route policy registry', () => {
     // WP-32 adds the Tag Opening label-file setup, the label print POST /stock/tag-opening/:vchNo/print
     // (TR_TAG_OPBL.cs:11477-11551) and its Set default-file: 816 + 3 = 819.
     // WP-18 replaces the HuId Report's three-line builder screen with its own plugin and adds the three
-    // export paths (CSV, XLSX, PDF) under the same Reports/HuId Report caption: 819 + 3 = 822. Data Refresh (MS_UPDATE) adds its four Print-right routes under the caption: 822 + 4 = 826.
-    expect(routes).toHaveLength(826);
-    expect(new Set(routes.map((route) => `${route.method} ${route.path}`)).size).toBe(826);
+    // export paths (CSV, XLSX, PDF) under the same Reports/HuId Report caption: 819 + 3 = 822.
+    // The Stock Report voucher zoom (GET /reports/stock-report/zoom, RP_STOCK.cs:5218): 822 + 5 = 827 (the zoom, the InOut picker list, the item ledger and its PDF, the printed summary).
+    // export paths (CSV, XLSX, PDF) under the same Reports/HuId Report caption: 819 + 3 = 822, + POST /auth/data-type = 823.
+    // Owner data-type decision adds POST /auth/data-type. [827 on main + 1 here = 828]
+    // Data Refresh (MS_UPDATE) adds its four Print-right routes under the caption: 828 + 4 = 832.
+    expect(routes).toHaveLength(832);
+    expect(new Set(routes.map((route) => `${route.method} ${route.path}`)).size).toBe(832);
 
     const policies = routes.map((route) => ({
       ...route,

@@ -1,4 +1,5 @@
 import assert from 'node:assert/strict';
+import { rollbackMatrix, tenantFingerprint, changedTables, withWriteFault } from '../faults.mjs';
 import { FIXTURE_MANIFEST, ITEMS, PARTIES, USERS } from '../fixtures/catalogue.mjs';
 import { escLeavesWithNoFocus } from '../harness.mjs';
 
@@ -53,11 +54,6 @@ const C = (id, group, kind, source, run, extra = {}) => ({
   run,
   ...extra,
 });
-const pending = (name, group, reason) => ({
-  ...C(`${name}.pending`, group, 'read-only', `Playbook ${group}`, async () => ({})),
-  blocked: reason,
-});
-
 const HEADERS = [
   'Sr.',
   'ItCode',
@@ -213,6 +209,7 @@ export const itemOpening = {
   title: 'Master → Item Opening (TR_ITM_OPBL)',
   defaultUser: as(USERS.admin.user),
   inputs: [
+    'web/apps/web/test/features/faults.mjs',
     'web/apps/web/app/(app)/txn/item-opening/page.tsx',
     'web/apps/web/lib/screenEscape.ts',
     'web/apps/api/src/modules/stock/itemOpening.ts',
@@ -249,7 +246,12 @@ export const itemOpening = {
         assert.equal(await focused(cell(page, 'Rtype', 1)), true, 'row 1, Rtype has the cursor');
         await loadType(page, 'S');
         assert.equal(await cell(page, 'ItCode', 1).inputValue(), SILVER);
-        assert.equal(await cell(page, 'ItCode', 2).count(), 0, 'one silver item');
+        // A new company also carries the installer's own silver items (MS_YEAR.cs:1555-1592), so the
+        // silver grid lists more than the fixture's one; it must still hold no gold item.
+        const silverCodes = await page
+          .getByLabel(/^ItCode row \d+$/)
+          .evaluateAll((els) => els.map((e) => e.value));
+        assert.equal(silverCodes.includes(GOLD), false, 'the silver grid lists no gold item');
         return {
           observation: `blank type focused; ${options.length} type choices; ${headers.length} columns; Gold lists ${GOLD}, Silver lists ${SILVER}`,
           expected: { headers: HEADERS, gold: GOLD, silver: SILVER, focus: 'Rtype row 1' },
@@ -898,7 +900,85 @@ export const itemOpening = {
         }
       },
     ),
-    pending('rollback', 'T14', 'No fault injector in the harness yet (G173 / N166).'),
+
+    C(
+      'rollback.save',
+      'T14',
+      'refusal',
+      'WP-35 cases.md; TR_ITM_OPBL.cs:1414, :1423, :1453-1458; atomic replacement of metal-letter key.',
+      async (ctx) => {
+        const { page } = await ctx.session();
+        try {
+          const before = await tenantFingerprint(ctx);
+          await saveType(page, 'G', { Pcs: '1', GrWt: '5' });
+          const tables = changedTables(before, await tenantFingerprint(ctx));
+          assert.ok(tables.includes('ITM_OPBL') && tables.includes('MAIN_STOCK'));
+          assert.ok(
+            tables.every((t) => ['ITM_OPBL', 'MAIN_STOCK', 'DM_DATA', 'BAR_DATA'].includes(t)),
+          );
+          await removeOpening(page, 'G');
+          await openScreen(page);
+          await loadType(page, 'G');
+          await enterRow(page, 1, { Pcs: '1', GrWt: '5' });
+          const result = await rollbackMatrix(ctx, {
+            tables,
+            book: '000',
+            headerTable: 'ITM_OPBL',
+            fixedVoucherNo: true,
+            voucherNoOf: async () => 'G',
+            submit: () => save(page),
+          });
+          const rows = await opbl(ctx, 'G');
+          assert.equal(rows.length, 1);
+          return {
+            observation: JSON.stringify(result),
+            expected: 'Whole tenant unchanged on each failed write',
+            database: { result, rows },
+          };
+        } finally {
+          await removeOpening(page, 'G');
+        }
+      },
+    ),
+    C(
+      'rollback.delete',
+      'T14',
+      'refusal',
+      'WP-35 cases.md; TR_ITM_OPBL.cs:1509-1514 removes stock, detail and opening atomically in the web.',
+      async (ctx) => {
+        const { page } = await ctx.session();
+        try {
+          const initial = await tenantFingerprint(ctx);
+          await saveType(page, 'G', { Pcs: '1', GrWt: '5' });
+          const tables = changedTables(initial, await tenantFingerprint(ctx));
+          assert.ok(tables.includes('ITM_OPBL') && tables.includes('MAIN_STOCK'));
+          const before = await tenantFingerprint(ctx);
+          for (const table of tables)
+            await withWriteFault(ctx, table, 'DELETE', async () => {
+              await openScreen(page);
+              await loadType(page, 'G');
+              const [response] = await Promise.all([
+                page.waitForResponse((r) => isApi(r, 'DELETE', '/stock/item-opening/type/G')),
+                button(page, 'Delete').click(),
+              ]);
+              assert.ok(response.status() >= 400);
+              assert.deepEqual(await tenantFingerprint(ctx), before);
+              await page.locator('.msg[role="alert"]').waitFor();
+            });
+          await removeOpening(page, 'G');
+          assert.deepEqual(await opbl(ctx, 'G'), []);
+          assert.deepEqual(await stock(ctx, 'G'), []);
+          return {
+            observation: `Delete faults checked on ${tables.join(', ')}`,
+            expected: 'Rollback then one successful reversal',
+            database: { before, tables },
+          };
+        } finally {
+          await removeOpening(page, 'G');
+        }
+      },
+    ),
+
     C(
       'history.other-year',
       'T15',
@@ -1013,9 +1093,15 @@ export const itemOpening = {
           await cell(page, 'LType', 1).focus();
           await page.keyboard.type("g'");
           assert.equal(await cell(page, 'LType', 1).inputValue(), 'G', 'upper case, no apostrophe');
-          await cell(page, 'NetAmt', 1).focus();
+          // The installer's seeded gold items also list here, so the last row is not row 1.
+          const last = await page.getByLabel(/^ItCode row \d+$/).count();
+          await cell(page, 'NetAmt', last).focus();
           await page.keyboard.press('Enter');
-          assert.equal(await focused(cell(page, 'ItCode', 2)), true, 'the last NetAmt adds a row');
+          assert.equal(
+            await focused(cell(page, 'ItCode', last + 1)),
+            true,
+            'the last NetAmt adds a row',
+          );
           await page.keyboard.press('Enter');
           assert.equal(await focused(button(page, 'Save')), true, 'an empty ItCode goes to Save');
           await cell(page, 'Pcs', 1).focus();

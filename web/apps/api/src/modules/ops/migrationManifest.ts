@@ -230,4 +230,12 @@ export const EXPECTED_MIGRATIONS: ReadonlyArray<{
     name: '20261125120000_company_soft_delete',
     checksum: '37964a30d01d481c5c13a4b3468d4c4b058b78accd48ac1fb20453c109aeadf4',
   },
+  {
+    name: '20261125130000_data_type_access',
+    checksum: '9da9643b3b34a7889a0ec18c9f2454d9a286f5d765ad6b0670c0199b75c04f15',
+  },
+  {
+    name: '20261126100000_opening_detail_data_type',
+    checksum: 'bdfff53db903f05275a594331e1193e526c961d68a257083673e5b656069dfb2',
+  },
 ];

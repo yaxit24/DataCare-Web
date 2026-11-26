@@ -2229,6 +2229,8 @@ model DM_DATA {
   INOUT_TYPE   String?   @db.VarChar(255)
   MAIN_IT_CODE String?   @db.VarChar(255)
   TBL_CODE     String?   @db.VarChar(3)
+  /// Web-only owner of an Item Opening row (migration 20261126100000); NULL or blank reads as 'A'.
+  DATA_TYPE    String?   @default("A") @db.VarChar(1)
 
   @@id([tenantId, CO_CODE, LC_CODE, CO_YEAR, CO_BOOK, VCH_NO, MAIN_SRNO, SR_NO, ISR_NO])
   @@map("DM_DATA")
@@ -3790,6 +3792,8 @@ model LOCT_MAST {
 }
 
 model LOGIN_MAST {
+  DATA_TYPE_ALLOW String @default("ABC") @db.VarChar(3)
+  DATA_TYPE_DEFAULT String @default("C") @db.VarChar(1)
   tenantId                String    @map("tenant_id") @db.VarChar(24)
   rowId                   BigInt    @id @default(autoincrement()) @map("row_id")
   CO_CODE                 String?   @db.VarChar(2)
@@ -3816,6 +3820,7 @@ model LOGIN_MAST {
 }
 
 model AuthSession {
+  dataType String @default("C") @map("data_type") @db.VarChar(1)
   tenantId       String    @map("tenant_id") @db.VarChar(24)
   sessionId      String    @map("session_id") @db.VarChar(36)
   loginName      String    @map("login_name") @db.VarChar(255)
@@ -7132,6 +7137,8 @@ model OP_DETL {
   ADD_USER    String?   @db.VarChar(255)
   ADD_DATE    DateTime? @db.Timestamp(6)
   ITM_TYPE    String?   @db.VarChar(255)
+  /// Web-only owner of a bill-wise opening row (migration 20261126100000); NULL or blank reads as 'A'.
+  DATA_TYPE   String?   @default("A") @db.VarChar(1)
 
   @@id([tenantId, rowId])
   @@index([tenantId], map: "OP_DETL_tenant_idx")
@@ -7259,4 +7266,12 @@ model DailyRateCopyEntitlement {
 
   @@id([tenantId, coCode])
   @@map("daily_rate_copy_entitlement")
+}
+
+model TenantFeature {
+ tenantId String @map("tenant_id") @db.VarChar(24)
+ feature String @db.VarChar(64)
+ enabled Boolean @default(true)
+ @@id([tenantId, feature])
+ @@map("tenant_feature")
 }

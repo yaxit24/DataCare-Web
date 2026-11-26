@@ -377,6 +377,10 @@ export async function carryItemStock(
       }),
     }));
     const items = figures.filter((x) => x.f !== null).map((x) => String(x.g.it));
+    // The three deletes are type-blind on purpose and together: the carry sums every data type's closing stock into
+    // one 'A' row (BtmSchm.cs:2921-3002 has no DATA_TYPE filter and deletes every ITM_OPBL row of the location,
+    // :2932), so it replaces an item's hand-keyed opening of either type with that opening's ITOBL stock and
+    // other-detail rows (DM_DATA.DATA_TYPE, migration 20261126100000); nothing of B is left orphaned.
     const yearWhere = `"CO_CODE"=$1 AND "LC_CODE"=$2 AND "CO_YEAR"=$3 AND "CO_BOOK"='000'`;
     for (const sql of [
       `DELETE FROM "MAIN_STOCK" WHERE ${yearWhere} AND "VCH_TYPE"='ITOBL' AND "IT_CODE" = ANY($4::text[])`,

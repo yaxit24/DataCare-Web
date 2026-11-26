@@ -107,10 +107,12 @@ function harness() {
     $executeRawUnsafe: vi.fn(async () => 1),
     $queryRawUnsafe: vi.fn(async (sqlValue: unknown, ...params: unknown[]) => {
       const sql = String(sqlValue);
+      if (sql.includes('"tenant_feature"')) return []; // dataTypes flag: default on
       if (sql.includes('FROM "auth_session"')) {
         return [
           {
             tenantId: TENANT_ID,
+            dataType: 'C',
             sessionId: SESSION_ID,
             loginName: LOGIN_NAME,
             loginCoCode: COMPANY,
@@ -144,6 +146,8 @@ function harness() {
             USER_DELETE: 'Y',
             USER_PRINT: 'Y',
             PASSWORD_RESET_REQUIRED: 'N',
+            allowed: 'ABC',
+            defaultType: 'C',
           },
         ];
       }

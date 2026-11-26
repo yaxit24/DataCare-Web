@@ -302,11 +302,39 @@ type Cookie = string;
         'S001',
       ]);
       response = await request(adminCookie, 'GET', `${API}/lookups/groups`);
-      expect(response.json().rows.map((r: { code: string }) => r.code)).toEqual(['G22', 'S92']);
+      // The group and product helps list every GROUP_MAST / PRODUCT_MAST row by name, so the installer rows seeded
+      // into the company (MS_YEAR.cs:1555-1592) come with this suite's own G22, S92, CH and RN.
+      expect(response.json().rows.map((r: { code: string }) => r.code)).toEqual([
+        '916',
+        'DM',
+        'EM',
+        'FGL',
+        'FSL',
+        'G22',
+        'GO',
+        'OG',
+        'OS',
+        'ORD',
+        'OT',
+        'S92',
+        'SL',
+        'SN',
+      ]);
       response = await request(adminCookie, 'GET', `${API}/lookups/products`);
       expect(response.json().rows).toEqual([
         { name: 'CHAIN', code: 'CH' },
+        { name: 'DIAMOND', code: 'DM' },
+        { name: 'EMITATION', code: 'EM' },
+        { name: 'FINE', code: 'FN' },
+        { name: 'HALL MARK CHARGES', code: 'HM' },
+        { name: 'OLD GOLD', code: 'OG' },
+        { name: 'OLD SILVER', code: 'OS' },
+        { name: 'ORDER GOLD', code: 'OD' },
+        { name: 'ORNAMENTS', code: 'OR' },
+        { name: 'OTHER', code: 'OT' },
         { name: 'RING', code: 'RN' },
+        { name: 'RODIAM CHARGES', code: 'RD' },
+        { name: 'STONE', code: 'SN' },
       ]);
       expect((await request(adminCookie, 'GET', `${API}/lookups/colours`)).statusCode).toBe(400);
     });

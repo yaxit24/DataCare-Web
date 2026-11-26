@@ -17,7 +17,7 @@ const exec = (sql: string, ...params: unknown[]) =>
   withTenant(owner, TENANT, (tx) => tx.$executeRawUnsafe(sql, ...params));
 
 async function clean(): Promise<void> {
-  for (const table of ['DM_DATA', 'ITEM_MAST', 'AC_MAST']) {
+  for (const table of ['DM_DATA', 'ITEM_MAST', 'AC_MAST', 'BOOK_DATA']) {
     await owner.$executeRawUnsafe(`DELETE FROM "${table}" WHERE tenant_id=$1`, TENANT);
   }
 }
@@ -98,5 +98,51 @@ databaseDescribe('RP_OTH_DETL other item report parity builder', () => {
     await expect(
       otherItemReport(runtime, { ...scope, filters: { state: 'GJ' } }, { mode: 'stud-inout' }),
     ).rejects.toThrow(/cannot filter by: state/);
+  });
+
+  it('keeps only the session data type (RP_OTH_DETL.cs:3857-3863): book type for vouchers, own type for opening rows', async () => {
+    // SAL is a type-A book, PUR a type-B book; the opening book 000 has no BOOK_DATA row.
+    await exec(
+      `INSERT INTO "BOOK_DATA"(tenant_id,"CO_CODE","LC_CODE","CO_BOOK","BOOK_NAME","BOOK_SNAME","MAIN_BOOK","DATA_TYPE")
+       VALUES ($1,$2,$3,'SAL','Sale','SAL','SALES','A'),
+              ($1,$2,$3,'PUR','Purchase','PUR','PURCHASE','B')`,
+      TENANT,
+      CO,
+      LC,
+    );
+    await exec(
+      `INSERT INTO "DM_DATA"(tenant_id,"CO_CODE","LC_CODE","CO_YEAR","CO_BOOK","VCH_NO","MAIN_SRNO","SR_NO","ISR_NO","VCH_DATE","ENTRY_TYPE","BOOK_NAME","IT_CODE","DM_SIGN","DM_PCS","DM_WT","DATA_TYPE")
+       VALUES ($1,$2,$3,$4,'000','00009',1,1,1,'2024-06-05','L','ITOBL','DMG','+',1,11,'A'),
+              ($1,$2,$3,$4,'000','00009',1,2,1,'2024-06-05','L','ITOBL','DMG','+',1,12,'B'),
+              ($1,$2,$3,$4,'000','00009',1,3,1,'2024-06-05','L','ITOBL','DMG','+',1,13,NULL)`,
+      TENANT,
+      CO,
+      LC,
+      YEAR,
+    );
+    const vouchers = async (dataType?: string) =>
+      (
+        await otherItemReport(runtime, { ...scope, dataType } as never, { mode: 'loose-inout' })
+      ).rows
+        .map((r: any) => `${r.coBook}:${r.weight}`)
+        .sort();
+    const books = async (dataType?: string) =>
+      [
+        ...new Set(
+          (
+            await otherItemReport(runtime, { ...scope, dataType } as never, { mode: 'stud-inout' })
+          ).rows.map((r: any) => r.coBook),
+        ),
+      ].sort();
+    // Loose rows: PUR/00003 (B book), opening 00009 sr 1 (A), 2 (B), 3 (NULL = A).
+    expect((await vouchers('A')).length).toBe(2);
+    expect((await vouchers('B')).length).toBe(2);
+    expect((await vouchers('C')).length).toBe(4);
+    expect(await vouchers('A')).toEqual(expect.arrayContaining(['000:11', '000:13']));
+    expect(await vouchers('B')).toEqual(expect.arrayContaining(['000:12', 'PUR:0.75']));
+    // Stud rows: SAL is type A.
+    expect(await books('A')).toEqual(['SAL']);
+    expect(await books('B')).toEqual([]);
+    expect(await books('C')).toEqual(['SAL']);
   });
 });

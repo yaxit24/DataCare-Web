@@ -75,8 +75,9 @@ d('company provisioning produces a postable company', () => {
     // 19 literal codes plus the six wholesale / rate-cut slot accounts (labour income and expense, silver
     // sale and purchase, other charges, fine kasar), plus BRANCH (the stock in/out branch account, N91),
     // plus WALKIN (the walk-in customer the sales screens default to, G124), plus ORDADV (the sale books'
-    // slot-4 order-advance account, N198), plus DISCOUNT (the purchase books' slot 5, N240).
-    expect(await count('AC_MAST')).toBe(30);
+    // slot-4 order-advance account, N198), plus DISCOUNT (the purchase books' slot 5, N240), plus the installer's
+    // sales-other, purchase-old-silver and purchase-other accounts (OTHSALE, OLDSLVPR, OTHPURC).
+    expect(await count('AC_MAST')).toBe(33);
   });
 
   it('creates every book with its posting legs', async () => {
@@ -157,6 +158,13 @@ d('company provisioning produces a postable company', () => {
       { b: 'SL', s: 4, a: 'ORDADV' },
       { b: 'SOR', s: 1, a: 'CASH' },
     ]);
+    const orderDirection: any[] = await withTenant(prisma, tenantId, (tx: any) =>
+      tx.$queryRawUnsafe(
+        `SELECT "BOOK_INOUT" io FROM "BOOK_DATA" WHERE "CO_CODE"=$1 AND "CO_BOOK"='SOR'`,
+        CO,
+      ),
+    );
+    expect(orderDirection).toEqual([{ io: 'I' }]);
   });
 
   it('provisions karigar and Jadtar issue/receipt books so a fresh company can use them (G19)', async () => {

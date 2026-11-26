@@ -42,7 +42,8 @@
     "size:audit": "node scripts/check-size-budget.mjs --audit",
     "advisories": "node scripts/check-advisories.mjs",
     "progress": "node scripts/generate-standard-progress.mjs",
-    "progress:check": "node scripts/generate-standard-progress.mjs --check"
+    "progress:check": "node scripts/generate-standard-progress.mjs --check",
+    "oracle:replay": "node scripts/parity-test-env.mjs -- node apps/api/integration/replay-desktop.mjs"
   },
   "devDependencies": {
     "@types/node": "24.19.0",

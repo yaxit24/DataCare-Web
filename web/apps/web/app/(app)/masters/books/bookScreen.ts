@@ -36,6 +36,7 @@ export interface ListRow {
   trfr: string;
 }
 export interface Header {
+  dataType: string;
   code: string;
   name: string;
   short: string;
@@ -56,6 +57,7 @@ export interface SlotView {
   acName: string;
 }
 export const blankHeader: Header = {
+  dataType: 'A',
   code: '',
   name: '',
   short: '',

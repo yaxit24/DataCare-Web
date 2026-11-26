@@ -8,13 +8,19 @@ import {
   type Dimension,
   type Filters,
   type MovementResult,
+  type MovementRow,
   type StockResult,
   type StockRow,
+  type ZoomAnswer,
 } from './types';
 
 /** The desktop's exact refusal texts (RP_STOCK.cs:4024 / :3237). */
 export const NO_PRINT_RIGHTS = 'You Have No Print Rights.....';
 
+/** MDI_FORM.cs:7047: the menu refuses a user without the View right with this text and the screen stays closed. */
+export const NO_RIGHTS = 'You Have No Rights.....';
+
+const ITEM_OPENING_REFUSAL = 'This Is a Item Wise Opening Stock Voucher You Cant Zoom ....';
 const BASE = '/reports/stock-report';
 
 /** The query one run was made with; the drill-down and the exports repeat it so every view agrees. */
@@ -55,6 +61,10 @@ export function useStockReport() {
   const [error, setError] = useState('');
   const [message, setMessage] = useState('');
   const [busy, setBusy] = useState(false);
+  const [noRights, setNoRights] = useState(false);
+  const [itemLot, setItemLot] = useState(false);
+  const merged = useRef(false);
+  const [futureWarning, setFutureWarning] = useState('');
   /** The filters of the run on screen. */
   const ran = useRef<{ filters: Filters; dimension: Dimension } | null>(null);
 
@@ -74,10 +84,15 @@ export function useStockReport() {
           itemType: d.itemType,
           gross: d.grossWeight,
         }));
+        setFutureWarning(d.futureVoucher?.message ?? '');
+        setItemLot(Boolean(d.itemLot));
+        merged.current = Boolean(d.companyMerge);
         setReady(true);
       })
       .catch((e) => {
-        if (live) setError(messageOf(e));
+        if (!live) return;
+        if (e instanceof ApiError && e.status === 403) setNoRights(true);
+        else setError(messageOf(e));
       });
     return () => {
       live = false;
@@ -125,6 +140,32 @@ export function useStockReport() {
 
   const back = useCallback(() => setMovements(null), []);
 
+  /** Double click on a movement row: the screen to open, or the desktop's refusal (RP_STOCK.cs:5218-5263). */
+  const zoom = useCallback(async (row: MovementRow): Promise<ZoomAnswer | null> => {
+    // Nothing opens while the companies' stock is merged (RP_STOCK.cs:5225).
+    if (merged.current) return { action: 'none' };
+    setMessage('');
+    // The server answers in the desktop's order: unknown book, then View right, then the Item Opening refusal
+    // (RP_STOCK.cs:5228-5263). The web's Item Opening rows carry the placeholder book '000', which has no BOOK_DATA
+    // row (the desktop's own item-opening book has one), so a short voucher number there answers the Item Opening
+    // text here; any real book goes to the server first.
+    if ((row.vchNo ?? '').trim().length < 3 && (!row.coBook || row.coBook === '000')) {
+      setMessage(ITEM_OPENING_REFUSAL);
+      return { action: 'refuse', message: ITEM_OPENING_REFUSAL };
+    }
+    if (!row.coBook) return null;
+    try {
+      const answer = await get<ZoomAnswer>(
+        `${BASE}/zoom?coBook=${encodeURIComponent(row.coBook)}&vchNo=${encodeURIComponent(row.vchNo ?? '')}`,
+      );
+      if (answer.action === 'refuse') setMessage(answer.message);
+      return answer;
+    } catch (e) {
+      setError(messageOf(e));
+      return null;
+    }
+  }, []);
+
   /** Ticking Gross Wise Weight clears an open drill-down but does NOT refresh the summary (RP_STOCK.cs:5710). */
   const setGross = useCallback(
     (gross: boolean) => {
@@ -146,13 +187,22 @@ export function useStockReport() {
       setFiltersState({
         ...EMPTY_FILTERS,
         fromDate: d.fromDate,
-        toDate: d.toDate,
+        toDate: d.systemDate,
         itemType: d.itemType,
         gross: d.grossWeight,
       });
     } catch (e) {
       setError(messageOf(e));
     }
+  }, []);
+
+  /** The query of the run on screen, for the documents that repeat it (the InOut ledger uses its dates). */
+  const ranFilters = useCallback(() => ran.current?.filters ?? null, []);
+
+  /** The printed document of the run on screen: the same query, as a PDF (RP_STOCK.cs:4020). */
+  const printUrl = useCallback((): string | null => {
+    const r = ran.current;
+    return r ? `/api${BASE}/export.pdf?${queryOf(r.filters, r.dimension).toString()}` : null;
   }, []);
 
   /** Print and Excel need the Print right: the API answers 403 and the screen shows the desktop text. */
@@ -182,11 +232,18 @@ export function useStockReport() {
     error,
     message,
     busy,
+    noRights,
+    itemLot,
+    futureWarning,
     run,
     drill,
+    zoom,
+    notify: setMessage,
     back,
     clear,
     exportFile,
+    printUrl,
+    ranFilters,
     dimension: ran.current?.dimension ?? null,
   };
 }

@@ -61,6 +61,8 @@ export interface StockResult {
 }
 export interface MovementRow {
   vchType: string | null;
+  /** The book of the voucher (CO_BOOK), which decides the entry screen a double click opens. */
+  coBook?: string | null;
   partyName: string;
   vchNo: string | null;
   vchDate: string | null;
@@ -79,10 +81,18 @@ export interface MovementResult {
   totals: { pcs: number; gwt: number; nwt: number; fine: number };
 }
 export interface Defaults {
+  /** CO_STK_MERGE: nothing opens from a movement row while merged (RP_STOCK.cs:5225). */
+  companyMerge?: boolean;
   fromDate: string;
   toDate: string;
+  /** What Cancel resets To to; To itself is a future voucher's date when one exists. */
+  systemDate: string;
   itemType: string;
   grossWeight: boolean;
+  /** ITM_WITH_LOT_STK = Y: the Safe button reads Item Lot and its drill-down shows the lot (RP_STOCK.cs:3701, :3102). */
+  itemLot?: boolean;
+  /** RP_STOCK.cs:3713: a movement dated after today; the screen shows `message` once on open. */
+  futureVoucher: { bookName: string; vchNo: string; vchDate: string; message: string } | null;
 }
 
 export interface Filters {
@@ -131,3 +141,17 @@ export const DRILL_COLUMNS: Array<{
   { column: 'sale', pcs: 'slPcs', wt: 'slWt', caption: ['SlPcs', 'SlWt'] },
   { column: 'closing', pcs: 'clPcs', wt: 'clWt', caption: ['ClPcs', 'ClWt'] },
 ];
+
+/** What a double click on a movement row does (GET /reports/stock-report/zoom). */
+export type ZoomAnswer =
+  | { action: 'none' }
+  | { action: 'refuse'; message: string }
+  | {
+      action: 'open';
+      path: string;
+      vchNo: string;
+      coBook: string;
+      coYear: string;
+      lcCode: string;
+      mode?: string;
+    };

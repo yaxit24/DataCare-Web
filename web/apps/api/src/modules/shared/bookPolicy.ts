@@ -1,4 +1,5 @@
 import type { VoucherScope } from '../vouchers/numbering.js';
+import { assertBookTypeInContextTx } from '../auth/bookDataType.js';
 export class BookPolicyValidationError extends Error {
   constructor(message: string) {
     super(message);
@@ -54,6 +55,13 @@ export const workflowPolicy: Record<BookWorkflow, { mainBook: string; inout: 'I'
   'VP PARCEL': { mainBook: 'VP PARCEL', inout: 'O' },
 };
 
+/**
+ * The desktop opens any SALES ORDER book whatever its BOOK_INOUT (CurBookHelp, DC_Main.cs:1495-1536) and its own standard
+ * Sales Order books are 'I' (MS_UPDATE.cs:31987, :17799-17831), so the direction is not a validity check for them.
+ * The order writer (salesOrder.ts resolveOrderBookTx) already accepts both.
+ */
+const ANY_DIRECTION: ReadonlySet<BookWorkflow> = new Set<BookWorkflow>(['SALES ORDER']);
+
 export async function resolveBookPolicyTx(
   tx: any,
   scope: VoucherScope,
@@ -61,6 +69,8 @@ export async function resolveBookPolicyTx(
   options: { requireExplicitMainBook?: boolean; expectedTable?: string } = {},
 ): Promise<BookPolicy> {
   const expected = workflowPolicy[workflow];
+  // An A or B request may not load, post or delete through a book of the other data type (bookDataType.ts).
+  await assertBookTypeInContextTx(tx, scope);
   const rows: Array<Record<string, unknown>> = await tx.$queryRawUnsafe(
     `SELECT "CO_BOOK","BOOK_SNAME","BOOK_NAME","MAIN_BOOK","BOOK_INOUT","BOOK_TBL_NAME"
        FROM "BOOK_DATA"
@@ -102,7 +112,7 @@ export async function resolveBookPolicyTx(
   const configuredInout = String(row.BOOK_INOUT ?? '')
     .trim()
     .toUpperCase();
-  if (configuredInout && configuredInout !== expected.inout) {
+  if (configuredInout && configuredInout !== expected.inout && !ANY_DIRECTION.has(workflow)) {
     throw new BookPolicyValidationError(
       `book ${scope.coBook} direction is ${configuredInout}, expected ${expected.inout}`,
     );
@@ -127,6 +137,7 @@ export async function resolveBookAccountTx(
   policy: BookPolicy,
   srNo: number,
 ): Promise<string> {
+  await assertBookTypeInContextTx(tx, scope);
   const rows: Array<Record<string, unknown>> = await tx.$queryRawUnsafe(
     `SELECT "AC_CODE"
        FROM "BOOK_DETL"
@@ -162,6 +173,7 @@ export async function resolveBookSlotRowTx(
   scope: VoucherScope,
   srNo: number,
 ): Promise<Record<string, string | null>> {
+  await assertBookTypeInContextTx(tx, scope);
   const rows: Array<Record<string, unknown>> = await tx.$queryRawUnsafe(
     `SELECT "CO_CODE"::text AS "CO_CODE","LC_CODE"::text AS "LC_CODE","CO_BOOK"::text AS "CO_BOOK",
         "MAIN_BOOK"::text AS "MAIN_BOOK","BOOK_INOUT"::text AS "BOOK_INOUT","BOOK_TYPE"::text AS "BOOK_TYPE",
@@ -183,4 +195,76 @@ export async function resolveBookSlotRowTx(
     );
   }
   return rows[0] as Record<string, string | null>;
+}
+
+/** A client-visible refusal (never a 500): the book named by a posting row cannot give a data type. */
+export class BookDataTypeError extends Error {
+  readonly statusCode: number;
+  constructor(
+    code: 'book-data-type-unavailable' | 'book-data-type-missing-key',
+    statusCode: number,
+  ) {
+    super(code);
+    this.name = 'BookDataTypeError';
+    this.statusCode = statusCode;
+  }
+}
+
+/**
+ * MS_BOOK.cs:2628-2671 stamps every slot of a book with the book's type. BOOK_DETL is keyed by company, location and
+ * book (it has no year column). A row that names no book, location or company is refused, never defaulted.
+ *
+ * A book with no BOOK_DETL slots at the row's location (an empty slot list, or a book kept at location '00' or NULL)
+ * takes BOOK_DATA.DATA_TYPE, the column the desktop re-stamps posted rows from (TR_SALE.cs:16105-16107), the row's own
+ * location first; only a book unknown to both tables falls back to 'A' (blank is 'A', MS_BOOK.cs:2524).
+ *
+ * `cache` (one per posting) answers repeated rows of the same book without a second lookup.
+ */
+export async function resolveBookDataTypeTx(
+  tx: any,
+  tenantId: string,
+  row: Record<string, unknown>,
+  cache?: Map<string, string>,
+): Promise<string> {
+  const key = [row.CO_CODE, row.LC_CODE, row.CO_BOOK].map((v) =>
+    typeof v === 'string' ? v.trim() : '',
+  );
+  if (key.some((v) => !v)) throw new BookDataTypeError('book-data-type-missing-key', 400);
+  const cacheKey = key.join('|');
+  const cached = cache?.get(cacheKey);
+  if (cached) return cached; // already checked against the request's data type on first resolve
+  const rows: Array<{ dataType: string }> = await tx.$queryRawUnsafe(
+    `SELECT DISTINCT coalesce(nullif(btrim("DATA_TYPE"),''),'A') AS "dataType" FROM "BOOK_DETL"
+     WHERE tenant_id=$1 AND "CO_CODE"=$2 AND "LC_CODE"=$3 AND "CO_BOOK"=$4`,
+    tenantId,
+    ...key,
+  );
+  let dataType: string;
+  let known = true;
+  if (rows.length === 0) {
+    const book: Array<{ dataType: string }> = await tx.$queryRawUnsafe(
+      `SELECT coalesce(nullif(btrim("DATA_TYPE"),''),'A') AS "dataType" FROM "BOOK_DATA"
+        WHERE tenant_id=$1 AND "CO_CODE"=$2 AND "CO_BOOK"=$4
+          AND ("LC_CODE"=$3 OR "LC_CODE"='00' OR "LC_CODE" IS NULL OR btrim("LC_CODE")='')
+        ORDER BY CASE WHEN "LC_CODE"=$3 THEN 0 ELSE 1 END LIMIT 1`,
+      tenantId,
+      ...key,
+    );
+    // The book form offers only A and B (MS_BOOK.cs:2524); any other stored letter is read as 'A'.
+    dataType = book[0]?.dataType === 'B' ? 'B' : 'A';
+    known = book.length > 0;
+  } else if (rows.length !== 1 || !['A', 'B'].includes(rows[0]!.dataType)) {
+    // MS_BOOK writes the same DATA_TYPE to every slot (:2628-2671). Refuse inconsistent configuration.
+    throw new BookDataTypeError('book-data-type-unavailable', 409);
+  } else dataType = rows[0]!.dataType;
+  cache?.set(cacheKey, dataType);
+  // A posted row whose book is of the other data type is refused inside an A or B request (bookDataType.ts). A book
+  // unknown to both tables is left to the writer's own checks.
+  if (known)
+    await assertBookTypeInContextTx(
+      tx,
+      { tenantId, coCode: key[0], lcCode: key[1], coBook: key[2] },
+      dataType,
+    );
+  return dataType;
 }

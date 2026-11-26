@@ -229,7 +229,6 @@ export const extendedHeaderFields: Array<[string, string]> = [
   ['chequeNo', 'Cheque No'],
   ['cardAc', 'Card A/c'],
   ['cardAdj', 'Card Adj'],
-  ['cashAc', 'Cash A/c'],
   ['address1', 'Address 1'],
   ['address2', 'Address 2'],
   ['address3', 'Address 3'],

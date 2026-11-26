@@ -30,6 +30,7 @@ const PUBLIC = new Set([
 
 const SYSTEM = new Set([
   'GET /me',
+  'POST /auth/data-type',
   'POST /auth/password/change',
   'GET /context/companies',
   'GET /context/locations',
@@ -1083,8 +1084,13 @@ route('Reports/Stock Report', [
   'GET /reports/stock-report',
   'GET /reports/stock-report/defaults',
   'GET /reports/stock-report/movements',
+  'GET /reports/stock-report/zoom',
+  'GET /reports/stock-report/item-ledger/items',
   'GET /reports/stock-report/export.csv',
   'GET /reports/stock-report/export.xlsx',
+  'GET /reports/stock-report/export.pdf',
+  'GET /reports/stock-report/item-ledger',
+  'GET /reports/stock-report/item-ledger.pdf',
 ]);
 // WP-18: the RP_HUID screen, its exports and their print gate live in routes/huidReport.ts. The export
 // paths are classified read here; the handler itself re-checks the print right (USER_SET.FRM_PRINT) and
@@ -1219,6 +1225,7 @@ const PRINT_ROUTES = new Set([
   'GET /reports/gst-report/workbook.xlsx',
   'GET /reports/stock-report/export.csv',
   'GET /reports/stock-report/export.xlsx',
+  'GET /reports/stock-report/export.pdf',
   'GET /reports/purchase-report/export.csv',
   'GET /reports/purchase-report/export.xlsx',
   'GET /reports/purchase-report/export.pdf',

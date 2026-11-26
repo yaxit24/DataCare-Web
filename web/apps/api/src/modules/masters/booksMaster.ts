@@ -70,6 +70,8 @@ export const BOOK_MESSAGES = {
   usedInAccounts: 'You Cant Delete Record This Book Code Use in Account Transection....',
   usedInStock: 'You Cant Delete Record This Book Code Use in Stock Transection....',
   familyLocked: 'This book already has vouchers, so its Transaction Name cannot be changed.',
+  // Owner decision 2026-11-25 (the desktop has no such rule; it follows the family lock, D4).
+  dataTypeLocked: 'This book already has vouchers, so its Data Type cannot be changed.',
 } as const;
 /** tBkCode_Validating (MS_BOOK.cs:2778) and tBkName_Validating (:2800). */
 export const bookCodeTakenMessage = (name: string): string =>
@@ -120,6 +122,7 @@ export interface BookView {
   family: string;
   itemType: string;
   inout: string;
+  dataType?: string;
   bookType: string;
   vchSeries: string;
   resetBook: string;
@@ -198,6 +201,36 @@ async function voucherUseTx(
     code,
   );
   return { accounts: Boolean(row?.accounts), stock: Boolean(row?.stock) };
+}
+
+/**
+ * The voucher tables a book's rows are keyed into by CO_BOOK (the ledger and stock families that carry the book's type,
+ * posting/dataType.ts, plus every family's header table, DESKTOP_BOOK_TABLES). Web-only lock (owner decision 2026-11-25):
+ * the desktop lets MS_BOOK change DATA_TYPE at any time (MS_BOOK.cs:2524, :2628-2671), which would leave posted rows
+ * stamped with the old type while new ones get the new type.
+ */
+const TYPE_LOCK_TABLES = [
+  'AC_DATA',
+  'LEDR_AC_DATA',
+  'FINE_DATA',
+  'ROJ_MEL_DATA',
+  'MAIN_STOCK',
+  'BAR_DETL',
+  'BAR_CAN_DETL',
+  ...new Set(Object.values(DESKTOP_BOOK_TABLES).map((t) => t.table)),
+] as const;
+
+/** Whether any voucher row of the company names the book (the Data Type lock). */
+async function typeLockedTx(tx: any, scope: BooksScope, code: string): Promise<boolean> {
+  const [row] = await tx.$queryRawUnsafe(
+    `SELECT ${TYPE_LOCK_TABLES.map(
+      (t) => `EXISTS(SELECT 1 FROM "${t}" WHERE tenant_id=$1 AND "CO_CODE"=$2 AND "CO_BOOK"=$3)`,
+    ).join(' OR ')} AS used`,
+    scope.tenantId,
+    scope.coCode,
+    code,
+  );
+  return Boolean(row?.used);
 }
 
 async function accountNamesTx(
@@ -413,6 +446,7 @@ export async function getBook(
       family: text(head.MAIN_BOOK),
       itemType: comboLetter(head.ITM_TYPE, 'AGS', 'A'),
       inout: comboLetter(head.BOOK_INOUT, 'IO', 'I'),
+      dataType: text(head.DATA_TYPE) || 'A',
       bookType: comboLetter(head.BOOK_TYPE, 'FTM', 'F'),
       vchSeries: text(head.BOOK_SR_NAME),
       resetBook: text(head.RESET_BOOK),
@@ -563,7 +597,12 @@ export async function saveBook(
       bookType = text(stored.BOOK_TYPE) || h.bookType;
       mobileEntry = text(stored.WITH_MOBILE_ENTRY);
     }
-    const dataType = text(stored?.DATA_TYPE) || 'A';
+    const dataType = text(input.values.dataType ?? stored?.DATA_TYPE) || 'A';
+    if (!['A', 'B'].includes(dataType))
+      throw new BooksMasterValidationError('Data Type must be A or B');
+    if (stored && dataType !== (text(stored.DATA_TYPE) || 'A')) {
+      if (await typeLockedTx(tx, scope, h.code)) fail(BOOK_MESSAGES.dataTypeLocked);
+    }
     const tables = DESKTOP_BOOK_TABLES[h.family];
     const header: Record<string, unknown> = {
       BOOK_NAME: h.name,

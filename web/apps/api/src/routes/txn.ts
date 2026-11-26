@@ -714,6 +714,7 @@ export interface TxnDeps {
     sub: string;
     coCode: string;
     lcCode: string;
+    dataType?: string;
     coYear?: string;
     loginCoCode: string;
     // Optional in this shared dependency for unrelated legacy route harnesses; the guarded PUT
@@ -726,6 +727,7 @@ export interface TxnDeps {
     tenantId: string;
     coCode: string;
     lcCode: string;
+    dataType?: string;
     coYear?: string;
     coBook?: string;
   };
@@ -843,6 +845,7 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
     const iso = (v?: string): string | undefined =>
       v && /^\d{4}-\d{2}-\d{2}$/.test(v) ? v : undefined;
     return {
+      dataType: sess(req).dataType,
       tenantId: scope.tenantId,
       coCode: scope.coCode,
       lcCode: scope.lcCode,
@@ -1088,6 +1091,7 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
     run,
     body,
     mainUserOf: (req: FastifyRequest) => sess(req).sub,
+    dataTypeOf: (req: FastifyRequest) => sess(req).dataType ?? 'C',
     standardDocumentCopy,
   };
   registerCrmRoutes(app, extraRouteHelpers);
@@ -2198,6 +2202,7 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
           coYear: s.coYear,
           coBook: String(s.coBook),
           vchNo: String(q.vchNo),
+          orderDataType: sess(req).dataType,
           orderFamily: family,
           copy: q.copy as OrderReportCopy | undefined,
         });
@@ -4180,6 +4185,7 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
         coYear: s.coYear ?? '',
         fromDate: s.fromDate,
         toDate: s.toDate,
+        dataType: s.dataType,
         filters: s.filters,
       },
       (req.query ?? {}) as Record<string, unknown>,
@@ -4432,7 +4438,7 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
     pdfRenderer: deps.pdfRenderer,
   }); // WP-12 Purchase Rpt (RP_ALL)
   registerTagStockRoutes(app, { prisma, auth, guard, scopeOf });
-  registerStockReportRoutes(app, { prisma, auth, guard, readScope }); // WP-16 Stock Report (RP_STOCK)
+  registerStockReportRoutes(app, { prisma, auth, guard, readScope, sendReportPdf }); // WP-16 Stock Report (RP_STOCK)
 
   // Screens for four reports registered only in REPORT_BUILDERS (exports worked, screens 404'd —
   // PARITY-EVALUATION-2026-09-28 D3; the HuId Report moved to its own plugin above). Each calls the
@@ -6498,6 +6504,7 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
         coYear: s.coYear!,
         coBook: String(s.coBook),
         vchNo: String(q.vchNo ?? ''),
+        orderDataType: sess(req).dataType,
         orderFamily: q.orderFamily,
         copy: q.copy,
       });
