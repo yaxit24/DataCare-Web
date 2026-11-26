@@ -408,7 +408,9 @@ describe.skipIf(!RUN)(
       await rows(`UPDATE "OP_DETL" SET "DATA_TYPE"=NULL WHERE tenant_id=$1 RETURNING 1`, TENANT);
       await rows(`UPDATE "OP_DATA" SET "DATA_TYPE"='' WHERE tenant_id=$1 RETURNING 1`, TENANT);
       expect((await getPartyOpening(runtime, scope, PARTY)).bills).toHaveLength(1);
-      expect((await getPartyOpening(runtime, { ...scope, dataType: 'B' }, PARTY)).bills).toEqual([]);
+      expect((await getPartyOpening(runtime, { ...scope, dataType: 'B' }, PARTY)).bills).toEqual(
+        [],
+      );
       await deletePartyOpening(runtime, scope, PARTY, 'CLERK');
       expect(await rows(`SELECT 1 FROM "OP_DETL" WHERE tenant_id=$1`, TENANT)).toHaveLength(0);
       expect(await opData(PARTY)).toHaveLength(0);

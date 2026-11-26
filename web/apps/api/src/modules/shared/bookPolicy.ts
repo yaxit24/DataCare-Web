@@ -262,9 +262,9 @@ export async function resolveBookDataTypeTx(
   // unknown to both tables is left to the writer's own checks.
   if (known)
     await assertBookTypeInContextTx(
-    tx,
-    { tenantId, coCode: key[0], lcCode: key[1], coBook: key[2] },
-    dataType,
-  );
+      tx,
+      { tenantId, coCode: key[0], lcCode: key[1], coBook: key[2] },
+      dataType,
+    );
   return dataType;
 }

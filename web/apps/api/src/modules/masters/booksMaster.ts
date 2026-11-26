@@ -224,8 +224,7 @@ const TYPE_LOCK_TABLES = [
 async function typeLockedTx(tx: any, scope: BooksScope, code: string): Promise<boolean> {
   const [row] = await tx.$queryRawUnsafe(
     `SELECT ${TYPE_LOCK_TABLES.map(
-      (t) =>
-        `EXISTS(SELECT 1 FROM "${t}" WHERE tenant_id=$1 AND "CO_CODE"=$2 AND "CO_BOOK"=$3)`,
+      (t) => `EXISTS(SELECT 1 FROM "${t}" WHERE tenant_id=$1 AND "CO_CODE"=$2 AND "CO_BOOK"=$3)`,
     ).join(' OR ')} AS used`,
     scope.tenantId,
     scope.coCode,

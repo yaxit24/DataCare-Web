@@ -379,9 +379,7 @@ describe.skipIf(!RUN)('Item Opening = desktop TR_ITM_OPBL (N209, G222)', () => {
       rows: [line],
     });
     // Mark A's row as carried, as carryItemStock writes it (DATA_TYPE 'A', CARRIED_FROM set).
-    await rows(
-      `UPDATE "ITM_OPBL" SET "CARRIED_FROM"='2024' WHERE tenant_id=$1 RETURNING 1`,
-    );
+    await rows(`UPDATE "ITM_OPBL" SET "CARRIED_FROM"='2024' WHERE tenant_id=$1 RETURNING 1`);
     // B saves the same figures: written as B's own opening, with stock and no carried marker.
     await saveItemOpening(runtime, {
       scope: asB,
