@@ -16,11 +16,13 @@
  *        LEFT JOIN AC_MAST D ON C.AC_CODE = D.AC_CODE
  *   WHERE A.CO_CODE=.. AND A.LC_CODE=.. AND A.CO_YEAR=..
  *     AND B.MAIN_BOOK IN ('PURCHASE','B2B PURC') AND B.BOOK_INOUT = 'I'
+ *     [AND A.CO_BOOK=..] [AND A.VCH_NO=..] AND A.LOT_NO <> ''
  *
  * Kept as an INSERT..SELECT rather than rebuilt in TypeScript so every value comes from the same
  * source rows and joins the desktop uses — nothing is recomputed or substituted here. Note the
- * desktop stamps `HD_VCH_NO` with `A.VCH_NO` (not the hidden number) and applies no LOT_NO filter,
- * both reproduced exactly.
+ * desktop stamps `HD_VCH_NO` with `A.VCH_NO` (not the hidden number), reproduced exactly. Only lines that name a
+ * lot are copied: the statement ends `AND A.LOT_NO <> ''` (SQL Server ignores trailing blanks, and NULL fails the
+ * test), so a purchase without lot numbers writes no LOT_DETL row.
  */
 export interface LotRegisterScope {
   coCode: string;
@@ -45,6 +47,8 @@ export async function stagePurchaseLotDetailTx(
     'a."CO_YEAR"=$4',
     `b."MAIN_BOOK" IN ('PURCHASE','B2B PURC')`,
     `b."BOOK_INOUT" = 'I'`,
+    // Ac_Stock.cs:624 `AND A.LOT_NO <> ''`.
+    `btrim(coalesce(a."LOT_NO"::text,'')) <> ''`,
   ];
   const params: unknown[] = [tenantId, scope.coCode, scope.lcCode, scope.coYear];
   if (coBook) {
