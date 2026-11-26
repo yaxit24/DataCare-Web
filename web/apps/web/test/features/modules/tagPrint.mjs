@@ -362,11 +362,6 @@ const sheetResult = (observation, expected, html, extra = {}) => ({
   output: Buffer.from(html),
   ...extra,
 });
-const blockedCase = (name, group, reason) => ({
-  ...C(name, group, 'read-only', `cases.md tag-print.${name}`, async () => ({})),
-  blocked: reason,
-});
-
 export const tagPrint = {
   feature: 'tag-print',
   title: 'Other → Tag Print (UT_TAG_PRINT)',
@@ -1587,10 +1582,29 @@ export const tagPrint = {
           return sheetResult('no sub-report line', 'none', html);
         }),
     ),
-    blockedCase(
+    C(
       'print.empty-file',
       'T06',
-      "what message should the web show when Print file Name is empty? The desktop passes the empty name to Crystal (UT_TAG_PRINT.cs:5209) and fails with Crystal's own error; no desktop text exists (study Gap 8). Until the owner fixes the text the web prints an empty choice in the BarPrint10 layout. Unblocks when the owner fixes the text.",
+      'refusal',
+      'UT_TAG_PRINT.cs:5209 an empty Print file Name makes the Crystal file name "<app>\\Report\\.RPT", which does not exist, so the desktop prints nothing; the web refuses the empty name like an unknown one (400 "Unknown print file: ") and stages nothing',
+      async (ctx) =>
+        withCase(ctx, async () => {
+          await putFiles(ctx, [['TAG', 'BarPrint10', 'Y']]);
+          const { page } = await ctx.session();
+          await openScreen(page);
+          const before = await staged(ctx);
+          const response = await page.request.post(`/api${API}/print`, {
+            data: { bookCode: BOOK, file: '', tags: TWO_TAGS },
+          });
+          assert.equal(response.status(), 400);
+          assert.ok((await response.text()).includes('Unknown print file: '));
+          assert.deepEqual(await staged(ctx), before);
+          return {
+            observation: '400 Unknown print file: (empty); the staging is untouched',
+            expected: '400',
+            database: { staged: before.length },
+          };
+        }),
     ),
     C(
       'required.unknown-file',

@@ -1,7 +1,7 @@
 'use client';
 import { useRouter } from 'next/navigation';
 import { useEffect, useMemo, useRef, useState, type KeyboardEvent as ReactKeyEvent } from 'react';
-import { get } from '../../../../lib/api';
+import { ApiError, get, getPageContextState } from '../../../../lib/api';
 import { LookupPicker } from '../../../../components/LookupPicker';
 import { useScreenEscape, type ScreenKeyEvent } from '../../../../lib/screenEscape';
 import { isoToDesktop, parseDesktopDate } from './dateText';
@@ -18,7 +18,8 @@ import { todayLocal } from '../../../../lib/localDate';
  * history. Footer sums cover every row of the report (the API has no row cap) and follow the search box.
  * Keys: Escape closes (RP_TAG.cs:3865), Down/Up on a selector moves to the grid (:3871), Enter in a date moves on
  * after the date mask check (DC_Main.cs:1641), Alt+I/O/M/E/C/X and the first-letter mnemonics run the buttons.
- * Not here: the voucher zoom, Print window and Crystal layouts, the approval other-item columns (study gaps 10, 11, 13).
+ * Print and Summ open the print window (RP_TAG.cs:8578, :8755); its layout is the web's table, not the Crystal template.
+ * A double click on a Tag row opens its voucher (RP_TAG.cs:8917); Apr can add the other detail items (:4221).
  */
 const MODES: Array<{ tab: TagStockTab; label: string; alt: string }> = [
   { tab: 'stock', label: 'Stock Tag', alt: 's' },
@@ -77,6 +78,38 @@ export default function TagStockPage() {
   };
   const sixth = () => (summ ? productStock() : go('all'));
   const exit = () => router.back();
+  /**
+   * DGV_DoubleClick (RP_TAG.cs:8917-9140): the voucher of the row opens in its own screen. Nothing happens in Tag Summ
+   * (:8920) or when the Location box is not the session location. A target the user may not open answers with the
+   * desktop text "You Have No Rights..." (:8943).
+   */
+  const zoom = async (index: number) => {
+    const row = rows[index];
+    if (!row || summ || report?.view !== 'tag') return;
+    if (filters.lcCode.trim().toUpperCase() !== (getPageContextState().context?.lcCode ?? ''))
+      return;
+    // A tag carried from an earlier year: the desktop's copy sits in book 000, which opens nothing (RP_TAG.cs:8924).
+    if (row.carried) return;
+    const book = String(row.book ?? '');
+    const vchNo = String(row.vchNo ?? '');
+    if (!book || !vchNo) return;
+    try {
+      const target = await get<{ path: string; query: Record<string, string> }>(
+        `/reports/tag-stock/zoom?bookCode=${encodeURIComponent(book)}&vchNo=${encodeURIComponent(vchNo)}`,
+      );
+      const query = new URLSearchParams({ ...target.query, vchNo, coBook: book });
+      router.push(`${target.path}?${query.toString()}`);
+    } catch (e) {
+      if (e instanceof ApiError && e.status === 403) t.setError('You Have No Rights...');
+      else if (!(e instanceof ApiError && e.status === 404)) t.setError('failed');
+    }
+  };
+  /** BtnSumm_Click (RP_TAG.cs:8847-8851): "Product Wise Group Report" Yes prints TagStkSummRpt, No TagStkItemSumRpt. */
+  const summPrint = () =>
+    void t.exportAs(
+      window.confirm('Product Wise Group Report') ? 'summ-product' : 'summ-item',
+      filters.search,
+    );
 
   /** The date mask: a typed date is checked on Enter; a bad one is refused, reset and kept selected. */
   const dateKey =
@@ -103,7 +136,7 @@ export default function TagStockPage() {
     m: () => go('mrp'),
     a: () => go('apr'),
     l: sixth,
-    e: () => t.exportAs('xlsx', filters.search),
+    e: () => void t.exportAs('xlsx', filters.search),
     c: () => {
       t.reset();
       setSelected(0);
@@ -275,13 +308,29 @@ export default function TagStockPage() {
           <button
             type="button"
             className="ghost"
-            onClick={() => t.exportAs('xlsx', filters.search)}
+            onClick={() => void t.exportAs('xlsx', filters.search)}
           >
             Excel
           </button>
-          <button type="button" className="ghost" onClick={() => t.exportAs('csv', filters.search)}>
+          <button
+            type="button"
+            className="ghost"
+            onClick={() => void t.exportAs('csv', filters.search)}
+          >
             CSV
           </button>
+          <button
+            type="button"
+            className="ghost"
+            onClick={() => void t.exportAs('print', filters.search)}
+          >
+            Print
+          </button>
+          {!summ && (
+            <button type="button" className="ghost" onClick={summPrint}>
+              Summ
+            </button>
+          )}
           <button type="button" className="ghost" onClick={alt.c}>
             Cancel
           </button>
@@ -375,6 +424,7 @@ export default function TagStockPage() {
           rows={rows}
           selected={selected}
           onSelect={setSelected}
+          onOpen={zoom}
           gridRef={grid}
         />
       )}

@@ -496,7 +496,7 @@ export async function tagPrintHmUpdate(
 export interface TagPrintStageInput {
   book: string;
   labelSkip?: string | number;
-  /** cboPrintfile.Text (UT_TAG_PRINT.cs:5200): the label file the print is for; checked against PRINT_MAST when given. */
+  /** cboPrintfile.Text (UT_TAG_PRINT.cs:5200): the label file the print is for; checked against PRINT_MAST when sent (an empty text is refused). */
   file?: string;
   tags: Array<{ tagNo: string; vchSrno: number }>;
 }
@@ -518,17 +518,21 @@ export async function tagPrintStage(
   const cols = TAG_PRINT_STAGING_COLUMNS.filter((c) => c !== 'CO_CODE').map((c) => `"${c}"`);
   const file = text(input.file);
   return withTxBudget(prisma, scope.tenantId, 'voucher', async (tx: any) => {
-    if (file) {
-      // The desktop hands any text to Crystal and fails at run time (:5209); the web refuses a name PRINT_MAST lacks,
-      // before anything is cleared.
+    // The desktop hands the combo text to Crystal as "<app>\\Report\\<text>.RPT" (:5209). An empty text names no
+    // report file, so Crystal cannot open it and nothing prints; the desktop has no message of its own. The web refuses
+    // an empty or unknown name, before anything is cleared. A request that sends no file at all (not the screen) is
+    // not checked.
+    if (input.file !== undefined) {
       const behavior = await resolveSettingsBehaviorTx(tx, scope);
-      const [known]: any[] = await tx.$queryRawUnsafe(
-        `SELECT 1 FROM "PRINT_MAST" WHERE tenant_id=$1 AND "CO_CODE"=$2 AND "PRINT_TYPE"=$3 AND "PRINT_FILE"=$4 LIMIT 1`,
-        scope.tenantId,
-        scope.coCode,
-        behavior.qrCodeGeneration ? 'QR' : 'TAG',
-        file,
-      );
+      const [known]: any[] = file
+        ? await tx.$queryRawUnsafe(
+            `SELECT 1 FROM "PRINT_MAST" WHERE tenant_id=$1 AND "CO_CODE"=$2 AND "PRINT_TYPE"=$3 AND "PRINT_FILE"=$4 LIMIT 1`,
+            scope.tenantId,
+            scope.coCode,
+            behavior.qrCodeGeneration ? 'QR' : 'TAG',
+            file,
+          )
+        : [];
       if (!known) throw new TagPrintValidationError(`Unknown print file: ${file}`);
     }
     await tx.$executeRawUnsafe(`DELETE FROM "TAG_PRINT_DATA" WHERE tenant_id=$1`, scope.tenantId);

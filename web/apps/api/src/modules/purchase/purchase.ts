@@ -554,6 +554,74 @@ interface WritePurchaseContext {
   persistedTagSrnos?: Map<string, number>;
   /** WP-28 (D6, D12): this voucher's PR_DETL rows read before the rewrite, by SR_NO. */
   persistedLines?: Map<number, Record<string, unknown>>;
+  /** This voucher's BAR_DETL rows read before the rewrite, by SR_NO (TR_PURC_HM keeps an unchanged tag's STK_DATE). */
+  persistedTags?: Map<number, Record<string, unknown>>;
+}
+
+/**
+ * TR_PURC_HM's "this line changed" test on save (TR_PURC_HM.cs:8185-8195), over the PR_DETL columns the reopen loads
+ * into the grid (TR_PURC_HM.cs:7467-7586, TAG PURCHASE). The desktop compares a SUM of the weight/amount columns
+ * (each read at its grid format, the sum at 0.000; TAG_NWT and TAG_FINE count twice; TAG_NWT falls back to ITM_NWT)
+ * and a concatenation of the text columns (HM_ID4 twice, HM_ID3 not at all), exactly as written there.
+ */
+function hallmarkLineSignature(row: Record<string, unknown>): string {
+  const v = (column: string, places: number) => Number(num(row[column]).toFixed(places));
+  const tagNwt = v('TAG_NWT', 3) || v('ITM_NWT', 3);
+  const tagFine = v('TAG_FINE', 2);
+  const sum =
+    // :8186 cols 9,10,12,21,41,45
+    v('BAG_WT', 3) +
+    num(row.ITM_PCS) +
+    v('ITM_GWT', 3) +
+    v('ITM_FINE', 3) +
+    tagNwt +
+    tagFine +
+    // :8187 cols 27,30,31,34,35
+    v('LBR_PRC', 2) +
+    v('LBR_AMT', 2) +
+    v('OTH_AMT', 2) +
+    v('TAG_COST', 2) +
+    v('ITM_MRP', 2) +
+    // :8188 cols 57,59,61,63,80
+    v('HM_ID_WT', 3) +
+    v('HM_ID2_WT', 3) +
+    v('HM_ID3_WT', 3) +
+    v('HM_ID4_WT', 3) +
+    num(row.OLD_SRNO) +
+    // :8189 cols 40,41,43,44,51
+    v('TAG_OTH_WT', 3) +
+    tagNwt +
+    v('TAG_TOUCH', 2) +
+    v('TAG_WEST_PRC', 2) +
+    v('TAG_OTH_AMT', 2) +
+    // :8190 cols 45,48,49,50,54
+    tagFine +
+    v('TAG_LBR_PRC', 2) +
+    v('TAG_LBR_RATE', 2) +
+    v('TAG_LBR_AMT', 2) +
+    v('TAG_MRP', 2) +
+    // :8191 cols 46,47,52,53
+    v('TAG_IT_RATE', 2) +
+    v('TAG_IT_AMT', 2) +
+    v('TAG_TOT_COST', 2) +
+    v('TAG_MARGIN_PRC', 2);
+  // :8193-8194 cols 1,4,5,8,3 then 55,58,62,62,86,56
+  const words = [
+    'IT_CODE',
+    'TBL_CODE',
+    'DESIGN_NO',
+    'ITM_SIZE',
+    'TAG_NO',
+    'HM_ID',
+    'HM_ID2',
+    'HM_ID4',
+    'HM_ID4',
+    'DESIGN_IMG_ID',
+    'KR_NAME',
+  ]
+    .map((column) => text(row[column]))
+    .join('');
+  return `${sum.toFixed(3)}|${words}`;
 }
 
 function completePurchaseScope(
@@ -1125,6 +1193,26 @@ async function writePurchaseTx(
     })),
   );
 
+  /**
+   * TR_PURC_HM.cs:8195-8197: an edit deletes and rewrites a tag's BAR_DETL row only when its line changed
+   * (hallmarkLineSignature); an unchanged tag keeps its row, so its STK_DATE stays the earlier one even when the
+   * voucher date moved. Only STK_DATE is kept here; every other column is written as before. The plain TR_PURC
+   * rewrites every tag with the voucher date (TR_PURC.cs:13298 deletes them all, :13347), so this is TAG PURCHASE
+   * (the TR_PURC_HM tag book) only.
+   */
+  const keptStkDate = (idx: number): string | undefined => {
+    if (!isTagBook || !ctx.isEdit) return undefined;
+    const prior = priorRows[idx];
+    if (!prior) return undefined;
+    const tag = ctx.persistedTags?.get(num(prior.SR_NO));
+    if (!tag || text(tag.TAG_NO) !== text(detl[idx]?.TAG_NO)) return undefined;
+    if (
+      hallmarkLineSignature(prior) !== hallmarkLineSignature(detl[idx] as Record<string, unknown>)
+    )
+      return undefined;
+    const kept = text(tag.STK_DATE);
+    return kept || undefined;
+  };
   const barDetl = isPurchaseQuotation
     ? []
     : computed.flatMap((c, idx) => {
@@ -1135,6 +1223,11 @@ async function writePurchaseTx(
             SR_NO: idx + 1,
             OLD_SRNO: idx + 1,
             VCH_DATE: vchDate,
+            // The tag's stock date is the voucher date (TR_PURC.cs:13347, TR_PURC_HM.cs:8212
+            // `dataRow["STK_DATE"] = mVchDate.Text`). BAR_DETL.STK_DATE is varchar here, written as the
+            // 10-character day like the MAIN_STOCK row below; without it the tag never passes a report's
+            // `STK_DATE <= To` (HuId Stock, RP_HUID.cs:1838).
+            STK_DATE: keptStkDate(idx) ?? vchDate.toISOString().slice(0, 10),
             VCH_TIME: sharedVoucherTime,
             VCH_TYPE: bookPolicy.vchType,
             INOUT_TYPE: 'I',
@@ -2549,6 +2642,18 @@ export async function editPurchase(
       writeInput = normalized.input;
       writeLines = normalized.lines;
     }
+    // The tags as stored before the rewrite (TR_PURC_HM keeps an unchanged tag's STK_DATE, see keptStkDate).
+    const priorTags: Array<Record<string, unknown>> = await tx.$queryRawUnsafe(
+      `SELECT "SR_NO","TAG_NO","STK_DATE" FROM "BAR_DETL"
+           WHERE tenant_id=$1 AND "CO_CODE"=$2 AND "LC_CODE"=$3 AND "CO_YEAR"=$4 AND "CO_BOOK"=$5 AND "VCH_NO"=$6
+           ORDER BY "SR_NO"`,
+      scope.tenantId,
+      scope.coCode,
+      scope.lcCode,
+      scope.coYear,
+      scope.coBook,
+      voucherNo,
+    );
     // TR_PURC.cs:12939-12944,13252,13297-13299,13548 replaces the full write set and temp row.
     // Desktop edit never writes DELETE_DATA.
     await deleteVoucherWriteSetTx(tx, {
@@ -2570,6 +2675,7 @@ export async function editPurchase(
       // Keeps each tag's identity across the rewrite; see WritePurchaseContext.persistedTagSrnos.
       persistedTagSrnos,
       persistedLines: new Map(priorLines.map((row) => [num(row.SR_NO), row])),
+      persistedTags: new Map(priorTags.map((row) => [num(row.SR_NO), row])),
     });
     if (isConsignmentPurchase) {
       await applyConsignmentPurchaseAdjustmentsTx(tx, scope, voucherNo, 1);

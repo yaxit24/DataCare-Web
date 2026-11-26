@@ -1,5 +1,7 @@
 import assert from 'node:assert/strict';
-import { readFile } from 'node:fs/promises';
+import { mkdtemp, readFile, rm } from 'node:fs/promises';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
 import { inflateRawSync } from 'node:zlib';
 import { USERS } from '../fixtures/catalogue.mjs';
 import { HUID_LC, cleanHuid, huidUser, seedHuid } from './huidSeed.mjs';
@@ -65,7 +67,7 @@ async function setWindow(page) {
 /** Clicks a view and waits for its API response, so the case reads the result and not the page before it. */
 async function runView(page, name) {
   const isReport = (r) =>
-    new URL(r.url()).pathname.startsWith('/api/reports/huid') && r.request().method() === 'GET';
+    new URL(r.url()).pathname === '/api/reports/huid' && r.request().method() === 'GET';
   const [res] = await Promise.all([page.waitForResponse(isReport), button(page, name).click()]);
   assert.equal(res.status(), 200, `${name}: report request status`);
 }
@@ -107,7 +109,17 @@ async function downloadOf(page, name) {
   const [file] = await Promise.all([page.waitForEvent('download'), button(page, name).click()]);
   return file;
 }
-const bytesOf = async (download) => readFile(await download.path());
+/** saveAs works for a local and a remote browser; download.path() does not when the browser runs in a container. */
+const bytesOf = async (download) => {
+  const dir = await mkdtemp(join(tmpdir(), 'huid-dl-'));
+  try {
+    const file = join(dir, 'download.bin');
+    await download.saveAs(file);
+    return await readFile(file);
+  } finally {
+    await rm(dir, { recursive: true, force: true });
+  }
+};
 const csvUrl = (url) => url.replace(/\/export\.\w+/, '/export.csv');
 const fetchText = (page, url) =>
   page.evaluate(async (u) => {
@@ -255,19 +267,7 @@ export const outputCases = [
     },
   ),
 
-  // T05 Children: blocked for this package (supervisor decision); no assertions.
-  {
-    ...C(
-      'huid-report.drill.double-click-opens-source-voucher',
-      'T05',
-      'RP_HUID.cs:2272 {{DC_Main.CurBookVch = ((ColumnView)GridView1).GetFocusedRowCellValue("VchNo")}}',
-      async () => {
-        throw new Error('blocked: not run');
-      },
-    ),
-    blocked:
-      'Blocked for this package (supervisor decision, 16 November 2026): the target voucher screens were not traced in the study (open question 4) and no drill-down handler is built.',
-  },
+  // T05 Children: the double-click zoom builds real vouchers, so it is in huidReportJourney.mjs.
 
   // T11 Scope and rights
   C(
