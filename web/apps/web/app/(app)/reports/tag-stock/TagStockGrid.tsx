@@ -35,12 +35,15 @@ export function TagStockGrid({
   rows,
   selected,
   onSelect,
+  onOpen,
   gridRef,
 }: {
   columns: TagStockColumn[];
   rows: TagStockRow[];
   selected: number;
   onSelect: (i: number) => void;
+  /** Double click on a row: the desktop opens the row's voucher (RP_TAG.cs:8917). */
+  onOpen?: (i: number) => void;
   gridRef: RefObject<HTMLDivElement | null>;
 }) {
   const totals = footerTotals(columns, rows);
@@ -69,6 +72,7 @@ export function TagStockGrid({
               key={`${r.tagNo ?? ''}-${r.tagId ?? ''}-${r.vchNo ?? ''}-${r.vchDate ?? ''}-${r.sign ?? ''}-${i}`}
               className={i === selected ? 'active' : undefined}
               onClick={() => onSelect(i)}
+              onDoubleClick={() => onOpen?.(i)}
               style={{ cursor: 'pointer' }}
             >
               {columns.map((c) => (

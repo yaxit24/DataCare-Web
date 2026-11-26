@@ -81,7 +81,7 @@ async function setFilters(page, f = {}) {
 /** Clicks a view and waits for its API response, so the case reads the result and not the page before it. */
 async function runView(page, name) {
   const isReport = (r) =>
-    new URL(r.url()).pathname.startsWith('/api/reports/huid') && r.request().method() === 'GET';
+    new URL(r.url()).pathname === '/api/reports/huid' && r.request().method() === 'GET';
   const [res] = await Promise.all([page.waitForResponse(isReport), button(page, name).click()]);
   assert.equal(res.status(), 200, `${name}: report request status`);
 }
@@ -283,7 +283,7 @@ export const filterCases = [
     'T02',
     `RP_HUID.cs:1768 {{DC_Main.RsQry += "AND C.HM_ID = '' ";}}`,
     (ctx) =>
-      showing(ctx, { ...WINDOW, hm: 'Without HuId' }, 'In Tag', [
+      showing(ctx, { ...WINDOW, hm: 'Whout HuId' }, 'In Tag', [
         'TG-002',
         'TG-003',
         'TG-004',

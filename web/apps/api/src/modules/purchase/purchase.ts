@@ -554,6 +554,74 @@ interface WritePurchaseContext {
   persistedTagSrnos?: Map<string, number>;
   /** WP-28 (D6, D12): this voucher's PR_DETL rows read before the rewrite, by SR_NO. */
   persistedLines?: Map<number, Record<string, unknown>>;
+  /** This voucher's BAR_DETL rows read before the rewrite, by SR_NO (TR_PURC_HM keeps an unchanged tag's STK_DATE). */
+  persistedTags?: Map<number, Record<string, unknown>>;
+}
+
+/**
+ * TR_PURC_HM's "this line changed" test on save (TR_PURC_HM.cs:8185-8195), over the PR_DETL columns the reopen loads
+ * into the grid (TR_PURC_HM.cs:7467-7586, TAG PURCHASE). The desktop compares a SUM of the weight/amount columns
+ * (each read at its grid format, the sum at 0.000; TAG_NWT and TAG_FINE count twice; TAG_NWT falls back to ITM_NWT)
+ * and a concatenation of the text columns (HM_ID4 twice, HM_ID3 not at all), exactly as written there.
+ */
+function hallmarkLineSignature(row: Record<string, unknown>): string {
+  const v = (column: string, places: number) => Number(num(row[column]).toFixed(places));
+  const tagNwt = v('TAG_NWT', 3) || v('ITM_NWT', 3);
+  const tagFine = v('TAG_FINE', 2);
+  const sum =
+    // :8186 cols 9,10,12,21,41,45
+    v('BAG_WT', 3) +
+    num(row.ITM_PCS) +
+    v('ITM_GWT', 3) +
+    v('ITM_FINE', 3) +
+    tagNwt +
+    tagFine +
+    // :8187 cols 27,30,31,34,35
+    v('LBR_PRC', 2) +
+    v('LBR_AMT', 2) +
+    v('OTH_AMT', 2) +
+    v('TAG_COST', 2) +
+    v('ITM_MRP', 2) +
+    // :8188 cols 57,59,61,63,80
+    v('HM_ID_WT', 3) +
+    v('HM_ID2_WT', 3) +
+    v('HM_ID3_WT', 3) +
+    v('HM_ID4_WT', 3) +
+    num(row.OLD_SRNO) +
+    // :8189 cols 40,41,43,44,51
+    v('TAG_OTH_WT', 3) +
+    tagNwt +
+    v('TAG_TOUCH', 2) +
+    v('TAG_WEST_PRC', 2) +
+    v('TAG_OTH_AMT', 2) +
+    // :8190 cols 45,48,49,50,54
+    tagFine +
+    v('TAG_LBR_PRC', 2) +
+    v('TAG_LBR_RATE', 2) +
+    v('TAG_LBR_AMT', 2) +
+    v('TAG_MRP', 2) +
+    // :8191 cols 46,47,52,53
+    v('TAG_IT_RATE', 2) +
+    v('TAG_IT_AMT', 2) +
+    v('TAG_TOT_COST', 2) +
+    v('TAG_MARGIN_PRC', 2);
+  // :8193-8194 cols 1,4,5,8,3 then 55,58,62,62,86,56
+  const words = [
+    'IT_CODE',
+    'TBL_CODE',
+    'DESIGN_NO',
+    'ITM_SIZE',
+    'TAG_NO',
+    'HM_ID',
+    'HM_ID2',
+    'HM_ID4',
+    'HM_ID4',
+    'DESIGN_IMG_ID',
+    'KR_NAME',
+  ]
+    .map((column) => text(row[column]))
+    .join('');
+  return `${sum.toFixed(3)}|${words}`;
 }
 
 function completePurchaseScope(
@@ -608,6 +676,33 @@ async function configuredPurchaseBookNameTx(
     throw new PurchaseValidationError(`purchase book configuration is ambiguous: ${scope.coBook}`);
   }
   return String(rows[0]?.BOOK_NAME ?? '').trim();
+}
+
+/**
+ * `PR_DATA.IT_TYPE` is the header Item Type combo, not the metal of the first line.
+ *
+ * Both purchase forms save `Strings.Mid(cboItemTyp.Text, 1, 1)` (TR_PURC.cs:12972, TR_PURC_HM.cs:7832). The combo
+ * is hidden on a purchase book (TR_PURC.cs:4870; shown only for OLD ITEM SALES, :11849), so the operator never
+ * changes it: a new voucher takes the company metal type, Gold when `MsMetalType = 'G'` and Silver otherwise
+ * (TR_PURC.cs:11880-11889, :11991-11997; TR_PURC_HM.cs:6971-6977, :7088-7094), where `MsMetalType` is
+ * `CO_MAST.METAL_TYPE` with blank read as 'G' (MS_OPNCOMP.cs:481-485). A reopened voucher shows its stored value,
+ * Gold for 'G' and Silver for anything else (TR_PURC.cs:12144-12149), and saves that back.
+ */
+async function purchaseHeaderItemTypeTx(
+  tx: any,
+  scope: VoucherScope,
+  ctx: Pick<WritePurchaseContext, 'isEdit' | 'persistedHeader'>,
+): Promise<'G' | 'S'> {
+  if (ctx.isEdit && ctx.persistedHeader) {
+    return text(ctx.persistedHeader.IT_TYPE).toUpperCase() === 'G' ? 'G' : 'S';
+  }
+  const rows: Array<{ METAL_TYPE: unknown }> = await tx.$queryRawUnsafe(
+    `SELECT "METAL_TYPE" FROM "CO_MAST" WHERE tenant_id=$1 AND "CO_CODE"=$2 LIMIT 1`,
+    scope.tenantId,
+    scope.coCode,
+  );
+  const metalType = text(rows[0]?.METAL_TYPE).toUpperCase() || 'G';
+  return metalType === 'G' ? 'G' : 'S';
 }
 
 async function authoritativePurchaseAccountNameTx(
@@ -1086,7 +1181,12 @@ async function writePurchaseTx(
       INOUT_TYPE: bookPolicy.inout, // FormBookInOut :13218
       ENTRY_TYPE: 'P', // literal       :13219
       BOOK_NAME: bookPolicy.bookName, // FormMainBook  :13220
-      AC_CODE: input.acCode, // tAcCode.Text  :13221
+      // tAcCode.Text :13221. Kept although the Next24M rows hold NULL: that data comes from a desktop build whose
+      // writer differs from this source (its Purc_Ledr leg codes differ from Ac_Ledr.cs:377-466 too).
+      AC_CODE: input.acCode,
+      // Not set by the writer (:13213-13244), so the desktop column default applies: VCH_SRNO is
+      // NOT NULL DEFAULT 0 on PR_IDTL, 0 on every desktop row.
+      VCH_SRNO: 0,
       SR_NO: idx + 1, // parent line   :13222
       ISR_NO: stone.isrNo ?? sIdx + 1, // [0]           :13223
       IT_CODE: text(stone.itCode).slice(0, 10) || null, // [1]  :13224
@@ -1125,6 +1225,26 @@ async function writePurchaseTx(
     })),
   );
 
+  /**
+   * TR_PURC_HM.cs:8195-8197: an edit deletes and rewrites a tag's BAR_DETL row only when its line changed
+   * (hallmarkLineSignature); an unchanged tag keeps its row, so its STK_DATE stays the earlier one even when the
+   * voucher date moved. Only STK_DATE is kept here; every other column is written as before. The plain TR_PURC
+   * rewrites every tag with the voucher date (TR_PURC.cs:13298 deletes them all, :13347), so this is TAG PURCHASE
+   * (the TR_PURC_HM tag book) only.
+   */
+  const keptStkDate = (idx: number): string | undefined => {
+    if (!isTagBook || !ctx.isEdit) return undefined;
+    const prior = priorRows[idx];
+    if (!prior) return undefined;
+    const tag = ctx.persistedTags?.get(num(prior.SR_NO));
+    if (!tag || text(tag.TAG_NO) !== text(detl[idx]?.TAG_NO)) return undefined;
+    if (
+      hallmarkLineSignature(prior) !== hallmarkLineSignature(detl[idx] as Record<string, unknown>)
+    )
+      return undefined;
+    const kept = text(tag.STK_DATE);
+    return kept || undefined;
+  };
   const barDetl = isPurchaseQuotation
     ? []
     : computed.flatMap((c, idx) => {
@@ -1135,6 +1255,11 @@ async function writePurchaseTx(
             SR_NO: idx + 1,
             OLD_SRNO: idx + 1,
             VCH_DATE: vchDate,
+            // The tag's stock date is the voucher date (TR_PURC.cs:13347, TR_PURC_HM.cs:8212
+            // `dataRow["STK_DATE"] = mVchDate.Text`). BAR_DETL.STK_DATE is varchar here, written as the
+            // 10-character day like the MAIN_STOCK row below; without it the tag never passes a report's
+            // `STK_DATE <= To` (HuId Stock, RP_HUID.cs:1838).
+            STK_DATE: keptStkDate(idx) ?? vchDate.toISOString().slice(0, 10),
             VCH_TIME: sharedVoucherTime,
             VCH_TYPE: bookPolicy.vchType,
             INOUT_TYPE: 'I',
@@ -1236,7 +1361,7 @@ async function writePurchaseTx(
     VCH_TIME: sharedVoucherTime,
     HD_VCH_NO: ctx.hdVchNo,
     MAIN_USER: ctx.mainUser || null,
-    IT_TYPE: computed.length ? lineItemType(0) : 'G',
+    IT_TYPE: await purchaseHeaderItemTypeTx(tx, input.scope, ctx),
     /**
      * The party's metal position moves only when the metal came in UNPRICED.
      *
@@ -1460,21 +1585,6 @@ async function writePurchaseTx(
     BILL_OS: round2(grandTotal - tender.paidNow - tender.kasar),
     BANK_AC: input.bankAc ?? null,
   });
-  const osRow = {
-    ...key,
-    VCH_TYPE: bookPolicy.vchType,
-    INOUT_TYPE: 'I',
-    ENTRY_TYPE: 'N',
-    BOOK_NAME: bookPolicy.bookName,
-    SR_NO: 1,
-    VCH_DATE: header.VCH_DATE,
-    AC_CODE: input.acCode,
-    BILL_AMT: grandTotal,
-    REC_AMT: tender.paidNow,
-    KASAR_AMT: tender.kasar,
-  };
-  // What the supplier is still owed after this voucher's own tender and write-off.
-  const outstanding = round2(grandTotal - tender.paidNow - tender.kasar);
 
   // Every purchase detail moves stock; loose inventory uses TAG_NO=N/VCH_SRNO=0.
   const mainStock = computed.map((c, idx) => ({
@@ -1669,6 +1779,14 @@ async function writePurchaseTx(
     false, // inward: metal in, party credited
   );
 
+  // LDR_NAME carries PR_DATA.AC_NAME on the party's bill leg (Ac_Ledr.cs:377, leg 01) and on the cash account's
+  // credit when the supplier is paid in cash (Ac_Ledr.cs:454); every other purchase leg writes ''.
+  for (const line of ledger) {
+    if (line.legType === PURC_LEG.party || line.legType === PURC_LEG.settleCash) {
+      line.LDR_NAME = supplierName;
+    }
+  }
+
   await postVoucherTx(tx, tenantId, {
     ledger: { table: 'AC_DATA', lines: ledger },
     bookName: bookPolicy.bookName,
@@ -1682,37 +1800,17 @@ async function writePurchaseTx(
       ...(barIdtl.length ? [{ table: 'BAR_IDTL', rows: barIdtl }] : []),
       ...(mainStock.length ? [{ table: 'MAIN_STOCK', rows: mainStock }] : []),
       ...(taxRows.length ? [{ table: 'TAX_DATA', rows: taxRows }] : []),
-      /**
-       * The payable register row is written only when something is actually OUTSTANDING.
-       *
-       * The desktop writes no `BILL_OS_DATA` at all for any of the 51 captured purchases — every one is settled
-       * in full at entry — yet the web wrote one unconditionally. A payable row for a bill that was paid on the
-       * spot is not a cosmetic difference: it is a liability the business does not owe, and it appears in
-       * outstanding and ageing reports as though it were real.
-       */
-      ...(outstanding > 0.005 ? [{ table: 'BILL_OS_DATA', rows: [osRow] }] : []),
+      // No BILL_OS_DATA: the purchase save never writes it (TR_PURC.cs:12773-13688 BtnSave_Click, and none of
+      // Purc_Ledr, Purc_Rojmel, Purc_GST or Purc_Stk). The supplier's unpaid amount is PR_DATA.BILL_OS; BILL_OS_DATA
+      // rows belong to the settling voucher (TR_BILL_TO). The desktop year has none under any purchase book although
+      // 37 of its 74 purchases carry a BILL_OS.
       ...(rojmelRows.length ? [{ table: 'ROJ_MEL_DATA', rows: rojmelRows }] : []),
     ],
   });
 
-  // Lot register (LOT_DETL): desktop Ac_Stock.PrKr_Lot runs after the voucher rows exist and copies
-  // them through the same joins (Ac_Stock.cs:624). Narrowed to this voucher so a save never rebuilds
-  // the whole company register. LOT_DETL is in PURCHASE_WRITE_TABLES, so edit/delete reverse it.
-  /**
-   * Staged unconditionally, DELIBERATELY, despite the comparison reporting 78 lot rows the desktop did not have.
-   *
-   * A guard on "does any line name a lot" was written and then reverted, because it contradicts the desktop's own
-   * source: `Ac_Stock.cs`'s `LOT_DETL` insert filters only on `MAIN_BOOK IN ('PURCHASE','B2B PURC')` and
-   * `BOOK_INOUT = 'I'` — there is NO lot-number condition, so the desktop stages every purchase line.
-   *
-   * The captured data disagrees: none of the 51 purchase vouchers has a `LOT_DETL` row. The likely reconciliation
-   * is that `PrKr_Lot` is a separate stock-posting pass rather than part of the voucher save — this module's own
-   * comment says it "runs after the voucher rows exist" — so the capture may simply predate the pass for these
-   * vouchers.
-   *
-   * Two readings, opposite conclusions, and no evidence here to settle which. Guessing would either invent lot
-   * rows or suppress real ones, so the source is followed and the discrepancy is recorded instead.
-   */
+  // Lot register (LOT_DETL): the save ends with PrKr_Lot for this voucher (TR_PURC.cs:13685-13687), which copies
+  // only the lines that name a lot (Ac_Stock.cs:624, `AND A.LOT_NO <> ''`). LOT_DETL is in PURCHASE_WRITE_TABLES, so
+  // edit and delete reverse it.
   await stagePurchaseLotDetailTx(
     tx,
     tenantId,
@@ -2549,6 +2647,18 @@ export async function editPurchase(
       writeInput = normalized.input;
       writeLines = normalized.lines;
     }
+    // The tags as stored before the rewrite (TR_PURC_HM keeps an unchanged tag's STK_DATE, see keptStkDate).
+    const priorTags: Array<Record<string, unknown>> = await tx.$queryRawUnsafe(
+      `SELECT "SR_NO","TAG_NO","STK_DATE" FROM "BAR_DETL"
+           WHERE tenant_id=$1 AND "CO_CODE"=$2 AND "LC_CODE"=$3 AND "CO_YEAR"=$4 AND "CO_BOOK"=$5 AND "VCH_NO"=$6
+           ORDER BY "SR_NO"`,
+      scope.tenantId,
+      scope.coCode,
+      scope.lcCode,
+      scope.coYear,
+      scope.coBook,
+      voucherNo,
+    );
     // TR_PURC.cs:12939-12944,13252,13297-13299,13548 replaces the full write set and temp row.
     // Desktop edit never writes DELETE_DATA.
     await deleteVoucherWriteSetTx(tx, {
@@ -2570,6 +2680,7 @@ export async function editPurchase(
       // Keeps each tag's identity across the rewrite; see WritePurchaseContext.persistedTagSrnos.
       persistedTagSrnos,
       persistedLines: new Map(priorLines.map((row) => [num(row.SR_NO), row])),
+      persistedTags: new Map(priorTags.map((row) => [num(row.SR_NO), row])),
     });
     if (isConsignmentPurchase) {
       await applyConsignmentPurchaseAdjustmentsTx(tx, scope, voucherNo, 1);

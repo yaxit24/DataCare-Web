@@ -408,6 +408,16 @@ type Cookie = string;
       expect(images[0]!.n).toBe(0);
     });
 
+    it('refuses an empty Print file Name (UT_TAG_PRINT.cs:5209 names no report file) and clears nothing', async () => {
+      await files([['TAG', 'BarPrint10', 'Y']]);
+      expect((await print('BarPrint10')).statusCode).toBe(200);
+      const staging = await staged();
+      const response = await print('');
+      expect(response.statusCode).toBe(400);
+      expect(response.body).toContain('Unknown print file: ');
+      expect(await staged()).toEqual(staging);
+    });
+
     it('answers the chosen file, and a replay stages the same rows (no doubled labels)', async () => {
       await files([['TAG', 'BarPrint13', 'Y']]);
       const first = await print('BarPrint13');
@@ -420,8 +430,12 @@ type Cookie = string;
       expect(labels).toHaveLength(2);
     });
 
-    it('with no file chosen prints in the BarPrint10 layout (open question: no desktop message exists)', async () => {
-      const { labels } = await sheet('');
+    it('a request that sends no file at all stages, and the sheet without a file is the BarPrint10 layout', async () => {
+      const printed = await print(undefined);
+      expect(printed.statusCode, printed.body).toBe(200);
+      const response = await request(admin, 'GET', `${API}/labels?file=`);
+      expect(response.statusCode).toBe(200);
+      const labels = response.body.split(/<div class="lbl[ "]/).slice(1);
       expect(labels).toHaveLength(2);
       expect(labelOf(labels, 'TP0001')).toContain('GLD1 / 1235');
     });

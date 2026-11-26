@@ -1211,6 +1211,10 @@ export const itemOpening = {
           if (saleNo) {
             await page.goto('/txn/sales');
             await page.getByRole('heading', { name: 'Sales Invoice', exact: true }).waitFor();
+            // Load needs the book, which the screen selects once its books arrive.
+            const book = page.getByRole('combobox', { name: 'Configured book', exact: true });
+            for (let i = 0; i < 50 && !(await book.inputValue()); i++)
+              await page.waitForTimeout(100);
             await page.getByLabel('Voucher No', { exact: true }).fill(saleNo);
             await button(page, 'Load').click();
             await page

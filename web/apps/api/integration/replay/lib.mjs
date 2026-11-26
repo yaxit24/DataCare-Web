@@ -290,6 +290,22 @@ export function labourOf(line) {
   return {};
 }
 
+/**
+ * The purchase Fine cell, sent only when the operator typed over it. The grid computes it as
+ * Format((net + ghat) x (touch + wastage - less touch) / 100 + kundan fine, "0.000") (TR_PURC.cs:7312), but the cell
+ * stays open for typing (TR_PURC.cs:7138-7146, stored as typed at :7225-7231) and the save takes the cell (:13122).
+ * The web screen posts a typed fine as `fineWt`; a stored fine that is not the formula's was typed.
+ */
+export function typedFineOf(line) {
+  const net = num(line.ITM_NWT) + num(line.ITM_GHT_WT);
+  const touch = num(line.ITM_TOUCH) + num(line.ITM_WEST_PRC);
+  // With no touch and wastage the cell is net + ghat + kundan fine (TR_PURC.cs:7358).
+  const formula =
+    (touch && net ? (net * (touch - num(line.ITM_LESS_TCH))) / 100 : net) + num(line.KUNDAN_FINE);
+  const computed = Math.round((formula + Number.EPSILON) * 1000) / 1000;
+  return Math.abs(computed - num(line.ITM_FINE)) > 0.0005 ? { fineWt: num(line.ITM_FINE) } : {};
+}
+
 const metalOf = (v) => {
   const t = str(v).toUpperCase();
   return t === 'G' || t === 'S' ? t : undefined;
@@ -477,6 +493,7 @@ export function purchaseRequest(v) {
       touch: num(l.ITM_TOUCH),
       westPct: nz(l.ITM_WEST_PRC),
       ghtWt: nz(l.ITM_GHT_WT),
+      ...typedFineOf(l),
       rate: num(l.ITM_RATE),
       otherAmount: nz(l.OTH_AMT),
       withStock: opt(l.WITH_STOCK),
