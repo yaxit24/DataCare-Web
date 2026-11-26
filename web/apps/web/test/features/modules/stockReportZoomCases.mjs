@@ -162,7 +162,7 @@ export const zoomCases = [
         // A second STOCK ADJUST book in this location: the screen has two books and no single default.
         await data.exec(
           ctx,
-          `INSERT INTO "BOOK_DATA" SELECT (jsonb_populate_record(NULL::"BOOK_DATA", to_jsonb(b) || '{"CO_BOOK":"SJ2","BOOK_SNAME":"SJ2"}'::jsonb)).*
+          `INSERT INTO "BOOK_DATA" SELECT (jsonb_populate_record(NULL::"BOOK_DATA", (to_jsonb(b) - 'row_id') || jsonb_build_object('row_id', (SELECT COALESCE(MAX(row_id),0)+1 FROM "BOOK_DATA"), 'CO_BOOK', 'SJ2', 'BOOK_SNAME', 'SJ2'))).*
              FROM "BOOK_DATA" b WHERE b.tenant_id=$1 AND b."CO_CODE"='01' AND b."LC_CODE"=$2 AND b."CO_BOOK"='SAJ'`,
           data.LC,
         );
