@@ -201,7 +201,11 @@ export function registerDataRepairRoutes(app: FastifyInstance, deps: DataRepairR
   app.get('/utilities/data-refresh/runs', auth as any, async (req, reply) => {
     if (!guard(req, reply, 'print')) return;
     const s = sess(req);
-    const runs = await repairHistory(prisma, { tenantId: s.tenantId, coCode: s.coCode });
-    return { runs: runs.filter((row) => SIX.has(String(row.operation_id))) };
+    const runs = await repairHistory(prisma, {
+      tenantId: s.tenantId,
+      coCode: s.coCode,
+      operationIds: [...SIX],
+    });
+    return { runs };
   });
 }
