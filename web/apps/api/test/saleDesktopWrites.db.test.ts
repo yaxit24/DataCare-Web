@@ -633,13 +633,17 @@ databaseDescribe('sale writes what the desktop writes', () => {
     );
   }, 30_000);
 
-  it('refuses a UPI amount without UPI rows, a TCS code without a tax account and a zero bill with priced items', async () => {
+  it('refuses a UPI amount without UPI rows and a zero bill with priced items; TCS falls back to its ledger', async () => {
     await expect(
       createSale(runtime, saleInput('TX', { upiAmt: 300 }), [looseLine()]),
     ).rejects.toThrow(/UPI amount needs its UPI rows/);
-    await expect(
-      createSale(runtime, saleInput('TX', { tcsCode: 'T2', tcsAmount: 5 }), [looseLine()]),
-    ).rejects.toThrow(/TCS code T2 has no tax account/);
+    // A TCS code without TAX_AC posts to the provisioned TCS ledger, as the tax leg falls back to GST.
+    const unset = await createSale(runtime, saleInput('TX', { tcsCode: 'T2', tcsAmount: 5 }), [
+      looseLine(),
+    ]);
+    expect(
+      (await ledger('TX', unset.vchNo)).filter((l) => String(l.k).trim().endsWith('10')),
+    ).toEqual([expect.objectContaining({ AC_CODE: 'TCS', cr: 5 })]);
     const priced = await createSale(runtime, saleInput('TX'), [looseLine()]);
     const [h] = await rows(
       `SELECT "NET_AMT"::float net FROM "SL_DATA" WHERE tenant_id=$1 AND "CO_BOOK"='TX' AND "VCH_NO"=lpad($2::text,5,'0')`,

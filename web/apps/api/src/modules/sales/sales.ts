@@ -861,9 +861,11 @@ async function writeSaleTx(
     throw new SaleValidationError(
       'the bill total is zero but its items are priced (a discount of the whole bill): reduce the discount',
     );
-  // TCS posts to the TCS code's own tax account (Ac_Ledr.cs:96 `D.TAX_AC` on `A.TCS_CODE`).
-  let tcsAc = '';
-  if (!isSalesQuotation && tcs !== 0) {
+  // TCS posts to the TCS code's own tax account (Ac_Ledr.cs:96 `D.TAX_AC` on `A.TCS_CODE`). A web-provisioned company
+  // leaves TAX_AC unset (seedCompany.ts TAXES), so an unset or absent one falls back to the provisioned TCS ledger,
+  // as the sale tax leg falls back to GST (fallbackTaxAc above).
+  let tcsAc = 'TCS';
+  if (!isSalesQuotation && tcs !== 0 && text(input.tcsCode)) {
     const rows: Array<{ ac: unknown }> = await tx.$queryRawUnsafe(
       `SELECT "TAX_AC" ac FROM "TAX_MAST" WHERE tenant_id=$1 AND "CO_CODE"=$2 AND "TAX_CODE"::text=$3::text
         ORDER BY coalesce("SR_NO",0), row_id LIMIT 1`,
@@ -871,11 +873,7 @@ async function writeSaleTx(
       input.scope.coCode,
       text(input.tcsCode),
     );
-    tcsAc = text(rows[0]?.ac);
-    if (!tcsAc)
-      throw new SaleValidationError(
-        `the TCS code ${text(input.tcsCode) || '(blank)'} has no tax account (TAX_MAST.TAX_AC)`,
-      );
+    tcsAc = text(rows[0]?.ac) || 'TCS';
   }
 
   // TR_SALE.cs:15111-15128: taxable sale bill value >= PAN_CARD_VAL blocks save for the generic
