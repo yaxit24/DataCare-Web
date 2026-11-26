@@ -54,7 +54,15 @@ export const FAMILIES = {
 };
 
 /** Families with a request builder. The others are enumerated and reported as could-not-replay. */
-export const REPLAYABLE = new Set(['SALES', 'PURCHASE', 'CASH/BANK', 'CONTRA', 'FINE JV']);
+export const REPLAYABLE = new Set([
+  'SALES',
+  'PURCHASE',
+  'CASH/BANK',
+  'CONTRA',
+  'FINE JV',
+  'SALES ORDER',
+  'WH SALES',
+]);
 
 /**
  * Map a book to its family. Book 043 (`GLURD`, the gold URD purchase book) has a blank MAIN_BOOK on this database but
@@ -499,6 +507,313 @@ export function purchaseRequest(v) {
   return { method: 'POST', path: '/purchases', body: compact(body) };
 }
 
+/** One SL_ORD_IDTL row back to the order page's component sub-grid (salesOrder.ts OrderComponent). */
+export function orderComponent(r) {
+  return {
+    isrNo: nz(r.ISR_NO),
+    itCode: str(r.IT_CODE),
+    itType: opt(r.IT_TYPE),
+    pcs: nz(r.IT_PCS),
+    grossWt: nz(r.IT_GWT),
+    amount: nz(r.IT_AMT),
+    netAmount: nz(r.IT_NET_AMT),
+    dmCode: opt(r.DM_CODE),
+    dmName: opt(r.DM_NAME),
+    dmSize: opt(r.DM_SIZE),
+    dmSfNo: opt(r.DM_SFNO),
+    dmColor: opt(r.DM_COLOR),
+    dmOrigin: opt(r.DM_ORIGIN),
+    dmRemark: opt(r.DM_REMARK),
+    dmLeb: opt(r.DM_LEB),
+    pcsWt: nz(r.IT_PCS_WT),
+    conPct: nz(r.IT_CON_PRC),
+    conWt: nz(r.IT_CON_WT),
+    rateType: opt(r.IT_RATE_TYPE),
+    rate: nz(r.IT_RATE),
+    labourRate: nz(r.IT_LBR_RATE),
+    labourAmount: nz(r.IT_LBR_AMT),
+    karigarWt: nz(r.KR_WT),
+    karigarLessPct: nz(r.KR_LESS_PRC),
+    karigarConPct: nz(r.KR_CON_PRC),
+    karigarConWt: nz(r.KR_CON_WT),
+    karigarRate: nz(r.KR_RATE),
+    karigarAmount: nz(r.KR_AMT),
+    karigarLabourRate: nz(r.KR_LBR_RATE),
+    karigarLabourAmount: nz(r.KR_LBR_AMT),
+    karigarNetAmount: nz(r.KR_NET_AMT),
+  };
+}
+
+/**
+ * One SL_PR_DETL row of an order back to the old-metal grid MSG_OLD (salesOrderOldMetal.ts orderOldMetalOf). The fine
+ * is a typed cell only without a touch (CommPassTotal_Old, TR_SALE_ORD.cs:4455-4472) and the amount only when the
+ * rate does not give it (:4474-4503).
+ */
+export function orderOldMetal(r) {
+  const net = Math.round((num(r.ITM_GWT) - num(r.ITM_OTH)) * 1000) / 1000;
+  const fine = num(r.ITM_FINE);
+  const rateType = str(r.ITM_RATE_TYPE).toUpperCase() === 'N' ? 'N' : 'F';
+  const basis = rateType === 'N' ? net : fine;
+  const rate = num(r.ITM_RATE);
+  const amount = num(r.NET_AMT);
+  const product = basis * rate;
+  // Math.Round half to even: an exact .5 product may land either way, so both neighbours count as the formula.
+  const formula = Math.abs(product - amount) <= 0.5 + 1e-9;
+  return {
+    itCode: str(r.IT_CODE),
+    pcs: nz(r.ITM_PCS),
+    grossWt: num(r.ITM_GWT),
+    otherWt: nz(r.ITM_OTH),
+    touch: nz(r.ITM_TOUCH),
+    fine: num(r.ITM_TOUCH) ? undefined : nz(fine),
+    rateType,
+    rate: nz(rate),
+    netAmt: rate && formula ? undefined : nz(amount),
+  };
+}
+
+/**
+ * Sales order (TR_SALE_ORD; page app/(app)/txn/sales-order/page.tsx, lib/salesOrderForm.ts salesOrderPayload). The
+ * header carries the tender grid MSG2_TOTAL (cash [3,3], cheque [4,3] with bank and number, card [5,3], scheme [8,3]),
+ * the old-metal grid (SL_PR_DETL) and the delivery and function dates; each line carries the grid cells TR_SALE_ORD
+ * saves at :9205-9305, the labour amount only when it was typed over the rate, and its stone components.
+ */
+export function salesOrderRequest(v) {
+  const h = (v.tables.SL_ORD_DATA ?? [])[0];
+  if (!h) throw new ReplayBuildError('no SL_ORD_DATA header');
+  const lines = [...(v.tables.SL_ORD_DETL ?? [])].sort(bySr);
+  const comps = v.tables.SL_ORD_IDTL ?? [];
+  const old = [...(v.tables.SL_PR_DETL ?? [])].filter((o) => v.book === str(o.CO_BOOK)).sort(bySr);
+  const upi = [...(v.tables.UPI_DATA ?? [])].sort(bySr);
+  if (num(h.UPI_AMT) && !upi.length) throw new ReplayBuildError('UPI_AMT without UPI_DATA rows');
+  if (num(h.RCUT_RATE)) throw new ReplayBuildError('rate-cut advance (RCUT_RATE) not rebuilt yet');
+  const delDate = isoDay(h.DEL_DATE);
+  const body = {
+    coBook: v.book,
+    coYear: opt(h.CO_YEAR),
+    lcCode: opt(h.LC_CODE),
+    acCode: str(h.AC_CODE),
+    acName: opt(h.AC_NAME),
+    vchDate: isoDay(h.VCH_DATE),
+    // The bill number defaults to the voucher number; a different one was typed.
+    billNo: str(h.BILL_NO) && str(h.BILL_NO) !== str(v.vchNo) ? str(h.BILL_NO) : undefined,
+    taxCode: opt(h.TAX_CODE),
+    taxRatePct: num(h.TAX_PRC),
+    vchDesc: opt(h.VCH_DESC),
+    empCode: opt(h.EMP_CODE),
+    mobile: opt(h.MOBILE),
+    address1: opt(h.ADD1),
+    address2: opt(h.ADD2),
+    address3: opt(h.ADD3),
+    city: opt(h.CITY),
+    deliveryDate: delDate,
+    functionDate: isoDay(h.FUN_DATE),
+    advanceAmount: num(h.CASH_AMT),
+    chequeAmount: nz(h.CHQ_AMT),
+    bankAc: num(h.CHQ_AMT) ? opt(h.BANK_AC) : undefined,
+    chequeNo: num(h.CHQ_AMT) ? opt(h.CHQ_NO) : undefined,
+    bankName: opt(h.BANK_NAME),
+    cardAmount: nz(h.CARD_AMT),
+    cardAc: num(h.CARD_AMT) ? opt(h.CARD_AC) : undefined,
+    cardAdj: opt(h.CARD_ADJ),
+    schemeAmount: nz(h.SCHM_AMT),
+    adjustGold: nz(h.ADJ_GOLD),
+    adjustSilver: nz(h.ADJ_SILVER),
+    orderAdjustAmount: nz(h.ORD_ADJ_AMT),
+    upiRows: upi.length
+      ? upi.map((u) => ({
+          upiAc: str(u.UPI_AC_CODE),
+          upiType: str(u.UPI_TYPE),
+          upiId: str(u.UPI_ID),
+          amount: num(u.UPI_AMT),
+        }))
+      : undefined,
+    oldMetalRows: old.length ? old.map(orderOldMetal) : undefined,
+    // An order without grid lines is saved on its typed amount (salesOrder.ts `input.netAmount`).
+    netAmount: lines.length ? undefined : nz(h.NET_AMT),
+    lines: lines.map((l) => {
+      const labour = labourOf(l);
+      const tagNo = tagOf(l.TAG_NO);
+      const lineDel = isoDay(l.ORD_DEL_DATE);
+      return {
+        srNo: nz(l.SR_NO),
+        oldSrNo: num(l.OLD_SRNO) !== num(l.SR_NO) ? nz(l.OLD_SRNO) : undefined,
+        itCode: str(l.IT_CODE),
+        tagNo,
+        vchSrno: tagNo ? nz(l.VCH_SRNO) : undefined,
+        designNo: opt(l.DESIGN_NO),
+        tblCode: opt(l.TBL_CODE),
+        itmColor: opt(l.ITM_COLOR),
+        itmSize: opt(l.ITM_SIZE),
+        bagWt: nz(l.BAG_WT),
+        pcs: num(l.ITM_PCS),
+        grossWt: num(l.ITM_GWT),
+        lessWt: nz(l.ITM_OTH_WT),
+        netWt: num(l.ITM_NWT),
+        ghtPct: nz(l.ITM_GHT_PRC),
+        ghtWt: nz(l.ITM_GHT_WT),
+        touch: num(l.ITM_TOUCH),
+        westPct: nz(l.ITM_WEST_PRC),
+        rate: num(l.ITM_RATE),
+        rateFix: opt(l.RATE_FIX),
+        labourType: opt(l.LBR_TYPE),
+        labourPct: nz(l.LBR_PRC),
+        labourRate: nz(l.LBR_RATE),
+        // The amount cell is typed only where it is not the rate x weight product (labourOf).
+        labourAmount: labour.labourType === 'fixed' ? labour.labourFixed : undefined,
+        otherAmount: nz(l.OTH_AMT),
+        mrp: nz(l.ITM_MRP),
+        remark: opt(l.ITM_REMARK),
+        // A line delivery date equal to the header's is the default the grid copies (:9285-9290).
+        orderDeliveryDate: lineDel && lineDel !== delDate ? lineDel : undefined,
+        karigarNetWt: nz(l.KR_NET_WT),
+        karigarTouch: nz(l.KR_TOUCH),
+        karigarWestPct: nz(l.KR_WEST_PRC),
+        karigarFine: nz(l.KR_FINE),
+        karigarName: opt(l.KR_NAME),
+        tagCost: nz(l.TAG_COST),
+        rateType: opt(l.RATE_TYPE),
+        itType: opt(l.IT_TYPE),
+        prCode: opt(l.PR_CODE),
+        oldTblCode: opt(l.OLD_TBL_CODE),
+        tagStockLess: str(l.TAG_STK_LESS) === 'Y' ? 'Y' : undefined,
+        huid: opt(l.HM_ID),
+        hallmarkId2: opt(l.HM_ID2),
+        hallmarkId3: opt(l.HM_ID3),
+        hallmarkId4: opt(l.HM_ID4),
+        hallmarkIdWt: nz(l.HM_ID_WT),
+        hallmarkId2Wt: nz(l.HM_ID2_WT),
+        hallmarkId3Wt: nz(l.HM_ID3_WT),
+        hallmarkId4Wt: nz(l.HM_ID4_WT),
+        // The route requires the component array on every line (txn.ts completeSalesOrderInput).
+        components: comps
+          .filter((c) => num(c.SR_NO) === num(l.SR_NO))
+          .sort((a, b) => num(a.ISR_NO) - num(b.ISR_NO))
+          .map(orderComponent),
+      };
+    }),
+  };
+  return { method: 'POST', path: '/sales-orders', body: compact(body) };
+}
+
+/**
+ * One RATE_CUT_ISU (issue) or RATE_CUT_REC (receive) row back to the TR_WH_SALE grid row the page posts
+ * (web lib/wholesaleVoucher.ts linePayload). The grid derives net (gross - other), the tag weights (the line's own
+ * gross and net), fine, amounts and the karigar columns; a stored value is sent only where it is not that formula.
+ */
+export function wholesaleLine(r, side) {
+  const net = Math.round((num(r.ITM_GWT) - num(r.ITM_OTH_WT)) * 1000) / 1000;
+  const tagNo = side === 'issue' ? tagOf(r.TAG_NO) : undefined;
+  const rate = num(r.LBR_RATE);
+  return {
+    itCode: str(r.IT_CODE),
+    itemName: opt(r.ITM_REMARK),
+    tagNo,
+    vchSrno: tagNo ? nz(r.VCH_SRNO) : undefined,
+    tblCode: side === 'issue' ? opt(r.TBL_CODE) : undefined,
+    designNo: opt(r.DESIGN_NO),
+    itemSize: side === 'issue' ? opt(r.ITM_SIZE) : undefined,
+    hallmarkId: side === 'issue' ? opt(r.HM_ID) : undefined,
+    hallmarkIdWt: side === 'issue' ? nz(r.HM_ID_WT) : undefined,
+    karigarName: side === 'issue' ? opt(r.KR_NAME) : undefined,
+    prCode: opt(r.PR_CODE),
+    lotNo: opt(r.LOT_NO),
+    itemLot: opt(r.ITM_LOT),
+    pcs: nz(r.ITM_PCS),
+    grossWt: num(r.ITM_GWT),
+    othWt: nz(r.ITM_OTH_WT),
+    netWt: Math.abs(num(r.ITM_NWT) - net) > 1e-9 ? num(r.ITM_NWT) : undefined,
+    ghtWt: nz(r.ITM_GHT_WT),
+    touch: nz(r.ITM_TOUCH),
+    westPct: nz(r.ITM_WEST_PRC),
+    lessTouch: nz(r.LESS_TOUCH),
+    lessWt: nz(r.LESS_WT),
+    hallmarkFine: side === 'issue' ? nz(r.HM_FINE) : undefined,
+    convRate: nz(r.CONV_RATE),
+    convPct: nz(r.CONV_PRC),
+    rate: nz(r.ITM_RATE),
+    rateType: opt(r.RATE_TYPE),
+    // The Lbr Type cell starts as the company basis (CommPassAdd, TR_WH_SALE.cs:8362) and can be cleared; a stored
+    // blank is what the operator left, so the cell is always sent (the page sends it once it is not the company's).
+    lbrType: str(r.LBR_TYPE).toUpperCase(),
+    lbrRate: nz(rate),
+    // With a rate the grid computes the labour amount (rateCut.ts RateCutLine.lbrRate); without one it is typed.
+    lbrAmt: rate ? undefined : nz(r.LBR_AMT),
+    othAmt: nz(r.OTH_AMT),
+    otherRate: nz(r.ITM_OTH_RATE),
+    otherFine: nz(r.ITM_OTH_FINE),
+    mrp: nz(r.ITM_MRP),
+    taxPct: nz(r.TAX_PRC),
+    tagCost: nz(r.TAG_COST),
+    tagGrossWt: side === 'issue' && num(r.TAG_GWT) !== num(r.ITM_GWT) ? num(r.TAG_GWT) : undefined,
+    tagNetWt: num(r.TAG_NWT) !== num(r.ITM_NWT) ? num(r.TAG_NWT) : undefined,
+    silverFine: nz(r.SILVER_FINE),
+    adjustWt: nz(r.ADJ_WT),
+    isuRef: str(r.ISU_NO)
+      ? {
+          yrcd: opt(r.ISU_YRCD),
+          dbcd: opt(r.ISU_DBCD),
+          no: opt(r.ISU_NO),
+          srno: nz(r.ISU_SRNO),
+        }
+      : undefined,
+  };
+}
+
+/**
+ * Wholesale sale (TR_WH_SALE on a WH SALES book; page app/(app)/txn/wholesale-sale/page.tsx through
+ * components/WholesaleVoucherForm.tsx and lib/wholesaleVoucher.ts voucherPayload). The settlement boxes of BILL_TOTAL
+ * are sent as the operator fills them: the fine rate, the fine cut (DR_FINE / CR_FINE) and the fine kasar; the money
+ * legs follow from them.
+ */
+export function wholesaleSaleRequest(v) {
+  const h = (v.tables.RATE_CUT_DATA ?? [])[0];
+  if (!h) throw new ReplayBuildError('no RATE_CUT_DATA header');
+  const issued = [...(v.tables.RATE_CUT_ISU ?? [])].sort(bySr);
+  const received = [...(v.tables.RATE_CUT_REC ?? [])].sort(bySr);
+  const tender = (p) => ({
+    cash: nz(h[`${p}_CASH_AMT`]),
+    chq: nz(h[`${p}_CHQ_AMT`]),
+    card: nz(h[`${p}_CARD_AMT`]),
+    kasar: nz(h[`${p}_KASAR_AMT`]),
+  });
+  const body = {
+    coBook: v.book,
+    coYear: opt(h.CO_YEAR),
+    lcCode: opt(h.LC_CODE),
+    vchDate: isoDay(h.VCH_DATE),
+    billNo: str(h.BILL_NO) && str(h.BILL_NO) !== str(v.vchNo) ? str(h.BILL_NO) : undefined,
+    acCode: str(h.AC_CODE),
+    acName: opt(h.AC_NAME),
+    mobile: opt(h.MOBILE),
+    add1: opt(h.ADD1),
+    add2: opt(h.ADD2),
+    add3: opt(h.ADD3),
+    city: opt(h.CITY),
+    bankName: opt(h.BANK_NAME),
+    empCode: opt(h.EMP_CODE),
+    vchDesc: opt(h.VCH_DESC),
+    itType: str(h.IT_TYPE).toUpperCase() === 'S' ? 'S' : 'G',
+    fineRate: nz(h.FINE_RATE),
+    convRate: nz(h.CONV_RATE),
+    convPct: nz(h.CONV_PRC),
+    settleDrFine: nz(h.DR_FINE),
+    settleCrFine: nz(h.CR_FINE),
+    ksrFineDr: nz(h.KSR_FINE_DR),
+    ksrFineCr: nz(h.KSR_FINE_CR),
+    lines: issued.map((r) => wholesaleLine(r, 'issue')),
+    receivedLines: received.map((r) => wholesaleLine(r, 'receive')),
+    pay: {
+      ...tender('SL'),
+      bankAc: opt(h.BANK_AC),
+      chqNo: opt(h.CHQ_NO),
+      cardAc: opt(h.CARD_AC),
+    },
+    receivedPay: tender('PR'),
+  };
+  return { method: 'POST', path: '/wholesale-sales', body: compact(body) };
+}
+
 export class ReplayBuildError extends Error {
   constructor(message) {
     super(message);
@@ -519,6 +834,10 @@ export function buildRequest(v, ctx) {
       return saleRequest(v, ctx);
     case 'PURCHASE':
       return purchaseRequest(v);
+    case 'SALES ORDER':
+      return salesOrderRequest(v);
+    case 'WH SALES':
+      return wholesaleSaleRequest(v);
     default:
       throw new ReplayBuildError(`no request builder for the ${v.family} family yet`);
   }
@@ -537,6 +856,12 @@ export const DROP_TABLES = {
     'audit of an earlier desktop delete of the same book/number (desktop history, not written by a create)',
   OP_LDR:
     'year-opening ledger snapshot; (CO_BOOK, VCH_NO) does not identify a voucher (parity-extract-mssql.mjs)',
+  FINE_DATA:
+    'scheme ledger staging: the scheme module deletes and rebuilds it for the whole company (Module_Schm.cs:138, ' +
+    ':963) and no voucher save writes it',
+  RATE_CUT_ISU_REC:
+    'Wh Sales print scratch: BtnPrint_Click empties it for the company and refills it with the printed voucher ' +
+    '(TR_WH_SALE.cs:13682-13722), so it holds whichever voucher was printed last, not what a save wrote',
 };
 
 /** Columns dropped from both sides: wall clock and operator identity, which differ between two sessions. */
@@ -554,20 +879,40 @@ export function isDroppedColumn(name) {
 }
 
 /**
+ * Desktop columns a LATER voucher or utility rewrites after the save: the replayed save writes the save-time value,
+ * so the desktop side is compared at that value. Each entry names the save and the later writer.
+ */
+export const LATER_UPDATES = {
+  SL_ORD_DETL: {
+    ORD_REC_AMT: {
+      saved: 0,
+      note: 'the order save writes 0 (TR_SALE_ORD.cs:9306); the scheme/receipt roll-up rewrites it (BtmSchm.cs:3210-3212)',
+    },
+  },
+};
+
+/**
  * Normalise one bundle case in place-free style. `desktopTables` is the set of table names in the DESKTOP schema: a
  * table only the web schema has (audit, idempotency, version tables) is a web addition and cannot be a parity failure,
  * while a desktop table the web wrote and the desktop did not stays as a genuine extra write.
  */
-export function normaliseCase(c, desktopTables) {
+export function normaliseCase(c, desktopTables, side) {
   const tables = {};
   for (const [name, t] of Object.entries(c.tables)) {
     const upper = name.toUpperCase();
     if (DROP_TABLES[upper]) continue;
     if (desktopTables && !desktopTables.has(upper)) continue;
     const keep = t.columns.map((col, i) => [col, i]).filter(([col]) => !isDroppedColumn(col.name));
+    const later = side === 'desktop' ? (LATER_UPDATES[upper] ?? {}) : {};
     tables[upper] = {
       columns: keep.map(([col]) => col),
-      rows: t.rows.map((r) => keep.map(([, i]) => r[i])),
+      rows: t.rows.map((r) =>
+        keep.map(([col, i]) =>
+          later[String(col.name).toUpperCase()]
+            ? later[String(col.name).toUpperCase()].saved
+            : r[i],
+        ),
+      ),
     };
   }
   return { ...c, tables };
