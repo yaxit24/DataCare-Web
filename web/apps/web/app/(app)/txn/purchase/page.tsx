@@ -35,6 +35,7 @@ import { todayLocal } from '../../../../lib/localDate';
 import { carryPurchaseHeader, carryUnmanaged } from '../../../../lib/purchaseCarry';
 import HallmarkPurchasePage from '../purchase-hm/page';
 import { openDocument } from '../../../../lib/openDocument';
+import { useVoucherZoom } from '../../../../lib/voucherZoom';
 
 interface Line {
   itCode: string;
@@ -438,6 +439,13 @@ function PlainPurchasePage() {
     setLines([blank()]);
     setTender({});
   }
+
+  useVoucherZoom({
+    ready: !!coBook,
+    book: coBook,
+    setBook: setCoBook,
+    load: (vchNo, book) => openPurchase(vchNo, book),
+  });
 
   async function loadPurchase() {
     await openPurchase(voucherLookup);

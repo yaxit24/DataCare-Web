@@ -634,6 +634,14 @@ export async function createSaleReturn(
       LBR_AMT: line.calc.labour,
       OTH_AMT: num(line.in.otherAmount),
       NET_AMT: line.calc.net,
+      // Ac_Stock.cs:247 copies the returned line into the karigar columns (KR_NWT, KR_TOUCH, KR_WEST, KR_FINE and
+      // KR_COST = TAG_COST). Stock Report's movement grid shows KR_FINE for a '+' row (RP_STOCK.cs:2896), so a return
+      // must carry its fine there or the report shows 0.000.
+      KR_NWT: num(line.in.netWt),
+      KR_TOUCH: num(line.in.touch),
+      KR_WEST: num(line.in.westPct),
+      KR_FINE: line.calc.fine,
+      KR_COST: num(line.in.tagCost),
     }));
 
     await insertRowTx(tx, 'TEMP_BOOK_DATA', tenantId, {

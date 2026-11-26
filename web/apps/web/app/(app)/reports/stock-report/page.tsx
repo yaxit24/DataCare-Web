@@ -1,9 +1,19 @@
 'use client';
 import { useRouter } from 'next/navigation';
+import { formatDesktopDate } from '@datacare/core';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { downloadCsv } from '../../../../lib/api';
+import { useBusinessScope } from '../../../../components/BusinessScope';
+import {
+  DesktopDateInput,
+  type DesktopDateInputHandle,
+} from '../../../../components/DesktopDateInput';
+import { CodeBox } from './CodeBox';
+import { ItemPicker, type PickerItem } from './ItemPicker';
+import { get } from '../../../../lib/api';
+import { openDocument } from '../../../../lib/openDocument';
 import { MovementGrid, SummaryGrid } from './StockGrids';
-import { useStockReport } from './useStockReport';
+import { NO_RIGHTS, useStockReport } from './useStockReport';
 import { DIMENSIONS, ITEM_TYPES, type Dimension, type Filters } from './types';
 
 /**
@@ -25,13 +35,25 @@ const TEXT_FILTERS: Array<[keyof Filters, string, string]> = [
   ['tagNo', 'TagNo', 'sr-tag'],
   ['acCode', 'AcCode', 'sr-ac'],
 ];
+/** The code boxes that open the master's help on Enter (RP_STOCK.cs:5721-6179); Safe, Counter and TagNo have none. */
+const HELP_ENTITY: Partial<Record<keyof Filters, string>> = {
+  prCode: 'products',
+  grCode: 'groups',
+  itCode: 'items',
+  designNo: 'designs',
+  acCode: 'accounts',
+};
 const KEY_DIMENSION: Record<string, Dimension> = { g: 'group', i: 'item', p: 'product' };
 
 export default function StockReportPage() {
   const router = useRouter();
   const s = useStockReport();
   const { filters, setFilters, result, movements, error, message, busy } = s;
+  const { coYear } = useBusinessScope();
+  const fromDate = useRef<DesktopDateInputHandle>(null);
+  const toDate = useRef<DesktopDateInputHandle>(null);
   const [search, setSearch] = useState('');
+  const [picker, setPicker] = useState<PickerItem[] | null>(null);
   const gridRef = useRef<HTMLTableElement | null>(null);
   const buttons = useRef<Record<string, HTMLButtonElement | null>>({});
 
@@ -46,6 +68,10 @@ export default function StockReportPage() {
     void s.run(d);
     buttons.current[d]?.focus();
   };
+  // RP_STOCK.cs:3713: the open-time warning about a movement dated after today (a MsgBox; To is already its date).
+  useEffect(() => {
+    if (s.futureWarning) window.alert(s.futureWarning);
+  }, [s.futureWarning]);
   const latest = useRef({ runDimension, back: s.back, open: false, exit: router.back });
   latest.current = {
     runDimension,
@@ -78,31 +104,48 @@ export default function StockReportPage() {
   }, []);
 
   const print = async () => {
+    // The Print right is checked first (RP_STOCK.cs:4024); the document is then built from the same query as the grid.
     const blob = await s.exportFile('csv');
-    if (blob) window.print();
+    const url = s.printUrl();
+    if (blob && url) openDocument(url);
   };
   const excel = async () => {
     if (movements) {
       // The Excel button writes the visible grid: the movement grid while a drill-down is open.
       const blob = await s.exportFile('csv');
       if (!blob) return;
-      downloadCsv(
-        movements.data.rows.map((r, i) => ({
-          SrNo: i + 1,
-          Vchtype: r.vchType ?? '',
-          'Party Name': r.partyName,
-          VchNo: r.vchNo ?? '',
-          VchDate: r.vchDate ?? '',
-          TagNo: r.tagNo ?? '',
-          ItName: r.itName,
-          Pcs: r.pcs,
-          GrWt: r.gwt.toFixed(3),
-          NetWt: r.nwt.toFixed(3),
-          Fine: r.fine.toFixed(3),
-          Sign: r.sign,
-        })),
-        'stock-report-movements',
-      );
+      const t = movements.data.totals;
+      const lines: Array<Record<string, string>> = movements.data.rows.map((r, i) => ({
+        SrNo: String(i + 1),
+        Vchtype: r.vchType ?? '',
+        'Party Name': r.partyName,
+        VchNo: r.vchNo ?? '',
+        VchDate: formatDesktopDate(r.vchDate),
+        TagNo: r.tagNo ?? '',
+        ItName: r.itName,
+        Pcs: String(r.pcs),
+        GrWt: r.gwt.toFixed(3),
+        NetWt: r.nwt.toFixed(3),
+        Fine: r.fine.toFixed(3),
+        Sign: r.sign,
+      }));
+      // The desktop writes every cell of the visible grid, the "Total :" row included (RP_STOCK.cs:3262-3283).
+      if (lines.length)
+        lines.push({
+          SrNo: '',
+          Vchtype: 'Total :',
+          'Party Name': '',
+          VchNo: '',
+          VchDate: '',
+          TagNo: '',
+          ItName: '',
+          Pcs: String(t.pcs),
+          GrWt: t.gwt.toFixed(3),
+          NetWt: t.nwt.toFixed(3),
+          Fine: t.fine.toFixed(3),
+          Sign: '',
+        });
+      downloadCsv(lines, 'stock-report-movements');
       return;
     }
     const blob = await s.exportFile('xlsx');
@@ -117,13 +160,43 @@ export default function StockReportPage() {
     setTimeout(() => URL.revokeObjectURL(url), 1000);
   };
 
-  const dateKey = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key !== 'Enter') return;
-    e.preventDefault();
-    const inputs = Array.from(document.querySelectorAll<HTMLElement>('[data-sr-field]'));
-    const next = inputs[inputs.indexOf(e.currentTarget) + 1];
-    next?.focus();
+  /** InOut (RP_STOCK.cs:5857): list the items of the chosen Item Type with tick boxes. */
+  const openPicker = async () => {
+    s.notify('');
+    try {
+      setPicker(
+        await get<PickerItem[]>(
+          `/reports/stock-report/item-ledger/items?itemType=${encodeURIComponent(filters.itemType.slice(0, 1))}`,
+        ),
+      );
+    } catch {
+      setPicker([]);
+    }
   };
+  /** Ok of the picker (RP_STOCK.cs:5927): nothing ticked answers the desktop text, otherwise the ledger prints. */
+  const pickerOk = (codes: string[]) => {
+    setPicker(null);
+    if (codes.length === 0) {
+      s.notify('Item Selection Not Done...');
+      return;
+    }
+    const q = new URLSearchParams({
+      items: codes.join(','),
+      fromDate: filters.fromDate,
+      toDate: filters.toDate,
+    });
+    openDocument(`/api/reports/stock-report/item-ledger.pdf?${q.toString()}`);
+  };
+
+  if (s.noRights)
+    return (
+      <div>
+        <h1>Stock Report</h1>
+        <div className="msg err" role="alert" data-testid="stock-no-rights">
+          {NO_RIGHTS}
+        </div>
+      </div>
+    );
 
   return (
     <div>
@@ -131,27 +204,25 @@ export default function StockReportPage() {
       <div className="panel">
         <div className="row">
           <div className="field">
-            <label htmlFor="sr-from">From</label>
-            <input
+            <DesktopDateInput
+              ref={fromDate}
               id="sr-from"
-              data-sr-field
-              type="date"
+              label="From"
+              coYear={coYear}
               value={filters.fromDate}
-              onChange={(e) => setFilters({ fromDate: e.target.value })}
-              onKeyDown={dateKey}
-              disabled={!s.ready}
+              onChange={(iso) => setFilters({ fromDate: iso })}
+              onAdvance={() => toDate.current?.focus()}
             />
           </div>
           <div className="field">
-            <label htmlFor="sr-to">To</label>
-            <input
+            <DesktopDateInput
+              ref={toDate}
               id="sr-to"
-              data-sr-field
-              type="date"
+              label="To"
+              coYear={coYear}
               value={filters.toDate}
-              onChange={(e) => setFilters({ toDate: e.target.value })}
-              onKeyDown={dateKey}
-              disabled={!s.ready}
+              onChange={(iso) => setFilters({ toDate: iso })}
+              onAdvance={() => document.getElementById('sr-search')?.focus()}
             />
           </div>
           <div className="field">
@@ -213,13 +284,24 @@ export default function StockReportPage() {
           {TEXT_FILTERS.map(([key, label, id]) => (
             <div className="field" key={key}>
               <label htmlFor={id}>{label}</label>
-              <input
-                id={id}
-                data-sr-field
-                value={String(filters[key])}
-                style={{ width: 110 }}
-                onChange={(e) => setFilters({ [key]: e.target.value.toUpperCase() })}
-              />
+              {HELP_ENTITY[key] ? (
+                <CodeBox
+                  id={id}
+                  entity={HELP_ENTITY[key]}
+                  value={String(filters[key])}
+                  onChange={(v) => setFilters({ [key]: v })}
+                  blankIsKnown={key === 'acCode'}
+                  onKnown={key === 'acCode' ? () => runDimension('item') : undefined}
+                />
+              ) : (
+                <input
+                  id={id}
+                  data-sr-field
+                  value={String(filters[key])}
+                  style={{ width: 110 }}
+                  onChange={(e) => setFilters({ [key]: e.target.value.toUpperCase() })}
+                />
+              )}
             </div>
           ))}
         </div>
@@ -235,9 +317,17 @@ export default function StockReportPage() {
               disabled={!s.ready || busy}
               onClick={() => runDimension(d.value)}
             >
-              {d.label}
+              {d.value === 'safe' && s.itemLot ? 'Item Lot' : d.label}
             </button>
           ))}
+          <button
+            type="button"
+            className="ghost"
+            disabled={!s.ready || busy}
+            onClick={() => void openPicker()}
+          >
+            InOut
+          </button>
           <span className="spacer" />
           <button type="button" className="ghost" onClick={() => void print()} disabled={!result}>
             Print
@@ -257,6 +347,7 @@ export default function StockReportPage() {
           </button>
         </div>
       </div>
+      {picker && <ItemPicker items={picker} onOk={pickerOk} onCancel={() => setPicker(null)} />}
       {error && (
         <div className="msg err" role="alert" data-testid="stock-error">
           {error}
@@ -272,10 +363,28 @@ export default function StockReportPage() {
           <p className="muted" data-testid="stock-title">
             {result.title} ({result.weight})
           </p>
-          <SummaryGrid result={result} rows={rows} onDrill={s.drill} gridRef={gridRef} />
+          <SummaryGrid
+            result={result}
+            rows={rows}
+            onDrill={s.drill}
+            gridRef={gridRef}
+            showTotal={search.trim() === ''}
+          />
         </>
       )}
-      {movements && <MovementGrid data={movements.data} lotCaption={false} />}
+      {movements && (
+        <MovementGrid
+          data={movements.data}
+          lotCaption={s.itemLot && s.dimension === 'safe'}
+          onZoom={(row) => {
+            void s.zoom(row).then((a) => {
+              if (a?.action !== 'open') return;
+              const q = new URLSearchParams({ vchNo: a.vchNo, coBook: a.coBook, lcCode: a.lcCode });
+              router.push(`${a.path}?${q.toString()}`);
+            });
+          }}
+        />
+      )}
     </div>
   );
 }

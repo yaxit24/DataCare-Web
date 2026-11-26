@@ -28,6 +28,7 @@ import {
 } from '../../../../lib/purchaseReturnForm';
 import { todayLocal } from '../../../../lib/localDate';
 import { billTotals, purchaseReturnRoundingPolicy } from '@datacare/core';
+import { useVoucherZoom } from '../../../../lib/voucherZoom';
 
 const n = (v: string) => Number(v || 0);
 const r2 = (x: number) => Math.round((x + 1e-9) * 100) / 100;
@@ -130,6 +131,13 @@ export default function PurchaseReturnPage() {
     setResult(null);
     setErr('');
   }
+
+  useVoucherZoom({
+    ready: !!coBook,
+    book: coBook,
+    setBook: setCoBook,
+    load: (vchNo) => loadReturn(vchNo),
+  });
 
   /** Hydrate every field the API returns, so an unchanged save writes the same rows. */
   async function loadReturn(requested = voucherLookup) {

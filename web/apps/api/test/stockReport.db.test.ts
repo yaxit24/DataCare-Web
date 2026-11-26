@@ -1050,6 +1050,213 @@ const W3 = { from: D(10), to: D(14) };
       });
     });
 
+    describe('open-time defaults, voucher zoom and the InOut item ledger', () => {
+      const grossOf = (m: Mv) => m.gwt;
+      void grossOf;
+      it('Item Type defaults from the company metal type: blank and G are Gold, anything else Silver (RP_STOCK.cs:3628)', async () => {
+        const defaults = async () =>
+          (await get('printer', '/reports/stock-report/defaults')).json();
+        expect((await defaults()).itemType).toBe('G');
+        await exec(
+          `UPDATE "CO_MAST" SET "METAL_TYPE"='S' WHERE tenant_id=$1 AND "CO_CODE"='01'`,
+          TENANT,
+        );
+        try {
+          expect((await defaults()).itemType).toBe('S');
+        } finally {
+          await exec(
+            `UPDATE "CO_MAST" SET "METAL_TYPE"=NULL WHERE tenant_id=$1 AND "CO_CODE"='01'`,
+            TENANT,
+          );
+        }
+        expect((await defaults()).itemType).toBe('G');
+      });
+
+      it('a movement dated after today gives the desktop warning and sets To to its date (RP_STOCK.cs:3713)', async () => {
+        const defaults = async () =>
+          (await get('printer', '/reports/stock-report/defaults')).json();
+        const none = await defaults();
+        expect(none.futureVoucher).toBeNull();
+        expect(none.toDate).toBe(none.systemDate);
+        const later = new Date(Date.now() + 5 * 86_400_000).toISOString().slice(0, 10);
+        await exec(
+          `INSERT INTO "MAIN_STOCK"(tenant_id,"CO_CODE","LC_CODE","CO_YEAR","CO_BOOK","VCH_NO","SR_NO","VCH_DATE","VCH_TYPE","IT_CODE","TAG_NO","TR_TYPE","ITM_SIGN","ITM_PCS","ITM_GWT","ITM_NWT","DATA_TYPE")
+           VALUES($1,'01','01',$2,'SAL','000045',1,$3::date,'X','GRNG','N','S','-',1,1,1,'A')`,
+          TENANT,
+          YEAR,
+          later,
+        );
+        try {
+          const d = await defaults();
+          expect(d.futureVoucher).toEqual({
+            bookName: 'Sales',
+            vchNo: '000045',
+            vchDate: later,
+            message:
+              'Please Check Voucher Date in Entry Because Entry Date > Curent Date... Book = Sales And VchNo = 000045....',
+          });
+          expect(d.toDate).toBe(later);
+          expect(d.systemDate).toBe(none.systemDate);
+        } finally {
+          await exec(`DELETE FROM "MAIN_STOCK" WHERE tenant_id=$1 AND "VCH_NO"='000045'`, TENANT);
+        }
+      });
+
+      it('zoom: the entry screen of each book, the Item Opening refusal, and the target menu View right (RP_STOCK.cs:5218)', async () => {
+        const zoom = async (user: string, book: string, vch: string) =>
+          (
+            await get(user, `/reports/stock-report/zoom?${qs({ coBook: book, vchNo: vch })}`)
+          ).json();
+        // The printer holds no rights row for Sales: the hosted service refuses (decision 5).
+        expect(await zoom('printer', 'SAL', 'M10')).toEqual({
+          action: 'refuse',
+          message: 'You Have No Rights...',
+        });
+        await exec(
+          `INSERT INTO "USER_SET"(tenant_id,"CO_CODE","LC_CODE","USER_NAME","MAIN_MENU","SUB_MENU","FRM_VIEW","FRM_EDIT","FRM_DELETE","FRM_PRINT")
+           VALUES($1,'01','01','printer','Sales','Sales Invoice','N','N','N','N')`,
+          TENANT,
+        );
+        try {
+          expect((await zoom('printer', 'SAL', 'M10')).message).toBe('You Have No Rights...');
+          await exec(
+            `UPDATE "USER_SET" SET "FRM_VIEW"='Y' WHERE tenant_id=$1 AND "USER_NAME"='printer' AND "SUB_MENU"='Sales Invoice'`,
+            TENANT,
+          );
+          expect(await zoom('printer', 'SAL', 'M10')).toEqual({
+            action: 'open',
+            path: '/txn/sales',
+            vchNo: 'M10',
+            coBook: 'SAL',
+            coYear: YEAR,
+            lcCode: '01',
+          });
+        } finally {
+          await exec(
+            `DELETE FROM "USER_SET" WHERE tenant_id=$1 AND "USER_NAME"='printer' AND "SUB_MENU"='Sales Invoice'`,
+            TENANT,
+          );
+        }
+        // A voucher number shorter than 3 characters is an Item Opening row; an unknown book opens nothing.
+        expect(await zoom('printer', 'IOB', 'G')).toEqual({
+          action: 'refuse',
+          message: 'This Is a Item Wise Opening Stock Voucher You Cant Zoom ....',
+        });
+        expect(await zoom('printer', 'NOPE', 'M10')).toEqual({ error: 'book-unavailable' });
+        // The Tag Transfer book has no Lite screen.
+        expect(await zoom('printer', 'TRF', 'M12')).toEqual({ action: 'none' });
+        // No View right on the Stock Report: the route itself is refused.
+        expect(
+          (
+            await get(
+              'blocked',
+              `/reports/stock-report/zoom?${qs({ coBook: 'SAL', vchNo: 'M10' })}`,
+            )
+          ).statusCode,
+        ).toBe(403);
+      });
+
+      it('the InOut item ledger covers the ticked items up to To, needs the Print right and a selection (RP_STOCK.cs:5927-5976)', async () => {
+        const url = (extra: Record<string, string>) =>
+          `/reports/stock-report/item-ledger?${qs({ fromDate: W1.from, toDate: W1.to, ...extra })}`;
+        const a = ITEMS.A.code;
+        const ledger = (await get('printer', url({ items: a }))).json();
+        expect(ledger.title).toBe(
+          `Stock Ledger Report From ${W1.from.split('-').reverse().join('/')} To ${W1.to.split('-').reverse().join('/')}`,
+        );
+        expect(ledger.items.map((i: any) => i.code)).toEqual([a]);
+        // Item A (cases.md section 1): Opening 13 / 126.000 before D10, Closing 14 / 138.000 at D40.
+        const mine = MOVES.filter((m) => m.item === 'A');
+        const signed = (rows: Mv[]) => ({
+          pcs: round(
+            rows.reduce((n, m) => n + (m.sign === '+' ? m.pcs : -m.pcs), 0),
+            3,
+          ),
+          nwt: round(
+            rows.reduce((n, m) => n + (m.sign === '+' ? m.nwt : -m.nwt), 0),
+            3,
+          ),
+        });
+        const opening = signed(mine.filter((m) => D(m.day) < W1.from));
+        const closing = signed(mine.filter((m) => D(m.day) <= W1.to));
+        const item = ledger.items[0];
+        expect([item.openingPcs, item.openingNetWt]).toEqual([opening.pcs, opening.nwt]);
+        expect([item.closingPcs, item.closingNetWt]).toEqual([closing.pcs, closing.nwt]);
+        expect([closing.pcs, closing.nwt]).toEqual([14, 138]);
+        expect(item.rows).toHaveLength(mine.filter((m) => D(m.day) >= W1.from).length);
+        // Items that are not ticked are absent; a code of another tenant or location adds nothing.
+        const both = (await get('printer', url({ items: `${a},${ITEMS.S.code}` }))).json();
+        expect(both.items.map((i: any) => i.code).sort()).toEqual([ITEMS.S.code, a].sort());
+        expect((await get('printer', url({ items: '' }))).statusCode).toBe(400);
+        expect((await get('printer', url({ items: '' }))).json().message).toBe(
+          'Item Selection Not Done...',
+        );
+        expect((await get('viewer', url({ items: a }))).statusCode).toBe(403);
+        const pdf = await get(
+          'printer',
+          url({ items: a }).replace('item-ledger?', 'item-ledger.pdf?'),
+        );
+        expect([200, 500, 501, 503]).toContain(pdf.statusCode);
+        // The picker lists the items of the Item Type by name.
+        const list = (
+          await get('viewer', '/reports/stock-report/item-ledger/items?itemType=G')
+        ).json();
+        expect(list.map((r: any) => r.code)).toEqual(
+          Object.values(ITEMS)
+            .filter((i) => i.type === 'G' && !i.hidden)
+            .sort((x, y) => x.name.localeCompare(y.name))
+            .map((i) => i.code),
+        );
+      });
+
+      it('ITM_WITH_LOT_STK = Y: the Safe dimension groups by the stock lot and the defaults say so (RP_STOCK.cs:4483-4485)', async () => {
+        const had = await query(
+          `SELECT 1 FROM "CO_SET_NEW" WHERE tenant_id=$1 AND "CO_CODE"='01'`,
+          TENANT,
+        );
+        if (had.length === 0)
+          await exec(`INSERT INTO "CO_SET_NEW"(tenant_id,"CO_CODE") VALUES($1,'01')`, TENANT);
+        await exec(
+          `UPDATE "CO_SET_NEW" SET "ITM_WITH_LOT_STK"='Y' WHERE tenant_id=$1 AND "CO_CODE"='01'`,
+          TENANT,
+        );
+        await exec(
+          `UPDATE "MAIN_STOCK" SET "ITM_LOT"='LOT-A' WHERE tenant_id=$1 AND "VCH_NO"='M09'`,
+          TENANT,
+        );
+        try {
+          expect((await get('printer', '/reports/stock-report/defaults')).json().itemLot).toBe(
+            true,
+          );
+          const body = await summary('safe', W1, { itemType: 'G' });
+          const byLot = Object.fromEntries(body.rows.map((r: any) => [r.code, r]));
+          expect(Object.keys(byLot).sort()).toEqual(['', 'LOT-A']);
+          // M09 (4 pcs / 40.000 net) is the only lot-bearing movement.
+          expect([
+            byLot['LOT-A'].prPcs,
+            byLot['LOT-A'].prWt,
+            byLot['LOT-A'].clPcs,
+            byLot['LOT-A'].clWt,
+          ]).toEqual([4, 40, 4, 40]);
+          const drill = await movements('safe', W1, 'LOT-A', 'G', 'closing', { itemType: 'G' });
+          expect(drill.rows.map((r: any) => r.itLot)).toEqual(['LOT-A']);
+        } finally {
+          await exec(
+            `UPDATE "MAIN_STOCK" SET "ITM_LOT"=NULL WHERE tenant_id=$1 AND "VCH_NO"='M09'`,
+            TENANT,
+          );
+          if (had.length === 0)
+            await exec(`DELETE FROM "CO_SET_NEW" WHERE tenant_id=$1 AND "CO_CODE"='01'`, TENANT);
+          else
+            await exec(
+              `UPDATE "CO_SET_NEW" SET "ITM_WITH_LOT_STK"=NULL WHERE tenant_id=$1 AND "CO_CODE"='01'`,
+              TENANT,
+            );
+        }
+        expect((await get('printer', '/reports/stock-report/defaults')).json().itemLot).toBe(false);
+      });
+    });
+
     it('the other tenant sees only its own 1000 pcs, and tenant 1 never sees it', async () => {
       const mine = await summary('item', W1);
       expect(JSON.stringify(mine)).not.toContain('1000,');
