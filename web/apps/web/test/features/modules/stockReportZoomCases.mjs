@@ -154,7 +154,7 @@ export const zoomCases = [
     'zoom.screen-with-two-books',
     'T05',
     'read-only',
-    'RP_STOCK.cs:5240-5600: the zoom names the voucher\'s book (CurBook); a screen that has two books of the family still opens that voucher',
+    "RP_STOCK.cs:5240-5600: the zoom names the voucher's book (CurBook); a screen that has two books of the family still opens that voucher",
     async (ctx) =>
       onData(ctx, async () => {
         const { page } = await ctx.session();
@@ -171,7 +171,7 @@ export const zoomCases = [
           await page.waitForURL((url) => url.pathname === stockAdjust[3], { timeout: 15_000 });
           await page.getByText(stockAdjust[4](row[M.vch])).first().waitFor({ timeout: 15_000 });
           const book = page.getByRole('combobox', { name: 'Configured book', exact: true });
-          assert.equal(await book.inputValue(), 'SAJ', 'the voucher\'s own book is selected');
+          assert.equal(await book.inputValue(), 'SAJ', "the voucher's own book is selected");
           assert.equal(await book.locator('option[value]:not([value=""])').count(), 2);
         } finally {
           await data.exec(
@@ -218,7 +218,8 @@ export const zoomCases = [
           await page.unroute('**/api/reports/stock-report/zoom*');
         }
         return {
-          observation: 'the zoom address carried mode=TAG GEN and Tag Opening showed Only Tag Entry',
+          observation:
+            'the zoom address carried mode=TAG GEN and Tag Opening showed Only Tag Entry',
           expected: { mode: 'TAG GEN' },
         };
       }),
