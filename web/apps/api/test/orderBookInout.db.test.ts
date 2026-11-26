@@ -269,18 +269,32 @@ run('Sales Order on an I book follows the desktop', () => {
   });
 
   it("a TAG_STK_LESS 'Y' Order_Stk '-' row is rebuilt and does not block edit/delete", async () => {
+    // A line holds its tag ('Y') when the company's ORD_TAG_STK_LESS is 'Y' and the Tag cell took a tag in stock
+    // (TR_SALE_ORD.cs:5557, :7496, :9268-9286).
+    await exec(`UPDATE "CO_SET_NEW" SET "ORD_TAG_STK_LESS"='Y' WHERE tenant_id=$1`, tenantId);
+    await exec(
+      `INSERT INTO "BAR_DETL"(tenant_id,"CO_CODE","LC_CODE","TAG_NO","VCH_SRNO","IT_CODE","TBL_CODE","EMP_ISU")
+       VALUES($1,'01','01','T9',9,'GL','001','N')`,
+      tenantId,
+    );
+    await exec(
+      `INSERT INTO "MAIN_STOCK"(tenant_id,"CO_CODE","LC_CODE","CO_YEAR","CO_BOOK","VCH_NO","SR_NO","TAG_NO","VCH_SRNO","ITM_SIGN","TBL_CODE")
+       VALUES($1,'01','01',$2,'TGO','00001',1,'T9',9,'+','001')`,
+      tenantId,
+      YEAR,
+    );
     await createSalesOrder(
       runtime,
       input({
         oldMetalRows: [],
         advanceAmount: 0,
-        lines: [line({ tagStockLess: 'Y', tblCode: '002' })],
+        lines: [line({ tagNo: 'T9', tblCode: '002' })],
       }) as any,
     );
     const [out] = await query(
       `SELECT "SR_NO"::int sr,"ISR_NO"::int isr,"TR_TYPE" tr,"ITM_SIGN" sign,"TAG_NO" tag,"TBL_CODE" tbl,"ITM_NWT"::float nwt,
               "NET_AMT"::float net,"DATA_TYPE" dt,"VCH_TYPE" vt,"BOOK_NAME" bn,"MAIN_USER" mu
-         FROM "MAIN_STOCK" WHERE tenant_id=$1`,
+         FROM "MAIN_STOCK" WHERE tenant_id=$1 AND "CO_BOOK"='320'`,
       tenantId,
     );
     const [detl] = await query(
@@ -317,7 +331,10 @@ run('Sales Order on an I book follows the desktop', () => {
       expectedVersion: edited.version,
     });
     expect(
-      await query(`SELECT count(*)::int n FROM "MAIN_STOCK" WHERE tenant_id=$1`, tenantId),
+      await query(
+        `SELECT count(*)::int n FROM "MAIN_STOCK" WHERE tenant_id=$1 AND "CO_BOOK"='320'`,
+        tenantId,
+      ),
     ).toEqual([{ n: 0 }]);
   });
   it("the SALES ORDER book policy (print, design selection, order image) accepts the desktop's 'I' direction", async () => {
@@ -340,7 +357,7 @@ run('Sales Order on an I book follows the desktop', () => {
         }) as any,
       );
       await exec(
-        `UPDATE "SL_ORD_DETL" SET "TAG_NO"='T1',"VCH_SRNO"=7 WHERE tenant_id=$1`,
+        `UPDATE "SL_ORD_DETL" SET "TAG_NO"='T1',"VCH_SRNO"=7,"TAG_STK_LESS"='Y' WHERE tenant_id=$1`,
         tenantId,
       );
       await exec(
@@ -576,7 +593,7 @@ run('Sales Order on an I book follows the desktop', () => {
         }) as any,
       );
       await exec(
-        `UPDATE "SL_ORD_DETL" SET "TAG_NO"='T1',"VCH_SRNO"=7 WHERE tenant_id=$1`,
+        `UPDATE "SL_ORD_DETL" SET "TAG_NO"='T1',"VCH_SRNO"=7,"TAG_STK_LESS"='Y' WHERE tenant_id=$1`,
         tenantId,
       );
       await exec(
