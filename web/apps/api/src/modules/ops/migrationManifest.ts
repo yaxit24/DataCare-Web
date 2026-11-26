@@ -238,4 +238,19 @@ export const EXPECTED_MIGRATIONS: ReadonlyArray<{
     name: '20261126100000_opening_detail_data_type',
     checksum: 'bdfff53db903f05275a594331e1193e526c961d68a257083673e5b656069dfb2',
   },
+  {
+    // The web-provisioned sale book SL takes BOOK_TYPE 'T' / ITM_TYPE 'A' (MS_UPDATE.cs:7320; Ac_Tax.cs:92-98).
+    name: '20261126120000_web_sales_book_type',
+    checksum: 'fcc99b11a5ff2b354a4f732b9e33e2c24f9863c027d36235777a5f9621c43227',
+  },
+  {
+    // The web-provisioned sale book SL gets BOOK_DETL slot 5 DISCOUNT, the 33/34 pair's account (Ac_Ledr.cs:155-157).
+    name: '20261126130000_web_sales_discount_slot',
+    checksum: '0b03c0f4df60db19780ee5ece79b5439141e06260d72102bbbbd4146be789367',
+  },
+  {
+    // Web-provisioned companies get the TDS ledger the sale's 13/14 pair falls back to (Ac_Ledr.cs:112-114).
+    name: '20261126140000_web_tds_ledger',
+    checksum: 'bbad5418ec64dcfca04dd3150c7795bfc807783555418c13476ddad5ec3560b5',
+  },
 ];

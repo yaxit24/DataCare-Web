@@ -120,7 +120,7 @@ describe('buildSaleLedger with a two-account bill (G169)', () => {
     expect(balance.dr).toBe(69921.04);
   });
 
-  it('keys each revenue leg by its line and leaves party and tax on their measured codes', () => {
+  it('keys each revenue leg STR(SR_NO)+07 and the party 01, tax 09 (Ac_Ledr.cs:64, :90, :94)', () => {
     const shape = ledger.map((line) => ({
       ac: line.AC_CODE,
       cr: line.CR_AMT,
@@ -130,15 +130,15 @@ describe('buildSaleLedger with a two-account bill (G169)', () => {
     }));
     expect(shape).toEqual([
       { ac: 'CUST', cr: 0, dr: 69921.04, legType: 1, legKeySuffix: undefined },
-      { ac: 'SALES', cr: 63609.5, dr: 0, legType: undefined, legKeySuffix: '         103' },
-      { ac: 'SLVSALE', cr: 4275, dr: 0, legType: undefined, legKeySuffix: '         203' },
-      { ac: 'GST', cr: 2036.54, dr: 0, legType: 4, legKeySuffix: undefined },
+      { ac: 'SALES', cr: 63609.5, dr: 0, legType: undefined, legKeySuffix: '         107' },
+      { ac: 'SLVSALE', cr: 4275, dr: 0, legType: undefined, legKeySuffix: '         207' },
+      { ac: 'GST', cr: 2036.54, dr: 0, legType: 9, legKeySuffix: undefined },
     ]);
   });
 
   it('gives every revenue leg its own key (the pre-G169 code gave both legType 3 and collided)', () => {
     const tails = ledger.filter((line) => line.AC_CODE !== 'CUST' && line.AC_CODE !== 'GST');
-    expect(tails.map((line) => line.legKeySuffix)).toEqual(['         103', '         203']);
+    expect(tails.map((line) => line.legKeySuffix)).toEqual(['         107', '         207']);
     expect(tails.every((line) => line.legType === undefined)).toBe(true);
   });
 });

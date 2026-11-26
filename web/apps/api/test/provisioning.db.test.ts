@@ -76,8 +76,9 @@ d('company provisioning produces a postable company', () => {
     // sale and purchase, other charges, fine kasar), plus BRANCH (the stock in/out branch account, N91),
     // plus WALKIN (the walk-in customer the sales screens default to, G124), plus ORDADV (the sale books'
     // slot-4 order-advance account, N198), plus DISCOUNT (the purchase books' slot 5, N240), plus the installer's
-    // sales-other, purchase-old-silver and purchase-other accounts (OTHSALE, OLDSLVPR, OTHPURC).
-    expect(await count('AC_MAST')).toBe(33);
+    // sales-other, purchase-old-silver and purchase-other accounts (OTHSALE, OLDSLVPR, OTHPURC), plus TDS (the
+    // sale's TDS pair 13/14, Ac_Ledr.cs:112-114).
+    expect(await count('AC_MAST')).toBe(34);
   });
 
   it('creates every book with its posting legs', async () => {
@@ -105,22 +106,21 @@ d('company provisioning produces a postable company', () => {
               ? 9
               : // PURCHASE and TAG PURCHASE add slot 4, labour and other charges (Ac_Ledr.cs:419-421, G184),
                 // and slot 5, the template's discount account (MS_UPDATE.cs:25022, :30221, N240);
-                // SALES adds slot 4, the order advance a sale adjusts (Ac_Rojmel.cs:96, N198).
-                book === 'PR' || book === 'TPR'
+                // SALES adds slot 4, the order advance a sale adjusts (Ac_Rojmel.cs:96, N198), and slot 5, the
+                // discount pair's account (Ac_Ledr.cs:155-157).
+                book === 'PR' || book === 'TPR' || book === 'SL'
                 ? 5
-                : book === 'SL'
-                  ? 4
-                  : // LBR (labour) carries SR_NO 1 (metal), SR_NO 6 (labour income, G115) and the template's
-                    // 8 to 11 (MS_UPDATE.cs:23749-23761, N240).
-                    book === 'LBR'
-                    ? 6
-                    : book === 'CRD' || book === 'DIR'
-                      ? 2
-                      : // FSL/FPR (fine settlement) each carry their single configured control slot.
-                        book === 'FSL' || book === 'FPR'
-                        ? 1
-                        : // OTH INC / OTH EXP: slot 1 and the template's cash 2 and kasar 3 (N240).
-                          3,
+                : // LBR (labour) carries SR_NO 1 (metal), SR_NO 6 (labour income, G115) and the template's
+                  // 8 to 11 (MS_UPDATE.cs:23749-23761, N240).
+                  book === 'LBR'
+                  ? 6
+                  : book === 'CRD' || book === 'DIR'
+                    ? 2
+                    : // FSL/FPR (fine settlement) each carry their single configured control slot.
+                      book === 'FSL' || book === 'FPR'
+                      ? 1
+                      : // OTH INC / OTH EXP: slot 1 and the template's cash 2 and kasar 3 (N240).
+                        3,
       );
   });
 
@@ -385,7 +385,8 @@ d('company provisioning produces a postable company', () => {
     // 132: ORC carries the order-cancel layout, 1 = cash refund and 2 = kasar (TR_SL_ORD_ADJ.cs:2255-2263,
     // Ac_Ledr.cs:932-935, N233), not the three sale-book slots.
     // 146: the template slots N240 adds (OIN/OEX +2 each, TSP +4, PR/TPR +1 each, LBR +4).
-    expect(await count('BOOK_DETL')).toBe(146);
+    // 147: the sale book's discount slot 5 (Ac_Ledr.cs:155-157).
+    expect(await count('BOOK_DETL')).toBe(147);
   });
 
   /**
