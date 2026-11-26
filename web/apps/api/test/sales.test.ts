@@ -96,6 +96,23 @@ describe('sales builders', () => {
     expect(b.dr).toBe(1180);
     expect(lines.length).toBe(3); // no round-off line
   });
+  it('refuses a round-off leg past the rounding bound: line legs that do not add up to the bill', () => {
+    const build = (lineAmount: number) =>
+      buildSaleLedger({
+        key,
+        acCode: 'CUST',
+        salesAc: 'SALES',
+        taxAc: 'GST',
+        roundAc: 'ROF',
+        totals: { total: 1180, taxable: 1000, tax: 180, roundOff: 0, net: 1000 },
+        incomeLegs: [{ ac: 'SALES', amount: lineAmount, srNo: 1 }],
+        maxRoundOffResidue: 2.01,
+      });
+    // Paise of rounding is carried by the round-off leg...
+    expect(ledgerBalance(build(999.6)).balanced).toBe(true);
+    // ...a line total 100 short of the bill is refused rather than hidden in the round-off leg.
+    expect(() => build(900)).toThrow(/does not agree with the bill total/);
+  });
   it('buildSaleLedger balances (with round-off)', () => {
     const lines = buildSaleLedger({
       key,
@@ -117,7 +134,7 @@ describe('sales builders', () => {
       roundAc: 'ROF',
       controlAc: 'CTRL',
       totals: { total: 1180, taxable: 1000, tax: 180, roundOff: 0 },
-      payments: { cashAc: 'CASH', cashAmt: 200 },
+      payments: { cash: { ac: 'CASH', amount: 200 } },
     });
     expect(ledgerBalance(lines).balanced).toBe(true);
     expect(lines).toEqual(

@@ -135,8 +135,9 @@ databaseDescribe('database-backed transaction integrity', () => {
       ['348', 'Purchase Return 348', 'P348', 'PURC RETURN', 'O', 'PR_DATA'],
     ]) {
       await owner.$executeRawUnsafe(
-        `INSERT INTO "BOOK_DATA"(tenant_id,"CO_CODE","LC_CODE","CO_BOOK","BOOK_NAME","BOOK_SNAME","MAIN_BOOK","BOOK_INOUT","CUR_USE","BOOK_TBL_NAME")
-         VALUES ($1,$2,$3,$4,$5,$6,$7,$8,'Y',$9)`,
+        // A sale book is a tax-invoice book ('T'), so Sales_GST writes its TAX_DATA (Ac_Tax.cs:92-98).
+        `INSERT INTO "BOOK_DATA"(tenant_id,"CO_CODE","LC_CODE","CO_BOOK","BOOK_NAME","BOOK_SNAME","MAIN_BOOK","BOOK_INOUT","CUR_USE","BOOK_TBL_NAME","BOOK_TYPE")
+         VALUES ($1,$2,$3,$4,$5,$6,$7::text,$8,'Y',$9,CASE WHEN $7::text='SALES' THEN 'T' END)`,
         TENANT,
         CO,
         LC,

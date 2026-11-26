@@ -473,7 +473,7 @@ export const salesInvoice = {
           b: EXPECT_B,
           totals: TWO_LINES,
           ledger:
-            'one revenue leg per detail line on its group SALE_AC, keyed VCH_NO+STR(SR_NO)+03 (Ac_Ledr.cs:90 line path, measured revenue code 03)',
+            'one revenue leg per detail line on its group SALE_AC, keyed VCH_NO+STR(SR_NO)+07 (Ac_Ledr.cs:90 line path; book SL is ITM_TYPE A)',
         },
         observe: async (ctx) => ({
           countsAfterFailedSave: await counts(ctx),
