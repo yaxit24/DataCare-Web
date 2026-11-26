@@ -400,7 +400,8 @@ export function orderOldMetalView(saved: ReadonlyArray<Record<string, any>>) {
  * - OrdGold / OrdSilver sum the fine of the saved old metal rows of type G / S that carry no amount (`:9458-9465`).
  *   ORD_GOLD adds the rate-cut fine (`:9509`).
  * - ENTRY_TYPE 'O'; the ORD_* key is the order itself; PAID_AC '', PAID_AMT, KASAR_AMT and ORD_BAL_AMT 0; DATA_TRFR 'N';
- *   IT_DESC the narration, EMP_CODE the salesperson (`:9488-9514`).
+ *   IT_DESC the narration, EMP_CODE the salesperson (`:9488-9514`); USER_UPDATE and USER_DELETE 'N', the columns'
+ *   NOT NULL defaults (MS_UPDATE.cs:26133).
  * The '+' row is the advance, not a use of it: readers of "used" or "adjusted" count only the other signs.
  */
 export function orderAdvanceAdjRow(
@@ -457,5 +458,8 @@ export function orderAdvanceAdjRow(
     EMP_CODE: trimmed(header.EMP_CODE, 3),
     IT_DESC: trimmed(header.VCH_DESC, 250),
     MAIN_USER: order.mainUser,
+    // The row leaves the flags to the column defaults, NOT NULL DEFAULT 'N' (MS_UPDATE.cs:26133).
+    USER_UPDATE: 'N',
+    USER_DELETE: 'N',
   };
 }
