@@ -612,7 +612,7 @@ export const books = {
       'entry.lite-hidden-controls',
       'T01',
       'read-only',
-      'MS_BOOK.cs:1757, :1805 Data Type and Reset All hidden; :3064 the footer double-click reveals them only for A/E; :2113 employee only for E (D6)',
+      'MS_BOOK.cs:1757, :1805 Reset All hidden (Data Type is shown in the web Lite product by owner decision 2026-11-25, behind the dataTypes plan flag); :3064 the footer double-click reveals them only for A/E; :2113 employee only for E (D6)',
       async (ctx) =>
         withBooks(ctx, async () => {
           const { page } = await ctx.session();
@@ -625,8 +625,14 @@ export const books = {
               .map((el) => el.textContent.trim())
               .filter((t) => /Data Type|Reset All|Employee/i.test(t)),
           );
-          assert.deepEqual(found, []);
-          return { observation: 'no Data Type, Reset All or Employee control', expected: [] };
+          assert.deepEqual(
+            found.map((t) => t.slice(0, 9)),
+            ['Data type'],
+          );
+          return {
+            observation: 'Data type shown (owner decision); no Reset All or Employee control',
+            expected: ['Data type'],
+          };
         }),
     ),
     C(

@@ -161,7 +161,7 @@ export function desktopGlobalFormKeyActions(navigate: (href: string) => void): F
     F3: {
       id: 'stock-report',
       label: 'Stock report',
-      run: () => navigate('/reports/stock-valuation'),
+      run: () => navigate('/reports/stock-report'),
     },
     F4: { id: 'sales-order', label: 'Sales order', run: () => navigate('/txn/sales-order') },
     F5: { id: 'sales-bill', label: 'Sales bill', run: () => navigate('/txn/sales') },

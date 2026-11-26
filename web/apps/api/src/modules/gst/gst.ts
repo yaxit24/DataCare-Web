@@ -1,4 +1,5 @@
 import { withTxBudget } from '../shared/txBudget.js';
+import { bookDataTypeSql } from '../reports/reportDataType.js';
 
 /**
  * GSTR-1 return datasets (read-only) over the sales tables. Classification follows GST rules using
@@ -141,6 +142,8 @@ export interface GstScope {
   coCode: string;
   lcCode?: string;
   coYear?: string;
+  /** Session data type; 'A'/'B' keep that type's books (RP_TAX.cs:1941-1947, {BOOK_DATA.DATA_TYPE}). */
+  dataType?: string;
 }
 
 function scopeSql(
@@ -159,7 +162,7 @@ function scopeSql(
     parts.push(`${alias}."CO_YEAR"=$${i++}`);
     params.push(s.coYear);
   }
-  return { sql: parts.join(' AND '), params };
+  return { sql: parts.join(' AND ') + bookDataTypeSql(s.dataType, alias), params };
 }
 
 /** Live GSTR-1 datasets for a company scope (Req 18). */

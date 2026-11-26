@@ -118,6 +118,8 @@ const dayBefore = (iso) => {
   return d.toISOString().slice(0, 10);
 };
 async function recentRow(page, vchNo) {
+  // Wait for the list toggle in either state first; a slow render would otherwise leave the list collapsed.
+  await page.getByRole('button', { name: /^[▸▾] Recent vouchers$/ }).waitFor();
   const toggle = page.getByRole('button', { name: '▸ Recent vouchers', exact: true });
   if (await toggle.isVisible().catch(() => false)) await toggle.click();
   const cell = page.getByRole('cell', { name: vchNo, exact: true }).last();

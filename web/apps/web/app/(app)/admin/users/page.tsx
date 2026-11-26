@@ -1,4 +1,5 @@
 'use client';
+import { UserDataTypeControls } from '../../../../components/DataTypeControls';
 import { useCallback, useEffect, useRef, useState, type KeyboardEvent } from 'react';
 import { useRouter } from 'next/navigation';
 import { del, get, post, ApiError } from '../../../../lib/api';
@@ -16,6 +17,8 @@ import { UserRightsGrid } from '../../../../components/UserRightsGrid';
 import { useEditionCode } from '../../../../components/BusinessScope';
 
 interface UserRow {
+  allowedDataTypes?: string;
+  defaultDataType?: string;
   loginName: string;
   role: string;
   coCode: string;
@@ -62,6 +65,7 @@ export default function UserCreatePage() {
     newPassword: '',
     confirmPassword: '',
   });
+  const [access, setAccess] = useState({ allowed: 'ABC', defaultType: 'C' });
   const [userType, setUserType] = useState<UserType>('User');
   const [entryMode, setEntryMode] = useState<'A' | 'E'>('A');
   const [picked, setPicked] = useState('');
@@ -86,6 +90,7 @@ export default function UserCreatePage() {
   const clear = useCallback(async () => {
     setValues({ name: '', oldPassword: '', newPassword: '', confirmPassword: '' });
     setUserType('User');
+    setAccess({ allowed: 'ABC', defaultType: 'C' });
     setEntryMode('A');
     setPicked('');
     nameRefused.current = false;
@@ -121,8 +126,13 @@ export default function UserCreatePage() {
       focusBox('name', true);
       return;
     }
-    if (found) setUserType(userTypeOf(found.role));
-    else setEntryMode('A');
+    if (found) {
+      setUserType(userTypeOf(found.role));
+      setAccess({
+        allowed: found.allowedDataTypes ?? 'ABC',
+        defaultType: found.defaultDataType ?? 'C',
+      });
+    } else setEntryMode('A');
   }
 
   /** tOldPasword_Validating: an existing user's old password may not be left blank. */
@@ -176,6 +186,8 @@ export default function UserCreatePage() {
           newPassword: values.newPassword,
           confirmPassword: values.confirmPassword,
           userType,
+          allowedDataTypes: access.allowed,
+          defaultDataType: access.defaultType,
         });
       else
         await post('/admin/users', {
@@ -183,6 +195,8 @@ export default function UserCreatePage() {
           password: values.newPassword,
           confirmPassword: values.confirmPassword,
           userType,
+          allowedDataTypes: access.allowed,
+          defaultDataType: access.defaultType,
         });
       await clear();
       say('ok', USER_TEXT.CREATED);
@@ -295,6 +309,11 @@ export default function UserCreatePage() {
       <h1>User Create</h1>
       <div className="panel" style={{ display: 'flex', gap: 32, flexWrap: 'wrap' }}>
         <div>
+          <UserDataTypeControls
+            allowed={access.allowed}
+            defaultType={access.defaultType}
+            onChange={(allowed, defaultType) => setAccess({ allowed, defaultType })}
+          />
           {row(
             'name',
             <input

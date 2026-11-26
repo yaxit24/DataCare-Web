@@ -22,6 +22,8 @@ export type UserRole = (typeof USER_ROLES)[number];
 
 /** A user row safe to return to the client — NEVER includes LOGIN_PWD. */
 export interface UserRow {
+  allowedDataTypes?: string;
+  defaultDataType?: string;
   loginName: string; // LOGIN_NAME
   role: string; // LOGIN_CATG
   coCode: string; // CO_CODE
@@ -154,13 +156,15 @@ export async function listUsers(
       : '"LOGIN_NAME","LOGIN_CATG","CO_CODE"';
     const rows: Record<string, string | null>[] = coCode
       ? await tx.$queryRawUnsafe(
-          `SELECT ${cols} FROM "LOGIN_MAST" WHERE "CO_CODE"=$1 AND "LOGIN_ACTIVE"='Y' ORDER BY "LOGIN_NAME"`,
+          `SELECT ${cols},"DATA_TYPE_ALLOW","DATA_TYPE_DEFAULT" FROM "LOGIN_MAST" WHERE "CO_CODE"=$1 AND "LOGIN_ACTIVE"='Y' ORDER BY "LOGIN_NAME"`,
           coCode,
         )
       : await tx.$queryRawUnsafe(
-          `SELECT ${cols} FROM "LOGIN_MAST" WHERE "LOGIN_ACTIVE"='Y' ORDER BY "CO_CODE","LOGIN_NAME"`,
+          `SELECT ${cols},"DATA_TYPE_ALLOW","DATA_TYPE_DEFAULT" FROM "LOGIN_MAST" WHERE "LOGIN_ACTIVE"='Y' ORDER BY "CO_CODE","LOGIN_NAME"`,
         );
     return rows.map((r) => ({
+      allowedDataTypes: r.DATA_TYPE_ALLOW ?? 'ABC',
+      defaultDataType: r.DATA_TYPE_DEFAULT ?? 'C',
       loginName: r.LOGIN_NAME ?? '',
       role: r.LOGIN_CATG ?? '',
       coCode: r.CO_CODE ?? '',

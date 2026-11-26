@@ -20,6 +20,8 @@ export interface StockScope {
   coYear: string;
   /** CO_STK_MERGE = Y: the company condition is dropped inside the tenant (RP_STOCK.cs:4284). */
   merge: boolean;
+  /** ITM_WITH_LOT_STK = Y: the Safe dimension groups by the stock lot (RP_STOCK.cs:4483-4485). */
+  itemLot?: boolean;
 }
 
 const ITEM_JOIN = `LEFT JOIN "ITEM_MAST" b ON b.tenant_id = a.tenant_id AND b."CO_CODE" = a."CO_CODE" AND b."IT_CODE" = a."IT_CODE"`;
@@ -27,6 +29,7 @@ const GROUP_JOIN = `LEFT JOIN LATERAL (SELECT "GR_NAME","TRAD_TYPE" FROM "GROUP_
 
 const IT_TYPE = `COALESCE(b."IT_TYPE", '')`;
 const SAFE = `COALESCE(NULLIF(b."SAFE_NAME", ''), 'MAIN')`;
+const LOT = `COALESCE(a."ITM_LOT", '')`;
 const COUNTER = `COALESCE(NULLIF(a."TBL_CODE", ''), '001')`;
 const TRADING = `COALESCE(NULLIF(b."TRAD_TYPE", ''), NULLIF(g."TRAD_TYPE", ''), '')`;
 
@@ -96,7 +99,7 @@ function where(scope: StockScope, f: StockFilters, values: unknown[]): string {
   c.push(`a."CO_YEAR" = ${bind(scope.coYear)}`);
   // Items marked "not displayed in stock" are left out (RP_STOCK.cs:4284 `B.STK_DISPLAY <> 'N'`); NULL is shown.
   c.push(`COALESCE(b."STK_DISPLAY", 'Y') <> 'N'`);
-  if (f.dataType) c.push(`a."DATA_TYPE" = ${bind(f.dataType)}`);
+  if (f.dataType && f.dataType !== 'C') c.push(`a."DATA_TYPE" = ${bind(f.dataType)}`);
   if (f.stockType === 'tag') c.push(`COALESCE(a."TAG_NO", 'N') <> 'N'`);
   if (f.stockType === 'item') c.push(`COALESCE(a."TAG_NO", 'N') = 'N'`);
   if (f.acCode !== undefined) c.push(`a."AC_CODE" = ${bind(f.acCode)}`);
@@ -122,7 +125,10 @@ export function summaryQuery(
   gross: boolean,
 ): SqlQuery {
   const values: unknown[] = [];
-  const spec = DIM[dimension];
+  const spec =
+    dimension === 'safe' && scope.itemLot
+      ? { key: LOT, name: LOT, keyJoins: '', nameJoins: '' }
+      : DIM[dimension];
   const w = gross ? 'a."ITM_GWT"' : 'a."ITM_NWT"';
   const where_ = where(scope, f, values);
   values.push(f.fromDate, f.toDate);
@@ -181,7 +187,10 @@ export function movementsQuery(
   column: Column,
 ): SqlQuery {
   const values: unknown[] = [];
-  const spec = DIM[dimension];
+  const spec =
+    dimension === 'safe' && scope.itemLot
+      ? { key: LOT, name: LOT, keyJoins: '', nameJoins: '' }
+      : DIM[dimension];
   const where_ = where(scope, f, values);
   values.push(key, rowType, f.fromDate, f.toDate);
   const n = values.length;

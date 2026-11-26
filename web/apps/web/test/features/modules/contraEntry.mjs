@@ -133,6 +133,10 @@ const shift = (iso, days) => {
 };
 const dmy = (iso) => iso.split('-').reverse().join('/');
 const recentRow = async (page, vchNo) => {
+  // The list renders after the screen's own reads; wait for its toggle in either state before reading it, or a slow
+  // render leaves the list collapsed and the row never appears.
+  const either = page.getByRole('button', { name: /^[▸▾] Recent vouchers$/ });
+  await either.waitFor();
   const toggle = page.getByRole('button', { name: '▸ Recent vouchers', exact: true });
   if (await toggle.isVisible().catch(() => false)) await toggle.click();
   const cell = page.getByRole('cell', { name: vchNo, exact: true }).last();

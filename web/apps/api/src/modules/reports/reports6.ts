@@ -1,4 +1,5 @@
 import { dateWhere } from './reports.js';
+import { bookDataTypeSql, dataTypeSql } from './reportDataType.js';
 import { withTxBudget } from '../shared/txBudget.js';
 import type { ReportScope, ListReport } from './reports.js';
 import { barTagAvailableSql } from '../shared/stockSql.js';
@@ -48,7 +49,7 @@ export async function purchaseReturnRegister(prisma: any, s: ReportScope): Promi
               CASE WHEN ${NN('p."TOT_AMT"')} <> 0 THEN ${NN('p."TOT_AMT"')}
                    ELSE ${NN('p."NET_AMT"')} + ${NN('p."TAX_AMT"')} END AS total
        FROM "PR_DATA" p
-       WHERE p."CO_CODE"=$1${yr}${dt}
+       WHERE p."CO_CODE"=$1${yr}${dt}${bookDataTypeSql(s.dataType, 'p')}
          AND EXISTS (SELECT 1 FROM "BOOK_DATA" b
                        WHERE b."CO_CODE"::text=p."CO_CODE"::text AND b."CO_BOOK"::text=p."CO_BOOK"::text
                          AND b."BOOK_TBL_NAME"='PR_DATA' AND b."BOOK_NAME" ILIKE '%return%')
@@ -103,7 +104,7 @@ export async function contraRegister(prisma: any, s: ReportScope): Promise<ListR
                                      d."AC_CODE") END) AS "toAc",
               sum(${NN('d."DR_AMT"')}) AS amount
        FROM "AC_DATA" d
-       WHERE d."CO_CODE"=$1${yr}${dt}
+       WHERE d."CO_CODE"=$1${yr}${dt}${dataTypeSql(s.dataType, 'd."DATA_TYPE"')}
          AND EXISTS (SELECT 1 FROM "BOOK_DATA" b
                        WHERE b."CO_CODE"::text=d."CO_CODE"::text AND b."CO_BOOK"::text=d."CO_BOOK"::text
                          AND b."BOOK_NAME" ILIKE '%contra%')
@@ -145,7 +146,7 @@ export async function areaOutstanding(prisma: any, s: ReportScope): Promise<List
               sum(${NN('b."BILL_AMT"')} - ${NN('b."REC_AMT"')}) AS balance
        FROM "BILL_OS_DATA" b
        LEFT JOIN "AC_MAST" m ON m."AC_CODE"::text=b."AC_CODE"::text AND m."CO_CODE"::text=b."CO_CODE"::text
-       WHERE b."CO_CODE"=$1${yr}${dt}
+       WHERE b."CO_CODE"=$1${yr}${dt}${bookDataTypeSql(s.dataType, 'b')}
        GROUP BY 1, 2 ORDER BY balance DESC NULLS LAST`,
       ...params,
     );

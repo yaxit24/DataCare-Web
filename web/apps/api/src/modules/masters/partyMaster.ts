@@ -1,3 +1,4 @@
+import { openingDataType, rowDataTypeSql } from '../auth/dataTypePolicy.js';
 import { round, vbVal } from '@datacare/core';
 import { withTxBudget } from '../shared/txBudget.js';
 import { insertRowTx } from '../posting/posting.js';
@@ -73,6 +74,8 @@ export interface PartyScope {
   coCode: string;
   lcCode: string;
   coYear?: string;
+  /** The session's data type (A, B or C); the inline opening reads and writes it as an opening type (C as A). */
+  dataType?: string;
 }
 
 /** The text boxes of the screen, their AC_MAST columns and MaxLength (DataCareNext.MS_ACCT.resx). */
@@ -501,14 +504,19 @@ export async function getParty(
       if (ref) values.refName = text(ref.AC_NAME);
     }
     const [op]: any[] = await tx.$queryRawUnsafe(
+      // MS_ACCT.cs:6522 reads the row of MsDataType (no filter for C). The web reads the session's opening type, C as A,
+      // which is the row a save writes (:7861): showing B's figures to an All session and saving them back as A would
+      // overwrite A's opening with B's.
       `SELECT "OP_AMT","OP_SIGN","FINE_BAL","FINE_SIGN","SL_FINE_BAL","SL_FINE_SIGN" FROM "OP_DATA"
         WHERE tenant_id=$1 AND "CO_CODE"=$2 AND "LC_CODE"=$3 AND "CO_YEAR"=$4 AND "CO_BOOK"='000' AND "AC_CODE"=$5
+          AND ${rowDataTypeSql()}=$6
         ORDER BY row_id LIMIT 1`,
       scope.tenantId,
       scope.coCode,
       scope.lcCode,
       scope.coYear ?? '',
       code,
+      openingDataType(scope.dataType),
     );
     return {
       code,
@@ -675,12 +683,13 @@ export async function saveParty(
       // MS_ACCT writes its opening row with DATA_TRFR 'Y' (:7884).
       await tx.$executeRawUnsafe(
         `UPDATE "OP_DATA" SET "DATA_TRFR"='Y' WHERE tenant_id=$1 AND "CO_CODE"=$2 AND "LC_CODE"=$3 AND "CO_YEAR"=$4
-            AND "CO_BOOK"='000' AND "AC_CODE"=$5`,
+            AND "CO_BOOK"='000' AND "AC_CODE"=$5 AND ${rowDataTypeSql()}=$6`,
         tenantId,
         coCode,
         lcCode,
         scope.coYear ?? '',
         code,
+        openingDataType(scope.dataType),
       );
       opening = true;
     }

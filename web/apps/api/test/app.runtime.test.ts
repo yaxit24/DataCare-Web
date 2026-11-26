@@ -18,6 +18,8 @@ describe('production application security options', () => {
       CO_CODE: '01',
       LOGIN_NAME: 'admin',
       LOGIN_PWD: passwordHash,
+      allowed: 'ABC',
+      defaultType: 'C',
       LOGIN_CATG: 'ADMIN',
       USER_UPDATE: 'Y',
       USER_DELETE: 'Y',

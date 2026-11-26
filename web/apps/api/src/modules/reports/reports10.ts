@@ -1,4 +1,5 @@
 import { dateWhere } from './reports.js';
+import { bookDataTypeSql } from './reportDataType.js';
 import { withTxBudget } from '../shared/txBudget.js';
 import type { ReportScope, ListReport } from './reports.js';
 
@@ -131,7 +132,7 @@ export async function gstInputRegister(prisma: any, s: ReportScope): Promise<Lis
       `SELECT to_char("VCH_DATE"::timestamp,'YYYY-MM') AS month,
               sum(${NN('"NET_AMT"')}) AS taxable, sum(${NN('"TAX_AMT"')}) AS "inputGst",
               count(*)::int AS entries
-       FROM "TAX_DATA" WHERE "CO_CODE"=$1${yr}${dt} AND "TRAN_TYPE" IN ('P','PR') AND "VCH_DATE" IS NOT NULL
+       FROM "TAX_DATA" WHERE "CO_CODE"=$1${yr}${dt}${bookDataTypeSql(s.dataType, '"TAX_DATA"')} AND "TRAN_TYPE" IN ('P','PR') AND "VCH_DATE" IS NOT NULL
        GROUP BY 1 ORDER BY 1`,
       ...params,
     );
