@@ -82,6 +82,10 @@ export const ROW_KEYS: Record<string, readonly string[]> = {
   AC_DATA: ['AC_CODE', 'DR_AMT', 'CR_AMT'],
   TAX_DATA: ['TAX_CODE', 'IT_TAX_AMT'],
   CASH_DATA: ['AC_CODE', 'DR_AMT', 'CR_AMT'],
+  // Contra / Fine JV records are numbered 1..2n by both sides (TR_CONTRA.cs:2778, :2830 `SR_NO = ++R`), so the serial is
+  // identity. Without it the table fell back to the content key and one differing column (BOOK_NAME) left every row
+  // unpaired, hiding which other columns agreed (found by the desktop replay oracle).
+  CONTRA_DATA: ['SR_NO'],
 };
 
 export interface FieldDifference {
