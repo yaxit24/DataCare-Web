@@ -793,6 +793,8 @@ databaseDescribe('N18 tag cancel and tag transfer (TR_TAG_CAN) — contract vect
       VCH_SRNO: 100100000001,
       MAIN_IT_CODE: 'RNG',
       INOUT_TYPE: 'O',
+      // Web-only column (migration 20261126100000): the Item Opening owner; voucher rows take its default 'A'.
+      DATA_TYPE: 'A',
     });
 
     // One clock for the voucher: header and lines share VCH_TIME, dated the voucher day. MAIN_STOCK.ENTRY_TIME

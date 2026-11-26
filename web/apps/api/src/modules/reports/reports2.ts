@@ -1,4 +1,5 @@
 import { notCarriedOpening } from '../shared/carriedOpening.js';
+import { dataTypeSql } from './reportDataType.js';
 import { withTxBudget } from '../shared/txBudget.js';
 import type { ReportScope, ListReport } from './reports.js';
 
@@ -22,6 +23,7 @@ const NN = (c: string): string => `coalesce(NULLIF(${c}::text,'')::numeric,0)`;
  * is the account name resolved from AC_MAST. Dr/Cr footed in JS.
  */
 export async function cashBook(prisma: any, s: ReportScope): Promise<ListReport> {
+  // RP_CASH_BANK.cs:2123-2131 and RP_ALL.cs:9797 (btnCashBank): the session type's AC_DATA rows only.
   return withTxBudget(prisma, s.tenantId, 'read', async (tx: any) => {
     const rows: any[] = await tx.$queryRawUnsafe(
       `SELECT d."VCH_DATE" AS date, d."CO_BOOK"||'/'||d."VCH_NO" AS voucher,
@@ -29,7 +31,7 @@ export async function cashBook(prisma: any, s: ReportScope): Promise<ListReport>
                  WHERE m."AC_CODE"::text=d."AC_CODE"::text AND m."CO_CODE"::text=d."CO_CODE"::text LIMIT 1) AS particulars,
               ${NN('d."DR_AMT"')} AS dr, ${NN('d."CR_AMT"')} AS cr
        FROM "AC_DATA" d
-       WHERE d."CO_CODE"=$1 AND ${notCarriedOpening('d')}
+       WHERE d."CO_CODE"=$1 AND ${notCarriedOpening('d')}${dataTypeSql(s.dataType, 'd."DATA_TYPE"')}
          AND (d."AC_CODE"::text ILIKE '%CASH%'
               OR EXISTS (SELECT 1 FROM "AC_MAST" m
                            WHERE m."AC_CODE"::text=d."AC_CODE"::text AND m."CO_CODE"::text=d."CO_CODE"::text

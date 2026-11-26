@@ -568,6 +568,31 @@ interface DetlRow {
       expect(after.length - before.length).toBe(7);
     });
 
+    it('data type: a B book stamps the header and every slot; other values are refused (MS_BOOK.cs:2628-2671)', async () => {
+      const values = {
+        name: 'Zeta B Sales',
+        short: 'ZBS',
+        curUse: 'Y',
+        family: 'ITEM SALES',
+        itemType: 'A',
+        inout: 'O',
+        bookType: 'F',
+        vchSeries: '',
+        resetBook: '',
+        trfrBook: '',
+        mobileEntry: '',
+        slots: templateSlots('ITEM SALES'),
+      };
+      const refused = await admin('POST', API, book({ code: 'Z1B', ...values, dataType: 'C' }));
+      expect(refused.statusCode, refused.body).toBe(400);
+      const saved = await admin('POST', API, book({ code: 'Z1B', ...values, dataType: 'B' }));
+      expect(saved.statusCode, saved.body).toBe(201);
+      expect((await header('Z1B'))[0]!.DATA_TYPE).toBe('B');
+      const slots = await detail('Z1B');
+      expect(slots.length).toBe(6);
+      expect(new Set(slots.map((row) => row.dtype))).toEqual(new Set(['B']));
+    });
+
     it('T02 stores the first letter of each combo in both tables and keeps the name case', async () => {
       const response = await admin(
         'POST',
@@ -934,6 +959,54 @@ interface DetlRow {
         expect(response.statusCode, response.body).toBe(400);
       }
       expect(await footprint()).toEqual(before);
+    });
+
+    it('data type: changing it is refused once the book has vouchers, allowed before', async () => {
+      const values = {
+        name: 'Zeta Lock Sales',
+        short: 'ZLS',
+        curUse: 'Y',
+        family: 'ITEM SALES',
+        itemType: 'A',
+        inout: 'O',
+        bookType: 'F',
+        vchSeries: '',
+        resetBook: '',
+        trfrBook: '',
+        mobileEntry: '',
+        slots: templateSlots('ITEM SALES'),
+      };
+      expect((await admin('POST', API, book({ code: 'Z3L', ...values }))).statusCode).toBe(201);
+      let opened = (await admin('GET', `${API}/Z3L`)).json();
+      const free = await admin('PUT', `${API}/Z3L`, {
+        ...opened,
+        dataType: 'B',
+        expectedVersion: opened.version,
+      });
+      expect(free.statusCode, free.body).toBe(200);
+      expect((await header('Z3L'))[0]!.DATA_TYPE).toBe('B');
+      // Any voucher table keyed by CO_BOOK locks the type, not only AC_DATA and MAIN_STOCK: an order header, a fine
+      // row, a tag (BAR_DETL) row, and finally a ledger row.
+      for (const table of ['SL_ORD_DATA', 'FINE_DATA', 'BAR_DETL', 'AC_DATA']) {
+        await exec(
+          `INSERT INTO "${table}"(tenant_id,"CO_CODE","LC_CODE","CO_YEAR","CO_BOOK","VCH_NO")
+         VALUES ($1,'01','01',$2,'Z3L','00001')`,
+          tenantId,
+          YEAR,
+        );
+        opened = (await admin('GET', `${API}/Z3L`)).json();
+        await expectRefused(
+          await admin('PUT', `${API}/Z3L`, {
+            ...opened,
+            dataType: 'A',
+            expectedVersion: opened.version,
+          }),
+          'This book already has vouchers, so its Data Type cannot be changed.',
+        );
+        expect((await header('Z3L'))[0]!.DATA_TYPE, table).toBe('B');
+        if (table !== 'AC_DATA')
+          await exec(`DELETE FROM "${table}" WHERE tenant_id=$1 AND "CO_BOOK"='Z3L'`, tenantId);
+      }
     });
 
     it('T09/T06 the family changes on a book without vouchers and is refused on a book with vouchers (D4)', async () => {

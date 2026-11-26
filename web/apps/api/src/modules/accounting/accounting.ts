@@ -1,6 +1,7 @@
 import { notCarriedOpening } from '../shared/carriedOpening.js';
 import { withTxBudget } from '../shared/txBudget.js';
 import { resolveSettingsBehaviorTx } from '../shared/settingsBehavior.js';
+import { dataTypeSql } from '../reports/reportDataType.js';
 
 /**
  * Read-only accounting datasets over AC_DATA (no writes): trial balance and account ledger /
@@ -12,6 +13,8 @@ export interface ScopeFilter {
   coCode: string;
   lcCode?: string;
   coYear?: string;
+  /** The session data type: 'A'/'B' filter AC_DATA.DATA_TYPE, 'C' or absent reads every type (reportDataType.ts). */
+  dataType?: string;
 }
 
 export interface TrialBalanceRow {
@@ -94,7 +97,9 @@ function scopeSql(s: ScopeFilter, startIdx: number): { sql: string; params: unkn
     // Every year is read, so a carried opening would repeat the previous years' history (carriedOpening.ts).
     parts.push(notCarriedOpening());
   }
-  return { sql: parts.join(' AND '), params };
+  // Ac_Final.cs:151-182 and RP_BALANCE.cs:2034-2038, 2241-2266: the trial balance and the ledger read only the
+  // session type's rows unless it is 'C'.
+  return { sql: parts.join(' AND ') + dataTypeSql(s.dataType), params };
 }
 
 /** Trial balance: per-AC_CODE Σ DR / Σ CR with a grand Dr=Cr check (live, RLS-scoped). */

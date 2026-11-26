@@ -365,6 +365,35 @@ const YEAR = `${startYear}-${startYear + 1}`;
     );
   });
 
+  it('a client-sent dataType is ignored: the session data type decides (owner decision 2026-11-25)', async () => {
+    const summary = async (query: string) => {
+      const res = await get(`/reports/account-ledger?view=summary&coYear=${YEAR}${query}`);
+      expect(res.statusCode, res.body).toBe(200);
+      return res.json().rows.some((r: any) => r.acCode === 'A100');
+    };
+    const setSession = (type: string) =>
+      exec(`UPDATE auth_session SET data_type=$2 WHERE tenant_id=$1`, tenantId, type);
+    await exec(
+      `UPDATE "AC_DATA" SET "DATA_TYPE"='B' WHERE tenant_id=$1 AND "AC_CODE"='A100'`,
+      tenantId,
+    );
+    try {
+      // All (the default session) sees B rows whatever the client asks for.
+      expect(await summary('&dataType=A')).toBe(true);
+      await setSession('A');
+      expect(await summary('&dataType=B')).toBe(false);
+      expect(await summary('&dataType=C')).toBe(false);
+      await setSession('B');
+      expect(await summary('&dataType=A')).toBe(true);
+    } finally {
+      await setSession('C');
+      await exec(
+        `UPDATE "AC_DATA" SET "DATA_TYPE"='A' WHERE tenant_id=$1 AND "AC_CODE"='A100'`,
+        tenantId,
+      );
+    }
+  });
+
   it('the view right is required for the screen', async () => {
     await exec(
       `UPDATE "USER_SET" SET "FRM_VIEW"='N' WHERE tenant_id=$1 AND "USER_NAME"=$2 AND "SUB_MENU"='Ledger Report'`,

@@ -663,5 +663,70 @@ type Cookie = string;
       expect(printed).toContain('100202');
       expect(printed).not.toContain('100201');
     });
+
+    it('a B session writes and shows its own inline opening; A keeps its own (MS_ACCT.cs:6522, :7861-7888)', async () => {
+      const switched = await app.inject({
+        method: 'POST',
+        url: '/auth/data-type',
+        headers: { cookie: adminCookie },
+        payload: { type: 'B' },
+      });
+      expect(switched.statusCode, switched.body).toBe(200);
+      const fresh = switched.headers['set-cookie'];
+      const jar = new Map(
+        adminCookie.split('; ').map((c) => [c.split('=', 1)[0]!, c] as [string, string]),
+      );
+      for (const part of Array.isArray(fresh) ? fresh : fresh ? [fresh] : []) {
+        const c = part.split(';', 1)[0]!;
+        jar.set(c.split('=', 1)[0]!, c);
+      }
+      const bCookie = [...jar.values()].join('; ');
+      const response = await request(bCookie, 'POST', '/masters/party-master', {
+        code: '100230',
+        ...full({ name: 'b party', short: 'bpt', mobile: '9876500030', gstNo: '' }),
+        opening: { amount: '700', sign: 'D', gold: '', goldSign: 'C', silver: '', silverSign: 'C' },
+      });
+      expect(response.statusCode, response.body).toBe(201);
+      const code = response.json().code as string;
+      const typed = (table: string) =>
+        query<Array<{ t: string }>>(
+          `SELECT DISTINCT "DATA_TYPE" t FROM "${table}" WHERE tenant_id=$1 AND "AC_CODE"=$2 AND "CO_BOOK"='000'`,
+          tenantId,
+          code,
+        );
+      expect(await typed('OP_DATA')).toEqual([{ t: 'B' }]);
+      expect(await typed('AC_DATA')).toEqual([{ t: 'B' }]);
+      // An A opening of the same party (Party Opening screen) is a separate row.
+      await exec(
+        `INSERT INTO "OP_DATA"(tenant_id,"CO_CODE","LC_CODE","CO_YEAR","CO_BOOK","VCH_NO","AC_CODE","OP_AMT","OP_SIGN","DATA_TYPE")
+         VALUES ($1,'01','01',$2,'000','00000',$3,55,'C','A')`,
+        tenantId,
+        YEAR,
+        code,
+      );
+      const asB = await request(bCookie, 'GET', `/masters/party-master/${code}`);
+      expect(asB.json().opening).toMatchObject({ amount: '700.00', sign: 'D' });
+      const asA = await request(
+        (await (async () => {
+          const back = await app.inject({
+            method: 'POST',
+            url: '/auth/data-type',
+            headers: { cookie: bCookie },
+            payload: { type: 'A' },
+          });
+          expect(back.statusCode, back.body).toBe(200);
+          const set = back.headers['set-cookie'];
+          for (const part of Array.isArray(set) ? set : set ? [set] : []) {
+            const c = part.split(';', 1)[0]!;
+            jar.set(c.split('=', 1)[0]!, c);
+          }
+          return [...jar.values()].join('; ');
+        })()) as string,
+        'GET',
+        `/masters/party-master/${code}`,
+      );
+      expect(asA.json().opening).toMatchObject({ amount: '55.00', sign: 'C' });
+      expect(await typed('OP_DATA')).toHaveLength(2);
+    });
   },
 );

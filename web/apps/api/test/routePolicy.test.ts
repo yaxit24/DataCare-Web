@@ -166,8 +166,10 @@ describe('route policy registry', () => {
     // WP-18 replaces the HuId Report's three-line builder screen with its own plugin and adds the three
     // export paths (CSV, XLSX, PDF) under the same Reports/HuId Report caption: 819 + 3 = 822.
     // The Stock Report voucher zoom (GET /reports/stock-report/zoom, RP_STOCK.cs:5218): 822 + 5 = 827 (the zoom, the InOut picker list, the item ledger and its PDF, the printed summary).
-    expect(routes).toHaveLength(827);
-    expect(new Set(routes.map((route) => `${route.method} ${route.path}`)).size).toBe(827);
+    // export paths (CSV, XLSX, PDF) under the same Reports/HuId Report caption: 819 + 3 = 822, + POST /auth/data-type = 823.
+    // Owner data-type decision adds POST /auth/data-type. [827 on main + 1 here = 828]
+    expect(routes).toHaveLength(828);
+    expect(new Set(routes.map((route) => `${route.method} ${route.path}`)).size).toBe(828);
 
     const policies = routes.map((route) => ({
       ...route,

@@ -428,18 +428,24 @@ const TO = '2024-06-30';
     await gold({ vchNo: '00103', date: '2024-05-10', cr: 10, sign: '+', fine: 0.5, dataType: 'A' });
     await gold({ vchNo: '00104', date: '2024-05-11', dr: 50, sign: '-', fine: 2, dataType: 'B' });
     const q = `acCode=Z700&fromDate=${FROM}&toDate=${TO}`;
-    const a = (await get(`${routes[1]}?${q}&dataType=A`)).json();
+    // Owner decision 2026-11-25: the session decides; a contradicting client dataType is ignored.
+    const setSession = (type: string) =>
+      exec(`UPDATE auth_session SET data_type=$2 WHERE tenant_id=$1`, tenantId, type);
+    await setSession('A');
+    const a = (await get(`${routes[1]}?${q}&dataType=C`)).json();
     expect([a.opening, a.closing]).toEqual([
       { amount: 100, fine: 1 },
       { amount: 110, fine: 1.5 },
     ]);
-    const b = (await get(`${routes[1]}?${q}&dataType=B`)).json();
+    await setSession('B');
+    const b = (await get(`${routes[1]}?${q}&dataType=A`)).json();
     expect([b.opening, b.closing]).toEqual([
       { amount: 900, fine: 9 },
       { amount: 850, fine: 7 },
     ]);
     // Type C drops the predicate: both types count.
-    const c = (await get(`${routes[1]}?${q}&dataType=C`)).json();
+    await setSession('C');
+    const c = (await get(`${routes[1]}?${q}&dataType=A`)).json();
     expect([c.opening, c.closing]).toEqual([
       { amount: 1000, fine: 10 },
       { amount: 960, fine: 8.5 },
