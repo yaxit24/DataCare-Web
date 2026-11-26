@@ -16,6 +16,18 @@ const num = (value: unknown): number => (value == null || value === '' ? 0 : Num
 /** Ac_Rojmel.cs:19 {{'00079'}}: the day-book scheme account the desktop writes literally. */
 const DESKTOP_SCHEME_AC = '00079';
 
+/**
+ * Ledger legs 01-06 and day-book types 01-06 are INSERT ... SELECT statements that join BOOK_DETL with SR_NO = 1
+ * (Ac_Ledr.cs:30-40, Ac_Rojmel.cs:11-21), so a book without slot 1 writes none of them. The other legs (ledger 12/13 UPI,
+ * day-book 08) do not use that join and still post.
+ */
+const SLOT_JOINED_LEG_LAST = 6;
+const legOfKey = (ledrKey: unknown) => Number(String(ledrKey ?? '').slice(21, 23));
+const isSlotJoinedLedgerLeg = (row: object) =>
+  Number((row as { legType?: unknown }).legType) <= SLOT_JOINED_LEG_LAST;
+const isSlotJoinedRojmelRow = (row: Record<string, unknown>) =>
+  legOfKey(row.LEDR_KEY) <= SLOT_JOINED_LEG_LAST;
+
 export async function orderPostingRowsTx(
   tx: any,
   order: {
@@ -29,25 +41,31 @@ export async function orderPostingRowsTx(
     };
     key: { CO_BOOK: string; VCH_NO: string } & Record<string, unknown>;
     header: Record<string, unknown>;
-    /** The resolved cash account; an explicit request account wins, as before. */
-    cashAc: string;
     tender: OrderTender;
     party: { code: string; name: string };
     vchDate: Date;
   },
 ): Promise<{ ledger: LedgerLine[]; rojmelRows: Record<string, unknown>[] }> {
-  const { book, key, header, tender, cashAc } = order;
-  // BOOK_DETL slot 1 names the cash account and gives legs 01-06 and day-book 01-06 their VCH_TYPE, BOOK_NAME and
-  // DATA_TYPE (Ac_Ledr.cs:30-40, Ac_Rojmel.cs:11-21). A book without slot 1 falls back to its BOOK_DATA columns.
+  const { book, key, header, tender } = order;
+  // BOOK_DETL slot 1 names the cash account and gives legs 01-06 and day-book 01-06 their columns. Because the
+  // desktop uses a joined SELECT with B.SR_NO=1, a missing slot writes none of those rows (Ac_Ledr.cs:30-40;
+  // Ac_Rojmel.cs:11-21). The request's Cash A/c field is not referenced by either routine.
   const slot1 = (
     await resolveBookSlotRowsTx(tx, { ...order.scope, coBook: book.coBook }, 'cash-settlement')
   ).get(1);
-  const slot = {
+  const slot = slot1 && {
     // Day-book type 01 names the slot's account even when there is no cash tender (Ac_Rojmel.cs:11).
-    account: cashAc || slot1?.accountCode || '',
-    vchType: slot1?.shortName || book.vchType,
-    mainBook: slot1?.mainBook || book.mainBook,
-    dataType: slot1?.dataType || book.dataType,
+    account: slot1.accountCode,
+    // Blank slot columns keep the book's own values, as before.
+    vchType: slot1.shortName || book.vchType,
+    mainBook: slot1.mainBook || book.mainBook,
+    dataType: slot1.dataType || book.dataType,
+  };
+  const postingSlot = slot ?? {
+    account: '',
+    vchType: book.vchType,
+    mainBook: book.mainBook,
+    dataType: book.dataType,
   };
   // Ac_Ledr.cs:48-50 gates the old-metal fine mirror leg 10 on the company's trading-fine setting
   // (CO_SET.TRAD_FINE, blank 'N', MS_OPNCOMP.cs:690, :813-816); read it only when those legs can post.
@@ -66,7 +84,9 @@ export async function orderPostingRowsTx(
       : false;
   const ledger: LedgerLine[] = [
     // Order_Ledr 01-06 and 12/13 from the saved header, for both forms.
-    ...orderMoneyLedger(key, header, slot, book, tender.upiRows),
+    ...orderMoneyLedger(key, header, postingSlot, book, tender.upiRows).filter(
+      (row) => slot || !isSlotJoinedLedgerLeg(row),
+    ),
     // Legs 07-10 (Ac_Ledr.cs:42-50) carry the line's VCH_TIME, HD_VCH_NO and MAIN_USER and BOOK_DATA's columns.
     ...oldMetal
       .orderOldMetalLedger(
@@ -107,25 +127,29 @@ export async function orderPostingRowsTx(
   const rojmelRows = rateCut.withOrderRateCutRojmel(
     [
       // Types 01, 02, 03, 05 and 08 from the saved header.
-      ...orderHeaderRojmel(context, header, slot, book, tender.upiRows, schemeAc),
+      ...orderHeaderRojmel(context, header, postingSlot, book, tender.upiRows, schemeAc).filter(
+        (row) => slot || !isSlotJoinedRojmelRow(row),
+      ),
       // Types 04 and 06, old metal, from the grid (Ac_Rojmel.cs:17-21; BOOK_DETL slot 1's columns).
-      ...buildOrderRojmel(
-        {
-          ...context,
-          vchDate: order.vchDate,
-          vchType: slot.vchType,
-          bookName: slot.mainBook,
-          partyName: order.party.name,
-          partyCode: order.party.code,
-        },
-        {
-          advanceContraAc: cashAc,
-          bankAc: '',
-          advanceAmount: 0,
-          chequeAmount: 0,
-          oldMetal: oldMetal.orderOldMetalRojmel(tender.oldMetal),
-        },
-      ).map((row) => ({ ...row, DATA_TYPE: slot.dataType })),
+      ...(slot
+        ? buildOrderRojmel(
+            {
+              ...context,
+              vchDate: order.vchDate,
+              vchType: slot.vchType,
+              bookName: slot.mainBook,
+              partyName: order.party.name,
+              partyCode: order.party.code,
+            },
+            {
+              advanceContraAc: slot.account,
+              bankAc: '',
+              advanceAmount: 0,
+              chequeAmount: 0,
+              oldMetal: oldMetal.orderOldMetalRojmel(tender.oldMetal),
+            },
+          ).map((row) => ({ ...row, DATA_TYPE: slot.dataType }))
+        : []),
     ],
     context,
     header,

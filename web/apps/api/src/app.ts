@@ -825,15 +825,41 @@ export async function buildApp(opts: BuildOpts): Promise<FastifyInstance> {
     });
   });
 
-  app.get('/context/locations', { preHandler: requireAuth }, async (req: FastifyRequest) => {
+  // MS_OPNCOMP.cs:487-493, :4391-4454: the Location and Year boxes list the company just chosen, so the select page
+  // may ask for another company's choices; only companies this login may open are answered.
+  const choiceCompany = async (req: FastifyRequest, reply: FastifyReply) => {
     const s = sess(req);
-    return listScopeLocations(prisma, { tenantId: s.tenantId, coCode: s.coCode });
-  });
+    const asked = (req.query as Record<string, unknown>)?.coCode;
+    if (asked === undefined || asked === '' || asked === s.coCode) return s.coCode;
+    const allowed = await listScopeCompanies(prisma, {
+      tenantId: s.tenantId,
+      loginName: s.sub,
+      isAdmin: principalOf(req).isAdmin,
+    });
+    if (typeof asked === 'string' && allowed.some((row) => row.CO_CODE === asked)) return asked;
+    reply.code(404).send({ error: 'company-unavailable' });
+    return null;
+  };
 
-  app.get('/context/years', { preHandler: requireAuth }, async (req: FastifyRequest) => {
-    const s = sess(req);
-    return listScopeYears(prisma, { tenantId: s.tenantId, coCode: s.coCode });
-  });
+  app.get(
+    '/context/locations',
+    { preHandler: requireAuth },
+    async (req: FastifyRequest, reply: FastifyReply) => {
+      const coCode = await choiceCompany(req, reply);
+      if (coCode === null) return reply;
+      return listScopeLocations(prisma, { tenantId: sess(req).tenantId, coCode });
+    },
+  );
+
+  app.get(
+    '/context/years',
+    { preHandler: requireAuth },
+    async (req: FastifyRequest, reply: FastifyReply) => {
+      const coCode = await choiceCompany(req, reply);
+      if (coCode === null) return reply;
+      return listScopeYears(prisma, { tenantId: sess(req).tenantId, coCode });
+    },
+  );
 
   app.get('/context/books', { preHandler: requireAuth }, async (req: FastifyRequest, reply) => {
     const s = sess(req);
@@ -883,6 +909,8 @@ export async function buildApp(opts: BuildOpts): Promise<FastifyInstance> {
           coYear: selected.session.coYear,
           scoped: true,
           replayed: selected.replayed,
+          // MS_OPNCOMP.cs:1503-1505: whether opening this company just set yesterday's lock (null on a replay).
+          lastDayLock: selected.lastDayLock,
           ledgerContext: selected.session.ledgerContext,
           context: contextDescriptor(selected.session),
         };

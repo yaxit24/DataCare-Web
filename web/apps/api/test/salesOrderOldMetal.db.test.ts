@@ -155,7 +155,7 @@ run('Sales Order old gold and old silver', () => {
   const keyed = (table: 'AC_DATA' | 'ROJ_MEL_DATA') =>
     query(
       `SELECT substr("LEDR_KEY",22,2) leg,btrim(substr("LEDR_KEY",24)) line,length("LEDR_KEY")::int len,
-              btrim("AC_CODE") ac,btrim("LD_CODE") ld,"DR_AMT"::float dr,"CR_AMT"::float cr,btrim("IT_TYPE") typ,
+              btrim("AC_CODE") ac,${table === 'ROJ_MEL_DATA' ? `btrim("AC_NAME")` : `''::text`} name,btrim("LD_CODE") ld,"DR_AMT"::float dr,"CR_AMT"::float cr,btrim("IT_TYPE") typ,
               btrim(coalesce("SIGN",'')) sign,
               ${table === 'ROJ_MEL_DATA' ? `"ITM_FINE"::float fine,btrim("IT_CODE") it` : `0::float fine,''::text it`}
          FROM "${table}" WHERE tenant_id=$1 ORDER BY "LEDR_KEY"`,
@@ -262,11 +262,24 @@ run('Sales Order old gold and old silver', () => {
     ]);
     const day = await keyed('ROJ_MEL_DATA');
     expect(
-      day.map((r) => [r.leg, r.line, r.len, r.ac, r.ld, r.dr, r.cr, r.typ, r.sign, r.fine, r.it]),
+      day.map((r) => [
+        r.leg,
+        r.line,
+        r.len,
+        r.ac,
+        r.name,
+        r.ld,
+        r.dr,
+        r.cr,
+        r.typ,
+        r.sign,
+        r.fine,
+        r.it,
+      ]),
     ).toEqual([
-      ['01', '', 23, 'PARTY', 'CASH', 0, 3000, 'A', '', 0, ''],
-      ['04', '1', 33, 'PURCHASE', 'PARTY', 2000, 0, 'A', '', 9.16, 'GL'],
-      ['06', '3', 33, 'PARTY', 'SLVPURC', 0, 0, 'S', '+', 20, 'SV'],
+      ['01', '', 23, 'PARTY', 'Saved customer', 'CASH', 0, 3000, 'A', '', 0, ''],
+      ['04', '1', 33, 'PURCHASE', 'Gold purchase', 'PARTY', 2000, 0, 'A', '', 9.16, 'GL'],
+      ['06', '3', 33, 'PARTY', 'Saved customer', 'SLVPURC', 0, 0, 'S', '+', 20, 'SV'],
     ]);
 
     // Reopen: the grid rows come back, and an order with old metal can be edited.

@@ -5,6 +5,9 @@ export async function seedSalesOrder(sql) {
   await sql(`INSERT INTO "BOOK_DATA"(tenant_id,"CO_CODE","LC_CODE","CO_BOOK","BOOK_NAME","BOOK_SNAME","MAIN_BOOK","BOOK_INOUT","CUR_USE","BOOK_TBL_NAME","BOOK_TBL_DETL")
     VALUES($1,'01','01','S41','Browser Sales Order','SORD','SALES ORDER','O','Y','SL_ORD_DATA','SL_ORD_DETL'),
           ($1,'01','01','S42','Imported Sales Order','SORD','SALES ORDER','O','Y','SL_ORD_DATA','SL_ORD_DETL')`);
+  // The cash contra comes from BOOK_DETL slot 1 (Ac_Ledr.cs:30-40, Ac_Rojmel.cs:11-21); the order form has no Cash A/c.
+  await sql(`INSERT INTO "BOOK_DETL"(tenant_id,"CO_CODE","LC_CODE","CO_BOOK","SR_NO","AC_CODE","BOOK_SNAME","MAIN_BOOK","BOOK_INOUT","DATA_TYPE")
+    VALUES($1,'01','01','S41',1,'CASH','SORD','SALES ORDER','O','A'),($1,'01','01','S42',1,'CASH','SORD','SALES ORDER','O','A')`);
   await sql(`INSERT INTO "SL_ORD_DATA"(tenant_id,"CO_CODE","LC_CODE","CO_YEAR","CO_BOOK","VCH_NO","VCH_DATE","VCH_TIME","HD_VCH_NO","AC_CODE","AC_NAME","NET_AMT","TOT_AMT","TAX_PRC","TAX_AMT","ADV_AMT","ADD3","BILL_NO")
     VALUES($1,'01','01','2024-2025','S42','00001','2024-07-01','2024-07-01 12:13:14.123456','00041','TOURAC','Imported Sales customer',177.37,177.37,0,0,0,NULL,'IMPORTED-41')`);
   await sql(`INSERT INTO "SL_ORD_DETL"(tenant_id,"CO_CODE","LC_CODE","CO_YEAR","CO_BOOK","VCH_NO","VCH_DATE","SR_NO","OLD_SRNO","VCH_SRNO","IT_CODE","TAG_NO","DESIGN_IMG_ID","ITM_PCS","ITM_GWT","ITM_NWT","ITM_TOUCH","ITM_RATE","LBR_TYPE","LBR_RATE","LBR_PRC","LBR_AMT","ITM_AMT","NET_AMT","TOT_AMT","BAG_WT","ITM_REMARK")
@@ -121,7 +124,6 @@ export async function exerciseSalesOrder(page, { checkpoint } = {}) {
     for (const [label, val] of Object.entries({
       'Bill No': 'WEB-SALES/41',
       'Order time': '15:42:31.123456',
-      'Cash A/c': 'CASH',
       'Address 3': 'Sales third road',
       'Delivery Date': '2024-07-20',
     }))

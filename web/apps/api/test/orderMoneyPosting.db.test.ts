@@ -305,6 +305,42 @@ run('Order money ledger and day book follow Ac_Ledr.cs:30-40 and Ac_Rojmel.cs:11
     ]);
   });
 
+  it('ignores the web Cash A/c field and posts cash through BOOK_DETL slot 1 (Ac_Ledr.cs:30-32)', async () => {
+    await exec(
+      `INSERT INTO "AC_MAST"(tenant_id,"CO_CODE","LC_CODE","AC_CODE","AC_NAME") VALUES($1,'01','01','OTHER','Wrong request cash')`,
+      tenantId,
+    );
+    await createSalesOrder(
+      runtime,
+      salesInput({ cashAc: 'OTHER', chequeAmount: 0, cardAmount: 0, upiRows: [] }) as any,
+    );
+    const rows = await query(
+      `SELECT right("LEDR_KEY",2) leg,btrim("AC_CODE") ac,btrim("LD_CODE") ld
+         FROM "AC_DATA" WHERE tenant_id=$1 ORDER BY "LEDR_KEY"`,
+      tenantId,
+    );
+    expect(rows).toEqual([
+      { leg: '01', ac: 'PARTY', ld: 'CASH' },
+      { leg: '02', ac: 'CASH', ld: 'PARTY' },
+    ]);
+  });
+
+  it('a book without BOOK_DETL slot 1 writes no ledger/day-book rows 01-06 (Ac_Ledr.cs:30-40)', async () => {
+    await exec(
+      `DELETE FROM "BOOK_DETL" WHERE tenant_id=$1 AND "CO_BOOK"='SOR' AND "SR_NO"=1`,
+      tenantId,
+    );
+    await expect(
+      createSalesOrder(runtime, salesInput({ upiRows: [] }) as any),
+    ).resolves.toMatchObject({ vchNo: 1 });
+    expect(await query(`SELECT "LEDR_KEY" FROM "AC_DATA" WHERE tenant_id=$1`, tenantId)).toEqual(
+      [],
+    );
+    expect(
+      await query(`SELECT "LEDR_KEY" FROM "ROJ_MEL_DATA" WHERE tenant_id=$1`, tenantId),
+    ).toEqual([]);
+  });
+
   it('Sales Order: an unchanged re-save keeps every row; an edit rebuilds from the header; delete removes them', async () => {
     await createSalesOrder(runtime, salesInput() as any);
     const before = await snapshot();
