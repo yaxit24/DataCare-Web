@@ -95,6 +95,9 @@ const SYSTEM_ACCOUNTS: { code: string; name: string; gr: string; gstType?: strin
   { code: 'BRANCH', name: 'BRANCH STOCK IN HAND', gr: '18' },
 ];
 
+/** The system account codes a provisioned company carries (Old Software Import keeps them, dataImport.ts). */
+export const SYSTEM_ACCOUNT_CODES: readonly string[] = Object.freeze(SYSTEM_ACCOUNTS.map((a) => a.code));
+
 /**
  * BOOK_DETL of a purchase-family book (PURCHASE, TAG PURCHASE): 1 purchase, 2 cash, 3 round-off and 4 labour and
  * other charges. With CO_SET.PURC_WITH_LBR = 'N' the desktop posts a line's labour and other charges to slot 4

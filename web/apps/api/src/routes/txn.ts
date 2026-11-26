@@ -251,6 +251,7 @@ import { registerWholesaleSaleRoutes } from './wholesaleSale.js';
 import { registerAccountLedgerRoutes } from './accountLedger.js';
 import { registerHuidReportRoutes } from './huidReport.js';
 import { registerTagStockRoutes } from './tagStock.js';
+import { registerDataImportRoutes } from './dataImport.js';
 import { registerApprovalRoutes } from './approval.js';
 import { VoucherVersionConflictError, requiredVersion } from '../modules/vouchers/version.js';
 import { listYears, createYear, carryForwardOpenings } from '../modules/masters/year.js';
@@ -4559,6 +4560,7 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
   // Data repair console (desktop MS_UPDATE). Kept on the existing URLs and policy; extracted because this
   // shared transaction route file has a frozen size ceiling.
   registerDataRepairRoutes(app, { prisma, auth, guard, sess, run });
+  registerDataImportRoutes(app, { prisma, auth, guard, sess }); // Other → Data Import (UT_IMPORT Lite Soft)
   app.post('/admin/companies/:coCode/provision', auth, async (req, reply) => {
     if (!guard(req, reply, 'delete')) return; // admin-gate
     const s = sess(req);

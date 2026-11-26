@@ -574,7 +574,7 @@ export async function buildApp(opts: BuildOpts): Promise<FastifyInstance> {
       }
       if (error instanceof FormForbiddenError) {
         const message =
-          /^(\/company-identity|\/years|\/balance-transfer|\/backup|\/utilities\/data-refresh)/.test(
+          /^(\/company-identity|\/years|\/balance-transfer|\/backup|\/utilities\/data-refresh|\/utilities\/data-import)/.test(
             req.routeOptions.url ?? '',
           )
             ? error.action === 'print'
