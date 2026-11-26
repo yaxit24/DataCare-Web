@@ -840,7 +840,42 @@ async function writeSaleTx(
       ? round2s(num(input.tcsAmount))
       : round2s((totals.total * tcsPct) / 100);
   const kasar = round2s(num(input.kasarAmount));
+  const pointValue = round2s(num(input.pointValue));
   const grandWithTcs = roundingPolicy.roundBillTotal(grandTotal + tcs);
+  /**
+   * How far the round-off leg may stray from the bill's round-off. Beyond totals.roundOff it carries only the line
+   * nets' rounding into the bill: the net (calc.ts billTotals), the taxable after a discount, the bill with hallmark
+   * and the bill with TCS each round once to TOT_AMT_ROF, at most half a unit each, plus a paisa per line.
+   */
+  const maxRoundOffResidue =
+    4 * 0.5 * 10 ** -roundingPolicy.billTotalDecimals + 0.01 * computed.length;
+  // A 100% discount leaves TOT_AMT 0 with priced items: Sales_Ledr then skips the party leg (Ac_Ledr.cs:64
+  // `A.TOT_AMT <> 0`) but still credits the lines (:90) and tax (:94), an unbalanced voucher the web refuses.
+  if (
+    !isSalesQuotation &&
+    !input.rateUnfix &&
+    grandWithTcs === 0 &&
+    (totals.net !== 0 || totals.tax !== 0)
+  )
+    throw new SaleValidationError(
+      'the bill total is zero but its items are priced (a discount of the whole bill): reduce the discount',
+    );
+  // TCS posts to the TCS code's own tax account (Ac_Ledr.cs:96 `D.TAX_AC` on `A.TCS_CODE`).
+  let tcsAc = '';
+  if (!isSalesQuotation && tcs !== 0) {
+    const rows: Array<{ ac: unknown }> = await tx.$queryRawUnsafe(
+      `SELECT "TAX_AC" ac FROM "TAX_MAST" WHERE tenant_id=$1 AND "CO_CODE"=$2 AND "TAX_CODE"::text=$3::text
+        ORDER BY coalesce("SR_NO",0), row_id LIMIT 1`,
+      tenantId,
+      input.scope.coCode,
+      text(input.tcsCode),
+    );
+    tcsAc = text(rows[0]?.ac);
+    if (!tcsAc)
+      throw new SaleValidationError(
+        `the TCS code ${text(input.tcsCode) || '(blank)'} has no tax account (TAX_MAST.TAX_AC)`,
+      );
+  }
 
   // TR_SALE.cs:15111-15128: taxable sale bill value >= PAN_CARD_VAL blocks save for the generic
   // cash party (00045), or when the selected party's persisted AC_MAST.AC_PANNO is blank.
@@ -956,7 +991,10 @@ async function writeSaleTx(
     { amount: hmTax },
     { amount: tcs },
   ]);
-  if (!isSalesQuotation && (totals.roundOff !== 0 || ledgerRoundOff !== 0 || kasar !== 0)) {
+  if (
+    !isSalesQuotation &&
+    (totals.roundOff !== 0 || ledgerRoundOff !== 0 || kasar !== 0 || pointValue !== 0)
+  ) {
     const configured = await resolveBookAccountTx(tx, input.scope, bookPolicy, 3);
     roundAc = validateConfiguredAccount('round account', requestedRoundAc, configured);
     kasarAc = validateConfiguredAccount('kasar account', input.kasarAc, configured);
@@ -1486,24 +1524,30 @@ async function writeSaleTx(
 
   // The sale's ledger, keyed as Sales_Ledr keys it (SALE_LEG, Ac_Ledr.cs:61-172).
   //
-  // Cheque posts to BANK_AC (:116-118), card to CARD_AC unless the card commission is adjusted on a tax book
-  // (:120-122 `CARD_ADJ <> 'Y' OR BOOK_TYPE = 'M'`), each UPI_DATA row to its own account (:161-163). A UPI amount
-  // with no UPI rows posts as one row to the bank account, since the desktop has no other UPI leg.
+  // Cheque posts to BANK_AC (:116-118), card to CARD_AC as stored unless the card commission is adjusted on a tax
+  // book (:120-122 `CARD_ADJ <> 'Y' OR BOOK_TYPE = 'M'`), each UPI_DATA row to its own account keyed by its own SR_NO
+  // (:161-163 INNER JOIN UPI_DATA; the rows are written SR_NO 1..n, saleResiduals.ts saleTenderWrites).
   const bankAc = text(input.bankAc);
   const cardLegs =
     !behavior.cardCommissionAdjustment || saleBookTypes.bookType === 'M' ? cardAmt : 0;
-  const cardAc = text(input.cardAc) || bankAc;
-  const upiRows = (input.upiRows ?? []).filter((row) => round2s(num(row.amount)) !== 0);
-  const upiLegs: Array<{ ac: string; amount: number }> = upiRows.length
-    ? upiRows.map((row) => ({ ac: text(row.acCode), amount: round2s(num(row.amount)) }))
-    : upiAmt !== 0
-      ? [{ ac: bankAc, amount: upiAmt }]
-      : [];
-  if (
-    !isSalesQuotation &&
-    ((chequeAmt !== 0 && !bankAc) || (cardLegs !== 0 && !cardAc) || upiLegs.some((leg) => !leg.ac))
-  )
-    throw new SaleValidationError('bank account is required for card/upi/cheque tender');
+  const cardAc = text(input.cardAc);
+  const upiLegs = (input.upiRows ?? []).map((row, i) => ({
+    srNo: i + 1,
+    ac: text(row.acCode),
+    amount: round2s(num(row.amount)),
+  }));
+  if (!isSalesQuotation) {
+    if (chequeAmt !== 0 && !bankAc)
+      throw new SaleValidationError(DESKTOP_MESSAGES.CHEQUE_WITHOUT_BANK);
+    if (cardLegs !== 0 && !cardAc)
+      throw new SaleValidationError('a card amount needs the card account (CARD_AC)');
+    // The desktop's UPI amount is the UPI grid's total (TR_SALE.cs:6858-6867) and posts only through UPI_DATA, so a
+    // UPI amount without UPI rows would settle the bill without crediting the customer.
+    if (upiAmt !== 0 && !upiLegs.length)
+      throw new SaleValidationError(
+        'a UPI amount needs its UPI rows (account and amount): enter them in the UPI grid',
+      );
+  }
   // Old metal: one pair per SL_PR_DETL line to its item group's PURC_AC (Ac_Ledr.cs:135-137); an item without one
   // keeps the request account or the historical 'OLDGOLD' default.
   const oldMetalItems = oldMetalRows.map(
@@ -1532,7 +1576,7 @@ async function writeSaleTx(
       : 0;
   // The discount pair posts to the book's slot 5 (Ac_Ledr.cs:155-157 `B.SR_NO = 5`).
   const discountAc =
-    !isSalesQuotation && !input.rateUnfix && totals.discount !== 0
+    !isSalesQuotation && totals.discount !== 0
       ? await resolveBookAccountTx(tx, input.scope, bookPolicy, 5)
       : '';
 
@@ -1550,11 +1594,12 @@ async function writeSaleTx(
         totals: { ...totals, total: grandWithTcs },
         incomeLegs,
         charges: [
-          { legType: SALE_LEG.tcs, ac: input.tcsAc ?? 'TCS', amount: tcs },
+          { legType: SALE_LEG.tcs, ac: tcsAc, amount: tcs },
           { legType: SALE_LEG.hallmark, ac: input.hmChargeAc ?? 'HMCHRG', amount: hmAmt },
           { legType: SALE_LEG.hallmarkTax, ac: taxAc, amount: hmTax },
         ],
         discountAc,
+        maxRoundOffResidue,
         payments: {
           cash: { ac: cashAc, amount: cashAmt },
           cheque: { ac: bankAc, amount: chequeAmt },
@@ -1569,7 +1614,8 @@ async function writeSaleTx(
             ac: purcAcByItem.get(oldMetalItems[i] ?? '') ?? input.oldGoldAc ?? 'OLDGOLD',
             amount: metal.amount,
           })),
-          kasar: { ac: kasarAc, amount: kasar },
+          // KASAR_AMT + POINT_VAL (Ac_Ledr.cs:151-153).
+          kasar: { ac: kasarAc, amount: round2s(kasar + pointValue) },
           cashPaid: { ac: cashPaidAc, amount: cashPaidLegs, bookType: saleBookTypes.bookType },
         },
       });

@@ -100,6 +100,17 @@ export function saleLedgerRoundOff(
   return roundTo(partyDebit - credits.reduce((sum, leg) => sum + leg.amount, 0), 3);
 }
 
+/** The round-off leg would carry more than rounding: the item legs do not add up to the bill. */
+export class SaleLedgerResidueError extends Error {
+  constructor(roundOff: number, billRoundOff: number, bound: number) {
+    super(
+      `sale ledger does not agree with the bill total: round-off ${roundOff} against the bill's ${billRoundOff} ` +
+        `(more than the ${bound} that rounding can explain)`,
+    );
+    this.name = 'SaleLedgerResidueError';
+  }
+}
+
 /**
  * Build the balanced AC_DATA legs of a sale (pure), keyed as Sales_Ledr keys them (SALE_LEG above).
  *
@@ -124,12 +135,18 @@ export function buildSaleLedger(p: {
   incomeLegs?: LineLeg[];
   charges?: Array<{ legType: number; ac: string; amount: number }>;
   discountAc?: string;
+  /**
+   * The most the round-off leg may differ from the bill's own round-off (`totals.roundOff`). The difference is the
+   * line nets' rounding into the bill total, so it is bounded; past the bound the save is refused.
+   */
+  maxRoundOffResidue?: number;
   payments?: {
     cash?: SaleSettlement;
     cheque?: SaleSettlement;
     card?: SaleSettlement;
     /** UPI_DATA rows in SR_NO order. */
-    upi?: SaleSettlement[];
+    /** UPI_DATA rows, each with its own SR_NO (the key's line). */
+    upi?: Array<SaleSettlement & { srNo: number }>;
     /** SL_ORD_ADJ rows in SR_NO order whose ORD_AC_CODE is 00020 (Ac_Ledr.cs:131). */
     orders?: SaleSettlement[];
     /** SL_PR_DETL rows in SR_NO order, each to its item group's PURC_AC. */
@@ -159,7 +176,10 @@ export function buildSaleLedger(p: {
     const income: LineLeg[] =
       p.incomeLegs && p.incomeLegs.length
         ? p.incomeLegs
-        : [{ ac: p.controlAc ?? p.salesAc, amount: p.totals.net ?? p.totals.taxable }];
+        : // The book leg 08 is filtered `A.TOT_AMT <> 0` like the party's (Ac_Ledr.cs:92).
+          p.totals.total !== 0
+          ? [{ ac: p.controlAc ?? p.salesAc, amount: p.totals.net ?? p.totals.taxable }]
+          : [];
     for (const leg of income)
       if (leg.amount !== 0)
         lines.push({
@@ -195,6 +215,12 @@ export function buildSaleLedger(p: {
       p.totals.total === 0
         ? 0
         : saleLedgerRoundOff(partyDebit, [...income, { amount: p.totals.tax }, ...charges]);
+    // The round-off leg may carry only rounding: past the caller's bound the item legs disagree with the bill.
+    if (
+      p.maxRoundOffResidue != null &&
+      Math.abs(roundOff - p.totals.roundOff) > p.maxRoundOffResidue + 1e-9
+    )
+      throw new SaleLedgerResidueError(roundOff, p.totals.roundOff, p.maxRoundOffResidue);
     if (roundOff !== 0)
       lines.push({
         ...base,
@@ -290,16 +316,16 @@ export function buildSaleLedger(p: {
       'out',
     );
   pair(pay.kasar, { party: leg(SALE_LEG.partyKasar), account: leg(SALE_LEG.kasar) });
-  if (!p.rateUnfix && discount !== 0)
+  // No RATE_UNFIX filter on the discount pair (Ac_Ledr.cs:155-157).
+  if (discount !== 0)
     pair(
       { ac: p.discountAc ?? p.roundAc, amount: discount },
       { party: leg(SALE_LEG.partyDiscount), account: leg(SALE_LEG.discount) },
     );
-  (pay.upi ?? []).forEach((upi, i) =>
+  for (const upi of pay.upi ?? [])
     pair(upi, {
-      party: codeThenLine(SALE_LEG.partyUpi, i + 1),
-      account: codeThenLine(SALE_LEG.upi, i + 1),
-    }),
-  );
+      party: codeThenLine(SALE_LEG.partyUpi, upi.srNo),
+      account: codeThenLine(SALE_LEG.upi, upi.srNo),
+    });
   return lines;
 }

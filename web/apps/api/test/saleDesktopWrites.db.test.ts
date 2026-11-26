@@ -65,6 +65,9 @@ databaseDescribe('sale writes what the desktop writes', () => {
 
   const cleanup = async (): Promise<void> => {
     for (const table of [
+      'BANK_RECONCILE',
+      'UPI_DATA',
+      'USER_DATA',
       'DELETE_DATA',
       'SL_ORD_ADJ',
       'SL_ORD_DATA',
@@ -108,7 +111,8 @@ databaseDescribe('sale writes what the desktop writes', () => {
     await exec(
       `INSERT INTO "TAX_MAST"(tenant_id,"CO_CODE","TAX_CODE","SR_NO","TAX_GROUP","TAX_NAME","TAX_PRC","TAX_AC")
        VALUES ($1,$2,'10',0,'GST','GST 3%',3,'GSTLED'),($1,$2,'10',1,'SGST','SGST',1.5,'GSTLED'),
-              ($1,$2,'10',2,'CGST','CGST',1.5,'GSTLED'),($1,$2,'10',3,'IGST','IGST',3,'GSTLED')`,
+              ($1,$2,'10',2,'CGST','CGST',1.5,'GSTLED'),($1,$2,'10',3,'IGST','IGST',3,'GSTLED'),
+              ($1,$2,'T1',0,'TCS','TCS 1%',1,'TCSLED'),($1,$2,'T2',0,'TCS','TCS no ledger',1,NULL)`,
       CO,
     );
     await exec(
@@ -580,5 +584,86 @@ databaseDescribe('sale writes what the desktop writes', () => {
     const lineLegs = legs.filter((l) => /^\s+\d+0[27]$/.test(String(l.k).slice(-12)));
     expect(lineLegs.map((l) => l.cr)).toEqual(detl?.nets);
     expect(detl?.nets.some((n: number) => !Number.isInteger(n))).toBe(true);
+  }, 30_000);
+
+  /** Review fixes: UPI by its own rows, KASAR_AMT + POINT_VAL, TCS to its code's TAX_AC, discount on an unfixed sale. */
+  it('posts UPI per UPI_DATA row SR_NO, kasar with points, TCS to its tax account', async () => {
+    const sale = await createSale(
+      runtime,
+      saleInput('TX', {
+        upiRows: [
+          { acCode: 'UPIA', amount: 100 },
+          { acCode: '', amount: 50 },
+          { acCode: 'UPIB', amount: 200 },
+        ],
+        kasarAmount: 5,
+        pointValue: 7,
+        tcsCode: 'T1',
+        tcsAmount: 12,
+      }),
+      [looseLine()],
+    );
+    const vch = String(sale.vchNo).padStart(5, '0');
+    const legs = await ledger('TX', sale.vchNo);
+    const tail = (k: unknown) =>
+      String(k)
+        .slice(String(k).indexOf(`TX${vch}`) + 7)
+        .trim();
+    const shape = legs.map((l) => [tail(l.k), l.AC_CODE, l.dr, l.cr]);
+    const upi = await rows(
+      `SELECT "SR_NO"::int sr, "UPI_AC_CODE" ac FROM "UPI_DATA" WHERE tenant_id=$1 AND "CO_BOOK"='TX'
+          AND "VCH_NO"=$2 ORDER BY "SR_NO"`,
+      vch,
+    );
+    // The blank-account row is not a UPI row (TR_SALE.cs:6862); the legs carry UPI_DATA's own SR_NO (:161-163).
+    expect(upi).toEqual([
+      { sr: 1, ac: 'UPIA' },
+      { sr: 2, ac: 'UPIB' },
+    ]);
+    expect(shape).toEqual(
+      expect.arrayContaining([
+        ['36         1', 'CUST', 0, 100],
+        ['37         1', 'UPIA', 100, 0],
+        ['36         2', 'CUST', 0, 200],
+        ['37         2', 'UPIB', 200, 0],
+        ['31', 'CUST', 0, 12],
+        ['32', 'KASAR', 12, 0],
+        ['10', 'TCSLED', 0, 12],
+      ]),
+    );
+  }, 30_000);
+
+  it('refuses a UPI amount without UPI rows, a TCS code without a tax account and a zero bill with priced items', async () => {
+    await expect(
+      createSale(runtime, saleInput('TX', { upiAmt: 300 }), [looseLine()]),
+    ).rejects.toThrow(/UPI amount needs its UPI rows/);
+    await expect(
+      createSale(runtime, saleInput('TX', { tcsCode: 'T2', tcsAmount: 5 }), [looseLine()]),
+    ).rejects.toThrow(/TCS code T2 has no tax account/);
+    const priced = await createSale(runtime, saleInput('TX'), [looseLine()]);
+    const [h] = await rows(
+      `SELECT "NET_AMT"::float net FROM "SL_DATA" WHERE tenant_id=$1 AND "CO_BOOK"='TX' AND "VCH_NO"=lpad($2::text,5,'0')`,
+      priced.vchNo,
+    );
+    await expect(
+      createSale(runtime, saleInput('TX', { discountAmount: h!.net, taxRatePct: 0 }), [
+        looseLine(),
+      ]),
+    ).rejects.toThrow(/bill total is zero but its items are priced/);
+  }, 30_000);
+
+  it('posts the discount pair on an unfixed sale too (Ac_Ledr.cs:155-157 has no RATE_UNFIX filter)', async () => {
+    const sale = await createSale(
+      runtime,
+      saleInput('TX', { rateUnfix: true, discountAmount: 25 }),
+      [looseLine()],
+    );
+    const legs = await ledger('TX', sale.vchNo);
+    expect(
+      legs.filter((l) => /3[34]$/.test(String(l.k).trim())).map((l) => [l.AC_CODE, l.dr, l.cr]),
+    ).toEqual([
+      ['CUST', 0, 25],
+      ['DISCAC', 25, 0],
+    ]);
   }, 30_000);
 });

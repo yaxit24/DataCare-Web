@@ -399,7 +399,7 @@ databaseDescribe('database-backed sales voucher lifecycle', () => {
     );
     await owner.$executeRawUnsafe(
       `INSERT INTO "TAX_MAST"(tenant_id,"CO_CODE","TAX_CODE","SR_NO","TAX_GROUP","TAX_NAME","TAX_PRC","TAX_AC")
-       VALUES ($1,$2,'10',1,'GST','GST 3%',3,'GSTLED')`,
+       VALUES ($1,$2,'10',1,'GST','GST 3%',3,'GSTLED'),($1,$2,'TC',0,'TCS','TCS',0.1,'TCSLED')`,
       TENANT,
       CO,
     );
@@ -538,6 +538,7 @@ databaseDescribe('database-backed sales voucher lifecycle', () => {
         cashAmt: 100,
         cardAmt: 50,
         upiAmt: 25,
+        upiRows: [{ acCode: 'UPI', amount: 25 }],
         chequeAmt: 20,
         bankAc: 'BANK',
         cardAc: 'CARD',
