@@ -409,6 +409,24 @@ databaseDescribe('database-backed TR_OTH_PURC Other Income mode', () => {
     });
   });
 
+  it('a blank hidden number is never refused as a legacy cash payment (that refusal is the payment edit only)', async () => {
+    const created = await saveOtherIncome(runtime, input());
+    await exec(
+      `UPDATE "PAY_DATA" SET "HD_VCH_NO"='' WHERE tenant_id=$1 AND "CO_BOOK"=$2 AND "VCH_NO"=$3`,
+      TENANT,
+      BOOK,
+      created.voucherNo,
+    );
+    const edit = saveOtherIncome(runtime, input({ mainUser: 'editor' }), created.voucherNo).catch(
+      (error: Error) => error,
+    );
+    expect(String(((await edit) as Error)?.message ?? '')).not.toMatch(/legacy payment/);
+    const removal = deleteOtherIncome(runtime, scope, created.voucherNo, 'deleter').catch(
+      (error: Error) => error,
+    );
+    expect(String(((await removal) as Error)?.message ?? '')).not.toMatch(/legacy payment/);
+  });
+
   it('rejects non-OTH INC books and incomplete settlement accounts before writing', async () => {
     await seedBook('BAD', 'OTH EXP', 'O');
     await expect(

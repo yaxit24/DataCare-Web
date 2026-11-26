@@ -807,3 +807,24 @@ export function shortReason(reason) {
     .replace(/\d+(\.\d+)?/g, 'N')
     .slice(0, 160);
 }
+
+/**
+ * TEMP_BOOK_DATA has no year and its VCH_NO is the header's HD_VCH_NO, not its visible number
+ * (TR_CASH.cs:2976-3004). Resolve independently on each side, including company/location.
+ * A header without a hidden identity has no attributable TEMP_BOOK_DATA comparison.
+ */
+export function withHiddenBookRows(tables, header, tempRows) {
+  const out = { ...tables };
+  delete out.TEMP_BOOK_DATA;
+  const headers = tables[header] ?? [];
+  const rows = tempRows.filter((r) =>
+    headers.some(
+      (h) =>
+        str(h.HD_VCH_NO) &&
+        str(r.VCH_NO) === str(h.HD_VCH_NO) &&
+        ['CO_CODE', 'LC_CODE', 'CO_BOOK'].every((c) => str(r[c]) === str(h[c])),
+    ),
+  );
+  if (rows.length) out.TEMP_BOOK_DATA = rows;
+  return out;
+}

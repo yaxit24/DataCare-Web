@@ -1167,6 +1167,7 @@ describe('desktop Print-right boundary of the Company utilities (G225)', () => {
       form: 'Utilities/Backup',
       action: 'print',
       adminOnly: false,
+      businessScope: true,
     });
     expect(routePolicyFor('POST', '/backup/restore')).toMatchObject({
       form: 'Utilities/Backup',
