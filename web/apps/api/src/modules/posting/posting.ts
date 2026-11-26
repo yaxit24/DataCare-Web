@@ -536,12 +536,14 @@ export const PROVENANCE_COLUMN_NAMES = PROVENANCE_COLUMNS;
 export async function postVoucherTx(tx: any, tenantId: string, input: PostInput): Promise<void> {
   assertVoucherBalanced(input.ledger.lines);
   await assertPeriodOpen(tx, tenantId, input);
+  // One BOOK_DETL / BOOK_DATA lookup per book for the whole posting, not one per row.
+  const bookTypes = new Map<string, string>();
   for (const w of input.writes ?? []) {
     const stampDt = await tableHasDataType(tx, w.table); // desktop parity: DATA_TYPE='A' on all data rows
     const tableColumns = await columnsOf(tx, w.table);
     for (const r of w.rows) {
       const withDataType = stampDt
-        ? { ...r, DATA_TYPE: await postingDataTypeTx(tx, tenantId, w.table, r) }
+        ? { ...r, DATA_TYPE: await postingDataTypeTx(tx, tenantId, w.table, r, bookTypes) }
         : r;
       await insertRowTx(
         tx,
@@ -626,7 +628,13 @@ export async function postVoucherTx(tx: any, tenantId: string, input: PostInput)
       [ORDER_RATE_CUT_ONE_SIDED]: _oneSided,
       ...columns
     } = line as Record<string, unknown>;
-    columns.DATA_TYPE = await postingDataTypeTx(tx, tenantId, input.ledger.table, columns);
+    columns.DATA_TYPE = await postingDataTypeTx(
+      tx,
+      tenantId,
+      input.ledger.table,
+      columns,
+      bookTypes,
+    );
     const row =
       input.ledger.table === 'AC_DATA'
         ? enrichLedgerLine(

@@ -1,4 +1,4 @@
-import { openingDataType } from '../auth/dataTypePolicy.js';
+import { openingDataType, rowDataTypeSql } from '../auth/dataTypePolicy.js';
 import {
   isItemOpeningType,
   itemOpeningRowSaved,
@@ -226,7 +226,7 @@ export async function getItemOpening(
               coalesce("LBR_RATE",0)::float lr, coalesce("LBR_AMT",0)::float la, coalesce("OTH_AMT",0)::float oa,
               coalesce("NET_AMT",0)::float na
          FROM "ITM_OPBL"
-        WHERE "CO_CODE"=$1 AND "LC_CODE"=$2 AND "CO_YEAR"=$3 AND "CO_BOOK"=$4 AND "DATA_TYPE"=$5
+        WHERE "CO_CODE"=$1 AND "LC_CODE"=$2 AND "CO_YEAR"=$3 AND "CO_BOOK"=$4 AND ${rowDataTypeSql()}=$5
         ORDER BY "IT_CODE", "SR_NO", row_id`,
       coCode,
       lcCode,
@@ -269,7 +269,11 @@ export async function getItemOpening(
   });
 }
 
-/** The type's rows carried by Balance TrFr (ITM_OPBL.CARRIED_FROM), with the figures the screen must not change. */
+/**
+ * The type's rows carried by Balance TrFr (ITM_OPBL.CARRIED_FROM), with the figures the screen must not change. Only
+ * the session's opening data type: Balance TrFr carries item stock as 'A' (BtmSchm.cs:2921-3002), so a B session's
+ * own opening is neither refused nor marked carried because of A's carried rows.
+ */
 async function carriedRowsTx(
   tx: any,
   scope: ItemOpeningScope,
@@ -282,12 +286,14 @@ async function carriedRowsTx(
     `SELECT "IT_CODE" it, "CARRIED_FROM" cf, coalesce("ITM_PCS",0)::float pcs, coalesce("ITM_GWT",0)::float gwt,
             coalesce("ITM_NWT",0)::float nwt, coalesce("ITM_FINE",0)::float fine, coalesce("ITM_AMT",0)::float amt
        FROM "ITM_OPBL"
-      WHERE "CO_CODE"=$1 AND "LC_CODE"=$2 AND "CO_YEAR"=$3 AND "CO_BOOK"=$4 AND "VCH_NO"=$5 AND "CARRIED_FROM" IS NOT NULL`,
+      WHERE "CO_CODE"=$1 AND "LC_CODE"=$2 AND "CO_YEAR"=$3 AND "CO_BOOK"=$4 AND "VCH_NO"=$5 AND "CARRIED_FROM" IS NOT NULL
+        AND ${rowDataTypeSql()}=$6`,
     coCode,
     lcCode,
     coYear,
     ITEM_OPENING_BOOK,
     type,
+    openingDataType(scope.dataType),
   );
   return new Map(
     rows.map((r) => [
@@ -297,46 +303,20 @@ async function carriedRowsTx(
   );
 }
 
-/**
- * DM_DATA carries no DATA_TYPE column, so its rows belong to the type of the item's first ITM_OPBL row (the desktop
- * deletes them by book and type letter alone, TR_ITM_OPBL.cs:1456, :1511, which would let one data type destroy the
- * other's rows). Item codes whose detail rows another type owns are never deleted or rewritten by this session.
- */
-const DM_OWNER = `COALESCE((SELECT o."DATA_TYPE" FROM "ITM_OPBL" o WHERE o."CO_CODE"="DM_DATA"."CO_CODE"
-  AND o."LC_CODE"="DM_DATA"."LC_CODE" AND o."CO_YEAR"="DM_DATA"."CO_YEAR" AND o."CO_BOOK"="DM_DATA"."CO_BOOK"
-  AND o."VCH_NO"="DM_DATA"."VCH_NO" AND o."IT_CODE"="DM_DATA"."IT_CODE" ORDER BY o."row_id" LIMIT 1),$6)`;
-
-async function foreignDetailItemsTx(
-  tx: any,
-  scope: ItemOpeningScope,
-  type: string,
-): Promise<Set<string>> {
-  const { coCode, lcCode, coYear } = scopeOf(scope);
-  const rows: any[] = await tx.$queryRawUnsafe(
-    `SELECT DISTINCT "IT_CODE" it FROM "DM_DATA" WHERE "CO_CODE"=$1 AND "LC_CODE"=$2 AND "CO_YEAR"=$3 AND "CO_BOOK"=$4
-       AND "VCH_NO"=$5 AND "BOOK_NAME"='${VCH_TYPE}' AND ${DM_OWNER}<>$6`,
-    coCode,
-    lcCode,
-    coYear,
-    ITEM_OPENING_BOOK,
-    type,
-    openingDataType(scope.dataType),
-  );
-  return new Set(rows.map((r) => String(r.it)));
-}
-
 async function deleteTypeTx(tx: any, scope: ItemOpeningScope, type: string): Promise<number> {
   const { coCode, lcCode, coYear } = scopeOf(scope);
   const base = `"CO_CODE"=$1 AND "LC_CODE"=$2 AND "CO_YEAR"=$3 AND "CO_BOOK"=$4 AND "VCH_NO"=$5`;
-  // DM_DATA carries no DATA_TYPE column; the stock tables are scoped to the session's opening type.
-  const where = `${base} AND "DATA_TYPE"=$6`;
+  // Every table is scoped to the session's opening type, blank or NULL read as 'A'. DM_DATA's DATA_TYPE is web-only
+  // (migration 20261126100000): the desktop deletes these rows by book and type letter alone (TR_ITM_OPBL.cs:1456,
+  // :1511), which would let one data type destroy the other's other-detail rows.
+  const where = `${base} AND ${rowDataTypeSql()}=$6`;
   const args = [coCode, lcCode, coYear, ITEM_OPENING_BOOK, type, openingDataType(scope.dataType)];
   await tx.$executeRawUnsafe(
     `DELETE FROM "MAIN_STOCK" WHERE ${where} AND "VCH_TYPE"='${VCH_TYPE}'`,
     ...args,
   );
   await tx.$executeRawUnsafe(
-    `DELETE FROM "DM_DATA" WHERE ${base} AND "BOOK_NAME"='${VCH_TYPE}' AND ${DM_OWNER}=$6`,
+    `DELETE FROM "DM_DATA" WHERE ${where} AND "BOOK_NAME"='${VCH_TYPE}'`,
     ...args,
   );
   return Number(await tx.$executeRawUnsafe(`DELETE FROM "ITM_OPBL" WHERE ${where}`, ...args));
@@ -394,7 +374,6 @@ export async function saveItemOpening(
         line.row.amount === c.amt;
       if (!same) throw new ItemOpeningValidationError(carriedOpeningMessage(c.from));
     }
-    const foreignDetail = await foreignDetailItemsTx(tx, input.scope, type);
     await deleteTypeTx(tx, input.scope, type);
     const key = {
       CO_CODE: coCode,
@@ -478,16 +457,14 @@ export async function saveItemOpening(
         GHT_PRC: 0,
       });
       if (!oth) continue;
-      if (foreignDetail.has(itCode))
-        throw new ItemOpeningValidationError(
-          "This item's other-detail rows belong to another data type and cannot be changed from this one.",
-        );
       // Ac_Stock.Dm_Itm_Opbl_Detl (Ac_Stock.cs:734-741): only items posting other details (OTH_DETL_POSTING 'Y').
       await insertRowTx(tx, 'DM_DATA', input.scope.tenantId, {
         ...key,
         MAIN_SRNO: 1,
         SR_NO: srNo,
-        ISR_NO: 1,
+        // DM_DATA's key ends in MAIN_SRNO, SR_NO, ISR_NO, so A's and B's row for the same grid row would collide. A keeps
+        // the desktop's ISR_NO 1 (Ac_Stock.cs:734-741); B writes 2 (web-only, so both types can hold an opening).
+        ISR_NO: openingDataType(input.scope.dataType) === 'B' ? 2 : 1,
         VCH_DATE: stockDate,
         ENTRY_TYPE: 'L',
         BOOK_NAME: VCH_TYPE,
@@ -510,6 +487,7 @@ export async function saveItemOpening(
         MAIN_IT_CODE: '',
         INOUT_TYPE: 'P',
         TBL_CODE: '',
+        DATA_TYPE: openingDataType(input.scope.dataType),
       });
     }
   });

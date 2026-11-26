@@ -1,4 +1,4 @@
-import { openingDataType } from '../auth/dataTypePolicy.js';
+import { openingDataType, rowDataTypeSql } from '../auth/dataTypePolicy.js';
 import { round, toIsoDate } from '@datacare/core';
 import { withTxBudget } from '../shared/txBudget.js';
 import { insertRowTx } from '../posting/posting.js';
@@ -324,27 +324,15 @@ export function billHeads(bills: Required<PartyOpeningBillLine>[]): PartyOpening
 
 const opDataWhere = `"CO_CODE"=$1 AND "LC_CODE"=$2 AND "CO_YEAR"=$3 AND "CO_BOOK"='${OPENING_BOOK}' AND "AC_CODE"=$4`;
 
-/**
- * OP_DETL carries no DATA_TYPE column, so its rows belong to the type of the party's first OP_DATA row (the desktop
- * deletes and lists them by account alone, TR_AC_OPBL.cs:2584, :2696, :2877, which would let one type destroy the
- * other's bill-wise rows). A session of another type neither reads, replaces nor deletes them.
- */
-async function mayTouchDetailTx(
-  tx: any,
-  scope: PartyOpeningScope,
-  acCode: string,
-): Promise<boolean> {
-  const { coCode, lcCode, coYear } = scopeOf(scope);
-  const owner: any[] = await tx.$queryRawUnsafe(
-    `SELECT "DATA_TYPE" t FROM "OP_DATA" WHERE ${opDataWhere} ORDER BY "row_id" LIMIT 1`,
-    coCode,
-    lcCode,
-    coYear,
-    acCode,
-  );
-  return owner.length === 0 || String(owner[0].t ?? 'A') === openingDataType(scope.dataType);
-}
+/** The session's opening type ($5), with a blank or NULL row read as 'A'. */
+const TYPE_IS_5 = `${rowDataTypeSql()}=$5`;
 
+/**
+ * OP_DETL rows belong to the data type in their web-only DATA_TYPE column (migration 20261126100000, existing rows 'A').
+ * Deviation from the desktop, which lists and deletes them by account alone (TR_AC_OPBL.cs:2584, :2696, :2877) and so
+ * lets one data type destroy the other's bill-wise rows: every write stamps the session's opening type and every read
+ * and delete filters by it, so a type only ever sees and replaces its own bills.
+ */
 /**
  * Write one party's opening and its ledger legs inside the caller's transaction (TR_AC_OPBL.cs:2694-2775). The previous
  * row's MAIN_USER and DATA_TRFR are kept on an edit, as the desktop reload does (:2545-2546).
@@ -358,9 +346,8 @@ export async function writePartyOpeningTx(
   bills?: Required<PartyOpeningBillLine>[],
 ): Promise<void> {
   const { coCode, lcCode, coYear } = scopeOf(scope);
-  const mayTouchDetail = await mayTouchDetailTx(tx, scope, acCode);
   const previous: any[] = await tx.$queryRawUnsafe(
-    `SELECT "MAIN_USER" mu, "DATA_TRFR" tr FROM "OP_DATA" WHERE ${opDataWhere} AND "DATA_TYPE"=$5 LIMIT 1`,
+    `SELECT "MAIN_USER" mu, "DATA_TRFR" tr FROM "OP_DATA" WHERE ${opDataWhere} AND ${TYPE_IS_5} LIMIT 1`,
     coCode,
     lcCode,
     coYear,
@@ -370,7 +357,7 @@ export async function writePartyOpeningTx(
   const owner = String(previous[0]?.mu ?? '') || mainUser;
   const transfer = String(previous[0]?.tr ?? '') || 'N';
   await tx.$executeRawUnsafe(
-    `DELETE FROM "OP_DATA" WHERE ${opDataWhere} AND "DATA_TYPE"=$5`,
+    `DELETE FROM "OP_DATA" WHERE ${opDataWhere} AND ${TYPE_IS_5}`,
     coCode,
     lcCode,
     coYear,
@@ -395,7 +382,7 @@ export async function writePartyOpeningTx(
     MAIN_USER: owner,
   });
   await tx.$executeRawUnsafe(
-    `DELETE FROM "AC_DATA" WHERE ${opDataWhere} AND "DATA_TYPE"=$5`,
+    `DELETE FROM "AC_DATA" WHERE ${opDataWhere} AND ${TYPE_IS_5}`,
     coCode,
     lcCode,
     coYear,
@@ -406,20 +393,14 @@ export async function writePartyOpeningTx(
   for (const leg of openingLegs(scope, acCode, heads, legDate, owner))
     await insertRowTx(tx, 'AC_DATA', scope.tenantId, leg);
   if (!bills) return;
-  if (!mayTouchDetail) {
-    if (bills.length)
-      throw new PartyOpeningValidationError(
-        "This party's bill-wise rows belong to another data type and cannot be changed from this one.",
-      );
-    return;
-  }
-  // TR_AC_OPBL.cs:2696 and :2724-2760: the party's OP_DETL rows are replaced by the grid's rows.
+  // TR_AC_OPBL.cs:2696 and :2724-2760: the party's OP_DETL rows (of this data type) are replaced by the grid's rows.
   await tx.$executeRawUnsafe(
-    `DELETE FROM "OP_DETL" WHERE ${opDataWhere}`,
+    `DELETE FROM "OP_DETL" WHERE ${opDataWhere} AND ${TYPE_IS_5}`,
     coCode,
     lcCode,
     coYear,
     acCode,
+    openingDataType(scope.dataType),
   );
   let srNo = 0;
   for (const b of bills)
@@ -449,6 +430,7 @@ export async function writePartyOpeningTx(
       ITM_AMT: b.amount,
       ITM_SIGN: b.sign,
       MAIN_USER: owner,
+      DATA_TYPE: openingDataType(scope.dataType),
     });
 }
 
@@ -492,7 +474,7 @@ export async function refuseCarriedOpeningTx(
 ): Promise<void> {
   const { coCode, lcCode, coYear } = scopeOf(scope);
   const carried: any[] = await tx.$queryRawUnsafe(
-    `SELECT 1 FROM "AC_DATA" WHERE ${opDataWhere} AND "DATA_TYPE"=$5 AND "BOOK_NAME"=$6 LIMIT 1`,
+    `SELECT 1 FROM "AC_DATA" WHERE ${opDataWhere} AND ${TYPE_IS_5} AND "BOOK_NAME"=$6 LIMIT 1`,
     coCode,
     lcCode,
     coYear,
@@ -525,7 +507,7 @@ export async function writeMasterOpeningTx(
 ): Promise<boolean> {
   const { coCode, lcCode, coYear } = scopeOf(scope);
   const carried: any[] = await tx.$queryRawUnsafe(
-    `SELECT 1 FROM "AC_DATA" WHERE ${opDataWhere} AND "DATA_TYPE"=$5 AND "BOOK_NAME"=$6 LIMIT 1`,
+    `SELECT 1 FROM "AC_DATA" WHERE ${opDataWhere} AND ${TYPE_IS_5} AND "BOOK_NAME"=$6 LIMIT 1`,
     coCode,
     lcCode,
     coYear,
@@ -537,7 +519,7 @@ export async function writeMasterOpeningTx(
     const cur: any[] = await tx.$queryRawUnsafe(
       `SELECT coalesce("OP_AMT",0)::float a, "OP_SIGN" s, coalesce("FINE_BAL",0)::float g, "FINE_SIGN" gs,
               coalesce("SL_FINE_BAL",0)::float v, "SL_FINE_SIGN" vs
-         FROM "OP_DATA" WHERE ${opDataWhere} AND "DATA_TYPE"=$5 LIMIT 1`,
+         FROM "OP_DATA" WHERE ${opDataWhere} AND ${TYPE_IS_5} LIMIT 1`,
       coCode,
       lcCode,
       coYear,
@@ -626,19 +608,19 @@ async function billsTx(
   acCode: string,
 ): Promise<Required<PartyOpeningBillLine>[]> {
   const { coCode, lcCode, coYear } = scopeOf(scope);
-  if (!(await mayTouchDetailTx(tx, scope, acCode))) return [];
   const rows: any[] = await tx.$queryRawUnsafe(
     `SELECT "VCH_NO" vch, "VCH_DATE"::date::text dt, "BILL_NO" bill, coalesce("CR_DAYS",0)::float days, "ITM_DESC" descr,
             "ITM_TYPE" it, coalesce("ITM_GWT",0)::float gwt, coalesce("ITM_NWT",0)::float nwt, coalesce("ITM_GHTWT",0)::float ght,
             coalesce("ITM_TOUCH",0)::float touch, coalesce("ITM_WEST",0)::float west, coalesce("ITM_GL_FINE",0)::float gf,
             coalesce("ITM_SL_FINE",0)::float sf, "DM_PCS" pcs, coalesce("DM_WT",0)::float dwt, coalesce("DM_AMT",0)::float damt,
             coalesce("ITM_AMT",0)::float amt, "ITM_SIGN" sg
-       FROM "OP_DETL" WHERE ${opDataWhere}
+       FROM "OP_DETL" WHERE ${opDataWhere} AND ${TYPE_IS_5}
       ORDER BY CASE WHEN "SR_NO" ~ '^[0-9]+$' THEN "SR_NO"::int ELSE 0 END, "VCH_NO"`,
     coCode,
     lcCode,
     coYear,
     acCode,
+    openingDataType(scope.dataType),
   );
   return rows.map((r) => ({
     vchNo: String(r.vch ?? ''),
@@ -683,7 +665,7 @@ export async function getPartyOpening(
     const rows: any[] = await tx.$queryRawUnsafe(
       `SELECT coalesce("OP_AMT",0)::float amt, "OP_SIGN" osg, coalesce("FINE_BAL",0)::float g, "FINE_SIGN" gsg,
               coalesce("SL_FINE_BAL",0)::float s, "SL_FINE_SIGN" ssg
-         FROM "OP_DATA" WHERE ${opDataWhere} AND "DATA_TYPE"=$5 LIMIT 1`,
+         FROM "OP_DATA" WHERE ${opDataWhere} AND ${TYPE_IS_5} LIMIT 1`,
       coCode,
       lcCode,
       coYear,
@@ -761,7 +743,7 @@ export async function listPartyOpenings(
               CASE WHEN a."${sign}"='D' THEN coalesce(a."${value}",0) ELSE 0 END::float dr
          FROM "OP_DATA" a LEFT JOIN "AC_MAST" m ON m."CO_CODE"=a."CO_CODE" AND m."AC_CODE"=a."AC_CODE"
         WHERE a."CO_CODE"=$1 AND a."LC_CODE"=$2 AND a."CO_YEAR"=$3 AND a."CO_BOOK"='${OPENING_BOOK}'
-          AND a."DATA_TYPE"=$4 AND coalesce(a."${value}",0)<>0
+          AND ${rowDataTypeSql('a."DATA_TYPE"')}=$4 AND coalesce(a."${value}",0)<>0
         ORDER BY m."AC_GR", m."AC_NAME", a."AC_CODE"`,
       coCode,
       lcCode,
@@ -813,7 +795,7 @@ export async function deletePartyOpening(
               a."SL_FINE_SIGN" ssg, coalesce(a."SL_FINE_BAL",0)::float s
          FROM "OP_DATA" a LEFT JOIN "AC_MAST" m ON m."CO_CODE"=a."CO_CODE" AND m."AC_CODE"=a."AC_CODE"
         WHERE a."CO_CODE"=$1 AND a."LC_CODE"=$2 AND a."CO_YEAR"=$3 AND a."CO_BOOK"='${OPENING_BOOK}'
-          AND a."AC_CODE"=$4 AND a."DATA_TYPE"=$5`,
+          AND a."AC_CODE"=$4 AND ${rowDataTypeSql('a."DATA_TYPE"')}=$5`,
       coCode,
       lcCode,
       coYear,
@@ -821,7 +803,6 @@ export async function deletePartyOpening(
       openingDataType(scope.dataType),
     );
     if (!rows.length) return { deleted: false };
-    const mayTouchDetail = await mayTouchDetailTx(tx, scope, acCode);
     const legDate = await openingLegDateTx(tx, scope);
     const opDate = new Date(legDate);
     opDate.setUTCDate(opDate.getUTCDate() + 1);
@@ -873,23 +854,23 @@ export async function deletePartyOpening(
       if (Number(r.s) !== 0) await audit(1, 'S', { dr: 0, cr: 0 }, side(r.ssg, Number(r.s)));
     }
     await tx.$executeRawUnsafe(
-      `DELETE FROM "OP_DATA" WHERE ${opDataWhere} AND "DATA_TYPE"=$5`,
+      `DELETE FROM "OP_DATA" WHERE ${opDataWhere} AND ${TYPE_IS_5}`,
       coCode,
       lcCode,
       coYear,
       acCode,
       openingDataType(scope.dataType),
     );
-    if (mayTouchDetail)
-      await tx.$executeRawUnsafe(
-        `DELETE FROM "OP_DETL" WHERE ${opDataWhere}`,
-        coCode,
-        lcCode,
-        coYear,
-        acCode,
-      );
     await tx.$executeRawUnsafe(
-      `DELETE FROM "AC_DATA" WHERE ${opDataWhere} AND "DATA_TYPE"=$5`,
+      `DELETE FROM "OP_DETL" WHERE ${opDataWhere} AND ${TYPE_IS_5}`,
+      coCode,
+      lcCode,
+      coYear,
+      acCode,
+      openingDataType(scope.dataType),
+    );
+    await tx.$executeRawUnsafe(
+      `DELETE FROM "AC_DATA" WHERE ${opDataWhere} AND ${TYPE_IS_5}`,
       coCode,
       lcCode,
       coYear,

@@ -47,6 +47,9 @@ const ALLOWED_QUERY_FIELDS = new Set([
   'partyCode',
   'acCode', // shared report-filter alias for Party
   'lcCode', // validated by the central business-scope guard before this parser
+  // app.ts (sessionReportQuery) writes the session type into every /reports/* query of an A/B session. RP_GST has no
+  // MsDataType filter (the desktop form never reads it), so the field is accepted and ignored, never refused.
+  'dataType',
 ]);
 
 function scalar(query: Record<string, unknown>, field: string, max?: number): string | undefined {

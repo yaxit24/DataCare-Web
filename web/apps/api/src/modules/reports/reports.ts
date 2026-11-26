@@ -7,6 +7,7 @@ import { barTagAvailableSql } from '../shared/stockSql.js';
 import { fineStockValue, resolveSettingsBehaviorTx } from '../shared/settingsBehavior.js';
 import { stageListReportTx } from './reportGridStaging.js';
 import { trialBalance as trialBalanceDataset } from '../accounting/accounting.js';
+import { bookDataTypeSql, dataTypeSql } from './reportDataType.js';
 
 /**
  * Report dataset builders (read-only) reproducing the desktop .rpt field sets. The register shape
@@ -46,6 +47,11 @@ export interface ReportScope {
    * would advertise the dimension and the screen would send a filter that is then silently ignored.
    */
   filters?: ReportFilters;
+  /**
+   * The session data type (routes/txn.ts readScope). 'A'/'B' read only that type's rows, 'C' or absent reads all
+   * (reportDataType.ts; desktop MsDataType filters, e.g. Ac_Final.cs:151-182, RP_ROJMEL.cs:3048).
+   */
+  dataType?: string;
 }
 
 /**
@@ -169,7 +175,7 @@ async function registerFrom(
     const join = mainBook
       ? ` JOIN "BOOK_DATA" b ON b.tenant_id=v.tenant_id AND b."CO_CODE"=v."CO_CODE"
            AND b."LC_CODE"=v."LC_CODE" AND b."CO_BOOK"=v."CO_BOOK"
-           AND b."MAIN_BOOK"='${mainBook.replace(/[^A-Z0-9_ ]/g, '')}'`
+           AND b."MAIN_BOOK"='${mainBook.replace(/[^A-Z0-9_ ]/g, '')}'${dataTypeSql(s.dataType, 'b."DATA_TYPE"')}`
       : '';
     const rows: any[] = await tx.$queryRawUnsafe(
       `SELECT v."VCH_NO" AS "vchNo", v."CO_BOOK" AS "coBook", v."VCH_DATE" AS "vchDate", v."BILL_NO" AS "billNo", v."AC_CODE" AS "acCode", v."AC_NAME" AS party,
@@ -421,6 +427,8 @@ export async function oldGoldRegister(prisma: any, s: ReportScope): Promise<List
  *  INOUT 'I' = receivable (customer owes us), 'O' = payable (we owe supplier). */
 export async function billOutstanding(prisma: any, s: ReportScope): Promise<ListReport> {
   return withTxBudget(prisma, s.tenantId, 'read', async (tx: any) => {
+    // RP_OS.cs:5533-5539: bill-wise outstanding keeps the session type's books ({BOOK_DATA.DATA_TYPE}); BILL_OS_DATA's own
+    // DATA_TYPE is always the literal 'A' (posting/dataType.ts), so the book's type is used.
     const { yr, params } = coParams(s);
     const dt = dateWhere(s, 'b."VCH_DATE"', params);
     const rows: any[] = await tx.$queryRawUnsafe(
@@ -428,7 +436,7 @@ export async function billOutstanding(prisma: any, s: ReportScope): Promise<List
               (SELECT m."AC_NAME" FROM "AC_MAST" m WHERE m."AC_CODE"::text=b."AC_CODE"::text LIMIT 1) AS party,
               sum(${NN('b."BILL_AMT"')}) AS billed, sum(${NN('b."REC_AMT"')}) AS received,
               sum(${NN('b."BILL_AMT"')} - ${NN('b."REC_AMT"')}) AS balance, count(*)::int AS bills
-       FROM "BILL_OS_DATA" b WHERE b."CO_CODE"=$1${yr}${dt} GROUP BY b."AC_CODE", b."INOUT_TYPE" ORDER BY balance DESC`,
+       FROM "BILL_OS_DATA" b WHERE b."CO_CODE"=$1${yr}${dt}${bookDataTypeSql(s.dataType, 'b')} GROUP BY b."AC_CODE", b."INOUT_TYPE" ORDER BY balance DESC`,
       ...params,
     );
     const out = rows
@@ -469,9 +477,10 @@ export async function gstr3b(prisma: any, s: ReportScope): Promise<Record<string
     const r: any[] = await tx.$queryRawUnsafe(
       `SELECT coalesce(sum(${NN('"NET_AMT"')}-${NN('"DISC_AMT"')}),0) AS taxable, coalesce(sum(${NN('"TAX_AMT"')}),0) AS tax,
               coalesce(sum(${NN('"CGST_TAX"')}),0) AS cgst, coalesce(sum(${NN('"SGST_TAX"')}),0) AS sgst, coalesce(sum(${NN('"IGST_TAX"')}),0) AS igst
-       FROM "SL_DATA" WHERE "CO_CODE"=$1${yr}${dt} AND "CO_BOOK" IN (SELECT b."CO_BOOK" FROM "BOOK_DATA" b WHERE b."CO_CODE"=$1 AND b."MAIN_BOOK"='SALES')`,
+       FROM "SL_DATA" WHERE "CO_CODE"=$1${yr}${dt} AND "CO_BOOK" IN (SELECT b."CO_BOOK" FROM "BOOK_DATA" b WHERE b."CO_CODE"=$1 AND b."MAIN_BOOK"='SALES'${dataTypeSql(s.dataType, 'b."DATA_TYPE"')})`,
       ...params,
     );
+    // RP_TAX.cs:1941-1947: the GST reports keep the session type's books ({BOOK_DATA.DATA_TYPE}).
     const x = r[0];
     return {
       outwardTaxable: round2(num(x.taxable)),
@@ -557,13 +566,15 @@ export async function balanceSheet(
   return withTxBudget(prisma, s.tenantId, 'read', async (tx: any) => {
     const { yr, params } = coParams(s);
     const r: any[] = await tx.$queryRawUnsafe(
-      `SELECT coalesce(sum(${NN('"DR_AMT"')}),0) AS dr, coalesce(sum(${NN('"CR_AMT"')}),0) AS cr FROM "AC_DATA" WHERE "CO_CODE"=$1${yr}${carriedOpeningFilter(!!s.coYear)}`,
+      `SELECT coalesce(sum(${NN('"DR_AMT"')}),0) AS dr, coalesce(sum(${NN('"CR_AMT"')}),0) AS cr FROM "AC_DATA" WHERE "CO_CODE"=$1${yr}${carriedOpeningFilter(!!s.coYear)}${dataTypeSql(s.dataType)}`,
       ...params,
     );
     const dr = round2(num(r[0].dr));
     const cr = round2(num(r[0].cr));
     const stock = await closingStockValuationTx(
       tx,
+      // Ac_Final.cs:18-138 (Trading_Stock) values MAIN_STOCK of every data type: the desktop applies no
+      // MsDataType filter there, so the closing stock stays unfiltered.
       { tenantId: s.tenantId, coCode: s.coCode, coYear: s.coYear, lcCode: (s as any).lcCode },
       {
         // No closing date supplied means "as of today", matching the desktop's default final date.
@@ -622,7 +633,7 @@ export async function profitAndLoss(prisma: any, s: ReportScope): Promise<ListRe
               round(sum(${NN('d."CR_AMT"')}) - sum(${NN('d."DR_AMT"')}),2) AS balance
          FROM "AC_DATA" d
          LEFT JOIN "AC_MAST" m ON m."CO_CODE"::text=d."CO_CODE"::text AND m."AC_CODE"::text=d."AC_CODE"::text
-        WHERE ${conditions.join(' AND ')}${dt}${carriedOpeningFilter(!!s.coYear, 'd')}
+        WHERE ${conditions.join(' AND ')}${dt}${carriedOpeningFilter(!!s.coYear, 'd')}${dataTypeSql(s.dataType, 'd."DATA_TYPE"')}
         GROUP BY d."AC_CODE"
        HAVING abs(sum(${NN('d."CR_AMT"')}) - sum(${NN('d."DR_AMT"')})) > 0.005
         ORDER BY max(coalesce(m."AC_MAIN_GR",'')), max(coalesce(m."AC_GR",'')), d."AC_CODE"`,
@@ -733,7 +744,7 @@ export async function outstandingReport(prisma: any, s: ReportScope): Promise<Li
       `SELECT d."AC_CODE" AS "acCode", max(m."AC_NAME") AS party,
               round(sum(${NN('d."DR_AMT"')}) - sum(${NN('d."CR_AMT"')}), 2) AS balance
        FROM "AC_DATA" d LEFT JOIN "AC_MAST" m ON m."CO_CODE"=d."CO_CODE" AND m."AC_CODE"=d."AC_CODE"
-       WHERE d."CO_CODE"=$1${yr}${dt}${carriedOpeningFilter(!!s.coYear, 'd')}
+       WHERE d."CO_CODE"=$1${yr}${dt}${carriedOpeningFilter(!!s.coYear, 'd')}${dataTypeSql(s.dataType, 'd."DATA_TYPE"')}
        GROUP BY d."AC_CODE" HAVING abs(sum(${NN('d."DR_AMT"')}) - sum(${NN('d."CR_AMT"')})) > 0.005
        ORDER BY balance DESC`,
       ...params,
@@ -798,7 +809,7 @@ export async function dayBook(prisma: any, s: ReportScope, r: DateRange = {}): P
     const rows: any[] = await tx.$queryRawUnsafe(
       `SELECT "VCH_NO" AS "vchNo", "VCH_TYPE" AS "vchType", "AC_CODE" AS "acCode",
               ${NN('"DR_AMT"')} AS dr, ${NN('"CR_AMT"')} AS cr
-       FROM "AC_DATA" WHERE ${w.sql}${carriedOpeningFilter(!!s.coYear)} ORDER BY "VCH_DATE","VCH_NO"`,
+       FROM "AC_DATA" WHERE ${w.sql}${carriedOpeningFilter(!!s.coYear)}${dataTypeSql(s.dataType)} ORDER BY "VCH_DATE","VCH_NO"`,
       ...w.params,
     );
     const out: DayBookRow[] = rows.map((x) => ({

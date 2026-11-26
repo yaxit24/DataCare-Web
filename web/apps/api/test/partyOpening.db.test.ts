@@ -335,58 +335,83 @@ describe.skipIf(!RUN)(
       expect(await rows(`SELECT 1 FROM "OP_DETL" WHERE tenant_id=$1`, TENANT)).toHaveLength(1);
     });
 
-    it('data types: a B session neither reads, replaces nor deletes the bill-wise rows of an A opening', async () => {
-      const bills = [
-        { vchNo: '00012', itType: 'A', amount: 30000, sign: 'D' as const },
-        { vchNo: '00015', itType: 'A', amount: 5000, sign: 'C' as const },
-      ];
-      await savePartyOpening(runtime, { scope, acCode: PARTY, mainUser: 'ADMIN', bills });
+    it('data types: each type owns its bill-wise rows through OP_DETL.DATA_TYPE, whatever the save order', async () => {
       const detl = () =>
         rows(
-          `SELECT "VCH_NO" vch FROM "OP_DETL" WHERE tenant_id=$1 AND "AC_CODE"=$2 ORDER BY 1`,
+          `SELECT "VCH_NO" vch, coalesce(nullif(btrim("DATA_TYPE"),''),'A') dt FROM "OP_DETL"
+            WHERE tenant_id=$1 AND "AC_CODE"=$2 ORDER BY 1`,
           TENANT,
           PARTY,
         );
-      expect((await detl()).map((r: any) => r.vch)).toEqual(['00012', '00015']);
       const asB = { ...scope, dataType: 'B' };
-      // B has no opening of its own: it cannot read A's bills.
-      expect((await getPartyOpening(runtime, asB, PARTY)).bills).toEqual([]);
-      // B writing bills over A's is refused; nothing changes.
-      await expect(
-        savePartyOpening(runtime, {
-          scope: asB,
-          acCode: PARTY,
-          mainUser: 'ADMIN',
-          bills: [{ vchNo: '9', itType: 'A', amount: 1, sign: 'C' as const }],
-        }),
-      ).rejects.toThrow(/another data type/);
-      expect(await detl()).toHaveLength(2);
-      // B's own head without bills, then an empty grid, then delete: A's rows stay.
+      // The order that flipped the old "lowest OP_DATA row" owner: B first, then A, then a B edit.
       await savePartyOpening(runtime, {
         scope: asB,
         acCode: PARTY,
         mainUser: 'ADMIN',
-        amount: 10,
-        sign: 'C',
+        bills: [{ vchNo: 'B1', itType: 'A', amount: 700, sign: 'D' as const }],
+      });
+      await savePartyOpening(runtime, {
+        scope,
+        acCode: PARTY,
+        mainUser: 'ADMIN',
+        bills: [
+          { vchNo: '00012', itType: 'A', amount: 30000, sign: 'D' as const },
+          { vchNo: '00015', itType: 'A', amount: 5000, sign: 'C' as const },
+        ],
       });
       await savePartyOpening(runtime, {
         scope: asB,
         acCode: PARTY,
         mainUser: 'ADMIN',
-        amount: 10,
-        sign: 'C',
-        bills: [],
+        bills: [
+          { vchNo: 'B1', itType: 'A', amount: 700, sign: 'D' as const },
+          { vchNo: 'B2', itType: 'A', amount: 50, sign: 'D' as const },
+        ],
       });
-      expect(await detl()).toHaveLength(2);
-      expect((await getPartyOpening(runtime, asB, PARTY)).bills).toEqual([]);
-      await deletePartyOpening(runtime, asB, PARTY, 'CLERK');
-      expect(await detl()).toHaveLength(2);
-      expect(await opData(PARTY)).toHaveLength(1);
-      expect((await opData(PARTY))[0]).toMatchObject({ dt: 'A' });
-      // A still reads and may replace its own rows.
-      expect((await getPartyOpening(runtime, scope, PARTY)).bills).toHaveLength(2);
+      expect(await detl()).toEqual([
+        { vch: '00012', dt: 'A' },
+        { vch: '00015', dt: 'A' },
+        { vch: 'B1', dt: 'B' },
+        { vch: 'B2', dt: 'B' },
+      ]);
+      // Each type reads only its own bills.
+      expect((await getPartyOpening(runtime, scope, PARTY)).bills.map((b) => b.vchNo)).toEqual([
+        '00012',
+        '00015',
+      ]);
+      expect((await getPartyOpening(runtime, asB, PARTY)).bills.map((b) => b.vchNo)).toEqual([
+        'B1',
+        'B2',
+      ]);
+      // A replaces and then deletes its own: B's bills and opening stay.
       await savePartyOpening(runtime, { scope, acCode: PARTY, mainUser: 'ADMIN', bills: [] });
-      expect(await detl()).toHaveLength(0);
+      await deletePartyOpening(runtime, scope, PARTY, 'CLERK');
+      expect(await detl()).toEqual([
+        { vch: 'B1', dt: 'B' },
+        { vch: 'B2', dt: 'B' },
+      ]);
+      expect(await opData(PARTY)).toHaveLength(1);
+      expect((await opData(PARTY))[0]).toMatchObject({ dt: 'B' });
+      // B's delete removes B's bills.
+      await deletePartyOpening(runtime, asB, PARTY, 'CLERK');
+      expect(await detl()).toEqual([]);
+    });
+
+    it('data types: a NULL or blank OP_DETL / OP_DATA type reads as A', async () => {
+      await savePartyOpening(runtime, {
+        scope,
+        acCode: PARTY,
+        mainUser: 'ADMIN',
+        bills: [{ vchNo: '00012', itType: 'A', amount: 300, sign: 'D' as const }],
+      });
+      await rows(`UPDATE "OP_DETL" SET "DATA_TYPE"=NULL WHERE tenant_id=$1 RETURNING 1`, TENANT);
+      await rows(`UPDATE "OP_DATA" SET "DATA_TYPE"='' WHERE tenant_id=$1 RETURNING 1`, TENANT);
+      expect((await getPartyOpening(runtime, scope, PARTY)).bills).toHaveLength(1);
+      expect((await getPartyOpening(runtime, { ...scope, dataType: 'B' }, PARTY)).bills).toEqual([]);
+      await deletePartyOpening(runtime, scope, PARTY, 'CLERK');
+      expect(await rows(`SELECT 1 FROM "OP_DETL" WHERE tenant_id=$1`, TENANT)).toHaveLength(0);
+      expect(await opData(PARTY)).toHaveLength(0);
     });
 
     it('bill rows set the heads from their signed totals and replace OP_DETL (MSG_TOT_FILL, TR_AC_OPBL.cs:2724-2760)', async () => {

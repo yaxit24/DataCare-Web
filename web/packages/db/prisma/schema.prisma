@@ -2229,6 +2229,8 @@ model DM_DATA {
   INOUT_TYPE   String?   @db.VarChar(255)
   MAIN_IT_CODE String?   @db.VarChar(255)
   TBL_CODE     String?   @db.VarChar(3)
+  /// Web-only owner of an Item Opening row (migration 20261126100000); NULL or blank reads as 'A'.
+  DATA_TYPE    String?   @default("A") @db.VarChar(1)
 
   @@id([tenantId, CO_CODE, LC_CODE, CO_YEAR, CO_BOOK, VCH_NO, MAIN_SRNO, SR_NO, ISR_NO])
   @@map("DM_DATA")
@@ -7135,6 +7137,8 @@ model OP_DETL {
   ADD_USER    String?   @db.VarChar(255)
   ADD_DATE    DateTime? @db.Timestamp(6)
   ITM_TYPE    String?   @db.VarChar(255)
+  /// Web-only owner of a bill-wise opening row (migration 20261126100000); NULL or blank reads as 'A'.
+  DATA_TYPE   String?   @default("A") @db.VarChar(1)
 
   @@id([tenantId, rowId])
   @@index([tenantId], map: "OP_DETL_tenant_idx")

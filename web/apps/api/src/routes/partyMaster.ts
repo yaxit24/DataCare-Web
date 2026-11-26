@@ -44,7 +44,10 @@ const HELPS: readonly PartyHelp[] = [
  */
 export function registerPartyMasterRoutes(
   app: FastifyInstance,
-  h: Pick<CrmRouteHelpers, 'prisma' | 'auth' | 'scopeOf' | 'run' | 'body' | 'mainUserOf'> & {
+  h: Pick<
+    CrmRouteHelpers,
+    'prisma' | 'auth' | 'scopeOf' | 'run' | 'body' | 'mainUserOf' | 'dataTypeOf'
+  > & {
     guard: (
       req: FastifyRequest,
       reply: FastifyReply,
@@ -56,10 +59,18 @@ export function registerPartyMasterRoutes(
     form: string,
   ) => Promise<{ canUpdate: boolean; canDelete: boolean; canPrint: boolean }>,
 ): void {
-  const { prisma, auth, guard, scopeOf, run, body, mainUserOf } = h;
+  const { prisma, auth, guard, scopeOf, run, body, mainUserOf, dataTypeOf } = h;
+  // The session's data type reaches the inline opening (MS_ACCT.cs:7861-7888: OP_DATA and the book-000 AC_DATA legs
+  // are written as MsDataType, C as A) and the opening shown (:6522).
   const scope = (req: FastifyRequest) => {
     const s = scopeOf(req) as any;
-    return { tenantId: s.tenantId, coCode: s.coCode, lcCode: s.lcCode, coYear: s.coYear };
+    return {
+      tenantId: s.tenantId,
+      coCode: s.coCode,
+      lcCode: s.lcCode,
+      coYear: s.coYear,
+      dataType: dataTypeOf(req),
+    };
   };
   const codeOf = (req: FastifyRequest) => String((req.params as any).code ?? '');
   const query = (req: FastifyRequest, key: string) => String((req.query as any)?.[key] ?? '');

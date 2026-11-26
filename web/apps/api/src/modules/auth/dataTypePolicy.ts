@@ -28,3 +28,10 @@ export function sessionReportQuery(
   if ('orderDataType' in out) out.orderDataType = type;
   return out;
 }
+/**
+ * A row's data type as SQL: blank or NULL reads as 'A' (MS_BOOK.cs:2524 stores blank as 'A'; BtmSchm.cs:2765 groups
+ * blank with 'A'). `column` is a trusted, quoted column reference, never user input.
+ */
+export function rowDataTypeSql(column = '"DATA_TYPE"'): string {
+  return `COALESCE(NULLIF(btrim(${column}),''),'A')`;
+}

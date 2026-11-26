@@ -315,43 +315,94 @@ describe.skipIf(!RUN)('Item Opening = desktop TR_ITM_OPBL (N209, G222)', () => {
     ]);
   });
 
-  it('data types: a B session never deletes or rewrites the other-detail rows of an A opening', async () => {
+  it('data types: each type owns its DM_DATA other-detail rows through DM_DATA.DATA_TYPE', async () => {
     const asB = { ...scope, dataType: 'B' };
     const bver = async () => (await getItemOpening(runtime, asB, 'G')).version;
+    const dmRows = () =>
+      rows(
+        `SELECT "IT_CODE" it, "ISR_NO"::int isr, coalesce(nullif(btrim("DATA_TYPE"),''),'A') dt,
+                "DM_PCS"::float pcs FROM "DM_DATA" WHERE tenant_id=$1 ORDER BY 3, 1`,
+      );
+    // B first, then A, then a B edit (the order that flipped the old lowest-row owner).
+    await saveItemOpening(runtime, {
+      scope: asB,
+      type: 'G',
+      expectedVersion: await bver(),
+      rows: [{ itCode: 'BANG', pcs: 3, grossWt: 30, netWt: 30, rate: 10, amount: 300 }],
+    });
     await saveItemOpening(runtime, {
       scope,
       type: 'G',
       expectedVersion: await ver('G'),
       rows: [{ itCode: 'BANG', pcs: 2, grossWt: 20, netWt: 20, rate: 10, amount: 200 }],
     });
-    const dm = () => count('DM_DATA');
-    expect(await dm()).toBe(1);
-    // B saves another item: A's other-detail row stays, A's stock stays.
     await saveItemOpening(runtime, {
       scope: asB,
       type: 'G',
       expectedVersion: await bver(),
-      rows: [{ itCode: 'RING', pcs: 1, grossWt: 5, netWt: 5, rate: 0, amount: 0 }],
+      rows: [{ itCode: 'BANG', pcs: 4, grossWt: 40, netWt: 40, rate: 10, amount: 400 }],
     });
-    expect(await dm()).toBe(1);
-    // B cannot rewrite the detail of an item A owns.
-    await expect(
-      saveItemOpening(runtime, {
-        scope: asB,
-        type: 'G',
-        expectedVersion: await bver(),
-        rows: [{ itCode: 'BANG', pcs: 9, grossWt: 9, netWt: 9, rate: 1, amount: 9 }],
-      }),
-    ).rejects.toThrow(/another data type/);
-    expect(await dm()).toBe(1);
-    // B deletes its opening: A's rows (ITM_OPBL, MAIN_STOCK, DM_DATA) remain.
-    await deleteItemOpening(runtime, asB, 'G', await bver());
-    expect(await dm()).toBe(1);
-    expect(await count('ITM_OPBL', `"DATA_TYPE"='A'`)).toBe(1);
-    expect(await count('MAIN_STOCK', `"DATA_TYPE"='A' AND "VCH_TYPE"='ITOBL'`)).toBe(1);
-    // A deletes its own: the detail goes with it.
+    expect(await dmRows()).toEqual([
+      { it: 'BANG', isr: 1, dt: 'A', pcs: 2 },
+      { it: 'BANG', isr: 2, dt: 'B', pcs: 4 },
+    ]);
+    // A deletes its opening: B's rows (ITM_OPBL, MAIN_STOCK, DM_DATA) remain.
     await deleteItemOpening(runtime, scope, 'G', await ver('G'));
-    expect(await dm()).toBe(0);
+    expect(await dmRows()).toEqual([{ it: 'BANG', isr: 2, dt: 'B', pcs: 4 }]);
+    expect(await count('ITM_OPBL', `"DATA_TYPE"='B'`)).toBe(1);
+    expect(await count('MAIN_STOCK', `"DATA_TYPE"='B' AND "VCH_TYPE"='ITOBL'`)).toBe(1);
+    // B deletes its own: the detail goes with it.
+    await deleteItemOpening(runtime, asB, 'G', await bver());
+    expect(await dmRows()).toEqual([]);
+    // A NULL-typed detail row (migrated) belongs to A.
+    await saveItemOpening(runtime, {
+      scope,
+      type: 'G',
+      expectedVersion: await ver('G'),
+      rows: [{ itCode: 'BANG', pcs: 2, grossWt: 20, netWt: 20, rate: 10, amount: 200 }],
+    });
+    await rows(`UPDATE "DM_DATA" SET "DATA_TYPE"=NULL WHERE tenant_id=$1 RETURNING 1`);
+    await deleteItemOpening(runtime, asB, 'G', await bver());
+    expect(await count('DM_DATA')).toBe(1);
+    await deleteItemOpening(runtime, scope, 'G', await ver('G'));
+    expect(await count('DM_DATA')).toBe(0);
+  });
+
+  it('data types: Balance TrFr carried rows (type A) neither block nor mark a B opening', async () => {
+    const asB = { ...scope, dataType: 'B' };
+    const bver = async () => (await getItemOpening(runtime, asB, 'G')).version;
+    const line = { itCode: 'RING', pcs: 1, grossWt: 5, netWt: 5, rate: 0, amount: 0 };
+    await saveItemOpening(runtime, {
+      scope,
+      type: 'G',
+      expectedVersion: await ver('G'),
+      rows: [line],
+    });
+    // Mark A's row as carried, as carryItemStock writes it (DATA_TYPE 'A', CARRIED_FROM set).
+    await rows(
+      `UPDATE "ITM_OPBL" SET "CARRIED_FROM"='2024' WHERE tenant_id=$1 RETURNING 1`,
+    );
+    // B saves the same figures: written as B's own opening, with stock and no carried marker.
+    await saveItemOpening(runtime, {
+      scope: asB,
+      type: 'G',
+      expectedVersion: await bver(),
+      rows: [line],
+    });
+    expect(await count('ITM_OPBL', `"DATA_TYPE"='B' AND "CARRIED_FROM" IS NULL`)).toBe(1);
+    expect(await count('MAIN_STOCK', `"DATA_TYPE"='B' AND "VCH_TYPE"='ITOBL'`)).toBe(1);
+    // B changes and deletes its own opening freely; A's carried row stays.
+    await saveItemOpening(runtime, {
+      scope: asB,
+      type: 'G',
+      expectedVersion: await bver(),
+      rows: [{ ...line, pcs: 2 }],
+    });
+    await deleteItemOpening(runtime, asB, 'G', await bver());
+    expect(await count('ITM_OPBL', `"DATA_TYPE"='B'`)).toBe(0);
+    expect(await count('ITM_OPBL', `"DATA_TYPE"='A' AND "CARRIED_FROM" IS NOT NULL`)).toBe(1);
+    // A is still refused a change of its carried row.
+    await expect(deleteItemOpening(runtime, scope, 'G', await ver('G'))).rejects.toThrow();
   });
 
   it('keeps stored cells on an unchanged save, and replaces the type without duplicating it', async () => {

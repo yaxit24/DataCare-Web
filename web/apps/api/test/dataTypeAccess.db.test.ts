@@ -249,4 +249,72 @@ run('owner data-type decision: PostgreSQL and HTTP authority', () => {
     });
     expect(denied.statusCode).toBe(403);
   });
+
+  it('an A session is refused a B book chosen by the server, named as a second book, or as an import source', async () => {
+    await owner.$executeRawUnsafe(
+      `DELETE FROM "BOOK_DATA" WHERE tenant_id=$1 AND "CO_BOOK" IN ('FSL','FPR','SB2','SA2')`,
+      tenant,
+    );
+    await owner.$executeRawUnsafe(
+      `INSERT INTO "BOOK_DATA"(tenant_id,"CO_CODE","LC_CODE","CO_BOOK","BOOK_NAME","BOOK_SNAME","MAIN_BOOK","CUR_USE","DATA_TYPE")
+       VALUES ($1,'01','01','FSL','Fine Sale','FSL','FINE SALE','Y','B'),
+              ($1,'01','01','SB2','Sale B','SB2','SALES','Y','B'),
+              ($1,'01','01','SA2','Return A','SA2','SALES RETURNE','Y','A')`,
+      tenant,
+    );
+    await owner.$executeRawUnsafe(
+      `UPDATE "LOGIN_MAST" SET "DATA_TYPE_ALLOW"='ABC',"DATA_TYPE_DEFAULT"='A' WHERE tenant_id=$1 AND "LOGIN_NAME"='TYPEADMIN'`,
+      tenant,
+    );
+    const signed = await login();
+    expect(signed.statusCode, signed.body).toBe(200);
+    expect(signed.json().dataType).toBe('A');
+    const asA = cookie(signed);
+    const call = (method: string, url: string, payload?: unknown) =>
+      app.inject({
+        method: method as never,
+        url,
+        headers: { cookie: asA },
+        ...(payload === undefined ? {} : { payload: payload as never }),
+      });
+    const refused = (r: LightMyRequestResponse) => {
+      expect(r.statusCode, r.body).toBe(403);
+      expect(r.json().error).toBe('book-data-type-mismatch');
+    };
+    // Fine sale: the route always uses FSL (routes/txn.ts fineSaleInput), a B book here.
+    refused(await call('GET', '/fine-sale/00001'));
+    refused(await call('PUT', '/fine-sale/00001', { side: 'SALE', lines: [] }));
+    refused(await call('DELETE', '/fine-sale/00001', { side: 'SALE' }));
+    refused(await call('POST', '/fine-sale', { side: 'SALE', lines: [] }));
+    // A sales return in an A book whose original sale (origBook) is in a B book.
+    refused(
+      await call('POST', '/sales-returns', {
+        coBook: 'SA2',
+        origBook: 'SB2',
+        origYear: '2026',
+        origVchNo: '00001',
+        lines: [],
+      }),
+    );
+    // An import that names its source book (the sale-return source items of a B sale).
+    refused(
+      await call(
+        'GET',
+        '/sales-returns/source-items?sourceYear=2026&sourceBook=SB2&sourceVchNo=00001',
+      ),
+    );
+    // Nested second books in lines are seen too.
+    refused(
+      await call('POST', '/sales-returns', {
+        coBook: 'SA2',
+        lines: [{ saleBillBook: 'SB2' }],
+      }),
+    );
+    // The same requests naming A books are not refused for their book.
+    const own = await call(
+      'GET',
+      '/sales-returns/source-items?sourceYear=2026&sourceBook=SA2&sourceVchNo=00001',
+    );
+    expect(own.json().error).not.toBe('book-data-type-mismatch');
+  });
 });

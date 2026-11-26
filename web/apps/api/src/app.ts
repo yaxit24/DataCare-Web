@@ -1,8 +1,10 @@
 import { registerDataTypeRoute } from './routes/dataType.js';
 import {
-  assertBookMatchesSessionType,
+  assertBooksMatchSessionType,
+  BOOK_DATA_TYPE_MISMATCH_BODY,
   BookDataTypeMismatchError,
-  requestedBook,
+  booksOfRequest,
+  runWithSessionDataType,
 } from './modules/auth/bookDataType.js';
 import { sessionDataType } from './modules/auth/dataTypeAccess.js';
 import { sessionReportQuery } from './modules/auth/dataTypePolicy.js';
@@ -202,6 +204,15 @@ export async function buildApp(opts: BuildOpts): Promise<FastifyInstance> {
       ...(routeOptions.config ?? {}),
       authorizationPolicy: policy,
     } as any;
+    // The handler runs inside the session's data-type context, so the shared book resolvers and posting refuse a
+    // book of the other type whichever route chose it (modules/auth/bookDataType.ts). The session is read when the
+    // handler runs, after the preHandler hook has authenticated the request.
+    const original = routeOptions.handler as (this: unknown, ...args: unknown[]) => unknown;
+    routeOptions.handler = function (this: unknown, req: FastifyRequest, reply: FastifyReply) {
+      return runWithSessionDataType((req as RequestState).session as any, () =>
+        original.call(this, req, reply),
+      );
+    } as any;
   });
 
   app.addHook('onSend', async (_req: FastifyRequest, reply: FastifyReply, payload: unknown) => {
@@ -223,6 +234,8 @@ export async function buildApp(opts: BuildOpts): Promise<FastifyInstance> {
         .header('Retry-After', '1')
         .send({ error: 'transaction-timeout', retryable: true });
     }
+    if (error instanceof BookDataTypeMismatchError)
+      return reply.code(403).send(BOOK_DATA_TYPE_MISMATCH_BODY);
     if (error instanceof RpAllRequestError) {
       return reply
         .code(error.statusCode)
@@ -547,15 +560,12 @@ export async function buildApp(opts: BuildOpts): Promise<FastifyInstance> {
         });
       }
       if (policy.kind === 'form' || policy.businessScope)
-        await assertBookMatchesSessionType(prisma, s as any, requestedBook(req));
+        await assertBooksMatchSessionType(prisma, s as any, booksOfRequest(req));
       state.routeAuthorized = true;
       await enforceReportFilters(req, reply);
     } catch (error) {
       if (error instanceof BookDataTypeMismatchError)
-        return reply.code(403).send({
-          error: 'book-data-type-mismatch',
-          message: 'This book belongs to another data type. Switch the data type to use it.',
-        });
+        return reply.code(403).send(BOOK_DATA_TYPE_MISMATCH_BODY);
       if (error instanceof ScopeError) {
         return reply.code(error.statusCode).send({ error: error.code });
       }

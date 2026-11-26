@@ -234,4 +234,8 @@ export const EXPECTED_MIGRATIONS: ReadonlyArray<{
     name: '20261125130000_data_type_access',
     checksum: '9da9643b3b34a7889a0ec18c9f2454d9a286f5d765ad6b0670c0199b75c04f15',
   },
+  {
+    name: '20261126100000_opening_detail_data_type',
+    checksum: 'cf550648045e5d4a29ed810a1ac9ab20facdcb6a81cdf4a163b7656d219be770',
+  },
 ];

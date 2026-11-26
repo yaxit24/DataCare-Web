@@ -203,6 +203,37 @@ async function voucherUseTx(
   return { accounts: Boolean(row?.accounts), stock: Boolean(row?.stock) };
 }
 
+/**
+ * The voucher tables a book's rows are keyed into by CO_BOOK (the ledger and stock families that carry the book's type,
+ * posting/dataType.ts, plus every family's header table, DESKTOP_BOOK_TABLES). Web-only lock (owner decision 2026-11-25):
+ * the desktop lets MS_BOOK change DATA_TYPE at any time (MS_BOOK.cs:2524, :2628-2671), which would leave posted rows
+ * stamped with the old type while new ones get the new type.
+ */
+const TYPE_LOCK_TABLES = [
+  'AC_DATA',
+  'LEDR_AC_DATA',
+  'FINE_DATA',
+  'ROJ_MEL_DATA',
+  'MAIN_STOCK',
+  'BAR_DETL',
+  'BAR_CAN_DETL',
+  ...new Set(Object.values(DESKTOP_BOOK_TABLES).map((t) => t.table)),
+] as const;
+
+/** Whether any voucher row of the company names the book (the Data Type lock). */
+async function typeLockedTx(tx: any, scope: BooksScope, code: string): Promise<boolean> {
+  const [row] = await tx.$queryRawUnsafe(
+    `SELECT ${TYPE_LOCK_TABLES.map(
+      (t) =>
+        `EXISTS(SELECT 1 FROM "${t}" WHERE tenant_id=$1 AND "CO_CODE"=$2 AND "CO_BOOK"=$3)`,
+    ).join(' OR ')} AS used`,
+    scope.tenantId,
+    scope.coCode,
+    code,
+  );
+  return Boolean(row?.used);
+}
+
 async function accountNamesTx(
   tx: any,
   scope: BooksScope,
@@ -571,8 +602,7 @@ export async function saveBook(
     if (!['A', 'B'].includes(dataType))
       throw new BooksMasterValidationError('Data Type must be A or B');
     if (stored && dataType !== (text(stored.DATA_TYPE) || 'A')) {
-      const use = await voucherUseTx(tx, scope, h.code);
-      if (use.accounts || use.stock) fail(BOOK_MESSAGES.dataTypeLocked);
+      if (await typeLockedTx(tx, scope, h.code)) fail(BOOK_MESSAGES.dataTypeLocked);
     }
     const tables = DESKTOP_BOOK_TABLES[h.family];
     const header: Record<string, unknown> = {

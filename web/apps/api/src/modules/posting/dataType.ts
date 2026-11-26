@@ -21,8 +21,9 @@ export async function postingDataTypeTx(
   tenantId: string,
   table: string,
   row: Record<string, unknown>,
+  cache?: Map<string, string>,
 ): Promise<string> {
   if (LITERAL_TABLES.has(table)) return 'A';
   if (!BOOK_TABLES.has(table)) return String(row.DATA_TYPE ?? 'A');
-  return resolveBookDataTypeTx(tx, tenantId, row);
+  return resolveBookDataTypeTx(tx, tenantId, row, cache);
 }
