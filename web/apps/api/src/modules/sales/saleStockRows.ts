@@ -2,10 +2,11 @@
  * The MAIN_STOCK rows of a sale, as Sale_Stk writes them (Ac_Stock.cs:98-132): one OUT row per SL_DETL line and one
  * IN row per old-metal SL_PR_DETL line, each copied from its source row.
  *
- * SR_NO is the section constant: 1 for the sale line and 2 for old metal, what this desktop build wrote on all 245 sale
- * and 22 old-metal stock rows of the 2024-25 year. The decompiled source's non-P branch numbers the same sections 3
- * and 4 (Ac_Stock.cs:114, :116), a build difference reported with the sale ledger codes.
+ * SR_NO is the section constant of the non-'P' branch: 3 for the sale line and 4 for old metal (Ac_Stock.cs:114,
+ * :116). The 2024-25 data was written by an older build that numbered them 1 and 2; the owner chose the current source.
  */
+
+import { round } from '@datacare/core';
 
 type Row = Record<string, any>;
 
@@ -18,7 +19,6 @@ export interface SaleStockContext {
 }
 
 const num = (v: unknown): number => (v == null ? 0 : Number(v));
-const round2 = (n: number): number => Math.round((n + 1e-9) * 100) / 100;
 
 /**
  * The stock OUT row of one sale line (Ac_Stock.cs:114): ISR_NO = the line's SR_NO, STK_DATE = VCH_DATE, the book's
@@ -35,7 +35,7 @@ export function saleStockRow(
 ): Row {
   return {
     ...ctx.key,
-    SR_NO: 1,
+    SR_NO: 3,
     ISR_NO: d.SR_NO,
     VCH_DATE: ctx.vchDate,
     STK_DATE: ctx.vchDate.toISOString().slice(0, 10),
@@ -77,7 +77,7 @@ export function saleStockRow(
     ITM_DESC: '',
     GHT_PRC: d.ITM_GHT_PRC,
     ITM_LOT: d.ITM_LOT,
-    ITM_DISC: String(round2(num(d.IT_DISC_AMT) + num(d.DISC_AMT))),
+    ITM_DISC: String(round(num(d.IT_DISC_AMT) + num(d.DISC_AMT), 2)),
   };
 }
 
@@ -89,7 +89,7 @@ export function saleStockRow(
 export function saleOldMetalStockRow(g: Row, ctx: SaleStockContext): Row {
   return {
     ...ctx.key,
-    SR_NO: 2,
+    SR_NO: 4,
     ISR_NO: g.SR_NO,
     VCH_DATE: ctx.vchDate,
     STK_DATE: ctx.vchDate.toISOString().slice(0, 10),
