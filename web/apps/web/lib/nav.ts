@@ -377,6 +377,7 @@ export const NAV: NavGroup[] = [
       { label: 'Import / Export', href: '/masters/accounts', ready: true },
       { label: 'Data Export', href: '/utilities/data-export', ready: true },
       { label: 'Estimate Reset', href: '/utilities/estimate-reset', ready: true },
+      { label: 'Data Import', href: '/utilities/data-import', ready: true },
       { label: 'Data Refresh', href: '/utilities/data-refresh', ready: true },
       { label: 'Data Repair', href: '/utilities/data-repair', ready: true },
       { label: 'Provision Company', href: '/admin/provision', ready: true },

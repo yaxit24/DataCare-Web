@@ -253,7 +253,8 @@ export function pickAllowed(source: Record<string, Array<Record<string, unknown>
         `Table ${table} of the chosen file has more than ${MAX_SOURCE_ROWS} rows; nothing was imported.`,
       );
     const present = new Set<string>();
-    for (const row of rows) for (const key of Object.keys(row ?? {})) present.add(key.toUpperCase());
+    for (const row of rows)
+      for (const key of Object.keys(row ?? {})) present.add(key.toUpperCase());
     missing[table] = rows.length ? columnsOf(table).filter((c) => !present.has(c)) : [];
     tables[table] = rows.map((row) => {
       const upper = new Map(Object.entries(row ?? {}).map(([k, v]) => [k.toUpperCase(), v]));

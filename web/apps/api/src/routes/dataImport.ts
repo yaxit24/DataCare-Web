@@ -54,11 +54,25 @@ export function registerDataImportRoutes(app: FastifyInstance, deps: DataImportR
           ...(error.detail && typeof error.detail === 'object' ? error.detail : {}),
         });
       }
+      // A failed write rolled the whole import back; answer it as the other writers do (dataRepair.ts apply).
+      const text = String((error as any)?.message ?? '');
+      if (
+        (error as any)?.code === 'P2010' ||
+        /Raw query failed|violates|not-null|duplicate key/i.test(text)
+      ) {
+        const detail = text.match(/Message: `([^`]+)`/)?.[1] ?? text;
+        return reply.code(400).send({
+          error: 'data-import-failed',
+          message: `The import failed and nothing was imported: ${detail.replace(/^ERROR:\s*/, '').slice(0, 200)}`,
+        });
+      }
       throw error;
     }
   };
   const badFile = (reply: FastifyReply) =>
-    reply.code(400).send({ error: 'data-import-file', message: 'Choose the old software .mdb file.' });
+    reply
+      .code(400)
+      .send({ error: 'data-import-file', message: 'Choose the old software .mdb file.' });
 
   app.post(
     '/utilities/data-import/lite/preview',

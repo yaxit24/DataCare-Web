@@ -1,4 +1,22 @@
 import type { SourceReader, SourceRow, SourceTable } from './dataImportSource.js';
+import {
+  cmpText,
+  ddmmyyyy,
+  eq,
+  fmtRound,
+  fnv,
+  isoDay,
+  mid,
+  n,
+  notBlank,
+  rowsOf,
+  signed,
+  str,
+  sum,
+} from './dataImportAccess.js';
+import { liteBarData } from './dataImportLiteTags.js';
+
+export { fmtRound, fnv, str, val } from './dataImportAccess.js';
 
 /**
  * The five steps of the desktop "Lite Soft" import (UT_IMPORT.cs:8413-8445 BtnLite_Click) as pure functions from the
@@ -100,70 +118,6 @@ export const INSTALLER_ACCOUNTS: Readonly<Record<string, string>> = {
   '00098': 'FINEKSR',
 };
 
-// ---- Access semantics -------------------------------------------------------------------------------------------
-
-/** `x & ""`: NULL reads as the empty string. */
-export const str = (v: unknown): string => (v === null || v === undefined ? '' : String(v));
-/** VB Mid(s, 1, n). */
-const mid = (v: unknown, n: number): string => str(v).slice(0, n);
-/** VB Conversion.Val: the leading number of the text, else 0. */
-export function val(v: unknown): number {
-  if (typeof v === 'number') return Number.isFinite(v) ? v : 0;
-  if (typeof v === 'boolean') return v ? -1 : 0;
-  const m = /^\s*[-+]?(\d+\.?\d*|\.\d+)(e[-+]?\d+)?/i.exec(str(v).replace(/\s+/g, ''));
-  return m ? Number(m[0]) : 0;
-}
-/** DC_Main.Fnv (DC_Main.cs:2088-2103): NULL or '' is 0, else Val. */
-export const fnv = (v: unknown): number => (v === null || v === undefined || v === '' ? 0 : val(v));
-/** Access text equality (case-insensitive). NULL never equals anything. */
-const eq = (a: unknown, b: unknown): boolean =>
-  a !== null && a !== undefined && b !== null && b !== undefined && str(a).toUpperCase() === str(b).toUpperCase();
-/** `x <> ''` in Access: false for NULL. */
-const notBlank = (v: unknown): boolean => v !== null && v !== undefined && str(v) !== '';
-/** Access text order (case-insensitive); NULL sorts first. */
-function cmpText(a: unknown, b: unknown): number {
-  const na = a === null || a === undefined;
-  const nb = b === null || b === undefined;
-  if (na || nb) return na && nb ? 0 : na ? -1 : 1;
-  const x = str(a).toUpperCase();
-  const y = str(b).toUpperCase();
-  return x < y ? -1 : x > y ? 1 : 0;
-}
-const isoDay = (v: unknown): string | null => {
-  if (v === null || v === undefined || v === '') return null;
-  const s = str(v);
-  return /^\d{4}-\d{2}-\d{2}/.test(s) ? s.slice(0, 10) : null;
-};
-/** Access Format(x, '0.00' / '0.000'): rounds half away from zero. */
-export function fmtRound(x: number, places: number): number {
-  const f = 10 ** places;
-  return (Math.sign(x) * Math.round(Math.abs(x) * f + 1e-9)) / f;
-}
-const sum = (values: Array<number | null>): number | null => {
-  let total: number | null = null;
-  for (const v of values) if (v !== null) total = (total ?? 0) + v;
-  return total;
-};
-/** A numeric source cell for SUM: NULL stays NULL (Access SUM skips it). */
-const n = (v: unknown): number | null => (v === null || v === undefined || v === '' ? null : val(v));
-const signed = (sign: unknown, v: unknown): number | null => {
-  const x = n(v);
-  if (x === null) return null;
-  return eq(sign, '+') ? x : -x; // IIf(SIGN = '+', x, -x): a NULL sign is not '+'
-};
-const dayBefore = (iso: string): Date => {
-  const d = new Date(`${iso}T00:00:00.000Z`);
-  d.setUTCDate(d.getUTCDate() - 1);
-  return d;
-};
-const isoOf = (d: Date): string => d.toISOString().slice(0, 10);
-/** dd/MM/yyyy, the text the Party screen shows and saves for BR_DATE / AN_DATE. */
-const ddmmyyyy = (iso: string): string => `${iso.slice(8, 10)}/${iso.slice(5, 7)}/${iso.slice(0, 4)}`;
-
-function rowsOf(src: SourceReader, table: SourceTable): SourceRow[] {
-  return src.rows(table) ?? [];
-}
-
 /** The tables each step needs; a missing table or column stops the import before anything is written. */
 export const STEP_TABLES: Record<LiteStep, SourceTable[]> = {
   Lite_AcMast: ['AC_MAST', 'AREA_MAST'],
@@ -191,7 +145,10 @@ export function sourceProblems(src: SourceReader): ImportIssue[] {
 
 // ---- Step 1: Lite_AcMast (UT_IMPORT.cs:8694-8780) -----------------------------------------------------------------
 
-export function liteAcMast(src: SourceReader, ctx: LiteContext): {
+export function liteAcMast(
+  src: SourceReader,
+  ctx: LiteContext,
+): {
   accounts: Record<string, unknown>[];
   accountSrno: Record<string, unknown> | null;
 } {
@@ -272,12 +229,7 @@ export function liteAcMast(src: SourceReader, ctx: LiteContext): {
 // ---- Step 2: Wh_Item, Lite branches (UT_IMPORT.cs:4241-4328) ------------------------------------------------------
 
 /** A group's ledger: an installer system code moves to the web code of its role; any other code is kept. */
-function ledgerCode(
-  code: unknown,
-  where: string,
-  warnings: ImportIssue[],
-  row: number,
-): string {
+function ledgerCode(code: unknown, where: string, warnings: ImportIssue[], row: number): string {
   const c = str(code);
   if (!c || cmpText(c, '00100') > 0) return c;
   const mapped = INSTALLER_ACCOUNTS[c];
@@ -412,12 +364,16 @@ export function whAcOpbl(
   for (const b of rowsOf(src, 'AC_MAST'))
     if (eq(b.CO_CODE, ctx.coCode) && !names.has(str(b.AC_CODE).toUpperCase()))
       names.set(str(b.AC_CODE).toUpperCase(), b.AC_NAME);
-  const groups = new Map<string, { code: unknown; amt: Array<number | null>; g: Array<number | null>; s: Array<number | null> }>();
+  const groups = new Map<
+    string,
+    { code: unknown; amt: Array<number | null>; g: Array<number | null>; s: Array<number | null> }
+  >();
   for (const a of rowsOf(src, 'AC_DATA')) {
     if (!eq(a.CO_CODE, ctx.coCode)) continue;
     const day = isoDay(a.VCH_DATE);
     if (!day || day > ctx.clDate) continue;
-    const key = a.AC_CODE === null || a.AC_CODE === undefined ? '\u0000' : str(a.AC_CODE).toUpperCase();
+    const key =
+      a.AC_CODE === null || a.AC_CODE === undefined ? '\u0000' : str(a.AC_CODE).toUpperCase();
     const g = groups.get(key) ?? { code: a.AC_CODE, amt: [], g: [], s: [] };
     const cr = n(a.CR_AMT);
     const dr = n(a.DR_AMT);
@@ -476,251 +432,6 @@ export function whAcOpbl(
   return out;
 }
 
-// ---- Step 4: Lite_BarData (UT_IMPORT.cs:8447-8692) ----------------------------------------------------------------
-
-const GROUP_COLUMNS = [
-  'DESIGN',
-  'ITM_SIZE',
-  'ITM_PCS',
-  'ITM_GWT',
-  'ITM_NWT',
-  'LBR_AMT',
-  'OTH_AMT',
-  'CO_BOOK',
-  'VCH_NO',
-  'VCH_DATE',
-  'VCH_TYPE',
-  'BOOK_NAME',
-  'CUST_AC',
-  'AC_CODE',
-  'MRP',
-  'NET_COST',
-  'KR_NAME',
-] as const;
-
-export function liteBarData(
-  src: SourceReader,
-  ctx: LiteContext,
-  errors: ImportIssue[],
-): {
-  barData: Record<string, unknown>[];
-  barDetl: Record<string, unknown>[];
-  barIdtl: Record<string, unknown>[];
-} {
-  const itemType = new Map<string, unknown>();
-  for (const b of rowsOf(src, 'ITEM_MAST'))
-    if (eq(b.CO_CODE, ctx.coCode) && !itemType.has(str(b.IT_CODE).toUpperCase()))
-      itemType.set(str(b.IT_CODE).toUpperCase(), b.IT_TYPE);
-  const typeOf = (code: unknown) => itemType.get(str(code).toUpperCase()) ?? null;
-  const books = rowsOf(src, 'BOOK_DATA').filter((b) => eq(b.CO_CODE, ctx.coCode));
-  const detlAll = rowsOf(src, 'BAR_DETL').filter((c) => eq(c.CO_CODE, ctx.coCode));
-  const idtlAll = rowsOf(src, 'BAR_IDTL').filter((c) => eq(c.CO_CODE, ctx.coCode));
-  // :8462 MAIN_TAG_DATA of the company and year with a tag and an item
-  const tagRows = rowsOf(src, 'MAIN_TAG_DATA').filter(
-    (a) => eq(a.CO_CODE, ctx.coCode) && eq(a.CO_YEAR, ctx.coYear) && notBlank(a.TAG_NO) && notBlank(a.IT_CODE),
-  );
-  // GROUP BY A.IT_CODE, B.IT_TYPE ORDER BY B.IT_TYPE, A.IT_CODE
-  const itemCodes = new Map<string, unknown>();
-  for (const a of tagRows) if (!itemCodes.has(str(a.IT_CODE).toUpperCase())) itemCodes.set(str(a.IT_CODE).toUpperCase(), a.IT_CODE);
-  const items = [...itemCodes.values()].sort(
-    (x, y) => cmpText(typeOf(x), typeOf(y)) || cmpText(x, y),
-  );
-  const opDay = dayBefore(ctx.opDate); // MOp_dt.AddDays(-1)
-  const barData: Record<string, unknown>[] = [];
-  const barDetl: Record<string, unknown>[] = [];
-  const barIdtl: Record<string, unknown>[] = [];
-  let text = '00000';
-  for (const item of items) {
-    text = String(val(text) + 1).padStart(5, '0'); // :8478 one voucher per item
-    // :8479-8481 MAIN_TAG_DATA INNER JOIN BAR_DETL (CO_CODE, TAG_NO, IT_CODE), grouped by the tag and 17 detail
-    // columns, ordered by TAG_NO: one imported tag per distinct combination.
-    const seen = new Set<string>();
-    const tags: Array<{ tagNo: unknown; tagNwt: unknown }> = [];
-    for (const a of tagRows.filter((r) => eq(r.IT_CODE, item))) {
-      for (const c of detlAll.filter((d) => eq(d.TAG_NO, a.TAG_NO) && eq(d.IT_CODE, a.IT_CODE))) {
-        const key = JSON.stringify([
-          str(a.TAG_NO).toUpperCase(),
-          ...GROUP_COLUMNS.map((col) => (c[col] === null ? null : str(c[col]).toUpperCase())),
-        ]);
-        if (seen.has(key)) continue;
-        seen.add(key);
-        tags.push({ tagNo: a.TAG_NO, tagNwt: c.ITM_NWT });
-      }
-    }
-    tags.sort((x, y) => cmpText(x.tagNo, y.tagNo));
-    let num = 0;
-    for (const tag of tags) {
-      num += 1;
-      // :8492 the tag's BAR_DETL rows of the year, latest VCH_DATE first; row 0 is copied
-      const detl = detlAll
-        .filter((d) => eq(d.CO_YEAR, ctx.coYear) && eq(d.TAG_NO, tag.tagNo))
-        .map((d, i) => ({ d, i }))
-        .sort((x, y) => cmpText(isoDay(y.d.VCH_DATE), isoDay(x.d.VCH_DATE)) || x.i - y.i);
-      const d = detl[0]?.d;
-      if (!d) {
-        errors.push({
-          step: 'Lite_BarData',
-          table: 'BAR_DETL',
-          key: str(tag.tagNo),
-          reason: `Tag ${str(tag.tagNo)} has no BAR_DETL row in year ${ctx.coYear}.`,
-        });
-        continue;
-      }
-      const book = books.find((b) => eq(b.CO_BOOK, d.CO_BOOK));
-      const vchSrno = Number(`1${text}${num}`); // :8644 1 & text & num
-      barDetl.push({
-        // :8506 INSERT INTO BAR_DETL(...) VALUES, column by column
-        CO_CODE: str(d.CO_CODE) || ctx.coCode,
-        LC_CODE: ctx.lcCode,
-        CO_YEAR: ctx.coYear,
-        CO_BOOK: '000',
-        VCH_NO: text,
-        SR_NO: num,
-        OLD_SRNO: num,
-        VCH_DATE: opDay,
-        STK_DATE: isoOf(opDay),
-        VCH_TIME: opDay,
-        VCH_TYPE: str(book?.BOOK_SNAME),
-        INOUT_TYPE: 'I',
-        ENTRY_TYPE: 'O',
-        BOOK_NAME: str(book?.MAIN_BOOK),
-        AC_CODE: str(d.AC_CODE),
-        IT_CODE: str(d.IT_CODE),
-        TAG_NO: str(d.TAG_NO),
-        LOT_NO: '',
-        DESIGN_NO: mid(d.DESIGN, 15),
-        TBL_CODE: '001',
-        ITM_SIZE: str(d.ITM_SIZE),
-        ITM_PCS: fnv(d.ITM_PCS),
-        BAG_WT: 0,
-        ITM_GWT: fnv(d.ITM_GWT),
-        ITM_OTH_WT: fnv(d.ITM_GWT) - fnv(d.ITM_NWT),
-        ITM_NWT: fnv(d.ITM_NWT),
-        ITM_GHT_PRC: 0,
-        ITM_GHT_WT: fnv(d.ITM_GHAT),
-        ITM_TOUCH: fnv(d.ITM_TOUCH),
-        ITM_WEST_PRC: fnv(d.ITM_WEST),
-        ITM_FINE: fnv(d.ITM_FINE),
-        LBR_PRC: fnv(d.LBR_PRC),
-        LBR_RATE: fnv(d.LBR_RATE),
-        LBR_TYPE: '',
-        LBR_AMT: fnv(d.LBR_AMT),
-        OTH_AMT: fnv(d.OTH_AMT),
-        ITM_RATE: fnv(d.ITM_RAT),
-        ITM_AMT: fnv(d.ITM_AMT),
-        TAG_COST: fnv(d.NET_COST),
-        ITM_MARGIN: 0,
-        ITM_MRP: fnv(d.MRP),
-        ITM_REMARK: '',
-        SF_NO: '',
-        KR_NAME: str(d.KR_NAME),
-        KR_OTH_WT: 0,
-        KR_NET_WT: fnv(d.KR_ITM_NWT),
-        KR_GHT_PRC: 0,
-        KR_GHT_WT: fnv(d.KR_ITM_GHAT),
-        KR_TOUCH: fnv(d.KR_ITM_TOUCH),
-        KR_WEST_PRC: fnv(d.KR_ITM_WEST),
-        KR_FINE: fnv(d.ITM_FINE), // :8604-8607: the Lite import writes ITM_FINE here (Wh_BarData writes KR_FINE)
-        KR_LBR_RATE: fnv(d.KR_LBR_RATE),
-        KR_LBR_AMT: fnv(d.KR_LBR_AMT),
-        KR_OTH_AMT: 0,
-        KR_COST: fnv(d.NET_COST),
-        TAG_SRNO: num,
-        VCH_SRNO: vchSrno,
-        RATE_TYPE: str(d.RATE_TYPE),
-        IT_TYPE: str(d.IT_TYPE),
-        TAG_TYPE: str(d.IT_TYPE), // :8644: TAG_TYPE takes IT_TYPE
-        PR_CODE: str(d.PR_CODE),
-        APR_ISU: 'N',
-        ORD_NO: '',
-        ORD_SRNO: 0,
-        ORD_YRCD: '',
-        ORD_DBCD: '',
-        ORD_AC: '',
-        MAIN_USER: ctx.user,
-        ADD_USER: ctx.user,
-        DATA_TRFR: 'N',
-        DATA_TYPE: 'A',
-      });
-      // :8496 BAR_IDTL of the tag whose TAG_NWT equals the grouped row's net weight, by ISR_NO
-      const tagNwt = tag.tagNwt === null || tag.tagNwt === undefined ? null : val(tag.tagNwt);
-      const idtl = idtlAll
-        .filter((r) => eq(r.TAG_NO, tag.tagNo) && tagNwt !== null && r.TAG_NWT !== null && val(r.TAG_NWT) === tagNwt)
-        .map((r, i) => ({ r, i }))
-        .sort((x, y) => fnv(x.r.ISR_NO) - fnv(y.r.ISR_NO) || x.i - y.i)
-        .map(({ r }) => r);
-      idtl.forEach((r, k) =>
-        barIdtl.push({
-          // :8649 INSERT INTO BAR_IDTL(...) VALUES
-          CO_CODE: ctx.coCode,
-          LC_CODE: ctx.lcCode,
-          CO_YEAR: ctx.coYear,
-          CO_BOOK: '000',
-          VCH_NO: text,
-          SR_NO: num,
-          ISR_NO: k + 1,
-          VCH_DATE: opDay,
-          VCH_TYPE: str(book?.BOOK_SNAME),
-          INOUT_TYPE: 'I',
-          ENTRY_TYPE: 'O',
-          BOOK_NAME: str(book?.MAIN_BOOK),
-          AC_CODE: str(d.AC_CODE),
-          TAG_NO: str(d.TAG_NO),
-          VCH_SRNO: vchSrno,
-          IT_CODE: str(r.IT_CODE),
-          IT_TYPE: str(typeOf(r.IT_CODE)),
-          DM_CODE: '',
-          DM_SIZE: '',
-          DM_SFNO: '',
-          DM_LEB: '',
-          IT_PCS: fnv(r.ITM_PCS),
-          IT_PCS_WT: 0,
-          KR_WT: fnv(r.PR_WT),
-          KR_LESS_PRC: 0,
-          IT_GWT: fnv(r.ITM_GWT),
-          IT_CON_PRC: fnv(r.CON_PRC),
-          IT_CON_WT: fnv(r.CON_WT),
-          IT_RATE_TYPE: str(r.RATE_TYPE),
-          IT_RATE: fnv(r.ITM_RATE),
-          IT_AMT: fnv(r.IT_AMT),
-          IT_LBR_RATE: fnv(r.LBR_RATE),
-          IT_LBR_AMT: fnv(r.LBR_AMT),
-          IT_NET_AMT: fnv(r.ITM_AMT),
-          KR_CON_PRC: 0,
-          KR_CON_WT: fnv(r.PR_CON_WT),
-          KR_RATE: fnv(r.PR_RATE),
-          KR_AMT: fnv(r.PR_AMT),
-          KR_LBR_RATE: fnv(r.PR_LBR_RATE),
-          KR_LBR_AMT: fnv(r.PR_LBR_AMT),
-          KR_NET_AMT: fnv(r.PR_NET_AMT),
-          MAIN_USER: ctx.user,
-        }),
-      );
-    }
-    // :8682-8686 one BAR_DATA header per item that produced a tag
-    if (num > 0)
-      barData.push({
-        CO_CODE: ctx.coCode,
-        LC_CODE: ctx.lcCode,
-        CO_YEAR: ctx.coYear,
-        CO_BOOK: '000',
-        VCH_NO: text,
-        VCH_DATE: opDay,
-        VCH_TIME: opDay,
-        AC_CODE: '',
-        CUST_AC: '',
-        OP_STK: 'Y',
-        STK_IT_CODE: '',
-        EMP_CODE: '',
-        VCH_DESC: '',
-        HD_VCH_NO: text,
-        MAIN_USER: ctx.user,
-        DATA_TRFR: 'N',
-      });
-  }
-  return { barData, barDetl, barIdtl };
-}
-
 // ---- Step 5: WH_ItOpbl (UT_IMPORT.cs:3887-3965) -------------------------------------------------------------------
 
 export function whItOpbl(src: SourceReader, ctx: LiteContext): Record<string, unknown>[] {
@@ -730,7 +441,17 @@ export function whItOpbl(src: SourceReader, ctx: LiteContext): Record<string, un
       itemsByCode.set(str(b.IT_CODE).toUpperCase(), b);
   // :3890 MAIN_STOCK of the company and year up to the closing date, loose stock only (TAG_NO '' or NULL), grouped by
   // item; ClPcs/ClWt/ClWtGr are the signed sums of pieces, net and gross, ItAmt the signed pieces x ITEM_RATE.
-  const groups = new Map<string, { code: unknown; b: SourceRow | undefined; pcs: Array<number | null>; nwt: Array<number | null>; gwt: Array<number | null>; amt: Array<number | null> }>();
+  const groups = new Map<
+    string,
+    {
+      code: unknown;
+      b: SourceRow | undefined;
+      pcs: Array<number | null>;
+      nwt: Array<number | null>;
+      gwt: Array<number | null>;
+      amt: Array<number | null>;
+    }
+  >();
   for (const a of rowsOf(src, 'MAIN_STOCK')) {
     if (!eq(a.CO_CODE, ctx.coCode) || !eq(a.CO_YEAR, ctx.coYear) || !notBlank(a.IT_CODE)) continue;
     const day = isoDay(a.VCH_DATE);

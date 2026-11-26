@@ -23,7 +23,8 @@ const owner = new PrismaClient({
   datasources: { db: { url: process.env.MIGRATE_DATABASE_URL ?? process.env.DATABASE_URL ?? '' } },
 });
 const runtime = new PrismaClient({ datasources: { db: { url: process.env.DATABASE_URL ?? '' } } });
-const rows = (sql: string, ...p: unknown[]) => owner.$queryRawUnsafe(sql, TENANT, ...p) as Promise<any[]>;
+const rows = (sql: string, ...p: unknown[]) =>
+  owner.$queryRawUnsafe(sql, TENANT, ...p) as Promise<any[]>;
 
 async function wipe(tenant: string) {
   const tables = (await owner.$queryRawUnsafe(
@@ -73,7 +74,10 @@ async function freshCompany() {
   );
 }
 
-const file = (bytes?: Uint8Array) => ({ name: 'LITE.MDB', bytes: bytes ?? fixtureBytes(CO, scope.coYear, clDate) });
+const file = (bytes?: Uint8Array) => ({
+  name: 'LITE.MDB',
+  bytes: bytes ?? fixtureBytes(CO, scope.coYear, clDate),
+});
 
 describe.skipIf(!RUN)('Data Import (Lite Soft) write set', () => {
   beforeAll(async () => {
@@ -140,13 +144,19 @@ describe.skipIf(!RUN)('Data Import (Lite Soft) write set', () => {
       await rows(`SELECT "AC_CODE" FROM "AC_MAST_SRNO" WHERE tenant_id=$1 AND "CO_CODE"=$2`, CO),
     ).toEqual([{ AC_CODE: '00102' }]);
     expect(
-      await rows(`SELECT DISTINCT "VB_IMPORT" v FROM "CO_SET" WHERE tenant_id=$1 AND "CO_CODE"=$2`, CO),
+      await rows(
+        `SELECT DISTINCT "VB_IMPORT" v FROM "CO_SET" WHERE tenant_id=$1 AND "CO_CODE"=$2`,
+        CO,
+      ),
     ).toEqual([{ v: 'Y' }]);
     // Step 2: the company's installer masters are replaced by the file's
     expect(
-      (await rows(`SELECT "IT_CODE" c FROM "ITEM_MAST" WHERE tenant_id=$1 AND "CO_CODE"=$2 ORDER BY 1`, CO)).map(
-        (x) => x.c,
-      ),
+      (
+        await rows(
+          `SELECT "IT_CODE" c FROM "ITEM_MAST" WHERE tenant_id=$1 AND "CO_CODE"=$2 ORDER BY 1`,
+          CO,
+        )
+      ).map((x) => x.c),
     ).toEqual(['CHN', 'RNG', 'SLB']);
     expect(
       await rows(
@@ -165,9 +175,42 @@ describe.skipIf(!RUN)('Data Import (Lite Soft) write set', () => {
         CO,
       ),
     ).toEqual([
-      { AC_CODE: '00101', OP_AMT: 750.45, OP_SIGN: 'C', FINE_BAL: 8.25, FINE_SIGN: 'C', SL_FINE_BAL: 0, SL_FINE_SIGN: 'D', DATA_TYPE: 'A', CO_BOOK: '000', VCH_NO: '00000' },
-      { AC_CODE: '00102', OP_AMT: 500, OP_SIGN: 'D', FINE_BAL: 0, FINE_SIGN: 'D', SL_FINE_BAL: 100, SL_FINE_SIGN: 'C', DATA_TYPE: 'A', CO_BOOK: '000', VCH_NO: '00000' },
-      { AC_CODE: 'CASH', OP_AMT: 2000, OP_SIGN: 'C', FINE_BAL: 0, FINE_SIGN: 'D', SL_FINE_BAL: 0, SL_FINE_SIGN: 'D', DATA_TYPE: 'A', CO_BOOK: '000', VCH_NO: '00000' },
+      {
+        AC_CODE: '00101',
+        OP_AMT: 750.45,
+        OP_SIGN: 'C',
+        FINE_BAL: 8.25,
+        FINE_SIGN: 'C',
+        SL_FINE_BAL: 0,
+        SL_FINE_SIGN: 'D',
+        DATA_TYPE: 'A',
+        CO_BOOK: '000',
+        VCH_NO: '00000',
+      },
+      {
+        AC_CODE: '00102',
+        OP_AMT: 500,
+        OP_SIGN: 'D',
+        FINE_BAL: 0,
+        FINE_SIGN: 'D',
+        SL_FINE_BAL: 100,
+        SL_FINE_SIGN: 'C',
+        DATA_TYPE: 'A',
+        CO_BOOK: '000',
+        VCH_NO: '00000',
+      },
+      {
+        AC_CODE: 'CASH',
+        OP_AMT: 2000,
+        OP_SIGN: 'C',
+        FINE_BAL: 0,
+        FINE_SIGN: 'D',
+        SL_FINE_BAL: 0,
+        SL_FINE_SIGN: 'D',
+        DATA_TYPE: 'A',
+        CO_BOOK: '000',
+        VCH_NO: '00000',
+      },
     ]);
     const legs = await rows(
       `SELECT "AC_CODE", "CR_AMT"::float cr, "DR_AMT"::float dr, "VCH_DATE"::text d FROM "AC_DATA" WHERE tenant_id=$1 AND "CO_CODE"=$2 ORDER BY 1, 2, 3`,
@@ -198,11 +241,61 @@ describe.skipIf(!RUN)('Data Import (Lite Soft) write set', () => {
       CO,
     );
     expect(stock).toEqual([
-      { VCH_TYPE: 'ITOBL', BOOK_NAME: 'ITM OPBL', TAG_NO: 'N', VCH_SRNO: 0, q: 2, nwt: 15.5, f: 14.198, TR_TYPE: 'P', ITM_SIGN: '+' },
-      { VCH_TYPE: 'ITOBL', BOOK_NAME: 'ITM OPBL', TAG_NO: 'N', VCH_SRNO: 0, q: 0, nwt: 800, f: 740, TR_TYPE: 'P', ITM_SIGN: '+' },
-      { VCH_TYPE: 'TAGOP', BOOK_NAME: 'TAG OPBL', TAG_NO: 'C1', VCH_SRNO: 1000011, q: 1, nwt: 20, f: 18.72, TR_TYPE: 'P', ITM_SIGN: '+' },
-      { VCH_TYPE: 'TAGOP', BOOK_NAME: 'TAG OPBL', TAG_NO: 'R1', VCH_SRNO: 1000021, q: 1, nwt: 12, f: 11.232, TR_TYPE: 'P', ITM_SIGN: '+' },
-      { VCH_TYPE: 'TAGOP', BOOK_NAME: 'TAG OPBL', TAG_NO: 'R2', VCH_SRNO: 1000022, q: 1, nwt: 8, f: 7.488, TR_TYPE: 'P', ITM_SIGN: '+' },
+      {
+        VCH_TYPE: 'ITOBL',
+        BOOK_NAME: 'ITM OPBL',
+        TAG_NO: 'N',
+        VCH_SRNO: 0,
+        q: 2,
+        nwt: 15.5,
+        f: 14.198,
+        TR_TYPE: 'P',
+        ITM_SIGN: '+',
+      },
+      {
+        VCH_TYPE: 'ITOBL',
+        BOOK_NAME: 'ITM OPBL',
+        TAG_NO: 'N',
+        VCH_SRNO: 0,
+        q: 0,
+        nwt: 800,
+        f: 740,
+        TR_TYPE: 'P',
+        ITM_SIGN: '+',
+      },
+      {
+        VCH_TYPE: 'TAGOP',
+        BOOK_NAME: 'TAG OPBL',
+        TAG_NO: 'C1',
+        VCH_SRNO: 1000011,
+        q: 1,
+        nwt: 20,
+        f: 18.72,
+        TR_TYPE: 'P',
+        ITM_SIGN: '+',
+      },
+      {
+        VCH_TYPE: 'TAGOP',
+        BOOK_NAME: 'TAG OPBL',
+        TAG_NO: 'R1',
+        VCH_SRNO: 1000021,
+        q: 1,
+        nwt: 12,
+        f: 11.232,
+        TR_TYPE: 'P',
+        ITM_SIGN: '+',
+      },
+      {
+        VCH_TYPE: 'TAGOP',
+        BOOK_NAME: 'TAG OPBL',
+        TAG_NO: 'R2',
+        VCH_SRNO: 1000022,
+        q: 1,
+        nwt: 8,
+        f: 7.488,
+        TR_TYPE: 'P',
+        ITM_SIGN: '+',
+      },
     ]);
     // Step 5 and the year
     expect(
@@ -243,7 +336,11 @@ describe.skipIf(!RUN)('Data Import (Lite Soft) write set', () => {
     const bad = Buffer.from(JSON.stringify(f));
     const p = await previewLiteImport(runtime, scope, file(bad));
     expect(p.errors).toEqual([
-      expect.objectContaining({ table: 'BAR_DETL', key: 'R1', reason: expect.stringMatching(/KR_NAME/) }),
+      expect.objectContaining({
+        table: 'BAR_DETL',
+        key: 'R1',
+        reason: expect.stringMatching(/KR_NAME/),
+      }),
     ]);
     await expect(applyLiteImport(runtime, scope, file(bad), p.previewHash)).rejects.toMatchObject({
       code: 'row-errors',

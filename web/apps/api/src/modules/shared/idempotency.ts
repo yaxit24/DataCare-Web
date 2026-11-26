@@ -84,7 +84,12 @@ export const IDEMPOTENT_CREATE_ROUTES: readonly IdempotentRoute[] = Object.freez
     menus: ['Master/Tag Opening', 'Transaction/Only Tag Entry'],
   },
   // Other → Data Import (UT_IMPORT Lite Soft): a retried import answers the first result instead of importing twice.
-  { method: 'POST', url: '/utilities/data-import/lite/apply', status: 200, menus: ['Other/Data Import'] },
+  {
+    method: 'POST',
+    url: '/utilities/data-import/lite/apply',
+    status: 200,
+    menus: ['Other/Data Import'],
+  },
 ]);
 
 export const IDEMPOTENCY_KEY_HEADER = 'idempotency-key';

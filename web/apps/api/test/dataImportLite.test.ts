@@ -75,14 +75,37 @@ describe('Wh_Item, Lite branches (UT_IMPORT.cs:4241-4328)', () => {
       { CO_CODE: CO, PR_CODE: 'GO', PR_NAME: 'GOLD ORNAMENTS', MAIN_USER: 'e2eadmin' },
     ]);
     const [gld, slv] = p.groups as any[];
-    expect(gld).toMatchObject({ GR_CODE: 'GLD', TRAD_TYPE: '', GR_TOUCH: 91.6, GR_PURC_TOUCH: 0, MELTING_PRC: 99.5, GR_RATE: 6000, SALE_AC: 'SALES', PURC_AC: 'PURCHASE' });
+    expect(gld).toMatchObject({
+      GR_CODE: 'GLD',
+      TRAD_TYPE: '',
+      GR_TOUCH: 91.6,
+      GR_PURC_TOUCH: 0,
+      MELTING_PRC: 99.5,
+      GR_RATE: 6000,
+      SALE_AC: 'SALES',
+      PURC_AC: 'PURCHASE',
+    });
     expect(slv).toMatchObject({ GR_TOUCH: 0, SALE_AC: 'SLVSALE', PURC_AC: '' });
     expect(p.warnings.some((w) => w.table === 'GROUP_MAST' && /00021/.test(w.reason))).toBe(true);
     expect(p.tables).toEqual([
-      { CO_CODE: CO, LC_CODE: '01', TABLE_CODE: '001', TABLE_NAME: 'MAIN COUNTER', MAIN_USER: 'e2eadmin' },
+      {
+        CO_CODE: CO,
+        LC_CODE: '01',
+        TABLE_CODE: '001',
+        TABLE_NAME: 'MAIN COUNTER',
+        MAIN_USER: 'e2eadmin',
+      },
     ]);
     const rng = p.items.find((i) => i.IT_CODE === 'RNG')!;
-    expect(rng).toMatchObject({ PR_CODE: 'GO', TRAD_TYPE: '', ITEM_RATE: 0, AVG_TOUCH: 0, AC_ITEM: 'RNG', STK_DISPLAY: 'Y', SAFE_NAME: 'MAIN' });
+    expect(rng).toMatchObject({
+      PR_CODE: 'GO',
+      TRAD_TYPE: '',
+      ITEM_RATE: 0,
+      AVG_TOUCH: 0,
+      AC_ITEM: 'RNG',
+      STK_DISPLAY: 'Y',
+      SAFE_NAME: 'MAIN',
+    });
     expect(p.items.find((i) => i.IT_CODE === 'CHN')!.PR_CODE).toBe('');
   });
 
@@ -90,9 +113,7 @@ describe('Wh_Item, Lite branches (UT_IMPORT.cs:4241-4328)', () => {
     const f = liteFixture(CO, YEAR, CL);
     f.tables.ITEM_MAST.push({ ...f.tables.ITEM_MAST[0]! });
     const p = planLiteImport(fixtureReader(Buffer.from(JSON.stringify(f))), ctx);
-    expect(p.errors).toEqual([
-      expect.objectContaining({ table: 'ITEM_MAST', row: 4, key: 'RNG' }),
-    ]);
+    expect(p.errors).toEqual([expect.objectContaining({ table: 'ITEM_MAST', row: 4, key: 'RNG' })]);
   });
 });
 
@@ -101,14 +122,39 @@ describe('WH_AcOpbl (UT_IMPORT.cs:4330-4363)', () => {
     const p = plan();
     expect(p.openings).toEqual([
       // ORDER BY AC_NAME: CASH A/C (installer 00001 -> CASH), RAMESH, SURESH
-      { acCode: 'CASH', sourceAcCode: '00001', amount: 2000, sign: 'C', gold: 0, goldSign: 'D', silver: 0, silverSign: 'D' },
+      {
+        acCode: 'CASH',
+        sourceAcCode: '00001',
+        amount: 2000,
+        sign: 'C',
+        gold: 0,
+        goldSign: 'D',
+        silver: 0,
+        silverSign: 'D',
+      },
       // 1000 - 249.55 = 750.45 Cr; gold +10.5 - 2.25 = 8.25 Cr; the row after the closing date is left out
-      { acCode: '00101', sourceAcCode: '00101', amount: 750.45, sign: 'C', gold: 8.25, goldSign: 'C', silver: 0, silverSign: 'D' },
-      { acCode: '00102', sourceAcCode: '00102', amount: 500, sign: 'D', gold: 0, goldSign: 'D', silver: 100, silverSign: 'C' },
+      {
+        acCode: '00101',
+        sourceAcCode: '00101',
+        amount: 750.45,
+        sign: 'C',
+        gold: 8.25,
+        goldSign: 'C',
+        silver: 0,
+        silverSign: 'D',
+      },
+      {
+        acCode: '00102',
+        sourceAcCode: '00102',
+        amount: 500,
+        sign: 'D',
+        gold: 0,
+        goldSign: 'D',
+        silver: 100,
+        silverSign: 'C',
+      },
     ]);
-    expect(p.warnings).toContainEqual(
-      expect.objectContaining({ step: 'WH_AcOpbl', key: '00021' }),
-    );
+    expect(p.warnings).toContainEqual(expect.objectContaining({ step: 'WH_AcOpbl', key: '00021' }));
   });
 });
 
@@ -116,7 +162,12 @@ describe('Lite_BarData (UT_IMPORT.cs:8447-8692)', () => {
   it('numbers one voucher per item in IT_TYPE, IT_CODE order and copies the latest detail of each tag', () => {
     const p = plan();
     expect(p.barData.map((b) => b.VCH_NO)).toEqual(['00001', '00002']);
-    expect(p.barData[0]).toMatchObject({ CO_BOOK: '000', OP_STK: 'Y', HD_VCH_NO: '00001', DATA_TRFR: 'N' });
+    expect(p.barData[0]).toMatchObject({
+      CO_BOOK: '000',
+      OP_STK: 'Y',
+      HD_VCH_NO: '00001',
+      DATA_TRFR: 'N',
+    });
     expect(p.barDetl.map((d) => [d.VCH_NO, d.TAG_NO, d.SR_NO, d.VCH_SRNO])).toEqual([
       ['00001', 'C1', 1, 1000011],
       ['00002', 'R1', 1, 1000021],
@@ -156,7 +207,17 @@ describe('Lite_BarData (UT_IMPORT.cs:8447-8692)', () => {
       ['R1', 1, 'ST', 1000021],
       ['R1', 2, 'DM', 1000021],
     ]);
-    expect(p.barIdtl[1]).toMatchObject({ IT_PCS: 3, KR_WT: 0.1, IT_GWT: 0.5, IT_RATE: 1500, IT_AMT: 4500, IT_NET_AMT: 4500, KR_RATE: 1200, KR_AMT: 3600, KR_NET_AMT: 3600 });
+    expect(p.barIdtl[1]).toMatchObject({
+      IT_PCS: 3,
+      KR_WT: 0.1,
+      IT_GWT: 0.5,
+      IT_RATE: 1500,
+      IT_AMT: 4500,
+      IT_NET_AMT: 4500,
+      KR_RATE: 1200,
+      KR_AMT: 3600,
+      KR_NET_AMT: 3600,
+    });
   });
 });
 
@@ -164,8 +225,28 @@ describe('WH_ItOpbl (UT_IMPORT.cs:3887-3965)', () => {
   it('writes the signed loose-stock balance per item, ordered by group, with the fine at AVG_TOUCH', () => {
     const p = plan();
     expect(p.itemOpenings).toEqual([
-      expect.objectContaining({ IT_CODE: 'CHN', VCH_NO: 'G', SR_NO: 1, ITM_PCS: 2, ITM_GWT: 16, ITM_NWT: 15.5, ITM_TOUCH: 91.6, ITM_FINE: 14.198, ITM_AMT: 0, NET_AMT: 0 }),
-      expect.objectContaining({ IT_CODE: 'SLB', VCH_NO: 'S', SR_NO: 2, ITM_PCS: 0, ITM_GWT: 808, ITM_NWT: 800, ITM_TOUCH: 92.5, ITM_FINE: 740 }),
+      expect.objectContaining({
+        IT_CODE: 'CHN',
+        VCH_NO: 'G',
+        SR_NO: 1,
+        ITM_PCS: 2,
+        ITM_GWT: 16,
+        ITM_NWT: 15.5,
+        ITM_TOUCH: 91.6,
+        ITM_FINE: 14.198,
+        ITM_AMT: 0,
+        NET_AMT: 0,
+      }),
+      expect.objectContaining({
+        IT_CODE: 'SLB',
+        VCH_NO: 'S',
+        SR_NO: 2,
+        ITM_PCS: 0,
+        ITM_GWT: 808,
+        ITM_NWT: 800,
+        ITM_TOUCH: 92.5,
+        ITM_FINE: 740,
+      }),
     ]);
   });
 });
@@ -182,7 +263,9 @@ describe('source reader', () => {
 
   it('refuses an empty, oversized or non-Access file before reading it', async () => {
     await expect(openImportSource(new Uint8Array())).rejects.toBeInstanceOf(SourceFileError);
-    await expect(openImportSource(new Uint8Array(MAX_SOURCE_BYTES + 1))).rejects.toThrow(/larger than/);
+    await expect(openImportSource(new Uint8Array(MAX_SOURCE_BYTES + 1))).rejects.toThrow(
+      /larger than/,
+    );
     await expect(openImportSource(Buffer.from('hello world, not a database'))).rejects.toThrow(
       /not a Microsoft Access/,
     );

@@ -171,9 +171,10 @@ describe('route policy registry', () => {
     // Data Refresh (MS_UPDATE) adds its four Print-right routes under the caption: 828 + 4 = 832.
     // Inventory residuals: the Tag Stock Print window (RP_TAG.cs:8578, :8755) adds GET /reports/tag-stock/print; the
     // voucher zoom of Tag Stock and of the HuId Report (RP_TAG.cs:8917 DGV_DoubleClick) adds GET /reports/tag-stock/zoom
-    // and GET /reports/huid/zoom; report metal defaults adds one: 832 + 4 = 836.
-    expect(routes).toHaveLength(836);
-    expect(new Set(routes.map((route) => `${route.method} ${route.path}`)).size).toBe(836);
+    // and GET /reports/huid/zoom; report metal defaults adds one: 832 + 4 = 836. Data Import (UT_IMPORT Lite Soft)
+    // adds its preview and apply: 838.
+    expect(routes).toHaveLength(838);
+    expect(new Set(routes.map((route) => `${route.method} ${route.path}`)).size).toBe(838);
 
     const policies = routes.map((route) => ({
       ...route,

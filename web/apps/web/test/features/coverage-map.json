@@ -339,6 +339,17 @@
         "web/apps/api/src/routes/wholesaleSale.ts"
       ]
     },
+    "dataImport": {
+      "covers": [
+        "web/apps/web/app/(app)/utilities/data-import/page.tsx",
+        "web/apps/api/src/routes/dataImport.ts",
+        "web/apps/api/src/modules/utilities/dataImport.ts",
+        "web/apps/api/src/modules/utilities/dataImportLite.ts",
+        "web/apps/api/src/modules/utilities/dataImportLiteTags.ts",
+        "web/apps/api/src/modules/utilities/dataImportAccess.ts",
+        "web/apps/api/src/modules/utilities/dataImportSource.ts"
+      ]
+    },
     "dataRefresh": {
       "covers": [
         "web/apps/web/app/(app)/utilities/data-refresh/page.tsx",

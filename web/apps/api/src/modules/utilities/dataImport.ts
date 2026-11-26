@@ -35,7 +35,8 @@ export const DATA_IMPORT_MESSAGES = {
   COMPLETE: 'Process Are Complete....', // UT_IMPORT.cs:8443
   HAS_DATA:
     'This company already has vouchers, openings or tags. Old Software Import is only for a new company; nothing was imported.',
-  STALE: 'The file or the company changed after the preview. Preview the file again; nothing was imported.',
+  STALE:
+    'The file or the company changed after the preview. Preview the file again; nothing was imported.',
   HAS_ERRORS: 'The file has rows that cannot be imported (listed below); nothing was imported.',
 } as const;
 
@@ -180,9 +181,19 @@ async function columnLimitsTx(tx: any, tables: string[]): Promise<Map<string, nu
   return new Map(rows.map((r) => [`${r.t}.${r.c}`, Number(r.l)]));
 }
 
-const STEP_TABLE_ROWS: Array<{ step: LiteStep; table: string; pick: (p: LitePlan) => Record<string, unknown>[]; key: string }> = [
+const STEP_TABLE_ROWS: Array<{
+  step: LiteStep;
+  table: string;
+  pick: (p: LitePlan) => Record<string, unknown>[];
+  key: string;
+}> = [
   { step: 'Lite_AcMast', table: 'AC_MAST', pick: (p) => p.accounts, key: 'AC_CODE' },
-  { step: 'Lite_AcMast', table: 'AC_MAST_SRNO', pick: (p) => (p.accountSrno ? [p.accountSrno] : []), key: 'AC_CODE' },
+  {
+    step: 'Lite_AcMast',
+    table: 'AC_MAST_SRNO',
+    pick: (p) => (p.accountSrno ? [p.accountSrno] : []),
+    key: 'AC_CODE',
+  },
   { step: 'Wh_Item', table: 'PRODUCT_MAST', pick: (p) => p.products, key: 'PR_CODE' },
   { step: 'Wh_Item', table: 'GROUP_MAST', pick: (p) => p.groups, key: 'GR_CODE' },
   { step: 'Wh_Item', table: 'TABLE_MAST', pick: (p) => p.tables, key: 'TABLE_CODE' },
@@ -289,7 +300,13 @@ async function planTx(
   });
   if (!plan.errors.length)
     plan.errors.push(
-      ...lengthErrors(plan, await columnLimitsTx(tx, STEP_TABLE_ROWS.map((r) => r.table))),
+      ...lengthErrors(
+        plan,
+        await columnLimitsTx(
+          tx,
+          STEP_TABLE_ROWS.map((r) => r.table),
+        ),
+      ),
     );
   const companyData = await companyDataTx(tx, s);
   const hasData = Object.values(companyData).some((n) => n > 0);
@@ -362,8 +379,11 @@ export async function previewLiteImport(
 ): Promise<DataImportPreview> {
   const source = await sourceOf(file.bytes);
   const fileSha = sha256(file.bytes);
-  return withTxBudget(prisma, s.tenantId, 'read', async (tx: any) =>
-    (await planTx(tx, s, source, { name: file.name, sha256: fileSha })).preview,
+  return withTxBudget(
+    prisma,
+    s.tenantId,
+    'read',
+    async (tx: any) => (await planTx(tx, s, source, { name: file.name, sha256: fileSha })).preview,
   );
 }
 
@@ -382,7 +402,8 @@ export async function insertRowsTx(
   const defaults = DESKTOP_COLUMN_DEFAULTS[table] ?? {};
   const full = rows.map((row) => {
     const out: Record<string, unknown> = { ...defaults, ...row };
-    for (const [col, fallback] of Object.entries(defaults)) if (out[col] === null) out[col] = fallback;
+    for (const [col, fallback] of Object.entries(defaults))
+      if (out[col] === null) out[col] = fallback;
     return out;
   });
   const cols = [...new Set(full.flatMap((r) => Object.keys(r)))];
@@ -406,7 +427,13 @@ export async function insertRowsTx(
   }
 }
 
-async function deleteCompanyTx(tx: any, s: DataImportScope, table: string, where = '', ...extra: unknown[]) {
+async function deleteCompanyTx(
+  tx: any,
+  s: DataImportScope,
+  table: string,
+  where = '',
+  ...extra: unknown[]
+) {
   await tx.$executeRawUnsafe(
     `DELETE FROM "${table}" WHERE tenant_id=$1 AND "CO_CODE"=$2${where}`,
     s.tenantId,
@@ -595,7 +622,13 @@ export async function applyLiteImport(
     for (const o of plan.openings)
       await writePartyOpeningTx(
         tx,
-        { tenantId: s.tenantId, coCode: s.coCode, lcCode: s.lcCode, coYear: s.coYear, dataType: 'A' },
+        {
+          tenantId: s.tenantId,
+          coCode: s.coCode,
+          lcCode: s.lcCode,
+          coYear: s.coYear,
+          dataType: 'A',
+        },
         o.acCode,
         {
           amount: o.amount,

@@ -96,7 +96,9 @@ const SYSTEM_ACCOUNTS: { code: string; name: string; gr: string; gstType?: strin
 ];
 
 /** The system account codes a provisioned company carries (Old Software Import keeps them, dataImport.ts). */
-export const SYSTEM_ACCOUNT_CODES: readonly string[] = Object.freeze(SYSTEM_ACCOUNTS.map((a) => a.code));
+export const SYSTEM_ACCOUNT_CODES: readonly string[] = Object.freeze(
+  SYSTEM_ACCOUNTS.map((a) => a.code),
+);
 
 /**
  * BOOK_DETL of a purchase-family book (PURCHASE, TAG PURCHASE): 1 purchase, 2 cash, 3 round-off and 4 labour and
