@@ -152,6 +152,12 @@ async function companySession(ctx, slot) {
   return s;
 }
 
+/** The skipped installer balance of the fixture (00021, Dr 300) must be acknowledged before Import is enabled. */
+async function acknowledge(page) {
+  const box = page.getByRole('checkbox', { name: /Import without these balances/ });
+  if (await box.count()) await box.check();
+}
+
 /** Import through the screen and return the apply response. */
 async function importThroughScreen(page, file) {
   const dialogs = [];
@@ -165,6 +171,7 @@ async function importThroughScreen(page, file) {
   const applied = page.waitForResponse(
     (r) => new URL(r.url()).pathname === '/api/utilities/data-import/lite/apply',
   );
+  await acknowledge(page);
   await page.getByRole('button', { name: 'Import', exact: true }).click();
   const r = await applied;
   return {
@@ -213,6 +220,7 @@ export const dataImport = {
     'web/apps/api/src/modules/utilities/dataImportLite.ts',
     'web/apps/api/src/modules/utilities/dataImportLiteTags.ts',
     'web/apps/api/src/modules/utilities/dataImportAccess.ts',
+    'web/apps/api/src/modules/utilities/dataImportWrite.ts',
     'web/apps/api/src/modules/utilities/dataImportSource.ts',
     'web/apps/web/test/features/fixtures/liteImport.mjs',
     'web/apps/web/test/features/modules/dataImport.mjs',
@@ -274,6 +282,12 @@ export const dataImport = {
           ])
             assert.match(grid, new RegExp(title));
           assert.match(await s.page.locator('main').innerText(), /ignored: MSYS_SOMETHING/);
+          // The 00021 balance has no web account: Import waits for the operator to accept leaving it out.
+          assert.equal(preview.body.skippedTotal, 300);
+          const importButton = s.page.getByRole('button', { name: 'Import', exact: true });
+          assert.equal(await importButton.isDisabled(), true);
+          await acknowledge(s.page);
+          assert.equal(await importButton.isDisabled(), false);
           assert.deepEqual(await companyCounts(ctx), before, 'a preview writes nothing');
           return {
             observation:
@@ -560,6 +574,7 @@ export const dataImport = {
             asked.push(d.message());
             void d.dismiss();
           });
+          await acknowledge(s.page);
           await s.page.getByRole('button', { name: 'Import', exact: true }).click();
           await s.page.waitForTimeout(500);
           assert.deepEqual(asked, [QUESTION]);
@@ -652,6 +667,7 @@ export const dataImport = {
             fileName: 'LITE.MDB',
             data: fileOf(y).buffer.toString('base64'),
             previewHash: preview.body.previewHash,
+            acknowledgeSkipped: true,
           };
           const [a, b] = await Promise.all(
             [randomUUID(), randomUUID()].map((key) =>
@@ -695,6 +711,8 @@ export const dataImport = {
                 fileName: 'LITE.MDB',
                 data: fileOf(y).buffer.toString('base64'),
                 previewHash: preview.body.previewHash,
+                acknowledgeSkipped: true,
+                acknowledgeSkipped: true,
               },
               headers: { 'idempotency-key': key },
             });
@@ -778,6 +796,7 @@ export const dataImport = {
           const applied = s.page.waitForResponse(
             (r) => new URL(r.url()).pathname === '/api/utilities/data-import/lite/apply',
           );
+          await acknowledge(s.page);
           await s.page.getByRole('button', { name: 'Import', exact: true }).click();
           const r = await applied;
           assert.equal(r.status(), 409);

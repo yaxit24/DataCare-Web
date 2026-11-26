@@ -1,14 +1,23 @@
 import { createHash } from 'node:crypto';
 import { withTxBudget } from '../shared/txBudget.js';
-import { DESKTOP_COLUMN_DEFAULTS } from '../posting/desktopColumnDefaults.js';
-import { writePartyOpeningTx } from '../finance/partyOpening.js';
 import {
   type ImportIssue,
   type LitePlan,
   type LiteStep,
+  type SkippedOpening,
   planLiteImport,
+  skippedTotal,
 } from './dataImportLite.js';
 import { SOURCE_TABLES, type SourceReader, openImportSource } from './dataImportSource.js';
+import {
+  dayBefore,
+  deleteCompanyTx,
+  importedTagsAreStockTx,
+  insertRowsTx,
+  itemOpeningStock,
+  tagOpeningStock,
+  writeOpeningsTx,
+} from './dataImportWrite.js';
 
 /**
  * Other → Data Import (desktop UT_IMPORT "Old Softwar Import", UT_IMPORT.cs:3187), the "Lite Soft" button only
@@ -79,6 +88,9 @@ export const DATA_IMPORT_MESSAGES = {
   STALE:
     'The file or the company changed after the preview. Preview the file again; nothing was imported.',
   HAS_ERRORS: 'The file has rows that cannot be imported (listed below); nothing was imported.',
+  SKIPPED:
+    'Some opening balances have no web account and would not be imported. Confirm them on the screen; nothing was imported.',
+  BUSY: 'Another Old Software Import is being read or written for this company. Try again when it finishes.',
 } as const;
 
 export interface DataImportScope {
@@ -91,7 +103,14 @@ export interface DataImportScope {
 
 export class DataImportError extends Error {
   constructor(
-    readonly code: 'has-data' | 'stale-preview' | 'row-errors' | 'no-year' | 'file',
+    readonly code:
+      | 'has-data'
+      | 'stale-preview'
+      | 'row-errors'
+      | 'no-year'
+      | 'file'
+      | 'skipped-unacknowledged'
+      | 'busy',
     message: string,
     readonly detail?: unknown,
   ) {
@@ -100,7 +119,11 @@ export class DataImportError extends Error {
   }
 }
 
-/** Tables whose rows in the company mean it is not new (D-IMP-2): vouchers, openings, tags and stock. */
+/**
+ * Tables whose rows in the company mean it is not new (D-IMP-2): vouchers, openings, tags and stock. companyDataTx also
+ * refuses on ANY table of the company that holds a voucher number (every voucher and document header and detail) and
+ * on any row elsewhere that names an account or item the import would delete.
+ */
 export const COMPANY_DATA_TABLES = [
   'AC_DATA',
   'OP_DATA',
@@ -135,6 +158,9 @@ export interface DataImportPreview {
   /** Why the company is refused, or null. */
   refusal: string | null;
   companyData: Record<string, number>;
+  /** Installer-account balances with no web account: not imported; must be acknowledged when skippedTotal > 0. */
+  skipped: SkippedOpening[];
+  skippedTotal: number;
   /** The YEAR_MAST.OP_DATE the import will set (today), ISO. */
   newOpeningDate: string;
   question: string;
@@ -206,20 +232,84 @@ async function replacedAccountsTx(tx: any, s: DataImportScope): Promise<number> 
   return Number(rows[0]?.n ?? 0);
 }
 
+/** Replaced masters: their own rows do not make the company "not new". */
+const REPLACED_MASTERS = new Set([
+  'AC_MAST',
+  'AC_MAST_SRNO',
+  'PRODUCT_MAST',
+  'GROUP_MAST',
+  'TABLE_MAST',
+  'ITEM_MAST',
+]);
+
+let shapeCache: { voucher: string[]; account: string[]; item: string[] } | undefined;
+
+/** Tenant tables of a company, by the columns that make them documents or references (schema read once). */
+async function tableShapesTx(tx: any): Promise<NonNullable<typeof shapeCache>> {
+  if (shapeCache) return shapeCache;
+  const rows: any[] = await tx.$queryRawUnsafe(
+    `SELECT c.table_name t, bool_or(c.column_name='VCH_NO') v, bool_or(c.column_name='AC_CODE') a, bool_or(c.column_name='IT_CODE') i
+       FROM information_schema.columns c
+      WHERE c.table_schema='public'
+      GROUP BY c.table_name
+     HAVING bool_or(c.column_name='tenant_id') AND bool_or(c.column_name='CO_CODE')
+      ORDER BY 1`,
+  );
+  const keep = (pick: (r: any) => boolean) =>
+    rows.filter((r) => pick(r) && !REPLACED_MASTERS.has(r.t)).map((r) => String(r.t));
+  shapeCache = { voucher: keep((r) => r.v), account: keep((r) => r.a), item: keep((r) => r.i) };
+  return shapeCache;
+}
+
+/**
+ * Why the company is not new, as table -> rows (only non-zero). D-IMP-2 refuses a company with any of:
+ *  - a row in a table that carries a voucher number (VCH_NO): every voucher, receipt, order, repair, customer entry...;
+ *  - a row in COMPANY_DATA_TABLES (openings, tags, stock);
+ *  - a row anywhere else naming an account the import deletes (non-system, >= '00101') or an item it deletes.
+ */
 async function companyDataTx(tx: any, s: DataImportScope): Promise<Record<string, number>> {
+  const shapes = await tableShapesTx(tx);
   const out: Record<string, number> = {};
-  for (const table of COMPANY_DATA_TABLES) out[table] = await countTx(tx, s, table);
+  const add = (key: string, n: number) => {
+    if (n > 0) out[key] = (out[key] ?? 0) + n;
+  };
+  for (const table of new Set([...COMPANY_DATA_TABLES, ...shapes.voucher]))
+    add(table, await countTx(tx, s, table));
+  for (const table of shapes.account) {
+    if (out[table]) continue;
+    const rows: any[] = await tx.$queryRawUnsafe(
+      `SELECT count(*)::int n FROM "${table}" WHERE tenant_id=$1 AND "CO_CODE"=$2
+         AND coalesce("AC_CODE",'') >= '00101' AND NOT ("AC_CODE" = ANY($3::text[]))`,
+      s.tenantId,
+      s.coCode,
+      [...SYSTEM_ACCOUNT_CODES],
+    );
+    add(`${table}.AC_CODE`, Number(rows[0]?.n ?? 0));
+  }
+  for (const table of shapes.item) {
+    if (out[table]) continue;
+    const rows: any[] = await tx.$queryRawUnsafe(
+      `SELECT count(*)::int n FROM "${table}" t WHERE t.tenant_id=$1 AND t."CO_CODE"=$2
+         AND EXISTS (SELECT 1 FROM "ITEM_MAST" i WHERE i.tenant_id=$1 AND i."CO_CODE"=$2 AND i."IT_CODE"=t."IT_CODE")`,
+      s.tenantId,
+      s.coCode,
+    );
+    add(`${table}.IT_CODE`, Number(rows[0]?.n ?? 0));
+  }
   return out;
 }
 
 /** varchar lengths of the written columns, so an over-long source value is a row error, not a failed insert. */
+let limitsCache: Map<string, number> | undefined;
 async function columnLimitsTx(tx: any, tables: string[]): Promise<Map<string, number>> {
+  if (limitsCache) return limitsCache;
   const rows: any[] = await tx.$queryRawUnsafe(
     `SELECT table_name t, column_name c, character_maximum_length l FROM information_schema.columns
       WHERE table_schema='public' AND table_name = ANY($1::text[]) AND character_maximum_length IS NOT NULL`,
     tables,
   );
-  return new Map(rows.map((r) => [`${r.t}.${r.c}`, Number(r.l)]));
+  limitsCache = new Map(rows.map((r) => [`${r.t}.${r.c}`, Number(r.l)]));
+  return limitsCache;
 }
 
 const STEP_TABLE_ROWS: Array<{
@@ -275,7 +365,11 @@ function lengthErrors(plan: LitePlan, limits: Map<string, number>): ImportIssue[
   return out;
 }
 
-function stepsOf(plan: LitePlan, replaces: Record<string, number>): StepPreview[] {
+function stepsOf(
+  plan: LitePlan,
+  replaces: Record<string, number>,
+  tagStock: boolean,
+): StepPreview[] {
   const writes: Record<LiteStep, Record<string, number>> = {
     Lite_AcMast: {
       AC_MAST: plan.accounts.length,
@@ -299,7 +393,7 @@ function stepsOf(plan: LitePlan, replaces: Record<string, number>): StepPreview[
       BAR_DATA: plan.barData.length,
       BAR_DETL: plan.barDetl.length,
       BAR_IDTL: plan.barIdtl.length,
-      MAIN_STOCK: plan.barDetl.length,
+      MAIN_STOCK: tagStock ? plan.barDetl.length : 0,
     },
     WH_ItOpbl: { ITM_OPBL: plan.itemOpenings.length, MAIN_STOCK: plan.itemOpenings.length },
   };
@@ -318,20 +412,11 @@ function stepsOf(plan: LitePlan, replaces: Record<string, number>): StepPreview[
   }));
 }
 
-interface Planned {
-  preview: DataImportPreview;
-  plan: LitePlan;
-  year: { opDate: string; clDate: string };
-}
+type Year = { opDate: string; clDate: string };
 
-async function planTx(
-  tx: any,
-  s: DataImportScope,
-  source: SourceReader,
-  file: { name: string; sha256: string },
-): Promise<Planned> {
-  const year = await yearTx(tx, s);
-  const plan = planLiteImport(source, {
+/** The pure plan, made outside any transaction (it can be large). */
+function planOf(source: SourceReader, s: DataImportScope, year: Year): LitePlan {
+  return planLiteImport(source, {
     coCode: s.coCode,
     lcCode: s.lcCode,
     coYear: s.coYear,
@@ -339,8 +424,20 @@ async function planTx(
     opDate: year.opDate,
     user: s.user.slice(0, 15),
   });
-  if (!plan.errors.length)
-    plan.errors.push(
+}
+
+/** The company-side checks and counts of a plan, in the caller's transaction, and the preview they give. */
+async function previewTx(
+  tx: any,
+  s: DataImportScope,
+  source: SourceReader,
+  plan: LitePlan,
+  year: Year,
+  file: { name: string; sha256: string },
+): Promise<{ preview: DataImportPreview; tagStock: boolean }> {
+  const errors = [...plan.errors];
+  if (!errors.length)
+    errors.push(
       ...lengthErrors(
         plan,
         await columnLimitsTx(
@@ -350,7 +447,7 @@ async function planTx(
       ),
     );
   const companyData = await companyDataTx(tx, s);
-  const hasData = Object.values(companyData).some((n) => n > 0);
+  const hasData = Object.keys(companyData).length > 0;
   const replaces: Record<string, number> = {
     AC_MAST: await replacedAccountsTx(tx, s),
     AC_MAST_SRNO: plan.accountSrno ? await countTx(tx, s, 'AC_MAST_SRNO') : 0,
@@ -359,27 +456,29 @@ async function planTx(
     TABLE_MAST: await countTx(tx, s, 'TABLE_MAST'),
     ITEM_MAST: await countTx(tx, s, 'ITEM_MAST'),
   };
+  const tagStock = await importedTagsAreStockTx(tx, s);
   const sourceTables: Record<string, number> = {};
   for (const t of SOURCE_TABLES) {
     const rows = source.rows(t);
     if (rows) sourceTables[t] = rows.length;
   }
-  const steps = stepsOf(plan, replaces);
+  const steps = stepsOf(plan, replaces, tagStock);
   const newOpeningDate = businessToday();
+  const skipped = plan.skipped;
   const body = {
     file: file.sha256,
     scope: [s.tenantId, s.coCode, s.lcCode, s.coYear],
     steps,
-    errors: plan.errors.length,
+    errors: errors.length,
     warnings: plan.warnings.length,
+    skipped,
     companyData,
     year,
     newOpeningDate,
   };
   const previewHash = createHash('sha256').update(JSON.stringify(body)).digest('hex');
   return {
-    plan,
-    year,
+    tagStock,
     preview: {
       fileName: file.name,
       fileSha256: file.sha256,
@@ -390,10 +489,12 @@ async function planTx(
         .filter((t) => !(SOURCE_TABLES as string[]).includes(t))
         .sort(),
       steps,
-      errors: plan.errors.slice(0, 200),
+      errors: errors.slice(0, 200),
       warnings: plan.warnings.slice(0, 200),
       refusal: hasData ? DATA_IMPORT_MESSAGES.HAS_DATA : null,
       companyData,
+      skipped,
+      skippedTotal: skippedTotal(skipped),
       newOpeningDate,
       question: DATA_IMPORT_MESSAGES.QUESTION,
       previewHash,
@@ -401,16 +502,21 @@ async function planTx(
   };
 }
 
-async function sourceOf(bytes: Uint8Array): Promise<SourceReader> {
+async function sourceOf(bytes: Uint8Array, tenantId: string): Promise<SourceReader> {
   try {
-    return await openImportSource(bytes);
+    return await openImportSource(bytes, { tenantId });
   } catch (error: any) {
-    if (error?.name === 'SourceFileError') throw new DataImportError('file', error.message);
+    if (error?.name === 'SourceFileError')
+      throw new DataImportError(error.busy ? 'busy' : 'file', error.message);
     throw error;
   }
 }
 
 const sha256 = (bytes: Uint8Array) => createHash('sha256').update(bytes).digest('hex');
+
+async function readYear(prisma: any, s: DataImportScope): Promise<Year> {
+  return withTxBudget(prisma, s.tenantId, 'read', (tx: any) => yearTx(tx, s));
+}
 
 /** Read the file and show what each step would write. Writes nothing. */
 export async function previewLiteImport(
@@ -418,203 +524,48 @@ export async function previewLiteImport(
   s: DataImportScope,
   file: { name: string; bytes: Uint8Array },
 ): Promise<DataImportPreview> {
-  const source = await sourceOf(file.bytes);
+  const source = await sourceOf(file.bytes, s.tenantId);
   const fileSha = sha256(file.bytes);
+  const year = await readYear(prisma, s);
+  const plan = planOf(source, s, year);
   return withTxBudget(
     prisma,
     s.tenantId,
     'read',
-    async (tx: any) => (await planTx(tx, s, source, { name: file.name, sha256: fileSha })).preview,
+    async (tx: any) =>
+      (await previewTx(tx, s, source, plan, year, { name: file.name, sha256: fileSha })).preview,
   );
 }
 
-// ---- writing ------------------------------------------------------------------------------------------------------
-
-const q = (id: string) => `"${id.replace(/[^A-Za-z0-9_]/g, '')}"`;
-
-/** Multi-row INSERT with the desktop column defaults (posting.ts insertRowTx semantics), in chunks. */
-export async function insertRowsTx(
-  tx: any,
-  table: string,
-  tenantId: string,
-  rows: Record<string, unknown>[],
-): Promise<void> {
-  if (!rows.length) return;
-  const defaults = DESKTOP_COLUMN_DEFAULTS[table] ?? {};
-  const full = rows.map((row) => {
-    const out: Record<string, unknown> = { ...defaults, ...row };
-    for (const [col, fallback] of Object.entries(defaults))
-      if (out[col] === null) out[col] = fallback;
-    return out;
-  });
-  const cols = [...new Set(full.flatMap((r) => Object.keys(r)))];
-  const per = Math.max(1, Math.floor(30_000 / (cols.length + 1)));
-  for (let start = 0; start < full.length; start += per) {
-    const chunk = full.slice(start, start + per);
-    const params: unknown[] = [];
-    const values = chunk.map((row) => {
-      params.push(tenantId);
-      const marks = [`$${params.length}`];
-      for (const c of cols) {
-        params.push(c in row ? row[c] : (defaults[c] ?? null));
-        marks.push(`$${params.length}`);
-      }
-      return `(${marks.join(',')})`;
-    });
-    await tx.$executeRawUnsafe(
-      `INSERT INTO ${q(table)}(tenant_id,${cols.map(q).join(',')}) VALUES ${values.join(',')}`,
-      ...params,
-    );
-  }
-}
-
-async function deleteCompanyTx(
-  tx: any,
-  s: DataImportScope,
-  table: string,
-  where = '',
-  ...extra: unknown[]
-) {
-  await tx.$executeRawUnsafe(
-    `DELETE FROM "${table}" WHERE tenant_id=$1 AND "CO_CODE"=$2${where}`,
-    s.tenantId,
-    s.coCode,
-    ...extra,
-  );
-}
-
-const dayBefore = (isoDate: string): Date => {
-  const d = new Date(`${isoDate}T00:00:00.000Z`);
-  d.setUTCDate(d.getUTCDate() - 1);
-  return d;
-};
-
-/** Tag_Opbl_Stk (Ac_Stock.cs:22-26): an opening-book tag is one purchase-in MAIN_STOCK row, 'TAGOP' / 'TAG OPBL'. */
-export function tagOpeningStock(detl: Record<string, any>): Record<string, unknown> {
-  return {
-    CO_CODE: detl.CO_CODE,
-    LC_CODE: detl.LC_CODE,
-    CO_YEAR: detl.CO_YEAR,
-    CO_BOOK: detl.CO_BOOK,
-    VCH_NO: detl.VCH_NO,
-    SR_NO: detl.SR_NO,
-    ISR_NO: 1,
-    VCH_DATE: detl.VCH_DATE,
-    STK_DATE: detl.STK_DATE,
-    VCH_TYPE: 'TAGOP',
-    BOOK_NAME: 'TAG OPBL',
-    AC_CODE: '',
-    IT_CODE: detl.IT_CODE,
-    TAG_NO: detl.TAG_NO,
-    VCH_SRNO: detl.VCH_SRNO,
-    TBL_CODE: detl.TBL_CODE,
-    TR_TYPE: 'P',
-    ITM_SIGN: '+',
-    ITM_QTY: 1,
-    ITM_PCS: detl.ITM_PCS,
-    ITM_GWT: detl.ITM_GWT,
-    ITM_NWT: detl.ITM_NWT,
-    ITM_TOUCH: detl.ITM_TOUCH,
-    ITM_WEST: detl.ITM_WEST_PRC,
-    ITM_FINE: detl.ITM_FINE,
-    ITM_RATE: detl.ITM_RATE,
-    ITM_AMT: detl.ITM_AMT,
-    LBR_RATE: detl.LBR_RATE,
-    LBR_AMT: detl.LBR_AMT,
-    OTH_AMT: detl.OTH_AMT,
-    ITM_MRP: detl.ITM_MRP,
-    NET_AMT: 0,
-    KR_NWT: detl.KR_NET_WT,
-    KR_TOUCH: detl.KR_TOUCH,
-    KR_WEST: detl.KR_WEST_PRC,
-    KR_FINE: detl.KR_FINE,
-    KR_LBR_AMT: detl.KR_LBR_AMT,
-    KR_OTH_AMT: detl.KR_OTH_AMT,
-    KR_COST: detl.KR_COST,
-    EMP_CODE: '',
-    ENTRY_TIME: detl.VCH_TIME,
-    MAIN_USER: detl.MAIN_USER,
-    DATA_TYPE: detl.DATA_TYPE,
-    DESIGN_NO: detl.DESIGN_NO,
-    ITM_SIZE: detl.ITM_SIZE,
-    ITM_DESC: '',
-    GHT_PRC: detl.ITM_GHT_PRC,
-    ITM_LOT: '',
-    ITM_DISC: '0',
-  };
-}
-
-/** Itm_Opbl_Stk (Ac_Stock.cs:11-20): an item opening is one 'ITOBL' / 'ITM OPBL' MAIN_STOCK row, dated MOp_dt - 1. */
-export function itemOpeningStock(row: Record<string, any>, date: Date): Record<string, unknown> {
-  return {
-    CO_CODE: row.CO_CODE,
-    LC_CODE: row.LC_CODE,
-    CO_YEAR: row.CO_YEAR,
-    CO_BOOK: row.CO_BOOK,
-    VCH_NO: row.VCH_NO,
-    SR_NO: 1,
-    ISR_NO: row.SR_NO,
-    VCH_DATE: date,
-    STK_DATE: date.toISOString().slice(0, 10),
-    VCH_TYPE: 'ITOBL',
-    BOOK_NAME: 'ITM OPBL',
-    AC_CODE: '00000',
-    IT_CODE: row.IT_CODE,
-    TAG_NO: 'N',
-    VCH_SRNO: 0,
-    TBL_CODE: '',
-    TR_TYPE: 'P',
-    ITM_SIGN: '+',
-    ITM_QTY: row.ITM_PCS,
-    ITM_PCS: row.ITM_PCS,
-    ITM_GWT: row.ITM_GWT,
-    ITM_NWT: row.ITM_NWT,
-    ITM_TOUCH: row.ITM_TOUCH,
-    ITM_WEST: 0,
-    ITM_FINE: row.ITM_FINE,
-    ITM_RATE: row.ITM_RATE,
-    ITM_AMT: row.ITM_AMT,
-    LBR_RATE: 0,
-    LBR_AMT: row.LBR_AMT,
-    OTH_AMT: row.OTH_AMT,
-    ITM_MRP: 0,
-    NET_AMT: row.NET_AMT,
-    KR_NWT: row.ITM_NWT,
-    KR_TOUCH: row.ITM_TOUCH,
-    KR_WEST: 0,
-    KR_FINE: row.ITM_FINE,
-    KR_LBR_AMT: row.LBR_AMT,
-    KR_OTH_AMT: row.OTH_AMT,
-    KR_COST: row.NET_AMT,
-    EMP_CODE: '',
-    ENTRY_TIME: date,
-    MAIN_USER: row.MAIN_USER,
-    DATA_TYPE: row.DATA_TYPE,
-    DESIGN_NO: '',
-    ITM_SIZE: '',
-    ITM_DESC: '',
-    GHT_PRC: 0,
-    ITM_LOT: '',
-    ITM_DISC: '0',
-  };
-}
-
-/** Write the five steps in one transaction after the operator's Yes. */
+/**
+ * Write the five steps in one transaction after the operator's Yes. The file is read and planned before the
+ * transaction; inside it, under the company's import lock, the year, the company checks and the preview hash are
+ * worked out again, so anything that changed since the preview refuses the import.
+ */
 export async function applyLiteImport(
   prisma: any,
   s: DataImportScope,
   file: { name: string; bytes: Uint8Array },
   previewHash: string,
+  opts: { acknowledgeSkipped?: boolean } = {},
 ): Promise<DataImportResult> {
-  const source = await sourceOf(file.bytes);
+  const source = await sourceOf(file.bytes, s.tenantId);
   const fileSha = sha256(file.bytes);
+  const year = await readYear(prisma, s);
+  const plan = planOf(source, s, year);
   return withTxBudget(prisma, s.tenantId, 'heavy', async (tx: any) => {
     // One import per company at a time; a second request waits here and then finds the company no longer new.
     await tx.$executeRawUnsafe(
       'SELECT pg_advisory_xact_lock(hashtext($1))',
       `data-import|${s.tenantId}|${s.coCode}`,
     );
-    const { plan, preview } = await planTx(tx, s, source, { name: file.name, sha256: fileSha });
+    const now = await yearTx(tx, s);
+    if (now.opDate !== year.opDate || now.clDate !== year.clDate)
+      throw new DataImportError('stale-preview', DATA_IMPORT_MESSAGES.STALE);
+    const { preview, tagStock } = await previewTx(tx, s, source, plan, year, {
+      name: file.name,
+      sha256: fileSha,
+    });
     if (preview.refusal)
       throw new DataImportError('has-data', preview.refusal, { companyData: preview.companyData });
     if (preview.errors.length)
@@ -623,6 +574,11 @@ export async function applyLiteImport(
       });
     if (previewHash !== preview.previewHash)
       throw new DataImportError('stale-preview', DATA_IMPORT_MESSAGES.STALE);
+    if (preview.skippedTotal > 0 && opts.acknowledgeSkipped !== true)
+      throw new DataImportError('skipped-unacknowledged', DATA_IMPORT_MESSAGES.SKIPPED, {
+        skipped: preview.skipped,
+        skippedTotal: preview.skippedTotal,
+      });
 
     // UT_IMPORT.cs:8439-8440: YEAR_MAST.OP_DATE = today for every year of the company. Set first, so the opening legs
     // and item-opening stock take the date the desktop's refresh after the import gives them (OP_DATE - 1).
@@ -633,6 +589,7 @@ export async function applyLiteImport(
       s.coCode,
       today,
     );
+    const user = s.user.slice(0, 15);
 
     // Step 1 Lite_AcMast (:8694-8780)
     await deleteCompanyTx(tx, s, 'AC_MAST', REPLACED_ACCOUNTS, [...SYSTEM_ACCOUNT_CODES]);
@@ -658,36 +615,17 @@ export async function applyLiteImport(
       await insertRowsTx(tx, table, s.tenantId, rows);
     }
 
-    // Step 3 WH_AcOpbl (:4330-4363): OP_DATA through the Party Opening writer, which also posts AcOp_Ledr's legs
+    // Step 3 WH_AcOpbl (:4330-4363): OP_DATA and AcOp_Ledr's legs, as the Party Opening writer makes them, batched
     await deleteCompanyTx(tx, s, 'OP_DATA');
-    for (const o of plan.openings)
-      await writePartyOpeningTx(
-        tx,
-        {
-          tenantId: s.tenantId,
-          coCode: s.coCode,
-          lcCode: s.lcCode,
-          coYear: s.coYear,
-          dataType: 'A',
-        },
-        o.acCode,
-        {
-          amount: o.amount,
-          sign: o.sign,
-          gold: o.gold,
-          goldSign: o.goldSign,
-          silver: o.silver,
-          silverSign: o.silverSign,
-        },
-        s.user.slice(0, 15),
-      );
+    await writeOpeningsTx(tx, s, plan.openings, user);
 
-    // Step 4 Lite_BarData (:8447-8692) and its Tag_Opbl_Stk stock rows
+    // Step 4 Lite_BarData (:8447-8692) and its Tag_Opbl_Stk stock rows (Ac_Stock.cs:24, opening-book tags only)
     for (const table of ['BAR_DATA', 'BAR_DETL', 'BAR_IDTL']) await deleteCompanyTx(tx, s, table);
     await insertRowsTx(tx, 'BAR_DATA', s.tenantId, plan.barData);
     await insertRowsTx(tx, 'BAR_DETL', s.tenantId, plan.barDetl);
     await insertRowsTx(tx, 'BAR_IDTL', s.tenantId, plan.barIdtl);
-    await insertRowsTx(tx, 'MAIN_STOCK', s.tenantId, plan.barDetl.map(tagOpeningStock));
+    if (tagStock)
+      await insertRowsTx(tx, 'MAIN_STOCK', s.tenantId, plan.barDetl.map(tagOpeningStock));
 
     // Step 5 WH_ItOpbl (:3887-3965) and its Itm_Opbl_Stk stock rows
     await deleteCompanyTx(tx, s, 'ITM_OPBL');

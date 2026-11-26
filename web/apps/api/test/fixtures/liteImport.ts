@@ -150,18 +150,112 @@ export function liteFixture(co: string, year: string, clDate: string) {
         },
       ],
       AC_DATA: [
-        { CO_CODE: co, AC_CODE: '00101', VCH_DATE: '2025-05-01', CR_AMT: 1000, DR_AMT: 0, IT_TYPE: 'G', SIGN: '+', FINE_WT: 10.5 },
-        { CO_CODE: co, AC_CODE: '00101', VCH_DATE: '2025-06-01', CR_AMT: 0, DR_AMT: 249.55, IT_TYPE: 'G', SIGN: '-', FINE_WT: 2.25 },
-        { CO_CODE: co, AC_CODE: '00101', VCH_DATE: afterClose, CR_AMT: 99999, DR_AMT: 0, IT_TYPE: '', SIGN: '+', FINE_WT: 0 },
-        { CO_CODE: co, AC_CODE: '00102', VCH_DATE: '2025-05-02', CR_AMT: 0, DR_AMT: 500, IT_TYPE: 'S', SIGN: '+', FINE_WT: 100 },
-        { CO_CODE: co, AC_CODE: '00001', VCH_DATE: '2025-05-03', CR_AMT: 2000, DR_AMT: 0, IT_TYPE: '', SIGN: '', FINE_WT: 0 },
-        { CO_CODE: co, AC_CODE: '00021', VCH_DATE: '2025-05-03', CR_AMT: 0, DR_AMT: 300, IT_TYPE: '', SIGN: '', FINE_WT: 0 },
+        {
+          CO_CODE: co,
+          AC_CODE: '00101',
+          VCH_DATE: '2025-05-01',
+          CR_AMT: 1000,
+          DR_AMT: 0,
+          IT_TYPE: 'G',
+          SIGN: '+',
+          FINE_WT: 10.5,
+        },
+        {
+          CO_CODE: co,
+          AC_CODE: '00101',
+          VCH_DATE: '2025-06-01',
+          CR_AMT: 0,
+          DR_AMT: 249.55,
+          IT_TYPE: 'G',
+          SIGN: '-',
+          FINE_WT: 2.25,
+        },
+        {
+          CO_CODE: co,
+          AC_CODE: '00101',
+          VCH_DATE: afterClose,
+          CR_AMT: 99999,
+          DR_AMT: 0,
+          IT_TYPE: '',
+          SIGN: '+',
+          FINE_WT: 0,
+        },
+        {
+          CO_CODE: co,
+          AC_CODE: '00102',
+          VCH_DATE: '2025-05-02',
+          CR_AMT: 0,
+          DR_AMT: 500,
+          IT_TYPE: 'S',
+          SIGN: '+',
+          FINE_WT: 100,
+        },
+        {
+          CO_CODE: co,
+          AC_CODE: '00001',
+          VCH_DATE: '2025-05-03',
+          CR_AMT: 2000,
+          DR_AMT: 0,
+          IT_TYPE: '',
+          SIGN: '',
+          FINE_WT: 0,
+        },
+        {
+          CO_CODE: co,
+          AC_CODE: '00021',
+          VCH_DATE: '2025-05-03',
+          CR_AMT: 0,
+          DR_AMT: 300,
+          IT_TYPE: '',
+          SIGN: '',
+          FINE_WT: 0,
+        },
       ],
       MAIN_STOCK: [
-        { CO_CODE: co, CO_YEAR: year, IT_CODE: 'SLB', TAG_NO: '', VCH_DATE: '2025-05-01', SIGN: '+', ITM_PCS: 0, ITM_NWT: 1000, ITM_GWT: 1010 },
-        { CO_CODE: co, CO_YEAR: year, IT_CODE: 'SLB', TAG_NO: null, VCH_DATE: '2025-05-05', SIGN: '-', ITM_PCS: 0, ITM_NWT: 200, ITM_GWT: 202 },
-        { CO_CODE: co, CO_YEAR: year, IT_CODE: 'CHN', TAG_NO: '', VCH_DATE: '2025-05-01', SIGN: '+', ITM_PCS: 2, ITM_NWT: 15.5, ITM_GWT: 16 },
-        { CO_CODE: co, CO_YEAR: year, IT_CODE: 'RNG', TAG_NO: 'R1', VCH_DATE: '2025-05-01', SIGN: '+', ITM_PCS: 1, ITM_NWT: 12, ITM_GWT: 12.5 },
+        {
+          CO_CODE: co,
+          CO_YEAR: year,
+          IT_CODE: 'SLB',
+          TAG_NO: '',
+          VCH_DATE: '2025-05-01',
+          SIGN: '+',
+          ITM_PCS: 0,
+          ITM_NWT: 1000,
+          ITM_GWT: 1010,
+        },
+        {
+          CO_CODE: co,
+          CO_YEAR: year,
+          IT_CODE: 'SLB',
+          TAG_NO: null,
+          VCH_DATE: '2025-05-05',
+          SIGN: '-',
+          ITM_PCS: 0,
+          ITM_NWT: 200,
+          ITM_GWT: 202,
+        },
+        {
+          CO_CODE: co,
+          CO_YEAR: year,
+          IT_CODE: 'CHN',
+          TAG_NO: '',
+          VCH_DATE: '2025-05-01',
+          SIGN: '+',
+          ITM_PCS: 2,
+          ITM_NWT: 15.5,
+          ITM_GWT: 16,
+        },
+        {
+          CO_CODE: co,
+          CO_YEAR: year,
+          IT_CODE: 'RNG',
+          TAG_NO: 'R1',
+          VCH_DATE: '2025-05-01',
+          SIGN: '+',
+          ITM_PCS: 1,
+          ITM_NWT: 12,
+          ITM_GWT: 12.5,
+        },
       ],
       MAIN_TAG_DATA: [
         { CO_CODE: co, CO_YEAR: year, TAG_NO: 'R2', IT_CODE: 'RNG' },
@@ -170,13 +264,95 @@ export function liteFixture(co: string, year: string, clDate: string) {
         { CO_CODE: co, CO_YEAR: 'OLD-YEAR', TAG_NO: 'X9', IT_CODE: 'RNG' },
       ],
       BAR_DETL: [
-        detl({ TAG_NO: 'R1', IT_CODE: 'RNG', VCH_DATE: '2025-04-10', DESIGN: 'DESIGN-NUMBER-0123456789', ITM_GWT: 12.5, ITM_NWT: 12, ITM_FINE: 11.232, LBR_AMT: 4200, NET_COST: 70000, KR_ITM_NWT: 12, KR_LBR_AMT: 3600 }),
-        detl({ TAG_NO: 'R2', IT_CODE: 'RNG', VCH_DATE: '2025-04-11', DESIGN: 'R2D', ITM_GWT: 8.25, ITM_NWT: 8, ITM_FINE: 7.488, LBR_AMT: 2800, NET_COST: 48000, KR_ITM_NWT: 8, KR_LBR_AMT: 2400 }),
-        detl({ TAG_NO: 'C1', IT_CODE: 'CHN', VCH_DATE: '2025-04-12', DESIGN: 'C1D', ITM_GWT: 20, ITM_NWT: 20, ITM_FINE: 18.72, LBR_AMT: 5000, NET_COST: 120000, KR_ITM_NWT: 20, KR_LBR_AMT: 4000 }),
+        detl({
+          TAG_NO: 'R1',
+          IT_CODE: 'RNG',
+          VCH_DATE: '2025-04-10',
+          DESIGN: 'DESIGN-NUMBER-0123456789',
+          ITM_GWT: 12.5,
+          ITM_NWT: 12,
+          ITM_FINE: 11.232,
+          LBR_AMT: 4200,
+          NET_COST: 70000,
+          KR_ITM_NWT: 12,
+          KR_LBR_AMT: 3600,
+        }),
+        detl({
+          TAG_NO: 'R2',
+          IT_CODE: 'RNG',
+          VCH_DATE: '2025-04-11',
+          DESIGN: 'R2D',
+          ITM_GWT: 8.25,
+          ITM_NWT: 8,
+          ITM_FINE: 7.488,
+          LBR_AMT: 2800,
+          NET_COST: 48000,
+          KR_ITM_NWT: 8,
+          KR_LBR_AMT: 2400,
+        }),
+        detl({
+          TAG_NO: 'C1',
+          IT_CODE: 'CHN',
+          VCH_DATE: '2025-04-12',
+          DESIGN: 'C1D',
+          ITM_GWT: 20,
+          ITM_NWT: 20,
+          ITM_FINE: 18.72,
+          LBR_AMT: 5000,
+          NET_COST: 120000,
+          KR_ITM_NWT: 20,
+          KR_LBR_AMT: 4000,
+        }),
       ],
       BAR_IDTL: [
-        { CO_CODE: co, TAG_NO: 'R1', TAG_NWT: 12, ISR_NO: 2, IT_CODE: 'DM', ITM_PCS: 3, PR_WT: 0.1, ITM_GWT: 0.5, CON_PRC: 0, CON_WT: 0, RATE_TYPE: 'P', ITM_RATE: 1500, IT_AMT: 4500, LBR_RATE: 0, LBR_AMT: 0, ITM_AMT: 4500, PR_CON_WT: 0, PR_RATE: 1200, PR_AMT: 3600, PR_LBR_RATE: 0, PR_LBR_AMT: 0, PR_NET_AMT: 3600 },
-        { CO_CODE: co, TAG_NO: 'R1', TAG_NWT: 12, ISR_NO: 1, IT_CODE: 'ST', ITM_PCS: 1, PR_WT: 0, ITM_GWT: 0.25, CON_PRC: 0, CON_WT: 0, RATE_TYPE: 'W', ITM_RATE: 400, IT_AMT: 100, LBR_RATE: 0, LBR_AMT: 0, ITM_AMT: 100, PR_CON_WT: 0, PR_RATE: 0, PR_AMT: 0, PR_LBR_RATE: 0, PR_LBR_AMT: 0, PR_NET_AMT: 0 },
+        {
+          CO_CODE: co,
+          TAG_NO: 'R1',
+          TAG_NWT: 12,
+          ISR_NO: 2,
+          IT_CODE: 'DM',
+          ITM_PCS: 3,
+          PR_WT: 0.1,
+          ITM_GWT: 0.5,
+          CON_PRC: 0,
+          CON_WT: 0,
+          RATE_TYPE: 'P',
+          ITM_RATE: 1500,
+          IT_AMT: 4500,
+          LBR_RATE: 0,
+          LBR_AMT: 0,
+          ITM_AMT: 4500,
+          PR_CON_WT: 0,
+          PR_RATE: 1200,
+          PR_AMT: 3600,
+          PR_LBR_RATE: 0,
+          PR_LBR_AMT: 0,
+          PR_NET_AMT: 3600,
+        },
+        {
+          CO_CODE: co,
+          TAG_NO: 'R1',
+          TAG_NWT: 12,
+          ISR_NO: 1,
+          IT_CODE: 'ST',
+          ITM_PCS: 1,
+          PR_WT: 0,
+          ITM_GWT: 0.25,
+          CON_PRC: 0,
+          CON_WT: 0,
+          RATE_TYPE: 'W',
+          ITM_RATE: 400,
+          IT_AMT: 100,
+          LBR_RATE: 0,
+          LBR_AMT: 0,
+          ITM_AMT: 100,
+          PR_CON_WT: 0,
+          PR_RATE: 0,
+          PR_AMT: 0,
+          PR_LBR_RATE: 0,
+          PR_LBR_AMT: 0,
+          PR_NET_AMT: 0,
+        },
         { CO_CODE: co, TAG_NO: 'R1', TAG_NWT: 11, ISR_NO: 1, IT_CODE: 'OLD', ITM_PCS: 9 },
       ],
       BOOK_DATA: [{ CO_CODE: co, CO_BOOK: '150', BOOK_SNAME: 'OPTAG', MAIN_BOOK: 'OPSTK' }],
@@ -187,3 +363,68 @@ export function liteFixture(co: string, year: string, clDate: string) {
 
 export const fixtureBytes = (co: string, year: string, clDate: string): Uint8Array =>
   Buffer.from(JSON.stringify(liteFixture(co, year, clDate)), 'utf8');
+
+/**
+ * A large source for the size tests: 3,000 parties with an opening each, 20,000 tags of 10 items, each tag with one
+ * BAR_DETL row in the year plus 10,000 older-year rows (30,000 BAR_DETL), and a stone row per tag.
+ */
+export function bigFixture(co: string, year: string, clDate: string) {
+  const f = liteFixture(co, year, clDate) as any;
+  const t = f.tables;
+  t.AC_DATA = t.AC_DATA.filter((r: any) => r.AC_CODE !== '00021');
+  for (let i = 0; i < 2_998; i++) {
+    const code = String(200 + i).padStart(5, '0');
+    t.AC_MAST.push({ CO_CODE: co, AC_CODE: code, AC_NAME: `PARTY ${code}`, AC_GR: '20' });
+    t.AC_DATA.push({
+      CO_CODE: co,
+      AC_CODE: code,
+      VCH_DATE: '2025-05-01',
+      CR_AMT: (i % 97) + 1,
+      DR_AMT: 0,
+      IT_TYPE: 'G',
+      SIGN: '+',
+      FINE_WT: (i % 7) / 10,
+    });
+  }
+  const items = Array.from({ length: 10 }, (_, k) => `I${String(k).padStart(2, '0')}`);
+  for (const it of items)
+    t.ITEM_MAST.push({
+      CO_CODE: co,
+      IT_CODE: it,
+      IT_NAME: `ITEM ${it}`,
+      IT_TYPE: 'G',
+      TAG_TYPE: 'Y',
+      PR_CODE: 'GO',
+      GR_CODE: 'GLD',
+      UNIT_NAME: 'GMS',
+      RATE_TYPE: 'W',
+      HSN_CODE: '7113',
+      ITEM_RATE: 0,
+      AVG_TOUCH: 91.6,
+    });
+  const base = t.BAR_DETL[0];
+  for (let i = 0; i < 20_000; i++) {
+    const tag = `T${String(i).padStart(6, '0')}`;
+    const it = items[i % items.length];
+    t.MAIN_TAG_DATA.push({ CO_CODE: co, CO_YEAR: year, TAG_NO: tag, IT_CODE: it });
+    t.BAR_DETL.push({
+      ...base,
+      TAG_NO: tag,
+      IT_CODE: it,
+      DESIGN: `D${i}`,
+      ITM_NWT: 5 + (i % 10),
+      KR_ITM_NWT: 5,
+    });
+    if (i < 10_000)
+      t.BAR_DETL.push({
+        ...base,
+        CO_YEAR: 'OLD-YEAR',
+        TAG_NO: tag,
+        IT_CODE: it,
+        DESIGN: `D${i}`,
+        ITM_NWT: 5 + (i % 10),
+      });
+    t.BAR_IDTL.push({ ...t.BAR_IDTL[0], TAG_NO: tag, TAG_NWT: 5 + (i % 10) });
+  }
+  return f;
+}

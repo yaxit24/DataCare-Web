@@ -347,6 +347,7 @@
         "web/apps/api/src/modules/utilities/dataImportLite.ts",
         "web/apps/api/src/modules/utilities/dataImportLiteTags.ts",
         "web/apps/api/src/modules/utilities/dataImportAccess.ts",
+        "web/apps/api/src/modules/utilities/dataImportWrite.ts",
         "web/apps/api/src/modules/utilities/dataImportSource.ts"
       ]
     },

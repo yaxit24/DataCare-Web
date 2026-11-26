@@ -1,5 +1,11 @@
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
-import { planLiteImport, fmtRound, val, fnv } from '../src/modules/utilities/dataImportLite.js';
+import {
+  planLiteImport,
+  fmtRound,
+  val,
+  fnv,
+  skippedTotal,
+} from '../src/modules/utilities/dataImportLite.js';
 import {
   MAX_SOURCE_BYTES,
   SourceFileError,
@@ -8,7 +14,7 @@ import {
   openImportSource,
   pickAllowed,
 } from '../src/modules/utilities/dataImportSource.js';
-import { fixtureBytes, liteFixture } from './fixtures/liteImport.js';
+import { bigFixture, fixtureBytes, liteFixture } from './fixtures/liteImport.js';
 
 const CO = '07';
 const YEAR = '2025-2026';
@@ -155,6 +161,88 @@ describe('WH_AcOpbl (UT_IMPORT.cs:4330-4363)', () => {
       },
     ]);
     expect(p.warnings).toContainEqual(expect.objectContaining({ step: 'WH_AcOpbl', key: '00021' }));
+    // 00021 CLG.STOCK has no web account: skipped, and the total must be acknowledged (Dr 300 -> -300)
+    expect(p.skipped).toEqual([{ acCode: '00021', name: '', amount: -300, gold: 0, silver: 0 }]);
+    expect(skippedTotal(p.skipped)).toBe(300);
+  });
+
+  it('maps installer 00013 TDS A/C to the web TDS account and skips 00042 KASAR AVAK A/C', () => {
+    const f = liteFixture(CO, YEAR, CL);
+    f.tables.AC_DATA.push(
+      {
+        CO_CODE: CO,
+        AC_CODE: '00013',
+        VCH_DATE: '2025-05-03',
+        CR_AMT: 0,
+        DR_AMT: 40,
+        IT_TYPE: '',
+        SIGN: '',
+        FINE_WT: 0,
+      },
+      {
+        CO_CODE: CO,
+        AC_CODE: '00042',
+        VCH_DATE: '2025-05-03',
+        CR_AMT: 12.5,
+        DR_AMT: 0,
+        IT_TYPE: '',
+        SIGN: '',
+        FINE_WT: 0,
+      },
+    );
+    const p = planLiteImport(fixtureReader(Buffer.from(JSON.stringify(f))), ctx);
+    expect(p.openings.find((o) => o.acCode === 'TDS')).toMatchObject({ amount: 40, sign: 'D' });
+    expect(p.skipped.map((x) => x.acCode).sort()).toEqual(['00021', '00042']);
+    expect(skippedTotal(p.skipped)).toBe(312.5);
+  });
+
+  it('merges two source accounts that land on one web account instead of losing one', () => {
+    const f = liteFixture(CO, YEAR, CL);
+    // A source ledger keyed CASH (it sorts above 00100) and the installer 00001 both resolve to CASH.
+    f.tables.AC_DATA.push({
+      CO_CODE: CO,
+      AC_CODE: 'CASH',
+      VCH_DATE: '2025-05-03',
+      CR_AMT: 0,
+      DR_AMT: 2500,
+      IT_TYPE: '',
+      SIGN: '',
+      FINE_WT: 0,
+    });
+    const p = planLiteImport(fixtureReader(Buffer.from(JSON.stringify(f))), ctx);
+    expect(p.openings.filter((o) => o.acCode === 'CASH')).toEqual([
+      expect.objectContaining({
+        amount: 500,
+        sign: 'D',
+        sourceAcCode: expect.stringMatching(/00001/),
+      }),
+    ]); // 2000 Cr + 2500 Dr = 500 Dr
+  });
+});
+
+describe('company code (item 4)', () => {
+  it('refuses a file that has rows but none for this company', () => {
+    const p = planLiteImport(fixtureReader(fixtureBytes(CO, YEAR, CL)), { ...ctx, coCode: '08' });
+    expect(p.errors).toEqual([
+      expect.objectContaining({
+        table: 'CO_CODE',
+        reason: expect.stringMatching(/no rows for company 08/),
+      }),
+    ]);
+    expect(p.accounts).toEqual([]);
+  });
+});
+
+describe('planning size', () => {
+  it('plans 20,000 tags over 30,000 BAR_DETL rows and 3,000 parties in under 2 s', () => {
+    const reader = fixtureReader(Buffer.from(JSON.stringify(bigFixture(CO, YEAR, CL))));
+    const started = performance.now();
+    const p = planLiteImport(reader, ctx);
+    const ms = performance.now() - started;
+    expect(p.errors).toEqual([]);
+    expect(p.barDetl.length).toBe(20_003);
+    expect(p.accounts.length).toBe(3_000);
+    expect(ms).toBeLessThan(2_000);
   });
 });
 

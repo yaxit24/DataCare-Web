@@ -23,7 +23,8 @@ const BODY_LIMIT = Math.ceil((MAX_SOURCE_BYTES * 4) / 3) + 64 * 1024;
  * and BtnLite_Click checks nothing more (UT_IMPORT.cs:8413-8445). Preview is a read; Import is a create (G225).
  *
  *   POST /utilities/data-import/lite/preview  {fileName, data: base64}               rows per step, errors, refusal
- *   POST /utilities/data-import/lite/apply    {fileName, data: base64, previewHash}  the five steps in one transaction
+ *   POST /utilities/data-import/lite/apply    {fileName, data: base64, previewHash, acknowledgeSkipped?}
+ *                                             the five steps in one transaction
  */
 export function registerDataImportRoutes(app: FastifyInstance, deps: DataImportRouteDeps): void {
   const { prisma, auth, guard, sess } = deps;
@@ -47,7 +48,11 @@ export function registerDataImportRoutes(app: FastifyInstance, deps: DataImportR
       return reply.code(200).send(await fn());
     } catch (error) {
       if (error instanceof DataImportError) {
-        const status = error.code === 'has-data' || error.code === 'stale-preview' ? 409 : 400;
+        const status = ['has-data', 'stale-preview', 'busy', 'skipped-unacknowledged'].includes(
+          error.code,
+        )
+          ? 409
+          : 400;
         return reply.code(status).send({
           error: `data-import-${error.code}`,
           message: error.message,
@@ -92,8 +97,12 @@ export function registerDataImportRoutes(app: FastifyInstance, deps: DataImportR
       if (!guard(req, reply, 'create')) return;
       const file = fileOf(req);
       if (!file) return badFile(reply);
-      const previewHash = String(((req.body ?? {}) as Record<string, unknown>).previewHash ?? '');
-      return answer(reply, () => applyLiteImport(prisma, scopeOf(req), file, previewHash));
+      const b = (req.body ?? {}) as Record<string, unknown>;
+      return answer(reply, () =>
+        applyLiteImport(prisma, scopeOf(req), file, String(b.previewHash ?? ''), {
+          acknowledgeSkipped: b.acknowledgeSkipped === true,
+        }),
+      );
     },
   );
 }

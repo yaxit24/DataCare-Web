@@ -44,13 +44,17 @@ The import itself writes no `MAIN_STOCK` and no ledger legs: the desktop's refre
 |---|---|---|
 | Five steps, no transaction, deletes first | One transaction; a failure anywhere changes nothing | D-IMP-2 |
 | Question first, no preview | The file is read first; rows per step, row errors and warnings shown; then the question | D-IMP-2 |
-| Re-import wipes the company's tags | A company with any `AC_DATA`, `OP_DATA`, `ITM_OPBL`, `BAR_*`, `MAIN_STOCK`, `SL_DATA` or `PR_DATA` row is refused | D-IMP-2 |
+| Re-import wipes the company's tags | Refused when the company has a row in any table with a voucher number (every voucher and document, e.g. a repair receipt or a customer entry), in `OP_DATA`/`ITM_OPBL`/`BAR_*`/`MAIN_STOCK`, or any row naming an account (non-system, `>= '00101'`) or item the import would delete | D-IMP-2 |
 | Jet OLEDB on the PC | `mdb-reader` 3.2.0 (MIT) in a worker thread: 32 MB file cap, 500,000 rows per table, 768 MB heap, 60 s, table/column allow-list | D-IMP-3 |
 | `HDD_MAST.REF_NO`, `LOCT_MAST.TRY_DATE` | Not written (licence and trial state) | D-IMP-4 |
 | Application exits | The operator is signed out | no desktop process to end |
 | Refresh posts `MAIN_STOCK` / ledger later | Posted in the same transaction, as Ac_Stock.cs / AcOp_Ledr build them | the web has no deferred refresh |
 | `AC_CODE >= '00101'` deleted | The same, minus the web chart's named system accounts (`CASH`, `SALES`, …, seedCompany.ts) | those codes sort above `00101` |
-| Installer codes 00001-00100 in openings and group ledgers | Mapped to the web account of the same role (`INSTALLER_ACCOUNTS`); one with no web account is a warning, not written | the web chart is named, not numeric |
+| Installer codes 00001-00100 in openings and group ledgers | Mapped to the web account of the same role (`INSTALLER_ACCOUNTS`, incl. 00013 TDS A/C -> `TDS`). A balance with no web account (e.g. 00042 KASAR AVAK A/C) is listed with its total; Import stays disabled until the operator accepts leaving it out (`acknowledgeSkipped`) | the web chart is named, not numeric |
+| Two source accounts on one web code would write two OP_DATA rows | Their heads are added (Cr +, Dr -) into one row | one opening per account |
+| A file of another company empties the masters | Refused: the file has rows but none for this company | nothing replaced by nothing |
+| Tag stock rows by refresh (Ac_Stock.cs:24 joins book 000) | `TAGOP` rows only when the company's book 000 is an opening-stock book; with no book 000 the installer's (`OPSTK`) applies | as the desktop join |
+| One parse per PC | At most 2 parsing workers per process and one file per tenant at a time; rows counted inside the worker; the JSON fixture reader never runs with `NODE_ENV=production` | shared server |
 | Address line with `'` blanked (`:8722-8752`) | Kept | the blanking only protected string-built SQL |
 | `NULL` mobile/PR_CODE/number crashes the import | Written as `''` / 0 (Fnv) | no half-finished import |
 | Over-long value stops SQL Server mid-way | Listed as a row error; nothing imported | atomic |

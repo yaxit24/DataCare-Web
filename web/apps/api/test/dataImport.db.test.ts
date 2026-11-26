@@ -8,7 +8,9 @@ import {
   businessToday,
   previewLiteImport,
 } from '../src/modules/utilities/dataImport.js';
-import { fixtureBytes, liteFixture } from './fixtures/liteImport.js';
+import { bigFixture, fixtureBytes, liteFixture } from './fixtures/liteImport.js';
+import { writePartyOpeningTx } from '../src/modules/finance/partyOpening.js';
+import { withTxBudget } from '../src/modules/shared/txBudget.js';
 
 /**
  * Write set of Other → Data Import, Lite Soft (UT_IMPORT.cs:8413-8445) through the SourceReader fixture: the five steps
@@ -75,6 +77,7 @@ async function freshCompany() {
   );
 }
 
+const ACK = { acknowledgeSkipped: true };
 const file = (bytes?: Uint8Array) => ({
   name: 'LITE.MDB',
   bytes: bytes ?? fixtureBytes(CO, scope.coYear, clDate),
@@ -123,7 +126,7 @@ describe.skipIf(!RUN)('Data Import (Lite Soft) write set', () => {
   it('writes every step in one transaction', async () => {
     const otherBefore = await fingerprint(OTHER);
     const p = await previewLiteImport(runtime, scope, file());
-    const r = await applyLiteImport(runtime, scope, file(), p.previewHash);
+    const r = await applyLiteImport(runtime, scope, file(), p.previewHash, ACK);
     expect(r.message).toBe('Process Are Complete....');
     const today = businessToday();
     // Step 1
@@ -325,11 +328,13 @@ describe.skipIf(!RUN)('Data Import (Lite Soft) write set', () => {
 
   it('refuses a company that already has data, and a second import, writing nothing', async () => {
     const p = await previewLiteImport(runtime, scope, file());
-    await applyLiteImport(runtime, scope, file(), p.previewHash);
+    await applyLiteImport(runtime, scope, file(), p.previewHash, ACK);
     const before = await fingerprint(TENANT);
     const again = await previewLiteImport(runtime, scope, file());
     expect(again.refusal).toBe(DATA_IMPORT_MESSAGES.HAS_DATA);
-    await expect(applyLiteImport(runtime, scope, file(), again.previewHash)).rejects.toMatchObject({
+    await expect(
+      applyLiteImport(runtime, scope, file(), again.previewHash, ACK),
+    ).rejects.toMatchObject({
       code: 'has-data',
     });
     expect(await fingerprint(TENANT)).toEqual(before);
@@ -337,7 +342,9 @@ describe.skipIf(!RUN)('Data Import (Lite Soft) write set', () => {
 
   it('refuses a stale preview and a file with row errors, writing nothing', async () => {
     const before = await fingerprint(TENANT);
-    await expect(applyLiteImport(runtime, scope, file(), '0'.repeat(64))).rejects.toMatchObject({
+    await expect(
+      applyLiteImport(runtime, scope, file(), '0'.repeat(64), ACK),
+    ).rejects.toMatchObject({
       code: 'stale-preview',
     });
     const f = liteFixture(CO, scope.coYear, clDate);
@@ -351,11 +358,138 @@ describe.skipIf(!RUN)('Data Import (Lite Soft) write set', () => {
         reason: expect.stringMatching(/KR_NAME/),
       }),
     ]);
-    await expect(applyLiteImport(runtime, scope, file(bad), p.previewHash)).rejects.toMatchObject({
+    await expect(
+      applyLiteImport(runtime, scope, file(bad), p.previewHash, ACK),
+    ).rejects.toMatchObject({
       code: 'row-errors',
     });
     expect(await fingerprint(TENANT)).toEqual(before);
   });
+
+  it('refuses until the skipped installer balances are acknowledged, writing nothing', async () => {
+    const before = await fingerprint(TENANT);
+    const p = await previewLiteImport(runtime, scope, file());
+    expect(p.skipped).toEqual([{ acCode: '00021', name: '', amount: -300, gold: 0, silver: 0 }]);
+    expect(p.skippedTotal).toBe(300);
+    await expect(applyLiteImport(runtime, scope, file(), p.previewHash)).rejects.toMatchObject({
+      code: 'skipped-unacknowledged',
+    });
+    expect(await fingerprint(TENANT)).toEqual(before);
+  });
+
+  it('refuses a company that holds only a repair receipt or a customer entry', async () => {
+    for (const [table, insert] of [
+      [
+        'REP_DATA',
+        `INSERT INTO "REP_DATA"(tenant_id,"CO_CODE","LC_CODE","CO_YEAR","CO_BOOK","VCH_NO","AC_CODE") VALUES ($1,$2,'01',$3,'REP','00001','WALKIN')`,
+      ],
+      [
+        'CUST_DATA',
+        `INSERT INTO "CUST_DATA"(tenant_id,"CO_CODE","LC_CODE","CO_YEAR","CO_BOOK","VCH_NO","SR_NO","AC_CODE") VALUES ($1,$2,'01',$3,'CST','00001',1,'WALKIN')`,
+      ],
+    ] as const) {
+      await freshCompany();
+      await owner.$executeRawUnsafe(insert, TENANT, CO, scope.coYear);
+      const before = await fingerprint(TENANT);
+      const p = await previewLiteImport(runtime, scope, file());
+      expect(p.refusal, table).toBe(DATA_IMPORT_MESSAGES.HAS_DATA);
+      expect(p.companyData[table], table).toBe(1);
+      await expect(
+        applyLiteImport(runtime, scope, file(), p.previewHash, ACK),
+      ).rejects.toMatchObject({ code: 'has-data' });
+      expect(await fingerprint(TENANT)).toEqual(before);
+    }
+  });
+
+  it('refuses a master row that names a party the import would delete', async () => {
+    await owner.$executeRawUnsafe(
+      `UPDATE "LOCT_MAST" SET "AC_CODE"='OLDPTY' WHERE tenant_id=$1 AND "CO_CODE"=$2`,
+      TENANT,
+      CO,
+    );
+    const p = await previewLiteImport(runtime, scope, file());
+    expect(p.companyData).toEqual({ 'LOCT_MAST.AC_CODE': 1 });
+    expect(p.refusal).toBe(DATA_IMPORT_MESSAGES.HAS_DATA);
+  });
+
+  it('writes the same OP_DATA and AC_DATA rows as the Party Opening writer', async () => {
+    const p = await previewLiteImport(runtime, scope, file());
+    await applyLiteImport(runtime, scope, file(), p.previewHash, ACK);
+    const cols = (t: string) =>
+      rows(
+        `SELECT to_jsonb(x) - 'row_id' j FROM "${t}" x WHERE tenant_id=$1 AND "CO_CODE"=$2 AND "AC_CODE" IN ('00101','00102') ORDER BY x::text`,
+        CO,
+      );
+    const imported = { op: await cols('OP_DATA'), legs: await cols('AC_DATA') };
+    await owner.$executeRawUnsafe(
+      `DELETE FROM "OP_DATA" WHERE tenant_id=$1 AND "CO_CODE"=$2 AND "AC_CODE" IN ('00101','00102')`,
+      TENANT,
+      CO,
+    );
+    await owner.$executeRawUnsafe(
+      `DELETE FROM "AC_DATA" WHERE tenant_id=$1 AND "CO_CODE"=$2 AND "AC_CODE" IN ('00101','00102')`,
+      TENANT,
+      CO,
+    );
+    await withTxBudget(runtime, TENANT, 'voucher', async (tx: any) => {
+      const ps = {
+        tenantId: TENANT,
+        coCode: CO,
+        lcCode: '01',
+        coYear: scope.coYear,
+        dataType: 'A',
+      };
+      await writePartyOpeningTx(
+        tx,
+        ps,
+        '00101',
+        { amount: 750.45, sign: 'C', gold: 8.25, goldSign: 'C', silver: 0, silverSign: 'D' },
+        'importer',
+      );
+      await writePartyOpeningTx(
+        tx,
+        ps,
+        '00102',
+        { amount: 500, sign: 'D', gold: 0, goldSign: 'D', silver: 100, silverSign: 'C' },
+        'importer',
+      );
+    });
+    expect({ op: await cols('OP_DATA'), legs: await cols('AC_DATA') }).toEqual(imported);
+  });
+
+  it('posts no TAGOP stock when the company book 000 is not an opening-stock book (Ac_Stock.cs:24)', async () => {
+    await owner.$executeRawUnsafe(
+      `INSERT INTO "BOOK_DATA"(tenant_id,"CO_CODE","LC_CODE","CO_BOOK","BOOK_NAME","BOOK_SNAME","MAIN_BOOK","DATA_TYPE") VALUES ($1,$2,'01','000','Sales Zero','SLZ','SALES','A')`,
+      TENANT,
+      CO,
+    );
+    const p = await previewLiteImport(runtime, scope, file());
+    expect(p.steps.find((x) => x.step === 'Lite_BarData')!.writes.MAIN_STOCK).toBe(0);
+    await applyLiteImport(runtime, scope, file(), p.previewHash, ACK);
+    expect(
+      await rows(
+        `SELECT count(*)::int n FROM "MAIN_STOCK" WHERE tenant_id=$1 AND "CO_CODE"=$2 AND "VCH_TYPE"='TAGOP'`,
+        CO,
+      ),
+    ).toEqual([{ n: 0 }]);
+  });
+
+  it('imports 20,000 tags and 3,000 parties inside the heavy transaction budget', async () => {
+    const big = Buffer.from(JSON.stringify(bigFixture(CO, scope.coYear, clDate)));
+    const p = await previewLiteImport(runtime, scope, file(big));
+    expect(p.errors).toEqual([]);
+    const started = Date.now();
+    await applyLiteImport(runtime, scope, file(big), p.previewHash, ACK);
+    const ms = Date.now() - started;
+    expect(
+      await rows(
+        `SELECT (SELECT count(*)::int FROM "BAR_DETL" WHERE tenant_id=$1 AND "CO_CODE"=$2) d,
+                (SELECT count(*)::int FROM "OP_DATA" WHERE tenant_id=$1 AND "CO_CODE"=$2) o`,
+        CO,
+      ),
+    ).toEqual([{ d: 20_003, o: 3_001 }]);
+    expect(ms).toBeLessThan(30_000);
+  }, 120_000);
 
   for (const table of ['AC_MAST', 'ITEM_MAST', 'AC_DATA', 'BAR_IDTL', 'ITM_OPBL']) {
     it(`a failure writing ${table} rolls every step back`, async () => {
@@ -369,7 +503,7 @@ describe.skipIf(!RUN)('Data Import (Lite Soft) write set', () => {
         `CREATE TRIGGER data_import_fault BEFORE INSERT ON "${table}" FOR EACH ROW EXECUTE FUNCTION data_import_fault()`,
       );
       try {
-        await expect(applyLiteImport(runtime, scope, file(), p.previewHash)).rejects.toThrow(
+        await expect(applyLiteImport(runtime, scope, file(), p.previewHash, ACK)).rejects.toThrow(
           /injected fault/,
         );
       } finally {

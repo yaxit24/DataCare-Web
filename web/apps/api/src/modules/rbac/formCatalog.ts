@@ -447,7 +447,7 @@ const aliases: Record<string, readonly string[]> = {
   'Utilities/Backup': ['Data Backup'],
   'Utilities/Data Export': ['Data Export', 'Data Transfer', 'UT_EXPORT'],
   'Utilities/Estimate Reset': ['Estimate Reset', 'UT_IMPORT'],
-  'Utilities/Data Import': ['Data Import', 'Old Software Import'],
+  'Utilities/Data Import': ['Data Import'],
   'Utilities/Data Refresh': ['Data Refresh'],
   'Utilities/Data Repair': ['Data Repair'],
   'Utilities/Users & Rights': ['User Create', 'Users'],

@@ -1,4 +1,9 @@
-import type { SourceReader, SourceRow, SourceTable } from './dataImportSource.js';
+import {
+  SOURCE_TABLES,
+  type SourceReader,
+  type SourceRow,
+  type SourceTable,
+} from './dataImportSource.js';
 import {
   cmpText,
   ddmmyyyy,
@@ -80,16 +85,35 @@ export interface LitePlan {
   barDetl: Record<string, unknown>[];
   barIdtl: Record<string, unknown>[];
   itemOpenings: Record<string, unknown>[];
+  /** Opening balances of installer accounts the web chart has no account for: not written, must be acknowledged. */
+  skipped: SkippedOpening[];
   errors: ImportIssue[];
   warnings: ImportIssue[];
 }
+
+export interface SkippedOpening {
+  acCode: string;
+  name: string;
+  /** Signed: Cr positive, Dr negative. */
+  amount: number;
+  gold: number;
+  silver: number;
+}
+
+/** |amount| + |gold| + |silver| over the skipped balances: non-zero means the operator must acknowledge them. */
+export const skippedTotal = (skipped: SkippedOpening[]): number =>
+  fmtRound(
+    skipped.reduce((t, x) => t + Math.abs(x.amount) + Math.abs(x.gold) + Math.abs(x.silver), 0),
+    3,
+  );
 
 /**
  * Installer account code (the desktop's fixed chart 00001-00100, kept by Lite_AcMast's `AC_CODE >= '00101'` delete) to
  * the web account of the same role. From seedCompany.ts SYSTEM_ACCOUNTS (its comment names CASH 00001, CAPITAL 00002,
  * LBRINC 00041, WALKIN 00045, LBREXP 00056, KASAR 00057, INTINC 00061, BANK 00075, DISCOUNT 00076, OTHCHRG 00077,
  * CARDCOMM 00078, HMCHRG 00097, FINEKSR 00098, ORDADV 00020) and desktopTemplateMasters.ts DESKTOP_ACCOUNT_ROLES
- * (00003-00012).
+ * (00003-00012), and 00013 TDS A/C -> TDS. 00042 KASAR AVAK A/C (kasar income, group 41) has no web account of the
+ * same role: its balance is skipped and must be acknowledged (SkippedOpening).
  */
 export const INSTALLER_ACCOUNTS: Readonly<Record<string, string>> = {
   '00001': 'CASH',
@@ -104,6 +128,7 @@ export const INSTALLER_ACCOUNTS: Readonly<Record<string, string>> = {
   '00010': 'OLDGOLD',
   '00011': 'OLDSLVPR',
   '00012': 'OTHPURC',
+  '00013': 'TDS', // installer TDS A/C, group 18; the web TDS RECEIVABLE (group 18, seedCompany.ts)
   '00020': 'ORDADV',
   '00041': 'LBRINC',
   '00045': 'WALKIN',
@@ -154,12 +179,20 @@ export function liteAcMast(
 } {
   // :8697 SELECT A.*, B.AREA_NAME FROM AC_MAST A LEFT JOIN AREA_MAST B ON CO_CODE AND A.AC_AREA = B.AREA_CODE
   //       WHERE A.CO_CODE = company AND AC_CODE > '00100'
-  const areas = rowsOf(src, 'AREA_MAST');
+  const areas = new Map<string, SourceRow[]>();
+  for (const b of rowsOf(src, 'AREA_MAST')) {
+    if (b.AREA_CODE === null || b.AREA_CODE === undefined) continue;
+    const k = `${str(b.CO_CODE).toUpperCase()}|${str(b.AREA_CODE).toUpperCase()}`;
+    areas.set(k, [...(areas.get(k) ?? []), b]);
+  }
   const joined: Array<{ a: SourceRow; areaName: unknown }> = [];
   for (const a of rowsOf(src, 'AC_MAST')) {
     if (!eq(a.CO_CODE, ctx.coCode) || !(notBlank(a.AC_CODE) && cmpText(a.AC_CODE, '00100') > 0))
       continue;
-    const matches = areas.filter((b) => eq(b.CO_CODE, a.CO_CODE) && eq(b.AREA_CODE, a.AC_AREA));
+    const matches =
+      a.AC_AREA === null || a.AC_AREA === undefined
+        ? []
+        : (areas.get(`${str(a.CO_CODE).toUpperCase()}|${str(a.AC_AREA).toUpperCase()}`) ?? []);
     if (!matches.length) joined.push({ a, areaName: null });
     for (const b of matches) joined.push({ a, areaName: b.AREA_NAME });
   }
@@ -355,6 +388,7 @@ export function whAcOpbl(
   ctx: LiteContext,
   importedCodes: Set<string>,
   warnings: ImportIssue[],
+  skipped: SkippedOpening[] = [],
 ): OpeningHeadsRow[] {
   // :4333 SELECT A.AC_CODE, B.AC_NAME, format(Sum(CR_AMT-DR_AMT),'0.00') Amount,
   //   format(SUM(iif(IT_TYPE='G', iif(SIGN='+',FINE_WT,-FINE_WT),0)),'0.000') GoldWt, ... SilverWt
@@ -401,11 +435,12 @@ export function whAcOpbl(
     if (cmpText(source, '00100') <= 0) {
       const mapped = INSTALLER_ACCOUNTS[source];
       if (!mapped) {
+        skipped.push({ acCode: source, name: str(g.name), amount: a, gold: gw, silver: sw });
         warnings.push({
           step: 'WH_AcOpbl',
           table: 'OP_DATA',
           key: source,
-          reason: `The opening of installer account ${source} (${str(g.name)}) has no web account of the same role and is not imported.`,
+          reason: `The opening of installer account ${source} (${str(g.name)}) has no web account of the same role and is not imported (acknowledge it to import the rest).`,
         });
         continue;
       }
@@ -429,7 +464,62 @@ export function whAcOpbl(
       silverSign: sw > 0 ? 'C' : 'D',
     });
   }
-  return out;
+  return mergeOpenings(out);
+}
+
+/**
+ * Two source accounts can land on one web account (an installer code mapped to a web code the file also uses). The
+ * desktop would write two OP_DATA rows; the web keeps one row per account, so the heads are added as signed values
+ * (Cr +, Dr -) and the sign re-derived as the desktop does (> 0 is 'C', else 'D').
+ */
+export function mergeOpenings(rows: OpeningHeadsRow[]): OpeningHeadsRow[] {
+  const byCode = new Map<string, OpeningHeadsRow>();
+  const signedOf = (v: number, sign: 'C' | 'D') => (sign === 'C' ? v : -v);
+  for (const row of rows) {
+    const key = row.acCode.toUpperCase();
+    const prev = byCode.get(key);
+    if (!prev) {
+      byCode.set(key, row);
+      continue;
+    }
+    const amt = fmtRound(signedOf(prev.amount, prev.sign) + signedOf(row.amount, row.sign), 2);
+    const gold = fmtRound(signedOf(prev.gold, prev.goldSign) + signedOf(row.gold, row.goldSign), 3);
+    const silver = fmtRound(
+      signedOf(prev.silver, prev.silverSign) + signedOf(row.silver, row.silverSign),
+      3,
+    );
+    byCode.set(key, {
+      acCode: prev.acCode,
+      sourceAcCode: `${prev.sourceAcCode}+${row.sourceAcCode}`,
+      amount: Math.abs(amt),
+      sign: amt > 0 ? 'C' : 'D',
+      gold: Math.abs(gold),
+      goldSign: gold > 0 ? 'C' : 'D',
+      silver: Math.abs(silver),
+      silverSign: silver > 0 ? 'C' : 'D',
+    });
+  }
+  return [...byCode.values()];
+}
+
+/** Item 4: a file whose rows all belong to other companies would replace this company's masters with nothing. */
+export function companyMismatch(src: SourceReader, coCode: string): ImportIssue | null {
+  let total = 0;
+  let mine = 0;
+  const others = new Set<string>();
+  for (const table of SOURCE_TABLES) {
+    for (const row of src.rows(table) ?? []) {
+      total += 1;
+      if (str(row.CO_CODE).toUpperCase() === coCode.toUpperCase()) mine += 1;
+      else others.add(str(row.CO_CODE));
+    }
+  }
+  if (total === 0 || mine > 0) return null;
+  return {
+    step: 'Lite_AcMast',
+    table: 'CO_CODE',
+    reason: `The file has no rows for company ${coCode} (it holds company ${[...others].sort().join(', ')}); nothing was imported.`,
+  };
 }
 
 // ---- Step 5: WH_ItOpbl (UT_IMPORT.cs:3887-3965) -------------------------------------------------------------------
@@ -507,6 +597,9 @@ export function whItOpbl(src: SourceReader, ctx: LiteContext): Record<string, un
       DM_AMT: 0,
       MAIN_USER: ctx.user,
       LBR_RATE: 0,
+      // The desktop INSERT (:3927) names no DATA_TYPE; the desktop column default is 'A' (Next24 INFORMATION_SCHEMA
+      // ITM_OPBL.DATA_TYPE DEFAULT ('A')). The web column has no default, and Itm_Opbl_Stk (Ac_Stock.cs:15-17) posts only
+      // 'A'/'B' rows, so the default is written explicitly.
       DATA_TYPE: 'A',
     });
   });
@@ -516,7 +609,12 @@ export function whItOpbl(src: SourceReader, ctx: LiteContext): Record<string, un
 /** All five steps, in the desktop's order (UT_IMPORT.cs:8432-8437). */
 export function planLiteImport(src: SourceReader, ctx: LiteContext): LitePlan {
   const errors: ImportIssue[] = sourceProblems(src);
+  if (!errors.length) {
+    const mismatch = companyMismatch(src, ctx.coCode);
+    if (mismatch) errors.push(mismatch);
+  }
   const warnings: ImportIssue[] = [];
+  const skipped: SkippedOpening[] = [];
   const empty: LitePlan = {
     accounts: [],
     accountSrno: null,
@@ -529,6 +627,7 @@ export function planLiteImport(src: SourceReader, ctx: LiteContext): LitePlan {
     barDetl: [],
     barIdtl: [],
     itemOpenings: [],
+    skipped,
     errors,
     warnings,
   };
@@ -540,6 +639,7 @@ export function planLiteImport(src: SourceReader, ctx: LiteContext): LitePlan {
     ctx,
     new Set(accounts.map((a) => str(a.AC_CODE).toUpperCase())),
     warnings,
+    skipped,
   );
   const bar = liteBarData(src, ctx, errors);
   const itemOpenings = whItOpbl(src, ctx);
@@ -550,6 +650,7 @@ export function planLiteImport(src: SourceReader, ctx: LiteContext): LitePlan {
     openings,
     ...bar,
     itemOpenings,
+    skipped,
     errors,
     warnings,
   };

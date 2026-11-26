@@ -181,11 +181,20 @@ export const SOURCE_TIMEOUT_MS = 60_000;
 const WORKER_HEAP_MB = 768;
 
 export class SourceFileError extends Error {
-  constructor(message: string) {
+  constructor(
+    message: string,
+    /** True when the file was not read because another read was running (try again later). */
+    readonly busy = false,
+  ) {
     super(message);
     this.name = 'SourceFileError';
   }
 }
+
+/** At most this many parsing workers in the process, and one file being read per tenant. */
+export const MAX_SOURCE_WORKERS = 2;
+let workersRunning = 0;
+const tenantsReading = new Set<string>();
 
 export const SOURCE_MESSAGES = {
   EMPTY: 'The chosen file is empty. Choose the old Lite software .mdb file.',
@@ -194,6 +203,7 @@ export const SOURCE_MESSAGES = {
     'The chosen file is not a Microsoft Access (.mdb) database and was not read; nothing was imported.',
   UNREADABLE: 'The chosen .mdb file could not be read; nothing was imported.',
   TIMEOUT: 'Reading the chosen .mdb file took too long and was stopped; nothing was imported.',
+  BUSY: 'Another Old Software Import file is being read. Try again when it finishes; nothing was imported.',
 } as const;
 
 /** Jet 3/4 and ACE files carry "Standard Jet DB" / "Standard ACE DB" at byte 4 of their first page. */
@@ -271,7 +281,9 @@ export function pickAllowed(source: Record<string, Array<Record<string, unknown>
  * database test harnesses set and a deployment never does.
  */
 export function fixtureReaderEnabled(): boolean {
-  return process.env.DATACARE_IMPORT_FIXTURE_READER === '1';
+  return (
+    process.env.NODE_ENV !== 'production' && process.env.DATACARE_IMPORT_FIXTURE_READER === '1'
+  );
 }
 
 export function fixtureReader(bytes: Uint8Array): SourceReader {
@@ -302,7 +314,10 @@ const { parentPort, workerData } = require('node:worker_threads');
     if (t.rowCount > workerData.maxRows) throw new Error('too-many-rows:' + table);
     const byUpper = new Map(t.getColumnNames().map((c) => [c.toUpperCase(), c]));
     const present = columns.filter((c) => byUpper.has(c)).map((c) => byUpper.get(c));
-    tables[actual] = present.length ? t.getData({ columns: present }) : Array.from({ length: t.rowCount }, () => ({}));
+    const rows = present.length ? t.getData({ columns: present }) : Array.from({ length: t.rowCount }, () => ({}));
+    // The header's row count can be wrong in a damaged file: count what was actually read.
+    if (rows.length > workerData.maxRows) throw new Error('too-many-rows:' + table);
+    tables[actual] = rows;
   }
   parentPort.postMessage({ ok: true, names, tables });
 })().catch((error) => parentPort.postMessage({ ok: false, error: String((error && error.message) || error) }));
@@ -318,6 +333,19 @@ function mdbReaderUrl(): string {
 export async function mdbReader(
   bytes: Uint8Array,
   opts: { timeoutMs?: number } = {},
+): Promise<SourceReader> {
+  if (workersRunning >= MAX_SOURCE_WORKERS) throw new SourceFileError(SOURCE_MESSAGES.BUSY, true);
+  workersRunning += 1;
+  try {
+    return await readInWorker(bytes, opts);
+  } finally {
+    workersRunning -= 1;
+  }
+}
+
+async function readInWorker(
+  bytes: Uint8Array,
+  opts: { timeoutMs?: number },
 ): Promise<SourceReader> {
   const allow = Object.fromEntries(SOURCE_TABLES.map((t) => [t, columnsOf(t)]));
   const result = await new Promise<{ ok: boolean; error?: string; names?: string[]; tables?: any }>(
@@ -367,11 +395,20 @@ export async function mdbReader(
 /** Open an uploaded file: size cap first, then an Access file through the worker, or (tests only) a fixture. */
 export async function openImportSource(
   bytes: Uint8Array,
-  opts: { timeoutMs?: number } = {},
+  opts: { timeoutMs?: number; tenantId?: string } = {},
 ): Promise<SourceReader> {
   if (!bytes.length) throw new SourceFileError(SOURCE_MESSAGES.EMPTY);
   if (bytes.length > MAX_SOURCE_BYTES) throw new SourceFileError(SOURCE_MESSAGES.TOO_LARGE);
-  if (isAccessFile(bytes)) return mdbReader(bytes, opts);
-  if (fixtureReaderEnabled() && bytes[0] === 0x7b /* { */) return fixtureReader(bytes);
-  throw new SourceFileError(SOURCE_MESSAGES.NOT_MDB);
+  const tenant = opts.tenantId;
+  if (tenant !== undefined) {
+    if (tenantsReading.has(tenant)) throw new SourceFileError(SOURCE_MESSAGES.BUSY, true);
+    tenantsReading.add(tenant);
+  }
+  try {
+    if (isAccessFile(bytes)) return await mdbReader(bytes, opts);
+    if (fixtureReaderEnabled() && bytes[0] === 0x7b /* { */) return fixtureReader(bytes);
+    throw new SourceFileError(SOURCE_MESSAGES.NOT_MDB);
+  } finally {
+    if (tenant !== undefined) tenantsReading.delete(tenant);
+  }
 }

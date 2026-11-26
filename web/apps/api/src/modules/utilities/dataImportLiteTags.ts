@@ -61,6 +61,29 @@ export function liteBarData(
       notBlank(a.TAG_NO) &&
       notBlank(a.IT_CODE),
   );
+  // Indexes by the join keys, so each tag looks up its rows instead of scanning the tables (Access joins on them).
+  const up = (v: unknown) => str(v).toUpperCase();
+  const group = <T>(rows: T[], key: (row: T) => string) => {
+    const map = new Map<string, T[]>();
+    for (const row of rows) {
+      const k = key(row);
+      const list = map.get(k);
+      if (list) list.push(row);
+      else map.set(k, [row]);
+    }
+    return map;
+  };
+  const tagsByItem = group(tagRows, (a) => up(a.IT_CODE));
+  const detlByTag = group(
+    detlAll.map((d, i) => ({ d, i })),
+    ({ d }) => (d.TAG_NO === null || d.TAG_NO === undefined ? '\u0000' : up(d.TAG_NO)),
+  );
+  const idtlByTag = group(
+    idtlAll.map((r, i) => ({ r, i })),
+    ({ r }) => (r.TAG_NO === null || r.TAG_NO === undefined ? '\u0000' : up(r.TAG_NO)),
+  );
+  const bookByCode = new Map<string, (typeof books)[number]>();
+  for (const b of books) if (!bookByCode.has(up(b.CO_BOOK))) bookByCode.set(up(b.CO_BOOK), b);
   // GROUP BY A.IT_CODE, B.IT_TYPE ORDER BY B.IT_TYPE, A.IT_CODE
   const itemCodes = new Map<string, unknown>();
   for (const a of tagRows)
@@ -80,8 +103,10 @@ export function liteBarData(
     // columns, ordered by TAG_NO: one imported tag per distinct combination.
     const seen = new Set<string>();
     const tags: Array<{ tagNo: unknown; tagNwt: unknown }> = [];
-    for (const a of tagRows.filter((r) => eq(r.IT_CODE, item))) {
-      for (const c of detlAll.filter((d) => eq(d.TAG_NO, a.TAG_NO) && eq(d.IT_CODE, a.IT_CODE))) {
+    for (const a of tagsByItem.get(up(item)) ?? []) {
+      for (const { d: c } of (detlByTag.get(up(a.TAG_NO)) ?? []).filter(({ d }) =>
+        eq(d.IT_CODE, a.IT_CODE),
+      )) {
         const key = JSON.stringify([
           str(a.TAG_NO).toUpperCase(),
           ...GROUP_COLUMNS.map((col) => (c[col] === null ? null : str(c[col]).toUpperCase())),
@@ -96,9 +121,8 @@ export function liteBarData(
     for (const tag of tags) {
       num += 1;
       // :8492 the tag's BAR_DETL rows of the year, latest VCH_DATE first; row 0 is copied
-      const detl = detlAll
-        .filter((d) => eq(d.CO_YEAR, ctx.coYear) && eq(d.TAG_NO, tag.tagNo))
-        .map((d, i) => ({ d, i }))
+      const detl = (detlByTag.get(up(tag.tagNo)) ?? [])
+        .filter(({ d }) => eq(d.CO_YEAR, ctx.coYear))
         .sort((x, y) => cmpText(isoDay(y.d.VCH_DATE), isoDay(x.d.VCH_DATE)) || x.i - y.i);
       const d = detl[0]?.d;
       if (!d) {
@@ -110,7 +134,7 @@ export function liteBarData(
         });
         continue;
       }
-      const book = books.find((b) => eq(b.CO_BOOK, d.CO_BOOK));
+      const book = bookByCode.get(up(d.CO_BOOK));
       const vchSrno = Number(`1${text}${num}`); // :8644 1 & text & num
       barDetl.push({
         // :8506 INSERT INTO BAR_DETL(...) VALUES, column by column
@@ -184,19 +208,12 @@ export function liteBarData(
         MAIN_USER: ctx.user,
         ADD_USER: ctx.user,
         DATA_TRFR: 'N',
-        DATA_TYPE: 'A',
+        DATA_TYPE: 'A', // not in the desktop INSERT (:8506); the desktop column default BAR_DETL.DATA_TYPE ('A')
       });
       // :8496 BAR_IDTL of the tag whose TAG_NWT equals the grouped row's net weight, by ISR_NO
       const tagNwt = tag.tagNwt === null || tag.tagNwt === undefined ? null : val(tag.tagNwt);
-      const idtl = idtlAll
-        .filter(
-          (r) =>
-            eq(r.TAG_NO, tag.tagNo) &&
-            tagNwt !== null &&
-            r.TAG_NWT !== null &&
-            val(r.TAG_NWT) === tagNwt,
-        )
-        .map((r, i) => ({ r, i }))
+      const idtl = (idtlByTag.get(up(tag.tagNo)) ?? [])
+        .filter(({ r }) => tagNwt !== null && r.TAG_NWT !== null && val(r.TAG_NWT) === tagNwt)
         .sort((x, y) => fnv(x.r.ISR_NO) - fnv(y.r.ISR_NO) || x.i - y.i)
         .map(({ r }) => r);
       idtl.forEach((r, k) =>

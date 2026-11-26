@@ -41,6 +41,8 @@ interface Preview {
   newOpeningDate: string;
   question: string;
   previewHash: string;
+  skipped: { acCode: string; name: string; amount: number; gold: number; silver: number }[];
+  skippedTotal: number;
 }
 interface Applied extends Preview {
   message: string;
@@ -96,6 +98,7 @@ export default function DataImportPage() {
   const [file, setFile] = useState<{ name: string; data: string } | null>(null);
   const [preview, setPreview] = useState<Preview | null>(null);
   const [busy, setBusy] = useState<'read' | 'import' | null>(null);
+  const [acknowledged, setAcknowledged] = useState(false);
   const [msg, setMsg] = useState<{ kind: 'ok' | 'err'; text: string } | null>(null);
   const [processLabel, setProcessLabel] = useState('Data Import');
   // One key per chosen file: a retried Import of the same file answers the first result (D18).
@@ -123,6 +126,7 @@ export default function DataImportPage() {
       });
       setFile({ name: chosen.name, data });
       setPreview(next);
+      setAcknowledged(false);
       command.renew();
     } catch (e) {
       setFile(null);
@@ -146,7 +150,12 @@ export default function DataImportPage() {
     try {
       const done = await postCommand<Applied>(
         '/utilities/data-import/lite/apply',
-        { fileName: file.name, data: file.data, previewHash: preview.previewHash },
+        {
+          fileName: file.name,
+          data: file.data,
+          previewHash: preview.previewHash,
+          acknowledgeSkipped: acknowledged,
+        },
         command.key,
       );
       setPreview(done);
@@ -160,7 +169,12 @@ export default function DataImportPage() {
     }
   }
 
-  const canImport = !!preview && !preview.refusal && preview.errors.length === 0 && busy === null;
+  const canImport =
+    !!preview &&
+    !preview.refusal &&
+    preview.errors.length === 0 &&
+    (preview.skippedTotal === 0 || acknowledged) &&
+    busy === null;
 
   return (
     <div ref={screenRef} onKeyDown={onScreenKeyDown}>
@@ -252,6 +266,42 @@ export default function DataImportPage() {
             <div className="panel" style={{ overflow: 'auto' }}>
               <strong>Not imported</strong>
               <IssueTable caption="Import warnings" rows={preview.warnings} />
+            </div>
+          )}
+
+          {preview.skippedTotal > 0 && (
+            <div className="panel" style={{ overflow: 'auto' }}>
+              <strong>Opening balances with no web account</strong>
+              <table className="grid" aria-label="Skipped balances">
+                <thead>
+                  <tr>
+                    <th>Account</th>
+                    <th>Name</th>
+                    <th className="num">Amount</th>
+                    <th className="num">Gold</th>
+                    <th className="num">Silver</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {preview.skipped.map((x) => (
+                    <tr key={x.acCode}>
+                      <td>{x.acCode}</td>
+                      <td>{x.name}</td>
+                      <td className="num">{x.amount.toFixed(2)}</td>
+                      <td className="num">{x.gold.toFixed(3)}</td>
+                      <td className="num">{x.silver.toFixed(3)}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+              <label>
+                <input
+                  type="checkbox"
+                  checked={acknowledged}
+                  onChange={(e) => setAcknowledged(e.target.checked)}
+                />{' '}
+                Import without these balances (total {preview.skippedTotal})
+              </label>
             </div>
           )}
 
