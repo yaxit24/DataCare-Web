@@ -3,6 +3,7 @@ import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { PrismaClient } from '@datacare/db';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
+import { webAccountFor } from '../src/modules/ops/desktopTemplateMasters.js';
 import { seedCompany } from '../src/modules/ops/seedCompany.js';
 import { assertIsolatedTestDatabase } from './support/isolatedDatabase.js';
 
@@ -28,6 +29,7 @@ const TABLES = [
   'BAL_GR',
   'CO_SET',
   'CO_SET_NEW',
+  'CONV_MAST',
   'EMP_MAST',
   'TABLE_MAST',
   'STATE_MAST',
@@ -56,8 +58,6 @@ const EXCEPTIONS: Partial<Record<(typeof TABLES)[number], string>> = {
   MFG_MAST: 'MS_YEAR.cs:1504-1595 never copies MFG_MAST, even though its schema has CO_CODE.',
   PRINT_MAST:
     'Crystal Reports print-file defaults are desktop-only; web reports use web renderers.',
-  CO_SET:
-    'Web stores one company settings row with source-backed SL_AMT_TYPE/PR_AMT_TYPE defaults; installer fixtures include two edition rows.',
   STATE_MAST: 'MS_YEAR.cs:1504-1595 never copies this shared geography table; it has no CO_CODE.',
   COUNTRY_MAST: 'MS_YEAR.cs:1504-1595 never copies this shared geography table; it has no CO_CODE.',
   COL_MAST: 'Desktop grid-caption overrides are not currently copied into a web company.',
@@ -87,6 +87,83 @@ const COPIED_COLUMNS: Partial<Record<(typeof TABLES)[number], string[]>> = {
     'TRAD_AMT',
     'TRAD_WT',
     'CLG_AC',
+  ],
+  CO_SET: [
+    'CO_CODE',
+    'BTN_NAME',
+    'THEME',
+    'COUNTRY_CODE',
+    'LBR_TYPE',
+    'AC_LC_CODE_LEN',
+    'LOCK_DATE',
+    'TAX_ROF',
+    'RATE_PAR',
+    'SL_ROW_CHANGE',
+    'VB_IMPORT',
+    'TAG_RPT',
+    'FINE_STK_TYPE',
+    'RATE_MAST_OPEN',
+    'LBR_RATE_GEN',
+    'DHRN_INT_TYPE',
+    'INT_YEAR_DAYS',
+    'OP_DHRN',
+    'INT_DAY',
+    'HELP_SERCH',
+    'WEIGHT_PORT',
+    'LDR_SUMM',
+    'SL_AMT_TYPE',
+    'SMS_LINK',
+    'OP_LOAN',
+    'LOAN_INT_TYPE',
+    'TRAD_FINE',
+    'LBR_ROF',
+    'REMINDER_OPEN',
+    'ITM_RATE_ROF',
+    'ADMIN_SMS',
+    'CUST_SMS',
+    'PURC_WITH_LBR',
+    'DHIRN_COMPOUND',
+    'GRID_SCROLL',
+    'STK_RPT_TYPE',
+    'TOUCH_AUTO_SAVE',
+    'PAN_CARD_VAL',
+    'DHRN_PRC',
+    'DUP_PRINT',
+    'TAX_CODE',
+    'IP_WITH_PC',
+    'CO_STK_MERGE',
+    'STK_RPT_VIEW',
+    'PR_AMT_TYPE',
+    'CARD_COM_ADJ',
+    'CASH_PURC_AC',
+    'EMP_CODE_MANDATORY',
+    'STOCK_RPT_TYPE',
+    'LAST_DAY_LOCK',
+    'CASH_LIMIT',
+    'DHRN_WAPP',
+    'SCHM_WAPP',
+    'LEDR_BILL_COL',
+    'ALL_ROF_REMOVE',
+    'OZ_CON_VAL',
+    'FX_RATE',
+    'FX_CODE',
+  ],
+  CONV_MAST: [
+    'CO_CODE',
+    'CON_CODE',
+    'CON_NAME',
+    'RATE_DATE',
+    'GOLD_OZ_RATE',
+    'SILVER_OZ_RATE',
+    'CURRENCY_RATE',
+    'OUNCES_CONV',
+    'GOLD_CONV',
+    'SILVER_CONV',
+    'GOLD_PR_RATE',
+    'GOLD_SL_RATE',
+    'SILVER_PR_RATE',
+    'SILVER_SL_RATE',
+    'MAIN_USER',
   ],
   CO_SET_NEW: [
     'CO_CODE',
@@ -233,6 +310,22 @@ const COPIED_COLUMNS: Partial<Record<(typeof TABLES)[number], string[]>> = {
 };
 const NOT_COPIED = ['WEIGHT_MAST', 'MFG_MAST', 'STATE_MAST', 'COUNTRY_MAST'];
 
+/**
+ * The two documented adaptations of a copied value (desktopTemplateMasters.ts): the installer account codes of
+ * GROUP_MAST and BAL_GR become the web role accounts, and the TABLE_MAST counter takes the company's location ('01').
+ */
+function adapted(table: string, column: string, value: unknown): unknown {
+  if (table === 'TABLE_MAST' && column === 'LC_CODE') return '01';
+  // The web column is numeric(18,2); the installer's 82.772 is stored as 82.77.
+  if (table === 'CONV_MAST' && column === 'CURRENCY_RATE') return Number(value).toFixed(2);
+  if (
+    (table === 'GROUP_MAST' || table === 'BAL_GR') &&
+    ['SALE_AC', 'PURC_AC', 'CLOSING_AC', 'OP_AC', 'CLG_AC'].includes(column)
+  )
+    return webAccountFor(value);
+  return value;
+}
+
 function companyFixture(table: (typeof TABLES)[number], coCode: string): Row[] {
   const columns = COPIED_COLUMNS[table];
   if (!columns) return fixture(table);
@@ -242,7 +335,11 @@ function companyFixture(table: (typeof TABLES)[number], coCode: string): Row[] {
       Object.fromEntries(
         Object.keys(row).map((column) => [
           column,
-          column === 'CO_CODE' ? coCode : columns.includes(column) ? row[column] : null,
+          column === 'CO_CODE'
+            ? coCode
+            : columns.includes(column)
+              ? adapted(table, column, row[column])
+              : null,
         ]),
       ),
     );
@@ -376,7 +473,12 @@ databaseDescribe('new-company desktop template masters', () => {
         `SELECT * FROM "${table}" WHERE tenant_id=$1 AND "CO_CODE"='03'`,
         TENANT,
       );
-      expect(rows, table).toEqual([]);
+      if (table === 'CO_SET') {
+        // An established company keeps the minimal source-backed row (Ac_Image.cs:6221, :7101), not the installer's.
+        expect(rows.map((r) => [r.SL_AMT_TYPE, r.PR_AMT_TYPE, r.TAX_ROF, r.LBR_ROF])).toEqual([
+          ['N', 'F', null, null],
+        ]);
+      } else expect(rows, table).toEqual([]);
     }
   });
 

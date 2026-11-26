@@ -4,7 +4,9 @@ import { fileURLToPath } from 'node:url';
 import { describe, expect, it } from 'vitest';
 import {
   DESKTOP_ACCOUNT_GROUPS,
+  DESKTOP_ACCOUNT_ROLES,
   seedDesktopCompanyMasters,
+  webAccountFor,
 } from '../src/modules/ops/desktopTemplateMasters.js';
 
 const fixture = (table: string): Record<string, unknown>[] =>
@@ -17,7 +19,9 @@ const desktop = readFileSync(
 ).split('\n');
 const authority: Record<string, number> = {
   BAL_GR: 1562,
+  CO_SET: 1568,
   CO_SET_NEW: 1570,
+  CONV_MAST: 1574,
   EMP_MAST: 1576,
   GROUP_MAST: 1578,
   ITEM_MAST: 1580,
@@ -25,8 +29,21 @@ const authority: Record<string, number> = {
   TABLE_MAST: 1590,
 };
 
+// The two documented web adaptations of the copied values (desktopTemplateMasters.ts): installer account codes
+// become web role accounts, and the TABLE_MAST counter takes the company's location (default '01', not '00').
+const adapted = (table: string, column: string, value: unknown): unknown => {
+  if (column === 'CO_CODE') return '73';
+  if (table === 'TABLE_MAST' && column === 'LC_CODE') return '01';
+  if (
+    (table === 'GROUP_MAST' || table === 'BAL_GR') &&
+    ['SALE_AC', 'PURC_AC', 'CLOSING_AC', 'OP_AC', 'CLG_AC'].includes(column)
+  )
+    return webAccountFor(value);
+  return value;
+};
+
 describe('installer provisioning data against desktop new-company SQL', () => {
-  it('binds exactly the copied columns and installer values, rewriting only CO_CODE', async () => {
+  it('binds exactly the copied columns and installer values, rewriting only CO_CODE, the installer account codes and the TABLE_MAST location', async () => {
     const inserted: Record<string, Record<string, unknown>[]> = {};
     const tx = {
       async $executeRawUnsafe(sql: string, tenant: string, ...values: unknown[]) {
@@ -61,7 +78,7 @@ describe('installer provisioning data against desktop new-company SQL', () => {
         .filter((row) => !single || row[single[1]!] === single[2])
         .map((row) =>
           Object.fromEntries(
-            columns.map((column) => [column, column === 'CO_CODE' ? '73' : row[column]]),
+            columns.map((column) => [column, adapted(table, column, row[column])]),
           ),
         );
       expect(inserted[table], `${table}: MS_YEAR.cs:${line}`).toEqual(expected);
@@ -85,7 +102,29 @@ describe('installer provisioning data against desktop new-company SQL', () => {
       'isolated-unit-tenant',
       '73',
     );
-    expect(checks).toHaveLength(43);
+    expect(checks).toHaveLength(45);
+  });
+});
+
+describe('installer account codes map to web role accounts', () => {
+  it('names every account the seeded GROUP_MAST and BAL_GR rows use, with the installer AC_MAST name beside it', () => {
+    const names = new Map(
+      fixture('AC_MAST')
+        .filter((r) => r.CO_CODE === '01')
+        .map((r) => [String(r.AC_CODE), String(r.AC_NAME)]),
+    );
+    const used = new Set<string>();
+    for (const table of ['GROUP_MAST', 'BAL_GR'])
+      for (const row of fixture(table).filter((r) => r.CO_CODE === '01'))
+        for (const column of ['SALE_AC', 'PURC_AC', 'CLOSING_AC', 'OP_AC', 'CLG_AC'])
+          if (row[column]) used.add(String(row[column]));
+    for (const code of used) {
+      expect(DESKTOP_ACCOUNT_ROLES[code], `installer account ${code}`).toBeDefined();
+      expect(DESKTOP_ACCOUNT_ROLES[code]!.installerName).toBe(names.get(code));
+    }
+    expect(webAccountFor('00003')).toBe('SALES');
+    expect(webAccountFor('00009')).toBe('SLVPURC');
+    expect(() => webAccountFor('00099')).toThrow();
   });
 });
 

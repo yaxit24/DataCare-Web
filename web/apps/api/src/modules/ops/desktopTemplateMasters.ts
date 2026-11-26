@@ -1069,6 +1069,174 @@ const DESKTOP_COMPANY_MASTERS: ReadonlyArray<{
       ['01', 'SN', 'STONE', 'ABC'],
     ],
   },
+  // unified/src/csharp/DataCareNext/MS_YEAR.cs:1568
+  {
+    table: 'CO_SET',
+    columns: [
+      'CO_CODE',
+      'BTN_NAME',
+      'THEME',
+      'COUNTRY_CODE',
+      'LBR_TYPE',
+      'AC_LC_CODE_LEN',
+      'LOCK_DATE',
+      'TAX_ROF',
+      'RATE_PAR',
+      'SL_ROW_CHANGE',
+      'VB_IMPORT',
+      'TAG_RPT',
+      'FINE_STK_TYPE',
+      'RATE_MAST_OPEN',
+      'LBR_RATE_GEN',
+      'DHRN_INT_TYPE',
+      'INT_YEAR_DAYS',
+      'OP_DHRN',
+      'INT_DAY',
+      'HELP_SERCH',
+      'WEIGHT_PORT',
+      'LDR_SUMM',
+      'SL_AMT_TYPE',
+      'SMS_LINK',
+      'OP_LOAN',
+      'LOAN_INT_TYPE',
+      'TRAD_FINE',
+      'LBR_ROF',
+      'REMINDER_OPEN',
+      'ITM_RATE_ROF',
+      'ADMIN_SMS',
+      'CUST_SMS',
+      'PURC_WITH_LBR',
+      'DHIRN_COMPOUND',
+      'GRID_SCROLL',
+      'STK_RPT_TYPE',
+      'TOUCH_AUTO_SAVE',
+      'PAN_CARD_VAL',
+      'DHRN_PRC',
+      'DUP_PRINT',
+      'TAX_CODE',
+      'IP_WITH_PC',
+      'CO_STK_MERGE',
+      'STK_RPT_VIEW',
+      'PR_AMT_TYPE',
+      'CARD_COM_ADJ',
+      'CASH_PURC_AC',
+      'EMP_CODE_MANDATORY',
+      'STOCK_RPT_TYPE',
+      'LAST_DAY_LOCK',
+      'CASH_LIMIT',
+      'DHRN_WAPP',
+      'SCHM_WAPP',
+      'LEDR_BILL_COL',
+      'ALL_ROF_REMOVE',
+      'OZ_CON_VAL',
+      'FX_RATE',
+      'FX_CODE',
+    ],
+    keys: ['CO_CODE'],
+    rows: [
+      [
+        '01',
+        'Transaction',
+        1,
+        'INR',
+        'G',
+        '1',
+        '2000-04-04T00:00:00.000Z',
+        2,
+        'G',
+        'N',
+        'N',
+        'N',
+        'F',
+        'N',
+        'N',
+        'M',
+        0,
+        'Y',
+        '1',
+        'S',
+        '0',
+        'N',
+        'N',
+        '001',
+        'Y',
+        'M',
+        'N',
+        0,
+        'N',
+        0,
+        'N',
+        'N',
+        'Y',
+        'Y',
+        'Y',
+        'N',
+        'N',
+        200000,
+        2,
+        'N',
+        '10',
+        'A',
+        'N',
+        'OLD',
+        'F',
+        'N',
+        'N',
+        'N',
+        'OLD',
+        'N',
+        0,
+        'N',
+        'N',
+        'N',
+        'N',
+        31.1035,
+        87,
+        'INR',
+      ],
+    ],
+  },
+  // unified/src/csharp/DataCareNext/MS_YEAR.cs:1574
+  {
+    table: 'CONV_MAST',
+    columns: [
+      'CO_CODE',
+      'CON_CODE',
+      'CON_NAME',
+      'RATE_DATE',
+      'GOLD_OZ_RATE',
+      'SILVER_OZ_RATE',
+      'CURRENCY_RATE',
+      'OUNCES_CONV',
+      'GOLD_CONV',
+      'SILVER_CONV',
+      'GOLD_PR_RATE',
+      'GOLD_SL_RATE',
+      'SILVER_PR_RATE',
+      'SILVER_SL_RATE',
+      'MAIN_USER',
+    ],
+    keys: ['CO_CODE', 'CON_CODE'],
+    rows: [
+      [
+        '01',
+        'INR',
+        'Indian Rupee',
+        '2024-03-07T09:56:00.000Z',
+        2163.4,
+        24.385,
+        82.772,
+        35.274,
+        1.0573,
+        1.022,
+        0,
+        30097.75,
+        72763,
+        41181.99,
+        null,
+      ],
+    ],
+  },
   // unified/src/csharp/DataCareNext/MS_YEAR.cs:1590
   {
     table: 'TABLE_MAST',
@@ -1078,17 +1246,77 @@ const DESKTOP_COMPANY_MASTERS: ReadonlyArray<{
   },
 ];
 
-/** Called only under seedCompany's freshChart guard, in its existing tenant transaction. */
+/**
+ * Web adaptation of the installer account codes (the same one seedCompany makes for AC_MAST: named posting-role
+ * accounts replace the numeric installer chart). The installer GROUP_MAST and BAL_GR rows name accounts 00003-00012 and
+ * 00021-00035 of the installer AC_MAST (test/fixtures/desktop-template/AC_MAST.json), which a web company does not
+ * have, so a sale or purchase of a seeded item would post to a nameless account. Each code becomes the SYSTEM_ACCOUNTS
+ * account of the same meaning (the roles bookTemplates.ts DESKTOP_DEFAULT_ACCOUNT_ROLES already uses for 00003-00006 and
+ * 00008-00009); `null` means the web chart has no account of that meaning and none is invented, so the column is left
+ * blank (the operator names one in Group master, MS_GROUP).
+ */
+export const DESKTOP_ACCOUNT_ROLES: Readonly<
+  Record<string, { installerName: string; webCode: string | null }>
+> = {
+  '00003': { installerName: 'SALES GOLD A/C', webCode: 'SALES' },
+  '00004': { installerName: 'SALES SILVER A/C', webCode: 'SLVSALE' },
+  '00005': { installerName: 'SALES OLD GOLD A/C', webCode: 'OG' },
+  '00006': { installerName: 'SALES OLD SILVER A/C', webCode: 'OS' },
+  '00007': { installerName: 'SALES OTHER A/C', webCode: null },
+  '00008': { installerName: 'PURCHASE GOLD A/C', webCode: 'PURCHASE' },
+  '00009': { installerName: 'PURCHASE SILVER A/C', webCode: 'SLVPURC' },
+  '00010': { installerName: 'PURCHASE OLD GOLD A/C', webCode: 'OLDGOLD' },
+  '00011': { installerName: 'PURCHASE OLD SILVER A/C', webCode: null },
+  '00012': { installerName: 'PURCHASE OTHER A/C', webCode: null },
+  '00021': { installerName: 'CLG.STOCK GOLD ORNA.A/C.', webCode: null },
+  '00022': { installerName: 'CLG.STOCK SILVER ORNA.A/C.', webCode: null },
+  '00023': { installerName: 'CLG.STOCK OLD GOLD A/C.', webCode: null },
+  '00024': { installerName: 'CLG.STOCK OLD SILVER A/C.', webCode: null },
+  '00025': { installerName: 'CLG.STOCK OTHER A/C.', webCode: null },
+  '00026': { installerName: 'CLOSING STOCK - P & L - GOLD ORNA.', webCode: null },
+  '00027': { installerName: 'CLOSING STOCK - P & L - SILVER ORNA.', webCode: null },
+  '00028': { installerName: 'CLOSING STOCK - P & L - OLD GOLD A/C', webCode: null },
+  '00029': { installerName: 'CLOSING STOCK - P & L - OLD SILVER A/C', webCode: null },
+  '00030': { installerName: 'CLOSING STOCK - P & L - OTHER A/C', webCode: null },
+  '00031': { installerName: 'OPNING STOCK- GOLD ORNA.', webCode: null },
+  '00032': { installerName: 'OPNING STOCK- SILVER ORNA.', webCode: null },
+  '00033': { installerName: 'OPNING STOCK- OLD GOLD A/C', webCode: null },
+  '00034': { installerName: 'OPNING STOCK- OLD SILVER A/C', webCode: null },
+  '00035': { installerName: 'OPNING STOCK- OTHER A/C', webCode: null },
+};
+const ACCOUNT_COLUMNS = new Set(['SALE_AC', 'PURC_AC', 'CLOSING_AC', 'OP_AC', 'CLG_AC']);
+const ACCOUNT_TABLES = new Set(['GROUP_MAST', 'BAL_GR']);
+
+/** The web account for one installer account value; anything not in the map is a bug in this file's data. */
+export function webAccountFor(installerCode: unknown): string | null {
+  if (installerCode == null || installerCode === '') return null;
+  const mapped = DESKTOP_ACCOUNT_ROLES[String(installerCode)];
+  if (!mapped) throw new Error(`installer account ${String(installerCode)} has no web mapping`);
+  return mapped.webCode;
+}
+
+/**
+ * Called only under seedCompany's freshChart guard, in its existing tenant transaction. MS_YEAR.cs:1562-1590
+ * rewrites CO_CODE only; this seed also (a) maps the installer account codes (DESKTOP_ACCOUNT_ROLES) and (b) gives
+ * the TABLE_MAST counter the company's own location, because the web company's location is `lcCode`, not the
+ * installer's '00' (the desktop copies the counter with the location it is created in).
+ */
 export async function seedDesktopCompanyMasters(
   tx: any,
   absent: Absent,
   tenantId: string,
   coCode: string,
+  lcCode = '01',
 ): Promise<void> {
   for (const { table, columns, keys, rows } of DESKTOP_COMPANY_MASTERS) {
     for (const source of rows) {
-      // MS_YEAR.cs:1562-1590 rewrites CO_CODE only; LC_CODE remains the installer's counter code.
-      const values = source.map((value, index) => (columns[index] === 'CO_CODE' ? coCode : value));
+      const values = source.map((value, index) => {
+        const column = columns[index]!;
+        if (column === 'CO_CODE') return coCode;
+        if (table === 'TABLE_MAST' && column === 'LC_CODE') return lcCode;
+        if (ACCOUNT_TABLES.has(table) && ACCOUNT_COLUMNS.has(column)) return webAccountFor(value);
+        return value;
+      });
       const where = keys.map((key, index) => `"${key}"=$${index + 2}`).join(' AND ');
       if (await absent(table, where, ...keys.map((key) => values[columns.indexOf(key)]))) {
         await tx.$executeRawUnsafe(

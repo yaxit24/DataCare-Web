@@ -133,11 +133,18 @@ d('WP-26 Sales Invoice residuals (database)', () => {
   const seedMasters = async (tenantId: string) => {
     await seedCompany(prisma, tenantId, CO, { coName: 'WP26', lcCode: LC });
     await withTenant(prisma, tenantId, async (tx: any) => {
-      // The desktop installer CO_SET_NEW (seeded into every new company) has TOT_AMT_ROF 0: whole-rupee bill
-      // totals. These fixtures were measured with the 2-decimal total (65,517.27), so the company here is
-      // configured for 2 decimals, a setting the desktop's Company Setting form offers (0/1/2).
+      // The installer CO_SET (TAX_ROF 2, LBR_ROF 0, ITM_RATE_ROF 0, CASH_LIMIT 0) and CO_SET_NEW (TOT_AMT_ROF 0) that
+      // seedCompany copies (MS_YEAR.cs:1568-1570) round differently from these fixtures, which were measured with 2
+      // decimals throughout and the 200,000 cash limit (CASH_LIMIT 0 would lift the limit the cash-limit case measures).
+      // So the company is set to what a company that never opened Company Settings has, and TOT_AMT_ROF to 2, a value
+      // the Company Setting form offers (0/1/2).
       await tx.$executeRawUnsafe(
         `UPDATE "CO_SET_NEW" SET "TOT_AMT_ROF"=2 WHERE tenant_id=$1 AND "CO_CODE"=$2`,
+        tenantId,
+        CO,
+      );
+      await tx.$executeRawUnsafe(
+        `UPDATE "CO_SET" SET "TAX_ROF"=NULL,"LBR_ROF"=NULL,"ITM_RATE_ROF"=NULL,"CASH_LIMIT"=NULL WHERE tenant_id=$1 AND "CO_CODE"=$2`,
         tenantId,
         CO,
       );

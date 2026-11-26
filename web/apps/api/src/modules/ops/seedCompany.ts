@@ -763,7 +763,10 @@ export async function seedCompany(
         (await absent('AC_MAST', '"CO_CODE"=$2 AND "AC_CODE"=$3', coCode, 'CASH')));
     if (freshChart) {
       await seedDesktopAccountGroups(tx, absent, tenantId, coCode);
-      await seedDesktopCompanyMasters(tx, absent, tenantId, coCode);
+      const coSetMissing = await absent('CO_SET', '"CO_CODE"=$2', coCode);
+      await seedDesktopCompanyMasters(tx, absent, tenantId, coCode, lcCode);
+      // The desktop copies company 01's whole CO_SET row (MS_YEAR.cs:1568), so a fresh company's row comes from there.
+      if (coSetMissing && !(await absent('CO_SET', '"CO_CODE"=$2', coCode))) coSet = true;
     }
     for (const a of SYSTEM_ACCOUNTS) {
       if (await absent('AC_MAST', '"CO_CODE"=$2 AND "AC_CODE"=$3', coCode, a.code)) {

@@ -542,9 +542,14 @@ const splitAudit = (diff: TenantDiff) => {
     const before = await stableSnapshot(owner, tenantId);
     const put = (user: string, payload: unknown, voucher = vchNo) =>
       request(user, 'PUT', `/purchase-returns/${voucher}`, payload);
+    // The seeded CO_SET carries the installer's old LOCK_DATE (MS_YEAR.cs:1568), which the test puts back at the end.
+    const [{ lock: originalLock }] = await query<Array<{ lock: string | null }>>(
+      `SELECT "LOCK_DATE" lock FROM "CO_SET" WHERE tenant_id=$1 AND "CO_CODE"='01'`,
+      tenantId,
+    );
     const setLock = (day: string | null) =>
       exec(
-        `UPDATE "CO_SET" SET "LOCK_DATE"=$1::date WHERE tenant_id=$2 AND "CO_CODE"='01'`,
+        `UPDATE "CO_SET" SET "LOCK_DATE"=$1 WHERE tenant_id=$2 AND "CO_CODE"='01'`,
         day,
         tenantId,
       );
@@ -559,7 +564,7 @@ const splitAudit = (diff: TenantDiff) => {
     const lockedNew = await put(EDITOR, payloadOf(view, { vchDate: `${startYear}-06-05` }));
     expect(lockedNew.statusCode, lockedNew.body).toBe(400);
     expect(lockedNew.json().error).toBe('PeriodLockValidationError');
-    await setLock(null);
+    await setLock(originalLock);
 
     const outOfYear = await put(EDITOR, payloadOf(view, { vchDate: `${startYear + 1}-04-15` }));
     expect(outOfYear.statusCode, outOfYear.body).toBe(400);

@@ -53,10 +53,17 @@ export async function seedCatalogue(stack, { password }) {
   });
   assert(created, 'seedCompany must provision the base company');
 
-  // The installer CO_SET_NEW that seedCompany now copies (MS_YEAR.cs:1555-1592) has TOT_AMT_ROF 0 (whole-rupee
-  // bill totals). The matrices' measured totals (65,517.27 ...) were taken with the setting blank, which the desktop
-  // reads as 2 decimals, so the fixture company leaves it blank. settingsEffects sets it explicitly where it matters.
+  // The installer CO_SET_NEW that seedCompany now copies (MS_YEAR.cs:1555-1592) has TOT_AMT_ROF 0 (whole-rupee bill
+  // totals). The matrices' measured totals (65,517.27 ...) were taken with 2 decimals, so the fixture company keeps
+  // 2 decimals on purpose by leaving the setting NULL, which the web rule reads as 2 dp. (The desktop does not read
+  // a blank as 2: MS_OPNCOMP.cs:991 ToInteger.) settingsEffects sets it explicitly where it matters.
   await sql(`UPDATE "CO_SET_NEW" SET "TOT_AMT_ROF"=NULL WHERE tenant_id=$1 AND "CO_CODE"='01'`);
+  // Likewise the installer CO_SET (MS_YEAR.cs:1568: TAX_ROF 2, LBR_ROF 0, ITM_RATE_ROF 0, CASH_LIMIT 0, LBR_TYPE G): the matrices'
+  // figures were measured with these blank (2 decimals throughout, the 200,000 cash limit), so the fixture company
+  // leaves them blank on purpose.
+  await sql(
+    `UPDATE "CO_SET" SET "TAX_ROF"=NULL,"LBR_ROF"=NULL,"ITM_RATE_ROF"=NULL,"CASH_LIMIT"=NULL,"LBR_TYPE"=NULL WHERE tenant_id=$1 AND "CO_CODE"='01'`,
+  );
 
   // F06: a historic year next to the current one, so year scoping is exercised.
   await sql(

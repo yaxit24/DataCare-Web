@@ -106,6 +106,11 @@ const headOf = (vchNo: string) => `0101${YEAR}${BOOK}${vchNo}`;
       `UPDATE "CO_SET_NEW" SET "TOT_AMT_ROF"=2 WHERE tenant_id=$1 AND "CO_CODE"='01'`,
       tenantId,
     );
+    // The installer CO_SET (TAX_ROF 2, LBR_ROF 0, ITM_RATE_ROF 0) is blanked too: the measured legs are at 2 decimals.
+    await exec(
+      `UPDATE "CO_SET" SET "TAX_ROF"=NULL,"LBR_ROF"=NULL,"ITM_RATE_ROF"=NULL WHERE tenant_id=$1 AND "CO_CODE"='01'`,
+      tenantId,
+    );
     // F02 sample data: each group names its own income account (GROUP_MAST.SALE_AC).
     await exec(
       `INSERT INTO "GROUP_MAST"(tenant_id,"CO_CODE","GR_CODE","GR_NAME","SALE_AC","PURC_AC")
