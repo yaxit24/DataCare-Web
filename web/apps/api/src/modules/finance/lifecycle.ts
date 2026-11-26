@@ -232,6 +232,14 @@ export async function editIdentityTx(
       ledger: { table: 'AC_DATA', lines: [{ CO_CODE: options.scope.coCode, VCH_DATE: date }] },
     });
   }
+  // TR_CASH.cs:2976-3004 allocates a hidden identity for a NEW cash voucher. Legacy PAY_DATA grids
+  // have no such identity and this single-party edit cannot safely reconstruct their PAY_DETL lines.
+  // Refuse before replaceWriteSetTx deletes anything rather than silently collapsing the old grid.
+  if (options.table === 'PAY_DATA' && !text(persisted.HD_VCH_NO)) {
+    throw new FinanceLifecycleValidationError(
+      'Cannot edit this legacy payment: it has no hidden voucher number. Its saved payment lines must be migrated before editing.',
+    );
+  }
   const hiddenVoucherNo = formatVoucherNo(text(persisted.HD_VCH_NO));
   return {
     persisted,
