@@ -1523,6 +1523,18 @@ const tagStockCases = [
         'carried into this year; the one sold last year is not',
       );
       assert.equal(stock.rows[0].Qty, '1');
+      // The carried row opens nothing: the desktop's copy sits in book 000, which BOOK_DATA does not hold
+      // (BtmSchm.cs:2378, RP_TAG.cs:8924); the web row is last year's voucher, whose number must not open this year.
+      const zoomCalls = [];
+      const onRequest = (request) => {
+        if (request.url().includes('/reports/tag-stock/zoom')) zoomCalls.push(request.url());
+      };
+      page.on('request', onRequest);
+      await page.getByTestId('tag-stock-grid').locator('tbody tr').first().dblclick();
+      await page.waitForTimeout(800);
+      page.off('request', onRequest);
+      assert.match(new URL(page.url()).pathname, /\/reports\/tag-stock/);
+      assert.deepEqual(zoomCalls, [], 'no zoom is asked for a carried row');
       // The movements of the year stay the year's own: In and All of this year do not list it.
       await runMode(page, 'In Tag', 'in');
       assert.deepEqual(tagsOf(await readGrid(page)), []);

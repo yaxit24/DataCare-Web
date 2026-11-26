@@ -630,8 +630,16 @@ d('Tag Stock report (RP_TAG) selections, stock state and totals', () => {
     );
     // An imported copied opening in the latest earlier year supersedes earlier copies of the same tag.
     await seedWith(soldNow, [open(soldNow)], { year: '2024-2025' });
-    const stock = tagsOf(await run('stock', { toDate: '2026-05-31' }));
+    const stockReport = await run('stock', { toDate: '2026-05-31' });
+    const stock = tagsOf(stockReport);
     expect(stock).toContain('AY1');
+    // The carried row is the earlier year's voucher: it is marked so the screen does not zoom it (the desktop's copy
+    // sits in book 000, which BOOK_DATA does not hold, RP_TAG.cs:8924); rows of this year are not marked.
+    const carriedRows = stockReport.rows.filter((r: any) => r.carried === true);
+    expect(carriedRows.map((r: any) => r.tagNo)).toEqual(['AY1']);
+    expect(stockReport.rows.some((r: any) => r.tagNo !== 'AY1' && r.carried === undefined)).toBe(
+      true,
+    );
     expect(stock).not.toContain('AY4');
     expect(stock).not.toContain('AY5');
     // Before the sale of this year the carried tag is still there; the movements of other tabs stay in the year.
@@ -649,6 +657,7 @@ d('Tag Stock report (RP_TAG) selections, stock state and totals', () => {
       { ...scope, CO_YEAR: '2025-2026' },
     );
     expect(tagsOf(previous)).toContain('AY1');
+    expect(previous.rows.find((r: any) => r.tagNo === 'AY1')?.carried).toBeUndefined();
   });
 
   // ---------------------------------------------------------------- Apr (approval pending)

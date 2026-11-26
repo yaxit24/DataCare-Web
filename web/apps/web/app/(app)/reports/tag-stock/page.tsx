@@ -88,6 +88,8 @@ export default function TagStockPage() {
     if (!row || summ || report?.view !== 'tag') return;
     if (filters.lcCode.trim().toUpperCase() !== (getPageContextState().context?.lcCode ?? ''))
       return;
+    // A tag carried from an earlier year: the desktop's copy sits in book 000, which opens nothing (RP_TAG.cs:8924).
+    if (row.carried) return;
     const book = String(row.book ?? '');
     const vchNo = String(row.vchNo ?? '');
     if (!book || !vchNo) return;

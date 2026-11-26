@@ -81,6 +81,8 @@ export interface TagStockFilters {
   view?: TagStockView;
 }
 export interface TagStockRow {
+  /** A tag carried from an earlier year (no voucher of the session year): it does not zoom. */
+  carried?: boolean;
   lcCode: string | null;
   vchType: string | null;
   vchNo: string | null;
@@ -543,7 +545,11 @@ export async function tagStockReport(
       const k = fromC('c');
       k.vchDate = stkDate('c');
       k.day = `(${sys()} - ${stkDate('c')})`;
-      sql = `SELECT ${selectList(k)}
+      // A row of an earlier year is a tag the year rollover carried. The desktop copies it into the new year under
+      // CO_BOOK '000' (BtmSchm.cs:2378), which BOOK_DATA does not hold, so its double click opens nothing
+      // (RP_TAG.cs:8924-8926); here the row is the earlier year's own voucher, so it is marked and never zoomed.
+      const carriedCol = year ? `(c."CO_YEAR"<${p.add(year)})` : 'false';
+      sql = `SELECT ${selectList(k)}, ${carriedCol} AS "carried"
         FROM "BAR_DETL" c ${itemJoin('c')}`;
       where.push(`c."CO_CODE"=${co}`);
       lcWhere('c');
@@ -637,6 +643,7 @@ export async function tagStockReport(
       prName: S(r.prName),
       designNo: S(r.design),
       tblCode: S(r.counter),
+      ...(r.carried === true ? { carried: true } : {}),
       ...(f.otherItems && tab === 'apr' && aprKind === 'party'
         ? Object.fromEntries(
             [1, 2, 3, 4, 5].flatMap((n) => [
