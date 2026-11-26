@@ -562,6 +562,54 @@ describe.runIf(RUN)('payments saved in PAY_DATA before they moved to CASH_DATA s
     ]);
   });
 
+  it('clearly refuses a legacy grid without a hidden number and preserves the complete saved write set', async () => {
+    await exec(`UPDATE "PAY_DATA" SET "HD_VCH_NO"=NULL WHERE tenant_id=$1`, TENANT);
+    await exec(
+      `INSERT INTO "PAY_DETL"(tenant_id,"CO_CODE","LC_CODE","CO_YEAR","CO_BOOK","VCH_NO","SR_NO","AC_CODE")
+       VALUES ($1,$2,$3,$4,'002','00001',1,$5),($1,$2,$3,$4,'002','00001',2,$6)`,
+      TENANT,
+      CO,
+      LC,
+      YEAR,
+      PARTY,
+      PARTY_B,
+    );
+    const snapshot = async () => {
+      const out: Record<string, unknown> = {};
+      for (const table of [
+        'PAY_DATA',
+        'PAY_DETL',
+        'CASH_DATA',
+        'AC_DATA',
+        'ROJ_MEL_DATA',
+        'TEMP_BOOK_DATA',
+        'DELETE_DATA',
+      ]) {
+        out[table] = await rows(
+          `SELECT * FROM "${table}" t WHERE tenant_id=$1 ORDER BY to_jsonb(t)::text`,
+        );
+      }
+      return out;
+    };
+    const before = await snapshot();
+    await expect(
+      editPayment(
+        runtime,
+        {
+          scope: scopeOf('002'),
+          partyAc: PARTY,
+          amount: 360,
+          mode: 'cash',
+          vchDate: '2024-05-01',
+        } as never,
+        '00001',
+      ),
+    ).rejects.toThrow(
+      'Cannot edit this legacy payment: it has no hidden voucher number. Its saved payment lines must be migrated before editing.',
+    );
+    expect(await snapshot()).toEqual(before);
+  });
+
   it('deletes a legacy payment, even one saved before the hidden number existed', async () => {
     await exec(`UPDATE "PAY_DATA" SET "HD_VCH_NO"=NULL WHERE tenant_id=$1`, TENANT);
     await deletePayment(runtime, { scope: scopeOf('002'), vchNo: '00001', deleteUser: 'tester' });

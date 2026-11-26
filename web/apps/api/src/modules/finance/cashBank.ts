@@ -737,6 +737,12 @@ async function editCash(
       // A grid voucher's rows differ in SR_NO, so this refuses ("voucher is ambiguous") rather than collapse a
       // multi-line voucher into one line; the screen offers no single-line edit for it.
       extraColumns: table === 'CASH_DATA' ? ['SR_NO'] : [],
+      // TR_CASH.cs:2976-3004 gives a NEW cash voucher its hidden number. A payment saved in PAY_DATA before payments
+      // moved to CASH_DATA has none, and this single-party edit cannot rebuild its PAY_DETL lines.
+      blankHiddenRefusal:
+        table === 'PAY_DATA'
+          ? 'Cannot edit this legacy payment: it has no hidden voucher number. Its saved payment lines must be migrated before editing.'
+          : undefined,
     });
     let merged = input;
     if (table === 'CASH_DATA') {
