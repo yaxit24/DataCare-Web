@@ -7,15 +7,16 @@ import {
   type DesktopDateInputHandle,
 } from '../../../../components/DesktopDateInput';
 import { useScreenEscape, type ScreenKeyEvent } from '../../../../lib/screenEscape';
-import { get } from '../../../../lib/api';
+import { ApiError, get } from '../../../../lib/api';
 import { HuidGrid } from './HuidGrid';
 import { HuidLookupField, focusControl } from './HuidLookupField';
 import { todayIso, useHuidReport } from './useHuidReport';
-import { HUID_VIEWS, type HelpRow, type HuidFilters, type HuidView } from './types';
+import { HUID_VIEWS, type HelpRow, type HuidFilters, type HuidRow, type HuidView } from './types';
 
 /**
- * Report → HuId Report: the desktop RP_HUID form, caption "Tag Stock With HuId"
- * (RP_HUID.cs:1067 `lblBook.Text = "Tag Stock With HuId";`). A static route, so it takes precedence over
+ * Report → HuId Report: the desktop RP_HUID form, caption "HuId Report": the design-time "Tag Stock With HuId"
+ * (RP_HUID.cs:1067) is replaced at load by the menu name (`lblBook.Text = CurRpt` = MsUserRightForm, :1408-1409;
+ * menu "HuId Report", MDI_FORM.cs:9032). A static route, so it takes precedence over
  * the generic `[report]` page, which cannot express RP_HUID's three views and their date rules.
  *
  * Controls follow the desktop's tab order (study Screen table): From, To (both on the system date,
@@ -48,6 +49,27 @@ export default function HuidReportPage() {
   const [products, setProducts] = useState<HelpRow[]>([]);
   const [groups, setGroups] = useState<HelpRow[]>([]);
   const report = useHuidReport(products, groups);
+  const [zoomError, setZoomError] = useState('');
+  /**
+   * DGV_DoubleClick (RP_HUID.cs:2252): the voucher of the row opens in the screen of its book on the row's VchNo. A
+   * target the user may not open answers "You Have No Rights..." (the desktop text of RP_TAG.cs:8943).
+   */
+  const zoom = async (row: HuidRow) => {
+    setZoomError('');
+    const book = String(row.book ?? '');
+    const vchNo = String(row.vchNo ?? '');
+    if (!book || !vchNo) return;
+    try {
+      const target = await get<{ path: string; query: Record<string, string> }>(
+        `/reports/huid/zoom?bookCode=${encodeURIComponent(book)}&vchNo=${encodeURIComponent(vchNo)}`,
+      );
+      const query = new URLSearchParams({ ...target.query, vchNo, coBook: book });
+      router.push(`${target.path}?${query.toString()}`);
+    } catch (e) {
+      if (e instanceof ApiError && e.status === 403) setZoomError('You Have No Rights...');
+      else if (!(e instanceof ApiError && e.status === 404)) setZoomError('failed');
+    }
+  };
   const {
     filters,
     setFilters,
@@ -150,10 +172,10 @@ export default function HuidReportPage() {
 
   return (
     <div>
-      <h1>Tag Stock With HuId</h1>
+      <h1>HuId Report</h1>
       <form
         ref={screenRef}
-        aria-label="Tag Stock With HuId"
+        aria-label="HuId Report"
         onKeyDown={onScreenKey}
         onSubmit={(event) => event.preventDefault()}
       >
@@ -269,7 +291,7 @@ export default function HuidReportPage() {
               >
                 <option value="all">All</option>
                 <option value="with">With HuId</option>
-                <option value="without">Without HuId</option>
+                <option value="without">Whout HuId</option>
               </select>
             </div>
             <HuidLookupField
@@ -297,19 +319,19 @@ export default function HuidReportPage() {
           </div>
         </div>
 
-        {error && (
+        {(error || zoomError) && (
           <div className="msg err" role="alert">
-            {error}
+            {error || zoomError}
           </div>
         )}
-        {!error && status && (
+        {!error && !zoomError && status && (
           <div className="msg" role="status">
             {status}
           </div>
         )}
 
         <div className="panel" style={{ marginTop: 8, overflow: 'auto' }}>
-          <HuidGrid ref={grid} result={result} />
+          <HuidGrid ref={grid} result={result} onOpen={zoom} />
         </div>
 
         <div className="row" style={{ marginTop: 8 }}>
