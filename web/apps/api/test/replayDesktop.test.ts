@@ -558,13 +558,55 @@ describe('replay oracle: normalisation and grouping', () => {
 });
 
 describe('known desktop build differences', () => {
-  it('marks the sale ledger keys and stock sections as build differences, and nothing else', () => {
-    const group = (family: string, table: string, column: string, kind: string) =>
-      lib.buildDifferenceOf({ family, table, column, kind });
-    expect(group('SALES', 'AC_DATA', '*', 'rows-unpaired')).toMatch(/Ac_Ledr\.cs/);
-    expect(group('SALES', 'AC_DATA', 'LEDR_KEY', 'value')).toMatch(/LEDR_KEY/);
-    expect(group('SALES', 'MAIN_STOCK', '*', 'rows-unpaired')).toMatch(/Ac_Stock\.cs:114/);
-    expect(group('SALES', 'AC_DATA', 'DR_AMT', 'value')).toBeUndefined();
-    expect(group('CONTRA', 'AC_DATA', '*', 'rows-unpaired')).toBeUndefined();
+  const head = '01002024-2025026' + '00001';
+  const diff = (table: string, column: string, desktop: unknown, web: unknown) =>
+    lib.buildDifferenceOf({ family: 'SALES', table, column, desktop, web });
+  it('passes a renumbered key only when both builds name the same role on the same line', () => {
+    expect(diff('AC_DATA', 'LEDR_KEY', `${head}19`, `${head}25`)).toMatch(/same role cash.party/);
+    expect(diff('AC_DATA', 'LEDR_KEY', `${head}03`, `${head}08`)).toMatch(/item.book/);
+    expect(diff('AC_DATA', 'LEDR_KEY', `${head}         102`, `${head}         107`)).toMatch(
+      /item.line#1/,
+    );
+    // Colliding codes: data 09 is the bank pair, source 09 the tax leg; data 25 kasar, source 25 cash.
+    expect(diff('AC_DATA', 'LEDR_KEY', `${head}09`, `${head}09`)).toBeUndefined();
+    expect(diff('AC_DATA', 'LEDR_KEY', `${head}25`, `${head}25`)).toBeUndefined();
+    // Same role, different line: a real difference.
+    expect(
+      diff('AC_DATA', 'LEDR_KEY', `${head}         102`, `${head}         207`),
+    ).toBeUndefined();
+    expect(diff('MAIN_STOCK', 'SR_NO', 1, 3)).toMatch(/Ac_Stock\.cs:114/);
+    expect(diff('MAIN_STOCK', 'SR_NO', 1, 4)).toBeUndefined();
+  });
+
+  it('keeps unpaired ledger rows and amount differences as defects', () => {
+    const report = {
+      cases: [
+        {
+          caseId: 'SALES:026/00001',
+          tables: [
+            {
+              table: 'AC_DATA',
+              presentOn: 'both',
+              desktopRows: 3,
+              webRows: 4,
+              missingRows: [],
+              extraRows: ['x'],
+              missingColumns: [],
+              differences: [
+                { column: 'LEDR_KEY', rowKey: 'k', desktop: `${head}04`, web: `${head}09` },
+                { column: 'LEDR_KEY', rowKey: 'k2', desktop: `${head}09`, web: `${head}09` },
+              ],
+            },
+          ],
+        },
+      ],
+    };
+    const groups = lib.groupDifferences(report as any, () => 'SALES');
+    const kinds = groups.map((g: any) => [g.kind, g.cases, Boolean(g.buildDifference)]).sort();
+    expect(kinds).toEqual([
+      ['build-difference', 1, true],
+      ['row-count', 1, false],
+      ['value', 1, false],
+    ]);
   });
 });

@@ -599,39 +599,94 @@ export function maskValue(column, value) {
 
 /**
  * Differences the replay is EXPECTED to report because the web follows the current desktop source while the replayed
- * year was written by an older build (owner decision: copy the current DataCareNext source). They are grouped apart
- * in the report as "desktop build difference" rather than as defects. A row whose key holds the code (AC_DATA
- * LEDR_KEY, MAIN_STOCK SR_NO) cannot pair, so those tables' unpaired rows and row counts are listed here too; a real
- * defect in the same table still shows in its column-level value differences.
+ * year was written by an older build (owner decision: copy the current DataCareNext source).
+ *
+ * Only the key TEXT is a build difference. AC_DATA rows pair on (AC_CODE, DR_AMT, CR_AMT) (bundleDiff.ts ROW_KEYS),
+ * so an unpaired row or a row-count difference is a real posting difference and stays a defect. A paired row's
+ * LEDR_KEY difference is a build difference only when the old code and the source code name the SAME role on the
+ * same line: each key's code is translated to its role first, so the colliding codes (data 09 bank against source 09
+ * tax, data 25 kasar against source 25 cash) cannot pass as a renumbering.
  */
-export const KNOWN_BUILD_DIFFERENCES = [
-  {
-    family: 'SALES',
-    table: 'AC_DATA',
-    note:
-      'sale LEDR_KEY codes: data 01/03/04/02, bank 09/10, cash 19/20, kasar 25/26; source (Ac_Ledr.cs:61-172) ' +
-      '01/08/09/STR+07, cheque 15/16, card 17/18, cash 25/26, kasar 31/32, discount 33/34, old metal STR+23/24, ' +
-      'UPI 36/37+STR',
+const SALE_KEY_ROLES = {
+  // The 2024-25 data's build.
+  desktop: {
+    '01': 'party',
+    '02': 'item.line',
+    '03': 'item.book',
+    '04': 'tax',
+    '09': 'bank.party',
+    10: 'bank.account',
+    17: 'oldmetal.party',
+    18: 'oldmetal.account',
+    19: 'cash.party',
+    20: 'cash.account',
+    21: 'cashpaid.party',
+    22: 'cashpaid.account',
+    23: 'cashpaid.party',
+    24: 'cashpaid.account',
+    25: 'kasar.party',
+    26: 'kasar.account',
   },
-  {
-    family: 'SALES',
-    table: 'MAIN_STOCK',
-    note: 'sale stock section SR_NO: data 1/2, source 3/4 (Ac_Stock.cs:114, :116)',
+  // The current source, Sales_Ledr (Ac_Ledr.cs:61-172); the web writes these.
+  web: {
+    '01': 'party',
+    '07': 'item.line',
+    '08': 'item.book',
+    '09': 'tax',
+    15: 'bank.party',
+    16: 'bank.account',
+    17: 'bank.party',
+    18: 'bank.account',
+    23: 'oldmetal.party',
+    24: 'oldmetal.account',
+    25: 'cash.party',
+    26: 'cash.account',
+    27: 'cashpaid.party',
+    28: 'cashpaid.account',
+    29: 'cashpaid.party',
+    30: 'cashpaid.account',
+    31: 'kasar.party',
+    32: 'kasar.account',
   },
-];
+};
 
-/** The build-difference note of a grouped difference, or undefined for a genuine one. */
-export function buildDifferenceOf(group) {
-  const known = KNOWN_BUILD_DIFFERENCES.find(
-    (k) => k.family === group.family && k.table === group.table,
-  );
-  if (!known) return undefined;
-  const keyed =
-    group.kind === 'rows-unpaired' ||
-    group.kind === 'row-count' ||
-    (group.table === 'AC_DATA' && group.column === 'LEDR_KEY') ||
-    (group.table === 'MAIN_STOCK' && group.column === 'SR_NO');
-  return keyed ? known.note : undefined;
+/**
+ * The role and line of a sale LEDR_KEY as one side's build numbers it, or undefined for a code that side does not
+ * map. A plain key ends in the 2-character code; a line key ends in STR(SR_NO)+code (line legs) or code+STR(SR_NO)
+ * (settlement rows such as UPI), 12 characters with the line right-aligned in 10.
+ */
+export function saleKeyRole(key, side) {
+  const k = String(key ?? '');
+  const roles = SALE_KEY_ROLES[side];
+  if (!roles) return undefined;
+  const tail = k.slice(-12);
+  if (/^\s+\d+$/.test(tail) || /^\d\d\s+\d+$/.test(tail)) {
+    const codeFirst = /^\d\d\s/.test(tail);
+    const code = codeFirst ? tail.slice(0, 2) : tail.slice(-2);
+    const line = (codeFirst ? tail.slice(2) : tail.slice(0, 10)).trim();
+    const role = roles[code];
+    return role ? `${role}#${line}` : undefined;
+  }
+  const role = roles[k.slice(-2)];
+  return role ? `${role}#` : undefined;
+}
+
+/** The build-difference note of one field difference, or undefined for a genuine one. */
+export function buildDifferenceOf({ family, table, column, desktop, web }) {
+  if (family !== 'SALES') return undefined;
+  if (table === 'AC_DATA' && column === 'LEDR_KEY') {
+    const before = saleKeyRole(desktop, 'desktop');
+    return before && before === saleKeyRole(web, 'web')
+      ? `sale LEDR_KEY renumbered, same role ${before.replace(/#$/, '')} (Ac_Ledr.cs:61-172)`
+      : undefined;
+  }
+  if (table === 'MAIN_STOCK' && column === 'SR_NO') {
+    const pair = `${Number(desktop)}>${Number(web)}`;
+    return pair === '1>3' || pair === '2>4'
+      ? 'sale stock section SR_NO: data 1/2, source 3/4 (Ac_Stock.cs:114, :116)'
+      : undefined;
+  }
+  return undefined;
 }
 
 /**
@@ -640,6 +695,7 @@ export function buildDifferenceOf(group) {
  */
 export function groupDifferences(report, familyOfCase) {
   const groups = new Map();
+  const builds = new Map();
   const add = (fam, table, column, kind, caseId, example) => {
     const key = `${fam}|${table}|${column}|${kind}`;
     const g = groups.get(key) ?? {
@@ -671,17 +727,30 @@ export function groupDifferences(report, familyOfCase) {
           add(fam, t.table, '*', 'rows-unpaired', c.caseId);
         for (const col of t.missingColumns)
           add(fam, t.table, col, 'column-missing-in-web', c.caseId);
-        for (const d of t.differences)
-          add(fam, t.table, d.column, 'value', c.caseId, {
+        for (const d of t.differences) {
+          const build = buildDifferenceOf({
+            family: fam,
+            table: t.table,
+            column: d.column,
+            desktop: d.desktop,
+            web: d.web,
+          });
+          add(fam, t.table, d.column, build ? 'build-difference' : 'value', c.caseId, {
             rowKey: d.rowKey.startsWith('content:') ? '(content key)' : maskValue('key', d.rowKey),
             desktop: maskValue(d.column, d.desktop),
             web: maskValue(d.column, d.web),
           });
+          if (build) builds.set(`${fam}|${t.table}|${d.column}|build-difference`, build);
+        }
       }
     }
   }
   return [...groups.values()]
-    .map((g) => ({ ...g, cases: g.cases.size, buildDifference: buildDifferenceOf(g) }))
+    .map((g) => ({
+      ...g,
+      cases: g.cases.size,
+      buildDifference: builds.get(`${g.family}|${g.table}|${g.column}|${g.kind}`),
+    }))
     .sort((a, b) => b.cases - a.cases || a.table.localeCompare(b.table));
 }
 
