@@ -189,10 +189,10 @@ export function registerDataRepairRoutes(app: FastifyInstance, deps: DataRepairR
         error?.code === 'P2010' ||
         /Raw query failed|violates|not-null|duplicate key/i.test(text)
       ) {
-        const detail = text.match(/Message: `([^`]+)`/)?.[1] ?? text;
-        return reply
-          .code(400)
-          .send({ error: 'invalid-data', detail: detail.replace(/^ERROR:\s*/, '').slice(0, 200) });
+        return reply.code(400).send({
+          error: 'invalid-data',
+          detail: 'Data Refresh could not be applied because the data is invalid.',
+        });
       }
       throw error;
     }
