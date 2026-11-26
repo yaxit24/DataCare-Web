@@ -58,6 +58,9 @@ const SYSTEM_ACCOUNTS: { code: string; name: string; gr: string; gstType?: strin
   { code: 'ROUNDOFF', name: 'ROUND OFF', gr: '45' },
   { code: 'KASAR', name: 'KASAR / WRITE-OFF', gr: '45' },
   { code: 'TCS', name: 'TCS PAYABLE', gr: '12' },
+  // The TDS a customer deducts, a current asset as the template's TDS ledger (group 18); the sale's 13/14 pair posts
+  // to it when the TDS code's TAX_MAST.TAX_AC is unset (Ac_Ledr.cs:112-114).
+  { code: 'TDS', name: 'TDS RECEIVABLE', gr: '18' },
   { code: 'HMCHRG', name: 'HALLMARK CHARGES', gr: '41' },
   { code: 'OLDGOLD', name: 'OLD GOLD EXCHANGE', gr: '30' },
   { code: 'OG', name: 'OLD GOLD', gr: '25' },

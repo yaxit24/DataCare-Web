@@ -756,4 +756,39 @@ databaseDescribe('sale writes what the desktop writes', () => {
       Math.round(legs.reduce((t, l) => t + Number(l[side]), 0) * 100) / 100;
     expect(sum('dr')).toBe(sum('cr'));
   }, 30_000);
+
+  /**
+   * An old web TDS sale kept the typed TDS inside TOT_AMT. Re-saving it totals it as the desktop does, and BILL_OS_DATA is
+   * rewritten from the new total, as TR_SALE's save rewrites it on every edit (TR_SALE.cs:15760).
+   */
+  it('re-totals an old web TDS sale on edit and rewrites its receivable', async () => {
+    await exec(`INSERT INTO "CO_SET_NEW"(tenant_id,"CO_CODE","SL_TDS_TAX") VALUES ($1,$2,'Y')`, CO);
+    const input = saleInput('TX', { tdsCode: 'D1', tdsPct: 1 });
+    const sale = await createSale(runtime, input, [looseLine()]);
+    const vch = String(sale.vchNo).padStart(5, '0');
+    const header = async () =>
+      (
+        await rows(
+          `SELECT "TOT_AMT"::float tot,"BILL_OS"::float os,"TDS_AMT"::float tds FROM "SL_DATA"
+            WHERE tenant_id=$1 AND "CO_BOOK"='TX' AND "VCH_NO"=$2`,
+          vch,
+        )
+      )[0]!;
+    const fresh = await header();
+    // The old web wrote the typed TDS and left it in the total.
+    await exec(
+      `UPDATE "SL_DATA" SET "TOT_AMT"="TOT_AMT"+$3,"BILL_OS"="BILL_OS"+$3,"TDS_AMT"=50
+        WHERE tenant_id=$1 AND "CO_BOOK"='TX' AND "VCH_NO"=$2`,
+      vch,
+      fresh.tds,
+    );
+    const view: any = await getSale(runtime, scopeOf('TX'), sale.vchNo);
+    await editSale(runtime, input, [looseLine()], sale.vchNo, view.version);
+    expect(await header()).toEqual(fresh);
+    const [os] = await rows(
+      `SELECT "BILL_AMT"::float amt FROM "BILL_OS_DATA" WHERE tenant_id=$1 AND "CO_BOOK"='TX' AND "VCH_NO"=$2`,
+      vch,
+    );
+    expect(os?.amt).toBe(fresh.tot);
+  }, 30_000);
 });

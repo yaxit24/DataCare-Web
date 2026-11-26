@@ -859,22 +859,22 @@ async function writeSaleTx(
     : roundingPolicy.roundBillTotal(grandTotal + tcs);
   // The bill's own round-off: the totals' one, or under TDS the TOT_AMT rounding the desktop leaves unposted.
   const billRoundOff = tdsEnabled ? roundTo(grandWithTcs - tdsGross, 3) : totals.roundOff;
-  // TDS posts to the TDS code's TAX_MAST.TAX_AC (Ac_Ledr.cs:112-114 `D.TAX_AC` on `A.TDS_CODE`).
-  let tdsAc = '';
-  if (!isSalesQuotation && tdsAmt !== 0) {
+  // TDS posts to the TDS code's parent-row tax account (Ac_Ledr.cs:112-114 join TAX_MAST `D.SR_NO = 0` on
+  // `A.TDS_CODE`). A web-provisioned company leaves TAX_AC unset (seedCompany.ts TAXES), so an unset or absent one
+  // falls back to the provisioned TDS ledger, as TCS and the tax leg fall back to theirs.
+  let tdsAc = 'TDS';
+  if (!isSalesQuotation && tdsAmt !== 0 && text(input.tdsCode)) {
     const rows: Array<{ ac: unknown }> = await tx.$queryRawUnsafe(
       `SELECT "TAX_AC" ac FROM "TAX_MAST" WHERE tenant_id=$1 AND "CO_CODE"=$2 AND "TAX_CODE"::text=$3::text
-        ORDER BY coalesce("SR_NO",0), row_id LIMIT 1`,
+          AND coalesce("SR_NO",0)=0
+        ORDER BY row_id LIMIT 1`,
       tenantId,
       input.scope.coCode,
       text(input.tdsCode),
     );
-    tdsAc = text(rows[0]?.ac);
-    if (!tdsAc)
-      throw new SaleValidationError(
-        `the TDS code ${text(input.tdsCode) || '(blank)'} has no tax account (TAX_MAST.TAX_AC)`,
-      );
+    tdsAc = text(rows[0]?.ac) || 'TDS';
   }
+
   /**
    * How far the round-off leg may stray from the bill's round-off. Beyond totals.roundOff it carries only the line
    * nets' rounding into the bill: the net (calc.ts billTotals), the taxable after a discount, the bill with hallmark
@@ -893,14 +893,14 @@ async function writeSaleTx(
     throw new SaleValidationError(
       'the bill total is zero but its items are priced (a discount of the whole bill): reduce the discount',
     );
-  // TCS posts to the TCS code's own tax account (Ac_Ledr.cs:96 `D.TAX_AC` on `A.TCS_CODE`). A web-provisioned company
+  // TCS posts to the TCS code's parent-row tax account (Ac_Ledr.cs:96 `D.TAX_AC`, `D.SR_NO = 0`, on `A.TCS_CODE`). A web-provisioned company
   // leaves TAX_AC unset (seedCompany.ts TAXES), so an unset or absent one falls back to the provisioned TCS ledger,
   // as the sale tax leg falls back to GST (fallbackTaxAc above).
   let tcsAc = 'TCS';
   if (!isSalesQuotation && tcs !== 0 && text(input.tcsCode)) {
     const rows: Array<{ ac: unknown }> = await tx.$queryRawUnsafe(
       `SELECT "TAX_AC" ac FROM "TAX_MAST" WHERE tenant_id=$1 AND "CO_CODE"=$2 AND "TAX_CODE"::text=$3::text
-        ORDER BY coalesce("SR_NO",0), row_id LIMIT 1`,
+        AND coalesce("SR_NO",0)=0 ORDER BY row_id LIMIT 1`,
       tenantId,
       input.scope.coCode,
       text(input.tcsCode),

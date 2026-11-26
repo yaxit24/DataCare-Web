@@ -248,4 +248,9 @@ export const EXPECTED_MIGRATIONS: ReadonlyArray<{
     name: '20261126130000_web_sales_discount_slot',
     checksum: '0b03c0f4df60db19780ee5ece79b5439141e06260d72102bbbbd4146be789367',
   },
+  {
+    // Web-provisioned companies get the TDS ledger the sale's 13/14 pair falls back to (Ac_Ledr.cs:112-114).
+    name: '20261126140000_web_tds_ledger',
+    checksum: 'bbad5418ec64dcfca04dd3150c7795bfc807783555418c13476ddad5ec3560b5',
+  },
 ];

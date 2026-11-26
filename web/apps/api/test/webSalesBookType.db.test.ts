@@ -38,6 +38,14 @@ const statements: string[] = [];
   }
 }
 const dml = statements.filter((s) => /^UPDATE/.test(s));
+const tdsSql = readFileSync(
+  new URL(
+    '../../../packages/db/prisma/migrations/20261126140000_web_tds_ledger/migration.sql',
+    import.meta.url,
+  ),
+  'utf8',
+);
+const tdsInsert = tdsSql.slice(tdsSql.indexOf('INSERT INTO'), tdsSql.lastIndexOf(';\n\nCOMMIT'));
 const slotSql = readFileSync(
   new URL(
     '../../../packages/db/prisma/migrations/20261126130000_web_sales_discount_slot/migration.sql',
@@ -189,4 +197,65 @@ const slotInsert = slotSql.slice(
       { co: '02', ac: 'DISCOUNT', mb: 'SALES' },
     ]);
   });
+
+  it('a TDS sale on a web-provisioned company posts 13/14 to the seeded TDS ledger; the migration adds it once', async () => {
+    const tdsLedger = () =>
+      owner.$queryRawUnsafe(
+        `SELECT "CO_CODE" co,"AC_NAME" nm,"AC_GR" gr FROM "AC_MAST"
+          WHERE tenant_id=$1 AND "AC_CODE"='TDS' ORDER BY "CO_CODE"`,
+        tenantId,
+      ) as Promise<Array<Record<string, string>>>;
+    expect(await tdsLedger()).toEqual([
+      { co: '01', nm: 'TDS RECEIVABLE', gr: '18' },
+      { co: '02', nm: 'TDS RECEIVABLE', gr: '18' },
+    ]);
+    // A company provisioned before the TDS ledger existed.
+    await exec(
+      `DELETE FROM "AC_MAST" WHERE tenant_id=$1 AND "CO_CODE"='02' AND "AC_CODE"='TDS'`,
+      tenantId,
+    );
+    const insert = () =>
+      withTenant(runtime, tenantId, (tx: any) => tx.$executeRawUnsafe(tdsInsert));
+    expect(Number(await insert())).toBe(1);
+    expect(Number(await insert())).toBe(0);
+    expect(await tdsLedger()).toHaveLength(2);
+    // SL_TDS_TAX on company 01; the TDS code has no TAX_AC, as seedCompany leaves every tax code.
+    await exec(
+      `UPDATE "CO_SET_NEW" SET "SL_TDS_TAX"='Y' WHERE tenant_id=$1 AND "CO_CODE"='01'`,
+      tenantId,
+    );
+    await exec(
+      `INSERT INTO "TAX_MAST"(tenant_id,"CO_CODE","TAX_CODE","SR_NO","TAX_NAME","TAX_PRC","TAX_GROUP")
+       VALUES ($1,'01','25',0,'TDS 1%',1,'TDS')`,
+      tenantId,
+    );
+    const sale = await createSale(
+      runtime,
+      {
+        scope: { tenantId, coCode: '01', lcCode: '01', coYear: YEAR, coBook: 'SL' },
+        mainUser: 'tester',
+        acCode: 'WSBCUS',
+        acName: 'Synthetic Customer',
+        vchDate: '2024-04-11',
+        taxRatePct: 3,
+        taxCode: '10',
+        interState: false,
+        tdsCode: '25',
+        tdsPct: 1,
+      } as any,
+      [{ itCode: 'GOLD', pcs: 1, grossWt: 1, netWt: 1, touch: 90, metalAmount: 1000 } as any],
+    );
+    const legs = (await owner.$queryRawUnsafe(
+      `SELECT right(btrim("LEDR_KEY"),2) k,"AC_CODE" ac,"DR_AMT"::float dr,"CR_AMT"::float cr FROM "AC_DATA"
+        WHERE tenant_id=$1 AND "CO_CODE"='01' AND "CO_BOOK"='SL' AND "VCH_NO"=lpad($2::text,5,'0')
+          AND right(btrim("LEDR_KEY"),2) IN ('13','14') ORDER BY 1`,
+      tenantId,
+      sale.vchNo,
+    )) as Array<Record<string, unknown>>;
+    // 1,000 x 1% = 10 (TR_SALE.cs:19261-19275).
+    expect(legs).toEqual([
+      { k: '13', ac: 'WSBCUS', dr: 0, cr: 10 },
+      { k: '14', ac: 'TDS', dr: 10, cr: 0 },
+    ]);
+  }, 60_000);
 });

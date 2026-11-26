@@ -76,8 +76,9 @@ d('company provisioning produces a postable company', () => {
     // sale and purchase, other charges, fine kasar), plus BRANCH (the stock in/out branch account, N91),
     // plus WALKIN (the walk-in customer the sales screens default to, G124), plus ORDADV (the sale books'
     // slot-4 order-advance account, N198), plus DISCOUNT (the purchase books' slot 5, N240), plus the installer's
-    // sales-other, purchase-old-silver and purchase-other accounts (OTHSALE, OLDSLVPR, OTHPURC).
-    expect(await count('AC_MAST')).toBe(33);
+    // sales-other, purchase-old-silver and purchase-other accounts (OTHSALE, OLDSLVPR, OTHPURC), plus TDS (the
+    // sale's TDS pair 13/14, Ac_Ledr.cs:112-114).
+    expect(await count('AC_MAST')).toBe(34);
   });
 
   it('creates every book with its posting legs', async () => {
