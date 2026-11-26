@@ -3,6 +3,7 @@ import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest';
 import { createSale, type SaleLineInput } from '../src/modules/sales/sales.js';
 import { openAdvanceOfOrderTx } from '../src/modules/sales/orderCancel.js';
 import { cancelIrnForSale } from '../src/modules/einvoice/einvoice.js';
+import { bankReconClear, bankReconList } from '../src/modules/finance/bankRecon.js';
 import type { VoucherScope } from '../src/modules/vouchers/numbering.js';
 
 /**
@@ -116,9 +117,15 @@ databaseDescribe('sale writes what the desktop writes', () => {
       CO,
     );
     await exec(
+      `INSERT INTO "GROUP_MAST"(tenant_id,"CO_CODE","GR_CODE","GR_NAME","PURC_AC")
+       VALUES ($1,$2,'G03','Old Gold','OGPURC')`,
+      CO,
+    );
+    await exec(
       `INSERT INTO "ITEM_MAST"(tenant_id,"CO_CODE","IT_CODE","IT_NAME","IT_TYPE","GR_CODE")
        VALUES ($1,$2,'GOLD','Gold','G','G01'),($1,$2,'LOOSE','Loose Gold','G','G01'),
-              ($1,$2,'OTH','Other Item','O','G02'),($1,$2,'HM','Hallmark','O','G02')`,
+              ($1,$2,'OTH','Other Item','O','G02'),($1,$2,'HM','Hallmark','O','G02'),
+              ($1,$2,'OG','Old Gold','G','G03')`,
       CO,
     );
     // TX: a tax-invoice book; ES: an estimate book that posts the item side per line (ITM_TYPE 'A').
@@ -134,7 +141,7 @@ databaseDescribe('sale writes what the desktop writes', () => {
       await exec(
         `INSERT INTO "BOOK_DETL"(tenant_id,"CO_CODE","LC_CODE","CO_BOOK","SR_NO","AC_CODE","MAIN_BOOK","BOOK_INOUT")
          VALUES ($1,$2,$3,$4,1,'CTRL','SALES','O'),($1,$2,$3,$4,2,'CASH','SALES','O'),
-                ($1,$2,$3,$4,3,'KASAR','SALES','O')`,
+                ($1,$2,$3,$4,3,'KASAR','SALES','O'),($1,$2,$3,$4,5,'DISCAC','SALES','O')`,
         CO,
         LC,
         book,
@@ -223,20 +230,20 @@ databaseDescribe('sale writes what the desktop writes', () => {
       PARTY_AC_CODE: 'CUST',
       LDR_NAME: 'Synthetic Customer',
     });
-    // Revenue 03 and tax 04: no party, no name (Ac_Ledr.cs:92, :94).
-    expect(byLeg.get('03')).toMatchObject({ AC_CODE: 'SALEAC', PARTY_AC_CODE: '', LDR_NAME: '' });
-    expect(byLeg.get('04')).toMatchObject({ AC_CODE: 'GSTLED', PARTY_AC_CODE: '', LDR_NAME: '' });
-    // Cash pair: the party's credit carries the party; the cash debit carries the name (Ac_Ledr.cs:139-141).
-    expect(byLeg.get('19')).toMatchObject({ AC_CODE: 'CUST', PARTY_AC_CODE: 'CUST', LDR_NAME: '' });
-    expect(byLeg.get('20')).toMatchObject({
+    // Book item leg 08 to the slot-1 account and tax 09: no party, no name (Ac_Ledr.cs:92, :94).
+    expect(byLeg.get('08')).toMatchObject({ AC_CODE: 'CTRL', PARTY_AC_CODE: '', LDR_NAME: '' });
+    expect(byLeg.get('09')).toMatchObject({ AC_CODE: 'GSTLED', PARTY_AC_CODE: '', LDR_NAME: '' });
+    // Cash pair 25/26: the party's credit carries the party; the cash debit carries the name (Ac_Ledr.cs:139-141).
+    expect(byLeg.get('25')).toMatchObject({ AC_CODE: 'CUST', PARTY_AC_CODE: 'CUST', LDR_NAME: '' });
+    expect(byLeg.get('26')).toMatchObject({
       AC_CODE: 'CASH',
       PARTY_AC_CODE: '',
       LDR_NAME: 'Synthetic Customer',
       dr: 1000,
     });
-    // Kasar pair 25 (party credit) / 26 (kasar debit), not the unmapped 5x band.
-    expect(byLeg.get('25')).toMatchObject({ AC_CODE: 'CUST', PARTY_AC_CODE: 'CUST', cr: 5 });
-    expect(byLeg.get('26')).toMatchObject({ AC_CODE: 'KASAR', PARTY_AC_CODE: '', dr: 5 });
+    // Kasar pair 31 (party credit) / 32 (kasar debit), not the unmapped 5x band (Ac_Ledr.cs:151-153).
+    expect(byLeg.get('31')).toMatchObject({ AC_CODE: 'CUST', PARTY_AC_CODE: 'CUST', cr: 5 });
+    expect(byLeg.get('32')).toMatchObject({ AC_CODE: 'KASAR', PARTY_AC_CODE: '', dr: 5 });
     expect(
       legs.filter((l) => Number(String(l.k).slice(-2)) >= 50 && String(l.k).slice(-2) !== '99'),
     ).toEqual([]);
@@ -280,7 +287,7 @@ databaseDescribe('sale writes what the desktop writes', () => {
     );
     expect(stock).toEqual([
       {
-        sr: 1,
+        sr: 3,
         isr: 1,
         STK_DATE: DAY,
         TBL_CODE: '002',
@@ -300,7 +307,7 @@ databaseDescribe('sale writes what the desktop writes', () => {
         ITM_SIGN: '-',
       },
       expect.objectContaining({
-        sr: 1,
+        sr: 3,
         isr: 2,
         TAG_NO: 'TAGN',
         vs: 12,
@@ -374,11 +381,122 @@ databaseDescribe('sale writes what the desktop writes', () => {
     const items = (await ledger('ES', sale.vchNo)).filter(
       (l) => l.cr > 0 && l.AC_CODE !== 'GSTLED',
     );
-    // VCH_NO + STR(SR_NO) + '02' to each line's group account (Ac_Ledr.cs:90).
+    // VCH_NO + STR(SR_NO) + '07' to each line's group account (Ac_Ledr.cs:90).
     expect(items.map((l) => [String(l.k).slice(-12), l.AC_CODE])).toEqual([
-      ['         102', 'SALEAC'],
-      ['         202', 'OTHSALE'],
+      ['         107', 'SALEAC'],
+      ['         207', 'OTHSALE'],
     ]);
+  }, 30_000);
+
+  /** Item 4: a book whose ITM_TYPE is not 'A' posts ONE item leg, the bill net to its slot-1 account (Ac_Ledr.cs:92). */
+  it("posts one '08' item leg to the book account on a non-'A' book, whatever the item groups", async () => {
+    const sale = await createSale(runtime, saleInput('TX'), [
+      looseLine(),
+      looseLine({ itCode: 'OTH', ghtWt: 0 }),
+    ]);
+    const [header] = await rows(
+      `SELECT "NET_AMT"::float net FROM "SL_DATA" WHERE tenant_id=$1 AND "CO_BOOK"='TX' AND "VCH_NO"=lpad($2::text,5,'0')`,
+      sale.vchNo,
+    );
+    const items = (await ledger('TX', sale.vchNo)).filter(
+      (l) => l.cr > 0 && l.AC_CODE !== 'GSTLED',
+    );
+    expect(items.map((l) => [String(l.k).slice(-2), l.AC_CODE, l.cr])).toEqual([
+      ['08', 'CTRL', header?.net],
+    ]);
+  }, 30_000);
+
+  /** Every settlement pair on Sales_Ledr's code, the party first (Ac_Ledr.cs:116-163). */
+  it('keys cheque, card, UPI, old metal, cash paid and discount as Sales_Ledr does', async () => {
+    const sale = await createSale(
+      runtime,
+      saleInput('TX', {
+        discountAmount: 100,
+        chequeAmt: 1000,
+        bankAc: 'BANKAC',
+        cardAmt: 500,
+        cardAc: 'CARDAC',
+        upiAmt: 300,
+        upiRows: [{ acCode: 'UPIAC', amount: 300 }],
+        cashAmt: 200,
+        cashPaid: 40,
+        oldGold: [{ metal: 'G', itCode: 'OG', netWt: 1, touch: 100, rate: 6000, amount: 6000 }],
+      }),
+      [looseLine()],
+    );
+    const legs = await ledger('TX', sale.vchNo);
+    const vch = String(sale.vchNo).padStart(5, '0');
+    const tail = (k: unknown) =>
+      String(k)
+        .slice(String(k).indexOf(`TX${vch}`) + 7)
+        .trim();
+    const shape = legs.map((l) => [tail(l.k), l.AC_CODE, l.dr, l.cr]);
+    expect(shape).toEqual(
+      expect.arrayContaining([
+        ['15', 'CUST', 0, 1000],
+        ['16', 'BANKAC', 1000, 0],
+        ['17', 'CUST', 0, 500],
+        ['18', 'CARDAC', 500, 0],
+        ['123', 'CUST', 0, 6000],
+        ['124', 'OGPURC', 6000, 0],
+        ['25', 'CUST', 0, 200],
+        ['26', 'CASH', 200, 0],
+        ['29', 'CUST', 40, 0],
+        ['30', 'CASH', 0, 40],
+        ['33', 'CUST', 0, 100],
+        ['34', 'DISCAC', 100, 0],
+        ['36         1', 'CUST', 0, 300],
+        ['37         1', 'UPIAC', 300, 0],
+      ]),
+    );
+    // The party's bill debit is TOT_AMT + DISC_AMT (Ac_Ledr.cs:64); the old-metal pair writes BILL_NO '' (:135-137).
+    const [header] = await rows(
+      `SELECT "TOT_AMT"::float tot, "DISC_AMT"::float disc, "BILL_OS"::float os, "CASH_PAID"::float paid
+         FROM "SL_DATA" WHERE tenant_id=$1 AND "CO_BOOK"='TX' AND "VCH_NO"=lpad($2::text,5,'0')`,
+      sale.vchNo,
+    );
+    expect(legs.find((l) => String(l.k).endsWith('01'))?.dr).toBe(header!.tot + header!.disc);
+    const sum = (side: 'dr' | 'cr') =>
+      Math.round(legs.reduce((t, l) => t + Number(l[side]), 0) * 100) / 100;
+    expect(sum('dr')).toBe(sum('cr'));
+    // BILL_OS adds the cash paid back (TR_SALE.cs:19386).
+    expect(header!.os).toBe(
+      Math.round((header!.tot - 1000 - 500 - 300 - 200 - 6000 + 40) * 100) / 100,
+    );
+    // Old metal comes into stock as section 4 (Ac_Stock.cs:116).
+    const [stock] = await rows(
+      `SELECT "SR_NO"::int sr FROM "MAIN_STOCK" WHERE tenant_id=$1 AND "CO_BOOK"='TX'
+          AND "VCH_NO"=lpad($2::text,5,'0') AND "ITM_SIGN"='+'`,
+      sale.vchNo,
+    );
+    expect(stock?.sr).toBe(4);
+  }, 30_000);
+
+  /** Bank reconciliation lists and clears a sale's cheque by its bank account's own leg, now keyed 16. */
+  it("lists and clears the sale's cheque leg in bank reconciliation", async () => {
+    const sale = await createSale(
+      runtime,
+      saleInput('TX', { chequeAmt: 700, bankAc: 'BANKAC', chequeNo: '123456' }),
+      [looseLine()],
+    );
+    const scope = { tenantId: TENANT, coCode: CO };
+    const listed = await bankReconList(runtime, scope, 'BANKAC');
+    const vch = String(sale.vchNo).padStart(5, '0');
+    expect(listed.rows.filter((r) => r.coBook === 'TX' && r.vchNo === vch)).toEqual([
+      expect.objectContaining({ dr: 700, cr: 0, clrDate: null }),
+    ]);
+    expect(
+      await bankReconClear(runtime, scope, 'BANKAC', [
+        { coBook: 'TX', vchNo: vch, clrDate: '2024-05-10' },
+      ]),
+    ).toEqual({ updated: 1 });
+    const [cleared] = await rows(
+      `SELECT trim("LEDR_KEY") k, "CLR_DATE"::text clr FROM "AC_DATA"
+        WHERE tenant_id=$1 AND "CO_BOOK"='TX' AND "VCH_NO"=$2 AND "AC_CODE"='BANKAC'`,
+      vch,
+    );
+    expect(String(cleared?.k).slice(-2)).toBe('16');
+    expect(cleared?.clr).toBe('2024-05-10');
   }, 30_000);
 
   /** BILL_OS_DATA: none for the counter-cash party (TR_SALE.cs:15736); the USER_* column defaults 'N'. */

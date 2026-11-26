@@ -243,4 +243,9 @@ export const EXPECTED_MIGRATIONS: ReadonlyArray<{
     name: '20261126120000_web_sales_book_type',
     checksum: 'fcc99b11a5ff2b354a4f732b9e33e2c24f9863c027d36235777a5f9621c43227',
   },
+  {
+    // The web-provisioned sale book SL gets BOOK_DETL slot 5 DISCOUNT, the 33/34 pair's account (Ac_Ledr.cs:155-157).
+    name: '20261126130000_web_sales_discount_slot',
+    checksum: '0b03c0f4df60db19780ee5ece79b5439141e06260d72102bbbbd4146be789367',
+  },
 ];

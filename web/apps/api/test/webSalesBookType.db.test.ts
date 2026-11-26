@@ -38,6 +38,17 @@ const statements: string[] = [];
   }
 }
 const dml = statements.filter((s) => /^UPDATE/.test(s));
+const slotSql = readFileSync(
+  new URL(
+    '../../../packages/db/prisma/migrations/20261126130000_web_sales_discount_slot/migration.sql',
+    import.meta.url,
+  ),
+  'utf8',
+);
+const slotInsert = slotSql.slice(
+  slotSql.indexOf('INSERT INTO'),
+  slotSql.lastIndexOf(';\n\nCOMMIT'),
+);
 
 (enabled ? describe : describe.skip)('web sale book type', () => {
   let owner: PrismaClient;
@@ -156,4 +167,26 @@ const dml = statements.filter((s) => /^UPDATE/.test(s));
     const typed = await sell('01');
     expect(await taxRows('01', typed.vchNo)).toHaveLength(2);
   }, 60_000);
+
+  it('the discount-slot migration gives an old SL its slot 5 DISCOUNT once (Ac_Ledr.cs:155-157)', async () => {
+    const slot5 = () =>
+      owner.$queryRawUnsafe(
+        `SELECT "CO_CODE" co,"AC_CODE" ac,"MAIN_BOOK" mb FROM "BOOK_DETL"
+          WHERE tenant_id=$1 AND "CO_BOOK"='SL' AND "SR_NO"=5 ORDER BY "CO_CODE"`,
+        tenantId,
+      ) as Promise<Array<Record<string, string>>>;
+    expect(await slot5()).toHaveLength(2);
+    await exec(
+      `DELETE FROM "BOOK_DETL" WHERE tenant_id=$1 AND "CO_CODE"='01' AND "CO_BOOK"='SL' AND "SR_NO"=5`,
+      tenantId,
+    );
+    const insert = () =>
+      withTenant(runtime, tenantId, (tx: any) => tx.$executeRawUnsafe(slotInsert));
+    expect(Number(await insert())).toBe(1);
+    expect(Number(await insert())).toBe(0);
+    expect(await slot5()).toEqual([
+      { co: '01', ac: 'DISCOUNT', mb: 'SALES' },
+      { co: '02', ac: 'DISCOUNT', mb: 'SALES' },
+    ]);
+  });
 });

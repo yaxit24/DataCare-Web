@@ -117,7 +117,7 @@ describe('sales builders', () => {
       roundAc: 'ROF',
       controlAc: 'CTRL',
       totals: { total: 1180, taxable: 1000, tax: 180, roundOff: 0 },
-      payments: { cashAc: 'CASH', cashAmt: 200 },
+      payments: { cash: { ac: 'CASH', amount: 200 } },
     });
     expect(ledgerBalance(lines).balanced).toBe(true);
     expect(lines).toEqual(

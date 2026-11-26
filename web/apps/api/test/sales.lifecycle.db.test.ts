@@ -430,7 +430,8 @@ databaseDescribe('database-backed sales voucher lifecycle', () => {
       `INSERT INTO "BOOK_DETL"(tenant_id,"CO_CODE","LC_CODE","CO_BOOK","SR_NO","AC_CODE","MAIN_BOOK","BOOK_INOUT")
        VALUES ($1,$2,$3,$4,1,'CTRL','SALES','O'),
               ($1,$2,$3,$4,2,'CASH','SALES','O'),
-              ($1,$2,$3,$4,3,'ROUND','SALES','O')`,
+              ($1,$2,$3,$4,3,'ROUND','SALES','O'),
+              ($1,$2,$3,$4,5,'ROUND','SALES','O')`,
       TENANT,
       CO,
       LC,

@@ -176,11 +176,11 @@ const headOf = (vchNo: string) => `0101${YEAR}${BOOK}${vchNo}`;
     ).toEqual([
       // Party leg: the measured 2-character tail 01; its contra is the book's slot-1 account (Ac_Ledr.cs:64).
       { tail: '01', tailLength: 2, ac: 'CUST01', ld: 'SALES', dr: 69920.52, cr: 0 },
-      // Tax leg: measured tail 04 (account: the documented GST default while TAX_MAST.TAX_AC is unset).
-      { tail: '04', tailLength: 2, ac: 'GST', ld: 'CUST01', dr: 0, cr: 2036.52 },
-      // Per-line revenue legs: STR(SR_NO) right-aligned in 10, then the revenue code 03 (12-character tail).
-      { tail: '         102', tailLength: 12, ac: 'SALES', ld: 'CUST01', dr: 0, cr: 63609 },
-      { tail: '         202', tailLength: 12, ac: 'SLVSALE', ld: 'CUST01', dr: 0, cr: 4275 },
+      // Tax leg 09 (Ac_Ledr.cs:94; account: the documented GST default while TAX_MAST.TAX_AC is unset).
+      { tail: '09', tailLength: 2, ac: 'GST', ld: 'CUST01', dr: 0, cr: 2036.52 },
+      // Per-line revenue legs: STR(SR_NO) right-aligned in 10, then the line code 07 (Ac_Ledr.cs:90).
+      { tail: '         107', tailLength: 12, ac: 'SALES', ld: 'CUST01', dr: 0, cr: 63609 },
+      { tail: '         207', tailLength: 12, ac: 'SLVSALE', ld: 'CUST01', dr: 0, cr: 4275 },
     ]);
     const dr = rows.reduce((s, r) => s + r.dr, 0);
     const cr = rows.reduce((s, r) => s + r.cr, 0);
@@ -226,48 +226,50 @@ const headOf = (vchNo: string) => `0101${YEAR}${BOOK}${vchNo}`;
     const rows = await ledger(vchNo);
     expect(rows.map((r) => [r.tail, r.ac, r.dr, r.cr])).toEqual([
       ['01', 'CUST01', 70152.27, 0],
-      ['04', 'GST', 0, 2043.27],
-      ['         102', 'SALES', 0, 63609],
-      ['         202', 'SLVSALE', 0, 4500],
+      ['09', 'GST', 0, 2043.27],
+      ['         107', 'SALES', 0, 63609],
+      ['         207', 'SLVSALE', 0, 4500],
     ]);
   });
 
-  it('T03 bill discount: the per-line legs share the taxable amount and still sum to it exactly', async () => {
+  it('T03 bill discount: the line legs stay the line nets and the discount is its own 33/34 pair', async () => {
     // Line amounts are whole rupees (TR_SALE.cs:10343-10362): gold 63,609, silver 4,275, net 67,884.
-    // Discount 884 → taxable 67,000.00; GST 3% = 2,010.00; total 69,010.00.
-    // Gold 67,000 × 63,609 / 67,884 = 62,780.6699… → 62,780.67; silver the remainder 4,219.33
-    // (independently 4,219.3300… → 4,219.33).
+    // Discount 884 → taxable 67,000.00; GST 3% = 2,010.00; total 69,010.00. The party is debited TOT_AMT + DISC_AMT
+    // = 69,894 (Ac_Ledr.cs:64) and credited the discount back against slot 5, DISCOUNT (:155-157).
     const vchNo = await create(sale([GOLD_LINE, SILVER_LINE], { discountAmount: 884 }));
     const rows = await ledger(vchNo);
     expect(rows.map((r) => [r.tail, r.ac, r.dr, r.cr])).toEqual([
-      ['01', 'CUST01', 69010, 0],
-      ['04', 'GST', 0, 2010],
-      ['         102', 'SALES', 0, 62780.67],
-      ['         202', 'SLVSALE', 0, 4219.33],
+      ['01', 'CUST01', 69894, 0],
+      ['09', 'GST', 0, 2010],
+      ['33', 'CUST01', 0, 884],
+      ['34', 'DISCOUNT', 884, 0],
+      ['         107', 'SALES', 0, 63609],
+      ['         207', 'SLVSALE', 0, 4275],
     ]);
   });
 
-  it('control: two lines on ONE account keep the measured single revenue leg (2-character tail 03)', async () => {
+  it('two lines on ONE account still post one 07 leg per line on the line-path book SL', async () => {
     // Two gold lines in group E1: 63,609 + 63,609 = 127,218.00; GST 3% = 3,816.54; total 131,034.54.
     const vchNo = await create(sale([GOLD_LINE, { ...GOLD_LINE, itCode: 'GLD02' }]));
     const rows = await ledger(vchNo);
     expect(rows.map((r) => [r.tail, r.ac, r.dr, r.cr])).toEqual([
       ['01', 'CUST01', 131034.54, 0],
-      ['03', 'SALES', 0, 127218],
-      ['04', 'GST', 0, 3816.54],
+      ['09', 'GST', 0, 3816.54],
+      ['         107', 'SALES', 0, 63609],
+      ['         207', 'SALES', 0, 63609],
     ]);
   });
 
-  it('cash tender: the settlement pair keeps its measured codes 19/20 beside the per-line revenue legs', async () => {
+  it('cash tender: the settlement pair is keyed 25/26 beside the per-line revenue legs', async () => {
     const vchNo = await create(sale([GOLD_LINE, SILVER_LINE], { cashAmt: 10000 }));
     const rows = await ledger(vchNo);
     expect(rows.map((r) => [r.tail, r.ac, r.dr, r.cr])).toEqual([
       ['01', 'CUST01', 69920.52, 0],
-      ['04', 'GST', 0, 2036.52],
-      ['19', 'CUST01', 0, 10000],
-      ['20', 'CASH', 10000, 0],
-      ['         102', 'SALES', 0, 63609],
-      ['         202', 'SLVSALE', 0, 4275],
+      ['09', 'GST', 0, 2036.52],
+      ['25', 'CUST01', 0, 10000],
+      ['26', 'CASH', 10000, 0],
+      ['         107', 'SALES', 0, 63609],
+      ['         207', 'SLVSALE', 0, 4275],
     ]);
   });
 
@@ -287,7 +289,7 @@ const headOf = (vchNo: string) => `0101${YEAR}${BOOK}${vchNo}`;
     );
     expect(
       removedLedger.map((row) => String(row.LEDR_KEY).slice(headOf(vchNo).length)).sort(),
-    ).toEqual(['01', '04', '         102', '         202'].sort());
+    ).toEqual(['01', '09', '         107', '         207'].sort());
     expect((diff.added.DELETE_DATA ?? []).length).toBeGreaterThan(0);
     expect(diff.added.AC_DATA ?? []).toEqual([]);
   });

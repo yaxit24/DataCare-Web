@@ -189,6 +189,8 @@ const SALE_BOOK_SLOTS: Array<{ srNo: number; acCode: string }> = [
   { srNo: 2, acCode: 'CASH' },
   { srNo: 3, acCode: 'ROUNDOFF' },
   { srNo: 4, acCode: 'ORDADV' },
+  // Sales_Ledr posts the bill discount pair 33/34 to slot 5 (Ac_Ledr.cs:155-157 `B.SR_NO = 5`).
+  { srNo: 5, acCode: 'DISCOUNT' },
 ];
 
 /**

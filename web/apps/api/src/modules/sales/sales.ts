@@ -83,7 +83,7 @@ import {
 } from '../shared/settingsBehavior.js';
 import { partyCashReceivedTx } from '../finance/finance.js';
 import { tenderThresholdDecision } from '../finance/tender.js';
-import { buildLineLegs, lineLegKey, type LineLeg } from '../posting/lineLegs.js';
+import { lineLegKey, sqlStr, type LineLeg } from '../posting/lineLegs.js';
 import {
   consumeSaleReferencesTx,
   lockApprovalSaleReferencesTx,
@@ -391,76 +391,102 @@ export function computeLine(
   return { fine, metal: metalRounded, labour: labourRounded, net, labourRate };
 }
 
-/** Build the balanced double-entry AC_DATA lines for a sale (pure, Req 10.8/13.1).
- *  Settlement: Dr cash/bank/old-gold for amounts received now, Dr customer for the balance (BILL_OS);
- *  Cr sales (taxable) + GST (tax) + round-off. With no payments, the whole total is the customer balance
- *  (credit sale) — identical to the prior behaviour. */
 /**
- * Desktop leg type codes for a sale, measured across books 026/027/029/032.
+ * The LEDR_KEY code of each sale leg, as Sales_Ledr writes it (Ac_Ledr.cs:61-172, the current DataCareNext build).
  *
- * The last two characters of `LEDR_KEY` name the leg's ROLE, they are not a sequence. Settlement legs come in
- * pairs of party-credit plus receiving-account-debit:
+ * The last two characters of a sale LEDR_KEY name the leg's ROLE. Settlement legs come in pairs of party credit and
+ * receiving-account debit, the party first:
  *
- *     PARTY_BILL 01  Dr the customer for the bill
- *     REVENUE    03  Cr the sales account          TAX 04  Cr the tax account
- *     BANK pair  09/10   party Cr / bank Dr
- *     CASH pair  19/20   party Cr / cash Dr
- *     KASAR pair 25/26   party Cr / kasar Dr
+ *     01 party Dr (TOT_AMT + DISC_AMT + TDS_AMT)        :64
+ *     STR(SR_NO)+07 line item Cr (ITM_TYPE 'A' books)   :90       08 book item Cr (other books)   :92
+ *     09 tax Cr :94     10 TCS Cr :96     11 hallmark Cr :107     12 hallmark tax Cr :109
+ *     15/16 cheque :116-118     17/18 card :120-122     21/22+STR order advance (ORD_AC_CODE 00020) :131-133
+ *     STR(SR_NO)+23/24 old metal :135-137     25/26 cash :139-141     27/28 cash paid, 'M' books :143-145
+ *     29/30 cash paid, 'T' books :147-149     31/32 kasar :151-153     33/34 discount :155-157
+ *     36/37+STR UPI :161-163
  *
- * `02` does not appear on any sale book, which is why a 1..n sequence cannot be right: it gets leg 1 by
- * coincidence and shifts every leg after it.
- *
- * Codes NOT yet measured are deliberately absent. A settlement kind with no entry here keeps the sequence
- * rather than being given a guessed code - the same discipline that cut rate cut from 40 row types to 9.
+ * The 2024-25 data was written by an older build with other codes (party 01, revenue 03, tax 04, bank 09/10, cash
+ * 19/20, kasar 25/26, line 02); the owner chose the current source. The UAE-only legs 02-06 are not posted, nor
+ * leg 35: the desktop posts it from ROF_AMT, which it stores 0 (see webRoundOff).
  */
-const SALE_LEG = {
+export const SALE_LEG = {
   partyBill: 1,
-  revenue: 3,
-  /** The per-line item leg of a line-path book (BOOK_DATA.ITM_TYPE = 'A'), keyed after STR(SR_NO). */
-  revenueLine: 2,
-  tax: 4,
-  partyBank: 9,
-  bank: 10,
-  partyCash: 19,
-  cash: 20,
-  partyKasar: 25,
-  kasar: 26,
+  revenueLine: 7,
+  revenue: 8,
+  tax: 9,
+  tcs: 10,
+  hallmark: 11,
+  hallmarkTax: 12,
+  partyCheque: 15,
+  cheque: 16,
+  partyCard: 17,
+  card: 18,
+  partyOrder: 21,
+  order: 22,
+  partyOldMetal: 23,
+  oldMetal: 24,
+  partyCash: 25,
+  cash: 26,
+  partyCashPaidEstimate: 27,
+  cashPaidEstimate: 28,
+  partyCashPaidTax: 29,
+  cashPaidTax: 30,
+  partyKasar: 31,
+  kasar: 32,
+  partyDiscount: 33,
+  discount: 34,
+  partyUpi: 36,
+  upi: 37,
   /**
-   * The web's round-off leg, which the DESKTOP DOES NOT WRITE AT ALL.
+   * The web's round-off leg, which the DESKTOP DOES NOT WRITE.
    *
-   * `SL_DATA.ROF_AMT` is 0.00 on all 190 real sale headers: the desktop rounds the bill total and posts the
-   * sub-rupee residue nowhere, which is why 89 of its sale vouchers are out of balance by under a rupee. The
-   * web balances instead, so it has a leg the desktop has no code for.
-   *
-   * 99 rather than a plausible-looking low number, deliberately. Inventing `05` would put a web-only leg in the
-   * middle of a measured scheme and make it indistinguishable from a desktop code nobody had checked yet. And
-   * it cannot be left to the sequence: legs 1-3 now take 1/3/4, so a fourth leg numbered positionally collides
-   * with the tax leg's 04.
-   *
-   * If the owner decision (docs/FIRST-REAL-COMPARISON.md 3.4) is to reproduce the desktop's imbalance, this
-   * leg and this code disappear together.
+   * The desktop posts leg 35 from SL_DATA.ROF_AMT only when it is non-zero (Ac_Ledr.cs:159), and ROF_AMT is 0.00 on
+   * all 190 real sale headers: the desktop rounds the bill total and posts the sub-rupee residue nowhere, which is
+   * why 89 of its sale vouchers are out of balance by under a rupee. The web balances instead, with this leg. Whether
+   * to keep it, drop it, or post it as 35 is an open owner question (docs/FIRST-REAL-COMPARISON.md 3.4); until then
+   * its code stays 99, outside every desktop code.
    */
   webRoundOff: 99,
 } as const;
 
-/**
- * The amount of the web's round-off leg (SALE_LEG.webRoundOff): whatever balances the party's bill debit against the
- * item and tax credits.
- *
- * On the header path the item leg is the bill taxable, so this is the totals' round-off exactly. On the line path
- * each item leg is its own line's NET_AMT (Ac_Ledr.cs:90), while the bill total is rounded from the ROUNDED net
- * (calc.ts billTotals, TOT_AMT_ROF): with paise on a line and a rupee-rounded bill the two differ by the line nets'
- * rounding, which the desktop leaves unposted (its ROF_AMT is 0, see webRoundOff). The web keeps the voucher balanced
- * by carrying that residue in the same round-off leg; nothing else about the leg changes.
- */
-export function saleLedgerRoundOff(
-  totals: Pick<BillTotals, 'total' | 'tax'>,
-  income: ReadonlyArray<{ amount: number }>,
-): number {
-  const credited = income.reduce((sum, leg) => sum + leg.amount, 0) + totals.tax;
-  return roundTo(totals.total - credited, 3);
+/** `code + STR(SR_NO)`: the tail of a desktop key that puts the row number AFTER the code (legs 21/22, 36/37). */
+function codeThenLine(code: number, srNo: number): { legKeySuffix: string } {
+  return { legKeySuffix: `${String(code).padStart(2, '0')}${sqlStr(srNo)}` };
 }
 
+/** A settlement pair: the party's credit, then the receiving account's debit. */
+interface SaleSettlement {
+  ac: string;
+  amount: number;
+}
+
+/**
+ * The amount of the web's round-off leg (SALE_LEG.webRoundOff): whatever balances the party's bill debit against the
+ * item, tax and charge credits.
+ *
+ * On the header path the item leg is SL_DATA.NET_AMT and the party debit TOT_AMT + DISC_AMT, so this is the bill's
+ * round-off. On the line path each item leg is its own line's NET_AMT (Ac_Ledr.cs:90), while the bill total is
+ * rounded from the ROUNDED net (calc.ts billTotals, TOT_AMT_ROF): with paise on a line and a rupee-rounded bill the
+ * two differ by the line nets' rounding, which the desktop leaves unposted. The web carries that residue in the same
+ * round-off leg; nothing else about the leg changes.
+ */
+export function saleLedgerRoundOff(
+  partyDebit: number,
+  credits: ReadonlyArray<{ amount: number }>,
+): number {
+  return roundTo(partyDebit - credits.reduce((sum, leg) => sum + leg.amount, 0), 3);
+}
+
+/**
+ * Build the balanced AC_DATA legs of a sale (pure), keyed as Sales_Ledr keys them (SALE_LEG above).
+ *
+ * - `totals.total` is the bill (SL_DATA.TOT_AMT, with hallmark and TCS); `totals.discount` the bill discount. The
+ *   party's debit is their sum (Ac_Ledr.cs:64), the discount coming back as the 33/34 pair (:155-157).
+ * - `incomeLegs`, on an ITM_TYPE 'A' book, are the lines (`srNo`, NET_AMT, group account): one 07 leg each (:90).
+ *   Without them the book posts ONE 08 leg of `totals.net` (SL_DATA.NET_AMT) to `controlAc`, the book's slot-1
+ *   account (:92).
+ * - `charges` are TCS (10), hallmark (11) and hallmark tax (12), credits the party's bill debit already carries.
+ */
 export function buildSaleLedger(p: {
   key: VoucherKey;
   acCode: string;
@@ -470,43 +496,51 @@ export function buildSaleLedger(p: {
   controlAc?: string;
   rateUnfix?: boolean;
   vchType?: string;
-  totals: Pick<BillTotals, 'total' | 'taxable' | 'tax' | 'roundOff'>;
+  totals: Pick<BillTotals, 'total' | 'taxable' | 'tax' | 'roundOff'> &
+    Partial<Pick<BillTotals, 'net' | 'discount'>>;
   incomeLegs?: LineLeg[];
+  charges?: Array<{ legType: number; ac: string; amount: number }>;
+  discountAc?: string;
   payments?: {
-    cashAc?: string;
-    cashAmt?: number;
-    bankAc?: string;
-    bankAmt?: number;
-    oldGoldAc?: string;
-    oldGoldAmt?: number;
+    cash?: SaleSettlement;
+    cheque?: SaleSettlement;
+    card?: SaleSettlement;
+    /** UPI_DATA rows in SR_NO order. */
+    upi?: SaleSettlement[];
+    /** SL_ORD_ADJ rows in SR_NO order whose ORD_AC_CODE is 00020 (Ac_Ledr.cs:131). */
+    orders?: SaleSettlement[];
+    /** SL_PR_DETL rows in SR_NO order, each to its item group's PURC_AC. */
+    oldMetal?: SaleSettlement[];
+    kasar?: SaleSettlement;
+    /** Cash paid back to the customer, and the book type that picks its codes (27/28 'M', 29/30 'T'). */
+    cashPaid?: SaleSettlement & { bookType: string };
   };
 }): LedgerLine[] {
   const base = { ...p.key, VCH_TYPE: p.vchType ?? 'SALE' };
-  const R2 = (x: number): number => Math.round((x + 1e-9) * 100) / 100;
   const lines: LedgerLine[] = [];
+  const discount = p.totals.discount ?? 0;
+  const charges = (p.charges ?? []).filter((charge) => charge.amount !== 0);
 
-  // Desktop Sales_Ledr suppresses the normal customer/income money footprint when RATE_UNFIX='Y'.
   if (!p.rateUnfix) {
+    const partyDebit = roundTo(p.totals.total + discount, 3);
     if (p.totals.total !== 0)
       lines.push({
         ...base,
         legType: SALE_LEG.partyBill,
         AC_CODE: p.acCode,
         LD_CODE: p.controlAc ?? p.salesAc,
-        DR_AMT: p.totals.total,
+        DR_AMT: partyDebit,
         CR_AMT: 0,
         SIGN: 'D',
       });
-    const income =
+    const income: LineLeg[] =
       p.incomeLegs && p.incomeLegs.length
         ? p.incomeLegs
-        : [{ ac: p.salesAc, amount: p.totals.taxable }];
+        : [{ ac: p.controlAc ?? p.salesAc, amount: p.totals.net ?? p.totals.taxable }];
     for (const leg of income)
       if (leg.amount !== 0)
         lines.push({
           ...base,
-          // A line leg (srNo) is keyed `STR(SR_NO) + '02'`: the code this desktop build wrote on all 115 line-path
-          // legs of book 032 in 2024-25 (the decompiled source keys the same leg '07', Ac_Ledr.cs:90).
           ...lineLegKey(leg, leg.srNo == null ? SALE_LEG.revenue : SALE_LEG.revenueLine),
           AC_CODE: leg.ac,
           LD_CODE: p.acCode,
@@ -524,74 +558,126 @@ export function buildSaleLedger(p: {
         CR_AMT: p.totals.tax,
         SIGN: 'C',
       });
-    const roundOff = saleLedgerRoundOff(p.totals, income);
-    if (roundOff > 0)
+    for (const charge of charges)
       lines.push({
         ...base,
-        legType: SALE_LEG.webRoundOff,
-        AC_CODE: p.roundAc,
+        legType: charge.legType,
+        AC_CODE: charge.ac,
         LD_CODE: p.acCode,
         DR_AMT: 0,
-        CR_AMT: roundOff,
+        CR_AMT: charge.amount,
         SIGN: 'C',
       });
-    else if (roundOff < 0)
+    const roundOff =
+      p.totals.total === 0
+        ? 0
+        : saleLedgerRoundOff(partyDebit, [...income, { amount: p.totals.tax }, ...charges]);
+    if (roundOff !== 0)
       lines.push({
         ...base,
         legType: SALE_LEG.webRoundOff,
         AC_CODE: p.roundAc,
         LD_CODE: p.acCode,
-        DR_AMT: Math.abs(roundOff),
+        DR_AMT: roundOff < 0 ? Math.abs(roundOff) : 0,
+        CR_AMT: roundOff > 0 ? roundOff : 0,
+        SIGN: roundOff > 0 ? 'C' : 'D',
+      });
+  } else {
+    // An unfixed sale posts no bill, item or tax leg (Ac_Ledr.cs:64, :90, :92 `RATE_UNFIX <> 'Y'`). A charge on it is
+    // billed to the customer by its own debit so the voucher stays balanced; the desktop has no such leg.
+    for (const charge of charges) {
+      lines.push({
+        ...base,
+        AC_CODE: charge.ac,
+        LD_CODE: p.acCode,
+        DR_AMT: 0,
+        CR_AMT: charge.amount,
+        SIGN: 'C',
+      });
+      lines.push({
+        ...base,
+        AC_CODE: p.acCode,
+        LD_CODE: charge.ac,
+        DR_AMT: charge.amount,
         CR_AMT: 0,
         SIGN: 'D',
       });
+    }
   }
 
-  // Desktop emits a self-balanced party/tender pair, not a netted party balance.
-  // Each settlement is a PAIR with its own measured code pair: party credit, then the receiving account debit.
-  // Book 027 shows 09/10 for bank, 19/20 for cash and 25/26 for kasar, each with the party on the odd code.
-  const addReceipt = (
-    account: string,
-    amount: number,
-    legs?: { party: number; account: number },
+  /** A settlement pair, the party's leg first. `dir` 'in' credits the party (money received), 'out' debits it. */
+  const pair = (
+    s: SaleSettlement | undefined,
+    keys: { party: Record<string, unknown>; account: Record<string, unknown> },
+    dir: 'in' | 'out' = 'in',
+    extra: Partial<LedgerLine> = {},
   ): void => {
-    const value = R2(amount);
-    if (value <= 0) return;
+    if (!s || s.amount === 0) return;
+    const value = s.amount;
     lines.push({
       ...base,
-      ...(legs ? { legType: legs.party } : {}),
+      ...keys.party,
+      ...extra,
       AC_CODE: p.acCode,
-      LD_CODE: account,
-      DR_AMT: 0,
-      CR_AMT: value,
-      SIGN: 'C',
-    });
+      LD_CODE: s.ac,
+      DR_AMT: dir === 'out' ? value : 0,
+      CR_AMT: dir === 'in' ? value : 0,
+      SIGN: dir === 'in' ? 'C' : 'D',
+    } as LedgerLine);
     lines.push({
       ...base,
-      ...(legs ? { legType: legs.account } : {}),
-      AC_CODE: account,
+      ...keys.account,
+      ...extra,
+      AC_CODE: s.ac,
       LD_CODE: p.acCode,
-      DR_AMT: value,
-      CR_AMT: 0,
-      SIGN: 'D',
-    });
+      DR_AMT: dir === 'in' ? value : 0,
+      CR_AMT: dir === 'out' ? value : 0,
+      SIGN: dir === 'in' ? 'D' : 'C',
+    } as LedgerLine);
   };
+  const leg = (code: number) => ({ legType: code });
   const pay = p.payments ?? {};
-  // cash = BOOK_DETL slot 2 (resolved by the writer); bank is fail-closed upstream when it posts.
-  // addReceipt ignores a zero amount, so a blank account is never used. Old gold has no configured
-  // source, so it keeps its historical default.
-  addReceipt(pay.cashAc ?? '', Number(pay.cashAmt ?? 0), {
-    party: SALE_LEG.partyCash,
-    account: SALE_LEG.cash,
-  });
-  addReceipt(pay.bankAc ?? '', Number(pay.bankAmt ?? 0), {
-    party: SALE_LEG.partyBank,
-    account: SALE_LEG.bank,
-  });
-  // Old gold has NO measured code pair on any sale book, so it keeps the sequence rather than borrowing one.
-  // Borrowing 25/26 would put an old-gold settlement under the kasar codes and corrupt any report that groups
-  // by leg type. It cannot collide with 01/03/04/09/10/19/20 because those are all above the leg count.
-  addReceipt(pay.oldGoldAc ?? 'OLDGOLD', Number(pay.oldGoldAmt ?? 0));
+  pair(pay.cheque, { party: leg(SALE_LEG.partyCheque), account: leg(SALE_LEG.cheque) });
+  pair(pay.card, { party: leg(SALE_LEG.partyCard), account: leg(SALE_LEG.card) });
+  (pay.orders ?? []).forEach((order, i) =>
+    pair(order, {
+      party: codeThenLine(SALE_LEG.partyOrder, i + 1),
+      account: codeThenLine(SALE_LEG.order, i + 1),
+    }),
+  );
+  // Old metal is keyed after its SL_PR_DETL line, and writes BILL_NO '' (Ac_Ledr.cs:135-137 select '').
+  (pay.oldMetal ?? []).forEach((metal, i) =>
+    pair(
+      metal,
+      {
+        party: lineLegKey({ srNo: i + 1 }, SALE_LEG.partyOldMetal),
+        account: lineLegKey({ srNo: i + 1 }, SALE_LEG.oldMetal),
+      },
+      'in',
+      { BILL_NO: '' } as Partial<LedgerLine>,
+    ),
+  );
+  pair(pay.cash, { party: leg(SALE_LEG.partyCash), account: leg(SALE_LEG.cash) });
+  if (pay.cashPaid && (pay.cashPaid.bookType === 'M' || pay.cashPaid.bookType === 'T'))
+    pair(
+      pay.cashPaid,
+      pay.cashPaid.bookType === 'M'
+        ? { party: leg(SALE_LEG.partyCashPaidEstimate), account: leg(SALE_LEG.cashPaidEstimate) }
+        : { party: leg(SALE_LEG.partyCashPaidTax), account: leg(SALE_LEG.cashPaidTax) },
+      'out',
+    );
+  pair(pay.kasar, { party: leg(SALE_LEG.partyKasar), account: leg(SALE_LEG.kasar) });
+  if (!p.rateUnfix && discount !== 0)
+    pair(
+      { ac: p.discountAc ?? p.roundAc, amount: discount },
+      { party: leg(SALE_LEG.partyDiscount), account: leg(SALE_LEG.discount) },
+    );
+  (pay.upi ?? []).forEach((upi, i) =>
+    pair(upi, {
+      party: codeThenLine(SALE_LEG.partyUpi, i + 1),
+      account: codeThenLine(SALE_LEG.upi, i + 1),
+    }),
+  );
   return lines;
 }
 
@@ -1004,21 +1090,15 @@ async function writeSaleTx(
   }));
   /**
    * BOOK_DATA.ITM_TYPE picks the item side's path (Sales_Ledr): 'A' posts one leg PER LINE, the line's NET_AMT to its
-   * group's SALE_AC (Ac_Ledr.cs:90, `AND B.ITM_TYPE = 'A' ... AND A.NET_AMT <> 0`); any other type posts the bill net
-   * to the book's slot-1 account (:92). Without a bill discount the line legs are exactly the line amounts; with one
-   * the web keeps sharing the taxable out over the lines so the voucher balances.
+   * group's SALE_AC, keyed STR(SR_NO)+'07' (Ac_Ledr.cs:90, `AND B.ITM_TYPE = 'A' ... AND A.NET_AMT <> 0`); any other
+   * type posts ONE leg, the bill's NET_AMT to the book's slot-1 account, keyed '08' (:92). A bill discount is its own
+   * 33/34 pair on both paths (:155-157), so the item legs are never shared out.
    */
-  const linePathBook =
-    (await saleBookTypesTx(tx, input.scope as CompleteSaleScope)).itmType === 'A';
-  const incomeLegs =
-    linePathBook && totals.discount === 0
-      ? lineAccounts.map((l, i) => ({ ac: l.ac, amount: l.net, srNo: i + 1 }))
-      : linePathBook
-        ? buildLineLegs(lineAccounts, totals.taxable, lineNetTotal).map((leg, i) => ({
-            ...leg,
-            srNo: leg.srNo ?? i + 1,
-          }))
-        : buildLineLegs(lineAccounts, totals.taxable, lineNetTotal);
+  const saleBookTypes = await saleBookTypesTx(tx, input.scope as CompleteSaleScope);
+  const linePathBook = saleBookTypes.itmType === 'A';
+  const incomeLegs: LineLeg[] | undefined = linePathBook
+    ? lineAccounts.map((l, i) => ({ ac: l.ac, amount: l.net, srNo: i + 1 }))
+    : undefined;
 
   // Hallmark charge (TR_SALE_HM): an extra hallmarking fee + its own GST, billed to the customer.
   // 0/absent ⇒ a normal sale, identical to before (no HM legs, TOT_AMT = item total).
@@ -1155,10 +1235,15 @@ async function writeSaleTx(
   // 6 labour income, 7 cash purchase, 8 scheme bonus. The Rojmel's advance row names slot 4.
   let advanceAc = '';
   let kasarAc = input.kasarAc ?? controlAc;
-  if (
-    !isSalesQuotation &&
-    (totals.roundOff !== 0 || saleLedgerRoundOff(totals, incomeLegs) !== 0 || kasar !== 0)
-  ) {
+  // The web's round-off leg balances the party's debit (TOT_AMT + DISC_AMT) against the item, tax and charge credits.
+  const ledgerRoundOff = saleLedgerRoundOff(round2s(grandWithTcs + totals.discount), [
+    ...(incomeLegs ?? [{ amount: totals.net }]),
+    { amount: totals.tax },
+    { amount: hmAmt },
+    { amount: hmTax },
+    { amount: tcs },
+  ]);
+  if (!isSalesQuotation && (totals.roundOff !== 0 || ledgerRoundOff !== 0 || kasar !== 0)) {
     const configured = await resolveBookAccountTx(tx, input.scope, bookPolicy, 3);
     roundAc = validateConfiguredAccount('round account', requestedRoundAc, configured);
     kasarAc = validateConfiguredAccount('kasar account', input.kasarAc, configured);
@@ -1642,144 +1727,13 @@ async function writeSaleTx(
   };
   Object.assign(header, { ACK_DATE: null });
 
-  // N59/G165: the electronic-tender (card/upi/cheque) leg posts to the request-named bank account,
-  // never a literal 'BANK'. BANK_AC is persisted and round-trips on reopen, so fail-closed is safe:
-  // if any electronic tender posts without a bank account, refuse rather than invent one.
-  const bankTenderAmt = round2s(num(input.cardAmt) + num(input.upiAmt) + num(input.chequeAmt));
-  const bankAc = text(input.bankAc);
-  if (!isSalesQuotation && bankTenderAmt > 0 && !bankAc)
-    throw new SaleValidationError('bank account is required for card/upi/cheque tender');
-
-  const ledger = isSalesQuotation
-    ? []
-    : buildSaleLedger({
-        key,
-        acCode: input.acCode,
-        salesAc,
-        taxAc,
-        roundAc,
-        controlAc,
-        rateUnfix: input.rateUnfix,
-        vchType: bookPolicy.vchType,
-        totals,
-        incomeLegs,
-        payments: {
-          cashAc,
-          cashAmt: input.cashAmt,
-          bankAc,
-          bankAmt: bankTenderAmt,
-          // Old gold has no persisted account column and no sale-book slot, so it keeps the request
-          // account or the historical 'OLDGOLD' default (unchanged behaviour; cannot round-trip a slot).
-          oldGoldAc: input.oldGoldAc,
-          oldGoldAmt: round2s(oldGoldAmount + oldSilverAmount),
-        },
-      });
-  if (!isSalesQuotation && hmAmt > 0) {
-    const hb = { ...key, VCH_TYPE: bookPolicy.vchType };
-    ledger.push({
-      ...hb,
-      AC_CODE: input.hmChargeAc ?? 'HMCHRG',
-      LD_CODE: input.acCode,
-      DR_AMT: 0,
-      CR_AMT: hmAmt,
-      SIGN: 'C',
-    }); // Cr hallmark income
-    if (hmTax > 0)
-      ledger.push({
-        ...hb,
-        AC_CODE: taxAc,
-        LD_CODE: input.acCode,
-        DR_AMT: 0,
-        CR_AMT: hmTax,
-        SIGN: 'C',
-      }); // Cr GST on hallmark
-    ledger.push({
-      ...hb,
-      AC_CODE: input.acCode,
-      LD_CODE: input.hmChargeAc ?? 'HMCHRG',
-      DR_AMT: round2s(hmAmt + hmTax),
-      CR_AMT: 0,
-      SIGN: 'D',
-    }); // billed to customer
-  }
-  if (!isSalesQuotation && tcs > 0) {
-    // TCS collected on the bill: Cr TCS-payable, billed to the customer
-    const tb = { ...key, VCH_TYPE: bookPolicy.vchType };
-    ledger.push({
-      ...tb,
-      AC_CODE: input.tcsAc ?? 'TCS',
-      LD_CODE: input.acCode,
-      DR_AMT: 0,
-      CR_AMT: tcs,
-      SIGN: 'C',
-    });
-    ledger.push({
-      ...tb,
-      AC_CODE: input.acCode,
-      LD_CODE: input.tcsAc ?? 'TCS',
-      DR_AMT: tcs,
-      CR_AMT: 0,
-      SIGN: 'D',
-    });
-  }
-  if (!isSalesQuotation && kasar > 0) {
-    // Kasar write-off, a settlement pair like cash: the party's credit first, then the kasar account's debit
-    // (Sales_Ledr, Ac_Ledr.cs:151-153 inserts the party leg before the account leg). Keyed 25/26, the codes the
-    // desktop wrote on all 100 kasar pairs of the 2024-25 year; the decompiled source numbers the same pair 31/32
-    // and its cash pair 25/26, a build difference reported with the round-off question (SALE_LEG above).
-    const kb = { ...key, VCH_TYPE: bookPolicy.vchType };
-    ledger.push({
-      ...kb,
-      legType: SALE_LEG.partyKasar,
-      AC_CODE: input.acCode,
-      LD_CODE: kasarAc,
-      DR_AMT: 0,
-      CR_AMT: kasar,
-      SIGN: 'C',
-    });
-    ledger.push({
-      ...kb,
-      legType: SALE_LEG.kasar,
-      AC_CODE: kasarAc,
-      LD_CODE: input.acCode,
-      DR_AMT: kasar,
-      CR_AMT: 0,
-      SIGN: 'D',
-    });
-  }
-  if (!isSalesQuotation) {
-    ledger.push(
-      ...buildSaleFineLedger({
-        key,
-        acCode: input.acCode,
-        vchType: bookPolicy.vchType,
-        rateUnfix: input.rateUnfix,
-        lines: computed.map((c) => ({
-          metal: metalByItem[String(c.in.itCode).trim()] ?? 'G',
-          saleAc: saleAcByItem[String(c.in.itCode).trim()] ?? salesAc,
-          fine: c.calc.fine,
-        })),
-      }),
-    );
-    assertBalanced(ledger);
-    // BILL_NO on the voucher's money legs is SL_DATA.BILL_NO (Ac_Ledr.cs:64-163 select A.BILL_NO); the unfixed fine
-    // leg writes '' (:165).
-    for (const line of ledger) if (line.FINE_WT == null) line.BILL_NO = header.BILL_NO;
-    // LDR_NAME is SL_DATA.AC_NAME on the party's bill leg (Ac_Ledr.cs:64, leg 01) and on the cash account's debit
-    // (Ac_Ledr.cs:141); every other sale leg writes '' (Ac_Ledr.cs:13 default).
-    for (const line of ledger) {
-      if (line.legType === SALE_LEG.partyBill || line.legType === SALE_LEG.cash) {
-        line.LDR_NAME = input.acName ?? '';
-      }
-    }
-  }
-
   const cashAmt = round2s(num(input.cashAmt));
   const cardAmt = round2s(num(input.cardAmt));
   const upiAmt = round2s(num(input.upiAmt));
   const chequeAmt = round2s(num(input.chequeAmt));
   const oldGoldAmt = round2s(oldGoldAmount + oldSilverAmount);
   const paidNow = round2s(cashAmt + cardAmt + upiAmt + chequeAmt + oldGoldAmt);
+  const cashPaidAmt = isSalesQuotation ? 0 : round2s(num(input.cashPaid));
   // Order advances (MSG_ORD) and credit notes (MSG_CRNT) settle the bill without a ledger leg here: the advance
   // and the note already credited the customer. TR_SALE.cs:19390 subtracts both from the bill outstanding.
   const creditNoteAdjust = round2s(num(input.currentAdjustmentAmount));
@@ -1789,11 +1743,15 @@ async function writeSaleTx(
         tx,
         input.scope,
         input.orders ?? [],
-        round2s(grandWithTcs - paidNow - kasar - creditNoteAdjust),
+        round2s(grandWithTcs - paidNow - kasar - creditNoteAdjust + cashPaidAmt),
         (msg) => new SaleValidationError(msg),
       );
   const orderAdjust = round2s(orderRows.reduce((sum, r) => sum + r.amount, 0));
-  const billOS = round2s(grandWithTcs - paidNow - kasar - orderAdjust - creditNoteAdjust);
+  // Cash paid back to the customer adds to what they owe (TR_SALE.cs:19386, `+ MSG2_TOTAL[13,3]`), as its ledger
+  // pair 27/28 or 29/30 debits them (Ac_Ledr.cs:143-149).
+  const billOS = round2s(
+    grandWithTcs - paidNow - kasar - orderAdjust - creditNoteAdjust + cashPaidAmt,
+  );
   // TR_SALE.cs: MsDefaulterAc = 'Y' AND outstanding > 0 -> credit to a flagged party is blocked.
   // The flag is read from the persisted account (AC_MAST.DEFAULTER_AC), never from the request.
   if (!isSalesQuotation && round2s(billOS) > 0) {
@@ -1810,6 +1768,123 @@ async function writeSaleTx(
         .toUpperCase() === 'Y'
     ) {
       throw new SaleValidationError(DESKTOP_MESSAGES.PARTY_IN_DEFAULTER_LIST);
+    }
+  }
+
+  // The sale's ledger, keyed as Sales_Ledr keys it (SALE_LEG, Ac_Ledr.cs:61-172).
+  //
+  // Cheque posts to BANK_AC (:116-118), card to CARD_AC unless the card commission is adjusted on a tax book
+  // (:120-122 `CARD_ADJ <> 'Y' OR BOOK_TYPE = 'M'`), each UPI_DATA row to its own account (:161-163). A UPI amount
+  // with no UPI rows posts as one row to the bank account, since the desktop has no other UPI leg.
+  const bankAc = text(input.bankAc);
+  const cardLegs =
+    !behavior.cardCommissionAdjustment || saleBookTypes.bookType === 'M' ? cardAmt : 0;
+  const cardAc = text(input.cardAc) || bankAc;
+  const upiRows = (input.upiRows ?? []).filter((row) => round2s(num(row.amount)) !== 0);
+  const upiLegs: Array<{ ac: string; amount: number }> = upiRows.length
+    ? upiRows.map((row) => ({ ac: text(row.acCode), amount: round2s(num(row.amount)) }))
+    : upiAmt !== 0
+      ? [{ ac: bankAc, amount: upiAmt }]
+      : [];
+  if (
+    !isSalesQuotation &&
+    ((chequeAmt !== 0 && !bankAc) || (cardLegs !== 0 && !cardAc) || upiLegs.some((leg) => !leg.ac))
+  )
+    throw new SaleValidationError('bank account is required for card/upi/cheque tender');
+  // Old metal: one pair per SL_PR_DETL line to its item group's PURC_AC (Ac_Ledr.cs:135-137); an item without one
+  // keeps the request account or the historical 'OLDGOLD' default.
+  const oldMetalItems = oldMetalRows.map(
+    (g) => g.itCode ?? ((g.metal ?? 'G') === 'S' ? 'OS' : 'OG'),
+  );
+  const purcAcByItem = new Map<string, string>();
+  if (!isSalesQuotation && oldMetalItems.length) {
+    const rows: Array<{ ic: unknown; pac: unknown }> = await tx.$queryRawUnsafe(
+      `SELECT i."IT_CODE" ic, g."PURC_AC" pac FROM "ITEM_MAST" i
+         JOIN "GROUP_MAST" g ON g.tenant_id=i.tenant_id AND g."CO_CODE"=i."CO_CODE" AND g."GR_CODE"=i."GR_CODE"
+        WHERE i.tenant_id=$1 AND i."CO_CODE"=$2 AND i."IT_CODE"::text = ANY($3::text[])`,
+      tenantId,
+      input.scope.coCode,
+      oldMetalItems,
+    );
+    for (const row of rows) if (text(row.pac)) purcAcByItem.set(text(row.ic), text(row.pac));
+  }
+  // Cash paid back posts with the cash slot (Ac_Ledr.cs:143-149 `B.SR_NO = 2`): 27/28 on an estimate book, 29/30 on
+  // a tax book for a named customer.
+  let cashPaidAc = cashAc;
+  if (!isSalesQuotation && cashPaidAmt !== 0 && cashAmt === 0)
+    cashPaidAc = await resolveBookAccountTx(tx, input.scope, bookPolicy, 2);
+  const cashPaidLegs =
+    saleBookTypes.bookType === 'M' || (saleBookTypes.bookType === 'T' && input.acCode !== '00045')
+      ? cashPaidAmt
+      : 0;
+  // The discount pair posts to the book's slot 5 (Ac_Ledr.cs:155-157 `B.SR_NO = 5`).
+  const discountAc =
+    !isSalesQuotation && !input.rateUnfix && totals.discount !== 0
+      ? await resolveBookAccountTx(tx, input.scope, bookPolicy, 5)
+      : '';
+
+  const ledger = isSalesQuotation
+    ? []
+    : buildSaleLedger({
+        key,
+        acCode: input.acCode,
+        salesAc,
+        taxAc,
+        roundAc,
+        controlAc,
+        rateUnfix: input.rateUnfix,
+        vchType: bookPolicy.vchType,
+        totals: { ...totals, total: grandWithTcs },
+        incomeLegs,
+        charges: [
+          { legType: SALE_LEG.tcs, ac: input.tcsAc ?? 'TCS', amount: tcs },
+          { legType: SALE_LEG.hallmark, ac: input.hmChargeAc ?? 'HMCHRG', amount: hmAmt },
+          { legType: SALE_LEG.hallmarkTax, ac: taxAc, amount: hmTax },
+        ],
+        discountAc,
+        payments: {
+          cash: { ac: cashAc, amount: cashAmt },
+          cheque: { ac: bankAc, amount: chequeAmt },
+          card: { ac: cardAc, amount: cardLegs },
+          upi: upiLegs,
+          // SL_ORD_ADJ rows whose order account is the advance account 00020 (Ac_Ledr.cs:131-133).
+          orders: orderRows.map((row) => ({
+            ac: row.ordAcCode,
+            amount: row.ordAcCode === '00020' ? row.amount : 0,
+          })),
+          oldMetal: valuedOldMetal.map((metal, i) => ({
+            ac: purcAcByItem.get(oldMetalItems[i] ?? '') ?? input.oldGoldAc ?? 'OLDGOLD',
+            amount: metal.amount,
+          })),
+          kasar: { ac: kasarAc, amount: kasar },
+          cashPaid: { ac: cashPaidAc, amount: cashPaidLegs, bookType: saleBookTypes.bookType },
+        },
+      });
+  if (!isSalesQuotation) {
+    ledger.push(
+      ...buildSaleFineLedger({
+        key,
+        acCode: input.acCode,
+        vchType: bookPolicy.vchType,
+        rateUnfix: input.rateUnfix,
+        lines: computed.map((c) => ({
+          metal: metalByItem[String(c.in.itCode).trim()] ?? 'G',
+          saleAc: saleAcByItem[String(c.in.itCode).trim()] ?? salesAc,
+          fine: c.calc.fine,
+        })),
+      }),
+    );
+    assertBalanced(ledger);
+    // BILL_NO on the voucher's money legs is SL_DATA.BILL_NO (Ac_Ledr.cs:64-163 select A.BILL_NO); the old-metal pair
+    // (:135-137) and the unfixed fine leg (:165) write ''.
+    for (const line of ledger)
+      if (line.FINE_WT == null && line.BILL_NO == null) line.BILL_NO = header.BILL_NO;
+    // LDR_NAME is SL_DATA.AC_NAME on the party's bill leg (Ac_Ledr.cs:64, leg 01) and on the cash account's debit
+    // (Ac_Ledr.cs:141, leg 26); every other sale leg writes '' (Ac_Ledr.cs:13 default).
+    for (const line of ledger) {
+      if (line.legType === SALE_LEG.partyBill || line.legType === SALE_LEG.cash) {
+        line.LDR_NAME = input.acName ?? '';
+      }
     }
   }
 
