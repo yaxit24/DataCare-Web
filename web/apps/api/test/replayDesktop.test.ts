@@ -527,3 +527,28 @@ describe('replay oracle: normalisation and grouping', () => {
     expect(Object.keys(tally.CONTRA.reasons)).toEqual(['N book N voucher ##### refused N']);
   });
 });
+
+describe('TEMP_BOOK_DATA hidden identity', () => {
+  const key = { CO_CODE: '01', LC_CODE: '01', CO_BOOK: '026' };
+  const temp = (v: string, extra = {}) => ({ ...key, VCH_NO: v, ...extra });
+  it('ignores visible-number collisions from other years and uses each side’s own hidden number', () => {
+    const rows = [temp('00007'), temp('00123'), temp('00456'), temp('00123', { LC_CODE: '02' })];
+    for (const hidden of ['00123', '00456']) {
+      const tables = {
+        CASH_DATA: [{ ...key, CO_YEAR: '2024', VCH_NO: '00007', HD_VCH_NO: hidden }],
+      };
+      expect(lib.withHiddenBookRows(tables, 'CASH_DATA', rows).TEMP_BOOK_DATA).toEqual([
+        temp(hidden),
+      ]);
+    }
+  });
+  it('omits TEMP_BOOK_DATA when the header has no hidden number, or no matching row', () => {
+    for (const hidden of [undefined, null, '', '99999']) {
+      const tables = { CASH_DATA: [{ ...key, VCH_NO: '00007', HD_VCH_NO: hidden }] };
+      expect(lib.withHiddenBookRows(tables, 'CASH_DATA', [temp('00007')])).toEqual(tables);
+    }
+    expect(
+      lib.withHiddenBookRows({ CONTRA_DATA: [key] }, 'CONTRA_DATA', [temp('00007')]),
+    ).not.toHaveProperty('TEMP_BOOK_DATA');
+  });
+});
