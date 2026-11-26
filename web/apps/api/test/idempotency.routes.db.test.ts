@@ -371,9 +371,9 @@ const lines = (coBook: string, amount: number) => ({
 
   it.each([
     ['/receipts', receipt(1250), 'CASH_DATA', 'RCT'],
-    ['/payments', payment(640), 'PAY_DATA', 'PAY'],
+    ['/payments', payment(640), 'CASH_DATA', 'PAY'],
     ['/receipts/multi', lines('RCT', 310), 'CASH_DATA', 'RCT'],
-    ['/payments/multi', lines('PAY', 220), 'PAY_DATA', 'PAY'],
+    ['/payments/multi', lines('PAY', 220), 'CASH_DATA', 'PAY'],
   ] as const)(
     'Cash/Bank %s: a replay posts one voucher and one set of ledger legs; a changed body is 409',
     async (url, body, table, book) => {
@@ -401,10 +401,10 @@ const lines = (coBook: string, amount: number) => ({
     const key = 'b6f1a0de-5d0c-4a59-9a43-000000000007';
     const first = await post(TENANT, '/receipts', receipt(90), key);
     expect(first.statusCode, first.body).toBe(201);
-    const before = await count(TENANT, 'PAY_DATA', 'PAY');
+    const before = await count(TENANT, 'CASH_DATA', 'PAY');
     const elsewhere = await post(TENANT, '/payments', payment(90), key);
     expect(elsewhere.statusCode, elsewhere.body).toBe(409);
-    expect(await count(TENANT, 'PAY_DATA', 'PAY')).toBe(before);
+    expect(await count(TENANT, 'CASH_DATA', 'PAY')).toBe(before);
   });
 
   it('purges expired receipts of one tenant only, and an expired key is free again', async () => {

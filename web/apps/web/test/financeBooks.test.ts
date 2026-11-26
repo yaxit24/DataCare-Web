@@ -25,7 +25,7 @@ describe('finance book families (D1)', () => {
 
   it('the API enforces the same families on save', () => {
     const source = readFileSync(
-      resolve(__dirname, '../../api/src/modules/finance/finance.ts'),
+      resolve(__dirname, '../../api/src/modules/finance/cashBank.ts'),
       'utf8',
     );
     expect(source).toContain("receipt: { 'CASH REC': 'cash', 'BANK REC': 'bank', RECEIPT: 'any' }");

@@ -212,10 +212,12 @@ describe.runIf(RUN)('posting accounts fail closed', () => {
     expect(used.has('CASH')).toBe(false);
     expect(used.has('KASAR')).toBe(false);
 
+    // TR_CASH never writes REC_AC_CODE (TR_CASH.cs:3016-3062): the settlement account is the book's slot 1, which
+    // the ledger legs above already name.
     const header = await rows(
       `SELECT "REC_AC_CODE" ac FROM "CASH_DATA" WHERE tenant_id=$1`,
       TENANT,
     );
-    expect(String(header[0]?.ac ?? '')).toBe(CASH);
+    expect(header[0]?.ac ?? null).toBeNull();
   });
 });

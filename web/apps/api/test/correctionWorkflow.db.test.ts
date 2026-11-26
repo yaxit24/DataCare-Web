@@ -33,7 +33,7 @@ import {
   postReceipt,
   postPayment,
   deleteReceipt,
-  deleteFinance,
+  deletePayment,
 } from '../src/modules/finance/finance.js';
 
 const RUN = process.env.RUN_DB_INTEGRITY_TESTS === '1';
@@ -317,21 +317,20 @@ describe.runIf(RUN)('correction workflow: single receipt and payment (plan F1.3)
     } as never);
     const vchNo = String(created.vchNo).padStart(5, '0');
 
-    // postPayment writes PAY_DATA, NOT CASH_DATA (finance.ts:512). Pointing a delete at the wrong header
-    // table reverses nothing and still reports success, so the table is asserted explicitly here.
-    expect(await rowCount('PAY_DATA', PAY_BOOK, vchNo)).toBeGreaterThan(0);
+    // TR_CASH saves a payment into CASH_DATA like a receipt (TR_CASH.cs:3005); PAY_DATA is Other Expenses.
+    expect(await rowCount('CASH_DATA', PAY_BOOK, vchNo)).toBeGreaterThan(0);
+    expect(await rowCount('PAY_DATA', PAY_BOOK, vchNo)).toBe(0);
 
-    await deleteFinance(runtime, {
+    await deletePayment(runtime, {
       scope: financeScope(PAY_BOOK),
       vchNo,
-      headerTable: 'PAY_DATA',
-      book: PAY_BOOK,
-      vchType: 'CPAY', // BPAY for bank — finance.ts:523
       deleteUser: 'corr-wf',
     });
 
-    expect(await rowCount('PAY_DATA', PAY_BOOK, vchNo), 'header gone').toBe(0);
+    expect(await rowCount('CASH_DATA', PAY_BOOK, vchNo), 'header gone').toBe(0);
     expect(await rowCount('AC_DATA', PAY_BOOK, vchNo), 'ledger legs gone').toBe(0);
+    // TR_CASH.cs:3220-3223 removes the day book and the hidden identity with the voucher.
+    expect(await rowCount('ROJ_MEL_DATA', PAY_BOOK, vchNo), 'day book gone').toBe(0);
     expect(await rowCount('DELETE_DATA', PAY_BOOK, vchNo), 'deletion is audited').toBeGreaterThan(
       0,
     );

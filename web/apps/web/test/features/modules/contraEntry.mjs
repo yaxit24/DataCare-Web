@@ -227,6 +227,25 @@ export const contraEntry = {
           ],
           JSON.stringify(posted),
         );
+        // TR_CONTRA.cs:2776, :2828 and Contra_Ledr / Contra_Rojmel (Ac_Ledr.cs:842, Ac_Rojmel.cs:338): every data row
+        // carries the book's MAIN_BOOK; only TEMP_BOOK_DATA takes the form name (TR_CONTRA.cs:2751).
+        const names = await ctx.rows(
+          `SELECT t, array_agg(DISTINCT n ORDER BY n) names FROM (
+             SELECT 'CONTRA_DATA' t,"BOOK_NAME" n FROM "CONTRA_DATA" WHERE tenant_id=$1 AND "CO_BOOK"='${BOOK}' AND "VCH_NO"=$2
+             UNION ALL SELECT 'AC_DATA',"BOOK_NAME" FROM "AC_DATA" WHERE tenant_id=$1 AND "CO_BOOK"='${BOOK}' AND "VCH_NO"=$2
+             UNION ALL SELECT 'ROJ_MEL_DATA',"BOOK_NAME" FROM "ROJ_MEL_DATA" WHERE tenant_id=$1 AND "CO_BOOK"='${BOOK}' AND "VCH_NO"=$2
+           ) x GROUP BY t ORDER BY t`,
+          vchNo,
+        );
+        assert.deepEqual(
+          names.map((r) => [r.t, r.names]),
+          [
+            ['AC_DATA', ['CONTRA']],
+            ['CONTRA_DATA', ['CONTRA']],
+            ['ROJ_MEL_DATA', ['CONTRA']],
+          ],
+          JSON.stringify(names),
+        );
         return {
           observation: `voucher ${vchNo}: ${rows.length} CONTRA_DATA rows, ${posted.length} legs`,
           expected: 'the desktop pair of rows and one leg per row',
