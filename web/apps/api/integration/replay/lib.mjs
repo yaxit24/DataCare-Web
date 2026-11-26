@@ -966,6 +966,9 @@ export const KNOWN_BUILD_DIFFERENCES = [
   {
     family: 'SALES ORDER',
     table: 'ROJ_MEL_DATA',
+    // Only when every unpaired row is a day-book row 05 (key = voucher key + '05'); a missing advance row 01 stays a
+    // defect.
+    rowKeys: /^LEDR_KEY=.{21}05\s*$/,
     note:
       "scheme adjustment day-book row 05 (account 00079, 'MADJ - party'): source writes it whenever SCHM_AMT <> 0 " +
       '(Ac_Rojmel.cs:19), the data has none',
@@ -980,6 +983,8 @@ export const KNOWN_BUILD_DIFFERENCES = [
     family: 'WH SALES',
     table,
     columns,
+    // Rounding a 3-decimal fine to 2 moves it by at most 0.005; a larger difference is not this.
+    tolerance: 0.005,
     note:
       'loose-line fine net x (touch + wastage) / 100: data rounded to 2 decimals on the vouchers up to July 2024 and ' +
       'to 3 after, source Strings.Format(..., "0.000") (TR_WH_SALE.cs:10692, :10799)',
@@ -1015,12 +1020,13 @@ export const KNOWN_BUILD_DIFFERENCES = [
 /** The build-difference note of a grouped difference, or undefined for a genuine one. */
 export function buildDifferenceOf(group) {
   // An entry naming columns covers the value differences of those columns; one without covers the keyed ones.
+  // A tolerance entry covers only the 'value-within-tolerance' kind; a row-key entry only the 'known rows' kinds.
   const columnEntry = KNOWN_BUILD_DIFFERENCES.find(
     (k) =>
       k.columns &&
       k.family === group.family &&
       k.table === group.table &&
-      group.kind === 'value' &&
+      group.kind === (k.tolerance ? 'value-within-tolerance' : 'value') &&
       k.columns.includes(group.column),
   );
   if (columnEntry) return columnEntry.note;
@@ -1028,6 +1034,10 @@ export function buildDifferenceOf(group) {
     (k) => !k.columns && k.family === group.family && k.table === group.table,
   );
   if (!known) return undefined;
+  if (known.rowKeys)
+    return group.kind === 'row-count (known rows)' || group.kind === 'rows-unpaired (known rows)'
+      ? known.note
+      : undefined;
   const keyed =
     group.kind === 'rows-unpaired' ||
     group.kind === 'row-count' ||
@@ -1040,6 +1050,21 @@ export function buildDifferenceOf(group) {
  * Group the field differences of a diff report so identical defects read as one line:
  * key = family | table | column | kind, with a count of cases and up to three masked examples.
  */
+/** 'value-within-tolerance' when a tolerance build difference names the column and the two numbers are that close. */
+function valueKind(family, table, d) {
+  const entry = KNOWN_BUILD_DIFFERENCES.find(
+    (k) => k.tolerance && k.family === family && k.table === table && k.columns.includes(d.column),
+  );
+  const a = Number(d.desktop);
+  const b = Number(d.web);
+  return entry &&
+    Number.isFinite(a) &&
+    Number.isFinite(b) &&
+    Math.abs(a - b) <= entry.tolerance + 1e-9
+    ? 'value-within-tolerance'
+    : 'value';
+}
+
 export function groupDifferences(report, familyOfCase) {
   const groups = new Map();
   const add = (fam, table, column, kind, caseId, example) => {
@@ -1064,17 +1089,25 @@ export function groupDifferences(report, familyOfCase) {
       else if (t.presentOn === 'web-only')
         add(fam, t.table, '*', 'table-written-only-by-web', c.caseId);
       else {
+        // Unpaired rows a row-key build difference names (every one of them) are grouped apart.
+        const rowEntry = KNOWN_BUILD_DIFFERENCES.find(
+          (k) => k.rowKeys && k.family === fam && k.table === t.table,
+        );
+        const unpaired = [...t.missingRows, ...t.extraRows];
+        const known =
+          rowEntry && unpaired.length && unpaired.every((r) => rowEntry.rowKeys.test(r))
+            ? ' (known rows)'
+            : '';
         if (t.desktopRows !== t.webRows)
-          add(fam, t.table, '*', 'row-count', c.caseId, {
+          add(fam, t.table, '*', `row-count${known}`, c.caseId, {
             desktop: String(t.desktopRows),
             web: String(t.webRows),
           });
-        else if (t.missingRows.length || t.extraRows.length)
-          add(fam, t.table, '*', 'rows-unpaired', c.caseId);
+        else if (unpaired.length) add(fam, t.table, '*', `rows-unpaired${known}`, c.caseId);
         for (const col of t.missingColumns)
           add(fam, t.table, col, 'column-missing-in-web', c.caseId);
         for (const d of t.differences)
-          add(fam, t.table, d.column, 'value', c.caseId, {
+          add(fam, t.table, d.column, valueKind(fam, t.table, d), c.caseId, {
             rowKey: d.rowKey.startsWith('content:') ? '(content key)' : maskValue('key', d.rowKey),
             desktop: maskValue(d.column, d.desktop),
             web: maskValue(d.column, d.web),

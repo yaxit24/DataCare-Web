@@ -695,11 +695,73 @@ describe('replay oracle: normalisation and grouping', () => {
     });
     expect(lib.buildDifferenceOf(g('SALES ORDER', 'SL_ORD_DETL', 'TAG_NO'))).toMatch(/:9208-9215/);
     expect(lib.buildDifferenceOf(g('SALES ORDER', 'SL_ORD_DETL', 'ITM_FINE'))).toBeUndefined();
-    expect(lib.buildDifferenceOf(g('WH SALES', 'RATE_CUT_ISU', 'ITM_FINE'))).toMatch(/0\.000/);
+    // The fine rounding is a build difference only within 0.005.
+    expect(
+      lib.buildDifferenceOf(g('WH SALES', 'RATE_CUT_ISU', 'ITM_FINE', 'value-within-tolerance')),
+    ).toMatch(/0\.000/);
+    expect(lib.buildDifferenceOf(g('WH SALES', 'RATE_CUT_ISU', 'ITM_FINE'))).toBeUndefined();
     expect(lib.buildDifferenceOf(g('WH SALES', 'RATE_CUT_ISU', 'ITM_AMT'))).toBeUndefined();
-    expect(lib.buildDifferenceOf(g('SALES ORDER', 'ROJ_MEL_DATA', '*', 'row-count'))).toMatch(
-      /:19/,
-    );
+    // The scheme row 05 only: an unpaired row of any other key stays a defect.
+    expect(
+      lib.buildDifferenceOf(g('SALES ORDER', 'ROJ_MEL_DATA', '*', 'row-count (known rows)')),
+    ).toMatch(/:19/);
+    expect(
+      lib.buildDifferenceOf(g('SALES ORDER', 'ROJ_MEL_DATA', '*', 'row-count')),
+    ).toBeUndefined();
+  });
+
+  it('groups a scheme row 05 and a small fine rounding apart, and anything else as a defect', () => {
+    const tbl = (table: string, extra: Record<string, unknown>) => ({
+      table,
+      presentOn: 'both',
+      desktopRows: 1,
+      webRows: 1,
+      missingRows: [],
+      extraRows: [],
+      missingColumns: [],
+      differences: [],
+      ...extra,
+    });
+    const report = {
+      cases: [
+        {
+          caseId: 'o1',
+          tables: [
+            tbl('ROJ_MEL_DATA', {
+              webRows: 2,
+              extraRows: ['LEDR_KEY=01002024-202502000001' + '05'],
+            }),
+          ],
+        },
+        {
+          caseId: 'o2',
+          tables: [
+            tbl('ROJ_MEL_DATA', {
+              desktopRows: 2,
+              missingRows: ['LEDR_KEY=01002024-202502000002' + '01'],
+            }),
+          ],
+        },
+        {
+          caseId: 'w1',
+          tables: [
+            tbl('RATE_CUT_ISU', {
+              differences: [
+                { column: 'ITM_FINE', rowKey: 'k', desktop: '54.480', web: '54.483' },
+                { column: 'ITM_FINE', rowKey: 'k2', desktop: '54.480', web: '54.500' },
+              ],
+            }),
+          ],
+        },
+      ],
+    };
+    const fam: Record<string, string> = { o1: 'SALES ORDER', o2: 'SALES ORDER', w1: 'WH SALES' };
+    const groups = lib.groupDifferences(report, (id: string) => fam[id]);
+    const by = (kind: string) => groups.find((x: any) => x.kind === kind);
+    expect(by('row-count (known rows)').buildDifference).toMatch(/row 05/);
+    expect(by('row-count').buildDifference).toBeUndefined();
+    expect(by('value-within-tolerance').buildDifference).toMatch(/2 decimals/);
+    expect(by('value').buildDifference).toBeUndefined();
   });
 
   it('pairs rows that share a declared key by content, whatever order each database returned them in', () => {
