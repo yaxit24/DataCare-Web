@@ -42,6 +42,7 @@ const protectedTables = [
   'YEAR_MAST',
   'CO_SET',
   'CO_SET_NEW',
+  'BOOK_DETL',
   'BOOK_DATA',
   'ITEM_MAST',
   'AC_MAST',
@@ -106,7 +107,6 @@ db('Tour exact mapped saved values retain existing writer guards', () => {
     mainUser: 'saved-creator',
     acCode: 'PARTY',
     acName: 'Customer',
-    cashAc: 'CASH',
     taxRatePct: 0,
     advanceAmount: 25,
     vchDate: '2024-07-10',
@@ -142,6 +142,11 @@ db('Tour exact mapped saved values retain existing writer guards', () => {
     );
     await sql(
       `INSERT INTO "BOOK_DATA"(tenant_id,"CO_CODE","LC_CODE","CO_BOOK","MAIN_BOOK","BOOK_NAME","BOOK_SNAME","BOOK_INOUT","CUR_USE","BOOK_TBL_NAME") VALUES($1,'01','01','E13','TOUR ORDER','Exact Tour','TUROD','I','Y','SL_ORD_DATA'),($1,'01','01','E14','TOUR ORDER','Other Tour','TUROD','I','Y','SL_ORD_DATA')`,
+      tenantId,
+    );
+    // Desktop legs 01-06 join BOOK_DETL slot 1 for the cash account and book columns (Ac_Ledr.cs:30-40, Ac_Rojmel.cs:11-21).
+    await sql(
+      `INSERT INTO "BOOK_DETL"(tenant_id,"CO_CODE","LC_CODE","CO_BOOK","SR_NO","AC_CODE","BOOK_SNAME","MAIN_BOOK","BOOK_INOUT","DATA_TYPE") VALUES($1,'01','01','E13',1,'CASH','TUROD','TOUR ORDER','I','A'),($1,'01','01','E14',1,'CASH','TUROD','TOUR ORDER','I','A')`,
       tenantId,
     );
     await sql(

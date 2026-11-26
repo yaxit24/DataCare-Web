@@ -59,12 +59,13 @@ export async function nextVoucherNo(ctx, headerTable, book) {
  * @param {string}   o.book      CO_BOOK of the voucher; the trigger fires only for this tenant and book
  * @param {string}   o.headerTable  the voucher header table, to predict the next number
  * @param {() => Promise<any>} o.submit  click Save on the filled screen and return the response
+ * @param {boolean} [o.fixedVoucherNo=false] Skip numbering for replacements and fixed opening keys.
  * @param {(response: any) => Promise<string>} [o.voucherNoOf]
  */
 export async function rollbackMatrix(ctx, o) {
   const { tables, book, headerTable, submit } = o;
   const voucherNoOf = o.voucherNoOf ?? (async (response) => String((await response.json()).vchNo));
-  const expectedNo = await nextVoucherNo(ctx, headerTable, book);
+  const expectedNo = o.fixedVoucherNo ? null : await nextVoucherNo(ctx, headerTable, book);
   const before = await tenantFingerprint(ctx);
   const auditBefore = await auditRows(ctx);
 
@@ -130,9 +131,12 @@ export async function rollbackMatrix(ctx, o) {
 
   // The fault is gone: the same screen saves, and it takes the number the failed attempts did not use.
   const response = await submit();
-  assert.equal(response.status(), 201, await response.text());
-  const vchNo = (await voucherNoOf(response)).padStart(5, '0');
-  assert.equal(vchNo, String(expectedNo).padStart(5, '0'), 'no voucher number was consumed');
+  if (o.fixedVoucherNo) assert.ok([200, 201].includes(response.status()), await response.text());
+  else assert.equal(response.status(), 201, await response.text());
+  const rawNo = await voucherNoOf(response);
+  const vchNo = o.fixedVoucherNo ? rawNo : rawNo.padStart(5, '0');
+  if (!o.fixedVoucherNo)
+    assert.equal(vchNo, String(expectedNo).padStart(5, '0'), 'no voucher number was consumed');
 
   // The Idempotency-Key guard (N52) records its receipt beside the voucher in the same transaction. It is not part of
   // the voucher's write set, so it is left out here; a faulted save still had to leave it unchanged (checked above).
@@ -153,4 +157,28 @@ export async function rollbackMatrix(ctx, o) {
       `existing audit row ${row.id} stays unchanged`,
     );
   return { attempts, written, vchNo, expectedNo };
+}
+
+/** Scoped, real database fault; always remove the trigger even when a browser assertion fails. */
+export async function withWriteFault(ctx, table, operation, work) {
+  assert.match(table, /^[A-Za-z_]+$/);
+  assert.ok(['INSERT', 'UPDATE', 'DELETE'].includes(operation));
+  assert.match(ctx.tenantId, /^[A-Za-z0-9_-]+$/);
+  const row = operation === 'DELETE' ? 'OLD' : 'NEW';
+  await ctx.owner.$executeRawUnsafe(
+    `CREATE OR REPLACE FUNCTION wp35_fault() RETURNS trigger LANGUAGE plpgsql AS $f$
+     BEGIN
+       IF ${row}.tenant_id = '${ctx.tenantId}' THEN RAISE EXCEPTION 'WP35 injected fault'; END IF;
+       RETURN ${row};
+     END $f$`,
+  );
+  try {
+    await ctx.owner.$executeRawUnsafe(
+      `CREATE TRIGGER wp35_fault BEFORE ${operation} ON "${table}" FOR EACH ROW EXECUTE FUNCTION wp35_fault()`,
+    );
+    return await work();
+  } finally {
+    await ctx.owner.$executeRawUnsafe(`DROP TRIGGER IF EXISTS wp35_fault ON "${table}"`);
+    await ctx.owner.$executeRawUnsafe('DROP FUNCTION IF EXISTS wp35_fault()');
+  }
 }

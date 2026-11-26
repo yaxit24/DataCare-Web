@@ -57,6 +57,7 @@ const FINE_JV_BODY_SCHEMA = {
     vchDate: { type: 'string', pattern: '^[0-9]{4}-[0-9]{2}-[0-9]{2}$' },
     // CONTRA_DATA.EMP_CODE / EMP_MAST.EMP_CODE are varchar(3); '' clears the employee.
     empCode: { type: 'string', maxLength: 3 },
+    expectedVersion: { type: 'string', pattern: '^[0-9a-f]{64}$' },
   },
 } as const;
 
@@ -82,9 +83,11 @@ async function rejectUnknownFineJvFields(req: FastifyRequest, reply: FastifyRepl
     });
 }
 
-const fineJvBodyRoute = (auth: unknown) => ({
+const fineJvBodyRoute = (auth: unknown, edit = false) => ({
   ...(auth as object),
-  schema: { body: FINE_JV_BODY_SCHEMA },
+  schema: {
+    body: { ...FINE_JV_BODY_SCHEMA, required: edit ? ['lines', 'expectedVersion'] : ['lines'] },
+  },
   preValidation: rejectUnknownFineJvFields,
 });
 
@@ -99,6 +102,7 @@ export function registerFineJvRoutes(app: FastifyInstance, h: FineJvRouteHelpers
       metal: b.metal,
       vchDate: b.vchDate,
       empCode: b.empCode,
+      expectedVersion: b.expectedVersion,
     };
   };
 
@@ -147,19 +151,39 @@ export function registerFineJvRoutes(app: FastifyInstance, h: FineJvRouteHelpers
       { format: q.format, filename: `fine-jv-${scope.vchNo}` },
     );
   });
-  app.put('/fine-jv/:vchNo', fineJvBodyRoute(auth), async (req, reply) => {
+  app.put('/fine-jv/:vchNo', fineJvBodyRoute(auth, true), async (req, reply) => {
     if (!guard(req, reply, 'update')) return;
     return run(reply, 200, () => editFineJv(prisma, input(req), (req.params as any).vchNo));
   });
-  app.delete('/fine-jv/:vchNo', auth, async (req, reply) => {
-    if (!guard(req, reply, 'delete')) return;
-    return run(reply, 200, () =>
-      deleteFineJv(prisma, {
-        scope: scopeOf(req),
-        vchNo: (req.params as any).vchNo,
-        book: body(req).book,
-        deleteUser: mainUserOf(req),
-      }),
-    );
-  });
+  app.delete(
+    '/fine-jv/:vchNo',
+    {
+      ...auth,
+      schema: {
+        querystring: {
+          type: 'object',
+          additionalProperties: false,
+          required: ['expectedVersion'],
+          properties: {
+            coBook: FINE_JV_BODY_SCHEMA.properties.coBook,
+            lcCode: FINE_JV_BODY_SCHEMA.properties.lcCode,
+            coYear: FINE_JV_BODY_SCHEMA.properties.coYear,
+            expectedVersion: FINE_JV_BODY_SCHEMA.properties.expectedVersion,
+          },
+        },
+      },
+    },
+    async (req, reply) => {
+      if (!guard(req, reply, 'delete')) return;
+      return run(reply, 200, () =>
+        deleteFineJv(prisma, {
+          scope: scopeOf(req),
+          vchNo: (req.params as any).vchNo,
+          book: body(req).book,
+          deleteUser: mainUserOf(req),
+          expectedVersion: (req.query as Record<string, string>).expectedVersion,
+        }),
+      );
+    },
+  );
 }

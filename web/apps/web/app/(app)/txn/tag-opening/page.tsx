@@ -627,7 +627,7 @@ export default function TagOpeningPage() {
       setVoucherLookup(savedNo);
       setVersion(saved.version);
       setRes(saved);
-      command.renew();
+      if (!loadedVchNo) command.renew();
     } catch (error) {
       const message = errorText(error);
       setErr(message);

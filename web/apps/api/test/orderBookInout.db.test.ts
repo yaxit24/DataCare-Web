@@ -2,10 +2,14 @@ import { PrismaClient, withTenant } from '@datacare/db';
 import { afterAll, beforeEach, describe, expect, it } from 'vitest';
 import {
   cancelSalesOrder,
+  cancelTourOrder,
   createSalesOrder,
+  createTourOrder,
   editSalesOrder,
   getSalesOrder,
+  getTourOrder,
 } from '../src/modules/sales/salesOrder.js';
+import { resolveBookPolicyTx } from '../src/modules/shared/bookPolicy.js';
 
 /**
  * A Sales Order on an 'I' book, as the desktop's own order books are (Order Booking, MS_UPDATE.cs:31987; Mobile Order
@@ -36,6 +40,8 @@ run('Sales Order on an I book follows the desktop', () => {
     'UPI_DATA',
     'MAIN_STOCK',
     'TEMP_BOOK_DATA',
+    'SL_DETL',
+    'BAR_DETL',
     'BOOK_DETL',
     'BOOK_DATA',
     'PRODUCT_MAST',
@@ -262,7 +268,7 @@ run('Sales Order on an I book follows the desktop', () => {
     ).toEqual([{ n: 0 }]);
   });
 
-  it("a TAG_STK_LESS 'Y' line posts Order_Stk statement 2 ('-' row) and then blocks an edit as a stock allocation", async () => {
+  it("a TAG_STK_LESS 'Y' Order_Stk '-' row is rebuilt and does not block edit/delete", async () => {
     await createSalesOrder(
       runtime,
       input({
@@ -296,6 +302,298 @@ run('Sales Order on an I book follows the desktop', () => {
       mu: 'clerk',
     });
     const doc = (await getSalesOrder(runtime, scope, 1)) as any;
-    expect(doc.editBlockedReason).toMatch(/stock allocations/);
+    // TR_SALE_ORD.cs:9564-9566 deletes/rebuilds Order_Stk on save; :9728 deletes it with the order.
+    expect(doc.editBlockedReason).toBeUndefined();
+    await editSalesOrder(
+      runtime,
+      { ...doc, scope, expectedVersion: doc.version, mainUser: 'clerk' } as any,
+      1,
+    );
+    const edited = (await getSalesOrder(runtime, scope, 1)) as any;
+    await cancelSalesOrder(runtime, {
+      scope,
+      vchNo: 1,
+      deleteUser: 'clerk',
+      expectedVersion: edited.version,
+    });
+    expect(
+      await query(`SELECT count(*)::int n FROM "MAIN_STOCK" WHERE tenant_id=$1`, tenantId),
+    ).toEqual([{ n: 0 }]);
+  });
+  it("the SALES ORDER book policy (print, design selection, order image) accepts the desktop's 'I' direction", async () => {
+    // CurBookHelp opens any SALES ORDER book (DC_Main.cs:1495-1536); the standard books are 'I' (MS_UPDATE.cs:31987).
+    const policy = await withTenant(owner, tenantId, (tx: any) =>
+      resolveBookPolicyTx(tx, scope, 'SALES ORDER'),
+    );
+    expect(policy).toMatchObject({ coBook: '320', mainBook: 'SALES ORDER', inout: 'I' });
+  });
+
+  // TR_SALE_ORD.cs:9552-9556 (save), :9680-9693 (delete refusal), :9702-9706 (delete release).
+  describe('saved-tag reservation on BAR_DETL', () => {
+    const seedTagged = async () => {
+      await createSalesOrder(
+        runtime,
+        input({
+          oldMetalRows: [],
+          advanceAmount: 0,
+          lines: [line({ tagStockLess: 'Y', tblCode: '002', oldTblCode: '001', oldSrNo: 4 })],
+        }) as any,
+      );
+      await exec(
+        `UPDATE "SL_ORD_DETL" SET "TAG_NO"='T1',"VCH_SRNO"=7 WHERE tenant_id=$1`,
+        tenantId,
+      );
+      await exec(
+        `INSERT INTO "BAR_DETL"(tenant_id,"CO_CODE","LC_CODE","TAG_NO","VCH_SRNO","IT_CODE","TBL_CODE","ORD_NO","ORD_DBCD","ORD_YRCD","ORD_SRNO","ORD_AC")
+         VALUES($1,'01','01','T1',7,'GL','001','','','',0,''),($1,'02','01','T1',7,'GL','009','','','',0,'')`,
+        tenantId,
+      );
+      await exec(
+        `INSERT INTO "MAIN_STOCK"(tenant_id,"CO_CODE","LC_CODE","CO_YEAR","CO_BOOK","VCH_NO","SR_NO","TAG_NO","VCH_SRNO","ITM_SIGN","TBL_CODE")
+         VALUES($1,'01','01',$2,'TGI','00009',1,'T1',7,'+','001')`,
+        tenantId,
+        YEAR,
+      );
+    };
+    const bar = () =>
+      query(
+        `SELECT "CO_CODE" co,"TBL_CODE" tbl,"ORD_NO" ord,"ORD_DBCD" db,"ORD_YRCD" yr,"ORD_SRNO"::float sr,"ORD_AC" ac
+           FROM "BAR_DETL" WHERE tenant_id=$1 ORDER BY "CO_CODE"`,
+        tenantId,
+      );
+    const stockTbl = async () =>
+      (
+        await query(
+          `SELECT "TBL_CODE" tbl FROM "MAIN_STOCK" WHERE tenant_id=$1 AND "ITM_SIGN"='+' AND "TAG_NO"='T1'`,
+          tenantId,
+        )
+      ).map((r) => r.tbl);
+    const reserved = {
+      co: '01',
+      tbl: '002',
+      ord: '00001',
+      db: '320',
+      yr: YEAR,
+      sr: 4,
+      ac: 'PARTY',
+    };
+    const untouchedOtherCompany = {
+      co: '02',
+      tbl: '009',
+      ord: '',
+      db: '',
+      yr: '',
+      sr: 0,
+      ac: '',
+    };
+
+    it('an unchanged edit reserves the kept tag on BAR_DETL and sets both TBL_CODEs', async () => {
+      await seedTagged();
+      const doc = (await getSalesOrder(runtime, scope, 1)) as any;
+      await editSalesOrder(
+        runtime,
+        { ...doc, scope, expectedVersion: doc.version, mainUser: 'clerk' } as any,
+        1,
+      );
+      expect(await bar()).toEqual([reserved, untouchedOtherCompany]);
+      expect(await stockTbl()).toEqual(['002']);
+    });
+
+    it('delete releases the tag: ORD_* cleared and TBL_CODE restored from OLD_TBL_CODE', async () => {
+      await seedTagged();
+      const doc = (await getSalesOrder(runtime, scope, 1)) as any;
+      await editSalesOrder(
+        runtime,
+        { ...doc, scope, expectedVersion: doc.version, mainUser: 'clerk' } as any,
+        1,
+      );
+      const edited = (await getSalesOrder(runtime, scope, 1)) as any;
+      await cancelSalesOrder(runtime, {
+        scope,
+        vchNo: 1,
+        deleteUser: 'clerk',
+        expectedVersion: edited.version,
+      });
+      expect(await bar()).toEqual([
+        { co: '01', tbl: '001', ord: '', db: '', yr: '', sr: 0, ac: '' },
+        untouchedOtherCompany,
+      ]);
+      expect(await stockTbl()).toEqual(['001']);
+      expect(
+        await query(`SELECT count(*)::int n FROM "SL_ORD_DATA" WHERE tenant_id=$1`, tenantId),
+      ).toEqual([{ n: 0 }]);
+    });
+
+    it('delete is refused with the desktop message when the tag is already in SL_DETL, and nothing is written', async () => {
+      await seedTagged();
+      await exec(
+        `INSERT INTO "SL_DETL"(tenant_id,"CO_CODE","LC_CODE","CO_BOOK","VCH_NO","SR_NO","TAG_NO","VCH_SRNO")
+         VALUES($1,'01','01','SAL','00042',3,'T1',7)`,
+        tenantId,
+      );
+      const doc = (await getSalesOrder(runtime, scope, 1)) as any;
+      const before = await bar();
+      await expect(
+        cancelSalesOrder(runtime, {
+          scope,
+          vchNo: 1,
+          deleteUser: 'clerk',
+          expectedVersion: doc.version,
+        }),
+      ).rejects.toThrow(
+        'You Cant Delete This Order Because  This Tag T1 Sales With  Book =  SAL And Vch No = 00042 And Sr No = 3 ... ',
+      );
+      expect(await bar()).toEqual(before);
+      expect(
+        await query(`SELECT count(*)::int n FROM "SL_ORD_DATA" WHERE tenant_id=$1`, tenantId),
+      ).toEqual([{ n: 1 }]);
+      expect(
+        await query(`SELECT count(*)::int n FROM "DELETE_DATA" WHERE tenant_id=$1`, tenantId),
+      ).toEqual([{ n: 0 }]);
+    });
+
+    it('the web edit cannot remove or swap a saved tag (no desktop tag-selection screen), so nothing is released', async () => {
+      await seedTagged();
+      const doc = (await getSalesOrder(runtime, scope, 1)) as any;
+      await expect(
+        editSalesOrder(
+          runtime,
+          { ...doc, scope, expectedVersion: doc.version, mainUser: 'clerk', lines: [] } as any,
+          1,
+        ),
+      ).rejects.toThrow();
+      expect((await bar())[0]).toMatchObject({ tbl: '001', ord: '' });
+    });
+    it('an edit that omits oldTblCode keeps the saved OLD_TBL_CODE, so a later delete still restores TBL_CODE', async () => {
+      await seedTagged();
+      const doc = (await getSalesOrder(runtime, scope, 1)) as any;
+      await editSalesOrder(
+        runtime,
+        {
+          ...doc,
+          scope,
+          expectedVersion: doc.version,
+          mainUser: 'clerk',
+          lines: doc.lines.map(({ oldTblCode: _omitted, ...rest }: any) => rest),
+        } as any,
+        1,
+      );
+      expect(
+        await query(`SELECT "OLD_TBL_CODE" o FROM "SL_ORD_DETL" WHERE tenant_id=$1`, tenantId),
+      ).toEqual([{ o: '001' }]);
+      const edited = (await getSalesOrder(runtime, scope, 1)) as any;
+      await cancelSalesOrder(runtime, {
+        scope,
+        vchNo: 1,
+        deleteUser: 'clerk',
+        expectedVersion: edited.version,
+      });
+      expect((await bar())[0]).toMatchObject({ tbl: '001', ord: '' });
+    });
+
+    it('an edit that omits tagStockLess keeps the saved TAG_STK_LESS, the Order_Stk row and the reservation', async () => {
+      await seedTagged();
+      const doc = (await getSalesOrder(runtime, scope, 1)) as any;
+      await editSalesOrder(
+        runtime,
+        {
+          ...doc,
+          scope,
+          expectedVersion: doc.version,
+          mainUser: 'clerk',
+          lines: doc.lines.map(({ tagStockLess: _omitted, ...rest }: any) => rest),
+        } as any,
+        1,
+      );
+      expect(
+        await query(`SELECT "TAG_STK_LESS" t FROM "SL_ORD_DETL" WHERE tenant_id=$1`, tenantId),
+      ).toEqual([{ t: 'Y' }]);
+      expect(
+        await query(
+          `SELECT count(*)::int n FROM "MAIN_STOCK" WHERE tenant_id=$1 AND "ITM_SIGN"='-'`,
+          tenantId,
+        ),
+      ).toEqual([{ n: 1 }]);
+      expect((await bar())[0]).toMatchObject({ tbl: '002', ord: '00001' });
+    });
+
+    it('a create never reserves anything: a new line is untagged (TAG_NO N), so another tag on BAR_DETL is untouched', async () => {
+      await exec(
+        `INSERT INTO "BAR_DETL"(tenant_id,"CO_CODE","LC_CODE","TAG_NO","VCH_SRNO","IT_CODE","TBL_CODE","ORD_NO","ORD_SRNO")
+         VALUES($1,'01','01','T1',7,'GL','001','',0)`,
+        tenantId,
+      );
+      await createSalesOrder(
+        runtime,
+        input({
+          oldMetalRows: [],
+          advanceAmount: 0,
+          lines: [line({ tagStockLess: 'Y', tblCode: '002', oldTblCode: '001' })],
+        }) as any,
+      );
+      expect(await bar()).toEqual([
+        { co: '01', tbl: '001', ord: '', db: null, yr: null, sr: 0, ac: null },
+      ]);
+    });
+
+    it('a tagged line that is not TAG_STK_LESS Y keeps the old delete refusal', async () => {
+      await seedTagged();
+      await exec(`UPDATE "SL_ORD_DETL" SET "TAG_STK_LESS"='N' WHERE tenant_id=$1`, tenantId);
+      await exec(`DELETE FROM "MAIN_STOCK" WHERE tenant_id=$1 AND "ITM_SIGN"='-'`, tenantId);
+      const doc = (await getSalesOrder(runtime, scope, 1)) as any;
+      await expect(
+        cancelSalesOrder(runtime, {
+          scope,
+          vchNo: 1,
+          deleteUser: 'clerk',
+          expectedVersion: doc.version,
+        }),
+      ).rejects.toThrow(/tagged order cannot be deleted/);
+      expect(
+        await query(`SELECT count(*)::int n FROM "SL_ORD_DATA" WHERE tenant_id=$1`, tenantId),
+      ).toEqual([{ n: 1 }]);
+    });
+
+    it('a tagged Tour Order keeps the old delete refusal and no BAR_DETL write', async () => {
+      const tourScope = { ...scope, coBook: '510' };
+      await exec(
+        `INSERT INTO "BOOK_DATA"(tenant_id,"CO_CODE","LC_CODE","CO_BOOK","BOOK_NAME","BOOK_SNAME","MAIN_BOOK","BOOK_INOUT","CUR_USE","BOOK_TBL_NAME","DATA_TYPE")
+         VALUES($1,'01','01','510','Tour Order','TUROD','TOUR ORDER','I','Y','SL_ORD_DATA','A')`,
+        tenantId,
+      );
+      await exec(
+        `INSERT INTO "BOOK_DETL"(tenant_id,"CO_CODE","LC_CODE","CO_BOOK","SR_NO","AC_CODE","BOOK_SNAME","MAIN_BOOK","BOOK_INOUT","DATA_TYPE")
+         VALUES($1,'01','01','510',1,'CASH','TUROD','TOUR ORDER','I','A')`,
+        tenantId,
+      );
+      await createTourOrder(
+        runtime,
+        input({
+          scope: tourScope,
+          oldMetalRows: [],
+          advanceAmount: 0,
+          lines: [line({ tagStockLess: 'Y', tblCode: '002', oldTblCode: '001' })],
+        }) as any,
+      );
+      await exec(
+        `UPDATE "SL_ORD_DETL" SET "TAG_NO"='T1',"VCH_SRNO"=7 WHERE tenant_id=$1`,
+        tenantId,
+      );
+      await exec(
+        `INSERT INTO "BAR_DETL"(tenant_id,"CO_CODE","LC_CODE","TAG_NO","VCH_SRNO","IT_CODE","TBL_CODE","ORD_NO")
+         VALUES($1,'01','01','T1',7,'GL','001','')`,
+        tenantId,
+      );
+      const doc = (await getTourOrder(runtime, tourScope, 1)) as any;
+      await expect(
+        cancelTourOrder(runtime, {
+          scope: tourScope,
+          vchNo: 1,
+          deleteUser: 'clerk',
+          expectedVersion: doc.version,
+        }),
+      ).rejects.toThrow(/tagged order cannot be deleted/);
+      expect(await bar()).toMatchObject([{ tbl: '001', ord: '' }]);
+    });
   });
 });

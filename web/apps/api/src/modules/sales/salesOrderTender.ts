@@ -272,10 +272,6 @@ export function orderAdvanceTotal(tender: OrderTender): number {
   );
 }
 
-/** The order book's slot 1 is needed when the day book's advance row has no cash leg to name it: old metal, scheme. */
-export const needsAdvanceContra = (tender: OrderTender): boolean =>
-  tender.cash > 0 || tender.oldMetal.length > 0 || tender.scheme > 0;
-
 /** OLD_GL, OLD_GL_AMT, OLD_SL and OLD_SL_AMT from the grid (`:9136-9144`); a Tour Order writes the request's. */
 export function orderOldMetalColumns(tender: OrderTender, salesOrder = true) {
   return salesOrder && tender.oldMetalSent ? oldMetalHeader(tender.oldMetal) : {};

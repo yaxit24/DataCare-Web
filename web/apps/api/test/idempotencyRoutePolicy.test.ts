@@ -68,6 +68,14 @@ const GUARDED: Record<string, { page: string; sends: RegExp }> = {
     page: 'app/(app)/txn/order-cancel/page.tsx',
     sends: /postCommand<[^>]*>\(\s*'\/order-cancel',\s*body,\s*command\.key\s*\)/,
   },
+  'POST /fine-jv': {
+    page: 'app/(app)/txn/fine-jv/page.tsx',
+    sends: /postCommand<[^>]*>\(\s*'\/fine-jv',\s*body,\s*command\.key\s*\)/,
+  },
+  'POST /ac-opbl': {
+    page: 'app/(app)/txn/ac-opbl/page.tsx',
+    sends: /postCommand<[^>]*>\(\s*'\/ac-opbl',[\s\S]*?command\.key,?\s*\)/,
+  },
   'POST /stock/tag-opening': {
     page: 'app/(app)/txn/tag-opening/page.tsx',
     sends: /postCommand<[^>]*>\(\s*'\/stock\/tag-opening',\s*body,\s*command\.key\s*\)/,
@@ -82,8 +90,6 @@ const NOT_YET_GUARDED = [
   'POST /purchases',
   'POST /purchase-returns',
   'POST /wholesale-sales',
-  'POST /fine-jv',
-  'POST /ac-opbl',
   'POST /bill-to-bill/settle',
   'POST /bullion-sales',
   'POST /bullion/booking',
