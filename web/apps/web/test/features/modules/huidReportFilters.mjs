@@ -556,4 +556,35 @@ export const filterCases = [
         };
       }),
   ),
+  // T15 Config: the Lite data type (WP-35 D3).
+  C(
+    'huid-report.config.data-type-filter',
+    'T15',
+    'RP_HUID.cs:1761 {{Interaction.IIf(Operators.CompareString(DC_Main.MsDataType, "C", false) == 0, (object)"", (object)("AND C.DATA_TYPE = \'" + DC_Main.MsDataType + "\'"))}}; MS_OPNCOMP.cs:1459-1463 {{DC_Main.MsDataType = "C"; if (MsSoftType == "A" | MsSoftType == "E") DC_Main.MsDataType = "A";}}: a Lite login runs with MsDataType C (the A/B choice of MDI_FORM.cs:12720-12757 is Advance/Enterprise only, WP-35 D3), and the web session of a Lite login is data type C (LOGIN_MAST.DATA_TYPE_DEFAULT \'C\')',
+    (ctx) =>
+      withCase(ctx, async () => {
+        // One seeded tag of each data type: with C there is no DATA_TYPE condition, so all three still list.
+        for (const [tag, type] of [
+          ['TG-001', 'A'],
+          ['TG-002', 'B'],
+        ])
+          await ctx.owner.$executeRawUnsafe(
+            `UPDATE "BAR_DETL" SET "DATA_TYPE"=$3 WHERE tenant_id=$1 AND "TAG_NO"=$2`,
+            ctx.tenantId,
+            tag,
+            type,
+          );
+        const { page } = await ctx.session();
+        const me = await (await page.request.get('/api/me')).json();
+        assert.equal(me.dataType, 'C', 'a Lite session runs with data type C');
+        await open(page);
+        await setFilters(page, WINDOW);
+        await runView(page, 'In Tag');
+        await expectTags(page, GOLD_WINDOW);
+        return {
+          observation: `session data type ${me.dataType}; In lists A-typed TG-001, B-typed TG-002 and the C-typed rest: ${GOLD_WINDOW.join(', ')}`,
+          expected: { dataType: 'C', tags: GOLD_WINDOW },
+        };
+      }),
+  ),
 ];

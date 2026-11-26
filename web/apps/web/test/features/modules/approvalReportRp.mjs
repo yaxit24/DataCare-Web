@@ -899,12 +899,29 @@ export const approvalReportRp = {
       'RP_ALL.cs:8186 {{if (Operators.CompareString(DC_Main.MsDataType, "A", false) == 0)}}; RP_ALL.cs:8190 {{else if (Operators.CompareString(DC_Main.MsDataType, "B", false) == 0)}}',
       `Unit layer: ${UNIT_TEST} ("approval-report.filters.data-type-selection") drives the selection builder with A, B and blank; no browser surface carries the setting (D3).`,
     ),
-    blocked(
+    C(
       'filters.data-type-setting-source',
       'T02',
       'read-only',
-      'RP_ALL.cs:8186 {{if (Operators.CompareString(DC_Main.MsDataType, "A", false) == 0)}}; RP_ALL.cs:8192 {{{BOOK_DATA.DATA_TYPE}}}',
-      'D3: no accepted web contract supplies MsDataType. Owner question: which approved company/session setting supplies the A/B data-type input to the shared engine? Unblocks: owner accepts the setting source; then bind it and run.',
+      'RP_ALL.cs:8186 {{if (Operators.CompareString(DC_Main.MsDataType, "A", false) == 0)}}; RP_ALL.cs:8190 (B); RP_ALL.cs:8192 {{{BOOK_DATA.DATA_TYPE}}}. The setting source is the login: MS_OPNCOMP.cs:1459-1463 {{DC_Main.MsDataType = "C"; if (MsSoftType == "A" | MsSoftType == "E") DC_Main.MsDataType = "A";}}: a Lite login runs with MsDataType C (the A/B choice of MDI_FORM.cs:12720-12757 is Advance/Enterprise only, WP-35 D3), and the web session of a Lite login is data type C (LOGIN_MAST.DATA_TYPE_DEFAULT \'C\'), so neither branch appends a DATA_TYPE condition',
+      async (ctx) =>
+        withFixture(ctx, async () => {
+          const page = await openReport(ctx);
+          const me = await (await page.request.get('/api/me')).json();
+          assert.equal(me.dataType, 'C', 'a Lite session runs with data type C');
+          // The approval book is B-typed for this run: an A or B condition would drop its vouchers, C keeps them.
+          await ctx.rows(
+            `UPDATE "BOOK_DATA" SET "DATA_TYPE"='B' WHERE tenant_id=$1 AND "CO_BOOK"=$2 AND "LC_CODE"='01'`,
+            BOOK,
+          );
+          const run = await runMode(page, 'issue', { Book: BOOK });
+          assert.equal(run.query.get('dataType'), null, 'the client sends no data type');
+          assertCodes(await readGrid(page), ['AV1', 'AV2'], ['AV3']);
+          return {
+            observation: `session data type ${me.dataType}; the B-typed book's AV1 and AV2 are listed (no DATA_TYPE condition)`,
+            expected: { dataType: 'C', listed: ['AV1', 'AV2'] },
+          };
+        }),
     ),
 
     // ---- T03 Formula sequence (database layer) -----------------------------------------------------------

@@ -68,11 +68,6 @@ const blockedCases = [
     'blocked: `CO_STK_MERGE` has no entry in the settings catalogue (study Open question 3, `MS_OPNCOMP.cs:706 {{Rows[0][\"CO_STK_MERGE\"]}}`). It unblocks when the owner states the meaning of the flag.',
   ),
   notRun(
-    'huid-report.config.data-type-filter',
-    'T15',
-    'blocked: what the codes A, B and C mean is not known (study Open question 3). It unblocks when the owner states what each data-type code is for.',
-  ),
-  notRun(
     'huid-report.output.headers-desktop-aliases',
     'T16',
     'blocked: the owner must choose the header text (study Open question 10; a desktop screenshot or the video knowledge base would settle it, neither was read here).',
