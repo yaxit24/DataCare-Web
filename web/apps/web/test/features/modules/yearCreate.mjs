@@ -1,5 +1,6 @@
 import assert from 'node:assert/strict';
-import { TENANT } from '../harness.mjs';
+import { TENANT, switchCompany, purgeCompany, purgeYear } from '../harness.mjs';
+import { changedTables, tenantFingerprint } from '../faults.mjs';
 import { FIXTURE_MANIFEST, USERS } from '../fixtures/catalogue.mjs';
 const as = (user, slot) => ({
   user,
@@ -22,10 +23,6 @@ const base = (id, group, kind, source, run, extra = {}) => ({
         : ['browser', 'expected'],
   run,
   ...extra,
-});
-const blocked = (id, group, kind, source, reason) => ({
-  ...base(`${id}.blocked`, group, kind, source, async () => ({})),
-  blocked: reason,
 });
 const notApplicable = (id, group, source, reason) => ({
   ...base(`${id}.not-applicable`, group, 'read-only', source, async () => ({})),
@@ -54,6 +51,281 @@ async function apiPost(page, data) {
   });
   return { status: response.status(), body: await response.json().catch(() => ({})) };
 }
+
+const BARE = { code: '03', name: 'E2E FIRST YEAR COMPANY' };
+const FIRST_YEAR = '2030-2031';
+const exec = (ctx, sql, ...params) => ctx.owner.$executeRawUnsafe(sql, ctx.tenantId, ...params);
+
+/** Rows per table of the company, for every table that has tenant_id and CO_CODE. */
+async function companyCounts(ctx, coCode) {
+  const tables = await ctx.owner.$queryRawUnsafe(
+    `SELECT c.table_name FROM information_schema.columns c
+      WHERE c.table_schema='public' AND c.column_name='CO_CODE'
+        AND EXISTS (SELECT 1 FROM information_schema.columns t
+                     WHERE t.table_schema='public' AND t.table_name=c.table_name AND t.column_name='tenant_id')
+      GROUP BY c.table_name ORDER BY c.table_name`,
+  );
+  const out = {};
+  for (const { table_name } of tables) {
+    const [{ n }] = await ctx.rows(
+      `SELECT count(*)::int n FROM "${table_name}" WHERE tenant_id=$1 AND "CO_CODE"='${coCode}'`,
+    );
+    out[table_name] = n;
+  }
+  return out;
+}
+
+/**
+ * A company that has no year yet, and a session of its own on its Year Create screen. The desktop reaches it from
+ * Company Master (NewCompCode, MS_COMPANY.cs:6196 → MS_YEAR.cs:1357); here the fixture makes a company with one year,
+ * the operator's session switches to it through the header, and the year is removed, leaving what a brand-new company
+ * is: a company, a location and no YEAR_MAST row.
+ */
+async function openBareCompany(ctx, slot) {
+  await exec(
+    ctx,
+    `INSERT INTO "CO_MAST"(tenant_id,"CO_CODE","CO_NAME","LC_CODE","CO_TYPE") VALUES ($1,$2,$3,'01','S')`,
+    BARE.code,
+    BARE.name,
+  );
+  await exec(
+    ctx,
+    `INSERT INTO "LOCT_MAST"(tenant_id,"CO_CODE","LC_CODE","LC_NAME") VALUES ($1,$2,'01','E2E FIRST YEAR MAIN')`,
+    BARE.code,
+  );
+  await exec(
+    ctx,
+    `INSERT INTO "YEAR_MAST"(tenant_id,"CO_CODE","CO_YEAR","OP_DATE","CL_DATE") VALUES ($1,$2,'2025-2026','2025-04-01','2026-03-31'::timestamp)`,
+    BARE.code,
+  );
+  const session = await ctx.session({
+    user: USERS.admin.user,
+    slot,
+    get password() {
+      return process.env.FEATURE_E2E_PASSWORD;
+    },
+  });
+  await switchCompany(session.page, BARE.code);
+  await exec(ctx, `DELETE FROM "YEAR_MAST" WHERE tenant_id=$1 AND "CO_CODE"=$2`, BARE.code);
+  await session.page.goto('/masters/year-create');
+  await session.page.getByLabel('Year (CO_YEAR)', { exact: true }).waitFor();
+  return session;
+}
+const dropBareCompany = (ctx) => purgeCompany(ctx.owner, ctx.tenantId, BARE.code);
+
+async function submitYear(page, year) {
+  await page.getByLabel('Year (CO_YEAR)', { exact: true }).fill(year);
+  const [response] = await Promise.all([
+    page.waitForResponse(
+      (r) => new URL(r.url()).pathname === '/api/years' && r.request().method() === 'POST',
+    ),
+    page.getByRole('button', { name: 'Create Year', exact: true }).click(),
+  ]);
+  return response;
+}
+
+const firstYearCases = [
+  base(
+    'keyboard',
+    'T17',
+    'read-only',
+    'MS_YEAR.cs:681-734 tab order Year Code 0, Start Month 1, Opening Date 2, Closing Date 3; :1079-1087 Enter on a non-blank year code moves on; :1096-1137 Enter on a date moves on; :951-957 Esc closes',
+    async (ctx) => {
+      const { page } = await ctx.session();
+      await page.goto('/dashboard');
+      await page.goto('/masters/year-create');
+      const year = page.getByLabel('Year (CO_YEAR)', { exact: true });
+      await year.waitFor();
+      const active = () => page.evaluate(() => document.activeElement?.id ?? '');
+      const idOf = (label) => page.getByLabel(label, { exact: true }).getAttribute('id');
+      const ids = {
+        year: await idOf('Year (CO_YEAR)'),
+        month: await idOf('Start Month'),
+        op: await idOf('Opening Date'),
+        cl: await idOf('Closing Date'),
+      };
+      try {
+        // A blank year code does not move on (:1083).
+        await year.focus();
+        await page.keyboard.press('Enter');
+        assert.equal(await active(), ids.year);
+        // Tab order of the fields (a date box has its own day, month and year stops, so Tab is checked up to it).
+        await year.fill('2043-2044');
+        const tabbed = [];
+        for (let i = 0; i < 2; i += 1) {
+          await page.keyboard.press('Tab');
+          tabbed.push(await active());
+        }
+        assert.deepEqual(tabbed, [ids.month, ids.op]);
+        // Enter walks the same way.
+        await year.focus();
+        const entered = [];
+        for (let i = 0; i < 4; i += 1) {
+          await page.keyboard.press('Enter');
+          entered.push(await active());
+        }
+        assert.deepEqual(entered.slice(0, 3), [ids.month, ids.op, ids.cl]);
+        assert.equal(
+          await page.evaluate(() => document.activeElement?.textContent?.trim()),
+          'Create Year',
+        );
+        // Enter on the button saves, as the desktop's Save does.
+        const [saved] = await Promise.all([
+          page.waitForResponse(
+            (r) => new URL(r.url()).pathname === '/api/years' && r.request().method() === 'POST',
+          ),
+          page.keyboard.press('Enter'),
+        ]);
+        assert.equal(saved.status(), 201, await saved.text());
+        await page
+          .getByText('New Year are Created...Now ReOpen Sofware...', { exact: true })
+          .waitFor();
+        // Esc closes the form from a field.
+        await year.focus();
+        await Promise.all([
+          page.waitForURL((url) => !url.pathname.startsWith('/masters/year-create'), {
+            timeout: 10_000,
+          }),
+          page.keyboard.press('Escape'),
+        ]);
+        const database = (await yearRows(ctx)).filter((r) => r.CO_YEAR === '2043-2044');
+        assert.equal(database.length, 1);
+        return {
+          observation:
+            'blank year stays; Tab and Enter go year → month → opening → closing → Create Year; Enter saves; Esc leaves',
+          expected: {
+            order: ['Year', 'Start Month', 'Opening Date', 'Closing Date', 'Create Year'],
+          },
+        };
+      } finally {
+        await dropYears(ctx, ['2043-2044']);
+      }
+    },
+  ),
+  base(
+    'rollback',
+    'T14',
+    'refusal',
+    'MS_YEAR.cs:1357 first-year provisioning runs after the YEAR_MAST insert; the web writes both in one transaction (year.ts createYear)',
+    async (ctx) => {
+      try {
+        const { page } = await openBareCompany(ctx, 'yc-rollback');
+        // Learn the write set of a real first year: the tables that gain rows for the company.
+        const empty = await companyCounts(ctx, BARE.code);
+        const probe = await submitYear(page, FIRST_YEAR);
+        assert.equal(probe.status(), 201, await probe.text());
+        const full = await companyCounts(ctx, BARE.code);
+        const written = Object.keys(full).filter((t) => full[t] > empty[t]);
+        assert.ok(written.includes('YEAR_MAST'));
+        const cloned = written.filter((t) => t !== 'YEAR_MAST');
+        assert.ok(cloned.length >= 2, `the first year provisions masters (${cloned.join(', ')})`);
+        // Undo the probe through the owner connection: the company is empty again (the company and its location
+        // were not written by the year, so they stay).
+        for (const table of written)
+          await exec(ctx, `DELETE FROM "${table}" WHERE tenant_id=$1 AND "CO_CODE"='${BARE.code}'`);
+        const attempts = [];
+        for (const table of cloned) {
+          await ctx.owner.$executeRawUnsafe(
+            `CREATE OR REPLACE FUNCTION e2e_year_fault() RETURNS trigger LANGUAGE plpgsql SECURITY DEFINER AS $f$
+             BEGIN
+               IF NEW.tenant_id = '${ctx.tenantId}' AND NEW."CO_CODE" = '${BARE.code}' THEN
+                 RAISE EXCEPTION 'e2e fault on ${table}';
+               END IF;
+               RETURN NEW;
+             END $f$`,
+          );
+          await ctx.owner.$executeRawUnsafe(
+            `CREATE TRIGGER e2e_year_fault BEFORE INSERT ON "${table}" FOR EACH ROW EXECUTE FUNCTION e2e_year_fault()`,
+          );
+          try {
+            const before = await tenantFingerprint(ctx);
+            const refused = await submitYear(page, FIRST_YEAR);
+            assert.ok(refused.status() >= 400, `${table}: answered ${refused.status()}`);
+            await page.locator('.msg[role="alert"]').first().waitFor();
+            const after = await tenantFingerprint(ctx);
+            assert.deepEqual(changedTables(before, after), [], `${table}: nothing is left behind`);
+            assert.equal((await companyCounts(ctx, BARE.code)).YEAR_MAST, 0);
+            attempts.push({ table, status: refused.status() });
+          } finally {
+            await ctx.owner.$executeRawUnsafe(
+              `DROP TRIGGER IF EXISTS e2e_year_fault ON "${table}"`,
+            );
+            await ctx.owner.$executeRawUnsafe(`DROP FUNCTION IF EXISTS e2e_year_fault()`);
+          }
+        }
+        // The faults are gone: the same screen creates the year and provisions every table of the probe.
+        const done = await submitYear(page, FIRST_YEAR);
+        assert.equal(done.status(), 201, await done.text());
+        const final = await companyCounts(ctx, BARE.code);
+        assert.deepEqual(
+          Object.keys(final).filter((t) => final[t] > empty[t]),
+          written,
+        );
+        return {
+          observation: `a fault on each of ${cloned.length} provisioned tables left the company exactly as before; the retry wrote the whole first year`,
+          expected: { faulted: cloned, afterRetry: written },
+          database: { attempts, final },
+        };
+      } finally {
+        await dropBareCompany(ctx);
+      }
+    },
+  ),
+  base(
+    'full-journey',
+    'T18',
+    'mutation',
+    'MS_YEAR.cs:1357-1363 first-year provisioning copies the default masters when a new company gets its first year; MS_YEAR.cs:1394 refuses a repeat',
+    async (ctx) => {
+      try {
+        const { page } = await openBareCompany(ctx, 'yc-journey');
+        const before = await companyCounts(ctx, BARE.code);
+        assert.equal(before.YEAR_MAST, 0);
+        const created = await submitYear(page, FIRST_YEAR);
+        assert.equal(created.status(), 201, await created.text());
+        await page
+          .getByText('New Year are Created...Now ReOpen Sofware...', { exact: true })
+          .waitFor();
+        const after = await companyCounts(ctx, BARE.code);
+        const provisioned = Object.keys(after).filter((t) => after[t] > before[t]);
+        assert.ok(provisioned.includes('YEAR_MAST') && provisioned.length >= 3, provisioned.join());
+        // The same year again is refused and provisions nothing more.
+        const repeat = await submitYear(page, FIRST_YEAR);
+        assert.ok(repeat.status() >= 400 && repeat.status() < 500);
+        await page
+          .getByText('Year Is Already Exist...Now ReOpen Sofware...', { exact: true })
+          .waitFor();
+        assert.deepEqual(await companyCounts(ctx, BARE.code), after);
+        // "Now ReOpen Software": the company opens on its new year through the Open Company screen.
+        await page.goto('/select');
+        await page.locator('#context-company').waitFor();
+        await page.waitForFunction(
+          () => document.querySelectorAll('#context-year option').length > 0,
+        );
+        await page.locator('#context-year').selectOption(FIRST_YEAR);
+        await Promise.all([
+          page.waitForURL('**/dashboard', { timeout: 20_000 }),
+          page.getByRole('button', { name: 'Open', exact: true }).click(),
+        ]);
+        const me = await (await page.request.get('/api/me')).json();
+        assert.deepEqual([me.coCode, me.coYear], [BARE.code, FIRST_YEAR]);
+        const years = await (await page.request.get('/api/years')).json();
+        assert.deepEqual(
+          years.map((y) => [y.coYear, y.opDate, y.clDate]),
+          [[FIRST_YEAR, '2030-04-01', '2031-03-31']],
+        );
+        return {
+          observation: `the first year of company ${BARE.code} provisioned ${provisioned.join(', ')}; the repeat was refused; the company reopened on ${FIRST_YEAR}`,
+          expected: { year: FIRST_YEAR, provisioned: 'masters copied once' },
+          database: { before, after, provisioned },
+          downstream: { session: [me.coCode, me.coYear], years },
+        };
+      } finally {
+        await dropBareCompany(ctx);
+      }
+    },
+  ),
+];
 
 export const yearCreate = {
   feature: 'year-create',
@@ -349,13 +621,6 @@ export const yearCreate = {
         }
       },
     ),
-    blocked(
-      'rollback',
-      'T14',
-      'refusal',
-      'MS_YEAR.cs:1357 first-year provisioning runs after the YEAR_MAST insert',
-      'Blocked: failing after each table family needs server fault injection that the browser feature harness does not provide; the transactional write is covered by the DB tests.',
-    ),
     base(
       'config.alternate-year-code',
       'T15',
@@ -403,19 +668,6 @@ export const yearCreate = {
         }
       },
     ),
-    blocked(
-      'keyboard',
-      'T17',
-      'read-only',
-      'MS_YEAR.cs:1035-1228',
-      'Blocked: no recorded desktop keyboard order or throughput target exists for MS_YEAR to compare the web against.',
-    ),
-    blocked(
-      'full-journey',
-      'T18',
-      'mutation',
-      'MS_YEAR.cs:1357 first-year provisioning copies masters; desktop-runtime comparison is required for desktop-match credit',
-      'Blocked: first-year provisioning needs a company with no years and its own session, and no original Windows runtime comparison has been executed; DB tests cover the copy.',
-    ),
+    ...firstYearCases,
   ],
 };

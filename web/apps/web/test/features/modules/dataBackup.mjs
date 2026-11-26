@@ -408,11 +408,73 @@ export const dataBackup = {
         };
       },
     ),
-    blocked(
+    C(
       'rights.desktop-print-handoff',
       'T11',
-      'UT_BKP.cs:942-965 and :1198-1204 use USER_SET.FRM_PRINT under caption Data Backup',
-      'G225 remains the active cross-menu Print-right handoff. This milestone preserves the current authenticated/admin API policy and does not edit routePolicy/formCatalog owned by other work.',
+      'refusal',
+      'UT_BKP.cs:942-965 reads USER_SET FRM_PRINT under the caption Data Backup; :1203-1207 answers "You Have No Print Rights....." and returns before any backup',
+      async (ctx) => {
+        const before = await backupRuns(ctx);
+        const grants = (view, print) =>
+          ctx.owner.$executeRawUnsafe(
+            `INSERT INTO "USER_SET"(tenant_id,"CO_CODE","LC_CODE","USER_NAME","MAIN_MENU","SUB_MENU","FRM_VIEW","FRM_EDIT","FRM_DELETE","FRM_PRINT")
+             VALUES ($1,'01','01',$2,'Company','Data Backup',$3,'N','N',$4)`,
+            ctx.tenantId,
+            USERS.clerk.user,
+            view,
+            print,
+          );
+        const drop = () =>
+          ctx.owner.$executeRawUnsafe(
+            `DELETE FROM "USER_SET" WHERE tenant_id=$1 AND "SUB_MENU"='Data Backup' AND "USER_NAME"=$2`,
+            ctx.tenantId,
+            USERS.clerk.user,
+          );
+        await drop();
+        try {
+          const { page } = await ctx.session(as(USERS.clerk.user, 'backup-rights'));
+          // No Data Backup row at all: refused, with the Print text the form itself uses (:1203-1207).
+          const none = await page.request.get('/api/backup');
+          assert.equal(none.status(), 403);
+          assert.equal((await none.json()).message, 'You Have No Print Rights.....');
+          // The menu right without Print: the form opens, Backup answers the Print refusal.
+          await grants('Y', 'N');
+          await open(page);
+          await select(page);
+          const [refused] = await Promise.all([
+            page.waitForResponse(
+              (r) => new URL(r.url()).pathname === '/api/backup' && r.request().method() === 'GET',
+            ),
+            page.getByRole('button', { name: 'Backup', exact: true }).click(),
+          ]);
+          assert.equal(refused.status(), 403);
+          await page.getByText('You Have No Print Rights.....', { exact: true }).waitFor();
+          assert.equal(
+            await page.getByText('Backup Process Complete.', { exact: true }).count(),
+            0,
+          );
+          assert.deepEqual(await backupRuns(ctx), before);
+          // With Print the same user backs up, and the run is recorded under that user.
+          await drop();
+          await grants('Y', 'Y');
+          await open(page);
+          await select(page);
+          const result = await download(page);
+          verifyArchive(result.document);
+          const after = await backupRuns(ctx);
+          assert.equal(after.length, before.length + 1);
+          assert.equal(after.at(-1).operator, USERS.clerk.user);
+          return {
+            observation:
+              'no row: 403 "You Have No Print Rights....."; View only: "You Have No Print Rights....."; View+Print: the archive downloaded and was recorded under the clerk',
+            expected: { none: 403, viewOnly: 403, viewPrint: 'downloaded' },
+            database: { before: before.length, after: after.at(-1) },
+            downstream: { operator: after.at(-1).operator },
+          };
+        } finally {
+          await drop();
+        }
+      },
     ),
     C(
       'concurrency.busy-suppresses-duplicate',
@@ -448,7 +510,7 @@ export const dataBackup = {
       'retry.failure-has-no-success',
       'T13',
       'refusal',
-      'Current GET /backup policy is authenticated/admin; UT_BKP.cs:1198-1204 refuses unauthorized operators before backup',
+      'GET /backup needs the Data Backup menu right and its Print right (UT_BKP.cs:942-965, :1198-1204); a user without them is refused before any backup',
       async (ctx) => {
         const before = await backupRuns(ctx);
         const { page } = await ctx.session(as(USERS.clerk.user, 'backup-clerk'));
@@ -465,14 +527,17 @@ export const dataBackup = {
         assert.equal(new URL(response.url()).pathname, '/api/backup');
         assert.equal(response.request().method(), 'GET');
         assert.equal(response.status(), 403);
-        const alert = page.locator('.panel').getByRole('alert').filter({ hasText: 'forbidden' });
+        const alert = page
+          .locator('.panel')
+          .getByRole('alert')
+          .filter({ hasText: 'You Have No Print Rights.....' });
         await alert.waitFor();
-        assert.equal((await alert.innerText()).trim(), 'forbidden');
+        assert.equal((await alert.innerText()).trim(), 'You Have No Print Rights.....');
         assert.equal(await page.getByText('Backup Process Complete.', { exact: true }).count(), 0);
         assert.deepEqual(await backupRuns(ctx), before);
         return {
           observation:
-            'non-admin GET returned 403, displayed an error, no success, and no audit row',
+            'a user without the Data Backup Print right got 403 and the desktop text, no success, and no audit row',
           expected: { method: 'GET', path: '/api/backup', status: 403, success: false },
           database: { before, after: before },
         };
@@ -537,11 +602,90 @@ export const dataBackup = {
       'UT_BKP.cs:1216-1248 deletes/replaces a physical same-hour file; D-BKP-2 adapts this to a browser suggestion',
       'The current browser environment does not provide File System Access physical-save confirmation. Browser/OS overwrite or duplicate naming remains outside page control.',
     ),
-    blocked(
+    C(
       'output.full-lite-fixture',
       'T16',
-      'D-BKP-3 requires proof for every Lite dataset',
-      'The shared feature fixture exercises representative masters, vouchers, tags, openings and settings but does not populate every one of the 160 included tables. A large full-Lite fixture remains external evidence work; the existing 100,001-row DB test is cited rather than duplicated.',
+      'output',
+      'D-BKP-3 requires proof for every Lite dataset: the archive holds every company table, with a row in each, and every hash verifies',
+      async (ctx) => {
+        const { page } = await ctx.session();
+        await open(page);
+        await select(page);
+        const included = (await download(page)).document.manifest.tables
+          .filter((table) => table.included)
+          .map((table) => table.name);
+        const added = [];
+        const failed = [];
+        try {
+          for (const name of included) {
+            const [{ n }] = await ctx.rows(
+              `SELECT count(*)::int n FROM "${name}" WHERE tenant_id=$1 AND "CO_CODE"='01'`,
+            );
+            if (n > 0) continue;
+            const columns = await ctx.owner.$queryRawUnsafe(
+              `SELECT column_name name,data_type type,udt_name udt,character_maximum_length len,is_nullable nullable,
+                      column_default dflt,is_generated gen,is_identity ident
+                 FROM information_schema.columns WHERE table_schema='public' AND table_name=$1 ORDER BY ordinal_position`,
+              name,
+            );
+            const names = [];
+            const values = [];
+            for (const c of columns) {
+              const own =
+                c.name === 'tenant_id' ? ctx.tenantId : c.name === 'CO_CODE' ? '01' : undefined;
+              if (
+                own === undefined &&
+                (c.nullable === 'YES' || c.dflt !== null || c.gen === 'ALWAYS' || c.ident === 'YES')
+              )
+                continue;
+              names.push(`"${c.name}"`);
+              if (own !== undefined) values.push(`'${own}'`);
+              else if (/char|text/.test(c.type))
+                values.push(`'${'E'.repeat(Math.min(c.len ?? 3, 3))}'`);
+              else if (/int|numeric|double|real|decimal/.test(c.type)) values.push('0');
+              else if (c.type === 'date') values.push(`'2024-04-01'`);
+              else if (/timestamp/.test(c.type)) values.push('now()');
+              else if (c.type === 'boolean') values.push('false');
+              else if (/json/.test(c.type)) values.push(`'{}'`);
+              else if (c.type === 'bytea') values.push(`'\\x00'`);
+              else if (c.type === 'USER-DEFINED')
+                values.push(
+                  `(SELECT e.enumlabel::text FROM pg_enum e JOIN pg_type t ON t.oid=e.enumtypid WHERE t.typname='${c.udt}' ORDER BY e.enumsortorder LIMIT 1)::${c.udt}`,
+                );
+              else values.push('NULL');
+            }
+            try {
+              const [row] = await ctx.owner.$queryRawUnsafe(
+                `INSERT INTO "${name}"(${names.join(',')}) VALUES (${values.join(',')}) RETURNING ctid::text AS ctid`,
+              );
+              added.push({ name, ctid: row.ctid });
+            } catch (error) {
+              failed.push(
+                `${name}: ${String(error?.message ?? error)
+                  .split('\n')
+                  .pop()}`,
+              );
+            }
+          }
+          assert.deepEqual(failed, [], 'a row could be added to every empty company table');
+          const result = await download(page);
+          verifyArchive(result.document);
+          const empty = Object.entries(result.document.tables)
+            .filter(([, table]) => table.rowCount === 0)
+            .map(([name]) => name);
+          assert.deepEqual(empty, [], 'every company table carries at least one row');
+          assert.equal(result.document.totals.companyTables, included.length);
+          return {
+            observation: `${included.length} company tables, ${added.length} filled for the case, every one with rows and a verified checksum`,
+            expected: { tables: included.length, empty: 0 },
+            output: result.bytes,
+          };
+        } finally {
+          for (const { name, ctid } of added)
+            await ctx.owner.$executeRawUnsafe(`DELETE FROM "${name}" WHERE ctid=$1::tid`, ctid);
+        }
+      },
+      { requiredEvidence: ['browser', 'expected', 'output'] },
     ),
     C(
       'keyboard.reference-workflow',
@@ -590,11 +734,82 @@ export const dataBackup = {
         };
       },
     ),
-    blocked(
+    C(
       'journey.scratch-zero-diff',
       'T18',
-      'D-BKP-3 requires importing the actual browser artifact into scratch while web restore stays contained',
-      'X31/G64/N80 remain open: milestone 1 has no approved offline import for the tenant-shared NextMain-equivalent set, so a zero-diff scratch proof cannot yet be produced without guessing or enabling web restore.',
+      'output',
+      'D-BKP-3: the browser artifact is imported (replace) and the company reads back exactly as the artifact; web restore stays contained (POST /backup/restore 503)',
+      async (ctx) => {
+        await seedScopeSentinels(ctx);
+        const { restoreCompany, backupCompany } =
+          await import('../../../../api/dist/modules/ops/backup.js');
+        const { page } = await ctx.session();
+        await open(page);
+        await select(page);
+        const artifact = await download(page);
+        // The company changes after the backup was taken: a renamed company and a stray account.
+        const [{ name }] = await ctx.rows(
+          `SELECT "CO_NAME" name FROM "CO_MAST" WHERE tenant_id=$1 AND "CO_CODE"='01'`,
+        );
+        await ctx.owner.$executeRawUnsafe(
+          `UPDATE "CO_MAST" SET "CO_NAME"='PERTURBED AFTER BACKUP' WHERE tenant_id=$1 AND "CO_CODE"='01'`,
+          ctx.tenantId,
+        );
+        await ctx.owner.$executeRawUnsafe(
+          `INSERT INTO "AC_MAST"(tenant_id,"CO_CODE","LC_CODE","AC_CODE","AC_NAME") VALUES ($1,'01','01','E2EPERT','STRAY AFTER BACKUP')`,
+          ctx.tenantId,
+        );
+        const contained = await page.request.post('/api/backup/restore', { data: {} });
+        assert.equal(contained.status(), 503, 'the web restore route stays contained');
+        // An archive never carries a secret (D37): the credential columns come back empty from an import. The fixture's
+        // users must still sign in for the modules that run after this one, so their values are put back afterwards.
+        const secrets = [
+          ['LOGIN_MAST', 'LOGIN_PWD', 'LOGIN_NAME'],
+          ['CO_MAST', 'URL_PWD', 'CO_CODE'],
+          ['CO_MAST', 'MAIL_API', 'CO_CODE'],
+        ];
+        // The two other secret columns hold nothing in the fixture; had they held a value, the import would erase it.
+        const [{ other }] = await ctx.rows(
+          `SELECT (SELECT count(*) FROM "BOOK_IDTL" WHERE tenant_id=$1 AND "SVR_PWD" IS NOT NULL)::int
+                + (SELECT count(*) FROM "DG_GOLD_MAST" WHERE tenant_id=$1 AND "API_KEY" IS NOT NULL)::int other`,
+        );
+        assert.equal(other, 0, 'no other secret would be erased by the import');
+        const kept = [];
+        for (const [table, column, key] of secrets)
+          for (const row of await ctx.rows(
+            `SELECT "${key}"::text k,"${column}" v FROM "${table}" WHERE tenant_id=$1 AND "${column}" IS NOT NULL`,
+          ))
+            kept.push({ table, column, key, ...row });
+        let result;
+        try {
+          result = await restoreCompany(
+            ctx.stack.runtime,
+            { tenantId: ctx.tenantId, companyCode: '01' },
+            artifact.document,
+          );
+        } finally {
+          for (const { table, column, key, k, v } of kept)
+            await ctx.owner.$executeRawUnsafe(
+              `UPDATE "${table}" SET "${column}"=$3 WHERE tenant_id=$1 AND "${key}"::text=$2`,
+              ctx.tenantId,
+              k,
+              v,
+            );
+        }
+        const after = await backupCompany(ctx.stack.runtime, ctx.tenantId, '01');
+        assert.deepEqual(normalize(after), normalize(artifact.document));
+        const [back] = await ctx.rows(
+          `SELECT "CO_NAME" name,(SELECT count(*)::int FROM "AC_MAST" WHERE tenant_id=$1 AND "AC_CODE"='E2EPERT') stray
+             FROM "CO_MAST" WHERE tenant_id=$1 AND "CO_CODE"='01'`,
+        );
+        assert.deepEqual(back, { name, stray: 0 });
+        return {
+          observation: `the artifact was imported (${result.restored} rows) and the company reads back with the same schema fingerprint and ${Object.keys(artifact.document.tables).length} identical table checksums; the later changes are gone. The tenantConfig section has no import path (X31) and is not part of this proof`,
+          expected: { zeroDiff: true, restoreRoute: 503 },
+          output: artifact.bytes,
+        };
+      },
+      { requiredEvidence: ['browser', 'expected', 'output'] },
     ),
   ],
 };

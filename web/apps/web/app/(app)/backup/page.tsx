@@ -1,7 +1,7 @@
 'use client';
 import { useEffect, useRef, useState } from 'react';
 import { usePathname } from 'next/navigation';
-import { getDownload } from '../../../lib/api';
+import { ApiError, getDownload } from '../../../lib/api';
 
 const DESTINATION = 'Browser Save dialog';
 
@@ -59,7 +59,13 @@ export default function BackupPage() {
     } catch (error) {
       setMessage({
         kind: 'err',
-        text: error instanceof Error ? error.message : 'Could not download the company backup.',
+        // A refusal carries the desktop's text (UT_BKP.cs:1203-1207 "You Have No Print Rights.....").
+        text:
+          error instanceof ApiError && error.body?.message
+            ? String(error.body.message)
+            : error instanceof Error
+              ? error.message
+              : 'Could not download the company backup.',
       });
     } finally {
       busyRef.current = false;
