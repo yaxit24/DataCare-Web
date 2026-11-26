@@ -871,7 +871,8 @@ export const tagOpening = {
           updatedTables,
           book: OPEN_BOOK,
           headerTable: 'BAR_DETL',
-          scope: await (await page.request.get('/api/me')).json(),
+          // The probe above took the next number and was deleted again, so a save that consumed nothing reuses it.
+          expectedNo: Number(probe.vchNo),
           submit: () => save(page),
         });
         const saved = pad(result.vchNo);

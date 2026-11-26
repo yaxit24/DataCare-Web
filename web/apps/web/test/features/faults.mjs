@@ -67,13 +67,17 @@ export async function nextVoucherNo(ctx, headerTable, book, scope) {
  *   an UPDATE of each is injected as well, and they count as written in the final comparison
  * @param {{coCode: string, lcCode: string, coYear: string}} [o.scope] the session's company, location and year, to
  *   predict the number in the same scope the web numbers in
+ * @param {number} [o.expectedNo] the number the web itself just gave this scope (a probe saved and deleted again: MAX+1
+ *   reuses it), when the prediction cannot see every table the book is numbered from
  * @param {boolean} [o.fixedVoucherNo=false] Skip numbering for replacements and fixed opening keys.
  * @param {(response: any) => Promise<string>} [o.voucherNoOf]
  */
 export async function rollbackMatrix(ctx, o) {
   const { tables, book, headerTable, submit } = o;
   const voucherNoOf = o.voucherNoOf ?? (async (response) => String((await response.json()).vchNo));
-  const expectedNo = o.fixedVoucherNo ? null : await nextVoucherNo(ctx, headerTable, book, o.scope);
+  const expectedNo = o.fixedVoucherNo
+    ? null
+    : (o.expectedNo ?? (await nextVoucherNo(ctx, headerTable, book, o.scope)));
   const before = await tenantFingerprint(ctx);
   const auditBefore = await auditRows(ctx);
 
@@ -165,7 +169,11 @@ export async function rollbackMatrix(ctx, o) {
   const rawNo = await voucherNoOf(response);
   const vchNo = o.fixedVoucherNo ? rawNo : rawNo.padStart(5, '0');
   if (!o.fixedVoucherNo)
-    assert.equal(vchNo, String(expectedNo).padStart(5, '0'), 'no voucher number was consumed');
+    assert.equal(
+      vchNo,
+      String(expectedNo).padStart(5, '0'),
+      `no voucher number was consumed: saved ${vchNo}, expected ${expectedNo}`,
+    );
 
   // The Idempotency-Key guard (N52) records its receipt beside the voucher in the same transaction. It is not part of
   // the voucher's write set, so it is left out here; a faulted save still had to leave it unchanged (checked above).
