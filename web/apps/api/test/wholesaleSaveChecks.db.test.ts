@@ -94,7 +94,7 @@ describe('assertWholesaleItemCodes', () => {
     );
     await exec(
       `INSERT INTO "ITEM_MAST"(tenant_id,"CO_CODE","IT_CODE","IT_NAME","IT_TYPE","PR_CODE","RATE_TYPE")
-       VALUES ($1,'01','LR916','L RING 916','G','LR','G'),($1,'01','999','999 GOLD','G','FN','G')`,
+       VALUES ($1,'01','LR916','L RING 916','G','LR','G'),($1,'01','T999','999 GOLD','G','FN','G')`,
       tenantId,
     );
     await exec(

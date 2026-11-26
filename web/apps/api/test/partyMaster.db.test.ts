@@ -433,7 +433,7 @@ type Cookie = string;
       }
       // With BRANCH_ALL_AC_SHOW the mobile is required (:7671-7676).
       await exec(
-        `INSERT INTO "CO_SET_NEW"(tenant_id,"CO_CODE","BRANCH_ALL_AC_SHOW") VALUES ($1,'01','Y')`,
+        `UPDATE "CO_SET_NEW" SET "BRANCH_ALL_AC_SHOW"='Y' WHERE tenant_id=$1 AND "CO_CODE"='01'`,
         tenantId,
       );
       try {
@@ -451,7 +451,7 @@ type Cookie = string;
         expect(list.rows.map((r: { code: string }) => r.code)).toContain('200201');
         expect(list.rows[0].lc).toBe('00');
       } finally {
-        await exec(`DELETE FROM "CO_SET_NEW" WHERE tenant_id=$1`, tenantId);
+        await exec(`UPDATE "CO_SET_NEW" SET "BRANCH_ALL_AC_SHOW"='N' WHERE tenant_id=$1 AND "CO_CODE"='01'`, tenantId);
       }
       expect(await snapshot()).toEqual(before);
     });

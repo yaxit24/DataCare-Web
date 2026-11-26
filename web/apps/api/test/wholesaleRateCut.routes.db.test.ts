@@ -88,7 +88,7 @@ const DAY = `${startYear}-06-15`;
     );
     await exec(
       `INSERT INTO "ITEM_MAST"(tenant_id,"CO_CODE","IT_CODE","IT_NAME","IT_TYPE","PR_CODE","RATE_TYPE")
-       VALUES ($1,'01','LR916','L RING 916','G','LR','G'),($1,'01','999','999 GOLD','G','FN','G')`,
+       VALUES ($1,'01','LR916','L RING 916','G','LR','G'),($1,'01','T999','999 GOLD','G','FN','G')`,
       tenantId,
     );
     // A purchased tag: BAR_DETL plus the '+' stock row that makes it available.
@@ -142,7 +142,7 @@ const DAY = `${startYear}-06-15`;
     acName: 'Wholesale Customer',
     itType: 'G',
     lines: [{ tagNo: 'LRG00001' }],
-    receivedLines: [{ itCode: '999', grossWt: 10, netWt: 10, touch: 100 }],
+    receivedLines: [{ itCode: 'T999', grossWt: 10, netWt: 10, touch: 100 }],
     fineRate: 6400,
     settleCrFine: 1.931,
     pay: { cash: 12000 },
@@ -210,7 +210,7 @@ const DAY = `${startYear}-06-15`;
           fine: 11.931,
         },
       ],
-      receivedLines: [{ itCode: '999', itemName: '999 GOLD', fine: 10 }],
+      receivedLines: [{ itCode: 'T999', itemName: '999 GOLD', fine: 10 }],
     });
   });
 
@@ -264,9 +264,9 @@ const DAY = `${startYear}-06-15`;
       acCode: 'WHCUST',
       acName: 'Wholesale Customer',
       itType: 'G',
-      lines: [{ itCode: '999', itemName: '999 GOLD', grossWt: 5, netWt: 5, touch: 92, rate: 6400 }],
+      lines: [{ itCode: 'T999', itemName: '999 GOLD', grossWt: 5, netWt: 5, touch: 92, rate: 6400 }],
       receivedLines: [
-        { itCode: '999', itemName: 'OLD GOLD', grossWt: 1, netWt: 1, touch: 90, rate: 6000 },
+        { itCode: 'T999', itemName: 'OLD GOLD', grossWt: 1, netWt: 1, touch: 90, rate: 6000 },
       ],
     };
     const created = await request('quoter', 'POST', '/wholesale-quotations', quote);
@@ -276,8 +276,8 @@ const DAY = `${startYear}-06-15`;
     expect(opened.statusCode, opened.body).toBe(200);
     expect(opened.json()).toMatchObject({
       acCode: 'WHCUST',
-      lines: [{ itCode: '999' }],
-      receivedLines: [{ itCode: '999' }],
+      lines: [{ itCode: 'T999' }],
+      receivedLines: [{ itCode: 'T999' }],
     });
     const printed = await request(
       'quoter',

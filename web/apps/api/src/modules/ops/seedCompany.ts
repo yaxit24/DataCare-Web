@@ -1,7 +1,7 @@
 import { round } from '@datacare/core';
 import { withTxBudget } from '../shared/txBudget.js';
 import { type BookWorkflow, workflowPolicy } from '../shared/bookPolicy.js';
-import { seedDesktopAccountGroups } from './desktopTemplateMasters.js';
+import { seedDesktopAccountGroups, seedDesktopCompanyMasters } from './desktopTemplateMasters.js';
 
 /**
  * Company provisioning seed. A brand-new web company needs the system accounts that the posting engine
@@ -759,7 +759,10 @@ export async function seedCompany(
       coMast ||
       ((await absent('AC_GROUP', '"CO_CODE"=$2', coCode)) &&
         (await absent('AC_MAST', '"CO_CODE"=$2 AND "AC_CODE"=$3', coCode, 'CASH')));
-    if (freshChart) await seedDesktopAccountGroups(tx, absent, tenantId, coCode);
+    if (freshChart) {
+      await seedDesktopAccountGroups(tx, absent, tenantId, coCode);
+      await seedDesktopCompanyMasters(tx, absent, tenantId, coCode);
+    }
     for (const a of SYSTEM_ACCOUNTS) {
       if (await absent('AC_MAST', '"CO_CODE"=$2 AND "AC_CODE"=$3', coCode, a.code)) {
         await tx.$executeRawUnsafe(

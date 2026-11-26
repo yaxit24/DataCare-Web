@@ -167,10 +167,7 @@ type GroupRow = {
           name,
           group,
         );
-      await exec(
-        `INSERT INTO "BAL_GR"(tenant_id,"CO_CODE","TRAD_TYPE","TRAD_NAME") VALUES ($1,'01','SL','SILVER'),($1,'01','GO','GOLD ORNAMENT')`,
-        tenantId,
-      );
+      // BAL_GR comes from the installer; use the seeded trade types without duplicating their keys.
       // Another tenant's group GLD must never be listed or changed.
       await exec(
         `INSERT INTO "GROUP_MAST"(tenant_id,"CO_CODE","GR_CODE","GR_NAME","SALE_AC","PURC_AC") VALUES ($1,'01','GLD','OTHER TENANT','X','Y')`,
@@ -539,11 +536,14 @@ type GroupRow = {
       ]);
       response = await request(adminCookie, 'GET', '/masters/group-master/trade-types?q=');
       expect(response.json()).toEqual([
-        { code: 'GO', name: 'GOLD ORNAMENT' },
-        { code: 'SL', name: 'SILVER' },
+        { code: 'GO', name: 'Gold' },
+        { code: 'OG', name: 'Old Gold' },
+        { code: 'OS', name: 'Old Silver' },
+        { code: 'OT', name: 'Other' },
+        { code: 'SL', name: 'Silver' },
       ]);
       response = await request(adminCookie, 'GET', '/masters/group-master/trade-types?q=sl');
-      expect(response.json()[0]).toEqual({ code: 'SL', name: 'SILVER' });
+      expect(response.json()[0]).toEqual({ code: 'SL', name: 'Silver' });
     });
 
     it('prints every group of the company by code', async () => {
