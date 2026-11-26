@@ -87,6 +87,12 @@ const PROVIDER_ENV = [
     runtime = new PrismaClient();
     await wipe();
     await seedCompany(runtime, tenantId, '01');
+    // The installer CO_SET seeded into the company has DHRN_WAPP 'N' (MS_YEAR.cs:1568), which switches the Dhiran
+    // WhatsApp integration off (409). These cases measure the provider gate behind it, so the company enables it.
+    await exec(
+      `UPDATE "CO_SET" SET "DHRN_WAPP"='Y' WHERE tenant_id=$1 AND "CO_CODE"='01'`,
+      tenantId,
+    );
     await exec(
       `INSERT INTO "LOGIN_MAST"(tenant_id,"CO_CODE","LOGIN_NAME","LOGIN_PWD","LOGIN_CATG","USER_UPDATE","USER_DELETE","USER_PRINT","PASSWORD_RESET_REQUIRED")
        VALUES ($1,'01','messenger',$2,'ADMIN','Y','Y','Y','N')`,

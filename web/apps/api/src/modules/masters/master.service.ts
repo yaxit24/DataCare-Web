@@ -6,10 +6,6 @@ import {
   deleteColumnSetting,
   listColumnSettings,
 } from './columnSettings.js';
-import {
-  accountCodeHasConfiguredLength,
-  resolveSettingsBehaviorTx,
-} from '../shared/settingsBehavior.js';
 import { tableColumnTypesTx } from '../shared/schemaCatalog.js';
 
 /** Declarative config for a master table (Req 8). Column names are consistent across the
@@ -461,11 +457,6 @@ export async function createMaster(
   assertColumnRules(config, data);
   return withTxBudget(prisma, scope.tenantId, 'voucher', async (tx: any) => {
     await assertSaveGuardsTx(tx, scope, config);
-    if (config.table === 'AC_MAST') {
-      const behavior = await resolveSettingsBehaviorTx(tx, scope);
-      if (!accountCodeHasConfiguredLength(data.AC_CODE, behavior.accountCodeLength))
-        throw new DataError('AC_CODE does not match CO_SET.AC_LC_CODE_LEN'); // MS_ACCT.cs:6285,7741
-    }
     const dup = buildDuplicateCheck(config, data);
     const exists: unknown[] = await tx.$queryRawUnsafe(dup.sql, ...dup.params);
     if (exists.length) throw new DuplicateKeyError(config.duplicateMessage);
@@ -511,11 +502,6 @@ export async function updateMaster(
   if (!buildUpdate(config, data, data).setCols.length)
     throw new ValidationError(['(no updatable columns supplied)']);
   return withTxBudget(prisma, scope.tenantId, 'voucher', async (tx: any) => {
-    if (config.table === 'AC_MAST' && data.AC_CODE != null) {
-      const behavior = await resolveSettingsBehaviorTx(tx, scope);
-      if (!accountCodeHasConfiguredLength(data.AC_CODE, behavior.accountCodeLength))
-        throw new DataError('AC_CODE does not match CO_SET.AC_LC_CODE_LEN'); // MS_ACCT.cs:8800
-    }
     const chk = buildDuplicateCheck(config, data);
     const exists: unknown[] = await tx.$queryRawUnsafe(chk.sql, ...chk.params);
     if (!exists.length) throw new NotFoundError();

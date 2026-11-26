@@ -69,6 +69,15 @@ function nextDay() {
 }
 
 async function ensureGroups(ctx) {
+  // seedCompany copies the installer groups (MS_YEAR.cs:1555-1592); five of them have a touch (916, FGL, GO, FSL, SL),
+  // so the real grid lists them and Enter on the silver rate prices them too (the API suite proves that listing).
+  // This module's matrices are written over its own three groups, so the installer groups' touch is cleared here;
+  // nothing else in the shared database reads the installer groups' GR_TOUCH.
+  await ctx.owner.$executeRawUnsafe(
+    `UPDATE "GROUP_MAST" SET "GR_TOUCH"=0 WHERE tenant_id=$1 AND "CO_CODE"='01' AND "GR_CODE" = ANY($2::text[])`,
+    'feature-e2e',
+    ['916', 'FGL', 'GO', 'FSL', 'SL'],
+  );
   for (const [code, name, type, touch, tax, prTouch] of GROUPS)
     await ctx.owner.$executeRawUnsafe(
       `INSERT INTO "GROUP_MAST"(tenant_id,"CO_CODE","GR_CODE","GR_NAME","GR_TYPE","GR_TOUCH","TAX_PRC","GR_PURC_TOUCH","RATE_DISPLAY","GR_RATE")

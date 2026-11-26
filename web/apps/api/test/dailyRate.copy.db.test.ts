@@ -285,11 +285,20 @@ const gridB = [
       `SELECT "GR_CODE" gr,"GR_TOUCH"::float touch,"TAX_PRC"::float tax,"RATE_DISPLAY" disp FROM "GROUP_MAST" WHERE tenant_id=$1 ORDER BY 1`,
       tenantId,
     );
-    await save('00', H, gridB, 73000, 86000);
-    const rates = await query<Array<{ gr: string; rate: number }>>(
-      `SELECT "GR_CODE" gr,"GR_RATE"::float rate FROM "GROUP_MAST" WHERE tenant_id=$1 ORDER BY 1`,
+    // The installer groups seeded into the company are not in this grid, so their rate stays as seeded.
+    const ownRates = `SELECT "GR_CODE" gr,"GR_RATE"::float rate FROM "GROUP_MAST" WHERE tenant_id=$1 AND "GR_CODE"`;
+    const seededBefore = await query<Array<{ gr: string; rate: number }>>(
+      `${ownRates} NOT IN ('R18','R22','RHD','RSV') ORDER BY 1`,
       tenantId,
     );
+    await save('00', H, gridB, 73000, 86000);
+    const rates = await query<Array<{ gr: string; rate: number }>>(
+      `${ownRates} IN ('R18','R22','RHD','RSV') ORDER BY 1`,
+      tenantId,
+    );
+    expect(
+      await query(`${ownRates} NOT IN ('R18','R22','RHD','RSV') ORDER BY 1`, tenantId),
+    ).toEqual(seededBefore);
     expect(rates).toEqual([
       { gr: 'R18', rate: 54750 },
       { gr: 'R22', rate: 64920 },

@@ -88,7 +88,7 @@ const SRNO = 100312000009;
     await seedCompany(runtime, tenantId, '01');
     await exec(
       `INSERT INTO "ITEM_MAST"(tenant_id,"CO_CODE","IT_CODE","IT_NAME","IT_TYPE","PR_CODE","RATE_TYPE")
-       VALUES ($1,'01','LR916','L RING 916','G','LR','G'),($1,'01','OG','OLD GOLD','G','OG','G')`,
+       VALUES ($1,'01','LR916','L RING 916','G','LR','G'),($1,'01','TOLD','OLD GOLD','G','OG','G')`,
       tenantId,
     );
     await exec(
@@ -273,7 +273,7 @@ const SRNO = 100312000009;
     const created = await request('transferrer', 'POST', '/stock/tag-transfer', {
       coBook: 'TTR',
       vchDate: DAY,
-      lines: [{ tagNo: TAG, trfrItCode: 'OG' }],
+      lines: [{ tagNo: TAG, trfrItCode: 'TOLD' }],
     });
     expect(created.statusCode, created.body).toBe(201);
     expect(created.json()).toMatchObject({ vchNo: 1, stockRows: 2, diamondRows: 0 });
@@ -299,7 +299,7 @@ const SRNO = 100312000009;
       },
       {
         ISR_NO: 2,
-        IT_CODE: 'OG',
+        IT_CODE: 'TOLD',
         TAG_NO: 'N',
         ITM_SIGN: '+',
         TR_TYPE: 'I',
@@ -320,12 +320,12 @@ const SRNO = 100312000009;
     expect(missing.json().message).toBe('row 1: enter the transfer item (TrfrItm)');
     // The refused edit changed nothing.
     expect(await balance(TAG)).toBe(0);
-    expect(await balance('N', 'OG')).toBe(1);
+    expect(await balance('N', 'TOLD')).toBe(1);
 
     const removed = await request('transferrer', 'DELETE', '/stock/tag-transfer/00001?coBook=TTR');
     expect(removed.statusCode, removed.body).toBe(200);
     expect(await balance(TAG)).toBe(1);
-    expect(await balance('N', 'OG')).toBe(0);
+    expect(await balance('N', 'TOLD')).toBe(0);
   });
 
   it('reports a deadlock with another writer as 409 Conflict, writes nothing and uses no number', async () => {

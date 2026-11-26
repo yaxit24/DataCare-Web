@@ -246,7 +246,12 @@ export const itemOpening = {
         assert.equal(await focused(cell(page, 'Rtype', 1)), true, 'row 1, Rtype has the cursor');
         await loadType(page, 'S');
         assert.equal(await cell(page, 'ItCode', 1).inputValue(), SILVER);
-        assert.equal(await cell(page, 'ItCode', 2).count(), 0, 'one silver item');
+        // A new company also carries the installer's own silver items (MS_YEAR.cs:1555-1592), so the
+        // silver grid lists more than the fixture's one; it must still hold no gold item.
+        const silverCodes = await page
+          .getByLabel(/^ItCode row \d+$/)
+          .evaluateAll((els) => els.map((e) => e.value));
+        assert.equal(silverCodes.includes(GOLD), false, 'the silver grid lists no gold item');
         return {
           observation: `blank type focused; ${options.length} type choices; ${headers.length} columns; Gold lists ${GOLD}, Silver lists ${SILVER}`,
           expected: { headers: HEADERS, gold: GOLD, silver: SILVER, focus: 'Rtype row 1' },
@@ -1088,9 +1093,15 @@ export const itemOpening = {
           await cell(page, 'LType', 1).focus();
           await page.keyboard.type("g'");
           assert.equal(await cell(page, 'LType', 1).inputValue(), 'G', 'upper case, no apostrophe');
-          await cell(page, 'NetAmt', 1).focus();
+          // The installer's seeded gold items also list here, so the last row is not row 1.
+          const last = await page.getByLabel(/^ItCode row \d+$/).count();
+          await cell(page, 'NetAmt', last).focus();
           await page.keyboard.press('Enter');
-          assert.equal(await focused(cell(page, 'ItCode', 2)), true, 'the last NetAmt adds a row');
+          assert.equal(
+            await focused(cell(page, 'ItCode', last + 1)),
+            true,
+            'the last NetAmt adds a row',
+          );
           await page.keyboard.press('Enter');
           assert.equal(await focused(button(page, 'Save')), true, 'an empty ItCode goes to Save');
           await cell(page, 'Pcs', 1).focus();
