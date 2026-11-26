@@ -556,3 +556,15 @@ describe('replay oracle: normalisation and grouping', () => {
     expect(Object.keys(tally.CONTRA.reasons)).toEqual(['N book N voucher ##### refused N']);
   });
 });
+
+describe('known desktop build differences', () => {
+  it('marks the sale ledger keys and stock sections as build differences, and nothing else', () => {
+    const group = (family: string, table: string, column: string, kind: string) =>
+      lib.buildDifferenceOf({ family, table, column, kind });
+    expect(group('SALES', 'AC_DATA', '*', 'rows-unpaired')).toMatch(/Ac_Ledr\.cs/);
+    expect(group('SALES', 'AC_DATA', 'LEDR_KEY', 'value')).toMatch(/LEDR_KEY/);
+    expect(group('SALES', 'MAIN_STOCK', '*', 'rows-unpaired')).toMatch(/Ac_Stock\.cs:114/);
+    expect(group('SALES', 'AC_DATA', 'DR_AMT', 'value')).toBeUndefined();
+    expect(group('CONTRA', 'AC_DATA', '*', 'rows-unpaired')).toBeUndefined();
+  });
+});

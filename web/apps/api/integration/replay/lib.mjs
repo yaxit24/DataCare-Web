@@ -598,6 +598,43 @@ export function maskValue(column, value) {
 }
 
 /**
+ * Differences the replay is EXPECTED to report because the web follows the current desktop source while the replayed
+ * year was written by an older build (owner decision: copy the current DataCareNext source). They are grouped apart
+ * in the report as "desktop build difference" rather than as defects. A row whose key holds the code (AC_DATA
+ * LEDR_KEY, MAIN_STOCK SR_NO) cannot pair, so those tables' unpaired rows and row counts are listed here too; a real
+ * defect in the same table still shows in its column-level value differences.
+ */
+export const KNOWN_BUILD_DIFFERENCES = [
+  {
+    family: 'SALES',
+    table: 'AC_DATA',
+    note:
+      'sale LEDR_KEY codes: data 01/03/04/02, bank 09/10, cash 19/20, kasar 25/26; source (Ac_Ledr.cs:61-172) ' +
+      '01/08/09/STR+07, cheque 15/16, card 17/18, cash 25/26, kasar 31/32, discount 33/34, old metal STR+23/24, ' +
+      'UPI 36/37+STR',
+  },
+  {
+    family: 'SALES',
+    table: 'MAIN_STOCK',
+    note: 'sale stock section SR_NO: data 1/2, source 3/4 (Ac_Stock.cs:114, :116)',
+  },
+];
+
+/** The build-difference note of a grouped difference, or undefined for a genuine one. */
+export function buildDifferenceOf(group) {
+  const known = KNOWN_BUILD_DIFFERENCES.find(
+    (k) => k.family === group.family && k.table === group.table,
+  );
+  if (!known) return undefined;
+  const keyed =
+    group.kind === 'rows-unpaired' ||
+    group.kind === 'row-count' ||
+    (group.table === 'AC_DATA' && group.column === 'LEDR_KEY') ||
+    (group.table === 'MAIN_STOCK' && group.column === 'SR_NO');
+  return keyed ? known.note : undefined;
+}
+
+/**
  * Group the field differences of a diff report so identical defects read as one line:
  * key = family | table | column | kind, with a count of cases and up to three masked examples.
  */
@@ -644,7 +681,7 @@ export function groupDifferences(report, familyOfCase) {
     }
   }
   return [...groups.values()]
-    .map((g) => ({ ...g, cases: g.cases.size }))
+    .map((g) => ({ ...g, cases: g.cases.size, buildDifference: buildDifferenceOf(g) }))
     .sort((a, b) => b.cases - a.cases || a.table.localeCompare(b.table));
 }
 
