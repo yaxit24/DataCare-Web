@@ -32,11 +32,7 @@ export async function wipeTenants(owner: any, tenants: string[]): Promise<void> 
 export async function seedPopulatedTenant(runtime: any, tenantId: string): Promise<void> {
   await seedCompany(runtime, tenantId, WP24_CO);
   await withTenant(runtime, tenantId, async (tx: any) => {
-    await tx.$executeRawUnsafe(
-      `INSERT INTO "AC_GROUP"(tenant_id,"CO_CODE","AC_GR","AC_GR_NAME","AC_SUB_GR","AC_MAIN_GR") VALUES
-         ($1,'01','10','SUNDRY DEBTORS','CURRENT ASSETS','A'),($1,'01','11','SUNDRY CREDITORS','CURRENT LIAB','L')`,
-      tenantId,
-    );
+    // seedCompany provides the desktop installer account groups: 20 SUNDRY DEBTORS (main 2), 05 VEPARI (main 1).
     await tx.$executeRawUnsafe(
       `INSERT INTO "ITEM_MAST"(tenant_id,"CO_CODE","IT_CODE","IT_NAME","IT_TYPE","PR_CODE","GR_CODE")
        VALUES ($1,'01','GOLD','Gold item','G','P1','G01')`,
@@ -50,8 +46,8 @@ export async function seedPopulatedTenant(runtime: any, tenantId: string): Promi
   });
   const scope = { tenantId, coCode: WP24_CO, lcCode: WP24_LC };
   for (const [code, name, group] of [
-    ['010001', 'WP24 CUSTOMER', '10'],
-    ['010002', 'WP24 SUPPLIER', '11'],
+    ['010001', 'WP24 CUSTOMER', '20'],
+    ['010002', 'WP24 SUPPLIER', '05'],
   ] as const)
     await saveParty(runtime, {
       scope,

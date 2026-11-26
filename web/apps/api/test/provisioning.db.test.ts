@@ -157,6 +157,13 @@ d('company provisioning produces a postable company', () => {
       { b: 'SL', s: 4, a: 'ORDADV' },
       { b: 'SOR', s: 1, a: 'CASH' },
     ]);
+    const orderDirection: any[] = await withTenant(prisma, tenantId, (tx: any) =>
+      tx.$queryRawUnsafe(
+        `SELECT "BOOK_INOUT" io FROM "BOOK_DATA" WHERE "CO_CODE"=$1 AND "CO_BOOK"='SOR'`,
+        CO,
+      ),
+    );
+    expect(orderDirection).toEqual([{ io: 'I' }]);
   });
 
   it('provisions karigar and Jadtar issue/receipt books so a fresh company can use them (G19)', async () => {

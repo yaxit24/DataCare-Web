@@ -35,6 +35,8 @@ export interface OrderOldMetalRow {
   itType: string;
   /** The item group's purchase account, which the ledger legs and the day book name. */
   purchaseAc: string;
+  /** Joined AC_MAST name used by Order_Rojmel type 04. */
+  purchaseAcName?: string;
   pcs: number;
   grossWt: number;
   otherWt: number;
@@ -134,6 +136,7 @@ export function orderOldMetalOf(value: unknown): OrderOldMetalRow[] {
         itName: '',
         itType: '',
         purchaseAc: '',
+        purchaseAcName: '',
         pcs: round(nonNegative(row.pcs, 'Pcs', srNo), 0),
         grossWt: round(num(row.grossWt), 3),
         otherWt: round(num(row.otherWt), 3),
@@ -190,9 +193,11 @@ export async function resolveOrderOldMetalTx(
   for (const row of rows) {
     const [item] = await tx.$queryRawUnsafe(
       `SELECT btrim(i."IT_NAME"::text) AS name, btrim(coalesce(i."IT_TYPE"::text,'')) AS type,
-              btrim(coalesce(g."PURC_AC"::text,'')) AS purc
+              btrim(coalesce(g."PURC_AC"::text,'')) AS purc,
+              btrim(coalesce(a."AC_NAME"::text,'')) AS purc_name
          FROM "ITEM_MAST" i
          LEFT JOIN "GROUP_MAST" g ON g.tenant_id=i.tenant_id AND g."CO_CODE"=i."CO_CODE" AND g."GR_CODE"=i."GR_CODE"
+         LEFT JOIN "AC_MAST" a ON a.tenant_id=g.tenant_id AND a."CO_CODE"=g."CO_CODE" AND a."AC_CODE"=g."PURC_AC"
         WHERE i.tenant_id=$1 AND i."CO_CODE"=$2 AND upper(btrim(i."IT_CODE"::text))=upper($3) LIMIT 1`,
       scope.tenantId,
       scope.coCode,
@@ -209,6 +214,7 @@ export async function resolveOrderOldMetalTx(
     row.itName = String(item.name ?? '').slice(0, 50);
     row.itType = String(item.type ?? '').slice(0, 1);
     row.purchaseAc = String(item.purc);
+    row.purchaseAcName = String(item.purc_name ?? '').slice(0, 75);
   }
 }
 
@@ -338,6 +344,7 @@ export function orderOldMetalRojmel(rows: readonly OrderOldMetalRow[]): OrderOld
   return rows.map((row) => ({
     lineNo: row.srNo,
     purchaseAc: row.purchaseAc,
+    purchaseAcName: row.purchaseAcName,
     netAmount: row.netAmt,
     metal: row.itType as OrderOldMetalLine['metal'],
     pcs: row.pcs,
