@@ -119,7 +119,6 @@ async function createOrder(page, { customer = CUSTOMER.code, advance = 0, upi, c
   if (upi || cheque) {
     const summary = page.getByText('Order details', { exact: true });
     if (!(await summary.locator('..').evaluate((element) => element.open))) await summary.click();
-    await label(page, 'Cash A/c').fill(CASH);
   }
   if (cheque) {
     await label(page, 'Cheque Amt').fill(String(cheque));

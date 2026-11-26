@@ -34,6 +34,7 @@ run('Sales ordinary saved state and ordered design source replay', () => {
     'UPI_DATA',
     'MAIN_STOCK',
     'TEMP_BOOK_DATA',
+    'BOOK_DETL',
     'BOOK_DATA',
     'DESIGN_DETL',
     'PRODUCT_MAST',
@@ -66,6 +67,11 @@ run('Sales ordinary saved state and ordered design source replay', () => {
     );
     await sql(
       `INSERT INTO "BOOK_DATA"(tenant_id,"CO_CODE","LC_CODE","CO_BOOK","MAIN_BOOK","BOOK_INOUT","BOOK_SNAME","BOOK_NAME","CUR_USE","BOOK_TBL_NAME") VALUES($1,'01','01','S91','SALES ORDER','O','SORD','Sales One','Y','SL_ORD_DATA'),($1,'01','01','S92','SALES ORDER','O','SORD','Sales Two','Y','SL_ORD_DATA')`,
+      tenantId,
+    );
+    // Desktop legs 01-06 join BOOK_DETL slot 1 (Ac_Ledr.cs:30-40, Ac_Rojmel.cs:11-21).
+    await sql(
+      `INSERT INTO "BOOK_DETL"(tenant_id,"CO_CODE","LC_CODE","CO_BOOK","SR_NO","AC_CODE","BOOK_SNAME","MAIN_BOOK","BOOK_INOUT","DATA_TYPE") VALUES($1,'01','01','S91',1,'CASH','SORD','SALES ORDER','O','A'),($1,'01','01','S92',1,'CASH','SORD','SALES ORDER','O','A')`,
       tenantId,
     );
     await sql(
@@ -754,25 +760,27 @@ run('Sales ordinary saved state and ordered design source replay', () => {
     expect(await snapshot()).toEqual(before);
   });
 
-  // N59/G164: the order advance debits the book's slot-1 account, never the literal 'CASH'.
-  it('refuses an order advance when the book has no configured settlement account, and still honours an explicit one', async () => {
-    // Book S91 carries no BOOK_DETL slot 1. An advance with NO cashAc must be refused (fail-closed),
-    // not posted to a non-existent 'CASH' ledger — and nothing is left behind.
-    await expect(
-      createSalesOrder(runtime, { ...input(), cashAc: undefined, advanceAmount: 100 }),
-    ).rejects.toThrow();
-    const orphan = (await owner.$queryRawUnsafe(
-      `SELECT count(*)::int n FROM "SL_ORD_DATA" WHERE tenant_id=$1`,
+  // Desktop: the advance contra is BOOK_DETL slot 1 joined by the SELECT (Ac_Ledr.cs:30-40, Ac_Rojmel.cs:11-21); the form's
+  // Cash A/c is not read. A book without slot 1 matches no row, so legs 01-06 are simply not written (no refusal exists).
+  it('posts the advance to the book slot-1 account, ignores the request cashAc, and writes no legs 01-06 without slot 1', async () => {
+    await sql(`DELETE FROM "BOOK_DETL" WHERE tenant_id=$1 AND "CO_BOOK"='S91'`, tenantId);
+    await createSalesOrder(runtime, { ...input(), advanceAmount: 100 });
+    const none = (await owner.$queryRawUnsafe(
+      `SELECT (SELECT count(*)::int FROM "AC_DATA" WHERE tenant_id=$1) a,
+              (SELECT count(*)::int FROM "ROJ_MEL_DATA" WHERE tenant_id=$1) r`,
       tenantId,
-    )) as { n: number }[];
-    expect(orphan[0]!.n).toBe(0);
+    )) as { a: number; r: number }[];
+    expect(none[0]).toEqual({ a: 0, r: 0 });
 
-    // An explicit account still wins (posts the advance Dr leg to that account).
-    await createSalesOrder(runtime, { ...input(), cashAc: 'CASH', advanceAmount: 100 });
+    await sql(
+      `INSERT INTO "BOOK_DETL"(tenant_id,"CO_CODE","LC_CODE","CO_BOOK","SR_NO","AC_CODE","BOOK_SNAME","MAIN_BOOK","BOOK_INOUT","DATA_TYPE") VALUES($1,'01','01','S91',1,'CASH','SORD','SALES ORDER','O','A')`,
+      tenantId,
+    );
+    await createSalesOrder(runtime, { ...input(), cashAc: 'BANKX', advanceAmount: 100 } as any);
     const legs = (await owner.$queryRawUnsafe(
       `SELECT "AC_CODE" ac, "DR_AMT"::float dr FROM "AC_DATA" WHERE tenant_id=$1 AND "DR_AMT"::float=100`,
       tenantId,
     )) as { ac: string; dr: number }[];
-    expect(legs.find((l) => l.ac === 'CASH')).toBeTruthy();
+    expect(legs.map((l) => l.ac)).toEqual(['CASH']);
   });
 });

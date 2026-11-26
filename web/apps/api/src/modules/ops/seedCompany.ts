@@ -304,7 +304,9 @@ const BOOKS: {
     book: 'SOR',
     name: 'Sales Order',
     mainBook: 'SALES ORDER',
-    inout: 'O',
+    // Desktop standard Sales Order books are inbound (MS_UPDATE.cs:17799-17831, :31987).
+    // This template is inserted only while provisioning a new company; seedCompany never updates existing books.
+    inout: 'I',
     acCode: 'CASH',
     slots: [
       { srNo: 1, acCode: 'CASH' },
