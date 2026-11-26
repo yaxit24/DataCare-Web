@@ -83,6 +83,11 @@ const representativeDependentRows = async (ctx) => ({
   years: await rows(ctx, 'YEAR_MAST'),
   settings: await rows(ctx, 'CO_SET'),
 });
+// The page draws an empty form first and fills it when GET /company-identity/<code> answers, so a field is read
+// only once the current company (01) is displayed. A label that exists is not enough: the input is in the DOM
+// before its value is set.
+const recordShown = (page) =>
+  page.waitForFunction(() => document.querySelector('#company-code')?.value === '01');
 // A login without the Company FRM_VIEW right never opens the form on the desktop (MDI_FORM.cs:7032-7049 shows
 // "You Have No Rights....." and returns), so the web page stays blank with that message while the list still loads.
 async function open(page, { noRights = false } = {}) {
@@ -99,7 +104,7 @@ async function open(page, { noRights = false } = {}) {
     assert.equal(await page.locator('#company-code').inputValue(), '');
     return;
   }
-  await page.waitForFunction(() => document.querySelector('#company-code')?.value === '01');
+  await recordShown(page);
 }
 async function headers(page) {
   const response = await page.request.get('/api/me');
@@ -233,6 +238,7 @@ export const companyMaster = {
           await page.getByRole('button', { name: 'Save', exact: true }).click();
           await page.getByText('Data Are Saved.', { exact: true }).waitFor();
           await page.reload();
+          await recordShown(page);
           for (const [label, value] of Object.entries(values)) {
             await page.getByLabel(label, { exact: true }).waitFor();
             assert.equal(await page.getByLabel(label, { exact: true }).inputValue(), value);
