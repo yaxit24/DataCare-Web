@@ -1,6 +1,10 @@
 import { PrismaClient } from '@datacare/db';
 import { afterAll, beforeEach, describe, expect, it } from 'vitest';
-import { createSalesOrder } from '../src/modules/sales/salesOrder.js';
+import {
+  createSalesOrder,
+  editSalesOrder,
+  getSalesOrder,
+} from '../src/modules/sales/salesOrder.js';
 
 /**
  * What a Sales Order save writes, found by the desktop replay oracle (integration/replay-desktop.mjs) and pinned here
@@ -184,20 +188,48 @@ run('Sales Order desktop writes', () => {
     expect(h.bill).toBe('B-7');
   });
 
-  it('saves a new line picked from a tag, with the tag on its components, and refuses an unknown tag', async () => {
+  /** A tag at the order's location: BAR_DETL plus its '+' stock row, and optionally its sale ('-'). */
+  const seedTag = async (
+    tagNo: string,
+    srno: number,
+    opts: { tbl?: string; empIsu?: string; sold?: boolean } = {},
+  ) => {
     await sql(
-      `INSERT INTO "BAR_DETL"(tenant_id,"CO_CODE","LC_CODE","CO_YEAR","CO_BOOK","VCH_NO","TAG_NO","VCH_SRNO","IT_CODE")
-       VALUES($1,'01','01',$2,'TGO','00001','T-SYN1',7001,'GL')`,
+      `INSERT INTO "BAR_DETL"(tenant_id,"CO_CODE","LC_CODE","CO_YEAR","CO_BOOK","VCH_NO","TAG_NO","VCH_SRNO","IT_CODE",
+         "TBL_CODE","EMP_ISU","VCH_DATE") VALUES($1,'01','01',$2,'TGO','00001',$3,$4,'GL',$5,$6,'2024-04-02')`,
       tenantId,
       YEAR,
+      tagNo,
+      srno,
+      opts.tbl ?? 'C01',
+      opts.empIsu ?? 'N',
     );
+    for (const sign of opts.sold ? ['+', '-'] : ['+'])
+      await sql(
+        `INSERT INTO "MAIN_STOCK"(tenant_id,"CO_CODE","LC_CODE","CO_YEAR","CO_BOOK","VCH_NO","SR_NO","ISR_NO","VCH_DATE",
+           "IT_CODE","TAG_NO","VCH_SRNO","TR_TYPE","ITM_SIGN","ITM_QTY","ITM_PCS","ITM_GWT","ITM_NWT","TBL_CODE")
+         VALUES($1,'01','01',$2,$3,'00001',1,1,'2024-04-02','GL',$4,$5,'P',$6,1,1,2,2,$7)`,
+        tenantId,
+        YEAR,
+        sign === '+' ? 'TGO' : 'SLX',
+        tagNo,
+        srno,
+        sign,
+        opts.tbl ?? 'C01',
+      );
+  };
+
+  it('takes a tag in stock from BAR_DETL, not from the request, with its components; refuses one out of stock', async () => {
+    await seedTag('T-SYN1', 7001);
     await createSalesOrder(
       runtime,
       input({
         lines: [
           line({
             tagNo: 'T-SYN1',
-            vchSrno: 7001,
+            // A request's instance and counters are not trusted: the stock row's are saved.
+            oldTblCode: 'ZZZ',
+            tagStockLess: 'Y',
             components: [
               {
                 isrNo: 1,
@@ -215,13 +247,14 @@ run('Sales Order desktop writes', () => {
       }) as any,
     );
     const d = await query(
-      `SELECT "SR_NO"::int sr,"TAG_NO" tag,"VCH_SRNO"::float srno,"TAG_STK_LESS" stk FROM "SL_ORD_DETL"
-        WHERE tenant_id=$1 ORDER BY "SR_NO"`,
+      `SELECT "SR_NO"::int sr,"TAG_NO" tag,"VCH_SRNO"::float srno,"TBL_CODE" tbl,"OLD_TBL_CODE" old,
+              "TAG_STK_LESS" stk FROM "SL_ORD_DETL" WHERE tenant_id=$1 ORDER BY "SR_NO"`,
       tenantId,
     );
+    // ORD_TAG_STK_LESS is not 'Y' for this company, so the line does not hold the tag (:5557, :9268-9286).
     expect(d).toEqual([
-      { sr: 1, tag: 'T-SYN1', srno: 7001, stk: 'N' },
-      { sr: 2, tag: 'N', srno: 0, stk: 'N' },
+      { sr: 1, tag: 'T-SYN1', srno: 7001, tbl: 'C01', old: 'C01', stk: 'N' },
+      { sr: 2, tag: 'N', srno: 0, tbl: '', old: '', stk: 'N' },
     ]);
     const i = await query(
       `SELECT "SR_NO"::int sr,"TAG_NO" tag,"VCH_SRNO"::float srno FROM "SL_ORD_IDTL" WHERE tenant_id=$1 ORDER BY "SR_NO"`,
@@ -231,8 +264,79 @@ run('Sales Order desktop writes', () => {
       { sr: 1, tag: 'T-SYN1', srno: 7001 },
       { sr: 2, tag: '', srno: 0 },
     ]);
+    await seedTag('T-SOLD', 7002, { sold: true });
+    await seedTag('T-EMP', 7003, { empIsu: 'Y' });
+    for (const tagNo of ['T-NONE', 'T-SOLD', 'T-EMP'])
+      await expect(
+        createSalesOrder(runtime, input({ lines: [line({ tagNo })] }) as any),
+      ).rejects.toThrow(new RegExp(`${tagNo} is not in stock`));
+    await seedTag('T-TWO', 7004);
     await expect(
-      createSalesOrder(runtime, input({ lines: [line({ tagNo: 'T-NONE' })] }) as any),
-    ).rejects.toThrow(/T-NONE was not found/);
+      createSalesOrder(
+        runtime,
+        input({ lines: [line({ tagNo: 'T-TWO' }), line({ tagNo: 'T-TWO' })] }) as any,
+      ),
+    ).rejects.toThrow('Duplicate Tag No');
+  });
+
+  it("holds the tag when the company's ORD_TAG_STK_LESS is 'Y', and keeps the tag's counter when the line has none", async () => {
+    await sql(`UPDATE "CO_SET_NEW" SET "ORD_TAG_STK_LESS"='Y' WHERE tenant_id=$1`, tenantId);
+    await seedTag('T-HOLD', 7010, { tbl: '' });
+    await seedTag('T-HOLD2', 7011, { tbl: 'C02' });
+    await createSalesOrder(
+      runtime,
+      input({
+        lines: [line({ tagNo: 'T-HOLD' }), line({ tagNo: 'T-HOLD2', tblCode: 'C09' })],
+      }) as any,
+    );
+    const d = await query(
+      `SELECT "TAG_NO" tag,"TBL_CODE" tbl,"OLD_TBL_CODE" old,"TAG_STK_LESS" stk FROM "SL_ORD_DETL"
+        WHERE tenant_id=$1 ORDER BY "SR_NO"`,
+      tenantId,
+    );
+    expect(d).toEqual([
+      { tag: 'T-HOLD', tbl: '', old: '', stk: 'Y' },
+      { tag: 'T-HOLD2', tbl: 'C09', old: 'C02', stk: 'Y' },
+    ]);
+    const bar = await query(
+      `SELECT btrim("TAG_NO") tag,btrim("ORD_NO") ord,"TBL_CODE" tbl FROM "BAR_DETL" WHERE tenant_id=$1 ORDER BY "TAG_NO"`,
+      tenantId,
+    );
+    // The typed counter moves the tag there (:9554); a line without one leaves the tag's counter alone.
+    expect(bar).toEqual([
+      { tag: 'T-HOLD', ord: '00001', tbl: '' },
+      { tag: 'T-HOLD2', ord: '00001', tbl: 'C09' },
+    ]);
+  });
+
+  it('keeps a saved bill number when an edit does not send the box, clears it when sent blank', async () => {
+    await createSalesOrder(runtime, input({ billNo: 'B-9' }) as any);
+    const bill = async () =>
+      (await query(`SELECT "BILL_NO" bill FROM "SL_ORD_DATA" WHERE tenant_id=$1`, tenantId))[0]
+        .bill;
+    const edit = async (extra: Record<string, unknown>) => {
+      const doc: any = await getSalesOrder(runtime, scope as any, 1);
+      const { billNo: _omit, ...rest } = doc;
+      await editSalesOrder(
+        runtime,
+        { ...rest, ...extra, scope, expectedVersion: doc.version, mainUser: 'clerk' } as any,
+        1,
+      );
+    };
+    await edit({ vchDesc: 'changed' });
+    expect(await bill()).toBe('B-9');
+    await edit({ billNo: '' });
+    expect(await bill()).toBe('');
+  });
+
+  it('refuses a negative order amount and saves a zero one', async () => {
+    await expect(
+      createSalesOrder(runtime, input({ lines: [], netAmount: -5 }) as any),
+    ).rejects.toThrow('cannot be negative');
+    await expect(
+      createSalesOrder(runtime, input({ lines: [line({ rate: -10 })] }) as any),
+    ).rejects.toThrow('cannot be negative');
+    const r = await createSalesOrder(runtime, input({ lines: [], netAmount: 0 }) as any);
+    expect(r.total).toBe(0);
   });
 });
