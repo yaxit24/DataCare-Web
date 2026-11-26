@@ -571,16 +571,10 @@ export async function postVoucherTx(tx: any, tenantId: string, input: PostInput)
       ) ?? null;
   // The last two characters of LEDR_KEY are a SEMANTIC leg type, not a sequence.
   //
-  // Measured across the sale books (026/027/029/032) they are consistent by ROLE, and settlement legs come in
-  // pairs of party-credit plus receiving-account-debit:
-  //
-  //     01 party (the bill)      Dr     03 revenue account   Cr     04 tax             Cr
-  //     09 party, bank settle    Cr     10 bank              Dr
-  //     19 party, cash settle    Cr     20 cash              Dr
-  //     25 party, kasar          Cr     26 kasar             Dr
-  //
-  // A bare 1..n sequence therefore gets the FIRST leg right by coincidence and every later one wrong - the web
-  // wrote 01/02/03 where the desktop writes 01/03/04, and `02` does not appear on any sale book at all.
+  // They are consistent by ROLE, and settlement legs come in pairs of party-credit plus receiving-account-debit.
+  // The sale codes are Sales_Ledr's (Ac_Ledr.cs:61-172; sales.ts SALE_LEG): 01 party, 07/08 item, 09 tax, 15/16
+  // cheque, 25/26 cash, 31/32 kasar, 33/34 discount and so on. A bare 1..n sequence therefore gets the FIRST leg
+  // right by coincidence and every later one wrong.
   //
   // `legType` lets a caller state the role. Where it is absent the sequence is kept, so families whose codes
   // have not been measured yet are unchanged rather than being given a guessed mapping.
@@ -595,8 +589,8 @@ export async function postVoucherTx(tx: any, tenantId: string, input: PostInput)
     // number is indistinguishable from a measured desktop code, so an unmapped leg numbered 05 would look like
     // evidence about the desktop that nobody had gathered.
     //
-    // Measured sale codes occupy 01-26 (party 01, revenue 03, tax 04, and the settlement pairs 09/10, 19/20,
-    // 21/22, 23/24, 25/26). The band 50-98 is unused by any of them, and 99 is the web-only round-off leg.
+    // The sale codes occupy 01-39 (Ac_Ledr.cs:61-172). The band 50-98 is unused by any of them, and 99 is the
+    // web-only round-off leg.
     const declared = (line as Record<string, unknown>).legType;
     const legNo = typeof declared === 'number' ? declared : 50 + srno;
     // `legLine` appends a LINE NUMBER, right-aligned in 10, giving a 33-character key.

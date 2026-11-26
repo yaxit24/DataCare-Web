@@ -19,10 +19,8 @@ import { PRECISION, round } from '@datacare/core';
  *
  * Posting to more than one account is the line path's behaviour, so a multi-account bill takes the line path's
  * layout: one leg per detail line, the line number in `STR()` form (right-aligned in 10) ahead of the role code.
- * The role code stays the family's MEASURED code. The decompiled source's codes (sale `07`, purchase `08`) belong
- * to a code map that disagrees with the measured one on every role (sale tax is `09` there and `04` in the data),
- * so one code is not borrowed from it. This layout is inferred, not measured: the captured customer data holds no
- * bill that posts to two item accounts.
+ * The sale writer now posts the decompiled source's codes (sale `07`, Ac_Ledr.cs:90; sales.ts SALE_LEG); purchase keeps
+ * its measured role code.
  */
 
 /** An item leg: `srNo` is present only when the bill posts to more than one account. */

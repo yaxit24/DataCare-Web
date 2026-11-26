@@ -31,6 +31,7 @@ const BALANCE_SHEET = [
   'GST',
   'GSTINPUT',
   'TCS',
+  'TDS',
 ];
 const PROFIT_AND_LOSS = [
   'LBRINC',

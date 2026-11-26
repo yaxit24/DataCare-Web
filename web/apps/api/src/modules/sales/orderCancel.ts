@@ -263,11 +263,14 @@ export async function openAdvanceOfOrderTx(
   scope: VoucherScope,
   ordNo: number | string,
   ordBook = 'SOR',
+  ordYear = '',
 ): Promise<PendingOrder | null> {
   const no = formatVoucherNo(ordNo);
   const orders = await ordersWithAdvanceTx(tx, scope, [no]);
-  // The named book only: another book's order of the same number is a different order (review of #250).
-  return orders.find((o) => o.ordBook === ordBook) ?? null;
+  // The named book only: another book's order of the same number is a different order (review of #250). The same
+  // holds for the year: order numbers restart each year, and the sale's order row names the order by
+  // CO_YEAR + CO_BOOK + VCH_NO (TR_SALE.cs:7295 reads SL_ORD_DATA by mSG_ORD cells 4 and 5, the year and book).
+  return orders.find((o) => o.ordBook === ordBook && (!ordYear || o.ordYear === ordYear)) ?? null;
 }
 
 interface CheckedRow {
