@@ -32,7 +32,8 @@ import {
   assertFinanceVoucherDateTx,
   FinanceLifecycleValidationError,
 } from './lifecycle.js';
-import { FinanceValidationError, type FinanceResult } from './finance.js';
+import { FinanceValidationError } from './gridLines.js';
+import type { FinanceResult } from './cashBank.js';
 import { captureClearingTx, dropClearingTx, restoreClearingTx } from './contraClearing.js';
 
 /**
@@ -285,7 +286,8 @@ async function writeContraTx(
       vchNo: key.VCH_NO,
       vchDate,
       vchType: book.shortName,
-      bookName: book.name,
+      // Ac_Rojmel.cs:338-340 copies B.MAIN_BOOK into BOOK_NAME; the form's own name is only for TEMP_BOOK_DATA.
+      bookName: book.mainBook,
       // A contra moves money between the shop's own accounts, so there is no party to denormalise.
       partyName: '',
       partyCode: '',
@@ -306,7 +308,8 @@ async function writeContraTx(
   await insertHiddenIdentityTx(tx, scope, identity, book.name);
   await postVoucherTx(tx, scope.tenantId, {
     ledger: { table: 'AC_DATA', lines: ledger },
-    bookName: book.name,
+    // Ac_Ledr.cs:842 (`B.MAIN_BOOK`): every ledger leg of a contra carries the MAIN_BOOK, not the book's name.
+    bookName: book.mainBook,
     writes: [
       {
         table: 'CONTRA_DATA',
@@ -326,7 +329,8 @@ async function writeContraTx(
           VCH_TIME: identity.voucherTime,
           HD_VCH_NO: identity.hiddenVoucherNo,
           MAIN_USER: identity.mainUser || null,
-          BOOK_NAME: book.name,
+          // TR_CONTRA.cs:2776, :2828: BOOK_NAME = FormMainBook. Only TEMP_BOOK_DATA takes the form name (:2751).
+          BOOK_NAME: book.mainBook,
           // TR_CONTRA.cs:2774: the book's own in/out flag.
           INOUT_TYPE: book.inout || null,
           ENTRY_TYPE: 'J',

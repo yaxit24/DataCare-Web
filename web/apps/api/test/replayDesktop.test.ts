@@ -150,6 +150,59 @@ describe('replay oracle: request rebuild', () => {
     ).toThrow(lib.ReplayBuildError);
   });
 
+  it('sends the grid cells the desktop stored: charges, a clearing date other than the voucher date, cheque print name and bank name', () => {
+    const date = '2024-06-01T00:00:00.000Z';
+    // A one-row bank payment with only the Chq Ac Name box filled stays the single form (the page's single mode).
+    const printed = lib.cashRequest(
+      voucher(
+        'CASH/BANK',
+        '012',
+        {
+          CASH_DATA: [
+            {
+              SR_NO: 1,
+              AC_CODE: 'E1',
+              REC_AMT: 100,
+              VCH_DATE: date,
+              CLR_DATE: date,
+              CHQ_PRINT_NAME: 'PAYEE',
+            },
+          ],
+        },
+        { mainBook: 'BANK PAY' },
+      ),
+    );
+    expect(printed.path).toBe('/payments');
+    expect(printed.body).toMatchObject({ mode: 'bank', chqPrintName: 'PAYEE' });
+    expect(printed.body).not.toHaveProperty('clrDate');
+
+    // Bank charges or a different clearing date are Charges / Clearing Dt cells: the grid form (TR_CASH.cs:3022-3042).
+    const charged = lib.cashRequest(
+      voucher(
+        'CASH/BANK',
+        '012',
+        {
+          CASH_DATA: [
+            {
+              SR_NO: 1,
+              AC_CODE: 'E1',
+              REC_AMT: 100,
+              BANK_CHARGES: 18,
+              VCH_DATE: date,
+              CLR_DATE: '2024-06-03T00:00:00.000Z',
+              BANK_NAME: 'BANK X',
+            },
+          ],
+        },
+        { mainBook: 'BANK PAY' },
+      ),
+    );
+    expect(charged.path).toBe('/payments/multi');
+    expect(charged.body.lines).toEqual([
+      { partyAc: 'E1', amount: 100, bankCharges: 18, clrDate: '2024-06-03', bankName: 'BANK X' },
+    ]);
+  });
+
   it('rebuilds a sale from operator inputs only and takes karigar figures from the tag', () => {
     const h = {
       CO_YEAR: '2024-2025',

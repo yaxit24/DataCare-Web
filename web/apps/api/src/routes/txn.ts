@@ -150,7 +150,7 @@ import {
   editReceipt,
   getPayment,
   deleteReceipt,
-  deleteFinance,
+  deletePayment,
   postReceiptLines,
   postPaymentLines,
   deleteReceiptLines,
@@ -2679,6 +2679,13 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
   registerPurchaseReturnRoutes(app, extraRouteHelpers);
 
   // ---- Finance (receipt / payment / contra) ----
+  // The TR_CASH grid cells beyond party and amount: Remark, Charges, Clearing Dt and the Chq Ac Name box.
+  const cashGridCells = (b: Record<string, any>) => ({
+    itDesc: b.itDesc,
+    bankCharges: b.bankCharges != null ? Number(b.bankCharges) : undefined,
+    clrDate: b.clrDate,
+    chqPrintName: b.chqPrintName,
+  });
   const receiptInput = (req: FastifyRequest, b: Record<string, any>) => ({
     scope: scopeOf(req),
     partyAc: b.partyAc,
@@ -2694,6 +2701,8 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
     kasar: b.kasar != null ? Number(b.kasar) : undefined,
     kasarAc: b.kasarAc,
     empCode: b.empCode,
+    mainUser: sess(req).sub,
+    ...cashGridCells(b),
   });
   app.post('/receipts', auth, async (req, reply) => {
     if (!guard(req, reply, 'create')) return;
@@ -2718,6 +2727,8 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
     kasarAc: b.kasarAc,
     empCode: b.empCode,
     mainUser: sess(req).sub,
+    bankName: b.bankName,
+    ...cashGridCells(b),
   });
   app.post('/payments', auth, async (req, reply) => {
     if (!guard(req, reply, 'create')) return;
@@ -2754,6 +2765,9 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
         vchDate: b.vchDate,
         kasarAc: b.kasarAc,
         empCode: b.empCode,
+        mainUser: sess(req).sub,
+        chqPrintName: b.chqPrintName,
+        bankName: b.bankName,
         lines: b.lines ?? [],
       }),
     );
@@ -2769,7 +2783,7 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
     );
   });
   /**
-   * Single receipt/payment deletion (F1.3). Receipt=CASH_DATA (deleteReceipt), payment=PAY_DATA (deleteFinance). */
+   * Single receipt deletion (F1.3): the whole TR_CASH voucher. */
   app.delete('/receipts/:vchNo', auth, async (req, reply) => {
     if (!guard(req, reply, 'delete')) return;
     return run(reply, 200, () =>
@@ -2793,6 +2807,9 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
         vchDate: b.vchDate,
         kasarAc: b.kasarAc,
         empCode: b.empCode,
+        mainUser: sess(req).sub,
+        chqPrintName: b.chqPrintName,
+        bankName: b.bankName,
         lines: b.lines ?? [],
       }),
     );
@@ -2808,41 +2825,15 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
     );
   });
   /**
-   * Single payment deletion (F1.3). headerTable=PAY_DATA; the audit VCH_TYPE (CPAY cash / BPAY bank) is
-   * resolved from the mode or the persisted voucher. */
+   * Single payment deletion (F1.3): the whole TR_CASH voucher, whichever table holds it (CASH_DATA, or PAY_DATA for
+   * a payment saved before payments moved to CASH_DATA).
+   */
   app.delete('/payments/:vchNo', auth, async (req, reply) => {
     if (!guard(req, reply, 'delete')) return;
-    const b = body(req);
-    let mode = String(b.mode ?? '')
-      .trim()
-      .toLowerCase();
-    // Resolve the mode from the persisted PAY_DATA VCH_TYPE when the caller omits it (generic delete).
-    if (mode !== 'cash' && mode !== 'bank') {
-      const sc = scopeOf(req);
-      const rows: any[] = await withTxBudget(prisma, sc.tenantId, 'read', (tx: any) =>
-        tx.$queryRawUnsafe(
-          `SELECT "VCH_TYPE" t FROM "PAY_DATA" WHERE tenant_id=$1 AND "CO_CODE"=$2 AND "LC_CODE"=$3 AND "CO_YEAR"=$4 AND "CO_BOOK"=$5 AND "VCH_NO"=$6 LIMIT 1`,
-          sc.tenantId,
-          sc.coCode,
-          sc.lcCode,
-          sc.coYear,
-          String(b.book ?? sc.coBook ?? 'PAY'),
-          String((req.params as any).vchNo).padStart(5, '0'),
-        ),
-      );
-      const t = String(rows[0]?.t ?? '').toUpperCase();
-      mode = t === 'BPAY' ? 'bank' : t === 'CPAY' ? 'cash' : '';
-      if (mode !== 'cash' && mode !== 'bank') {
-        return reply.code(400).send({ error: "mode must be 'cash' or 'bank'" });
-      }
-    }
     return run(reply, 200, () =>
-      deleteFinance(prisma, {
+      deletePayment(prisma, {
         scope: scopeOf(req),
         vchNo: (req.params as any).vchNo,
-        headerTable: 'PAY_DATA',
-        book: String(b.book ?? scopeOf(req).coBook ?? 'PAY'),
-        vchType: mode === 'cash' ? 'CPAY' : 'BPAY',
         deleteUser: sess(req).sub,
       }),
     );
@@ -7281,10 +7272,7 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
     if (!guard(req, reply, 'view')) return;
     return run(reply, 200, () => getReceipt(prisma, scopeOf(req), (req.params as any).vchNo));
   });
-  /**
-   * A payment needs its OWN reader: its header is PAY_DATA, not the CASH_DATA a receipt writes, so
-   * `getReceipt` would report every payment as missing. 133 live vouchers — the second most-used family.
-   */
+  /** A payment is read from CASH_DATA like a receipt (TR_CASH); one saved in PAY_DATA earlier is read from there. */
   app.get('/payments/:vchNo', auth, async (req, reply) => {
     if (!guard(req, reply, 'view')) return;
     return run(reply, 200, () => getPayment(prisma, scopeOf(req), (req.params as any).vchNo));

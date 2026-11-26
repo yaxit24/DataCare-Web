@@ -134,7 +134,8 @@ export default function PaymentForm({ kind }: { kind: 'receipt' | 'payment' }) {
 
   // N172 (G179): the voucher number box's F1, Up, Down and Enter (TR_CASH tVchNo_KeyDown).
   const numberKeys = useVoucherNumberKeys({
-    table: kind === 'receipt' ? 'CASH_DATA' : 'PAY_DATA',
+    // TR_CASH keeps receipts AND payments in CASH_DATA (TR_CASH.cs:3005); the list also shows a payment saved earlier.
+    table: 'CASH_DATA',
     book: coBook,
     value: voucherLookup,
     open: (vchNo) => loadVoucher(vchNo),
@@ -566,7 +567,7 @@ export default function PaymentForm({ kind }: { kind: 'receipt' | 'payment' }) {
       )}
       {coBook && !multi && (
         <VoucherList
-          table={kind === 'receipt' ? 'CASH_DATA' : 'PAY_DATA'}
+          table="CASH_DATA"
           book={coBook}
           deleteBase={ep}
           onLoad={(vchNo) => void loadVoucher(vchNo)}

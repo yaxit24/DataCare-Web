@@ -30,6 +30,8 @@ const VOUCHER_IDENTITY_COLUMNS = [
 ];
 const VOUCHER_WIDTH = 5;
 const MAX_VOUCHER_NO = 10 ** VOUCHER_WIDTH - 1;
+/** The TR_CASH families, which share one header table (CASH_DATA) whichever way the money moves. */
+const CASH_BOOK_FAMILIES = new Set(['CASH REC', 'CASH PAY', 'BANK REC', 'BANK PAY']);
 
 export function scopeKey(s: VoucherScope): string {
   return [s.tenantId, s.coCode, s.lcCode, s.coYear ?? '', s.coBook ?? ''].join('|');
@@ -94,6 +96,12 @@ async function numberingTables(tx: any, s: VoucherScope): Promise<string[]> {
     // book now names BAR_CAN_DATA, so include both generations under the same complete voucher scope.
     if (mainBooks[0] === 'STOCK ADJUST' && !tables.includes('MAIN_STOCK')) {
       tables.push('MAIN_STOCK');
+    }
+    // Every cash and bank book is numbered from CASH_DATA (TR_CASH.cs:2674, :2968; MS_UPDATE.cs:7821). Payments the
+    // web saved in PAY_DATA before they moved there keep their numbers occupied.
+    if (CASH_BOOK_FAMILIES.has(mainBooks[0] ?? '')) {
+      for (const table of ['CASH_DATA', 'PAY_DATA'])
+        if (!tables.includes(table)) tables.push(table);
     }
     for (const table of tables) {
       if (!IDENTIFIER.test(table)) {

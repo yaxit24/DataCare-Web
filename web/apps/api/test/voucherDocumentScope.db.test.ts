@@ -116,6 +116,14 @@ const families: Array<{
           ...key,
           `${f.name} header ${index}`,
         );
+        // TR_CASH stamps every CASH_DATA row with its book's direction (TR_CASH.cs:3031): a receipt is 'I', so the
+        // payment print, which reads CASH_DATA first, does not take it for a payment.
+        if (f.head === 'CASH_DATA')
+          await owner.$executeRawUnsafe(
+            `UPDATE "CASH_DATA" SET "INOUT_TYPE"='I' WHERE tenant_id=$1 AND "CO_CODE"=$2 AND "LC_CODE"=$3
+               AND "CO_YEAR"=$4 AND "CO_BOOK"=$5 AND "VCH_NO"=$6`,
+            ...key,
+          );
       }
       // PAY_DETL carries the lines of both receipts and payments, so each detail table is seeded once.
       for (const detl of new Set(families.map((f) => f.detl))) {

@@ -61,6 +61,92 @@ export interface VoucherRow {
   total: number;
 }
 
+/**
+ * A header table's older generation under the same voucher key. Cash and bank PAYMENTS were saved in PAY_DATA by the
+ * web until they moved to CASH_DATA, where TR_CASH keeps every receipt and payment (TR_CASH.cs:3005); a list or a
+ * number walk over CASH_DATA must still see them. A book holds vouchers of one table only, so the union cannot
+ * mix two vouchers of one number.
+ */
+const LEGACY_HEADERS: Record<string, readonly string[]> = { CASH_DATA: ['PAY_DATA'] };
+
+async function listOneTable(
+  tx: any,
+  scope: VoucherListScope,
+  table: string,
+  book: string,
+  n: number,
+): Promise<VoucherRow[]> {
+  const colRows: { column_name: string }[] = await tx.$queryRawUnsafe(
+    `SELECT column_name FROM information_schema.columns
+      WHERE table_schema=current_schema() AND table_name=$1`,
+    table,
+  );
+  const cols = new Set(colRows.map((c) => c.column_name));
+  if (!IDENTITY_COLUMNS.every((c) => cols.has(c))) return [];
+  const amtCol = [
+    'TOT_AMT',
+    'NET_AMT',
+    'TOT_DR_AMT',
+    'SL_NET_AMT',
+    'REC_AMT',
+    'DIFF_AMT',
+    'SALARY_AMT',
+    'CARD_AMT',
+    'DHRN_AMT',
+  ].find((c) => cols.has(c));
+  const nameSel = cols.has('AC_NAME') ? '"AC_NAME"' : `''`;
+  const typeSel = cols.has('VCH_TYPE') ? `coalesce("VCH_TYPE",'')` : `''`;
+  const acSel = cols.has('AC_CODE') ? `coalesce("AC_CODE",'')` : `''`;
+  // CONTRA_DATA (contra, fine JV, journal) has no amount column; each money voucher is a set of one-sided
+  // DR_AMT / CR_AMT rows. Its total is the amount transferred, the voucher's summed debits (the desktop voucher
+  // list selects SUM(CR_AMT) and SUM(DR_AMT), TR_CONTRA.cs:3140-3144). Compute it before DISTINCT ON.
+  const amtSel = amtCol
+    ? `coalesce(NULLIF(${qid(amtCol)}::text,'')::numeric,0)::float`
+    : table === 'SL_ORD_ADJ'
+      ? `coalesce(sum(coalesce(NULLIF("ORD_AMT"::text,'')::numeric,0)) OVER (PARTITION BY "VCH_NO"),0)::float`
+      : cols.has('DR_AMT')
+        ? `coalesce(sum(coalesce(NULLIF("DR_AMT"::text,'')::numeric,0)) OVER (PARTITION BY "VCH_NO"),0)::float`
+        : '0::float';
+  const dateSel = cols.has('VCH_DATE') ? `"VCH_DATE"::text` : 'NULL';
+  // The header table can hold several rows per voucher (party leg + tax + old-gold components share one
+  // VCH_NO). The desktop voucher navigator lists ONE row per voucher, so collapse with DISTINCT ON and
+  // pick the representative row: prefer a row that carries the party code, then the largest amount.
+  const pickOrder = [
+    '"VCH_NO"',
+    cols.has('AC_CODE') ? `(CASE WHEN coalesce("AC_CODE",'')<>'' THEN 0 ELSE 1 END)` : '',
+    amtCol ? `${amtSel} DESC` : '',
+    !amtCol && cols.has('SR_NO') ? '"SR_NO"' : '',
+    cols.has('VCH_DATE') ? `"VCH_DATE" DESC NULLS LAST` : '',
+  ]
+    .filter(Boolean)
+    .join(', ');
+  const outerOrder = `${cols.has('VCH_DATE') ? 'vd DESC NULLS LAST,' : ''} length(vch) DESC, vch DESC`;
+  const rows: any[] = await tx.$queryRawUnsafe(
+    `SELECT * FROM (
+       SELECT DISTINCT ON ("VCH_NO") "VCH_NO" vch, ${dateSel} vd, ${typeSel} vt, ${acSel} ac, ${nameSel} acn, ${amtSel} tot
+         FROM ${qid(table)}
+        WHERE "CO_CODE"=$1 AND "LC_CODE"=$2 AND "CO_YEAR"=$3 AND "CO_BOOK"=$4
+         ORDER BY ${pickOrder}
+     ) x ORDER BY ${outerOrder} LIMIT ${n}`,
+    scope.coCode,
+    scope.lcCode,
+    scope.coYear,
+    book,
+  );
+  return rows.map((r) => ({
+    coCode: scope.coCode,
+    lcCode: scope.lcCode,
+    coYear: scope.coYear,
+    coBook: book,
+    vchNo: String(r.vch ?? ''),
+    vchDate: r.vd ? toIsoDate(r.vd) : null,
+    vchType: r.vt ?? null,
+    acCode: String(r.ac ?? ''),
+    acName: String(r.acn ?? ''),
+    total: Number(r.tot),
+  }));
+}
+
 export async function recentVouchers(
   prisma: any,
   scope: VoucherListScope,
@@ -73,75 +159,22 @@ export async function recentVouchers(
   if (!scope.coCode || !scope.lcCode || !scope.coYear || !book) return [];
   const n = Math.min(Number(limit) || 50, 200);
   return withTxBudget(prisma, scope.tenantId, 'read', async (tx: any) => {
-    const colRows: { column_name: string }[] = await tx.$queryRawUnsafe(
-      `SELECT column_name FROM information_schema.columns
-        WHERE table_schema=current_schema() AND table_name=$1`,
-      table,
-    );
-    const cols = new Set(colRows.map((c) => c.column_name));
-    if (!IDENTITY_COLUMNS.every((c) => cols.has(c))) return [];
-    const amtCol = [
-      'TOT_AMT',
-      'NET_AMT',
-      'TOT_DR_AMT',
-      'SL_NET_AMT',
-      'REC_AMT',
-      'DIFF_AMT',
-      'SALARY_AMT',
-      'CARD_AMT',
-      'DHRN_AMT',
-    ].find((c) => cols.has(c));
-    const nameSel = cols.has('AC_NAME') ? '"AC_NAME"' : `''`;
-    const typeSel = cols.has('VCH_TYPE') ? `coalesce("VCH_TYPE",'')` : `''`;
-    const acSel = cols.has('AC_CODE') ? `coalesce("AC_CODE",'')` : `''`;
-    // CONTRA_DATA (contra, fine JV, journal) has no amount column; each money voucher is a set of one-sided
-    // DR_AMT / CR_AMT rows. Its total is the amount transferred, the voucher's summed debits (the desktop voucher
-    // list selects SUM(CR_AMT) and SUM(DR_AMT), TR_CONTRA.cs:3140-3144). Compute it before DISTINCT ON.
-    const amtSel = amtCol
-      ? `coalesce(NULLIF(${qid(amtCol)}::text,'')::numeric,0)::float`
-      : table === 'SL_ORD_ADJ'
-        ? `coalesce(sum(coalesce(NULLIF("ORD_AMT"::text,'')::numeric,0)) OVER (PARTITION BY "VCH_NO"),0)::float`
-        : cols.has('DR_AMT')
-          ? `coalesce(sum(coalesce(NULLIF("DR_AMT"::text,'')::numeric,0)) OVER (PARTITION BY "VCH_NO"),0)::float`
-          : '0::float';
-    const dateSel = cols.has('VCH_DATE') ? `"VCH_DATE"::text` : 'NULL';
-    // The header table can hold several rows per voucher (party leg + tax + old-gold components share one
-    // VCH_NO). The desktop voucher navigator lists ONE row per voucher, so collapse with DISTINCT ON and
-    // pick the representative row: prefer a row that carries the party code, then the largest amount.
-    const pickOrder = [
-      '"VCH_NO"',
-      cols.has('AC_CODE') ? `(CASE WHEN coalesce("AC_CODE",'')<>'' THEN 0 ELSE 1 END)` : '',
-      amtCol ? `${amtSel} DESC` : '',
-      !amtCol && cols.has('SR_NO') ? '"SR_NO"' : '',
-      cols.has('VCH_DATE') ? `"VCH_DATE" DESC NULLS LAST` : '',
-    ]
-      .filter(Boolean)
-      .join(', ');
-    const outerOrder = `${cols.has('VCH_DATE') ? 'vd DESC NULLS LAST,' : ''} length(vch) DESC, vch DESC`;
-    const rows: any[] = await tx.$queryRawUnsafe(
-      `SELECT * FROM (
-         SELECT DISTINCT ON ("VCH_NO") "VCH_NO" vch, ${dateSel} vd, ${typeSel} vt, ${acSel} ac, ${nameSel} acn, ${amtSel} tot
-           FROM ${qid(table)}
-          WHERE "CO_CODE"=$1 AND "LC_CODE"=$2 AND "CO_YEAR"=$3 AND "CO_BOOK"=$4
-           ORDER BY ${pickOrder}
-       ) x ORDER BY ${outerOrder} LIMIT ${n}`,
-      scope.coCode,
-      scope.lcCode,
-      scope.coYear,
-      book,
-    );
-    return rows.map((r) => ({
-      coCode: scope.coCode,
-      lcCode: scope.lcCode,
-      coYear: scope.coYear,
-      coBook: book,
-      vchNo: String(r.vch ?? ''),
-      vchDate: r.vd ? toIsoDate(r.vd) : null,
-      vchType: r.vt ?? null,
-      acCode: String(r.ac ?? ''),
-      acName: String(r.acn ?? ''),
-      total: Number(r.tot),
-    }));
+    const rows = await listOneTable(tx, scope, table, book, n);
+    const legacy = LEGACY_HEADERS[table] ?? [];
+    if (!legacy.length) return rows;
+    const seen = new Set(rows.map((r) => r.vchNo));
+    for (const older of legacy)
+      for (const r of await listOneTable(tx, scope, older, book, n))
+        if (!seen.has(r.vchNo)) rows.push(r);
+    // Same order as the single-table query: newest date, then the highest number.
+    return rows
+      .sort(
+        (a, b) =>
+          String(b.vchDate ?? '').localeCompare(String(a.vchDate ?? '')) ||
+          b.vchNo.length - a.vchNo.length ||
+          b.vchNo.localeCompare(a.vchNo),
+      )
+      .slice(0, n);
   });
 }
 
@@ -199,8 +232,11 @@ export async function neighbourVoucher(
   return withTxBudget(prisma, scope.tenantId, 'read', async (tx: any) => {
     const identity = `"CO_CODE"=$1 AND "LC_CODE"=$2 AND "CO_YEAR"=$3 AND "CO_BOOK"=$4`;
     const params = [scope.coCode, scope.lcCode, scope.coYear, book];
+    const tables = [table, ...(LEGACY_HEADERS[table] ?? [])];
     const maxRows: Array<{ max: string | null }> = await tx.$queryRawUnsafe(
-      `SELECT MAX("VCH_NO") AS max FROM ${qid(table)} WHERE ${identity}`,
+      `SELECT MAX("VCH_NO") AS max FROM (${tables
+        .map((t) => `SELECT "VCH_NO" FROM ${qid(t)} WHERE ${identity}`)
+        .join(' UNION ALL ')}) u`,
       ...params,
     );
     const max = maxRows[0]?.max ?? null;
@@ -213,7 +249,12 @@ export async function neighbourVoucher(
       (n) => n >= 1,
     );
     const found: Array<{ vch: string }> = await tx.$queryRawUnsafe(
-      `SELECT DISTINCT "VCH_NO" AS vch FROM ${qid(table)} WHERE ${identity} AND "VCH_NO" = ANY($5::text[])`,
+      `SELECT DISTINCT vch FROM (${tables
+        .map(
+          (t) =>
+            `SELECT "VCH_NO" AS vch FROM ${qid(t)} WHERE ${identity} AND "VCH_NO" = ANY($5::text[])`,
+        )
+        .join(' UNION ALL ')}) u`,
       ...params,
       candidates.map(voucherText),
     );

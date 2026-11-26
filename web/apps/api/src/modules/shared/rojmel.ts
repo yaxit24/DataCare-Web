@@ -288,7 +288,7 @@ export interface RojmelLine {
   itemName?: string;
 }
 
-const blank = (ctx: RojmelContext, ledrKey: string): RojmelRow => ({
+export const blank = (ctx: RojmelContext, ledrKey: string): RojmelRow => ({
   ...ctx.key,
   LEDR_KEY: ledrKey,
   VCH_DATE: ctx.vchDate,

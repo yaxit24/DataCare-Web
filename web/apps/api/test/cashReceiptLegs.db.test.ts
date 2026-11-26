@@ -545,7 +545,9 @@ describe.runIf(RUN)('multi-line cash paths write a Rojmel row per line', () => {
         amt: l.amount,
         kasar: l.kasar,
         descr: l.itDesc,
-        rec: CASH,
+        // TR_CASH.cs:3016-3062 never sets REC_AC_CODE; the book's slot 1 is the settlement account (the web keeps the
+        // column only for an account other than the book's).
+        rec: null,
         vch: '00001',
       })),
     );
@@ -775,11 +777,6 @@ describe.runIf(RUN)('bank leg codes are not a mirror of cash', () => {
       LC,
       KASAR,
     );
-    // The web writes payments to PAY_DATA, so number this book from it (otherwise the second voucher re-draws 00001).
-    await exec(
-      `UPDATE "BOOK_DATA" SET "BOOK_TBL_NAME"='PAY_DATA' WHERE tenant_id=$1 AND "CO_BOOK"='012'`,
-      TENANT,
-    );
     const amount = 3000;
     const kasar = 25.5;
     await postPayment(runtime, {
@@ -814,7 +811,7 @@ describe.runIf(RUN)('bank leg codes are not a mirror of cash', () => {
   });
   /**
    * TR_CASH's employee box (tEmpCode): EMP_CODE_MANDATORY = 'Y' refuses a blank (TR_CASH.cs:2907-2911, before the
-   * year and lock checks), the code is stored on the CASH_DATA / PAY_DATA row (:3050) and shown again when the
+   * year and lock checks), the code is stored on the CASH_DATA row, receipt or payment (:3050) and shown again when the
    * voucher is opened (:2753-2754).
    */
   describe('employee code', () => {
@@ -872,10 +869,11 @@ describe.runIf(RUN)('bank leg codes are not a mirror of cash', () => {
       const r = await rec('E01');
       const p = await pay('E01');
       const heads = (await owner.$queryRawUnsafe(
-        `SELECT 'R' k, "EMP_CODE" e FROM "CASH_DATA" WHERE tenant_id=$1
-         UNION ALL SELECT 'P', "EMP_CODE" FROM "PAY_DATA" WHERE tenant_id=$1 ORDER BY 1`,
+        `SELECT CASE "INOUT_TYPE" WHEN 'I' THEN 'R' ELSE 'P' END k, "EMP_CODE" e FROM "CASH_DATA"
+          WHERE tenant_id=$1 ORDER BY 1`,
         TENANT,
       )) as Array<{ k: string; e: string }>;
+      // Receipt and payment are both CASH_DATA rows (TR_CASH.cs:3005, :3050).
       expect(heads).toEqual([
         { k: 'P', e: 'E01' },
         { k: 'R', e: 'E01' },
@@ -1033,12 +1031,14 @@ describe.runIf(RUN)(
       ]);
       // Debit 2000 + 7.5 = 2007.5 equals credit 2000 + 7.5 = 2007.5.
       expect(sums(rows)).toEqual({ dr: 2007.5, cr: 2007.5 });
-      const [head] = (await owner.$queryRawUnsafe(
-        `SELECT "NET_AMT"::float net, "KASAR_AMT"::float kasar FROM "PAY_DATA" WHERE tenant_id=$1`,
-        TENANT,
-      )) as Array<Record<string, number>>;
-      expect(head).toEqual({ net: 2000, kasar: 7.5 });
-      expect((await financeFootprint())!.detail).toBe(2);
+      // TR_CASH saves a payment grid as CASH_DATA rows, one per line, and writes no PAY_DATA / PAY_DETL
+      // (TR_CASH.cs:3005-3069): the ordinary line and the kasar-only line.
+      expect(await cashRows()).toEqual([
+        { sr: 1, ac: PARTY, amt: 2000, kasar: 0 },
+        { sr: 2, ac: PARTY, amt: 0, kasar: 7.5 },
+      ]);
+      const footprint = (await financeFootprint())!;
+      expect([footprint.pay, footprint.detail]).toEqual([0, 0]);
     });
 
     it('payment: a voucher of only a kasar-only line is saved with just the kasar pair', async () => {

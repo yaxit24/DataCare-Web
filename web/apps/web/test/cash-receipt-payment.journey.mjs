@@ -14,9 +14,10 @@ const BOOKS = ['CRB', 'CPB', 'BRB', 'CNB'];
 export async function seedCashReceiptPayment(sql) {
   await cleanupCashReceiptPayment(sql);
   for (const [book, name, shortName, mainBook, inout, table] of [
-    // Desktop-width names: CASH_DATA / PAY_DATA / ROJ_MEL_DATA.BOOK_NAME are varchar(20).
+    // Desktop-width names: CASH_DATA / ROJ_MEL_DATA.BOOK_NAME are varchar(20). Every cash and bank book names CASH_DATA
+    // (MS_UPDATE.cs:7821), payments included.
     ['CRB', 'Browser Cash Rec', 'CREC', 'CASH REC', 'I', 'CASH_DATA'],
-    ['CPB', 'Browser Cash Pay', 'CPAY', 'CASH PAY', 'O', 'PAY_DATA'],
+    ['CPB', 'Browser Cash Pay', 'CPAY', 'CASH PAY', 'O', 'CASH_DATA'],
     ['BRB', 'Browser Bank Rec', 'BREC', 'BANK REC', 'I', 'CASH_DATA'],
     ['CNB', 'Browser Contra', 'CONT', 'CONTRA', 'I', 'CONTRA_DATA'],
   ])
@@ -117,7 +118,8 @@ export async function exerciseCashReceiptPayment(page, { checkpoint, owner, tena
     vchDate: '2024-06-15',
     rec: 1000,
     kasar: 15,
-    recAc: 'CASH',
+    // Not a TR_CASH column (TR_CASH.cs:3016-3062): the settlement account is the book's slot 1.
+    recAc: null,
   });
   assert.deepEqual(await legs('CRB'), [
     { ac: 'RCPCUST', dr: 0, cr: 1000 },
@@ -155,9 +157,10 @@ export async function exerciseCashReceiptPayment(page, { checkpoint, owner, tena
   await page.getByRole('button', { name: 'Save Payment', exact: true }).click();
   await page.getByText('Saved — Voucher #1', { exact: false }).waitFor();
   const [pay] = await rows(
-    `SELECT "VCH_NO",left("VCH_DATE"::text,10) AS "vchDate","NET_AMT"::float AS net,"CASH_AMT"::float AS cash FROM "PAY_DATA" WHERE tenant_id=$1 AND "CO_BOOK"='CPB'`,
+    `SELECT "VCH_NO",left("VCH_DATE"::text,10) AS "vchDate","REC_AMT"::float AS rec,"INOUT_TYPE" AS inout FROM "CASH_DATA" WHERE tenant_id=$1 AND "CO_BOOK"='CPB'`,
   );
-  assert.deepEqual(pay, { VCH_NO: '00001', vchDate: '2024-06-16', net: 750, cash: 750 });
+  // TR_CASH saves a payment as a CASH_DATA row (TR_CASH.cs:3005), direction 'O'.
+  assert.deepEqual(pay, { VCH_NO: '00001', vchDate: '2024-06-16', rec: 750, inout: 'O' });
   assert.deepEqual(await legs('CPB'), [
     { ac: 'RCPCUST', dr: 750, cr: 0 },
     { ac: 'CASH', dr: 0, cr: 750 },

@@ -92,7 +92,7 @@
     },
     {
       "interface": "DeleteFinanceInput",
-      "file": "web/apps/api/src/modules/finance/finance.ts",
+      "file": "web/apps/api/src/modules/finance/cashBank.ts",
       "module": "finance",
       "field": "deleteUser",
       "class": "serverDerived",
@@ -100,7 +100,7 @@
     },
     {
       "interface": "DeleteFinanceInput",
-      "file": "web/apps/api/src/modules/finance/finance.ts",
+      "file": "web/apps/api/src/modules/finance/cashBank.ts",
       "module": "finance",
       "field": "headerTable",
       "class": "serverDerived",
@@ -507,14 +507,6 @@
       "reason": "assigned by the writer in row order"
     },
     {
-      "interface": "PaymentInput",
-      "file": "web/apps/api/src/modules/finance/finance.ts",
-      "module": "finance",
-      "field": "lineNo",
-      "class": "serverDerived",
-      "reason": "assigned by the writer in row order"
-    },
-    {
       "interface": "ProfitLineInput",
       "file": "web/apps/api/src/modules/sales/billProfit.ts",
       "module": "sales",
@@ -569,14 +561,6 @@
       "field": "hdVchNo",
       "class": "serverDerived",
       "reason": "hidden voucher number, allocated by nextHiddenVoucherNoTx"
-    },
-    {
-      "interface": "ReceiptInput",
-      "file": "web/apps/api/src/modules/finance/finance.ts",
-      "module": "finance",
-      "field": "lineNo",
-      "class": "serverDerived",
-      "reason": "assigned by the writer in row order"
     },
     {
       "interface": "RepairApplyInput",

@@ -55,6 +55,7 @@ export type PostingAccountRole =
   | 'cash-settlement'
   | 'bank-settlement'
   | 'kasar'
+  | 'bank-charges'
   | 'round-off'
   | 'labour-expense'
   | 'stock-adjustment'
