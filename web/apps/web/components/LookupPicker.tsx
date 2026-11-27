@@ -28,6 +28,7 @@ export function LookupPicker({
   resolveTypedCode = false,
   id,
   openOnFocus = true,
+  readOnly = false,
 }: {
   entity: string;
   value: string;
@@ -54,6 +55,8 @@ export function LookupPicker({
    * help only on F1 or on an unknown code, so tabbing across blank selectors must not pop a list over the next one.
    */
   openOnFocus?: boolean;
+  /** The box shows its value but takes no typing (a screen still reading the record it belongs to). */
+  readOnly?: boolean;
 }) {
   const [open, setOpen] = useState(false);
   const [rows, setRows] = useState<LookupRow[]>([]);
@@ -186,6 +189,7 @@ export function LookupPicker({
         id={id}
         value={value}
         aria-label={ariaLabel}
+        readOnly={readOnly}
         placeholder={placeholder || `search ${entity}… (F1)`}
         onChange={(e) => {
           picked.current = null;

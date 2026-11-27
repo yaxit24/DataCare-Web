@@ -38,6 +38,7 @@ import { assertVoucherVersionTx, requiredVersion, voucherVersionTx } from '../vo
 import { formatVoucherNo, nextVoucherNoTx, type VoucherScope } from '../vouchers/numbering.js';
 import { nextHiddenVoucherNoTx, voucherTimestamp } from '../vouchers/lifecycle.js';
 import { assertSavedRateCutTx, persistedHeaderTx } from './rateCutHeader.js';
+import { asStored, krNet } from './wholesaleLineCells.js';
 import {
   insertRowTx,
   postVoucherTx,
@@ -1316,8 +1317,8 @@ function buildLineRows(
        * The karigar valuation columns, which on these rows track NET WEIGHT rather than fine — measured
        * `KR_NET_WT == ITM_NWT` and `KR_FINE == ITM_NWT` on 19 of 20 rows, the exception being a weightless line.
        */
-      KR_NET_WT: l.krNetWt ?? c.netWt,
-      KR_FINE: c.netWt,
+      KR_NET_WT: krNet(l, c.netWt),
+      KR_FINE: krNet(l, c.netWt),
       BOOK_NAME: cls.bookName,
       AC_CODE: input.acCode,
       TAG_NO: isTagged(l.tagNo) ? String(l.tagNo).trim() : 'N',
@@ -1424,10 +1425,8 @@ function buildLineRows(
        * Derived rather than required from the caller, measured across the 20 captured rate-cut lines:
        *
        *   `TAG_GWT`  == `ITM_GWT`   20/20        `TAG_NWT`  == `ITM_NWT`   20/20
-       *   `KR_NET_WT` == `ITM_NWT`  19/20        `KR_FINE`  == `ITM_NWT`   19/20
        *
-       * `KR_FINE` tracking NET WEIGHT rather than fine weight is not a transcription slip — it is what the rows
-       * hold, on every line that carries weight. The exception in each pair is a line with no weight at all.
+       * `KR_NET_WT` and `KR_FINE` are the grid's gross-based KrNwt (`krNet` above).
        *
        * These were all zero before, because the builder only wrote what the caller passed and no caller passes a
        * tag weight for a loose line.
@@ -1561,11 +1560,13 @@ function buildReceivedLineRows(
  */
 function buildStockRows(
   ctx: RowCtx,
-  issuedRows: Record<string, unknown>[],
-  receivedRows: Record<string, unknown>[],
+  issuedLines: Record<string, unknown>[],
+  receivedLines: Record<string, unknown>[],
   oldGoldType: string,
 ): Record<string, unknown>[] {
   const { key, cls } = ctx;
+  const issuedRows = issuedLines.map((row) => asStored('RATE_CUT_ISU', row));
+  const receivedRows = receivedLines.map((row) => asStored('RATE_CUT_REC', row));
   const stockDate = ctx.vchDate.toISOString().slice(0, 10);
   const netFor = (row: Record<string, unknown>): number => {
     const itCode = String(row.IT_CODE ?? '')
@@ -1605,7 +1606,7 @@ function buildStockRows(
     MAIN_USER: txt(row.MAIN_USER, 15),
     DATA_TYPE: txt(cls.dataType, 1) ?? 'A',
     DESIGN_NO: row.DESIGN_NO ?? null,
-    ITM_SIZE: txt(row.ITM_SIZE, 20),
+    ITM_SIZE: row.ITM_SIZE == null ? null : String(row.ITM_SIZE).slice(0, 20),
     ITM_DESC: txt(row.ITM_REMARK, 255),
     GHT_PRC: 0,
     ITM_DISC: '0',
@@ -1624,7 +1625,7 @@ function buildStockRows(
       KR_WEST: num(row.KR_WEST_PRC),
       KR_FINE: num(row.KR_FINE),
       KR_COST: num(row.TAG_COST),
-      ITM_LOT: txt(row.ITM_LOT, 255),
+      ITM_LOT: String(row.ITM_LOT ?? '').slice(0, 255),
     })),
     ...receivedRows.map((row) => ({
       ...common(row),

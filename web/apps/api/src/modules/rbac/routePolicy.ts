@@ -216,7 +216,9 @@ route('Sales/Sales Invoice', [
   'POST /sales/print-files/default',
   'DELETE /sales/:vchNo',
   'GET /sales/invoice',
-  // Contained pending an atomic Sales Invoice import + approval closure transaction.
+  // TR_SALE.cs:20562 Apr No help, :20008 its import, and both saved in one createSale transaction.
+  'GET /sales/approval-help',
+  'GET /sales/approval-import',
   'POST /tour/:vchNo/bill',
 ]);
 route('Sales/Sales Quotation', [

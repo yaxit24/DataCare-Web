@@ -623,6 +623,39 @@ export const salesOrder = {
     ),
 
     C(
+      'create.desktop-flags',
+      'T07',
+      'mutation',
+      "A new order saves the typed bill box (blank: TR_SALE_ORD.cs:9115), the flags DATA_TRFR/USER_UPDATE/USER_DELETE 'N' (:9163-9174), each line's TAG_STK_LESS 'N' (:9268-9286) and leaves the line's DATA_TRFR unset",
+      async (ctx) => {
+        const { page } = await ctx.session();
+        const vchNo = await createOrder(ctx, page);
+        const [h] = await ctx.rows(
+          `SELECT coalesce("BILL_NO",'') bill,"DATA_TRFR" trfr,"USER_UPDATE" uu,"USER_DELETE" ud
+             FROM "SL_ORD_DATA" WHERE tenant_id=$1 AND "CO_BOOK"='${BOOK}' AND "VCH_NO"=$2`,
+          vchNo,
+        );
+        const d = await ctx.rows(
+          `SELECT "TAG_STK_LESS" stk,"DATA_TRFR" trfr FROM "SL_ORD_DETL"
+            WHERE tenant_id=$1 AND "CO_BOOK"='${BOOK}' AND "VCH_NO"=$2`,
+          vchNo,
+        );
+        const expected = { bill: '', trfr: 'N', uu: 'N', ud: 'N' };
+        assert.deepEqual(h, expected);
+        assert.ok(
+          d.length > 0 && d.every((x) => x.stk === 'N' && x.trfr === null),
+          JSON.stringify(d),
+        );
+        return {
+          observation: `order ${vchNo}: bill '${h.bill}', flags ${h.trfr}/${h.uu}/${h.ud}, ${d.length} line(s) TAG_STK_LESS N`,
+          expected: { header: expected, lineTagStockLess: 'N', lineDataTrfr: null },
+          database: { header: h, lines: d },
+          downstream: { lines: d.length },
+        };
+      },
+    ),
+
+    C(
       'create.no-advance',
       'T07',
       'mutation',
