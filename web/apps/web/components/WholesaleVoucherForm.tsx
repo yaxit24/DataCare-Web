@@ -240,7 +240,10 @@ const message = (caught: unknown, fallback: string): string =>
 export function WholesaleVoucherForm({ workflow }: { workflow: WholesaleWorkflow }) {
   const cfg = WHOLESALE_WORKFLOWS[workflow];
   const command = useIdempotencyKey();
-  const rights = useFormRights('Sales/Wholesale Sale');
+  // TR_WH_SALE reads USER_SET under the caption it was opened with (MDI_FORM.cs:8149-8156: Wh Quotation).
+  const rights = useFormRights(
+    workflow === 'wholesale-quotation' ? 'Sales/Wholesale Quotation' : 'Sales/Wholesale Sale',
+  );
   /** Item-detail rows and fine kasar are Wh Sales (and its quotation document); Rate Cut and Tour Sales keep their form. */
   const residual = workflow === 'wholesale-sale' || workflow === 'wholesale-quotation';
   const { lcCode, coYear } = useBusinessScope();
@@ -1162,11 +1165,16 @@ export function WholesaleVoucherForm({ workflow }: { workflow: WholesaleWorkflow
           <button
             type="button"
             className="ghost"
-            onClick={() =>
+            onClick={() => {
+              // TR_WH_SALE.cs:13658-13660. Server independently enforces the print right.
+              if (!rights.canPrint) {
+                setError('You Have No Print Rights.....');
+                return;
+              }
               openDocument(
                 `/api/wholesale-quotations/${encodeURIComponent(loadedVoucherNo)}/print?coBook=${encodeURIComponent(coBook)}&format=html`,
-              )
-            }
+              );
+            }}
             disabled={busy}
           >
             Print
@@ -1182,7 +1190,7 @@ export function WholesaleVoucherForm({ workflow }: { workflow: WholesaleWorkflow
         onLoad={(vchNo) => void openFromKeys(vchNo)}
         openKey={numberKeys.listKey}
         printHref={
-          (workflow === 'wholesale-sale' && rights.canPrint) || workflow === 'wholesale-quotation'
+          (workflow === 'wholesale-sale' || workflow === 'wholesale-quotation') && rights.canPrint
             ? (vchNo) =>
                 `/api${cfg.endpoint}/${encodeURIComponent(vchNo)}/print?coBook=${encodeURIComponent(coBook)}&format=html`
             : undefined

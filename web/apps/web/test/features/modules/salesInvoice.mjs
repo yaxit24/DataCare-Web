@@ -1136,6 +1136,43 @@ export const salesInvoice = {
     ),
 
     C(
+      'rights.print-needs-frm-print',
+      'T11',
+      'refusal',
+      'TR_SALE.cs:16248-16254: BtnPrint answers "You Have No Print Rights....." when USER_SET.FRM_PRINT is not Y.',
+      async (ctx) => {
+        const admin = await ctx.session();
+        const vchNo = await createOneLine(ctx, admin.page);
+        const before = await header(ctx, vchNo);
+        const viewer = await ctx.session(as(USERS.printViewer.user));
+        await openSales(viewer.page);
+        let popups = 0;
+        viewer.page.context().on('page', () => popups++);
+        await viewer.page.getByRole('button', { name: '▸ Recent vouchers', exact: true }).click();
+        const row = viewer.page.locator('table.grid tr', { hasText: vchNo }).last();
+        await row.getByRole('link', { name: 'Print', exact: true }).click();
+        await viewer.page.getByText('You Have No Print Rights.....').waitFor();
+        assert.equal(popups, 0, 'no document window opens');
+        // The server refuses both bill documents on its own, whatever the screen does.
+        const answers = {};
+        for (const url of [
+          `/api/sales/${vchNo}/print?coBook=${BOOK}&format=html&copy=O`,
+          `/api/sales/invoice?coBook=${BOOK}&vchNo=${vchNo}&format=html&copy=O`,
+        ]) {
+          answers[url] = (await viewer.page.request.get(url)).status();
+          assert.equal(answers[url], 403, url);
+        }
+        const after = await header(ctx, vchNo);
+        assert.deepEqual(after, before);
+        return {
+          observation: `print-less user saw the message and got ${JSON.stringify(answers)}`,
+          expected: 'message, no window, 403 from both print routes; voucher unchanged',
+          database: { before, after },
+        };
+      },
+    ),
+
+    C(
       'concurrency.stale-second-save',
       'T12',
       'refusal',
