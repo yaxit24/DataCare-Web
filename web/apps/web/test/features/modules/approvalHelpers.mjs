@@ -288,3 +288,98 @@ export async function withRemarkFault(ctx, book, remark, work) {
     await ctx.owner.$executeRawUnsafe(`DROP FUNCTION IF EXISTS ${name}()`);
   }
 }
+
+export const SALE_BOOK = 'SL';
+export const APPROVAL_IMPORT_PROMPT = 'All Approval Tag In This Voucher Import?';
+
+/**
+ * Sales Invoice "Apr No" import (TR_SALE.cs:5449-5450 "A", :20562-20590 help, :19669 Enter, :20050 prompt), then the
+ * operator types the line rate and saves. Returns the sale number and the prompt the screen asked.
+ */
+export async function billApprovalInSales(page, issue, { rate = '6123.45' } = {}) {
+  await page.goto('/txn/sales');
+  await page.getByRole('heading', { name: 'Sales Invoice', exact: true }).waitFor();
+  const book = page.getByRole('combobox', { name: 'Configured book', exact: true });
+  for (let i = 0; i < 50 && (await book.inputValue()) !== SALE_BOOK; i++)
+    await page.waitForTimeout(100);
+  assert.equal(await book.inputValue(), SALE_BOOK);
+  await Promise.all([
+    page.waitForResponse((r) => isApi(r, 'GET', '/sales/approval-help')),
+    page.getByRole('button', { name: 'A', exact: true }).click(),
+  ]);
+  const help = page.getByRole('dialog', { name: 'Approval Help', exact: true });
+  await help
+    .locator(`tr[data-approval="${issue.voucherNo}"]`)
+    .filter({ hasText: ISSUE_BOOK })
+    .filter({ hasText: YEAR })
+    .click();
+  const aprNo = label(page, 'Apr No');
+  assert.equal(await aprNo.inputValue(), issue.voucherNo);
+  let prompt = '';
+  // The harness accepts every dialog (harness.mjs:320); this only reads the question.
+  page.once('dialog', (dialog) => {
+    prompt = dialog.message();
+  });
+  await aprNo.focus();
+  await Promise.all([
+    page.waitForResponse((r) => isApi(r, 'GET', '/sales/approval-import')),
+    aprNo.press('Enter'),
+  ]);
+  const cell = (column) =>
+    page.locator(`[data-grid-row="0"][data-grid-column="${column}"] input`).first();
+  await page.waitForFunction(
+    (tag) =>
+      document.querySelector('[data-grid-row="0"][data-grid-column="1"] input')?.value === tag,
+    issue.tag,
+  );
+  await cell(6).fill(rate);
+  const [response] = await Promise.all([
+    page.waitForResponse((r) => isApi(r, 'POST', '/sales')),
+    page.getByRole('button', { name: 'Save Invoice', exact: true }).click(),
+  ]);
+  assert.equal(response.status(), 201, await response.text());
+  const saved = await response.json();
+  await page.getByText(`Saved — Voucher #${saved.vchNo}`, { exact: false }).waitFor();
+  return {
+    vchNo: String(saved.vchNo).padStart(5, '0'),
+    version: String(saved.version ?? ''),
+    prompt,
+  };
+}
+
+/** Delete a sale through the Sales Invoice screen (TR_SALE.cs:16300-16330 reverses the approval closure). */
+export async function deleteSaleInScreen(page, vchNo) {
+  await page.getByRole('button', { name: 'New', exact: true }).click();
+  await page.getByLabel('Voucher No', { exact: true }).fill(vchNo);
+  await page.getByRole('button', { name: 'Load', exact: true }).click();
+  await page
+    .getByTestId('sales-loaded')
+    .filter({ hasText: `Loaded #${vchNo}` })
+    .waitFor();
+  const [response] = await Promise.all([
+    page.waitForResponse((r) => isApi(r, 'DELETE', `/sales/${vchNo}`)),
+    page.getByRole('button', { name: 'Delete', exact: true }).click(),
+  ]);
+  assert.equal(response.status(), 200, await response.text());
+}
+
+/** The sale's lines and stock rows for an approval-billed sale. */
+export const saleApprovalRows = async (ctx, vchNo) => ({
+  header: (
+    await ctx.rows(
+      `SELECT "AC_CODE" ac,"ISU_NO" no,"ISU_YRCD" yr,"ISU_DBCD" book FROM "SL_DATA"
+        WHERE tenant_id=$1 AND "CO_BOOK"='${SALE_BOOK}' AND "VCH_NO"=$2`,
+      vchNo,
+    )
+  )[0],
+  lines: await ctx.rows(
+    `SELECT "TAG_NO" tag,"ISU_NO" no,"ISU_DBCD" book,"ISU_SRNO"::int sr FROM "SL_DETL"
+      WHERE tenant_id=$1 AND "CO_BOOK"='${SALE_BOOK}' AND "VCH_NO"=$2 ORDER BY "SR_NO"`,
+    vchNo,
+  ),
+  stock: await ctx.rows(
+    `SELECT "SR_NO"::int sr,"TR_TYPE" tr,"ITM_SIGN" sign,"TAG_NO" tag FROM "MAIN_STOCK"
+      WHERE tenant_id=$1 AND "CO_BOOK"='${SALE_BOOK}' AND "VCH_NO"=$2 ORDER BY "SR_NO","ISR_NO"`,
+    vchNo,
+  ),
+});

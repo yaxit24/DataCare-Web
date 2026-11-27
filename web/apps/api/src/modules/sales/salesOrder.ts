@@ -858,13 +858,25 @@ function prepareSalesOrderCreate(input: SalesOrderInput, lifecycle?: OrderWriteC
           'A tagged order item cannot be removed in this editor; its stock allocation must be resolved first.',
         );
     }
+    const newTags = new Map<number, orderTags.PickedOrderTag>();
+    const tagStockLessSetting = salesOrderForm
+      ? await orderTags.orderTagStockLessSettingTx(tx, input.scope)
+      : 'N';
     for (const [index, line] of orderLines.entries()) {
       const previous = previousLines.get(parentNumbers[index]!);
       const savedTag = tagIdentity(previous?.TAG_NO);
-      if (line.tagNo != null && tagIdentity(line.tagNo) !== savedTag)
+      if (previous && line.tagNo != null && tagIdentity(line.tagNo) !== savedTag)
         throw new SaleValidationError(
           'Changing an order tag identity is not supported in this editor.',
         );
+      // A new line's Tag cell (TR_SALE_ORD.cs:7490-7690, saved :9208-9215): salesOrderTags.ts pickOrderTagTx.
+      if (!previous && tagIdentity(line.tagNo)) {
+        if (!salesOrderForm)
+          throw new SaleValidationError(
+            'Changing an order tag identity is not supported in this editor.',
+          );
+        newTags.set(index, await orderTags.pickOrderTagTx(tx, input.scope, line, newTags));
+      }
       if (savedTag && line.vchSrno != null && Number(line.vchSrno) !== Number(previous!.VCH_SRNO))
         throw new SaleValidationError(
           'Changing the saved tag instance is not supported in this editor.',
@@ -897,9 +909,11 @@ function prepareSalesOrderCreate(input: SalesOrderInput, lifecycle?: OrderWriteC
       );
     }
     const linesNet = round2(computed.reduce((s, c) => s + c.net, 0));
+    // No refusal of a zero amount (the saves check no amount, TR_SALE_ORD.cs:8925-9047, TR_TOUR_ORD.cs:7140-7230);
+    // a negative one is refused, as the grid cells take none.
     const baseNet = linesNet > 0 ? linesNet : Number(input.netAmount || 0);
-    if (!(baseNet > 0))
-      throw new SaleValidationError('order amount (or line weights/rate) is required');
+    if (Number(input.netAmount ?? 0) < 0 || linesNet < 0)
+      throw new SaleValidationError('The order amount cannot be negative.');
     let totals = pricing.orderTotals(policy, {
       lineNetTotal: baseNet,
       taxRatePct: input.taxRatePct,
@@ -999,7 +1013,8 @@ function prepareSalesOrderCreate(input: SalesOrderInput, lifecycle?: OrderWriteC
       {
         ...key,
         VCH_DATE: vchDate,
-        BILL_NO: input.billNo ?? formatVoucherNo(no),
+        // The typed box (TR_SALE_ORD.cs:9115, TR_TOUR_ORD.cs:7286): blank when new, reloaded on edit (:8543).
+        BILL_NO: input.billNo ?? lifecycle?.previousHeader?.BILL_NO ?? '',
         AC_CODE: input.acCode,
         AC_NAME: input.acName ?? null,
         NET_AMT: totals.taxable,
@@ -1022,6 +1037,10 @@ function prepareSalesOrderCreate(input: SalesOrderInput, lifecycle?: OrderWriteC
             : vchDate,
         HD_VCH_NO: hdVchNo,
         MAIN_USER: mainUser,
+        // TR_SALE_ORD.cs:9163-9174 / TR_TOUR_ORD.cs:7333-7336: the transfer and user flags of a saved order.
+        DATA_TRFR: 'N',
+        USER_UPDATE: 'N',
+        USER_DELETE: 'N',
         EMP_CODE: txt(input.empCode, 5),
         VCH_DESC: input.vchDesc ?? null,
         // Desktop SL_ORD_DATA columns (TR_SALE_ORD.cs:9120-9161): tax code, tender rows from the
@@ -1092,7 +1111,8 @@ function prepareSalesOrderCreate(input: SalesOrderInput, lifecycle?: OrderWriteC
           TAG_GEN: 'N',
           DESIGN_ISU: 'N',
           // Desktop SL_ORD_DETL grid columns (TR_SALE_ORD.cs:9205-9306).
-          TBL_CODE: txt(c.in.tblCode, 3), // mSG[i,3]  :9216
+          // mSG[i,3] :9216: typed, else the picked tag's (:7596); the save moves the tag there (:9554).
+          TBL_CODE: txt(c.in.tblCode, 3) ?? (newTags.get(i)?.tblCode || null),
           ITM_COLOR: txt(c.in.itmColor, 15), // mSG[i,5]  :9218
           ITM_SIZE: designText(c.in, c.in.itmSize, 20), // selected blank is a copied cell :7342
           BAG_WT: N(c.in.bagWt), // mSG[i,7]  :9220
@@ -1115,21 +1135,25 @@ function prepareSalesOrderCreate(input: SalesOrderInput, lifecycle?: OrderWriteC
           TAG_COST: N(c.in.tagCost), // mSG[i,43] :9250
           VCH_SRNO: tagIdentity(previousLines.get(parentNumbers[i]!)?.TAG_NO)
             ? previousLines.get(parentNumbers[i]!)!.VCH_SRNO
-            : N(c.in.vchSrno), // saved tag instance / mSG[i,42] :9262
+            : newTags.has(i)
+              ? newTags.get(i)!.vchSrno // the stock instance the Tag cell found (:7547)
+              : N(c.in.vchSrno), // saved tag instance / mSG[i,42] :9262
           OLD_SRNO: c.in.oldSrNo ?? i + 1, // mSG[i,47] :9205
           RATE_TYPE: txt(c.in.rateType, 1), // mSG[i,48] :9259
           IT_TYPE: txt(c.in.itType, 1), // mSG[i,49] :9260
           PR_CODE: txt(c.in.prCode, 2), // mSG[i,51] :9261
           // mSG[i,69] :9266. An edit that omits it keeps the saved line's value: the delete path restores BAR_DETL.TBL_CODE from it.
-          OLD_TBL_CODE: txt(
-            c.in.oldTblCode ?? previousLines.get(parentNumbers[i]!)?.OLD_TBL_CODE,
-            3,
-          ),
-          // mSG[i,70] :9267. An edit that omits it keeps the saved value, so it cannot drop the tag reservation.
-          TAG_STK_LESS: txt(
-            c.in.tagStockLess ?? previousLines.get(parentNumbers[i]!)?.TAG_STK_LESS,
-            1,
-          ),
+          OLD_TBL_CODE: newTags.has(i) // a picked tag's own counter (:7597), never the request's
+            ? newTags.get(i)!.tblCode.slice(0, 3) || null
+            : txt(c.in.oldTblCode ?? previousLines.get(parentNumbers[i]!)?.OLD_TBL_CODE, 3),
+          // mSG[i,70] :9267, salesOrderTags.ts orderLineTagStockLess.
+          TAG_STK_LESS: orderTags.orderLineTagStockLess({
+            salesOrderForm,
+            previous: previousLines.get(parentNumbers[i]!),
+            requested: c.in.tagStockLess,
+            picked: newTags.has(i),
+            setting: tagStockLessSetting,
+          }),
           DESIGN_IMG_ID:
             c.in.designImageId === undefined
               ? previousLines.has(parentNumbers[i]!)
@@ -1149,7 +1173,7 @@ function prepareSalesOrderCreate(input: SalesOrderInput, lifecycle?: OrderWriteC
           EMP_CODE: txt(input.empCode, 5), // tEmpCode.Text :9296
           TAG_NO: previousLines.has(parentNumbers[i]!)
             ? previousLines.get(parentNumbers[i]!)!.TAG_NO
-            : 'N', // saved parent identity; new untagged row sentinel
+            : (newTags.get(i)?.tagNo ?? 'N'), // saved identity; a new row's picked tag or 'N' :9208-9215
           ORD_REC_AMT: 0, // literal       :9306
         },
         c.in,
@@ -1172,7 +1196,8 @@ function prepareSalesOrderCreate(input: SalesOrderInput, lifecycle?: OrderWriteC
         INOUT_TYPE: book.inoutType,
         ENTRY_TYPE: 'O',
         BOOK_NAME: book.mainBook,
-        TAG_NO: 'N',
+        // The parent row's Tag cell as typed, blank when the line has no tag (TR_SALE_ORD.cs:9393).
+        TAG_NO: tagIdentity(detl[i]!.TAG_NO),
         VCH_SRNO: detl[i]!.VCH_SRNO,
         IT_CODE: c.in.itCode,
         IT_PCS: N(c.in.pcs),
@@ -2097,10 +2122,11 @@ export async function cancelSalesOrderAdjust(
     const ord: any = (
       await tx.$queryRawUnsafe(
         // A rate-cut order has no money advance to refund (MONEY_ADVANCE_SQL, TR_SALE_ORD.cs:9124-9133).
-        `SELECT "AC_CODE" ac, "AC_NAME" nm, ${MONEY_ADVANCE_SQL}::float adv, coalesce(NULLIF("TOT_AMT"::text,'')::numeric,0)::float tot FROM "SL_ORD_DATA" o WHERE "CO_CODE"=$1 AND "CO_BOOK"=$2 AND "VCH_NO"=$3 LIMIT 1`,
+        `SELECT "AC_CODE" ac, "AC_NAME" nm, ${MONEY_ADVANCE_SQL}::float adv, coalesce(NULLIF("TOT_AMT"::text,'')::numeric,0)::float tot FROM "SL_ORD_DATA" o WHERE tenant_id=$4 AND "CO_CODE"=$1 AND "CO_BOOK"=$2 AND "VCH_NO"=$3 LIMIT 1`,
         input.scope.coCode,
         ordBook,
         formatVoucherNo(input.vchNo),
+        tenantId,
       )
     )[0];
     if (!ord) throw new SaleValidationError(`sales order #${input.vchNo} not found`);

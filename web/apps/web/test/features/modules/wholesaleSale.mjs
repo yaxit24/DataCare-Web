@@ -690,6 +690,12 @@ export const wholesaleSale = {
         assert.deepEqual(await stockRows(ctx, vchNo), [
           { sr: 1, tag: t.tag, it: ITEMS.gold.code, sign: '-', fine: 9.16 },
         ]);
+        // Wh_Sale_Stk copies the line's stored ITM_LOT, NOT NULL DEFAULT '' (Ac_Stock.cs:153).
+        const lots = await ctx.rows(
+          `SELECT "ITM_LOT" lot FROM "MAIN_STOCK" WHERE tenant_id=$1 AND "CO_BOOK"='${BOOK}' AND "VCH_NO"=$2`,
+          vchNo,
+        );
+        assert.deepEqual(lots, [{ lot: '' }]);
         assert.equal(await tagBalance(ctx, t.tag), 0, 'the sold tag is out of stock');
         const moved =
           Math.round(((await partyBalance(ctx, PARTIES.local.code)) - balance0) * 100) / 100;

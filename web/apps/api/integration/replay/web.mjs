@@ -251,6 +251,44 @@ export async function connectWeb(ownerUrl) {
           vchNo,
         );
     },
+    /**
+     * The hidden number twin of `placeholder`: the web allocates HD_VCH_NO as MAX(TEMP_BOOK_DATA.VCH_NO)+1 per book
+     * (vouchers/lifecycle.ts nextHiddenVoucherNoTx), as the desktop does, so a gap the desktop left (a deleted voucher)
+     * needs a throwaway TEMP_BOOK_DATA row at hd-1. Returns its cleanup, or undefined when none was needed.
+     */
+    async hiddenPlaceholder(tenant, scope, hdVchNo) {
+      const want = Number(hdVchNo);
+      if (!Number.isInteger(want) || want <= 1) return undefined;
+      const [row] = await prisma.$queryRawUnsafe(
+        `SELECT coalesce(max(CASE WHEN "VCH_NO"::text ~ '^[0-9]+$' THEN "VCH_NO"::text::int END),0)::int AS m
+           FROM "TEMP_BOOK_DATA" WHERE tenant_id=$1 AND "CO_CODE"=$2 AND "LC_CODE"=$3 AND "CO_BOOK"=$4`,
+        tenant,
+        scope.coCode,
+        scope.lcCode,
+        scope.coBook,
+      );
+      if (Number(row?.m ?? 0) >= want - 1) return undefined;
+      const ph = String(want - 1).padStart(5, '0');
+      await prisma.$executeRawUnsafe(
+        `INSERT INTO "TEMP_BOOK_DATA"(tenant_id,"CO_CODE","LC_CODE","CO_BOOK","VCH_NO","BOOK_NAME")
+         VALUES ($1,$2,$3,$4,$5,'REPLAY-PH')`,
+        tenant,
+        scope.coCode,
+        scope.lcCode,
+        scope.coBook,
+        ph,
+      );
+      return () =>
+        prisma.$executeRawUnsafe(
+          `DELETE FROM "TEMP_BOOK_DATA" WHERE tenant_id=$1 AND "CO_CODE"=$2 AND "LC_CODE"=$3 AND "CO_BOOK"=$4
+             AND "VCH_NO"=$5 AND "BOOK_NAME"='REPLAY-PH'`,
+          tenant,
+          scope.coCode,
+          scope.lcCode,
+          scope.coBook,
+          ph,
+        );
+    },
     /** Web tables carrying CO_BOOK and VCH_NO (the same discovery rule as parity-extract-pg.mjs). */
     voucherTables() {
       return [...meta.keys()].filter(

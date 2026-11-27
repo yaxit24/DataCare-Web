@@ -4,8 +4,10 @@ import {
   ISSUE_BOOK,
   YEAR,
   approvalRows,
+  billApprovalInSales,
   createIssue,
   createReturn,
+  deleteSaleInScreen,
   isApi,
   reopenApproval,
   seedApprovalTag,
@@ -1759,12 +1761,54 @@ export const approvalReportRp = {
         observe: observeCurrent,
       },
     ),
-    blocked(
+    C(
       'journey.sale-consume-reverse',
       'T18',
       'mutation',
-      "TR_SALE.cs:16112 {{APR_DETL.SR_NO = B.ISU_SRNO}}; TR_SALE.cs:16112 {{AND APR_DETL.CO_BOOK = '018'}}; TR_SALE.cs:16112 {{UPDATE APR_DETL SET APR_DETL.ISU_REC = 'Y'}}",
-      'The web Sales Invoice screen has no approval-import control, and the approval billing route is fail-closed (txn.ts POST /tour/:vchNo/bill answers 409 approval-billing-unavailable until the sale import and the approval closure are atomic). Unblocks: the Sales Invoice approval import (its own work package); then run consume → InOut In 3 / Pending absent → reverse → Pending 3. The API-level sale reference rules are in salesInvoice.refusal.approval-tag-mismatch; the custody arithmetic is journey.custody-reconcile.',
+      "TR_SALE.cs:16112 {{APR_DETL.SR_NO = B.ISU_SRNO}}; TR_SALE.cs:16112 {{AND APR_DETL.CO_BOOK = '018'}}; TR_SALE.cs:16112 {{UPDATE APR_DETL SET APR_DETL.ISU_REC = 'Y'}}; TR_SALE.cs:16326 {{UPDATE APR_DETL SET APR_DETL.ISU_REC = 'N'}}; RP_ALL.cs:8302 {{AND {APR_DETL.ISU_REC} = 'N'}}",
+      async (ctx) => {
+        const { tag } = await seedApprovalTag(ctx, 'ARS');
+        const issue = await createIssue(ctx, tag, 'report sale journey');
+        const report = await openReport(ctx);
+        const afterIssue = await modesFor(report, tag);
+        assert.deepEqual(
+          [afterIssue.inout?.outPcs, afterIssue.inout?.inPcs, afterIssue.inout?.pendingPcs],
+          [1, 0, 1],
+        );
+        assert(afterIssue.pending, 'pending after the issue');
+        // The customer keeps the item: Sales Invoice imports the approval (Apr No) and the save closes it.
+        const sale = await billApprovalInSales(issue.page, issue);
+        const consumed = await approvalRows(ctx, ISSUE_BOOK, issue.voucherNo);
+        assert.equal(consumed[0].received, 'Y');
+        const afterSale = await modesFor(report, tag);
+        assert.equal(afterSale.issue?.pcs, 1, 'Approval Isu unchanged');
+        assert.deepEqual(
+          [afterSale.inout?.outPcs, afterSale.inout?.inPcs, afterSale.inout?.pendingPcs],
+          [1, 1, 0],
+        );
+        assert.equal(afterSale.pending, undefined, 'dropped from Approval Panding');
+        await ctx.shot(report, 'journey-after-sale');
+        await deleteSaleInScreen(issue.page, sale.vchNo);
+        const reopened = await approvalRows(ctx, ISSUE_BOOK, issue.voucherNo);
+        assert.equal(reopened[0].received, 'N');
+        assert.equal(reopened[0].net, consumed[0].net, 'only ISU_REC toggled');
+        const afterDelete = await modesFor(report, tag);
+        assert(afterDelete.pending, 'back in Approval Panding');
+        assert.deepEqual(
+          [afterDelete.inout?.outPcs, afterDelete.inout?.inPcs, afterDelete.inout?.pendingPcs],
+          [1, 0, 1],
+        );
+        return {
+          observation: `issue ${issue.voucherNo} → sale ${sale.vchNo} → sale deleted; reports followed ISU_REC`,
+          expected: { afterIssue: [1, 0, 1], afterSale: [1, 1, 0], afterDelete: [1, 0, 1] },
+          database: { consumed, reopened },
+          downstream: { afterIssue, afterSale, afterDelete },
+        };
+      },
+      {
+        expected: { afterIssue: [1, 0, 1], afterSale: [1, 1, 0], afterDelete: [1, 0, 1] },
+        observe: observeCurrent,
+      },
     ),
     dbLayer(
       'journey.custody-reconcile',

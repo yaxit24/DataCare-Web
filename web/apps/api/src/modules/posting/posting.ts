@@ -471,6 +471,8 @@ async function columnsOf(tx: any, table: string): Promise<ReadonlySet<string>> {
  * Defaulting them to `'N'` wrote a transfer flag onto rows the desktop leaves blank.
  */
 const DATA_TRFR_NEVER_SET = new Set([
+  // Neither order form sets the line's flag (TR_SALE_ORD.cs:9193-9309, TR_TOUR_ORD.cs line save), so it stays NULL.
+  'SL_ORD_DETL',
   'AD_OS',
   'SL_DETL',
   'SL_PR_DETL',
