@@ -2,7 +2,10 @@ import { createHash } from 'node:crypto';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { PrismaClient, withTenant } from '@datacare/db';
 import { applyRepair, previewRepair } from '../src/modules/utilities/dataRepair.js';
-import type { AccountCheck } from '../src/modules/utilities/accountRefresh.js';
+import {
+  ACCOUNT_REFRESH_VERIFIED,
+  type AccountCheck,
+} from '../src/modules/utilities/accountRefresh.js';
 import {
   editPayment,
   editReceipt,
@@ -18,7 +21,8 @@ import '../src/modules/utilities/dataRepairOps.js';
 import { assertIsolatedTestDatabase } from './support/isolatedDatabase.js';
 
 /**
- * Data Refresh > Account check-and-repair, Cash/Bank family (owner decision 2026-11-27; MS_UPDATE.cs:2470-2476,
+ * Data Refresh > Account check-and-repair, Cash/Bank family (preview-only until the desktop replay check; the tests
+ * after the first add it to ACCOUNT_REFRESH_VERIFIED to prove the apply) (owner decision 2026-11-27; MS_UPDATE.cs:2470-2476,
  * Cash_Ledr / Bank_Ledr Ac_Ledr.cs:565-610, Cash_Rojmel / Bank_Rojmel Ac_Rojmel.cs:179-219). Synthetic data only.
  *
  * Every receipt and payment saved through the TR_CASH writer (cash and bank books, the generic web books, single and
@@ -520,6 +524,18 @@ d('Data Refresh Account check-and-repair (Cash/Bank)', () => {
         cr,
       );
     foreign.push({ coBook: 'PAY', vchNo: '09001', label: 'legacy' });
+    // A kasar account the API named that is also the party: its kasar legs cannot be told apart from the party's.
+    const kasarIsParty = await postReceipt(runtime, {
+      ...base,
+      scope: book('CRC'),
+      partyAc: 'CBPARTY2',
+      amount: 44,
+      kasar: 4,
+      kasarAc: 'CBPARTY2',
+      mode: 'cash',
+      vchDate: `${y}-05-23`,
+    });
+    foreign.push({ coBook: 'CRC', vchNo: no(kasarIsParty.vchNo), label: 'kasarIsParty' });
     // The second tenant's sentinel voucher, damaged so that a scope leak would repair it.
     const sentinel = await postReceipt(runtime, {
       ...base,
@@ -539,6 +555,7 @@ d('Data Refresh Account check-and-repair (Cash/Bank)', () => {
   }, 180_000);
 
   afterAll(async () => {
+    (ACCOUNT_REFRESH_VERIFIED as Set<string>).delete('cash-bank');
     if (RUN) await wipe();
     await owner.$disconnect();
     await runtime.$disconnect();
@@ -572,12 +589,18 @@ d('Data Refresh Account check-and-repair (Cash/Bank)', () => {
     });
     expect(p.clean).toBe(true);
     expect(p.diffs).toEqual([]);
-    expect(p.applyAvailable).toBe(true);
+    // Not on the allowlist until a replay of real desktop vouchers checks clean (data-refresh.md): preview only.
+    expect(p.applyAvailable).toBe(false);
+    expect(p.blockedReason).toMatch(/not available until the family is verified/);
+    await expect(apply(p.previewHash)).rejects.toMatchObject({ code: 'preview-only' });
+    // The rest of this file proves the apply the allowlist would enable.
+    (ACCOUNT_REFRESH_VERIFIED as Set<string>).add('cash-bank');
     const reasons = Object.fromEntries(
       detail.vouchers.map((v) => [`${v.coBook}/${v.vchNo}`, v.reason ?? '']),
     );
     expect(reasons[`RCT/${foreign[0]!.vchNo}`]).toMatch(/not written by the receipt\/payment form/);
     expect(reasons['PAY/09001']).toMatch(/PAY_DATA/);
+    expect(reasons[`CRC/${foreign[2]!.vchNo}`]).toMatch(/kasar account cannot be told apart/);
   });
 
   it('flags only the damaged vouchers, repairs them to the writer rows and keeps CLR_DATE', async () => {
@@ -764,5 +787,74 @@ d('Data Refresh Account check-and-repair (Cash/Bank)', () => {
     expect(await postings(fx.genericCashNamed!.coBook, fx.genericCashNamed!.vchNo)).toEqual(
       before.cash,
     );
+  });
+
+  const slot = (coBook: string, srNo: number, ac: string) =>
+    exec(
+      `UPDATE "BOOK_DETL" SET "AC_CODE"=$4 WHERE tenant_id=$1 AND "CO_BOOK"=$2 AND "SR_NO"=$3`,
+      T,
+      coBook,
+      srNo,
+      ac,
+    );
+  const entryOf = (p: { detail?: unknown }, r: Ref) =>
+    detailOf(p).vouchers.find((v) => v.coBook === r.coBook && v.vchNo === r.vchNo);
+
+  it('reports a voucher whose book settings changed since save as unverified and never re-posts it', async () => {
+    const cash = fx.cashReceipt!;
+    const grid = fx.bankReceiptGrid!;
+    const named = fx.flagOff!;
+    const before = {
+      cash: await postings(cash.coBook, cash.vchNo),
+      grid: await postings(grid.coBook, grid.vchNo),
+      named: await postings(named.coBook, named.vchNo),
+    };
+    // (a) RCT's slot 1 becomes the bank account a cheque receipt kept in REC_AC_CODE.
+    await slot('RCT', 1, 'CBBANK');
+    // (b) CRC's cash account and BRC's short name change after their vouchers were saved.
+    await slot('CRC', 1, 'CBBANK2');
+    await exec(
+      `UPDATE "BOOK_DATA" SET "BOOK_SNAME"='BRX' WHERE tenant_id=$1 AND "CO_BOOK"='BRC'`,
+      T,
+    );
+    // The grid voucher is also damaged: still reported, never re-posted into today's settings.
+    const [leg] = await keysOf(grid.coBook, grid.vchNo, 'AC_DATA', `AND "DR_AMT"<>0`);
+    await exec(
+      `UPDATE "AC_DATA" SET "DR_AMT"="DR_AMT"+3 WHERE tenant_id=$1 AND "LEDR_KEY"=$2`,
+      T,
+      leg!.key,
+    );
+    const gridDamaged = await postings(grid.coBook, grid.vchNo);
+    try {
+      const p = await preview();
+      expect(entryOf(p, named)).toMatchObject({ status: 'unverified' });
+      expect(entryOf(p, named)!.reason).toMatch(/book configuration changed since save/);
+      expect(entryOf(p, cash)).toMatchObject({ status: 'unverified' });
+      expect(entryOf(p, cash)!.reason).toMatch(
+        /book configuration changed since save \(settlement CASH -> CBBANK2\)$/,
+      );
+      expect(entryOf(p, grid)!.status).toBe('unverified');
+      expect(entryOf(p, grid)!.reason).toMatch(/short name BRC -> BRX.*also differ/);
+      expect(p.samples.join('\n')).toMatch(/book configuration changed since save/);
+      expect(p.diffs).toEqual([]);
+      expect(detailOf(p).summary.differs).toBe(0);
+      await apply(p.previewHash);
+      expect(await postings(cash.coBook, cash.vchNo)).toEqual(before.cash);
+      expect(await postings(named.coBook, named.vchNo)).toEqual(before.named);
+      expect(await postings(grid.coBook, grid.vchNo)).toEqual(gridDamaged);
+    } finally {
+      await slot('RCT', 1, 'CASH');
+      await slot('CRC', 1, 'CASH');
+      await exec(
+        `UPDATE "BOOK_DATA" SET "BOOK_SNAME"='BRC' WHERE tenant_id=$1 AND "CO_BOOK"='BRC'`,
+        T,
+      );
+    }
+    // Settings restored, the damaged grid voucher is repaired again like any other.
+    const p = await preview();
+    expect(entryOf(p, grid)!.status).toBe('differs');
+    expect(entryOf(p, cash)).toBeUndefined();
+    await apply(p.previewHash);
+    expect(await postings(grid.coBook, grid.vchNo)).toEqual(before.grid);
   });
 });

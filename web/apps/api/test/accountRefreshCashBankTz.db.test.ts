@@ -7,6 +7,7 @@ import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { PrismaClient, withTenant } from '@datacare/db';
 import { applyRepair, previewRepair } from '../src/modules/utilities/dataRepair.js';
 import { postPayment, postReceipt } from '../src/modules/finance/cashBank.js';
+import { ACCOUNT_REFRESH_VERIFIED } from '../src/modules/utilities/accountRefresh.js';
 import { hashPassword } from '../src/modules/auth/password.js';
 import { seedCompany } from '../src/modules/ops/seedCompany.js';
 import '../src/modules/utilities/dataRepairOps.js';
@@ -85,6 +86,8 @@ d('Data Refresh Account check-and-repair of Cash/Bank under Asia/Kolkata', () =>
   beforeAll(async () => {
     assertIsolatedTestDatabase();
     expect(new Date(2026, 0, 1).getTimezoneOffset()).toBe(-330);
+    // Cash/Bank is preview-only until the desktop replay check; this file proves the apply it would enable.
+    (ACCOUNT_REFRESH_VERIFIED as Set<string>).add('cash-bank');
     await wipe();
     await seedCompany(runtime, T, CO);
     for (const [code, name] of [
@@ -160,6 +163,7 @@ d('Data Refresh Account check-and-repair of Cash/Bank under Asia/Kolkata', () =>
   }, 120_000);
 
   afterAll(async () => {
+    (ACCOUNT_REFRESH_VERIFIED as Set<string>).delete('cash-bank');
     if (RUN) await wipe();
     await owner.$disconnect();
     await runtime.$disconnect();

@@ -51,13 +51,13 @@ Defaults chosen with the decision:
 - books `888` and `000` are never touched;
 - `AC_DATA.CLR_DATE` (and the audit columns above) are carried over by key onto the replacing row, as the desktop restores `CLR_DATE` by `LEDR_KEY` after its rebuild (`MS_UPDATE.cs:2379-2396`); `BANK_RECONCILE` is not touched.
 
-Families and their state (`ACCOUNT_REFRESH_VERIFIED` in `web/apps/api/src/modules/utilities/accountRefresh.ts`): a family's apply is enabled only once every write-set fixture of it, saved through the normal writer, previews clean (`accountRefresh.db.test.ts`); any other family previews and shows "apply not available until verified".
+Families and their state (`ACCOUNT_REFRESH_VERIFIED` in `web/apps/api/src/modules/utilities/accountRefresh.ts`): a family's apply is enabled only once every write-set fixture of it, saved through the normal writer, previews clean (`accountRefresh.db.test.ts`) and, for families whose books also hold desktop-shaped rows, a replay of real desktop vouchers (`pnpm oracle:replay`) checks with no `differs`; any other family previews and shows "apply not available until verified".
 
-| Family    | Operation                        | Builders re-used                                                                                                   | Apply |
-| --------- | -------------------------------- | ------------------------------------------------------------------------------------------------------------------ | ----- |
-| Contra    | `data-refresh-account-contra`    | `contraPostInput` (Contra_Ledr `Ac_Ledr.cs:840-848`, Contra_Rojmel `Ac_Rojmel.cs:336-340`)                         | yes   |
-| Fine Jv   | `data-refresh-account-fine-jv`   | `fineJvPostInput` (Contra_Ledr `Ac_Ledr.cs:846-848`, Contra_Rojmel `Ac_Rojmel.cs:342-344`)                         | yes   |
-| Cash/Bank | `data-refresh-account-cash-bank` | `cashBankPostInput` (Cash_Ledr / Bank_Ledr `Ac_Ledr.cs:565-610`, Cash_Rojmel / Bank_Rojmel `Ac_Rojmel.cs:179-219`) | yes   |
+| Family    | Operation                        | Builders re-used                                                                                                   | Apply           |
+| --------- | -------------------------------- | ------------------------------------------------------------------------------------------------------------------ | --------------- |
+| Contra    | `data-refresh-account-contra`    | `contraPostInput` (Contra_Ledr `Ac_Ledr.cs:840-848`, Contra_Rojmel `Ac_Rojmel.cs:336-340`)                         | yes             |
+| Fine Jv   | `data-refresh-account-fine-jv`   | `fineJvPostInput` (Contra_Ledr `Ac_Ledr.cs:846-848`, Contra_Rojmel `Ac_Rojmel.cs:342-344`)                         | yes             |
+| Cash/Bank | `data-refresh-account-cash-bank` | `cashBankPostInput` (Cash_Ledr / Bank_Ledr `Ac_Ledr.cs:565-610`, Cash_Rojmel / Bank_Rojmel `Ac_Rojmel.cs:179-219`) | not yet (below) |
 
 The expected postings are derived from the stored `CONTRA_DATA` rows as they are, the way the desktop's builders read them, not re-gridded through the form. `REMARK_DATA` (rebuilt by the desktop's `Vch_Remark`, `MS_UPDATE.cs:2370-2373`) is not part of this check. The classification preview above stays on the Account button; the family checks are picked on the Account preview's "Account check and repair" panel. Next: the Purchase family.
 
@@ -68,9 +68,14 @@ One family covers every TR_CASH book: `CASH REC`, `CASH PAY`, `BANK REC`, `BANK 
 What `CASH_DATA` does not record is never guessed:
 
 - A generic book takes every mode. A voucher settled to slot 1 is cash; card / UPI rows or bank charges prove bank; a voucher naming another account may be either, so the check accepts it if its postings equal the bank posting (as the voucher reopens) or the cash one, and otherwise lists it `unverified`.
-- A kasar account the API named instead of slot 2 is offered the same way, from the accounts on the voucher's own legs.
+- A kasar account the API named instead of slot 2 is offered the same way, read from the voucher's own kasar legs. A kasar account that is also the voucher's party, settlement or charges account cannot be told apart from those legs: `unverified` ("kasar account cannot be told apart").
+- Book settings are read at check time, but a voucher is never re-posted into settings it was not saved with. The settlement and charges accounts, short name and MAIN_BOOK the voucher actually posted with are read from its own legs (by their `LEDR_KEY` tails); when they are not today's, the voucher is `unverified` with "book configuration changed since save (…)", whether or not its postings are otherwise intact. A kept `REC_AC_CODE` that is now the book's slot 1 proves the same (the writer keeps it only when it is not slot 1).
 - Rows another screen wrote into a receipt book (Bill to Bill, Batch Receipt: no `ENTRY_TYPE 'C'` or hidden number), rows that disagree on the voucher identity, repeated serials, a bank row without a clearing date and charges in a cash book are `unverified`.
 - Payments the web kept in `PAY_DATA` before payments moved to `CASH_DATA` are listed `unverified`, not as orphans.
+
+Which rows qualify for repair: every voucher whose `CASH_DATA` rows carry `ENTRY_TYPE 'C'` and a hidden number. That includes desktop-shaped rows (blank `REC_AC_CODE`, settled to slot 1) and receipts and payments the web saved with older writer code (between commits `ca32023f` and `f43e0a1f`). If such an older voucher's postings differ from today's builder, the apply re-posts it into today's shape with the same accounts (settlement, kasar and charges as the voucher posted them); the replaced rows stay in the run record.
+
+Apply is not enabled yet. Every write-set fixture checks clean (`accountRefreshCashBank.db.test.ts`, which also proves the apply with the family added to the allowlist, and `accountRefreshCashBankTz.db.test.ts` under Asia/Kolkata), but the replay of real desktop cash and bank vouchers followed by this check has not been run. `cash-bank` joins `ACCOUNT_REFRESH_VERIFIED` once that run shows no `differs`.
 
 Bank reconciliation writes only `AC_DATA.CLR_DATE` (`bankRecon.ts`), which the check ignores and the apply carries by `LEDR_KEY`, including a cleared mark removed (NULL). A bank leg's ledger date is the row's clearing date, so a changed `CASH_DATA.CLR_DATE` re-dates the leg and changes its key-stable row only; a cleared leg whose key the voucher no longer posts is warned about in the preview and in the run record. `BANK_RECONCILE` is not touched.
 

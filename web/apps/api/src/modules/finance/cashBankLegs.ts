@@ -62,7 +62,7 @@ export interface CashVoucherFacts {
   accounts: CashAccounts;
 }
 
-type Who = 'party' | 'settle' | 'kasar' | 'charges';
+export type Who = 'party' | 'settle' | 'kasar' | 'charges';
 interface LegSpec {
   code: string;
   /** Which column of the row must be non-zero for the leg to be written (`A.REC_AMT <> 0` ...). */
@@ -328,6 +328,28 @@ export function cashLedgerLegs(facts: CashVoucherFacts, rows: CashGridRow[]): Le
     }
   }
   return legs;
+}
+
+/**
+ * Which account role each AC_DATA leg of the voucher holds, keyed by its LEDR_KEY tail (the `legKeySuffix` of
+ * cashLedgerLegs). Data Refresh reads the accounts a saved voucher actually posted to with it.
+ */
+export function cashLegRoles(
+  layout: CashLayout,
+  direction: CashDirection,
+  rows: CashGridRow[],
+): Array<{ suffix: string; srNo: number; ac: Who; ld: Who }> {
+  const out: Array<{ suffix: string; srNo: number; ac: Who; ld: Who }> = [];
+  for (const row of rows)
+    for (const spec of (layout === 'bank' ? BANK_LEGS : CASH_LEGS)[direction])
+      if (amountOf(row, spec.when) !== 0)
+        out.push({
+          suffix: `${row.srNo}${spec.code}`.padStart(12, ' '),
+          srNo: row.srNo,
+          ac: spec.ac,
+          ld: spec.ld,
+        });
+  return out;
 }
 
 interface RowSpec {

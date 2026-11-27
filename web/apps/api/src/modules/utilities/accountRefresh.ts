@@ -9,6 +9,7 @@ import {
 import { voucherVersionTx, versionKeyOf } from '../vouchers/version.js';
 import {
   AccountRefreshDeriveError,
+  type RefreshCandidate,
   deriveContraPostingsTx,
   deriveFineJvPostingsTx,
   type RefreshVoucherScope,
@@ -99,20 +100,18 @@ export interface AccountRefreshFamily {
     tx: any,
     scope: RefreshVoucherScope,
     voucherNo: string,
-  ) => Promise<PostInput | PostInput[]>;
+  ) => Promise<RefreshCandidate | RefreshCandidate[]>;
   /** Serialise with the family's writer before the voucher is replaced. */
   lock: (tx: any, scope: RefreshVoucherScope, voucherNo: string) => Promise<void>;
 }
 
 /**
  * Families whose apply is enabled. A family is listed only after every write-set fixture of it, saved through the
- * normal writer, previews clean (accountRefresh.db.test.ts); every other family is preview-only.
+ * normal writer, previews clean (accountRefresh.db.test.ts) and a replay of real desktop vouchers checks with no
+ * `differs`; every other family is preview-only. Cash/Bank passes the first and waits for the second
+ * (docs/handbook/web/data-refresh.md). The set is read on every preview and apply.
  */
-export const ACCOUNT_REFRESH_VERIFIED: ReadonlySet<string> = new Set([
-  'contra',
-  'fine-jv',
-  'cash-bank',
-]);
+export const ACCOUNT_REFRESH_VERIFIED: ReadonlySet<string> = new Set(['contra', 'fine-jv']);
 
 export type VoucherStatus = 'match' | 'differs' | 'missing' | 'orphan' | 'locked' | 'unverified';
 
@@ -315,7 +314,7 @@ async function checkVoucherTx(
     },
     expected: null,
   });
-  let candidates: PostInput[];
+  let candidates: RefreshCandidate[];
   try {
     const derived = await family.derive(tx, scope, vchNo);
     candidates = Array.isArray(derived) ? derived : [derived];
@@ -323,9 +322,13 @@ async function checkVoucherTx(
     // A voucher the builders cannot re-derive is reported, never repaired.
     return unverified(error instanceof Error ? error.message : String(error));
   }
+  // Candidates the voucher may be repaired to come first; `unverifiedReason` candidates only explain the stored
+  // postings (e.g. the book's settings at save time) and are never written.
+  const drift = candidates.filter((c) => c.unverifiedReason);
+  candidates = candidates.filter((c) => !c.unverifiedReason);
   let expected = new Map<string, Record<string, unknown>[]>();
   let tables: TableCheck[] = [];
-  for (const [index, candidate] of candidates.entries()) {
+  const compareTx = async (candidate: PostInput) => {
     const materialized = await materializeVoucherRowsTx(tx, scope.tenantId, candidate);
     const tried = new Map<string, Record<string, unknown>[]>();
     const found: TableCheck[] = [];
@@ -340,8 +343,19 @@ async function checkVoucherTx(
       );
       if (differs(check)) found.push(check);
     }
+    return { tried, found };
+  };
+  for (const [index, candidate] of candidates.entries()) {
+    const { tried, found } = await compareTx(candidate);
     if (index === 0 || !found.length) [expected, tables] = [tried, found];
     if (!found.length) break;
+  }
+  // The stored postings follow settings the voucher no longer has: reported, never re-posted into today's settings.
+  if (tables.length && drift.length) {
+    const explained = !(await compareTx(drift[0]!)).found.length;
+    return unverified(
+      `voucher ${vchNo}: ${drift[0]!.unverifiedReason}${explained ? '' : '; its postings also differ from what they were then'}`,
+    );
   }
   // Rows that allow more than one posting, none of which is stored, cannot say which one to restore.
   if (tables.length && candidates.length > 1)
@@ -665,7 +679,7 @@ const FAMILIES = new Map<string, AccountRefreshFamily>();
 /** Register one family as the operation `data-refresh-account-<id>`. Apply only if it is verified. */
 export function registerAccountRefreshFamily(family: AccountRefreshFamily): void {
   FAMILIES.set(family.id, family);
-  const verified = ACCOUNT_REFRESH_VERIFIED.has(family.id);
+  const verified = () => ACCOUNT_REFRESH_VERIFIED.has(family.id);
   const blockedReason = `${family.title} apply is not available until the family is verified; preview only.`;
   registerRepair({
     id: `data-refresh-account-${family.id}`,
@@ -674,8 +688,12 @@ export function registerAccountRefreshFamily(family: AccountRefreshFamily): void
     // The registry's evidence format is one MS_UPDATE range; the family's builders are named in the description.
     desktopSource: 'MS_UPDATE.cs:2334-2669',
     risk: 'danger',
-    applyAvailable: verified,
-    ...(verified ? {} : { blockedReason }),
+    get applyAvailable() {
+      return verified();
+    },
+    get blockedReason() {
+      return verified() ? undefined : blockedReason;
+    },
     completionText: 'Account Refersh Process Complete.',
     tables: ACCOUNT_REFRESH_TABLES.map((t) => t.table),
     async preview(tx, scope) {
@@ -693,7 +711,7 @@ export function registerAccountRefreshFamily(family: AccountRefreshFamily): void
       };
     },
     async apply(tx, scope) {
-      if (!verified) throw new RepairError('preview-only', blockedReason);
+      if (!verified()) throw new RepairError('preview-only', blockedReason);
       return applyFamilyTx(tx, family, scope);
     },
   });

@@ -1,10 +1,20 @@
 import { round, toIsoDate } from '@datacare/core';
-import type { PostInput } from '../posting/posting.js';
 import { resolveBookSlotAccountTx } from '../shared/postingAccounts.js';
 import { configuredBookTx, num, text } from './lifecycle.js';
 import { cashBookFamily } from './cashBank.js';
-import { cashBankPostInput, type CashGridRow, type CashLayout } from './cashBankLegs.js';
-import { AccountRefreshDeriveError, type RefreshVoucherScope } from './contraRefresh.js';
+import {
+  cashBankPostInput,
+  cashLegRoles,
+  type CashGridRow,
+  type CashLayout,
+  type CashVoucherFacts,
+  type Who,
+} from './cashBankLegs.js';
+import {
+  AccountRefreshDeriveError,
+  type RefreshCandidate,
+  type RefreshVoucherScope,
+} from './contraRefresh.js';
 
 /**
  * Re-derivation of the postings of one saved Cash/Bank receipt or payment (TR_CASH), for Data Refresh > Account
@@ -73,15 +83,17 @@ async function hasCardOrUpiTx(
   return rows.length > 0;
 }
 
-/** Accounts on the voucher's stored AC_DATA legs, to offer a kasar account the API named instead of slot 2. */
-async function storedLegAccountsTx(
+/** The voucher's stored AC_DATA legs: what it actually posted, to tell the book's settings at save time. */
+async function storedLegsTx(
   tx: any,
   scope: RefreshVoucherScope,
   voucherNo: string,
-): Promise<string[]> {
-  const rows: Array<{ ac: string }> = await tx.$queryRawUnsafe(
-    `SELECT DISTINCT btrim("AC_CODE"::text) ac FROM "AC_DATA" WHERE tenant_id=$1 AND "CO_CODE"=$2 AND "LC_CODE"=$3
-        AND "CO_YEAR"=$4 AND "CO_BOOK"=$5 AND "VCH_NO"=$6 ORDER BY 1`,
+): Promise<Array<{ key: string; ac: string; ld: string; vchType: string; bookName: string }>> {
+  return tx.$queryRawUnsafe(
+    `SELECT "LEDR_KEY"::text "key", btrim(coalesce("AC_CODE"::text,'')) ac, btrim(coalesce("LD_CODE"::text,'')) ld,
+            btrim(coalesce("VCH_TYPE"::text,'')) "vchType", btrim(coalesce("BOOK_NAME"::text,'')) "bookName"
+       FROM "AC_DATA" WHERE tenant_id=$1 AND "CO_CODE"=$2 AND "LC_CODE"=$3 AND "CO_YEAR"=$4 AND "CO_BOOK"=$5
+        AND "VCH_NO"=$6 ORDER BY "LEDR_KEY"`,
     scope.tenantId,
     scope.coCode,
     scope.lcCode,
@@ -89,7 +101,39 @@ async function storedLegAccountsTx(
     scope.coBook,
     voucherNo,
   );
-  return rows.map((row) => row.ac).filter(Boolean);
+}
+
+type Role = Exclude<Who, 'party'>;
+
+/**
+ * The account each role (settlement, kasar, charges) posted to, read from the stored legs by their LEDR_KEY tails,
+ * for the first layout whose legs are exactly the ones stored. A role whose legs disagree is left out (damaged).
+ */
+function postedAccounts(
+  legs: Array<{ key: string; ac: string; ld: string }>,
+  layouts: CashLayout[],
+  direction: 'receipt' | 'payment',
+  rows: CashGridRow[],
+): { layout: CashLayout; accounts: Partial<Record<Role, string>> } | null {
+  for (const layout of layouts) {
+    const roles = cashLegRoles(layout, direction, rows);
+    const matched = roles.map((role) => legs.find((leg) => leg.key.endsWith(role.suffix)));
+    if (roles.length !== legs.length || matched.some((leg) => !leg)) continue;
+    const seen: Record<Role, Set<string>> = {
+      settle: new Set(),
+      kasar: new Set(),
+      charges: new Set(),
+    };
+    roles.forEach((role, i) => {
+      if (role.ac !== 'party') seen[role.ac].add(matched[i]!.ac);
+      if (role.ld !== 'party') seen[role.ld].add(matched[i]!.ld);
+    });
+    const accounts: Partial<Record<Role, string>> = {};
+    for (const r of ['settle', 'kasar', 'charges'] as const)
+      if (seen[r].size === 1) accounts[r] = [...seen[r]][0]!;
+    return { layout, accounts };
+  }
+  return null;
 }
 
 const slotTx = (tx: any, scope: RefreshVoucherScope, srNo: number): Promise<string> =>
@@ -106,7 +150,7 @@ export async function deriveCashBankPostingsTx(
   tx: any,
   scope: RefreshVoucherScope,
   voucherNo: string,
-): Promise<PostInput | PostInput[]> {
+): Promise<RefreshCandidate | RefreshCandidate[]> {
   const fail = (why: string): never => {
     throw new AccountRefreshDeriveError(`voucher ${voucherNo}: ${why}`);
   };
@@ -162,6 +206,12 @@ export async function deriveCashBankPostingsTx(
   // The settlement account: REC_AC_CODE when the writer kept it (not slot 1), else the book's slot 1.
   const slotOne = await slotTx(tx, scope, 1);
   const named = text(head.REC_AC_CODE);
+  // The writer keeps REC_AC_CODE only when it is NOT slot 1, so a kept account that is slot 1 now proves the book's
+  // slot 1 was changed after the save; which layout the voucher had can no longer be told.
+  if (named && named === slotOne)
+    fail(
+      'book configuration changed since save (the settlement account it kept is now slot 1 of the book)',
+    );
   const settle = named || slotOne;
   if (!settle) fail(`book ${scope.coBook} slot 1 names no settlement account`);
 
@@ -187,14 +237,25 @@ export async function deriveCashBankPostingsTx(
   const chargesAc = totalCharges !== 0 ? await slotTx(tx, scope, 3) : '';
   if (totalCharges !== 0 && !chargesAc)
     fail(`book ${scope.coBook} slot 3 names no charges account`);
+  // What the voucher actually posted, from its own legs (see postedAccounts).
+  const legs = await storedLegsTx(tx, scope, voucherNo);
+  const posted = postedAccounts(legs, layouts, direction, rows);
+  const parties = new Set(rows.map((r) => r.partyAc));
   let kasarAccounts = [''];
   if (totalKasar > 0) {
     const slotTwo = await slotTx(tx, scope, 2);
-    const known = new Set([settle, chargesAc, slotTwo, ...rows.map((r) => r.partyAc)]);
-    kasarAccounts = [
-      ...(slotTwo && slotTwo !== settle ? [slotTwo] : []),
-      ...(await storedLegAccountsTx(tx, scope, voucherNo)).filter((ac) => !known.has(ac)),
-    ];
+    const usable = slotTwo && slotTwo !== settle ? [slotTwo] : [];
+    // A kasar account the API named instead of slot 2 is offered too, unless it is the party, settlement or charges
+    // account: then the kasar legs cannot be told apart from the others and the voucher is not re-derived.
+    const named2 = posted?.accounts.kasar;
+    if (named2 && named2 !== slotTwo) {
+      if (named2 === settle || named2 === chargesAc || parties.has(named2))
+        fail(
+          `kasar account cannot be told apart (${named2} is also the voucher's party, settlement or charges account)`,
+        );
+      usable.push(named2);
+    }
+    kasarAccounts = usable;
     if (!kasarAccounts.length) fail(`book ${scope.coBook} slot 2 names no usable kasar account`);
   }
 
@@ -205,29 +266,71 @@ export async function deriveCashBankPostingsTx(
     CO_BOOK: scope.coBook,
     VCH_NO: voucherNo,
   };
-  const candidates: PostInput[] = [];
+  const facts = (
+    layout: CashLayout,
+    kasar: string,
+    over: Partial<CashVoucherFacts> = {},
+  ): CashVoucherFacts => ({
+    key,
+    coBook: scope.coBook,
+    vchNo: voucherNo,
+    layout,
+    direction,
+    shortName: book.shortName,
+    mainBook: book.mainBook,
+    dataType: book.dataType,
+    hiddenVoucherNo: text(head.HD_VCH_NO),
+    mainUser: text(head.MAIN_USER),
+    // The stored text: the database casts it back to the same wall clock in any server time zone.
+    voucherTime: text(head.VCH_TIME) || vchDate,
+    scope: { coCode: scope.coCode, lcCode: scope.lcCode, coYear: scope.coYear },
+    accounts: { settle, kasar, charges: chargesAc },
+    ...over,
+  });
+  const candidates: RefreshCandidate[] = [];
   for (const layout of layouts)
     for (const kasar of kasarAccounts)
-      candidates.push(
-        cashBankPostInput(
-          {
-            key,
-            coBook: scope.coBook,
-            vchNo: voucherNo,
-            layout,
-            direction,
-            shortName: book.shortName,
-            mainBook: book.mainBook,
-            dataType: book.dataType,
-            hiddenVoucherNo: text(head.HD_VCH_NO),
-            mainUser: text(head.MAIN_USER),
-            // The stored text: the database casts it back to the same wall clock in any server time zone.
-            voucherTime: text(head.VCH_TIME) || vchDate,
-            scope: { coCode: scope.coCode, lcCode: scope.lcCode, coYear: scope.coYear },
-            accounts: { settle, kasar, charges: chargesAc },
-          },
+      candidates.push(cashBankPostInput(facts(layout, kasar), rows));
+
+  // The book's settings at save time, read from the voucher's own legs: settlement and charges accounts, short name
+  // and MAIN_BOOK. When they are not today's, the voucher is explained by them and reported, never re-posted into
+  // today's settings (a changed slot would otherwise move every old voucher's legs).
+  if (posted && legs.length) {
+    const was = {
+      settle: posted.accounts.settle ?? settle,
+      charges: posted.accounts.charges ?? chargesAc,
+      shortName: legs[0]!.vchType,
+      mainBook: legs[0]!.bookName,
+    };
+    const changed = [
+      was.settle !== settle && `settlement ${was.settle} -> ${settle}`,
+      was.charges !== chargesAc && `charges ${was.charges} -> ${chargesAc}`,
+      was.shortName !== book.shortName && `short name ${was.shortName} -> ${book.shortName}`,
+      was.mainBook.toUpperCase() !== book.mainBook.toUpperCase() &&
+        `main book ${was.mainBook} -> ${book.mainBook}`,
+    ].filter(Boolean);
+    if (changed.length) {
+      const wasLayout = cashBookFamily(was.mainBook)?.layout;
+      candidates.push({
+        ...cashBankPostInput(
+          facts(
+            wasLayout === 'cash' || wasLayout === 'bank' ? wasLayout : posted.layout,
+            posted.accounts.kasar ?? kasarAccounts[0]!,
+            {
+              shortName: was.shortName,
+              mainBook: was.mainBook,
+              accounts: {
+                settle: was.settle,
+                kasar: posted.accounts.kasar ?? kasarAccounts[0]!,
+                charges: was.charges,
+              },
+            },
+          ),
           rows,
         ),
-      );
+        unverifiedReason: `book configuration changed since save (${changed.join(', ')})`,
+      });
+    }
+  }
   return candidates.length === 1 ? candidates[0]! : candidates;
 }

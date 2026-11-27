@@ -376,6 +376,7 @@ const ACCOUNT_FAMILIES = {
       ],
     }),
     tables: ['CONTRA_DATA', 'AC_DATA', 'ROJ_MEL_DATA', 'REMARK_DATA', 'TEMP_BOOK_DATA'],
+    applies: true,
   },
   // A cash receipt in the generic web RECEIPT book (TR_CASH; Cash_Ledr Ac_Ledr.cs:565-583): leg 02 debits cash.
   'cash-bank': {
@@ -392,6 +393,8 @@ const ACCOUNT_FAMILIES = {
       itDesc: 'DRF account check',
     }),
     tables: ['CASH_DATA', 'AC_DATA', 'ROJ_MEL_DATA', 'TEMP_BOOK_DATA'],
+    // Preview-only until a replay of real desktop vouchers checks clean (docs/handbook/web/data-refresh.md).
+    applies: false,
   },
 };
 
@@ -480,6 +483,22 @@ async function accountFamilyLifecycle(ctx, family) {
     assert.deepEqual(first.diffs, [{ table: 'AC_DATA', insert: 0, update: 1, delete: 0 }]);
     const row = page.locator(`tr[data-voucher="${coBook}/${vchNo}"]`);
     await row.getByText('AC_DATA: 0 missing, 0 extra, 1 changed (DR_AMT)').waitFor();
+    if (!spec.applies) {
+      // Preview-only family: the screen says so, offers no Apply, and a direct apply changes nothing.
+      await page.getByText(/Apply not available until verified/).waitFor();
+      assert.equal(
+        await page.getByRole('button', { name: `Apply ${spec.title} repair`, exact: true }).count(),
+        0,
+      );
+      const damaged = await familyPostings(ctx, coBook, vchNo);
+      const refused = await page.request.post(`/api/utilities/data-refresh/${operation}/apply`, {
+        data: { previewHash: first.previewHash },
+      });
+      assert.equal(refused.status(), 400);
+      assert.equal((await refused.json()).code, 'preview-only');
+      assert.deepEqual(await familyPostings(ctx, coBook, vchNo), damaged);
+      return { vchNo, first, applied: null, second: first, writer, repaired: damaged };
+    }
     await page.locator('#account-reason').fill(`repair the damaged ${spec.title} ledger leg`);
     await page.locator('#account-confirmation').fill(first.requiresConfirmation);
     await page.locator('#account-backup').fill(checksum);
@@ -1248,7 +1267,7 @@ export const dataRefresh = {
       'journey.account-full-builder',
       'T18',
       'MS_UPDATE.cs:2334-2669; playbook J23',
-      'Partly built: per the owner decision of 27 Nov 2026 Account is check-and-repair per voucher family, and Contra, Fine Jv and Cash/Bank apply (cases account.contra-check-and-repair and account.cash-bank-check-and-repair); the other families remain. The desktop Account button deletes AC_DATA, ROJ_MEL_DATA, TAX_DATA, DHRN_DATA and re-posts every voucher of the year through about 120 builder methods (Ac_Ledr 55, Ac_Rojmel 44, Ac_Tax 48; MS_UPDATE.cs:2401-2663). The web writes those rows inside each voucher save with its own posting rules, so an equal rebuild needs a per-voucher-type re-posting engine the web does not have. D-REF-3 (owner, 2 Nov 2026) says ship preview-only when the effect cannot be reproduced exactly. The proven prefix (book flags, clearing dates, bank reconciliation) is applied by the advanced operation ledger-normalise, covered by dataRepair.db.test.ts. Owner question: approve a re-posting engine, or accept preview-only for good.',
+      'Partly built: per the owner decision of 27 Nov 2026 Account is check-and-repair per voucher family, and Contra and Fine Jv apply (case account.contra-check-and-repair) while Cash/Bank previews only until a desktop replay check (case account.cash-bank-check-and-repair); the other families remain. The desktop Account button deletes AC_DATA, ROJ_MEL_DATA, TAX_DATA, DHRN_DATA and re-posts every voucher of the year through about 120 builder methods (Ac_Ledr 55, Ac_Rojmel 44, Ac_Tax 48; MS_UPDATE.cs:2401-2663). The web writes those rows inside each voucher save with its own posting rules, so an equal rebuild needs a per-voucher-type re-posting engine the web does not have. D-REF-3 (owner, 2 Nov 2026) says ship preview-only when the effect cannot be reproduced exactly. The proven prefix (book flags, clearing dates, bank reconciliation) is applied by the advanced operation ledger-normalise, covered by dataRepair.db.test.ts. Owner question: approve a re-posting engine, or accept preview-only for good.',
     ),
     blocked(
       'journey.stock-full-builder',
@@ -1342,7 +1361,7 @@ export const dataRefresh = {
       async (ctx) => {
         const result = await accountFamilyLifecycle(ctx, 'cash-bank');
         return {
-          observation: `Cash/Bank receipt RCT/${result.vchNo}: the check showed the damaged DR_AMT, the apply restored the writer's rows, the second check did not list it`,
+          observation: `Cash/Bank receipt RCT/${result.vchNo}: the check showed the damaged DR_AMT; the family is preview-only until the desktop replay check, so the screen offered no Apply and a direct apply was refused with no row changed`,
           expected: result.first.diffs,
           database: { writer: result.writer, repaired: result.repaired },
           downstream: { secondCheck: result.second.detail.summary },
