@@ -28,6 +28,7 @@ export function LookupPicker({
   resolveTypedCode = false,
   id,
   openOnFocus = true,
+  readOnly = false,
 }: {
   entity: string;
   value: string;
@@ -54,6 +55,8 @@ export function LookupPicker({
    * help only on F1 or on an unknown code, so tabbing across blank selectors must not pop a list over the next one.
    */
   openOnFocus?: boolean;
+  /** The box shows its value but takes no typing (a screen still reading the record it belongs to). */
+  readOnly?: boolean;
 }) {
   const [open, setOpen] = useState(false);
   const [rows, setRows] = useState<LookupRow[]>([]);
@@ -111,7 +114,11 @@ export function LookupPicker({
     onChange(String(r.code));
     onPick?.(r);
     setOpen(false);
-    if (advanceOnPick && inputRef.current) focusNext(inputRef.current);
+    // Enter-advance moves on from THIS box only. A pick that lands after an awaited lookup (resolveEnter) finds the
+    // operator already in another cell; moving the focus then sent the keys being typed there into the cell after
+    // this box (a Tag Opening weight typed into the 3-character counter cell, 2026-11-27 browser run).
+    if (advanceOnPick && inputRef.current && document.activeElement === inputRef.current)
+      focusNext(inputRef.current);
   };
   /**
    * The desktop resolves a typed code on Enter: `tAcCode_KeyDown` looks the exact code up in AC_MAST and fills
@@ -182,6 +189,7 @@ export function LookupPicker({
         id={id}
         value={value}
         aria-label={ariaLabel}
+        readOnly={readOnly}
         placeholder={placeholder || `search ${entity}… (F1)`}
         onChange={(e) => {
           picked.current = null;
