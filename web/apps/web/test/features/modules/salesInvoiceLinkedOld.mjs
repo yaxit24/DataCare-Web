@@ -219,10 +219,15 @@ export function salesInvoiceLinkedOldCases(h) {
           await page.keyboard.press('Escape'); // closes without changes
           await dialog(page).waitFor({ state: 'detached' });
           assert.equal(await rowAmount(page), 0, 'Escape keeps nothing');
+          const focused = await page.evaluate(() => ({
+            text: document.activeElement?.textContent,
+            html: document.activeElement?.outerHTML.slice(0, 160),
+            inert: document.querySelector('form')?.hasAttribute('inert'),
+          }));
           assert.equal(
-            await page.evaluate(() => document.activeElement?.textContent),
+            focused.text,
             'Old Gold purchase…',
-            'focus back on the row',
+            `focus back on the row (focused ${JSON.stringify(focused)})`,
           );
 
           // Enter on the row opens it again; the locked header.

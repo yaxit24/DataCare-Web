@@ -1,6 +1,13 @@
 'use client';
 
-import { useEffect, useRef, useState, type KeyboardEvent, type RefObject } from 'react';
+import {
+  useEffect,
+  useLayoutEffect,
+  useRef,
+  useState,
+  type KeyboardEvent,
+  type RefObject,
+} from 'react';
 import { createPortal } from 'react-dom';
 import { dotNetRoundDouble } from '@datacare/core';
 import { get } from '../lib/api';
@@ -250,9 +257,19 @@ export function useLinkedOldPurchase(
   };
 
   // While the purchase is open the sale form is inert (as OrderAdvanceConfirm): no book switch or save behind it.
-  useEffect(() => {
+  // Closing returns focus in the same commit that removes the dialog: the previous run's cleanup has already lifted
+  // `inert`, so the row (or the next field) takes focus before anything else can observe the closed dialog. A deferred
+  // focus (setTimeout) left a window in which focus sat on <body>.
+  const focusAfter = useRef<() => HTMLElement | null>(null);
+  useLayoutEffect(() => {
     const form = rowsRef.current?.closest('form');
-    if (!open || !form) return;
+    if (!open) {
+      const target = focusAfter.current?.();
+      focusAfter.current = null;
+      target?.focus();
+      return;
+    }
+    if (!form) return;
     form.setAttribute('inert', '');
     return () => form.removeAttribute('inert');
   }, [open]);
@@ -275,8 +292,8 @@ export function useLinkedOldPurchase(
   };
 
   const close = (metal: Metal) => {
+    focusAfter.current = () => (metal === 'G' ? goldRef : silverRef).current;
     setOpen(null);
-    setTimeout(() => (metal === 'G' ? goldRef : silverRef).current?.focus(), 0);
   };
 
   const node = sale.enabled ? (
@@ -330,11 +347,8 @@ export function useLinkedOldPurchase(
             const before = drafts[open];
             const dirty = !before || before.dirty || signature(before) !== signature(d);
             setDrafts((all) => ({ ...all, [open]: { ...d, dirty } }));
+            focusAfter.current = () => (open === 'G' ? silverRef.current : afterDone.current);
             setOpen(null);
-            setTimeout(
-              () => (open === 'G' ? silverRef.current?.focus() : afterDone.current?.focus()),
-              0,
-            );
           }}
         />
       )}
