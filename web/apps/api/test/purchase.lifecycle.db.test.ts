@@ -409,6 +409,27 @@ databaseDescribe('database-backed purchase voucher lifecycle', () => {
       expect(saved.totals.total).toBe(h.total);
       expect(legs.some((l) => l.ac === 'PURCAC')).toBe(false);
       expect(legs.reduce((n, l) => n + l.dr - l.cr, 0)).toBeCloseTo(0, 2);
+      // Purc_Rojmel (Ac_Rojmel.cs:115-177) on the data's codes, as the real data (TCS credited on type 04):
+      // item 01 (:119/:124), labour 02 on slot 4 only when PURC_WITH_LBR = 'N' (:126), tax 03 DR (:136),
+      // TCS 04 CR (:138), party 08 CR BILL_OS against slot 1 named the supplier (:156).
+      const day: Array<Record<string, unknown>> = await owner.$queryRawUnsafe(
+        `SELECT substr("LEDR_KEY",22,2) t,btrim("AC_CODE"::text) ac,btrim("LD_CODE"::text) ld,
+                "DR_AMT"::float dr,"CR_AMT"::float cr,coalesce("AC_NAME",'') nm
+           FROM "ROJ_MEL_DATA" WHERE tenant_id=$1 AND "VCH_NO"=$2 ORDER BY "LEDR_KEY"`,
+        TENANT,
+        String(saved.vchNo).padStart(5, '0'),
+      );
+      expect(day.map((r) => r.t)).toEqual(
+        withLabour === 'Y' ? ['01', '03', '04', '08'] : ['01', '02', '03', '04', '08'],
+      );
+      const byType = (t: string) => day.find((r) => r.t === t)!;
+      expect(byType('01')).toMatchObject({ ld: 'SUPP', dr: withLabour === 'Y' ? 200120 : 200000 });
+      if (withLabour === 'N')
+        expect(byType('02')).toMatchObject({ ac: 'LAB', ld: 'SUPP', dr: 120, cr: 0, nm: '' });
+      expect(byType('03')).toMatchObject({ ld: 'SUPP', dr: 6003.6, cr: 0, nm: '' });
+      expect(byType('04')).toMatchObject({ ac: 'ROUND', ld: 'SUPP', dr: 0, cr: 206, nm: '' });
+      expect(byType('08')).toMatchObject({ ac: 'SUPP', ld: 'CTRL', dr: 0, cr: 206329.6 });
+      expect(byType('08').nm).not.toBe('');
       const taxes = await owner.$queryRawUnsafe<any[]>(
         `SELECT "TOT_AMT"::float total FROM "TAX_DATA" WHERE tenant_id=$1 AND "VCH_NO"=$2`,
         TENANT,

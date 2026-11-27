@@ -47,7 +47,8 @@ import { resolveBookAccountTx, resolveBookPolicyTx } from '../shared/bookPolicy.
 import { assertCounterCodes, resolveCounterStockPolicyTx } from '../shared/counterStockPolicy.js';
 import { resolveRoundingPolicyTx } from '../shared/roundingPolicyLoader.js';
 import type { RoundingPolicy } from '../shared/roundingPolicy.js';
-import { buildSaleRojmel, rojmelMetalFor } from '../shared/rojmel.js';
+import { rojmelMetalFor } from '../shared/rojmel.js';
+import { buildPurchaseRojmel, purchaseRojmelOptionsTx } from '../shared/purchaseRojmel.js';
 import {
   desktopLabourTypeFor,
   effectiveLabourRate,
@@ -1736,11 +1737,16 @@ async function writePurchaseTx(
     return { vchNo, totals: { ...ledgerTotals, total: grandTotal } };
   }
 
-  // The Rojmel, inward. A purchase is the mirror of a sale: metal comes IN (SIGN '+'), the expense
-  // account is debited and the party credited. Confirmed against the real desktop database — books 035
-  // and 037 (gold purchase) write IT_TYPE 'G' with SIGN '+', 036 and 038 (silver) write 'S' with '+',
-  // against 'G'/'S' with '-' on the tax-invoice books.
-  const rojmelRows = buildSaleRojmel(
+  // The Rojmel, inward: Purc_Rojmel (Ac_Rojmel.cs:115-177) has its own rows, accounts and the data's codes
+  // (purchaseRojmel.ts). Metal comes IN (SIGN '+'), the purchase account is debited and the party credited.
+  const rojmelOptions = await purchaseRojmelOptionsTx(tx, input.scope, bookPolicy, header, {
+    withLabour: behavior.purchaseWithLabour,
+    partyAccount: controlAc,
+    kasarAccount: kasarAc,
+    taxAccount: taxAc,
+    tcsAccount: tcsAc,
+  });
+  const rojmelRows = buildPurchaseRojmel(
     {
       scope: { coCode: input.scope.coCode, lcCode: input.scope.lcCode, coYear: key.CO_YEAR },
       key,
@@ -1751,6 +1757,8 @@ async function writePurchaseTx(
       bookName: bookPolicy.bookName,
       partyName: supplierName || input.acName || '', // AC_MAST name, so a reopen cannot change it (WP-28)
       partyCode: input.acCode,
+      voucherDescription: text(header.VCH_DESC),
+      partyMasterName: supplierName,
     },
     computed.map((c, idx) => {
       const item = String(c.in.itCode ?? '').trim();
@@ -1783,6 +1791,8 @@ async function writePurchaseTx(
         touch: num(c.in.touch),
         wastage: num(c.in.westPct),
         fine: c.calc.fine,
+        otherFine: num(detl[idx]?.ITM_OTH_FINE),
+        silverFine: num(detl[idx]?.SILVER_FINE),
         rate: num(c.in.rate),
         itemAmount: c.calc.metal,
         labourRate: num(c.in.labourRate),
@@ -1791,24 +1801,8 @@ async function writePurchaseTx(
         netAmount: c.calc.net,
       };
     }),
-    {
-      taxAc,
-      taxAmount: totals.tax,
-      // THE PARTY ROJMEL ROW IS CONDITIONAL ON THE BILL BEING OUTSTANDING, and this argument is that
-      // OUTSTANDING amount - buildSaleRojmel names its local `outstanding` - not the bill total.
-      //
-      // Family 1 measured the rule on the sale books: of 47 sales with BILL_OS = 0, ZERO carry a party row;
-      // of 42 with BILL_OS <> 0, all 42 do. A settled bill leaves no receivable for a day book to show.
-      // Passing `totals.total` made the condition always true, so every purchase got a party row.
-      //
-      // It reproduces on the real purchase books. Voucher 035/00001 pays 6780.00 cash against a 6780.00 bill
-      // - BILL_OS 0 - and has ONE Rojmel row, the line row. Voucher 035/00003 leaves a balance and has three.
-      // I first recorded that pair as a DESKTOP INCONSISTENCY, having compared them on line count and tender
-      // without checking BILL_OS - the discriminator already measured and written into rojmel.ts in family 1.
-      // Retracted here because "the desktop is inconsistent" ends investigation and invites an invented rule.
-      partyAmount: round2(grandTotal - tender.paidNow - tender.kasar),
-    },
-    false, // inward: metal in, party credited
+    header,
+    rojmelOptions,
   );
 
   // LDR_NAME carries PR_DATA.AC_NAME on the party's bill leg (Ac_Ledr.cs:377, leg 01) and on the cash account's

@@ -1952,6 +1952,17 @@ async function writeSaleTx(
   if (orderAdjust !== 0) {
     advanceAc = await resolveBookAccountTx(tx, input.scope, bookPolicy, 4);
   }
+  // Ac_Rojmel.cs:100: 'OLD PURC - ' + the AC_MAST name of SL_PR_DETL.AC_CODE (the party).
+  const oldMetalParty: Array<{ name: unknown }> = oldGoldDetl.length
+    ? await tx.$queryRawUnsafe(
+        `SELECT "AC_NAME" name FROM "AC_MAST" WHERE tenant_id=$1 AND "CO_CODE"=$2 AND "AC_CODE"::text=$3::text
+          ORDER BY ("LC_CODE"::text=$4) DESC, row_id LIMIT 1`,
+        tenantId,
+        input.scope.coCode,
+        input.acCode,
+        input.scope.lcCode,
+      )
+    : [];
   const rojmelRows = buildSaleRojmel(
     {
       scope: { coCode: input.scope.coCode, lcCode: input.scope.lcCode, coYear: key.CO_YEAR },
@@ -1963,6 +1974,8 @@ async function writeSaleTx(
       bookName: bookPolicy.bookName,
       partyName: input.acName ?? '',
       partyCode: input.acCode,
+      partyMasterName: text(oldMetalParty[0]?.name),
+      voucherDescription: text(header.VCH_DESC),
     },
     computed.map((c, idx) => {
       const item = String(c.in.itCode ?? '').trim();
@@ -2003,6 +2016,7 @@ async function writeSaleTx(
       taxAc,
       taxAmount: totals.tax,
       partyAmount: billOS,
+      partyAccount: controlAc,
       // Ac_Rojmel.Sales_Rojmel guards each of these with `AND <column> <> 0`, so a sale settled wholly in
       // cash emits none of them. Identified by matching real amounts against SL_DATA across the sale
       // books: cheque 17/17 = CHQ_AMT, kasar 100/100 = KASAR_AMT, advance 23/23 = ADV_AMT on the book's
@@ -2010,14 +2024,32 @@ async function writeSaleTx(
       // so the day book shows metal taken in exchange without counting it as a metal sale.
       settlements: [
         { kind: 'cheque' as const, account: bankAc, amount: chequeAmt },
-        { kind: 'kasar' as const, account: kasarAc, amount: kasar },
+        // Card :92 (CARD_ADJ = 'N' OR BOOK_TYPE = 'M', as the ledger's card leg), card net of commission :104
+        // (CARD_ADJ = 'Y'), UPI per UPI_DATA row :106, discount slot 5 :98, kasar slot 3 KASAR_AMT+POINT_VAL :94.
+        { kind: 'card' as const, account: cardAc, amount: cardLegs },
+        {
+          kind: 'cardAdjusted' as const,
+          account: cardAc,
+          amount:
+            behavior.cardCommissionAdjustment && cardAmt !== 0
+              ? round2s(cardAmt - num(header.CARD_COM_AMT))
+              : 0,
+        },
+        ...upiLegs.map((row) => ({
+          kind: 'upi' as const,
+          account: row.ac,
+          amount: row.amount,
+          lineNo: row.srNo,
+        })),
+        { kind: 'discount' as const, account: discountAc, amount: totals.discount },
+        { kind: 'kasar' as const, account: kasarAc, amount: round2s(kasar + pointValue) },
         { kind: 'advance' as const, account: advanceAc, amount: orderAdjust },
         // Slot 5 is the book's round-off/discount account. SOURCE-ONLY: this company's data has ROF_AMT
         // non-zero on zero of 190 sales, so there is no real row to check the shape against.
         { kind: 'roundOff' as const, account: roundAc, amount: totals.roundOff },
         ...oldGoldDetl.map((g, i) => ({
           kind: 'oldMetal' as const,
-          account: String((g as any).AC_CODE ?? input.acCode),
+          account: purcAcByItem.get(String(g.IT_CODE)) ?? input.oldGoldAc ?? 'OLDGOLD',
           amount: num((g as any).NET_AMT),
           lineNo: i + 1,
           pcs: num((g as any).ITM_PCS),
@@ -2025,7 +2057,7 @@ async function writeSaleTx(
           netWt: num((g as any).ITM_NWT),
           touch: num((g as any).ITM_TOUCH),
           fine: num((g as any).ITM_FINE),
-          description: 'OLD GOLD',
+          description: text(g.IT_DESC), // SL_PR_DETL.IT_DESC (:100), e.g. 'OLD SILVER'
           itemCode: String((g as any).IT_CODE ?? ''),
         })),
       ],
