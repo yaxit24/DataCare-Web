@@ -324,7 +324,8 @@ export function buildWholesaleRojmel(
       AC_NAME: `LBR - ${input.headerName}`,
       CR_AMT: input.labourAmount,
     });
-  // Ac_Rojmel.cs:279-281 uses the configured interest account corresponding to desktop 00061.
+  // Ac_Rojmel.cs:279-281 uses the configured interest account corresponding to desktop 00061. Dormant: the Wh Sales
+  // interest and silver-cut inputs are not built (docs/handbook/web/desktop-adaptations.md).
   if (has(2) && input.interestFine && input.interestAccount !== undefined)
     rows.push({
       ...base(silver ? '30' : '29'),
