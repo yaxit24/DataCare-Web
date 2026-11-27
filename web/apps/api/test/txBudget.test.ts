@@ -3,6 +3,7 @@ import { MetricsRegistry } from '../src/modules/ops/metrics.js';
 import {
   COMMAND_TX_BUDGETS,
   isTransactionTimeout,
+  CompanyBusyError,
   READ_COMMITTED_VOUCHER,
   SERIALIZABLE_VOUCHER,
   SNAPSHOT_READ,
@@ -73,6 +74,14 @@ describe('command transaction budgets', () => {
     expect(isTransactionTimeout({ code: 'P2010', meta: { code: '55P03' }, message: '' })).toBe(
       true,
     );
+    // A deadlock or serialization failure rolled the whole transaction back too: retryable.
+    expect(isTransactionTimeout({ code: 'P2010', meta: { code: '40P01' }, message: '' })).toBe(
+      true,
+    );
+    expect(isTransactionTimeout({ code: 'P2010', meta: { code: '40001' }, message: '' })).toBe(
+      true,
+    );
+    expect(isTransactionTimeout(new CompanyBusyError())).toBe(true);
     expect(
       isTransactionTimeout({ code: 'P2010', meta: { code: '23505' }, message: 'Raw query failed' }),
     ).toBe(false);

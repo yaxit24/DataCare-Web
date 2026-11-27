@@ -64,7 +64,8 @@ data, keep the company**, so the company afterwards looks like a freshly provisi
 - **Kept in part:** one financial year (the caller's session year, or the company's latest year when it does not
   have that one); the accounts the desktop keeps (numeric code up to 99, `:90`) plus every account a kept book
   (`BOOK_DETL.AC_CODE`) or location (`LOCT_MAST.AC_CODE`) names, so no kept book posts to a missing account (the
-  desktop instead moves some book legs to account 00075, `:109`); and the account groups those accounts sit in.
+  desktop instead moves some book legs to account 00075, `:109`); the account groups those accounts sit in; and
+  employee 001 (`:136`) with every employee a kept book names (`BOOK_DATA.USER_EMP_CODE`).
 - **Everything else** in the company scope (every table with `tenant_id` and `CO_CODE`) is deleted for the company,
   and `provisionCompanyTx` (`seedCompany`, `templatesOnly`) puts back the default masters a new company gets
   (account groups, template masters, system accounts, taxes, serials). It inserts only missing rows and never
@@ -76,12 +77,17 @@ data, keep the company**, so the company afterwards looks like a freshly provisi
 - **No operator backup step** (the web is a hosted service). Every deleted row is copied, in the statement that
   deletes it, into the tenant-level `company_reset_archive` (forced RLS, append-only, outside the company scope and
   the company backup). Support can recover rows from it; there is no self-service undo.
-- **Writers are held off and the apply is tied to the preview.** The reset locks the tables it clears (and
-  `BOOK_DETL`, `LOCT_MAST`) `SHARE ROW EXCLUSIVE`, as the logical restore does, with a 10 s lock timeout (busy:
-  retryable 503). It refuses with "the data changed since you previewed it" unless the preview's `fingerprint`
-  (per-table counts and newest row versions) still matches, and it rolls back unless exactly the planned rows were
-  deleted and only seeded rows were added. It runs in its own `maintenance` transaction budget (5 minutes; 50,000
-  rows and 20 MB of images took about 4 s in the test).
+- **Writers are held off and the apply is tied to the preview.** Every write transaction of a request in company C
+  takes C's write key `pg_try_advisory_xact_lock_shared` (`withTxBudget`, `web/apps/api/src/modules/shared/companyWriteScope.ts`);
+  the reset takes it exclusively (waiting up to 10 s for in-flight writes). While C is reset, a write to C is refused
+  at once with a retryable 503 (`company-busy`); writes to other companies and tenants never touch the key. A write
+  to C from a session in another company is not keyed (Company create/edit/delete share the company-identity lock
+  with the reset; a reset rolls back if a kept table's row count moved). The reset refuses with "the data changed
+  since you previewed it" unless the preview's `fingerprint` still matches: a hash of the rows it clears and of the
+  kept columns that decide what stays (`BOOK_DETL`/`LOCT_MAST` account codes, `BOOK_DATA.USER_EMP_CODE`), so a login
+  does not make a preview stale. It rolls back unless exactly the planned rows were deleted and only seeded rows were
+  added. It runs in its own `maintenance` transaction budget (5 minutes; 50,000 rows and 20 MB of images took about
+  2 s in the test). A deadlock or serialization failure answers the retryable 503 like a timeout.
 - **Any company**, including 01 and the company the caller is working in, so a single-company Lite install can reset.
   Every other sign-in to the company ends (`auth_session` revoked with reason `company-reset`); the caller stays
   signed in and, after resetting the open company, returns to the dashboard.

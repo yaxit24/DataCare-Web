@@ -2,6 +2,7 @@ import { createHash, randomUUID } from 'node:crypto';
 import { withTxBudget } from '../shared/txBudget.js';
 import { loadBackupSchemaManifest, orderedCompanyTables } from '../ops/backupManifest.js';
 import { provisionCompanyTx } from '../ops/seedCompany.js';
+import { companyWriteLockKey } from '../shared/companyWriteScope.js';
 import {
   REPAIR_REASON_MIN_LENGTH,
   RepairError,
@@ -26,13 +27,15 @@ import {
  *    :161 does, for this company only). Kept in part: the one year that stays (the caller's session year, else the
  *    company's latest); the accounts the desktop keeps (numeric code up to 99, :90) plus every account a kept book,
  *    location names (`accountKept`), so no kept book posts to a missing account (the desktop instead moves
- *    some book legs to 00075, :109); and the account groups those accounts sit in.
+ *    some book legs to 00075, :109); the account groups those accounts sit in; employee 001 (:136) and every
+ *    employee a kept book names (BOOK_DATA.USER_EMP_CODE).
  *  * Every other company-scoped row (tenant_id + CO_CODE, the company backup's scope) is deleted, and
  *    `provisionCompanyTx(templatesOnly)` puts back the default masters a new company gets; it inserts only absent rows
  *    and never creates identity, settings, books, a location or a year.
  *  * Every deleted row is copied, in the statement that deletes it, into the tenant-level `company_reset_archive`
  *    (the web has no operator backup), tied to the run's `data_repair_run` row (who, when, why, counts).
- *  * Writers are held off: the cleared tables are locked SHARE ROW EXCLUSIVE before anything is read for the delete,
+ *  * Writers are held off: the company's write key is taken EXCLUSIVE (every write transaction of a request in the
+ *    company takes it SHARED, companyWriteScope.ts) before anything is read for the delete,
  *    the apply is refused unless the data still matches the preview the admin confirmed (`fingerprint`), and the
  *    rows left after the deletes and the seed are checked before commit.
  *  * The desktop's unscoped statements (Module_Schm.cs:110,161,188,208,210,215-216) are not ported.
@@ -70,6 +73,19 @@ const ACCOUNT_REFERENCES: readonly [table: string, column: string][] = [
   ['BOOK_DETL', 'AC_CODE'],
   ['LOCT_MAST', 'AC_CODE'],
 ];
+/** Kept books name their user's employee: that employee stays. */
+const EMPLOYEE_REFERENCES: readonly [table: string, column: string][] = [
+  ['BOOK_DATA', 'USER_EMP_CODE'],
+];
+/** Every kept column that decides which rows of a cleared table stay (fingerprinted). */
+const KEEP_REFERENCES = [...ACCOUNT_REFERENCES, ...EMPLOYEE_REFERENCES];
+const referenced = (refs: readonly (readonly [string, string])[]) =>
+  refs
+    .map(
+      ([table, column]) =>
+        `SELECT r.${quote(column)}::text FROM ${quote(table)} r WHERE r.tenant_id=$1 AND r."CO_CODE"::text=$2 AND r.${quote(column)} IS NOT NULL`,
+    )
+    .join(' UNION ');
 
 export type CompanyResetKind = 'vouchers' | 'masters' | 'years';
 const MASTERS = new Set(['AC_GROUP', 'BAL_GR', 'DM_SIZE', 'ITM_CITY', 'USER_DATA', 'USER_REQUEST']);
@@ -101,7 +117,7 @@ export interface CompanyResetPlan {
   keptTotal: number;
   deletedTotal: number;
   reasonMinLength: number;
-  /** Binds an apply to the data this preview counted; any change in the company's rows changes it. */
+  /** Binds an apply to what this preview counted: the rows it clears and the account codes that decide what stays. */
   fingerprint: string;
 }
 export interface CompanyResetInput {
@@ -127,10 +143,7 @@ const scoped = `tenant_id=$1 AND "CO_CODE"::text=$2`;
 
 /** The accounts a reset keeps: numeric code up to 99 (Module_Schm.cs:90) or named by a kept book or location. */
 const accountKept = (alias: string) =>
-  `((${alias}"AC_CODE" ~ '^[0-9]+$' AND ${alias}"AC_CODE"::numeric <= 99) OR ${alias}"AC_CODE"::text IN (${ACCOUNT_REFERENCES.map(
-    ([table, column]) =>
-      `SELECT r.${quote(column)}::text FROM ${quote(table)} r WHERE r.tenant_id=$1 AND r."CO_CODE"::text=$2 AND r.${quote(column)} IS NOT NULL`,
-  ).join(' UNION ')}))`;
+  `((${alias}"AC_CODE" ~ '^[0-9]+$' AND ${alias}"AC_CODE"::numeric <= 99) OR ${alias}"AC_CODE"::text IN (${referenced(ACCOUNT_REFERENCES)}))`;
 
 /**
  * SQL true for a row the reset deletes, or null for a table it keeps whole. A row whose keep test is unknown (a NULL
@@ -144,6 +157,9 @@ function removeRule(table: string): string | null {
   if (KEPT_TABLES.has(table)) return null;
   if (table === 'YEAR_MAST') return `"CO_YEAR" IS DISTINCT FROM $3::text`;
   if (table === 'AC_MAST') return `NOT ${accountKept('')}`;
+  // Employee 001 stays as on the desktop (Module_Schm.cs:136), and so does every employee a kept book names.
+  if (table === 'EMP_MAST')
+    return `NOT ("EMP_CODE"='001' OR "EMP_CODE"::text IN (${referenced(EMPLOYEE_REFERENCES)}))`;
   if (table === 'AC_GROUP')
     return `"AC_GR" IS NULL OR "AC_GR" NOT IN (SELECT a."AC_GR" FROM "AC_MAST" a WHERE a.tenant_id=$1 AND a."CO_CODE"::text=$2 AND a."AC_GR" IS NOT NULL AND ${accountKept('a.')})`;
   return 'true';
@@ -181,7 +197,12 @@ async function companyTables(tx: any): Promise<string[]> {
     .reverse();
 }
 
-/** Rows per table the reset deletes (d) and keeps (k), and the newest row version (x) for the fingerprint. */
+/**
+ * Rows per table the reset deletes (d) and keeps (k), and a content hash (x) for the fingerprint: every column of the
+ * rows of a table the reset clears, only the account codes of a table whose rows decide which accounts stay, and
+ * nothing of the other kept tables, so a login (LOGIN_MAST counters) or a settings change does not make a preview
+ * stale. A sum of row hashes ignores row order and does not depend on transaction ids.
+ */
 async function census(
   tx: any,
   tenantId: string,
@@ -193,9 +214,16 @@ async function census(
     tables
       .map((table, i) => {
         const remove = removes(table) ?? 'false';
+        const reference = KEEP_REFERENCES.find(([name]) => name === table);
+        const hashed = removes(table)
+          ? 'z::text'
+          : reference
+            ? `coalesce(${quote(reference[1])}::text, '')`
+            : null;
+        const x = hashed ? `coalesce(sum(hashtextextended(${hashed}, 0)), 0)::text` : `''`;
         return `SELECT $${i + 4}::text t, count(*) FILTER (WHERE ${remove})::int d,
-                       count(*) FILTER (WHERE NOT (${remove}))::int k, max(xmin::text::bigint)::text x
-                  FROM ${quote(table)} WHERE ${scoped}`;
+                       count(*) FILTER (WHERE NOT (${remove}))::int k, ${x} x
+                  FROM ${quote(table)} z WHERE ${scoped}`;
       })
       .join(' UNION ALL '),
     tenantId,
@@ -225,7 +253,12 @@ async function plan(tx: any, scope: CompanyResetScope, coCode: string) {
     .update(
       JSON.stringify({
         co: [company.coCode, company.coName, year],
-        rows: [...counted].sort((a, b) => a.t.localeCompare(b.t)).map((r) => [r.t, r.d, r.k, r.x]),
+        // Kept tables' counts are left out too: a new login or user must not make the preview stale.
+        rows: [...counted]
+          .sort((a, b) => a.t.localeCompare(b.t))
+          .map((r) =>
+            removes(r.t) || KEEP_REFERENCES.some(([n]) => n === r.t) ? [r.t, r.d, r.k, r.x] : [r.t],
+          ),
       }),
     )
     .digest('hex');
@@ -349,28 +382,24 @@ export async function resetCompany(
         'This company is already being reset. Wait for it to finish.',
         409,
       );
+    // Hold off this company's writers, and only them: every write transaction of a request in this company takes
+    // the company's write key SHARED (withTxBudget, companyWriteScope.ts); the reset takes it EXCLUSIVE. In-flight
+    // writes may finish (10 s, then a retryable 503); new ones are refused until the reset commits. Other companies
+    // and tenants never touch this key. Taken before the company-identity lock, in the same order a writer takes
+    // them, so the two cannot deadlock.
+    await tx.$executeRawUnsafe(`SELECT set_config('lock_timeout', '10s', true)`);
+    await tx.$executeRawUnsafe(
+      'SELECT pg_advisory_xact_lock(hashtextextended($1, 0))',
+      companyWriteLockKey(scope.tenantId, coCode),
+    );
+    await tx.$executeRawUnsafe(`SELECT set_config('lock_timeout', '0', true)`);
     // The lock Company create, edit, delete and the purge worker take (companyIdentity.ts, companyPurge.ts).
     await tx.$executeRawUnsafe(
       'SELECT pg_advisory_xact_lock(hashtext($1))',
       `company-identity:${scope.tenantId}`,
     );
     await companyRow(tx, scope.tenantId, coCode, true);
-
-    // Hold off every writer of the tables being cleared and of the rows that decide which accounts stay, as the
-    // logical restore does (backup.ts lockRestoreTables). Voucher writers take no company lock of their own, so a
-    // table lock is what keeps a sale saved mid-reset from surviving it. A busy table answers "try again"
-    // (lock_timeout → 503 retryable) instead of waiting out the budget.
     const tables = await companyTables(tx);
-    const lockSet = [
-      ...new Set([
-        ...tables.filter((table) => !KEPT_TABLES.has(table)),
-        ...ACCOUNT_REFERENCES.map(([table]) => table),
-      ]),
-    ].sort();
-    await tx.$executeRawUnsafe(`SET LOCAL lock_timeout = '10s'`);
-    await tx.$executeRawUnsafe(
-      `LOCK TABLE ${lockSet.map(quote).join(',')} IN SHARE ROW EXCLUSIVE MODE`,
-    );
 
     const { year, summary } = await plan(tx, scope, coCode);
     if (!input.fingerprint || input.fingerprint !== summary.fingerprint)

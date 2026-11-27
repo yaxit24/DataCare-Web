@@ -5,6 +5,11 @@ import { buildApp } from '../src/app.js';
 import { hashPassword } from '../src/modules/auth/password.js';
 import { seedCompany } from '../src/modules/ops/seedCompany.js';
 import { KEPT_TABLES } from '../src/modules/masters/companyReset.js';
+import {
+  companyWriteLockKey,
+  runWithCompanyWriteScope,
+} from '../src/modules/shared/companyWriteScope.js';
+import { CompanyBusyError, withTxBudget } from '../src/modules/shared/txBudget.js';
 import { assertIsolatedTestDatabase } from './support/isolatedDatabase.js';
 
 /**
@@ -189,8 +194,19 @@ type Cookie = string;
     const out = { ...fresh };
     out.AC_MAST = merge(accounts, fresh.AC_MAST, 'AC_CODE');
     out.AC_GROUP = merge(groups, fresh.AC_GROUP, 'AC_GR');
+    // Employee 001 (Module_Schm.cs:136) and every employee a kept book names stay too.
+    const employees = (
+      await query<{ r: string }[]>(
+        `SELECT (to_jsonb(e) - 'row_id')::text r FROM "EMP_MAST" e WHERE tenant_id=$1 AND "CO_CODE"=$2
+          AND ("EMP_CODE"='001' OR "EMP_CODE" IN (SELECT "USER_EMP_CODE" FROM "BOOK_DATA"
+                 WHERE tenant_id=$1 AND "CO_CODE"=$2 AND "USER_EMP_CODE" IS NOT NULL))`,
+        tenant,
+        coCode,
+      )
+    ).map((row) => row.r);
+    out.EMP_MAST = merge(employees, fresh.EMP_MAST, 'EMP_CODE');
     for (const key of Object.keys(out)) if (!out[key]!.length) delete out[key];
-    return { rest: out, keptRows: accounts.length + groups.length };
+    return { rest: out, keptRows: accounts.length + groups.length + employees.length };
   };
   const runs = () =>
     query<any[]>(
@@ -239,6 +255,15 @@ type Cookie = string;
     // A default master edited by the user goes back to its default; a kept row edited stays edited.
     await exec(
       `UPDATE "AC_GROUP" SET "AC_GR_NAME"='RENAMED BY USER' WHERE tenant_id=$1 AND "CO_CODE"='02' AND "AC_GR"='00'`,
+      tenantId,
+    );
+    // A kept book names its user's employee: that employee stays.
+    await exec(
+      `INSERT INTO "EMP_MAST"(tenant_id,"CO_CODE","EMP_CODE","EMP_NAME") VALUES ($1,'02','E77','BOOK USER')`,
+      tenantId,
+    );
+    await exec(
+      `UPDATE "BOOK_DATA" SET "USER_EMP_CODE"='E77' WHERE tenant_id=$1 AND "CO_CODE"='02' AND "CO_BOOK"='SL'`,
       tenantId,
     );
     await exec(
@@ -338,6 +363,138 @@ type Cookie = string;
     expect(await runs()).toEqual([]);
   });
 
+  it('holds off only the reset company: its writes are refused, other companies and tenants write on', async () => {
+    // Hold company 02's write key exclusively, as a running reset of 02 does.
+    let release!: () => void;
+    const held = new Promise<void>((resolve) => (release = resolve));
+    let locked!: () => void;
+    const isLocked = new Promise<void>((resolve) => (locked = resolve));
+    const holder = owner.$transaction(
+      async (tx: any) => {
+        await tx.$executeRawUnsafe(
+          'SELECT pg_advisory_xact_lock(hashtextextended($1, 0))',
+          companyWriteLockKey(tenantId, '02'),
+        );
+        locked();
+        await held;
+      },
+      { timeout: 60_000 },
+    );
+    await isLocked;
+    try {
+      const write = (tenant: string, coCode: string) =>
+        runWithCompanyWriteScope({ tenantId: tenant, coCode }, () =>
+          withTxBudget(runtime, tenant, 'voucher', (tx: any) =>
+            tx.$executeRawUnsafe(
+              `INSERT INTO "AC_DATA"(tenant_id,"CO_CODE","VCH_NO") VALUES ($1,$2,'LOCKT')`,
+              tenant,
+              coCode,
+            ),
+          ),
+        );
+      const started = Date.now();
+      await expect(write(tenantId, '02')).rejects.toBeInstanceOf(CompanyBusyError);
+      await expect(write(tenantId, '03')).resolves.toBe(1);
+      await expect(write(otherTenant, '02')).resolves.toBe(1);
+      expect(Date.now() - started).toBeLessThan(2_000);
+      // Reads are never held off.
+      await expect(
+        runWithCompanyWriteScope({ tenantId, coCode: '02' }, () =>
+          withTxBudget(runtime, tenantId, 'read', (tx: any) => tx.$queryRawUnsafe(`SELECT 1 n`)),
+        ),
+      ).resolves.toEqual([{ n: 1 }]);
+      // Through HTTP: the admin works in 01, so a held 02 does not stop an edit of 01, and a held 01 refuses it
+      // with a retryable 503.
+      const body = (row: Record<string, unknown>) => {
+        const { version, ...fields } = row;
+        return Object.fromEntries([
+          ...Object.entries(fields).filter(([, value]) => value !== null),
+          ['expectedVersion', version],
+        ]);
+      };
+      const current = (await request(adminCookie, 'GET', '/company-identity/01')).json();
+      const ok = await request(adminCookie, 'PUT', '/company-identity', body(current));
+      expect(ok.statusCode, ok.body).toBe(200);
+      const again = (await request(adminCookie, 'GET', '/company-identity/01')).json();
+      let release01!: () => void;
+      const held01 = new Promise<void>((resolve) => (release01 = resolve));
+      let locked01!: () => void;
+      const isLocked01 = new Promise<void>((resolve) => (locked01 = resolve));
+      const holder01 = owner.$transaction(
+        async (tx: any) => {
+          await tx.$executeRawUnsafe(
+            'SELECT pg_advisory_xact_lock(hashtextextended($1, 0))',
+            companyWriteLockKey(tenantId, '01'),
+          );
+          locked01();
+          await held01;
+        },
+        { timeout: 60_000 },
+      );
+      await isLocked01;
+      const busy = await request(adminCookie, 'PUT', '/company-identity', body(again));
+      release01();
+      await holder01;
+      expect(busy.statusCode, busy.body).toBe(503);
+      expect(busy.json()).toMatchObject({ error: 'company-busy', retryable: true });
+    } finally {
+      release();
+      await holder;
+      await exec(
+        `DELETE FROM "AC_DATA" WHERE tenant_id IN ($1,$2) AND "VCH_NO"='LOCKT'`,
+        tenantId,
+        otherTenant,
+      );
+    }
+  });
+
+  it('resets 02 while another company has a write transaction open', async () => {
+    // An open write of company 03 to a table the reset clears (the old table lock would have waited for it).
+    let release!: () => void;
+    const held = new Promise<void>((resolve) => (release = resolve));
+    let written!: () => void;
+    const isWritten = new Promise<void>((resolve) => (written = resolve));
+    const writer = owner.$transaction(
+      async (tx: any) => {
+        await tx.$executeRawUnsafe(
+          `INSERT INTO "AC_DATA"(tenant_id,"CO_CODE","VCH_NO") VALUES ($1,'03','LOCKT')`,
+          tenantId,
+        );
+        written();
+        await held;
+        throw new Error('rolled back on purpose');
+      },
+      { timeout: 60_000 },
+    );
+    await isWritten;
+    try {
+      const fingerprint = await fingerprintOf('02');
+      // Only checks that the reset is not blocked: the stale fingerprint answer comes at once, after the locks.
+      const started = Date.now();
+      const response = await reset({ fingerprint: '0'.repeat(64) });
+      expect(response.statusCode, response.body).toBe(409);
+      expect(response.json().code).toBe('stale-preview');
+      expect(Date.now() - started).toBeLessThan(5_000);
+      expect(fingerprint).toMatch(/^[0-9a-f]{64}$/);
+    } finally {
+      release();
+      await writer.catch(() => undefined);
+    }
+  });
+
+  it('keeps the preview valid across a login', async () => {
+    const fingerprint = await fingerprintOf('02');
+    await exec(
+      `UPDATE "LOGIN_MAST" SET "FAILED_LOGIN_COUNT"=coalesce("FAILED_LOGIN_COUNT",0)+1 WHERE tenant_id=$1 AND "CO_CODE"='02'`,
+      tenantId,
+    );
+    expect(await fingerprintOf('02')).toBe(fingerprint);
+    await exec(
+      `UPDATE "LOGIN_MAST" SET "FAILED_LOGIN_COUNT"=0 WHERE tenant_id=$1 AND "CO_CODE"='02'`,
+      tenantId,
+    );
+  });
+
   it('refuses a second reset while one holds the company lock', async () => {
     const before = await census(tenantId, '02');
     let release!: () => void;
@@ -395,6 +552,12 @@ type Cookie = string;
       archived: preview.deletedTotal,
     });
     expect(ok.deleted).toEqual(preview.deleted);
+    expect(
+      await query<{ n: number }[]>(
+        `SELECT count(*)::int n FROM "EMP_MAST" WHERE tenant_id=$1 AND "CO_CODE"='02' AND "EMP_CODE"='E77'`,
+        tenantId,
+      ),
+    ).toEqual([{ n: 1 }]);
     // Kept exactly, including the edited identity.
     expect(await content(tenantId, '02', (table) => KEPT_TABLES.has(table))).toEqual(keptBefore);
     expect(

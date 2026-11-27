@@ -1,6 +1,7 @@
 import type { Prisma } from '@datacare/db';
 import { withTenant, type Tx } from '@datacare/db';
 import { hasPostgresErrorCode } from './prismaError.js';
+import { companyWriteLockKey, companyWriteScope } from './companyWriteScope.js';
 import {
   claimCommandTx,
   commandForTransaction,
@@ -84,18 +85,32 @@ const TIMEOUT_MESSAGES = [
  * Also matches a wrapped cause.
  */
 export function isTransactionTimeout(error: unknown): boolean {
+  if (error instanceof CompanyBusyError) return true;
   // Prisma 7 nests the SQLSTATE under meta.driverAdapterError.cause; postgresErrorCodes reads both shapes.
-  if (hasPostgresErrorCode(error, '57014', '55P03')) return true;
+  // 40P01 (deadlock) and 40001 (serialization failure) rolled the whole transaction back too: retryable.
+  if (hasPostgresErrorCode(error, '57014', '55P03', '40P01', '40001')) return true;
   for (let e: unknown = error, depth = 0; e && depth < 4; depth++) {
     const candidate = e as { code?: unknown; message?: unknown; cause?: unknown; meta?: unknown };
     if (candidate.code === 'P2028') return true;
     const meta = candidate.meta as { code?: unknown } | undefined;
-    if (meta?.code === '57014' || meta?.code === '55P03') return true;
+    if (meta?.code && ['57014', '55P03', '40P01', '40001'].includes(String(meta.code))) return true;
     const message = typeof candidate.message === 'string' ? candidate.message : '';
     if (TIMEOUT_MESSAGES.some((pattern) => pattern.test(message))) return true;
     e = candidate.cause;
   }
   return false;
+}
+
+/**
+ * A write to a company that is being reset (companyWriteScope.ts). It rolled back before writing anything, so it is
+ * answered like a budget failure: a retryable 503.
+ */
+export class CompanyBusyError extends Error {
+  readonly code = 'company-busy';
+  constructor() {
+    super('This company is being reset. Try again in a moment.');
+    this.name = 'CompanyBusyError';
+  }
 }
 
 export type TxOutcome = 'committed' | 'rolled_back' | 'timeout';
@@ -215,14 +230,28 @@ export async function withTxBudget<T>(
   // N52: inside a guarded create, the first non-read transaction also claims and completes the request's
   // Idempotency-Key receipt, so the receipt commits or rolls back with the voucher (idempotencyContext.ts).
   const command = commandForTransaction(tenantId, budgetClass === 'read');
+  // A write of a request's own company waits for no reset of that company: it is refused while one runs.
+  const company =
+    budgetClass === 'read' || budgetClass === 'maintenance' ? undefined : companyWriteScope();
+  const companyLock = company?.tenantId === tenantId ? company : undefined;
+  const guarded = companyLock
+    ? async (tx: Tx): Promise<T> => {
+        const [row] = (await tx.$queryRawUnsafe(
+          'SELECT pg_try_advisory_xact_lock_shared(hashtextextended($1, 0)) AS ok',
+          companyWriteLockKey(companyLock.tenantId, companyLock.coCode),
+        )) as { ok: boolean }[];
+        if (!row?.ok) throw new CompanyBusyError();
+        return fn(tx);
+      }
+    : fn;
   const body = command
     ? async (tx: Tx): Promise<T> => {
         await claimCommandTx(tx, command);
-        const result = await fn(tx);
+        const result = await guarded(tx);
         await completeCommandTx(tx, command, result);
         return result;
       }
-    : fn;
+    : guarded;
   const started = performance.now();
   let outcome: TxOutcome = 'committed';
   try {
