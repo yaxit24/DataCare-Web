@@ -19,7 +19,7 @@ import { SECOND_TENANT, TENANT } from '../harness.mjs';
 export const USERS = Object.freeze({
   admin: { user: 'e2eadmin', category: 'ADMIN' },
   clerk: { user: 'e2eclerk', category: 'USER' }, // may view/create/edit sales, may NOT delete
-  printViewer: { user: 'e2eprint', category: 'USER' }, // may view Fine JV and Contra but may NOT print them
+  printViewer: { user: 'e2eprint', category: 'USER' }, // may view Fine JV, Contra, Wh Sales and Sales Invoice but may NOT print them
 });
 
 export const ITEMS = Object.freeze({
@@ -126,7 +126,8 @@ export async function seedCatalogue(stack, { password }) {
      VALUES ($1,'01','01',$2,'Sales','Sales Invoice','Y','Y','N','Y'),
             ($1,'01','01',$3,'Cash / Bank','Fine JV (metal transfer)','Y','Y','N','N'),
             ($1,'01','01',$3,'Cash / Bank','Contra','Y','Y','N','N'),
-            ($1,'01','01',$3,'Transaction','Wh Sales','Y','Y','N','N')`,
+            ($1,'01','01',$3,'Transaction','Wh Sales','Y','Y','N','N'),
+            ($1,'01','01',$3,'Sales','Sales Invoice','Y','Y','N','N')`,
     USERS.clerk.user,
     USERS.printViewer.user,
   );

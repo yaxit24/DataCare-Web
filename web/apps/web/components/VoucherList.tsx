@@ -30,6 +30,7 @@ export function VoucherList({
   onLoad,
   reloadKey,
   openKey,
+  canPrint = true,
 }: {
   table: string;
   book: string;
@@ -39,6 +40,8 @@ export function VoucherList({
   reloadKey?: unknown;
   /** Changing this opens the list and focuses its first voucher: the voucher number box's F1 (N172). */
   openKey?: number;
+  /** The session's USER_SET print right for this form; the server refuses the print route on its own as well. */
+  canPrint?: boolean;
 }) {
   const [rows, setRows] = useState<VRow[]>([]);
   const [open, setOpen] = useState(false);
@@ -173,6 +176,11 @@ export function VoucherList({
                         href={printHref(r.vchNo)}
                         target="_blank"
                         rel="noreferrer"
+                        onClick={(e) => {
+                          if (canPrint) return;
+                          e.preventDefault();
+                          setMsg('You Have No Print Rights.....');
+                        }}
                         style={{ marginLeft: 4 }}
                       >
                         Print
