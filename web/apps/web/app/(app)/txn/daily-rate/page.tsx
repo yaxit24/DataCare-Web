@@ -5,6 +5,8 @@ import { get, post, del, ApiError } from '../../../../lib/api';
 import { RateTicker } from '../../../../components/RateTicker';
 import { DAILY_RATE_CHANGED } from '../../../../components/DailyRateLabels';
 import { LookupPicker } from '../../../../components/LookupPicker';
+import { useRouter } from 'next/navigation';
+import { useScreenEscape, type ScreenKeyEvent } from '../../../../lib/screenEscape';
 import { todayLocal } from '../../../../lib/localDate';
 
 /**
@@ -47,6 +49,16 @@ const errText = (e: unknown, fallback: string) =>
   e instanceof ApiError ? e.body?.message || e.body?.error || e.message : fallback;
 
 export default function DailyRatePage() {
+  const router = useRouter();
+  const saveButton = useRef<HTMLButtonElement>(null);
+  const gridInputs = useRef(new Map<string, HTMLInputElement>());
+  // MS_RATE.cs:2149-2161: the editor commits before Escape moves to Save; a second Escape closes.
+  const onScreenKeyDown = (event: ScreenKeyEvent) => {
+    if (event.key !== 'Escape' || event.defaultPrevented) return;
+    event.preventDefault();
+    if (!busy) router.back();
+  };
+  const screenRef = useScreenEscape<HTMLDivElement>(onScreenKeyDown);
   const [date, setDate] = useState(todayLocal());
   const [header, setHeader] = useState<Header>(blankHeader);
   const [loaded, setLoaded] = useState({
@@ -107,7 +119,13 @@ export default function DailyRatePage() {
       if (shown.current !== d) return;
       setLoading(false);
       setRows([]);
-      setMsg({ kind: 'err', text: errText(e, 'failed to load') });
+      setMsg({
+        kind: 'err',
+        text:
+          e instanceof ApiError && e.status === 403
+            ? 'You Have No Rights.....' // MDI_FORM.cs:14395-14405
+            : errText(e, 'failed to load'),
+      });
     }
   }, []);
   useEffect(() => {
@@ -241,7 +259,7 @@ export default function DailyRatePage() {
   );
 
   return (
-    <div>
+    <div ref={screenRef} onKeyDown={onScreenKeyDown}>
       <h1>Rate Master</h1>
       <RateTicker />
       {msg && (
@@ -263,7 +281,7 @@ export default function DailyRatePage() {
                 if (!rows.length && !busy) void load(date);
               }}
               onKeyDown={(e) => {
-                if (e.key === 'F1') {
+                if (e.key === 'F1' && !e.ctrlKey) {
                   e.preventDefault();
                   void openList();
                 }
@@ -361,11 +379,60 @@ export default function DailyRatePage() {
               const cell = (key: keyof Row, label: string) => (
                 <td className="num">
                   <input
+                    ref={(input) => {
+                      const id = `${i}:${key}`;
+                      if (input) gridInputs.current.set(id, input);
+                      else gridInputs.current.delete(id);
+                    }}
+                    onKeyDown={(e) => {
+                      if (loading) return;
+                      // MS_RATE.cs:2178-2259: Enter at columns 5/8 advances rows to column 5.
+                      const keys: (keyof Row)[] = [
+                        'touch',
+                        'taxPct',
+                        'rate',
+                        'taxRate',
+                        'prTouch',
+                        'prRate',
+                      ];
+                      let row = i;
+                      let column = keys.indexOf(key);
+                      if (e.key === 'Escape') {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        saveButton.current?.focus();
+                        return;
+                      }
+                      if (e.key === 'Enter') {
+                        if (key === 'rate' || key === 'prRate') {
+                          if (i === rows.length - 1) {
+                            e.preventDefault();
+                            saveButton.current?.focus();
+                            return;
+                          }
+                          row++;
+                          column = 2;
+                        } else column++;
+                      } else if (e.key === 'ArrowRight') column++;
+                      else if (e.key === 'ArrowLeft') column--;
+                      else if (e.key === 'ArrowDown') row++;
+                      else if (e.key === 'ArrowUp') row--;
+                      else return;
+                      e.preventDefault();
+                      const input = gridInputs.current.get(
+                        `${Math.max(0, Math.min(rows.length - 1, row))}:${keys[Math.max(0, Math.min(keys.length - 1, column))]}`,
+                      );
+                      input?.focus();
+                      input?.select();
+                    }}
                     aria-label={`${label} ${r.grCode}`}
                     value={r[key] === 0 ? '' : String(r[key])}
                     inputMode="decimal"
-                    onChange={(e) => setCell(i, key, e.target.value)}
-                    readOnly={loading}
+                    onChange={(e) => {
+                      // MS_RATE.cs:1513-1530: purchase touch is displayed but never committed.
+                      if (key !== 'prTouch') setCell(i, key, e.target.value);
+                    }}
+                    readOnly={loading || key === 'prTouch'}
                     style={{ width: 100, textAlign: 'right' }}
                   />
                 </td>
@@ -379,7 +446,7 @@ export default function DailyRatePage() {
                   {cell('taxPct', 'Tax%')}
                   {cell('rate', 'Rate10gm')}
                   {cell('taxRate', 'TaxRate')}
-                  <td className="num">{r.prTouch ? r.prTouch.toFixed(2) : ''}</td>
+                  {cell('prTouch', 'PrTouch')}
                   {cell('prRate', 'PrRate')}
                 </tr>
               );
@@ -421,7 +488,12 @@ export default function DailyRatePage() {
           >
             Cancel
           </button>
-          <button className="primary" data-save-mnemonic disabled={busy || loading || !rows.length}>
+          <button
+            ref={saveButton}
+            className="primary"
+            data-save-mnemonic
+            disabled={busy || loading || !rows.length}
+          >
             {busy ? 'Saving…' : 'Save'}
           </button>
         </div>

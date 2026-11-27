@@ -1157,15 +1157,55 @@ export const purchaseReturn = {
         };
       },
     ),
-    {
-      ...C(
-        'config.setting-variant',
-        'T15',
-        'mutation',
-        'Playbook T15: a company with other rounding settings',
-        async () => ({}),
-      ),
-      blocked: 'No settings-variant company in the catalogue yet (G174 / N166).',
-    },
+    C(
+      'config.setting-variant',
+      'T15',
+      'mutation',
+      'TR_KR_ISU.cs:6522-6528 rounds the tax with DC_Main.MsTaxRof (CO_SET.TAX_ROF) while :4028 rounds labour with a fixed Math.Round(x, 0), ignoring LBR_ROF. With TAX_ROF 0 and LBR_ROF 2 (flipped in the case, as salesInvoiceResiduals config.setting-change does): net 10 at 6,123.45 and 237.55 /g saves metal 56,091, labour round(2,375.5, 0) = 2,376 (not 2,375.50), net 58,467, tax round(1,754.01, 0) = 1,754 (not 1,754.01) and total 60,221',
+      async (ctx) => {
+        const [saved] = await ctx.rows(
+          `SELECT "TAX_ROF" tax,"LBR_ROF" lbr FROM "CO_SET" WHERE tenant_id=$1 AND "CO_CODE"='01'`,
+        );
+        const set = (tax, lbr) =>
+          ctx.owner.$executeRawUnsafe(
+            `UPDATE "CO_SET" SET "TAX_ROF"=$2,"LBR_ROF"=$3 WHERE tenant_id=$1 AND "CO_CODE"='01'`,
+            ctx.tenantId,
+            tax,
+            lbr,
+          );
+        const expected = {
+          fine: 9.16,
+          metal: 56091,
+          labour: 2376,
+          net: 58467,
+          tax: 1754,
+          total: 60221,
+        };
+        await set('0', '2');
+        try {
+          const { page } = await ctx.session();
+          const vchNo = await createReturn(ctx, page, { lines: [{ ...LINE_P, making: '237.55' }] });
+          const [h] = await header(ctx, vchNo);
+          const [l] = await lines(ctx, vchNo);
+          const stored = {
+            fine: l.fine,
+            metal: l.amt,
+            labour: l.lbr,
+            net: h.net,
+            tax: h.tax,
+            total: h.tot,
+          };
+          assert.deepEqual(stored, expected);
+          return {
+            observation: `TAX_ROF 0 / LBR_ROF 2: voucher ${vchNo} stored ${JSON.stringify(stored)}`,
+            expected,
+            database: { header: h, line: l },
+            downstream: { total: h.tot },
+          };
+        } finally {
+          await set(saved?.tax ?? null, saved?.lbr ?? null);
+        }
+      },
+    ),
   ],
 };

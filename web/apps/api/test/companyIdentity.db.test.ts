@@ -132,6 +132,19 @@ const enabled = process.env.RUN_DB_INTEGRITY_TESTS === '1';
     await expect(
       saveCompanyIdentity(runtime, tenant, 'TEST', { CO_CODE: '03', CO_NAME: 'THIRD' }, false, 'L'),
     ).rejects.toThrow('You Cant Creat New Company');
+    // MS_COMPANY.cs:6054-6057 runs before the blank check (:6069-6072): a blank code in Lite gets the Lite text.
+    await expect(
+      saveCompanyIdentity(runtime, tenant, 'TEST', { CO_CODE: '', CO_NAME: '' }, false, 'L'),
+    ).rejects.toThrow('You Cant Creat New Company For DataCare Next Lite Version');
+    // MS_COMPANY.cs:6059-6067: Basic refuses an add once two companies exist, before the blank check.
+    const counted = await db.$queryRawUnsafe<{ n: number }[]>(
+      'SELECT count(*)::int n FROM "CO_MAST" WHERE tenant_id=$1 AND deleted_at IS NULL',
+      tenant,
+    );
+    expect(counted[0]?.n).toBeGreaterThanOrEqual(2);
+    await expect(
+      saveCompanyIdentity(runtime, tenant, 'TEST', { CO_CODE: '', CO_NAME: '' }, false, 'B'),
+    ).rejects.toThrow('You Cant Creat More Then 2 New Company For DataCare Next Basic Version...');
     expect(() => deleteCompanyIdentity(runtime, tenant, '01', '')).toThrow(
       'You cant Delete Defoult company...',
     );
