@@ -47,7 +47,8 @@ import { resolveBookAccountTx, resolveBookPolicyTx } from '../shared/bookPolicy.
 import { assertCounterCodes, resolveCounterStockPolicyTx } from '../shared/counterStockPolicy.js';
 import { resolveRoundingPolicyTx } from '../shared/roundingPolicyLoader.js';
 import type { RoundingPolicy } from '../shared/roundingPolicy.js';
-import { buildSaleRojmel, rojmelMetalFor } from '../shared/rojmel.js';
+import { rojmelMetalFor } from '../shared/rojmel.js';
+import { buildPurchaseRojmel, purchaseRojmelOptionsTx } from '../shared/purchaseRojmel.js';
 import {
   desktopLabourTypeFor,
   effectiveLabourRate,
@@ -61,6 +62,7 @@ import {
   tagSerialWidth,
   type LineAmountType,
 } from '../shared/settingsBehavior.js';
+import { purchaseBookItemTypeTx, purchaseTcsAccountTx, purchaseTcsTotals } from './purchaseTcs.js';
 import {
   purchaseLineAmounts,
   normalizePurchaseExplicitFine,
@@ -317,19 +319,21 @@ export function buildPurchaseLedger(p: {
   vchType?: string;
   totals: Pick<BillTotals, 'total' | 'taxable' | 'tax' | 'roundOff'>;
   expenseLegs?: LineLeg[];
-  /** PURC_WITH_LBR='N' labour/other to slot 4 (Ac_Ledr.cs:419-421); unmeasured code, so the unmapped band (G176). */
+  tcs?: number;
+  tcsAc?: string;
+  /** Non-A books with PURC_WITH_LBR='N': labour/other to slot 4 (Ac_Ledr.cs:419-421). */
   labourLeg?: { ac: string; amount: number };
 }): LedgerLine[] {
   const base = { ...p.key, VCH_TYPE: p.vchType ?? 'PURC' };
   const lines: LedgerLine[] = [];
-  if (p.totals.total !== 0)
+  if (p.totals.total + (p.tcs ?? 0) !== 0)
     lines.push({
       ...base,
       AC_CODE: p.acCode,
       legType: PURC_LEG.party,
       LD_CODE: p.controlAc ?? p.purchaseAc,
       DR_AMT: 0,
-      CR_AMT: p.totals.total,
+      CR_AMT: round2(p.totals.total + (p.tcs ?? 0)),
       SIGN: 'C',
     });
   const expense =
@@ -363,6 +367,18 @@ export function buildPurchaseLedger(p: {
       AC_CODE: p.taxAc,
       LD_CODE: p.acCode,
       DR_AMT: p.totals.tax,
+      CR_AMT: 0,
+      SIGN: 'D',
+    });
+  // Ac_Ledr.cs:434: parent TAX_MAST account, debit TCS, supplier as LD_CODE.
+  if (p.tcs && !p.tcsAc) throw new PurchaseValidationError('TCS posting account is required');
+  if (p.tcs)
+    lines.push({
+      ...base,
+      legType: PURC_LEG.tcs,
+      AC_CODE: p.tcsAc!,
+      LD_CODE: p.acCode,
+      DR_AMT: p.tcs,
       CR_AMT: 0,
       SIGN: 'D',
     });
@@ -508,6 +524,8 @@ const PURC_LEG = {
   party: 1,
   purchase: 3,
   tax: 6,
+  /** TCS (Ac_Ledr.cs:434). The keys here follow the build that wrote the 2024-25 data, which numbers TCS 07. */
+  tcs: 7,
   settleParty: 16,
   settleCash: 17,
   kasarParty: 18,
@@ -891,7 +909,19 @@ async function writePurchaseTx(
   const hmCgst = interState ? 0 : roundingPolicy.roundTaxAmount(hmTax / 2);
   const hmSgst = interState ? 0 : roundingPolicy.roundTaxAmount(hmTax - hmCgst);
   const hmIgst = interState ? hmTax : 0;
-  const grandTotal = roundingPolicy.roundBillTotal(totals.total + hmAmt + hmTax);
+  const withTcs = purchaseTcsTotals(totals, num(input.tcsPct), roundingPolicy.roundBillTotal);
+  const { tcs, billWithTcs } = withTcs;
+  const ledgerTotals = { ...totals, total: withTcs.total, roundOff: withTcs.roundOff };
+  const grandTotal = roundingPolicy.roundBillTotal(billWithTcs + hmAmt + hmTax);
+  // The desktop posts no TCS leg when the code has no account, leaving the voucher unbalanced; the web refuses.
+  const tcsCode = text(input.tcsCode);
+  const tcsAc =
+    !isPurchaseQuotation && tcs !== 0 && tcsCode
+      ? await purchaseTcsAccountTx(tx, tenantId, input.scope.coCode, tcsCode)
+      : '';
+  if (!isPurchaseQuotation && tcs !== 0 && !tcsAc)
+    throw new PurchaseValidationError(`TCS code ${tcsCode} has no tax account in the Tax master`);
+  const linePathBook = (await purchaseBookItemTypeTx(tx, tenantId, input.scope)) === 'A';
 
   const validateConfiguredAccount = (
     label: string,
@@ -903,7 +933,7 @@ async function writePurchaseTx(
     return configured;
   };
   const controlAc =
-    isPurchaseQuotation || totals.total === 0
+    isPurchaseQuotation || totals.total + tcs === 0
       ? purchaseAc
       : await resolveBookAccountTx(tx, input.scope, bookPolicy, 1);
   let cashAc = controlAc;
@@ -916,14 +946,13 @@ async function writePurchaseTx(
   }
   let roundAc = requestedRoundAc ?? controlAc;
   let kasarAc = input.kasarAc ?? controlAc;
-  if (!isPurchaseQuotation && (totals.roundOff !== 0 || round2(num(input.kasar)) !== 0)) {
+  if (!isPurchaseQuotation && (ledgerTotals.roundOff !== 0 || round2(num(input.kasar)) !== 0)) {
     const configured = await resolveBookAccountTx(tx, input.scope, bookPolicy, 3);
     roundAc = validateConfiguredAccount('round account', requestedRoundAc, configured);
     kasarAc = validateConfiguredAccount('kasar account', input.kasarAc, configured);
   }
 
-  // Per-group expense accounts (desktop GROUP_MAST.PURC_AC): map each item → its group's purchase
-  // account, fall back to the single purchaseAc when unmapped. Σ legs == taxable.
+  // Ac_Ledr.cs:410-421: A books use GROUP_MAST.PURC_AC; other books use slot 1.
   const itCodes = Array.from(
     new Set(lines.map((l) => String(l.itCode ?? '').trim()).filter(Boolean)),
   );
@@ -947,7 +976,7 @@ async function writePurchaseTx(
         .trim()
         .toUpperCase();
       if (!item) throw new PurchaseValidationError(`item not found or invalid: ${item || '?'}`);
-      if (!isPurchaseQuotation && !account)
+      if (!isPurchaseQuotation && linePathBook && !account)
         throw new PurchaseValidationError(`missing GROUP_MAST.PURC_AC for item ${item || '?'}`);
       if (itemType !== 'G' && itemType !== 'S') {
         throw new PurchaseValidationError(`invalid ITEM_MAST.IT_TYPE for item ${item || '?'}`);
@@ -962,7 +991,7 @@ async function writePurchaseTx(
       throw new PurchaseValidationError(`item configuration missing: ${missingItems.join(', ')}`);
     }
     const missing = itCodes.filter((item) => !purcAcByItem[item]);
-    if (!isPurchaseQuotation && missing.length)
+    if (!isPurchaseQuotation && linePathBook && missing.length)
       throw new PurchaseValidationError(
         `item/group posting configuration missing: ${missing.join(', ')}`,
       );
@@ -983,27 +1012,29 @@ async function writePurchaseTx(
     if (stored === 'G' || stored === 'S') return stored;
     return itemTypeByItem[text(computed[idx]?.in.itCode)]!;
   };
-  // Ac_Ledr.cs:520-532: PURC_WITH_LBR='Y' keeps labour/other in the primary purchase leg; 'N'
-  // separates those charges to BOOK_DETL row 4. Discount remains in the primary allocation so the
+  // Ac_Ledr.cs:410-421: A books keep line labour/other; non-A books with PURC_WITH_LBR='N'
+  // separate those charges to BOOK_DETL row 4. Discount remains in the primary allocation so the
   // web ledger remains exactly balanced without inventing an additional desktop discount account.
   const splits = computed.map((c) =>
     purchaseExpenseSplit(
       c.calc.net,
       c.calc.labour,
       num(c.in.otherAmount),
-      behavior.purchaseWithLabour,
+      linePathBook || behavior.purchaseWithLabour,
     ),
   );
   const labourOtherTotal = round2(splits.reduce((sum, split) => sum + split.labourOther, 0));
   const primaryTotal = splits.reduce((sum, split) => sum + split.primary, 0);
-  const expenseLegs = buildLineLegs(
-    computed.map((c, index) => ({
-      net: splits[index]?.primary ?? 0,
-      ac: purcAcByItem[String(c.in.itCode ?? '').trim()] ?? purchaseAc,
-    })),
-    round2(totals.taxable - labourOtherTotal),
-    primaryTotal,
-  );
+  const expenseLegs = linePathBook
+    ? buildLineLegs(
+        computed.map((c, index) => ({
+          net: splits[index]?.primary ?? 0,
+          ac: purcAcByItem[String(c.in.itCode ?? '').trim()] ?? purchaseAc,
+        })),
+        round2(totals.taxable - labourOtherTotal),
+        primaryTotal,
+      )
+    : [{ ac: controlAc, amount: round2(totals.taxable - labourOtherTotal) }];
   const labourLeg =
     !isPurchaseQuotation && labourOtherTotal !== 0
       ? { ac: await resolveBookAccountTx(tx, input.scope, bookPolicy, 4), amount: labourOtherTotal }
@@ -1387,7 +1418,7 @@ async function writePurchaseTx(
     CGST_TAX: totals.cgst,
     SGST_TAX: totals.sgst,
     IGST_TAX: totals.igst,
-    ROF_AMT: totals.roundOff,
+    ROF_AMT: ledgerTotals.roundOff,
     TOT_AMT: grandTotal,
     RATE_UNFIX: input.rateUnfix ? 'Y' : 'N',
     // Desktop PR_DATA header columns (TR_PURC.cs:12982-13056). Party address/bank/cheque come from
@@ -1405,7 +1436,7 @@ async function writePurchaseTx(
     DISC_PRC: num(input.discountPct), // MSG2_TOTAL[1,2]:12982
     TCS_CODE: text(input.tcsCode).slice(0, 10) || null, // MSG2_TOTAL[3,4]:12987
     TCS_PRC: num(input.tcsPct), // MSG2_TOTAL[3,2]:12988
-    TCS_AMT: round2(num(input.tcsAmount)), // MSG2_TOTAL[3,3]:12989
+    TCS_AMT: tcs, // MSG2_TOTAL[3,3]:12989
     /**
      * `PR_TDS_TAX` — purchase TDS is persisted only when the company charges it (P4).
      *
@@ -1439,8 +1470,10 @@ async function writePurchaseTx(
     roundAc,
     controlAc,
     vchType: bookPolicy.vchType,
-    totals,
+    totals: ledgerTotals,
     expenseLegs,
+    tcs,
+    tcsAc,
     labourLeg,
   });
   if (hmAmt > 0) {
@@ -1536,7 +1569,7 @@ async function writePurchaseTx(
     PARTY_NAME: supplierName || null,
     NET_AMT: totals.taxable,
     DISC_AMT: totals.discount,
-    TOT_AMT: totals.total,
+    TOT_AMT: billWithTcs, // Ac_Tax.cs:121-123: PR_DATA.TOT_AMT less HM_AMT and HM_TAX_AMT
     TAX_SIGN: '-',
     TAX_CODE: taxPolicy.taxCode,
   };
@@ -1701,14 +1734,19 @@ async function writePurchaseTx(
     await insertRowTx(tx, 'PR_DATA', tenantId, header);
     for (const row of detl) await insertRowTx(tx, 'PR_DETL', tenantId, row);
     for (const row of prIdtl) await insertRowTx(tx, 'PR_IDTL', tenantId, row);
-    return { vchNo, totals };
+    return { vchNo, totals: { ...ledgerTotals, total: grandTotal } };
   }
 
-  // The Rojmel, inward. A purchase is the mirror of a sale: metal comes IN (SIGN '+'), the expense
-  // account is debited and the party credited. Confirmed against the real desktop database — books 035
-  // and 037 (gold purchase) write IT_TYPE 'G' with SIGN '+', 036 and 038 (silver) write 'S' with '+',
-  // against 'G'/'S' with '-' on the tax-invoice books.
-  const rojmelRows = buildSaleRojmel(
+  // The Rojmel, inward: Purc_Rojmel (Ac_Rojmel.cs:115-177) has its own rows, accounts and the data's codes
+  // (purchaseRojmel.ts). Metal comes IN (SIGN '+'), the purchase account is debited and the party credited.
+  const rojmelOptions = await purchaseRojmelOptionsTx(tx, input.scope, bookPolicy, header, {
+    withLabour: behavior.purchaseWithLabour,
+    partyAccount: controlAc,
+    kasarAccount: kasarAc,
+    taxAccount: taxAc,
+    tcsAccount: tcsAc,
+  });
+  const rojmelRows = buildPurchaseRojmel(
     {
       scope: { coCode: input.scope.coCode, lcCode: input.scope.lcCode, coYear: key.CO_YEAR },
       key,
@@ -1719,6 +1757,8 @@ async function writePurchaseTx(
       bookName: bookPolicy.bookName,
       partyName: supplierName || input.acName || '', // AC_MAST name, so a reopen cannot change it (WP-28)
       partyCode: input.acCode,
+      voucherDescription: text(header.VCH_DESC),
+      partyMasterName: supplierName,
     },
     computed.map((c, idx) => {
       const item = String(c.in.itCode ?? '').trim();
@@ -1751,6 +1791,8 @@ async function writePurchaseTx(
         touch: num(c.in.touch),
         wastage: num(c.in.westPct),
         fine: c.calc.fine,
+        otherFine: num(detl[idx]?.ITM_OTH_FINE),
+        silverFine: num(detl[idx]?.SILVER_FINE),
         rate: num(c.in.rate),
         itemAmount: c.calc.metal,
         labourRate: num(c.in.labourRate),
@@ -1759,24 +1801,8 @@ async function writePurchaseTx(
         netAmount: c.calc.net,
       };
     }),
-    {
-      taxAc,
-      taxAmount: totals.tax,
-      // THE PARTY ROJMEL ROW IS CONDITIONAL ON THE BILL BEING OUTSTANDING, and this argument is that
-      // OUTSTANDING amount - buildSaleRojmel names its local `outstanding` - not the bill total.
-      //
-      // Family 1 measured the rule on the sale books: of 47 sales with BILL_OS = 0, ZERO carry a party row;
-      // of 42 with BILL_OS <> 0, all 42 do. A settled bill leaves no receivable for a day book to show.
-      // Passing `totals.total` made the condition always true, so every purchase got a party row.
-      //
-      // It reproduces on the real purchase books. Voucher 035/00001 pays 6780.00 cash against a 6780.00 bill
-      // - BILL_OS 0 - and has ONE Rojmel row, the line row. Voucher 035/00003 leaves a balance and has three.
-      // I first recorded that pair as a DESKTOP INCONSISTENCY, having compared them on line count and tender
-      // without checking BILL_OS - the discriminator already measured and written into rojmel.ts in family 1.
-      // Retracted here because "the desktop is inconsistent" ends investigation and invites an invented rule.
-      partyAmount: round2(grandTotal - tender.paidNow - tender.kasar),
-    },
-    false, // inward: metal in, party credited
+    header,
+    rojmelOptions,
   );
 
   // LDR_NAME carries PR_DATA.AC_NAME on the party's bill leg (Ac_Ledr.cs:377, leg 01) and on the cash account's
@@ -1846,7 +1872,7 @@ async function writePurchaseTx(
     }
   }
 
-  return { vchNo, totals };
+  return { vchNo, totals: { ...ledgerTotals, total: grandTotal } };
 }
 
 /** Create a purchase with independent main and hidden desktop voucher numbering. */

@@ -8,6 +8,7 @@ import {
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { del, get, post, put, ApiError } from '../../../../lib/api';
+import { usePrintGate } from '../../../../lib/formRights';
 import { useBusinessScope, useRoundingPolicy } from '../../../../components/BusinessScope';
 import { BookSelect } from '../../../../components/BookSelect';
 import { LookupPicker } from '../../../../components/LookupPicker';
@@ -26,6 +27,7 @@ import {
 } from '../../../../lib/companySettings';
 import {
   billTotals,
+  roundHalfEven,
   fineFor,
   normalizePurchaseExplicitFine,
   purchaseAmountType,
@@ -303,6 +305,7 @@ function PlainPurchasePage() {
   // WP-28 (D6): the stored voucher as read; every value this screen does not show is sent back on save.
   const [loadedView, setLoadedView] = useState<Record<string, unknown> | null>(null);
   const [err, setErr] = useState('');
+  const printGate = usePrintGate('Purchase/Purchase Invoice', setErr); // TR_PURC.cs:13541-13548
   // Desktop purchase header fields (TR_PURC:12982-13056) — party contact, bank/cheque,
   // credit terms, discount, TDS/TCS, hallmark charge and the posting-account overrides.
   const [address1, setAddress1] = useState('');
@@ -325,7 +328,6 @@ function PlainPurchasePage() {
   const [creditDays, setCreditDays] = useState('');
   const [discountPct, setDiscountPct] = useState('');
   const [tcsPct, setTcsPct] = useState('');
-  const [tcsAmount, setTcsAmount] = useState('');
   const [tdsPct, setTdsPct] = useState('');
   const [tdsAmount, setTdsAmount] = useState('');
   const [hmAmount, setHmAmount] = useState('');
@@ -420,7 +422,9 @@ function PlainPurchasePage() {
   );
   const taxable = previewTotals.taxable;
   const taxPrev = previewTotals.tax;
-  const totalPrev = previewTotals.total;
+  // TR_PURC.cs:15072: whole-rupee TCS on net before discount plus tax.
+  const tcsAmount = roundHalfEven(((previewTotals.net + taxPrev) * n(tcsPct)) / 100, 0);
+  const totalPrev = roundingPolicy.roundBillTotal(taxable + taxPrev + tcsAmount);
 
   function newPurchase() {
     setLoadedVchNo('');
@@ -486,7 +490,6 @@ function PlainPurchasePage() {
       setCreditDays(str(view.creditDays));
       setDiscountPct(str(view.discountPct));
       setTcsPct(str(view.tcsPct));
-      setTcsAmount(str(view.tcsAmount));
       setTdsPct(str(view.tdsPct));
       setTdsAmount(str(view.tdsAmount));
       setHmAmount(str(view.hmAmount));
@@ -647,7 +650,7 @@ function PlainPurchasePage() {
         creditDays: creditDays ? n(creditDays) : undefined,
         discountPct: discountPct ? n(discountPct) : undefined,
         tcsPct: tcsPct ? n(tcsPct) : undefined,
-        tcsAmount: tcsAmount ? n(tcsAmount) : undefined,
+        tcsAmount,
         tdsPct: tdsPct ? n(tdsPct) : undefined,
         tdsAmount: tdsAmount ? n(tdsAmount) : undefined,
         hmAmount: hmAmount ? n(hmAmount) : undefined,
@@ -1130,7 +1133,7 @@ function PlainPurchasePage() {
               </div>
               <div className="field">
                 <label>TCS Amt</label>
-                <input value={tcsAmount} onChange={(e) => setTcsAmount(e.target.value)} />
+                <input value={tcsAmount} readOnly />
               </div>
               <div className="field">
                 <label>TDS %</label>
@@ -1218,7 +1221,7 @@ function PlainPurchasePage() {
               type="button"
               className="ghost"
               onClick={() =>
-                openDocument(
+                printGate.open(
                   `/api/purchases/invoice?coBook=${encodeURIComponent(coBook)}&coYear=${encodeURIComponent(coYear)}&vchNo=${encodeURIComponent(String(result.vchNo))}&format=html`,
                 )
               }
@@ -1248,6 +1251,7 @@ function PlainPurchasePage() {
           `/api/purchases/invoice?coBook=${encodeURIComponent(coBook)}&coYear=${encodeURIComponent(coYear)}&vchNo=${encodeURIComponent(v)}&format=html`
         }
         reloadKey={result?.vchNo}
+        canPrint={printGate.canPrint}
       />
       {/* Desktop BtnImgS / BtnImgC / BtnImgD photograph the tag on the current grid row. */}
       <EntityImagePanel

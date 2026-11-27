@@ -20,8 +20,8 @@
  *
  * ## LD_CODE is the CONTRA account
  * Not a stock ledger. On a real sale the party is 000888 and the sales account 00004, and each row
- * names the OTHER side in LD_CODE. `AC_NAME` is denormalised to the PARTY's name on every row,
- * including rows whose AC_CODE is the sales or tax account — it is the day book's display name.
+ * names the OTHER side in LD_CODE. Sale item/party rows carry the party name; tax and tender rows
+ * have a blank name, and adjustments carry prefixes (Ac_Rojmel.cs:49-106).
  *
  * ## Composition of a sale — verified end to end on book 027 voucher 00001
  * The sale: party 000888, TOT_AMT 1560.00, TAX_AMT 45.45, NET_AMT 1515.00, two lines
@@ -63,45 +63,38 @@ export const ROJMEL_ROW_TYPE = {
   ADVANCE: '14',
   OLD_METAL: '16',
   /**
-   * Round-off. **SOURCE-DERIVED, NOT VERIFIED AGAINST DATA** — unlike every other type here.
-   *
-   * This company's database has `ROF_AMT` non-zero on ZERO of 190 sales, so there is no real row to
-   * check against; the same is true of `CARD_AMT`, `DISC_AMT` and `TCS_AMT`. The shape below comes from
-   * `Ac_Rojmel.Sales_Rojmel` alone, and that file has already been shown to be a LATER version than the
-   * code which wrote this data (its sale item rows are type `'02'`, the data's are `'01'`). So the
-   * amount, account and direction are trustworthy; the type code is a best reading and cannot be
-   * confirmed until a database that actually uses round-off is available.
+   * Party CREDIT (BILL_OS < 0, Ac_Rojmel.cs:54): the data's code, 1 real row (a sale with a negative outstanding). The
+   * rows below have no real row: their codes apply the constant offset the data shows from the source
+   * from cheque on (:90 '16' -> '11', :94 '18' -> '13', :96 '19' -> '14', :100 '21' -> '16'), so card
+   * :92 '17' -> '12', discount :98 '20' -> '15', card adjusted :104 '23' -> '18', UPI :106 '24' -> '19'.
+   * Round-off keeps its earlier source reading '22' (:102); zero of 190 real sales carry one.
    */
+  PARTY_CREDIT: '03',
+  CARD: '12',
+  DISCOUNT: '15',
+  CARD_ADJUSTED: '18',
+  UPI: '19',
   ROUND_OFF: '22',
 } as const;
 
 /**
- * Row types for an INWARD (purchase) day book, derived from the 51 captured purchase vouchers.
- *
- * These are a SEPARATE set from `ROJMEL_ROW_TYPE` above, which was derived from SALE data. The codes are not
- * interchangeable: `14` is the advance row on a sale and the unpriced-metal row on a purchase. This file already
- * records that `Ac_Rojmel.Sales_Rojmel` is a later version than the code which wrote this data — its sale item rows
- * are `02` where the data's are `01` — so a type code only means something within the family it was measured in.
- *
- * Measured distribution across the purchases:
- *
- *   `01` 43 rows  the item's MONEY row, on the contra account, no fine
- *   `14` 42 rows  the item's METAL row, on the PARTY, carrying `ITM_FINE`, no money
- *   `08` 19 rows  the party money leg
- *   `03`/`11`/`04`/`09`  settlement, cheque, tax and one further contra row
- *
- * The selector is the line's RATE, correlating 51/51: every voucher whose lines all carry `ITM_RATE = 0` has a
- * `14` row per line, and every voucher with a rate has none. That is the business case — metal received before its
- * price is fixed has a weight to record against the party but no value to book yet.
+ * Inward codes still used by `buildSaleRojmel(..., outward = false)` (the sales return). The PURCHASE day book has
+ * its own builder and the full measured code set: `PURCHASE_ROJMEL_TYPE` in purchaseRojmel.ts (Purc_Rojmel).
  */
-export const ROJMEL_PURCHASE_ROW_TYPE = {
-  /** Item money row. Same code as the sale item row, and measured independently here. */
-  ITEM_MONEY: '01',
-  /** Item metal row for metal taken in at no fixed rate. */
-  UNPRICED_METAL: '14',
-  /** The party money leg. */
-  PARTY: '08',
-} as const;
+export const ROJMEL_PURCHASE_ROW_TYPE = { UNPRICED_METAL: '14' } as const; // 51/51 captured purchases
+
+/** The sale settlement rows' codes (see ROJMEL_ROW_TYPE). */
+const SETTLEMENT_TYPE = {
+  cheque: ROJMEL_ROW_TYPE.CHEQUE,
+  card: ROJMEL_ROW_TYPE.CARD,
+  cardAdjusted: ROJMEL_ROW_TYPE.CARD_ADJUSTED,
+  upi: ROJMEL_ROW_TYPE.UPI,
+  discount: ROJMEL_ROW_TYPE.DISCOUNT,
+  kasar: ROJMEL_ROW_TYPE.KASAR,
+  advance: ROJMEL_ROW_TYPE.ADVANCE,
+  oldMetal: ROJMEL_ROW_TYPE.OLD_METAL,
+  roundOff: ROJMEL_ROW_TYPE.ROUND_OFF,
+};
 
 export type RojmelRowType = (typeof ROJMEL_ROW_TYPE)[keyof typeof ROJMEL_ROW_TYPE];
 
@@ -180,6 +173,7 @@ export function rojmelLedrKey(
     // book 052, so the same code means different things depending on the book.
     | RojmelKarigarRowType
     | RojmelPurcReturnRowType
+    | import('./purchaseRojmel.js').PurchaseRojmelRowType
     | (typeof ROJMEL_CASH_ROW_TYPE)[keyof typeof ROJMEL_CASH_ROW_TYPE],
   lineNo?: number,
 ): string {
@@ -237,9 +231,13 @@ export interface RojmelContext {
   vchDate: unknown;
   vchType: string;
   bookName: string;
-  /** Denormalised onto AC_NAME of every row — the day book's display name. */
+  /** Header name; individual builders override it where the desktop uses a different display name. */
   partyName: string;
   partyCode: string;
+  /** SL_DATA/PR_DATA.VCH_DESC: IT_DESC of every money row (Ac_Rojmel.cs:52-106, :126-166). */
+  voucherDescription?: string;
+  /** AC_MAST.AC_NAME of the party: the old-metal and purchase metal rows join it (Ac_Rojmel.cs:100, :173). */
+  partyMasterName?: string;
 }
 
 /**
@@ -249,7 +247,7 @@ export interface RojmelContext {
  * `BOOK_DETL` slot rather than being chosen by the caller.
  */
 export interface RojmelSettlement {
-  kind: 'cheque' | 'kasar' | 'advance' | 'oldMetal' | 'roundOff';
+  kind: keyof typeof SETTLEMENT_TYPE;
   account: string;
   amount: number;
   /** Old-metal rows carry the line's weight; the others do not. */
@@ -391,6 +389,7 @@ export function buildSaleRojmel(
     taxAc?: string;
     taxAmount?: number;
     partyAmount: number;
+    partyAccount?: string;
     /**
      * Settlement and adjustment rows. Each is written ONLY when its amount is non-zero, exactly as
      * `Ac_Rojmel.Sales_Rojmel` guards every one of its inserts with `AND <column> <> 0`. A sale settled
@@ -406,20 +405,8 @@ export function buildSaleRojmel(
   for (const l of lines) {
     if (!(l.amount || l.grossWt || l.pcs)) continue; // a wholly empty line is not a day-book event
 
-    /**
-     * An INWARD line taken in at no fixed rate gets a METAL row instead of a money row.
-     *
-     * Measured on all 51 captured purchases: a voucher whose lines carry `ITM_RATE = 0` has one type-`14` row per
-     * line — on the PARTY, carrying `ITM_FINE`, with no money — and no money row at all when the line's amount is
-     * zero as well. A voucher with a rate has money rows and no metal row. The correlation is 51/51.
-     *
-     * The web wrote only the money row, so every unpriced purchase was missing the weight side of its day book.
-     * In a jewellery business the Rojmel metal columns are how gold movement is read, so the omission is visible
-     * to the operator, not merely to a differ.
-     *
-     * Scoped to `!outward`: the sale day book uses `14` for the advance row, and these codes do not carry across
-     * families.
-     */
+    // An INWARD line at no fixed rate gets a METAL row (type 14, on the party, carrying ITM_FINE): 51/51 captured
+    // purchases. Only the sales return still takes this path; the purchase has buildPurchaseRojmel.
     const unpriced = !outward && !(l.rate ?? 0);
     if (unpriced) {
       rows.push({
@@ -503,20 +490,21 @@ export function buildSaleRojmel(
   // absolute). Measured on the real database: of 47 sales with BILL_OS = 0, ZERO carry a party row; of
   // 42 with BILL_OS <> 0, all 42 do. A fully settled bill leaves no receivable for a day book to show,
   // so writing one unconditionally overstated the day's debtors.
-  //
-  // Contra is the revenue account of the first line, mirroring the real row whose LD_CODE was the sales
-  // account.
-  const revenueAc = lines.find((l) => l.revenueAc)?.revenueAc ?? '';
+  // Ac_Rojmel.cs:52/54: the contra is BOOK_DETL slot 1 (`partyAccount`), not the first line's group account; a
+  // credit is the data's type 03 (seen on a real sale with a negative outstanding).
+  const revenueAc = legs.partyAccount ?? lines.find((l) => l.revenueAc)?.revenueAc ?? '';
   const outstanding = legs.partyAmount;
   if (outstanding) {
     // A negative outstanding means the customer overpaid: the party is credited, not debited, and the
     // amount is stated absolutely.
     const owed = outstanding > 0;
     const amount = Math.abs(outstanding);
+    const type = outward && !owed ? ROJMEL_ROW_TYPE.PARTY_CREDIT : ROJMEL_ROW_TYPE.PARTY;
     rows.push({
-      ...blank(ctx, rojmelLedrKey(ctx.scope, ctx.coBook, ctx.vchNo, ROJMEL_ROW_TYPE.PARTY)),
+      ...blank(ctx, rojmelLedrKey(ctx.scope, ctx.coBook, ctx.vchNo, type)),
       AC_CODE: ctx.partyCode,
       LD_CODE: revenueAc,
+      IT_DESC: ctx.voucherDescription ?? '',
       DR_AMT: outward === owed ? amount : 0,
       CR_AMT: outward === owed ? 0 : amount,
     });
@@ -527,22 +515,23 @@ export function buildSaleRojmel(
     rows.push({
       ...blank(ctx, rojmelLedrKey(ctx.scope, ctx.coBook, ctx.vchNo, ROJMEL_ROW_TYPE.TAX)),
       AC_CODE: legs.taxAc,
+      AC_NAME: outward ? '' : ctx.partyName, // Ac_Rojmel.cs:56
+      IT_DESC: ctx.voucherDescription ?? '',
       LD_CODE: ctx.partyCode,
       CR_AMT: outward ? legs.taxAmount : 0,
       DR_AMT: outward ? 0 : legs.taxAmount,
     });
   }
 
-  // Settlement and adjustment rows. All four are DEBITS on an outward voucher: money or metal coming in
-  // against the bill reduces what the party owes. Old-metal rows keep their weight even though IT_TYPE
-  // is 'A' — the desktop stores pcs, gross, net, touch and fine on them, so the day book can show metal
-  // taken in exchange without counting it as a metal sale.
-  const TYPE_OF: Record<RojmelSettlement['kind'], RojmelRowType> = {
-    cheque: ROJMEL_ROW_TYPE.CHEQUE,
-    kasar: ROJMEL_ROW_TYPE.KASAR,
-    advance: ROJMEL_ROW_TYPE.ADVANCE,
-    oldMetal: ROJMEL_ROW_TYPE.OLD_METAL,
-    roundOff: ROJMEL_ROW_TYPE.ROUND_OFF,
+  // Settlement and adjustment rows. All are DEBITS on an outward voucher: money or metal coming in
+  // against the bill reduces what the party owes (card-adjusted names the party in AC_CODE, :104).
+  // Old-metal rows keep their weight even though IT_TYPE is 'A' — the desktop stores pcs, gross, net,
+  // touch and fine on them, so the day book can show metal taken in exchange without counting it as a sale.
+  const PREFIX: Partial<Record<RojmelSettlement['kind'], string>> = {
+    kasar: 'KSR',
+    advance: 'OADJ',
+    discount: 'DISC',
+    oldMetal: 'OLD PURC',
   };
   for (const st of legs.settlements ?? []) {
     if (!st.amount) continue; // the desktop guards every settlement insert with `<> 0`
@@ -556,15 +545,24 @@ export function buildSaleRojmel(
         ...blank(ctx, rojmelLedrKey(ctx.scope, ctx.coBook, ctx.vchNo, ROJMEL_ROW_TYPE.ROUND_OFF)),
         AC_CODE: ctx.partyCode,
         LD_CODE: st.account,
+        AC_NAME: `ROF - ${ctx.partyName}`,
+        IT_DESC: ctx.voucherDescription ?? '',
         CR_AMT: st.amount > 0 ? st.amount : 0,
         DR_AMT: st.amount < 0 ? st.amount : 0,
       });
       continue;
     }
     rows.push({
-      ...blank(ctx, rojmelLedrKey(ctx.scope, ctx.coBook, ctx.vchNo, TYPE_OF[st.kind], st.lineNo)),
-      AC_CODE: st.account,
-      LD_CODE: ctx.partyCode,
+      ...blank(
+        ctx,
+        rojmelLedrKey(ctx.scope, ctx.coBook, ctx.vchNo, SETTLEMENT_TYPE[st.kind], st.lineNo),
+      ),
+      AC_CODE: st.kind === 'cardAdjusted' ? ctx.partyCode : st.account,
+      LD_CODE: st.kind === 'cardAdjusted' ? st.account : ctx.partyCode,
+      // Ac_Rojmel.cs:90-106: tender rows are unnamed; adjustments prefix the name (old metal: its AC_MAST name).
+      AC_NAME: PREFIX[st.kind]
+        ? `${PREFIX[st.kind]} - ${st.kind === 'oldMetal' ? ctx.partyMasterName || ctx.partyName : ctx.partyName}`
+        : '',
       DR_AMT: outward ? st.amount : 0,
       CR_AMT: outward ? 0 : st.amount,
       ITM_PCS: st.pcs ?? 0,
@@ -572,7 +570,7 @@ export function buildSaleRojmel(
       ITM_NWT: st.netWt ?? 0,
       ITM_TOUCH: st.touch ?? 0,
       ITM_FINE: st.fine ?? 0,
-      IT_DESC: st.description ?? '',
+      IT_DESC: st.kind === 'oldMetal' ? (st.description ?? '') : (ctx.voucherDescription ?? ''),
       IT_CODE: st.itemCode ?? '',
     });
   }

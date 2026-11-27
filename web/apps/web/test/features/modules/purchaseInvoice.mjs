@@ -1318,6 +1318,45 @@ export const purchaseInvoice = {
     ),
 
     C(
+      'rights.print-needs-frm-print',
+      'T11',
+      'refusal',
+      'TR_PURC.cs:13541-13548: BtnPrint answers "You Have No Print Rights....." when USER_SET.FRM_PRINT is not Y.',
+      async (ctx) => {
+        const admin = await ctx.session();
+        const vchNo = await createOne(ctx, admin.page);
+        const before = await header(ctx, vchNo);
+        const viewer = await ctx.session(as(USERS.printViewer.user));
+        // Not openPurchase: the print-less user's Save stays disabled, which this case does not need.
+        await viewer.page.goto('/txn/purchase');
+        await viewer.page.getByRole('heading', { name: 'Purchase Invoice', exact: true }).waitFor();
+        let popups = 0;
+        viewer.page.context().on('page', () => popups++);
+        await viewer.page.getByRole('button', { name: '▸ Recent vouchers', exact: true }).click();
+        const row = viewer.page.locator('table.grid tr', { hasText: vchNo }).last();
+        await row.getByRole('link', { name: 'Print', exact: true }).click();
+        await viewer.page.getByText('You Have No Print Rights.....').waitFor();
+        assert.equal(popups, 0, 'no document window opens');
+        // The server refuses both bill documents on its own, whatever the screen does.
+        const answers = {};
+        for (const url of [
+          `/api/purchases/${vchNo}/print?coBook=${BOOK}&format=html`,
+          `/api/purchases/invoice?coBook=${BOOK}&vchNo=${vchNo}&format=html`,
+        ]) {
+          answers[url] = (await viewer.page.request.get(url)).status();
+          assert.equal(answers[url], 403, url);
+        }
+        const after = await header(ctx, vchNo);
+        assert.deepEqual(after, before);
+        return {
+          observation: `print-less user saw the message and got ${JSON.stringify(answers)}`,
+          expected: 'message, no window, 403 from both print routes; voucher unchanged',
+          database: { before, after },
+        };
+      },
+    ),
+
+    C(
       'concurrency.stale-second-save',
       'T12',
       'refusal',
@@ -1487,7 +1526,7 @@ export const purchaseInvoice = {
       'settings.labour-to-slot-4',
       'T15',
       'mutation',
-      "Ac_Ledr.cs:419-421: with PURC_WITH_LBR = N a line's labour posts to the purchase book's slot 4; a provisioned book has it (G184)",
+      "Ac_Ledr.cs:419-421: with PURC_WITH_LBR = N a gold or silver book (ITM_TYPE not A) posts a line's labour to its slot 4; a provisioned book has it (G184)",
       async (ctx) => {
         const { page } = await ctx.session();
         const setLabourSetting = async (value) => {
@@ -1510,6 +1549,13 @@ export const purchaseInvoice = {
         const [{ before }] = await ctx.rows(
           `SELECT coalesce("PURC_WITH_LBR",'') before FROM "CO_SET" WHERE tenant_id=$1 AND "CO_CODE"='01'`,
         );
+        const [{ itemType }] = await ctx.rows(
+          `SELECT coalesce("ITM_TYPE",'') "itemType" FROM "BOOK_DATA" WHERE tenant_id=$1 AND "CO_CODE"='01' AND "CO_BOOK"='${BOOK}'`,
+        );
+        // An all-metal 'A' book keeps labour in each line's group leg whatever the setting (Ac_Ledr.cs:410).
+        await ctx.rows(
+          `UPDATE "BOOK_DATA" SET "ITM_TYPE"='G' WHERE tenant_id=$1 AND "CO_CODE"='01' AND "CO_BOOK"='${BOOK}'`,
+        );
         await setLabourSetting('N');
         try {
           const vchNo = await createOne(ctx, page); // 20 g x 150 making = 3,000 labour
@@ -1531,6 +1577,10 @@ export const purchaseInvoice = {
           };
         } finally {
           await setLabourSetting(before === 'N' ? 'N' : 'Y');
+          await ctx.rows(
+            `UPDATE "BOOK_DATA" SET "ITM_TYPE"=nullif($2,'') WHERE tenant_id=$1 AND "CO_CODE"='01' AND "CO_BOOK"='${BOOK}'`,
+            itemType,
+          );
         }
       },
     ),

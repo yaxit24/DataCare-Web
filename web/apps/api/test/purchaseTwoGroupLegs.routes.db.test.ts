@@ -107,6 +107,11 @@ const SILVER = { itCode: 'SLV01', pcs: 3, grossWt: 100.4, netWt: 100, touch: 92.
       `UPDATE "CO_SET" SET "TAX_ROF"=NULL,"LBR_ROF"=NULL,"ITM_RATE_ROF"=NULL WHERE tenant_id=$1 AND "CO_CODE"='01'`,
       tenantId,
     );
+    await exec(
+      `UPDATE "BOOK_DATA" SET "ITM_TYPE"='A' WHERE tenant_id=$1 AND "CO_BOOK"=$2`,
+      tenantId,
+      BOOK,
+    );
     // F02 sample data: each group names its own expense account (GROUP_MAST.PURC_AC).
     await exec(
       `INSERT INTO "GROUP_MAST"(tenant_id,"CO_CODE","GR_CODE","GR_NAME","SALE_AC","PURC_AC")
@@ -257,6 +262,11 @@ const SILVER = { itCode: 'SLV01', pcs: 3, grossWt: 100.4, netWt: 100, touch: 92.
       BOOK,
     )) as Array<{ ac: string }>;
     expect(slot4?.ac).toBe('LBREXP');
+    await exec(
+      `UPDATE "BOOK_DATA" SET "ITM_TYPE"='G' WHERE tenant_id=$1 AND "CO_BOOK"=$2`,
+      tenantId,
+      BOOK,
+    );
     try {
       // Gold only: primary 113,836 − 3,000 = 110,836 to PURCHASE; 3,000 to LBREXP; tax on 113,836 = 3,415.08.
       const vchNo = await create(purchase([GOLD]));
@@ -267,11 +277,17 @@ const SILVER = { itCode: 'SLV01', pcs: 3, grossWt: 100.4, netWt: 100, touch: 92.
         ['03', 'PURCHASE', 110836, 0],
         ['06', 'GSTINPUT', 3415.08, 0],
       ]);
-      // The labour leg's desktop code is not measured, so it sits in the unmapped band (50+), never on 03.
+      // Ac_Ledr.cs:421: a non-A book posts labour separately. Its desktop code is not measured, so it sits in the
+      // unmapped band (50+), never on 03.
       expect([labour?.ac, labour?.dr, labour?.cr]).toEqual(['LBREXP', 3000, 0]);
       expect(Number(labour?.tail)).toBeGreaterThanOrEqual(50);
       expect(rows).toHaveLength(4);
     } finally {
+      await exec(
+        `UPDATE "BOOK_DATA" SET "ITM_TYPE"='A' WHERE tenant_id=$1 AND "CO_BOOK"=$2`,
+        tenantId,
+        BOOK,
+      );
       await exec(
         `UPDATE "CO_SET" SET "PURC_WITH_LBR"='Y' WHERE tenant_id=$1 AND "CO_CODE"='01'`,
         tenantId,

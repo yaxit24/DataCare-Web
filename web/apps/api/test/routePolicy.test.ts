@@ -259,6 +259,22 @@ describe('route policy registry', () => {
     }
   });
 
+  it('makes every bill print whose desktop BtnPrint checks FRM_PRINT a print action', () => {
+    // TR_SALE.cs:16248-16254, TR_PURC.cs:13541-13548, TR_SALE_RTN.cs:15045-15052, TR_OTH_PURC.cs:3958-3966 and
+    // TR_WH_SALE.cs:13658-13660 (opened as Wh Quotation by MDI_FORM.cs:8149-8156). A GET is a read otherwise, so a
+    // user with view rights but no print right could print the bill.
+    for (const [form, base] of [
+      ['Sales/Sales Invoice', '/sales/:vchNo'],
+      ['Purchase/Purchase Invoice', '/purchases/:vchNo'],
+      ['Sales/Sales Return', '/sales-returns/:vchNo'],
+      ['Purchase/Other Income', '/other-income/:vchNo'],
+      ['Purchase/Other Purchase', '/other-purchase/:vchNo'],
+      ['Sales/Wholesale Quotation', '/wholesale-quotations/:vchNo'],
+    ] as const) {
+      expect(routePolicyFor('GET', `${base}/print`)).toMatchObject({ form, action: 'print' });
+    }
+  });
+
   it('binds generic, Design and repair image state and replacement to their own route rights', () => {
     for (const [path, form] of [
       ['/stock/tag-image', 'Inventory/Tag Print'],

@@ -223,6 +223,18 @@ databaseDescribe('sale writes what the desktop writes', () => {
     );
 
   /** Oracle A2, A8, A10, A14: PARTY_AC_CODE, LDR_NAME, kasar keys and the header's typed/default columns. */
+  it('totals line labour onto SL_DATA (TR_SALE.cs:15056)', async () => {
+    const sale = await createSale(runtime, saleInput('TX'), [
+      looseLine({ labourType: 'fixed', labourFixed: 125 }),
+      looseLine({ labourType: 'fixed', labourFixed: 75 }),
+    ]);
+    const [header] = await rows(
+      `SELECT "LBR_AMT"::float labour FROM "SL_DATA" WHERE tenant_id=$1 AND "CO_BOOK"='TX' AND "VCH_NO"=$2`,
+      String(sale.vchNo).padStart(5, '0'),
+    );
+    expect(header?.labour).toBe(200);
+  });
+
   it('keys and names the ledger legs as Sales_Ledr does', async () => {
     const sale = await createSale(runtime, saleInput('TX', { cashAmt: 1000, kasarAmount: 5 }), [
       looseLine(),
@@ -475,6 +487,69 @@ databaseDescribe('sale writes what the desktop writes', () => {
       sale.vchNo,
     );
     expect(stock?.sr).toBe(4);
+  }, 30_000);
+
+  /**
+   * The day book (Ac_Rojmel.cs Sales_Rojmel :41-106) on the data's codes: item/party rows named, tax and tenders
+   * blank, adjustments prefixed, money rows carrying VCH_DESC, the party contra on slot 1, old metal on its group's
+   * PURC_AC with SL_PR_DETL.IT_DESC, kasar KASAR_AMT + POINT_VAL.
+   */
+  it('projects the sale day book as Sales_Rojmel does', async () => {
+    const sale = await createSale(
+      runtime,
+      saleInput('TX', {
+        description: 'TEST NARRATION',
+        discountAmount: 100,
+        chequeAmt: 1000,
+        bankAc: 'BANKAC',
+        cardAmt: 500,
+        cardAc: 'CARDAC',
+        upiAmt: 300,
+        upiRows: [{ acCode: 'UPIAC', amount: 300 }],
+        kasarAmount: 5,
+        pointValue: 7,
+        oldGold: [
+          {
+            metal: 'G',
+            itCode: 'OG',
+            netWt: 1,
+            touch: 100,
+            rate: 6000,
+            amount: 6000,
+            description: 'OLD SILVER',
+          },
+        ],
+      }),
+      [looseLine()],
+    );
+    const day = await rows(
+      `SELECT substr("LEDR_KEY",22,2) t, btrim("AC_CODE"::text) ac, btrim("LD_CODE"::text) ld,
+              coalesce("AC_NAME",'') nm, coalesce("IT_DESC",'') ds, "DR_AMT"::float dr, "CR_AMT"::float cr
+         FROM "ROJ_MEL_DATA" WHERE tenant_id=$1 AND "CO_BOOK"='TX' AND "VCH_NO"=lpad($2::text,5,'0')
+        ORDER BY "LEDR_KEY"`,
+      sale.vchNo,
+    );
+    const shape = day.map((r) => [r.t, r.ac, r.ld, r.nm]);
+    expect(shape).toEqual(
+      expect.arrayContaining([
+        ['01', 'SALEAC', 'CUST', 'Synthetic Customer'], // :49
+        ['02', 'CUST', 'CTRL', 'Synthetic Customer'], // :52 slot 1
+        ['11', 'BANKAC', 'CUST', ''], // :90
+        ['12', 'CARDAC', 'CUST', ''], // :92
+        ['19', 'UPIAC', 'CUST', ''], // :106
+        ['15', 'DISCAC', 'CUST', 'DISC - Synthetic Customer'], // :98 slot 5
+        ['13', 'KASAR', 'CUST', 'KSR - Synthetic Customer'], // :94 slot 3
+        ['16', 'OGPURC', 'CUST', 'OLD PURC - Synthetic Customer'], // :100 D.PURC_AC, E.AC_NAME
+      ]),
+    );
+    const tax = day.find((r) => r.t === '04');
+    expect(tax).toMatchObject({ nm: '', ds: 'TEST NARRATION' }); // :56
+    expect(day.find((r) => r.t === '13')).toMatchObject({ dr: 12, cr: 0 });
+    expect(day.find((r) => r.t === '16')).toMatchObject({ ds: 'OLD SILVER', dr: 6000 });
+    // Every money row but old metal carries VCH_DESC.
+    expect(
+      day.filter((r) => !['01', '16'].includes(r.t)).every((r) => r.ds === 'TEST NARRATION'),
+    ).toBe(true);
   }, 30_000);
 
   /** Bank reconciliation lists and clears a sale's cheque by its bank account's own leg, now keyed 16. */

@@ -254,6 +254,11 @@ export const EXPECTED_MIGRATIONS: ReadonlyArray<{
     checksum: 'bbad5418ec64dcfca04dd3150c7795bfc807783555418c13476ddad5ec3560b5',
   },
   {
+    // The web-provisioned purchase books PR and TPR take ITM_TYPE 'A', the all-metal book (Ac_Ledr.cs:410-421).
+    name: '20261127120000_web_purchase_item_type',
+    checksum: '1d481c016b642d7b147bad49924c208b334e03c2c9b8661991f04a75078e8d0d',
+  },
+  {
     // Data Refresh > Account check-and-repair keeps the replaced rows on the run record (MS_UPDATE.cs:2334-2669).
     name: '20261127130000_data_repair_before_rows',
     checksum: '4ad81e3644cccdda687c18cea1c9f48936699cf6d06b92a57532703db9daf9ff',
