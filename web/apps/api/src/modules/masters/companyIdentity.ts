@@ -87,11 +87,29 @@ export async function saveCompanyIdentity(
   edit: boolean,
   edition?: string,
 ) {
-  const row = normalizeCompanyIdentity(input);
-  if (edition === 'L' && row.CO_CODE !== '01')
+  // MS_COMPANY.cs:6054-6057 refuses Lite before the blank check at :6069-6072, so a blank code in Lite gets the
+  // Lite text, not "Enter Company Detail".
+  if (
+    edition === 'L' &&
+    String(input.CO_CODE ?? '')
+      .trim()
+      .toUpperCase() !== '01'
+  )
     throw new CompanyIdentityError('You Cant Creat New Company For DataCare Next Lite Version');
   return withTxBudget(prisma, tenant, 'heavy', async (tx: any) => {
     await lock(tx, tenant);
+    if (!edit && edition === 'B') {
+      const [{ n }] = await tx.$queryRawUnsafe(
+        'SELECT count(*)::int n FROM "CO_MAST" WHERE tenant_id=$1 AND deleted_at IS NULL',
+        tenant,
+      );
+      // MS_COMPANY.cs:6059-6067, before the blank check at :6069-6072.
+      if (n >= 2)
+        throw new CompanyIdentityError(
+          'You Cant Creat More Then 2 New Company For DataCare Next Basic Version...',
+        );
+    }
+    const row = normalizeCompanyIdentity(input);
     const current = await readTx(tx, tenant, row.CO_CODE!);
     if (edit) {
       if (!current || requiredVersion(input.expectedVersion) !== current.version)
@@ -109,14 +127,6 @@ export async function saveCompanyIdentity(
         throw new CompanyIdentityError(
           `This Company Code already Exist in  '${existing[0].CO_NAME}'  Company Name...Please Change Company Code...`,
           409,
-        );
-      const [{ n }] = await tx.$queryRawUnsafe(
-        'SELECT count(*)::int n FROM "CO_MAST" WHERE tenant_id=$1 AND deleted_at IS NULL',
-        tenant,
-      );
-      if (edition === 'B' && n >= 2)
-        throw new CompanyIdentityError(
-          'You Cant Creat More Then 2 New Company For DataCare Next Basic Version...',
         );
     }
     const duplicateName = await tx.$queryRawUnsafe(
@@ -187,6 +197,21 @@ export async function saveCompanyIdentity(
     }
     return readTx(tx, tenant, row.CO_CODE!);
   });
+}
+/**
+ * BtnPrint_Click (MS_COMPANY.cs:6776-6790) prints Company.RPT for {CO_MAST.CO_CODE} = the logged-in company
+ * (DC_Main.MCo_code), not the company shown in the form. The layout (rpt_xml/Company.xml:88-250) shows code, name,
+ * address 1, address 2, state and city.
+ */
+export function companyPrintRows(prisma: any, tenant: string, code: string) {
+  return withTxBudget(prisma, tenant, 'read', (tx: any) =>
+    tx.$queryRawUnsafe(
+      `SELECT "CO_CODE","CO_NAME","CO_ADD1","CO_ADD2","CO_STATE","CO_CITY" FROM "CO_MAST"
+        WHERE tenant_id=$1 AND "CO_CODE"=$2 AND deleted_at IS NULL ORDER BY "CO_CODE"`,
+      tenant,
+      code,
+    ),
+  );
 }
 export function deleteCompanyIdentity(prisma: any, tenant: string, code: string, version: unknown) {
   if (code === '01') throw new CompanyIdentityError('You cant Delete Defoult company...');

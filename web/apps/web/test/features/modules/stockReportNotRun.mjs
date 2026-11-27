@@ -200,12 +200,7 @@ const REST = [
     'blocked',
     'the code boxes are plain text boxes in this PR; the Enter-opens-help lookup is not built',
   ],
-  [
-    'lookup.lc-code',
-    'T04',
-    'blocked',
-    'the code boxes are plain text boxes in this PR; the Enter-opens-help lookup is not built',
-  ],
+  ['lookup.lc-code', 'T04', 'na'],
   [
     'drill.purchase',
     'T05',
@@ -267,12 +262,7 @@ const REST = [
     'blocked',
     'no web voucher screen opens a voucher by its key (no deep link), so the voucher zoom is not built in this PR',
   ],
-  [
-    'zoom.not-from-merged-or-other-lc',
-    'T05',
-    'blocked',
-    'no web voucher screen opens a voucher by its key (no deep link), so the voucher zoom is not built in this PR',
-  ],
+  ['zoom.not-from-merged-or-other-lc', 'T05', 'na'],
   [
     'invalid.print-right-no-rights-row',
     'T06',
@@ -432,12 +422,7 @@ const REST = [
     'blocked',
     'the case needs vouchers created through the real Sales, Purchase, Tag or Approval screens, or a screen flow this PR did not drive; the figures it checks are proven at the API layer by stockReport.db.test.ts; stays in the denominator',
   ],
-  [
-    'config.emp-isu-adjustment',
-    'T15',
-    'blocked',
-    'the case needs vouchers created through the real Sales, Purchase, Tag or Approval screens, or a screen flow this PR did not drive; the figures it checks are proven at the API layer by stockReport.db.test.ts; stays in the denominator',
-  ],
+  ['config.emp-isu-adjustment', 'T15', 'na'],
   [
     'output.group-print',
     'T16',
@@ -480,12 +465,7 @@ const REST = [
     'blocked',
     'the InOut item-ledger picker and print are not built in this PR',
   ],
-  [
-    'output.print-title-with-lc',
-    'T16',
-    'blocked',
-    'the case needs vouchers created through the real Sales, Purchase, Tag or Approval screens, or a screen flow this PR did not drive; the figures it checks are proven at the API layer by stockReport.db.test.ts; stays in the denominator',
-  ],
+  ['output.print-title-with-lc', 'T16', 'na'],
   ['output.opening-print-layout', 'T16', 'na'],
   ['keyboard.arrows-and-escape', 'T17', 'blocked', 'not run in this PR'],
   ['keyboard.full-run-without-mouse', 'T17', 'blocked', 'not run in this PR'],
@@ -526,20 +506,21 @@ const NA_REASON = {
   'retry.duplicate-request': 'reads are idempotent and the web writes nothing',
   'rollback.none': 'the report has no write set',
   'output.opening-print-layout': 'layout fidelity is listed under "Not covered"',
+  'lookup.lc-code':
+    'Lite has no LC box: RP_STOCK.cs:3693 shows it only when `DC_Main.MsLcBoxShow` is true, and MS_OPNCOMP.cs:1415-1428 sets that only when `MsSoftType` is "E" (Enterprise) and the company has more than one LOCT_MAST row. The Location menu is edition E in docs/handbook/menu-editions.json, so a Lite company has the one location 00; there is no LC code to look up.',
+  'zoom.not-from-merged-or-other-lc':
+    'Lite has no LC box: RP_STOCK.cs:3693 shows it only when `DC_Main.MsLcBoxShow` is true, and MS_OPNCOMP.cs:1415-1428 sets that only when `MsSoftType` is "E" (Enterprise) and the company has more than one LOCT_MAST row. The Location menu is edition E in docs/handbook/menu-editions.json, so a Lite company has the one location 00; the other-LC half cannot arise. The merged-company half is covered by the zoom answer returning nothing while CO_STK_MERGE is Y (stockReport.db.test.ts).',
+  'output.print-title-with-lc':
+    'Lite has no LC box: RP_STOCK.cs:3693 shows it only when `DC_Main.MsLcBoxShow` is true, and MS_OPNCOMP.cs:1415-1428 sets that only when `MsSoftType` is "E" (Enterprise) and the company has more than one LOCT_MAST row. The Location menu is edition E in docs/handbook/menu-editions.json, so a Lite company has the one location 00; no print title carries an LC code.',
+  'config.emp-isu-adjustment':
+    'the only form that writes `EMP ISU` rows is the Stock Isu menu (`MDI_FORM.cs:9299 {{DC_Main.CurBookHelp("EMP ISU");}}`), which is edition E (Enterprise) in docs/handbook/menu-editions.json (Karigar/Stock Isu), not Lite, so no Lite company holds the rows the adjustment (`RP_STOCK.cs:4907-4994`) reads; the web report does not carry that adjustment.',
 };
 /** Blocked in the frozen case list itself (orchestration/work/WP-16/cases.md), with the reason written there. */
 const FROZEN_BLOCKED = {
-  'lookup.lc-code':
-    'the LC box is hidden unless `MsLcBoxShow` is set (RP_STOCK.cs:3693) and that setting is not part of the Lite edition; there is no Lite screen to switch it on. Unblocks if the owner adds it to the Lite settings.',
-  'zoom.not-from-merged-or-other-lc':
-    'needs the LC box, which is outside Lite (see `stock-report.lookup.lc-code`); the merged-company half is covered by the zoom answer returning nothing while CO_STK_MERGE is Y (stockReport.db.test.ts).',
-  'config.emp-isu-adjustment':
-    'the only form that writes `EMP ISU` rows is the Stock Isu menu (`MDI_FORM.cs:9299 {{DC_Main.CurBookHelp("EMP ISU");}}`), which is not in the Lite list of `docs/handbook/menu-editions.json`, so no Lite screen can create the data the adjustment (`RP_STOCK.cs:4907-4994`) reads; the web report does not carry that adjustment.',
   'output.titles-by-dimension':
     'the case prints the Safe dimension through the Crystal template `SafeStkRpt`, which is MISSING from `extraction_output/rpt_xml/`, so its title and layout cannot be read. The web prints the grid as a PDF (the other dimensions share the desktop title strings, asserted by `stock-report.output.group-print`).',
   'output.safe-summary-question':
     'the question chooses between the Crystal templates `SafeStkRpt` (missing from `extraction_output/rpt_xml/`) and `SafeStkSumm`; the web prints one table for both, so the answer has no web effect to assert.',
-  'output.print-title-with-lc': 'the LC box is outside Lite (see `stock-report.lookup.lc-code`).',
   'keyboard.alt-accelerators':
     'the desktop gives two buttons the same Alt letter (&I Item and InOut, &C Counter and Cancel, &S Safe and Size: RP_STOCK.cs:1977, 1991, 2438, 2490, 2516, 2706). Which one an Alt press reaches is WinForms mnemonic cycling (focus-order dependent), which RP_STOCK.cs does not state. Question for the owner: copy the WinForms cycle (the next matching button after the focused control), or give each duplicated letter to one button?',
 };

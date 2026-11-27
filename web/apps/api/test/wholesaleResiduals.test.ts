@@ -286,3 +286,167 @@ describe('planWholesaleDetails', () => {
     expect(() => kasarFine(-1, 'k')).toThrow(/negative/);
   });
 });
+
+// Ac_Rojmel.cs:239-261: silver uses slots 9/8, types 09-12 and 17-20.
+describe('silver wholesale day book', () => {
+  it('uses silver accounts, empty amount names, and silver fine kasar keys', () => {
+    const rows = buildWholesaleRojmel(
+      ctx as any,
+      {
+        ...base,
+        itType: 'S',
+        slots: { ...base.slots, 9: 'S9' },
+        drFine: 2,
+        crFine: 3,
+        purchaseBillOs: 5,
+        saleBillOs: 7,
+        purchaseAmount: 100,
+        saleAmount: 200,
+        ksrFineDr: 0.5,
+        ksrFineCr: 0.25,
+      } as any,
+    );
+    expect(
+      rows.map((r) => [
+        r.LEDR_KEY.slice(-2),
+        r.AC_CODE,
+        r.LD_CODE,
+        r.AC_NAME,
+        r.IT_TYPE,
+        r.DR_AMT,
+        r.CR_AMT,
+        r.ITM_FINE,
+      ]),
+    ).toEqual([
+      ['09', 'P1', 'S9', 'WSALE - Cust', 'S', 0, 5, 2],
+      ['10', 'S9', 'P1', '', 'A', 100, 0, 0],
+      ['11', 'P1', 'S8', 'WSALE - Cust', 'S', 7, 0, 3],
+      ['12', 'S8', 'P1', '', 'A', 0, 200, 0],
+      ['19', 'P1', 'S12', 'KSR - Customer Master', 'S', 0, 0, 0.5],
+      ['20', 'P1', 'S12', 'KSR - Customer Master', 'S', 0, 0, 0.25],
+    ]);
+  });
+});
+
+// TR_WH_SALE.cs:7326: even an editor cannot remove stored detail rows without UserDelete.
+describe('wholesale detail deletion authorization', () => {
+  it('rejects fewer stored rows before the voucher is reversed', async () => {
+    const { assertNoDetailDeletion } = await import('../src/modules/sales/wholesaleDetailRows.js');
+    const tx = { $queryRawUnsafe: async () => [{ sr: 1, count: 2 }] };
+    await expect(
+      assertNoDetailDeletion(
+        tx,
+        { tenantId: 't', CO_CODE: '01', LC_CODE: '01', CO_YEAR: 'Y', CO_BOOK: 'WHS', VCH_NO: '1' },
+        [{ details: [] }],
+      ),
+    ).rejects.toThrow('You Have No Rights.....');
+    await expect(
+      assertNoDetailDeletion(
+        tx,
+        { tenantId: 't', CO_CODE: '01', LC_CODE: '01', CO_YEAR: 'Y', CO_BOOK: 'WHS', VCH_NO: '1' },
+        [{ details: [{ pcs: 1 }, { pcs: 2 }] }],
+      ),
+    ).resolves.toBeUndefined();
+  });
+});
+
+// Ac_Rojmel.cs:251-257,279-293: independent desktop vectors for the remaining WH SALES families.
+describe('wholesale supplementary rojmel families', () => {
+  it('keeps silver receive on slot 8, clears its description, and writes embedded silver independently of line metal', () => {
+    const line = {
+      srNo: 2,
+      itType: 'S',
+      pcs: 1,
+      grossWt: 10,
+      netWt: 9,
+      touch: 92.5,
+      westPct: 1,
+      fine: 8.325,
+      itemAmount: 0,
+      remark: 'remark',
+      itCode: 'SLV',
+      silverFine: 0.3,
+    };
+    const rows = buildWholesaleRojmel(ctx as any, { ...base, issued: [line], received: [line] });
+    expect(
+      rows.map((r) => [
+        r.LEDR_KEY.slice(-12),
+        r.IT_TYPE,
+        r.LD_CODE,
+        r.SIGN,
+        r.ITM_GWT,
+        r.ITM_NWT,
+        r.ITM_FINE,
+        r.IT_DESC,
+      ]),
+    ).toEqual([
+      ['15         2', 'S', 'S8', '-', 10, 9, 8.325, 'remark'],
+      ['16         2', 'S', 'S8', '-', 0.3, 0.3, 0.3, 'remark'],
+      ['17         2', 'S', 'S8', '+', 10, 9, 8.325, ''],
+      ['18         2', 'S', 'S8', '+', 0.3, 0.3, 0.3, ''],
+    ]);
+  });
+  it.each(['G', 'S'] as const)(
+    'writes interest and silver conversion rows for a %s header',
+    (itType) => {
+      const rows = buildWholesaleRojmel(ctx as any, {
+        ...base,
+        itType,
+        slots: { ...base.slots, 9: 'S9' },
+        interestFine: 0.125,
+        interestAccount: 'INT',
+        silverFineCr: 2,
+        silverFineDr: 3,
+        silverAmountDr: 200,
+        silverAmountCr: 300,
+        silverFineRate: 100,
+      });
+      expect(
+        rows.map((r) => [
+          r.LEDR_KEY.slice(-2),
+          r.AC_CODE,
+          r.LD_CODE,
+          r.AC_NAME,
+          r.IT_TYPE,
+          r.SIGN,
+          r.ITM_FINE,
+          r.ITM_RATE,
+          r.DR_AMT,
+          r.CR_AMT,
+        ]),
+      ).toEqual([
+        [
+          itType === 'G' ? '29' : '30',
+          'P1',
+          'INT',
+          'INT - Customer Master',
+          itType,
+          '-',
+          0.125,
+          0,
+          0,
+          0,
+        ],
+        ['33', 'P1', 'S8', 'WSALE - Cust', itType, '+', 2, 100, 0, 0],
+        ['34', 'S8', 'P1', '', 'A', '', 0, 0, 0, 200],
+        ['35', 'P1', 'S9', 'WSALE - Cust', itType, '-', 3, 100, 0, 0],
+        ['36', 'S9', 'P1', '', 'A', '', 0, 0, 300, 0],
+      ]);
+      expect(
+        buildWholesaleRojmel(ctx as any, {
+          ...base,
+          slots: {},
+          interestFine: 1,
+          interestAccount: 'INT',
+          silverFineCr: 2,
+          silverAmountCr: 3,
+        }),
+      ).toEqual([]);
+    },
+  );
+  it('requires slot 1 for purchase cheque just as sale cheque does (:265)', () => {
+    expect(
+      buildWholesaleRojmel(ctx as any, { ...base, slots: {}, purchaseChequeAmount: 100 }),
+    ).toEqual([]);
+  });
+});

@@ -166,16 +166,10 @@ describe('completion register: the honesty rules WP-04 committed to', () => {
   });
 
   it('marks absent exactly the menus with no web workflow, each with its reason and desktop forms', () => {
-    // N85 (G71): these five were mapped to a different workflow (the generic receipt, the approval bill bridge,
-    // pledge interest, the pledge khata, the CRM report). Saying so is more useful than a surface that does something else.
+    // N85 (G71) marked five absent; the 2026-11-26 re-audit found web workflows for Card Rec, Tour Sales, Dhrn Os
+    // Letter and Cust Entry. Loan Intrest stays absent: the web interest page is pledge interest, not LOAN INT ENTRY.
     const absent = items.filter((it) => it.state === 'absent');
-    expect(absent.map(label).sort()).toEqual([
-      'Crm/Cust Entry',
-      'Dhiran/Dhrn Os Letter',
-      'Dhiran/Loan Intrest',
-      'ExtraTran/Card Rec',
-      'Karigar/Tour Sales',
-    ]);
+    expect(absent.map(label).sort()).toEqual(['Dhiran/Loan Intrest']);
     for (const it of absent) {
       expect(String(it.note ?? ''), `${label(it)}`).toMatch(
         /^No web surface: .+Desktop form\(s\):/s,

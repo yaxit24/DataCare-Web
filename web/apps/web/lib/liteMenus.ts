@@ -37,7 +37,7 @@ const LITE_MENUS: ReadonlyArray<
   ['Other', 'Tag Print', '/txn/tag-print', 'Inventory/Tag Print'],
   ['Other', 'Stock Adjust', '/txn/stock-adjust', 'Inventory/Stock Adjust'],
   ['Other', 'Order Cancel', '/txn/order-cancel', 'Sales/Order Cancel'],
-  ['Other', 'Data Import', '/masters/accounts', 'Utilities/Import / Export'],
+  ['Other', 'Data Import', '/utilities/data-import', 'Utilities/Data Import'],
   ['Report', 'Ledger Report', '/reports/account-ledger', 'Reports/Account Ledger'],
   ['Report', 'Stock Report', '/reports/stock-report', 'Reports/Stock Report'],
   ['Report', 'Tag Stock', '/reports/tag-stock', 'Reports/Tag-Stock Report'],

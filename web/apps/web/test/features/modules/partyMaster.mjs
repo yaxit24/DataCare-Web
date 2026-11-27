@@ -993,7 +993,8 @@ export const partyMaster = {
           questions = answerQuestions(page, false);
           await openParty(page, '199901');
           await button(page, 'Delete').click();
-          await page.waitForTimeout(300);
+          // The question comes after the in-use check answers; wait for it rather than a fixed delay.
+          for (let i = 0; i < 100 && !questions.length; i++) await page.waitForTimeout(100);
           assert.deepEqual(questions, [QUESTION]);
           assert.equal((await partyRows(ctx, '199901')).length, 1, 'No keeps it');
           questions = answerQuestions(page, true);

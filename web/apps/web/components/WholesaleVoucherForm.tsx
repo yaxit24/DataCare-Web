@@ -2,7 +2,9 @@
 
 import { useEffect, useMemo, useRef, useState, type CSSProperties } from 'react';
 import type { WholesaleLineResult } from '@datacare/core';
-import { ApiError, del, get, post, put } from '../lib/api';
+import { ApiError, del, get, post, postCommand, put } from '../lib/api';
+import { useIdempotencyKey } from '../lib/idempotencyKey';
+import { useFormRights } from '../lib/formRights';
 import { useCompanySettings } from '../lib/companySettings';
 import {
   WHOLESALE_WORKFLOWS,
@@ -237,6 +239,8 @@ const message = (caught: unknown, fallback: string): string =>
 
 export function WholesaleVoucherForm({ workflow }: { workflow: WholesaleWorkflow }) {
   const cfg = WHOLESALE_WORKFLOWS[workflow];
+  const command = useIdempotencyKey();
+  const rights = useFormRights('Sales/Wholesale Sale');
   /** Item-detail rows and fine kasar are Wh Sales (and its quotation document); Rate Cut and Tour Sales keep their form. */
   const residual = workflow === 'wholesale-sale' || workflow === 'wholesale-quotation';
   const { lcCode, coYear } = useBusinessScope();
@@ -285,7 +289,16 @@ export function WholesaleVoucherForm({ workflow }: { workflow: WholesaleWorkflow
     updateLine(side, index, (line) => editLine(line, field, value));
   const appendLine = (side: Side) =>
     setVoucher((v) => ({ ...v, [linesKey(side)]: [...v[linesKey(side)], blankLine()] }));
+  const mayDeleteRow = () => {
+    // TR_WH_SALE.cs:6389,7326,10224: the delete right applies in edit mode.
+    if (workflow === 'wholesale-sale' && loadedVoucherNo && !rights.canDelete) {
+      setError('You Have No Rights.....');
+      return false;
+    }
+    return true;
+  };
   const removeLine = (side: Side, index: number): boolean => {
+    if (!mayDeleteRow()) return false;
     setVoucher((v) => {
       const key = linesKey(side);
       const lines = v[key].filter((_, i) => i !== index);
@@ -329,6 +342,7 @@ export function WholesaleVoucherForm({ workflow }: { workflow: WholesaleWorkflow
 
   // ---- voucher lifecycle -----------------------------------------------------------------------
   function reset() {
+    command.renew();
     setVoucher(blankVoucher());
     setDetailLine(null);
     setVoucherNo('');
@@ -402,7 +416,10 @@ export function WholesaleVoucherForm({ workflow }: { workflow: WholesaleWorkflow
             `${cfg.endpoint}/${encodeURIComponent(loadedVoucherNo)}`,
             body,
           )
-        : await post<{ vchNo: number }>(cfg.endpoint, body);
+        : workflow === 'wholesale-sale'
+          ? await postCommand<{ vchNo: number }>(cfg.endpoint, body, command.key)
+          : await post<{ vchNo: number }>(cfg.endpoint, body);
+      if (!loadedVoucherNo) command.renew();
       // From here the voucher exists: a further Save must update it, never post a second one.
       const saved = String(result.vchNo);
       setLoadedVoucherNo(saved);
@@ -997,6 +1014,7 @@ export function WholesaleVoucherForm({ workflow }: { workflow: WholesaleWorkflow
         {grid('issue', voucher.issued, preview.issued, fullIssue)}
         {detailLine !== null && voucher.issued[detailLine] ? (
           <WholesaleDetailPanel
+            mayDelete={mayDeleteRow}
             lineNo={detailLine + 1}
             rows={voucher.issued[detailLine]!.details}
             onChange={(rows) =>
@@ -1125,12 +1143,16 @@ export function WholesaleVoucherForm({ workflow }: { workflow: WholesaleWorkflow
           <button
             type="button"
             className="ghost"
-            onClick={() =>
-              // TR_WH_SALE BtnPrint_Click prints WhSalesBill for a WH SALES book.
-              openDocument(
+            onClick={() => {
+              // TR_WH_SALE.cs:13658-13660. Server independently enforces the print right.
+              if (!rights.canPrint) {
+                setError('You Have No Print Rights.....');
+                return;
+              }
+              void openDocument(
                 `/api/wholesale-sales/${encodeURIComponent(loadedVoucherNo)}/print?coBook=${encodeURIComponent(coBook)}&format=html`,
-              )
-            }
+              );
+            }}
             disabled={busy}
           >
             Print
@@ -1160,7 +1182,7 @@ export function WholesaleVoucherForm({ workflow }: { workflow: WholesaleWorkflow
         onLoad={(vchNo) => void openFromKeys(vchNo)}
         openKey={numberKeys.listKey}
         printHref={
-          workflow === 'wholesale-sale' || workflow === 'wholesale-quotation'
+          (workflow === 'wholesale-sale' && rights.canPrint) || workflow === 'wholesale-quotation'
             ? (vchNo) =>
                 `/api${cfg.endpoint}/${encodeURIComponent(vchNo)}/print?coBook=${encodeURIComponent(coBook)}&format=html`
             : undefined

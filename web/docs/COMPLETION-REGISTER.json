@@ -8,7 +8,7 @@
   "implemented-elsewhere": "covered by a differently-named web feature; note must say which",
   "dead-in-dataset": "no real rows in Live24; note must carry the count",
   "scope-excluded": "deliberately out of scope; note must record the decision",
-  "absent": "visible on desktop but NO web surface exists; note must name the missing capability and the desktop form. Per plan \u00a711.2 every evaluated-visible entry must be verified or mapped, so an absent entry is a release blocker, not a classification of convenience"
+  "absent": "visible on desktop but NO web surface exists; note must name the missing capability and the desktop form. Per plan §11.2 every evaluated-visible entry must be verified or mapped, so an absent entry is a release blocker, not a classification of convenience"
  },
  "caveat": "formReferencedInWeb is a WEAK positive and a STRONG negative. A form named in a comment is not implemented, and a function can exist under another name. It orders the work; it does not classify it. Since classification, formReferencedInWeb has been shown wrong in both directions: 10 entries flagged false are implemented (e.g. Master/Labour Type, Other/Bank Reconcile) and 26 flagged true have no implementation. It remains an ordering signal only and must not be read as state.",
  "counts": {
@@ -16,8 +16,8 @@
   "formReferenced": 175,
   "formNeverReferenced": 14,
   "unresolvedLabel": 9,
-  "implemented-unverified": 193,
-  "absent": 5,
+  "implemented-unverified": 197,
+  "absent": 1,
   "unclassified": 0,
   "verified": 0,
   "implemented-elsewhere": 0,
@@ -457,10 +457,13 @@
     "UT_CUST_ENTRY"
    ],
    "formReferencedInWeb": true,
-   "state": "absent",
+   "state": "implemented-unverified",
    "evidence": null,
-   "note": "No web surface: UT_CUST_ENTRY has no web screen; GET /reports/customer-crm is the CRM report, not customer entry. Desktop form(s): UT_CUST_ENTRY. Corrected by N85 (G71).",
-   "webSurface": null,
+   "note": "Re-audit 2026-11-26: the web workflow exists (/txn/customer-entry); desktop parity not verified. Desktop form(s): UT_CUST_ENTRY.",
+   "webSurface": {
+    "kind": "route",
+    "surface": "POST /crm/customer-entries"
+   },
    "sharedSurfaceWith": []
   },
   {
@@ -542,10 +545,13 @@
     "TR_DHRN_INTREC"
    ],
    "formReferencedInWeb": true,
-   "state": "absent",
+   "state": "implemented-unverified",
    "evidence": null,
-   "note": "No web surface: the outstanding letter (CurBookHelp('OS LETTER')) has no web workflow; GET /dhrn/khata is the pledge khata, not the letter. Desktop form(s): TR_DHRN_INTREC. Corrected by N85 (G71).",
-   "webSurface": null,
+   "note": "Re-audit 2026-11-26: the web workflow exists (/txn/dhrn-os-letter); desktop parity not verified. Desktop form(s): TR_DHRN_INTREC.",
+   "webSurface": {
+    "kind": "route",
+    "surface": "GET /dhrn/os-letter"
+   },
    "sharedSurfaceWith": []
   },
   {
@@ -790,10 +796,13 @@
     "TR_CARD_REC"
    ],
    "formReferencedInWeb": true,
-   "state": "absent",
+   "state": "implemented-unverified",
    "evidence": "apps/api/test/financeBookFamily.db.test.ts; apps/api/test/financeBookSelection.routes.db.test.ts; apps/web/test/cash-receipt-payment.journey.mjs; apps/web/test/financeBooks.test.ts; desktop source MDI_FORM.cs:8052-8111 CurBookHelp, DC_Main.CurBookHelp, TR_CASH.cs, Ac_Ledr.cs:567-581",
-   "note": "No web surface: TR_CARD_REC writes CARD_DATA; the generic receipt (POST /receipts) is a different workflow. Desktop form(s): TR_CARD_REC. Corrected by N85 (G71).",
-   "webSurface": null,
+   "note": "Re-audit 2026-11-26: the web workflow exists (/txn/card-receipt); desktop parity not verified. Desktop form(s): TR_CARD_REC.",
+   "webSurface": {
+    "kind": "route",
+    "surface": "POST /card-receipts"
+   },
    "sharedSurfaceWith": []
   },
   {
@@ -1305,10 +1314,13 @@
     "TR_TOUR_SALE"
    ],
    "formReferencedInWeb": true,
-   "state": "absent",
+   "state": "implemented-unverified",
    "evidence": null,
-   "note": "No web surface: TR_TOUR_SALE has no web workflow; the approval bill bridge (POST /tour/:vchNo/bill) bills a tour, it is not Tour Sales. Desktop form(s): TR_TOUR_SALE. Corrected by N85 (G71).",
-   "webSurface": null,
+   "note": "Re-audit 2026-11-26: the web workflow exists (/txn/tour-sales); desktop parity not verified. Desktop form(s): TR_TOUR_SALE.",
+   "webSurface": {
+    "kind": "route",
+    "surface": "POST /tour-sales"
+   },
    "sharedSurfaceWith": []
   },
   {
@@ -2092,10 +2104,10 @@
    "formReferencedInWeb": true,
    "state": "implemented-unverified",
    "evidence": null,
-   "note": "master import subset only.",
+   "note": "Lite Soft importer only (D-IMP-1): /utilities/data-import previews and imports the five UT_IMPORT Lite steps in one transaction; a real Lite .mdb is not yet proven.",
    "webSurface": {
     "kind": "route",
-    "surface": "POST /masters/:name/import"
+    "surface": "POST /utilities/data-import/lite/apply"
    },
    "sharedSurfaceWith": []
   },
@@ -3525,9 +3537,9 @@
    "implemented-unverified": "a web surface was traced from the desktop form to a registered route, a dynamic master name, or a page file, and that surface is machine-verified to resolve by apps/api/test/completionRegister.test.ts. Nothing proves it MATCHES the desktop, which is exactly what this state means.",
    "absent": "no defensible web surface was found. Recorded rather than hidden under a softer state.",
    "verified": "DELIBERATELY UNUSED. The register defines it as compared or tested, but the plan means desktop-verified, and the controlling comparison is 0 of 66 matched (project-memory/parity/g5). Claiming verified from web-only tests would be the self-approval this project keeps finding.",
-   "implemented-elsewhere": "DELIBERATELY UNUSED. Every mapped entry here is reached through a web feature with a different name, so the label would apply to all 145 and distinguish nothing. The real signal \u2014 which entries collapse onto one shared surface \u2014 is recorded per item in sharedSurfaceWith instead.",
+   "implemented-elsewhere": "DELIBERATELY UNUSED. Every mapped entry here is reached through a web feature with a different name, so the label would apply to all 145 and distinguish nothing. The real signal — which entries collapse onto one shared surface — is recorded per item in sharedSurfaceWith instead.",
    "dead-in-dataset": "NOT USED. Requires Live24 row counts that were not available.",
-   "scope-excluded": "NOT USED. Requires an owner decision (plan \u00a78.1); a classifier cannot exclude scope on the business owner\u2019s behalf."
+   "scope-excluded": "NOT USED. Requires an owner decision (plan §8.1); a classifier cannot exclude scope on the business owner’s behalf."
   },
   "rejectedMethods": "Label matching reported 165 of 198 missing including Sales and Purchase; table-name grepping reported a hit for almost everything. Each entry was instead traced desktop form -> web implementation -> the exact registration site.",
   "whatThisDoesNotEstablish": "that any mapped surface behaves like the desktop. Modes are the known risk: 52 entries share 21 surfaces, and at least one collapsed pair is only half implemented (ExtraTran/Other Expenses is mapped while ExtraTran/Other Income is absent). WP-05 contracts must resolve each shared surface mode by mode."

@@ -2,7 +2,7 @@ import { rojmelLedrKey, type RojmelContext, type RojmelRow } from './rojmel.js';
 
 /**
  * The day book of a Wh Sales voucher, row for row from `Ac_Rojmel.Wh_Sales_Rojmel` (Ac_Rojmel.cs:221-310), gold
- * vouchers. WP-30 decision 1: the desktop source wins over the 66 rows the earlier slice measured, so keys, names and
+ * and silver vouchers. WP-30 decision 1: the desktop source wins over the 66 rows the earlier slice measured, so keys, names and
  * directions below are the source's. The insert is `INSERT INTO ROJ_MEL_DATA(... CR_AMT,DR_AMT ...)` and the select
  * lists the credit first: reading it the other way round is what made five directions look opposite.
  *
@@ -20,13 +20,12 @@ import { rojmelLedrKey, type RojmelContext, type RojmelRow } from './rojmel.js';
  *   26     purchase kasar                               slot 5 / party         'KSR - ' AC_NAME          Cr PR_KASAR_AMT
  *   27     labour                                       slot 6 / party         'LBR - ' AC_NAME          Cr SL_LBR_AMT + SL_OTH_AMT
  *
- * 21/23/24/25/28 follow the same source (cheque, card and kasar on the sale side, purchase card, purchase labour). Types 31/32
- * (tax) are written for a BUL WH SALE book only (`B.MAIN_BOOK = 'BUL WH SALE'`), which Wh Sales is not.
- * Every row also carries the voucher's description in IT_DESC (`A.VCH_DESC`; a line row carries its remark). Types
- * 21, 23, 24, 25, 28, 29-40 and the silver families are not built (case rojmel.missing-types-and-silver, blocked).
+ * Silver header/line families follow Ac_Rojmel.cs:239-261. Types 31/32/37/38 are BUL WH SALE only;
+ * 39/40 require registration HM033NEPK and IT_TYPE A (neither applies to this G/S WH SALES writer).
  * The line key is `voucher + type + Str(SR_NO)`, which `rojmelLedrKey` writes as the ten-wide right-aligned number.
  */
 export interface WholesaleRojmelLine {
+  silverFine?: number;
   srNo: number;
   itType: string;
   pcs: number;
@@ -42,6 +41,14 @@ export interface WholesaleRojmelLine {
 
 /** The stored voucher's figures the day book is built from: derived on the server at save, never an API input. */
 export interface WholesaleRojmelFigures {
+  itType?: 'G' | 'S';
+  interestFine?: number;
+  interestAccount?: string;
+  silverFineCr?: number;
+  silverFineDr?: number;
+  silverAmountCr?: number;
+  silverAmountDr?: number;
+  silverFineRate?: number;
   /**
    * The book's BOOK_DETL by SR_NO. A row joins `B.SR_NO = n`, so it is written whenever the slot row EXISTS, even
    * with a blank AC_CODE (the value is then ''); a slot with no row writes nothing.
@@ -116,35 +123,49 @@ export function buildWholesaleRojmel(
   const party = ctx.partyCode;
   const has = (n: number): boolean => input.slots[n] !== undefined;
   const at = (n: number): string => input.slots[n] ?? '';
-  const sale = has(1) ? at(1) : undefined;
-  const purchase = has(2) ? at(2) : undefined;
+  const metal = input.itType ?? 'G';
+  const silver = metal === 'S';
+  const sale = has(silver ? 8 : 1) ? at(silver ? 8 : 1) : undefined;
+  const purchase = has(silver ? 9 : 2) ? at(silver ? 9 : 2) : undefined;
 
   if (purchase !== undefined && (input.drFine !== 0 || input.purchaseBillOs > 0))
     rows.push({
-      ...base('01'),
+      ...base(silver ? '09' : '01'),
       AC_CODE: party,
       LD_CODE: purchase,
       CR_AMT: input.purchaseBillOs > 0 ? input.purchaseBillOs : 0,
-      IT_TYPE: 'G',
+      IT_TYPE: metal,
       SIGN: '-',
       ITM_FINE: input.drFine,
       ITM_RATE: input.fineRate,
     });
   if (purchase !== undefined && input.purchaseAmount !== 0)
-    rows.push({ ...base('02'), AC_CODE: purchase, LD_CODE: party, DR_AMT: input.purchaseAmount });
+    rows.push({
+      ...base(silver ? '10' : '02'),
+      AC_NAME: silver ? '' : bookPrefixed,
+      AC_CODE: purchase,
+      LD_CODE: party,
+      DR_AMT: input.purchaseAmount,
+    });
   if (sale !== undefined && (input.crFine !== 0 || input.saleBillOs > 0))
     rows.push({
-      ...base('03'),
+      ...base(silver ? '11' : '03'),
       AC_CODE: party,
       LD_CODE: sale,
       DR_AMT: input.saleBillOs > 0 ? input.saleBillOs : 0,
-      IT_TYPE: 'G',
+      IT_TYPE: metal,
       SIGN: '+',
       ITM_FINE: input.crFine,
       ITM_RATE: input.fineRate,
     });
   if (sale !== undefined && input.saleAmount !== 0)
-    rows.push({ ...base('04'), AC_CODE: sale, LD_CODE: party, CR_AMT: input.saleAmount });
+    rows.push({
+      ...base(silver ? '12' : '04'),
+      AC_NAME: silver ? '' : bookPrefixed,
+      AC_CODE: sale,
+      LD_CODE: party,
+      CR_AMT: input.saleAmount,
+    });
 
   const lineRow = (
     type: string,
@@ -167,40 +188,66 @@ export function buildWholesaleRojmel(
     IT_DESC: line.remark,
     IT_CODE: line.itCode,
   });
-  const qualifies = (line: WholesaleRojmelLine): boolean =>
-    line.fine !== 0 && line.itemAmount === 0 && line.itType === 'G';
-  if (sale !== undefined)
-    for (const line of input.issued) if (qualifies(line)) rows.push(lineRow('05', line, sale, '-'));
-  if (purchase !== undefined)
-    for (const line of input.received)
-      if (qualifies(line)) rows.push(lineRow('06', line, purchase, '+'));
+  // Detail metals are independent of the header metal (Ac_Rojmel.cs:231-233,251-257).
+  for (const [lines, issued] of [
+    [input.issued, true],
+    [input.received, false],
+  ] as const) {
+    for (const line of lines) {
+      const slot = line.itType === 'S' ? 8 : issued ? 1 : 2;
+      if (
+        has(slot) &&
+        line.fine !== 0 &&
+        line.itemAmount === 0 &&
+        ['G', 'S'].includes(line.itType)
+      ) {
+        const type = line.itType === 'S' ? (issued ? '15' : '17') : issued ? '05' : '06';
+        rows.push({
+          ...lineRow(type, line, at(slot), issued ? '-' : '+'),
+          IT_DESC: !issued && line.itType === 'S' ? '' : line.remark,
+        });
+      }
+      if (has(8) && line.silverFine)
+        rows.push({
+          ...lineRow(issued ? '16' : '18', line, at(8), issued ? '-' : '+'),
+          IT_TYPE: 'S',
+          ITM_PCS: 0,
+          ITM_GWT: line.silverFine,
+          ITM_NWT: line.silverFine,
+          ITM_TOUCH: 0,
+          ITM_WEST: 0,
+          ITM_FINE: line.silverFine,
+          IT_DESC: issued ? line.remark : '',
+        });
+    }
+  }
 
   if (has(12) && input.ksrFineDr !== 0)
     rows.push({
-      ...base('07'),
+      ...base(silver ? '19' : '07'),
       AC_CODE: party,
       LD_CODE: at(12),
       AC_NAME: `KSR - ${input.masterName}`,
-      IT_TYPE: 'G',
+      IT_TYPE: metal,
       SIGN: '-',
       ITM_FINE: input.ksrFineDr,
     });
   if (has(12) && input.ksrFineCr !== 0)
     rows.push({
-      ...base('08'),
+      ...base(silver ? '20' : '08'),
       AC_CODE: party,
       LD_CODE: at(12),
       AC_NAME: `KSR - ${input.masterName}`,
-      IT_TYPE: 'G',
+      IT_TYPE: metal,
       SIGN: '+',
       ITM_FINE: input.ksrFineCr,
     });
 
-  if (purchase !== undefined && input.purchaseBillOs < 0)
+  if (has(2) && input.purchaseBillOs < 0)
     rows.push({
       ...base('13'),
       AC_CODE: party,
-      LD_CODE: purchase,
+      LD_CODE: at(2),
       DR_AMT: Math.abs(input.purchaseBillOs),
     });
   // The source joins slot 8 (the silver sale account) for type 14 and filters no metal; kept as written.
@@ -253,7 +300,7 @@ export function buildWholesaleRojmel(
       AC_NAME: `LBR - ${input.headerName}`,
       DR_AMT: input.purchaseLabourAmount,
     });
-  if (input.purchaseChequeAmount !== 0)
+  if (has(1) && input.purchaseChequeAmount !== 0)
     rows.push({
       ...base('22'),
       AC_CODE: input.bankAc,
@@ -277,5 +324,37 @@ export function buildWholesaleRojmel(
       AC_NAME: `LBR - ${input.headerName}`,
       CR_AMT: input.labourAmount,
     });
+  // Ac_Rojmel.cs:279-281 uses the configured interest account corresponding to desktop 00061.
+  if (has(2) && input.interestFine && input.interestAccount !== undefined)
+    rows.push({
+      ...base(silver ? '30' : '29'),
+      AC_CODE: party,
+      LD_CODE: input.interestAccount,
+      AC_NAME: `INT - ${input.masterName}`,
+      IT_TYPE: metal,
+      SIGN: '-',
+      ITM_FINE: input.interestFine,
+    });
+  // Ac_Rojmel.cs:287-293 deliberately carries the HEADER metal on the silver conversion fine rows.
+  for (const [type, slot, fine, amount, sign] of [
+    ['33', 8, input.silverFineCr, 0, '+'],
+    ['34', 8, 0, input.silverAmountDr, ''],
+    ['35', 9, input.silverFineDr, 0, '-'],
+    ['36', 9, 0, input.silverAmountCr, ''],
+  ] as const) {
+    if (!has(slot) || !(fine || amount)) continue;
+    rows.push({
+      ...base(type),
+      AC_CODE: fine ? party : at(slot),
+      LD_CODE: fine ? at(slot) : party,
+      AC_NAME: fine ? bookPrefixed : '',
+      IT_TYPE: fine ? metal : 'A',
+      SIGN: sign,
+      ITM_FINE: fine ?? 0,
+      ITM_RATE: fine ? (input.silverFineRate ?? 0) : 0,
+      CR_AMT: type === '34' ? (amount ?? 0) : 0,
+      DR_AMT: type === '36' ? (amount ?? 0) : 0,
+    });
+  }
   return rows;
 }
