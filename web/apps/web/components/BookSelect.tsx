@@ -8,6 +8,8 @@ export interface ScopeBook {
   BOOK_NAME: string | null;
   BOOK_SNAME: string | null;
   MAIN_BOOK?: string | null;
+  /** 'T' tax invoice, 'M' estimate: a T sale book's Old Gold / Silver rows open the linked URD purchase. */
+  BOOK_TYPE?: string | null;
 }
 
 const FAMILY_MAIN_BOOK: Record<string, string> = {
@@ -24,6 +26,7 @@ export function BookSelect({
   family,
   disabled = false,
   required = true,
+  onBooks,
 }: {
   value: string;
   onChange: (book: string) => void;
@@ -44,11 +47,14 @@ export function BookSelect({
    * is blank on a free-standing return.
    */
   required?: boolean;
+  /** The offered books as loaded (their BOOK_TYPE among them). */
+  onBooks?: (books: ScopeBook[]) => void;
 }) {
   const [books, setBooks] = useState<ScopeBook[]>([]);
   const [loaded, setLoaded] = useState(false);
   const valueRef = useRef(value);
   const onChangeRef = useRef(onChange);
+  const onBooksRef = useRef(onBooks);
   // `mainBooks` is a prop array, so it is a NEW reference on every render. Deriving a stable string key and
   // memoising the parsed filter off that key keeps the fetch effect from re-firing each render while letting
   // it declare an honest dependency set — previously the effect depended on `mainBookKey` but read
@@ -61,7 +67,8 @@ export function BookSelect({
   useEffect(() => {
     valueRef.current = value;
     onChangeRef.current = onChange;
-  }, [onChange, value]);
+    onBooksRef.current = onBooks;
+  }, [onChange, onBooks, value]);
 
   useEffect(() => {
     let cancelled = false;
@@ -82,6 +89,7 @@ export function BookSelect({
         );
         setBooks(active);
         setLoaded(true);
+        onBooksRef.current?.(active);
         if (active.some((row) => row.CO_BOOK === valueRef.current)) return;
         // A zoom from a report names the voucher's book in the address (`?vchNo=&coBook=`, RP_STOCK.cs:5240-5600);
         // that book is the one shown, not the screen's first pick.

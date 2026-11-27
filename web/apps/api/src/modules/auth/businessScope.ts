@@ -268,11 +268,13 @@ export async function listScopeBooks(
     BOOK_NAME: string | null;
     BOOK_SNAME: string | null;
     MAIN_BOOK: string | null;
+    /** 'T' is the tax-invoice sale book whose Old Gold / Silver rows open the linked URD purchase (TR_SALE.cs:18756). */
+    BOOK_TYPE: string | null;
   }>
 > {
   return withTxBudget(prisma, input.tenantId, 'read', (tx: any) =>
     tx.$queryRawUnsafe(
-      `SELECT "CO_BOOK","BOOK_NAME","BOOK_SNAME","MAIN_BOOK" FROM "BOOK_DATA"
+      `SELECT "CO_BOOK","BOOK_NAME","BOOK_SNAME","MAIN_BOOK","BOOK_TYPE" FROM "BOOK_DATA"
         WHERE "CO_CODE"=$1 AND ("LC_CODE"=$2 OR "LC_CODE"='00' OR "LC_CODE" IS NULL)
           AND "CO_BOOK" IS NOT NULL AND COALESCE(UPPER("CUR_USE"),'Y')<>'N'
           AND ($4::text IS NULL OR $4='C' OR COALESCE(NULLIF(btrim("DATA_TYPE"),''),'A')=$4)

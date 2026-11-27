@@ -175,8 +175,9 @@ describe('route policy registry', () => {
     // The Sales Invoice Apr No import adds GET /sales/approval-help and GET /sales/approval-import: 836 + 2 = 838.
     // Data Import (UT_IMPORT Lite Soft) adds its preview and apply: 840.
     // The linked old-gold purchase adds GET and POST /settings/urd-books (Utilities/Settings): 842.
-    expect(routes).toHaveLength(842);
-    expect(new Set(routes.map((route) => `${route.method} ${route.path}`)).size).toBe(842);
+    // The Sales screen's linked old-gold modal reads its URD book under Sales Invoice (GET /sales/urd-books): 843.
+    expect(routes).toHaveLength(843);
+    expect(new Set(routes.map((route) => `${route.method} ${route.path}`)).size).toBe(843);
 
     const policies = routes.map((route) => ({
       ...route,

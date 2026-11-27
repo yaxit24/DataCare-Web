@@ -18,6 +18,7 @@ import {
 import { rollbackMatrix } from '../faults.mjs';
 import { salesInvoiceResidualCases } from './salesInvoiceResiduals.mjs';
 import { salesInvoiceOrderAdvanceCases } from './salesInvoiceOrderAdvance.mjs';
+import { salesInvoiceLinkedOldCases } from './salesInvoiceLinkedOld.mjs';
 
 /**
  * Feature: Sales → Sales Invoice (desktop TR_SALE, opened by MDI_FORM.cs:7918-7919 CurBookHelp("SALES")).
@@ -258,6 +259,11 @@ export const salesInvoice = {
     'web/apps/api/src/routes/txn.ts',
     'web/apps/web/test/features/modules/salesInvoice.mjs',
     'web/apps/web/test/features/modules/salesInvoiceResiduals.mjs',
+    'web/apps/web/test/features/modules/salesInvoiceLinkedOld.mjs',
+    'web/apps/web/components/LinkedOldPurchaseModal.tsx',
+    'web/apps/web/components/SaleOldGoldGrid.tsx',
+    'web/apps/web/components/PurchaseEntryForm.tsx',
+    'web/apps/api/src/modules/sales/linkedOldPurchaseSale.ts',
     'web/apps/web/components/SaleResidualPanel.tsx',
     'web/apps/web/lib/saleResidual.ts',
     'web/apps/api/src/modules/sales/saleResiduals.ts',
@@ -1486,6 +1492,17 @@ export const salesInvoice = {
       C,
       BOOK,
       LINE_A,
+      openSales,
+      pickParty,
+      fillLine,
+      save,
+      loadVoucher,
+    }),
+    // Owner decision 2B (PR3): the T book's Old Gold / Silver rows open the linked URD purchase.
+    ...salesInvoiceLinkedOldCases({
+      C,
+      BOOK,
+      as,
       openSales,
       pickParty,
       fillLine,
