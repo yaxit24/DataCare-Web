@@ -42,8 +42,6 @@ const notApplicable = (name, group, source, reason) => ({
   applicable: false,
   reason,
 });
-const blocked = (name, group, source, reason) =>
-  C(name, group, 'read-only', source, async () => ({}), { blocked: reason });
 
 const countRequests = (requests, method, path) =>
   requests.filter((request) => request.method === method && request.path === path).length;
@@ -596,11 +594,69 @@ export const dataBackup = {
         requiredEvidence: ['browser', 'expected', 'output'],
       },
     ),
-    blocked(
-      'output.physical-save-confirmation',
+    C(
+      'output.browser-download-handoff',
       'T16',
-      'UT_BKP.cs:1216-1248 deletes/replaces a physical same-hour file; D-BKP-2 adapts this to a browser suggestion',
-      'The current browser environment does not provide File System Access physical-save confirmation. Browser/OS overwrite or duplicate naming remains outside page control.',
+      'output',
+      "UT_BKP.cs:1216-1250 kills any same-hour Next<YY>[_<type>]_ddMMyy_HH.BAK, writes the new file to the chosen folder and then shows \"Backup Process Complete.\". WEB ADAPTATION (D-BKP-2, offline single-PC mechanic): a hosted server cannot write to the operator's disk, so the web hands the archive to the browser as an attachment download with the same name pattern and records the run on the server; the physical save/overwrite is the browser's and the OS's. This case asserts that handoff in place of the desktop's physical-file confirmation",
+      async (ctx) => {
+        await seedScopeSentinels(ctx);
+        const before = await backupRuns(ctx);
+        const { page } = await ctx.session();
+        await open(page);
+        await select(page);
+        const answer = page.waitForResponse(
+          (r) => new URL(r.url()).pathname === '/api/backup' && r.request().method() === 'GET',
+        );
+        const started = new Date();
+        const result = await download(page);
+        const response = await answer;
+        assert.equal(response.status(), 200);
+        const headers = response.headers();
+        // Fastify appends the charset to the route's application/json.
+        assert.match(
+          headers['content-type'] ?? '',
+          /^application\/json(;\s*charset=utf-8)?$/i,
+          `the archive is JSON: ${headers['content-type']}`,
+        );
+        const named = /^attachment; filename="([^"]+)"$/.exec(headers['content-disposition'] ?? '');
+        assert(named, `offered as an attachment download: ${headers['content-disposition']}`);
+        // The desktop name pattern (UT_BKP.cs:1218, 1236) with the web archive extension, for the hour of the run.
+        const two = (n) => String(n).padStart(2, '0');
+        const stamp = (d) =>
+          `${two(d.getDate())}${two(d.getMonth() + 1)}${two(d.getFullYear() % 100)}_${two(d.getHours())}`;
+        const hours = new Set([stamp(started), stamp(new Date())]);
+        const match = /^Next\d{2}_R_(\d{6}_\d{2})\.json$/.exec(named[1]);
+        assert(
+          match && hours.has(match[1]),
+          `${named[1]} follows Next<YY>_R_ddMMyy_HH for this hour`,
+        );
+        assert.equal(
+          result.artifact.suggestedFilename(),
+          named[1],
+          'the browser saves under the server name',
+        );
+        // The saved file is the server's archive: it parses, every table and the archive checksum recompute
+        // (verifyArchive), and the checksum equals the one the server recorded for this run. (Playwright keeps no
+        // body for this ~1.8 MB gzip fetch, so a byte compare against response.body() is not possible.)
+        verifyArchive(result.document);
+        const after = await backupRuns(ctx);
+        assert.equal(after.length, before.length + 1, 'the server records exactly one backup run');
+        assert.equal(after.at(-1).checksum, result.document.checksum);
+        assert.equal(after.at(-1).operator, USERS.admin.user);
+        return {
+          observation: `GET /api/backup → 200 ${headers['content-type']}, attachment "${named[1]}", the saved file verifies and carries the checksum the server recorded, "Backup Process Complete." shown, one company_backup_run recorded`,
+          expected: {
+            contentType: 'application/json',
+            disposition: 'attachment; filename="Next<YY>_R_ddMMyy_HH.json"',
+            message: 'Backup Process Complete.',
+            serverRecord: 1,
+          },
+          database: { before: before.length, after: after.at(-1) },
+          output: result.bytes,
+        };
+      },
+      { requiredEvidence: ['browser', 'expected', 'database', 'output'] },
     ),
     C(
       'output.full-lite-fixture',

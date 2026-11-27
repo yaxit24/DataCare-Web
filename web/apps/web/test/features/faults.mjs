@@ -219,3 +219,75 @@ export async function withWriteFault(ctx, table, operation, work) {
     await ctx.owner.$executeRawUnsafe('DROP FUNCTION IF EXISTS wp35_fault()');
   }
 }
+
+/**
+ * Scoped, real database READ fault for read-only screens (reports), the read-side partner of withWriteFault.
+ *
+ * PostgreSQL has no SELECT trigger, so the fault is a RESTRICTIVE row-level-security policy for the runtime role
+ * `app_user` (every tenant table already has forced RLS): its predicate raises for this tenant's rows only, so the
+ * first statement that reads `table` for the tenant fails inside the server's own transaction, exactly as a real
+ * read error would. Other tenants, the owner connection the case reads with, and every other table are untouched.
+ *
+ * The fault is not allowed to pass vacuously: a non-transactional sequence written from inside the failing statement
+ * records that it fired, and, for each table in `scansOf`, how many scans of it the same transaction had already
+ * made (pg_stat_get_xact_numscans of the table, i.e. sequential scans, plus of each of its indexes) — which is how a case proves a fault landed mid-way through a multi-query export.
+ *
+ * @param {object} ctx  the case context
+ * @param {string} table  the table whose read fails
+ * @param {() => Promise<any>} work  drive the screen while the fault is armed
+ * @param {{scansOf?: string[]}} [o]
+ * @returns {Promise<{result: any, fired: boolean, scans: Record<string, number>}>}
+ */
+export async function withReadFault(ctx, table, work, o = {}) {
+  const scansOf = o.scansOf ?? [];
+  for (const name of [table, ...scansOf]) assert.match(name, /^[A-Za-z_]+$/);
+  assert.match(ctx.tenantId, /^[A-Za-z0-9_-]+$/);
+  const sql = (text) => ctx.owner.$executeRawUnsafe(text);
+  const probes = scansOf.map((name, i) => ({ name, seq: `e2e_read_fault_scans_${i}` }));
+  try {
+    for (const seq of ['e2e_read_fault_fired', ...probes.map((p) => p.seq)]) {
+      await sql(`CREATE SEQUENCE IF NOT EXISTS ${seq}`);
+      await sql(`SELECT setval('${seq}', 1, false)`);
+    }
+    const record = probes
+      .map(
+        (p) =>
+          `PERFORM setval('${p.seq}', 1 + pg_stat_get_xact_numscans('public."${p.name}"'::regclass)
+             + COALESCE((SELECT sum(pg_stat_get_xact_numscans(i.indexrelid))::bigint FROM pg_index i
+                          WHERE i.indrelid = 'public."${p.name}"'::regclass), 0));`,
+      )
+      .join('\n');
+    await sql(
+      `CREATE OR REPLACE FUNCTION e2e_read_fault(t text) RETURNS boolean
+         LANGUAGE plpgsql SECURITY DEFINER SET search_path = public AS $f$
+       BEGIN
+         IF t = '${ctx.tenantId}' THEN
+           PERFORM setval('e2e_read_fault_fired', 1, true);
+           ${record}
+           RAISE EXCEPTION 'e2e read fault on ${table}';
+         END IF;
+         RETURN true;
+       END $f$`,
+    );
+    await sql('GRANT EXECUTE ON FUNCTION e2e_read_fault(text) TO app_user');
+    await sql(
+      `CREATE POLICY e2e_read_fault ON "${table}" AS RESTRICTIVE FOR SELECT TO app_user
+         USING (e2e_read_fault(tenant_id))`,
+    );
+    const result = await work();
+    const [{ fired }] = await ctx.owner.$queryRawUnsafe(
+      `SELECT is_called fired FROM e2e_read_fault_fired`,
+    );
+    const scans = {};
+    for (const p of probes) {
+      const [{ v }] = await ctx.owner.$queryRawUnsafe(`SELECT last_value::int v FROM ${p.seq}`);
+      scans[p.name] = v - 1;
+    }
+    return { result, fired, scans };
+  } finally {
+    await sql(`DROP POLICY IF EXISTS e2e_read_fault ON "${table}"`);
+    await sql('DROP FUNCTION IF EXISTS e2e_read_fault(text)');
+    for (const seq of ['e2e_read_fault_fired', ...probes.map((p) => p.seq)])
+      await sql(`DROP SEQUENCE IF EXISTS ${seq}`);
+  }
+}

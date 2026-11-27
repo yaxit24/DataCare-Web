@@ -1,6 +1,7 @@
 'use client';
 import Link from 'next/link';
 import { DataTypesFeature, DataTypeBadge } from './DataTypeControls';
+import type { TenantFeatureFlags } from './BusinessScope';
 import { usePathname } from 'next/navigation';
 import { useEffect, useRef, useState } from 'react';
 import { NAV } from '../lib/nav';
@@ -20,7 +21,7 @@ import {
 export interface Session {
   dataType?: string;
   allowedDataTypes?: string[];
-  features?: { dataTypes: boolean };
+  features?: TenantFeatureFlags & { dataTypes: boolean };
   user: string;
   context: BrowserSessionContext;
   coCode: string;

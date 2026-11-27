@@ -34,6 +34,8 @@ export function gstQuery(view: GstView, filters: GstFilters): string {
 
 const messageOf = (error: unknown): string => {
   if (!(error instanceof ApiError)) return 'Unable to run the GST report.';
+  // A server or database failure carries internal text; the operator gets one plain message (nothing was written).
+  if (error.status >= 500) return 'Unable to run the GST report.';
   const code = String(error.body?.error ?? '');
   if (code === 'missing-section') return 'Please Select Section Type And Try...';
   if (code === 'date-outside-year') return 'Date must be inside the selected financial year.';
@@ -130,7 +132,14 @@ export function useGstReport(coYear: string) {
   );
   const pdf = useCallback(async () => {
     const path = exportPath('pdf');
-    if (path) await downloadPdf(path, report?.fileName || 'gst-report');
+    if (!path) return;
+    setError('');
+    try {
+      await downloadPdf(path, report?.fileName || 'gst-report');
+    } catch (cause) {
+      // A failed print keeps the shown grid and says so instead of failing silently.
+      setError(messageOf(cause));
+    }
   }, [exportPath, report?.fileName]);
 
   return {
