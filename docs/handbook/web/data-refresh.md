@@ -2,7 +2,7 @@
 
 ## Milestone state
 
-Company → Data Refresh remains **PARTIAL**. PR-1 exposes the six operator-visible `MS_UPDATE` actions in desktop tab order and implements Approval Adj as a complete writer; Account adds check-and-repair for the Contra and Fine Jv families (below). Desktop-match coverage remains 0% because no case has run on the original Windows desktop.
+Company → Data Refresh remains **PARTIAL**. PR-1 exposes the six operator-visible `MS_UPDATE` actions in desktop tab order and implements Approval Adj as a complete writer; Account adds check-and-repair for the Contra, Fine Jv and Cash/Bank families (below). Desktop-match coverage remains 0% because no case has run on the original Windows desktop.
 
 The web deliberately uses preview-first, audited, idempotent execution. A preview writes no business row, but it appends a `data_repair_run` audit row, so it is not literally read-only. Apply re-derives the candidate set under the repair lock and writes the business changes plus the applied audit record in one transaction.
 
@@ -53,12 +53,26 @@ Defaults chosen with the decision:
 
 Families and their state (`ACCOUNT_REFRESH_VERIFIED` in `web/apps/api/src/modules/utilities/accountRefresh.ts`): a family's apply is enabled only once every write-set fixture of it, saved through the normal writer, previews clean (`accountRefresh.db.test.ts`); any other family previews and shows "apply not available until verified".
 
-| Family  | Operation                      | Builders re-used                                                                           | Apply |
-| ------- | ------------------------------ | ------------------------------------------------------------------------------------------ | ----- |
-| Contra  | `data-refresh-account-contra`  | `contraPostInput` (Contra_Ledr `Ac_Ledr.cs:840-848`, Contra_Rojmel `Ac_Rojmel.cs:336-340`) | yes   |
-| Fine Jv | `data-refresh-account-fine-jv` | `fineJvPostInput` (Contra_Ledr `Ac_Ledr.cs:846-848`, Contra_Rojmel `Ac_Rojmel.cs:342-344`) | yes   |
+| Family    | Operation                        | Builders re-used                                                                                                   | Apply |
+| --------- | -------------------------------- | ------------------------------------------------------------------------------------------------------------------ | ----- |
+| Contra    | `data-refresh-account-contra`    | `contraPostInput` (Contra_Ledr `Ac_Ledr.cs:840-848`, Contra_Rojmel `Ac_Rojmel.cs:336-340`)                         | yes   |
+| Fine Jv   | `data-refresh-account-fine-jv`   | `fineJvPostInput` (Contra_Ledr `Ac_Ledr.cs:846-848`, Contra_Rojmel `Ac_Rojmel.cs:342-344`)                         | yes   |
+| Cash/Bank | `data-refresh-account-cash-bank` | `cashBankPostInput` (Cash_Ledr / Bank_Ledr `Ac_Ledr.cs:565-610`, Cash_Rojmel / Bank_Rojmel `Ac_Rojmel.cs:179-219`) | yes   |
 
-The expected postings are derived from the stored `CONTRA_DATA` rows as they are, the way the desktop's builders read them, not re-gridded through the form. `REMARK_DATA` (rebuilt by the desktop's `Vch_Remark`, `MS_UPDATE.cs:2370-2373`) is not part of this check. The classification preview above stays on the Account button; the family checks are picked on the Account preview's "Account check and repair" panel. Next: the Purchase family and Cash/Bank.
+The expected postings are derived from the stored `CONTRA_DATA` rows as they are, the way the desktop's builders read them, not re-gridded through the form. `REMARK_DATA` (rebuilt by the desktop's `Vch_Remark`, `MS_UPDATE.cs:2370-2373`) is not part of this check. The classification preview above stays on the Account button; the family checks are picked on the Account preview's "Account check and repair" panel. Next: the Purchase family.
+
+#### Cash/Bank
+
+One family covers every TR_CASH book: `CASH REC`, `CASH PAY`, `BANK REC`, `BANK PAY` and the web's generic `RECEIPT` / `PAYMENT` books. The desktop rebuilds them from `CASH_DATA` alone (`MS_UPDATE.cs:2470-2476`), Cash_Ledr / Cash_Rojmel for the cash books and Bank_Ledr / Bank_Rojmel for the bank books, joining `BOOK_DETL` slot 1 (cash or bank), slot 2 (kasar) and slot 3 (bank charges). The web passes the stored `CASH_DATA` rows (amount, kasar, charges, narration, cheque number, clearing date, serial) unchanged to `cashBankPostInput`, the same builder `writeCashVoucherTx` posts with; the settlement account is `REC_AC_CODE` when the writer kept it, else slot 1. The card / UPI detail rows (`CARD_DATA`, `UPI_DATA`) carry no posting, so the `cashBankCardUpi` flag does not change the check; vouchers saved with it on still check clean after it is turned off.
+
+What `CASH_DATA` does not record is never guessed:
+
+- A generic book takes every mode. A voucher settled to slot 1 is cash; card / UPI rows or bank charges prove bank; a voucher naming another account may be either, so the check accepts it if its postings equal the bank posting (as the voucher reopens) or the cash one, and otherwise lists it `unverified`.
+- A kasar account the API named instead of slot 2 is offered the same way, from the accounts on the voucher's own legs.
+- Rows another screen wrote into a receipt book (Bill to Bill, Batch Receipt: no `ENTRY_TYPE 'C'` or hidden number), rows that disagree on the voucher identity, repeated serials, a bank row without a clearing date and charges in a cash book are `unverified`.
+- Payments the web kept in `PAY_DATA` before payments moved to `CASH_DATA` are listed `unverified`, not as orphans.
+
+Bank reconciliation writes only `AC_DATA.CLR_DATE` (`bankRecon.ts`), which the check ignores and the apply carries by `LEDR_KEY`, including a cleared mark removed (NULL). A bank leg's ledger date is the row's clearing date, so a changed `CASH_DATA.CLR_DATE` re-dates the leg and changes its key-stable row only; a cleared leg whose key the voucher no longer posts is warned about in the preview and in the run record. `BANK_RECONCILE` is not touched.
 
 ### Stock: preview-only
 
@@ -95,4 +109,4 @@ Every statement of the desktop handler is schema work in a side database: it cre
 
 `/utilities/data-repair` remains the advanced operation/history console. Preview-only operations publish neutral authority metadata: no confirmation, reason, reauthentication or backup requirement. Both consoles independently gate Apply and authority inputs on `applyAvailable`, and direct API calls are refused with `code: preview-only` before a transaction starts.
 
-PR-2 must classify Field Update and Old Field statement by statement. Account check-and-repair must be extended family by family (Purchase, Cash/Bank next); Stock's builder graph remains unproved (see KIRO-REPORT.md of the company-utils-blocked branch), and Old Field must be classified. No current record claims FULL, accepted, verified desktop parity, or a non-zero desktop match.
+PR-2 must classify Field Update and Old Field statement by statement. Account check-and-repair must be extended family by family (Purchase next); Stock's builder graph remains unproved (see KIRO-REPORT.md of the company-utils-blocked branch), and Old Field must be classified. No current record claims FULL, accepted, verified desktop parity, or a non-zero desktop match.

@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import { FIXTURE_MANIFEST, USERS } from '../fixtures/catalogue.mjs';
+import { FIXTURE_MANIFEST, PARTIES, USERS } from '../fixtures/catalogue.mjs';
 import { holdAdvisoryLock } from '../harness.mjs';
 import { changedTables, tenantFingerprint } from '../faults.mjs';
 
@@ -358,27 +358,61 @@ async function approvalLifecycle(ctx, inspect) {
 }
 
 /**
- * Account check-and-repair on Contra (owner decision 2026-11-27): a contra saved through the normal route, one ledger
- * amount damaged in the database, found by the screen's check, repaired by its apply, and clean on the next check.
+ * Account check-and-repair per voucher family (owner decision 2026-11-27): a voucher saved through the family's normal
+ * route, one ledger debit damaged in the database, found by the screen's check, repaired by its apply, and clean on
+ * the next check. `spec` names the family, its book, the save request and the tables to clean up.
  */
-const CONTRA_TABLES = ['CONTRA_DATA', 'AC_DATA', 'ROJ_MEL_DATA', 'REMARK_DATA', 'TEMP_BOOK_DATA'];
-async function contraPostings(ctx, vchNo) {
+const ACCOUNT_FAMILIES = {
+  contra: {
+    title: 'Contra',
+    coBook: 'CON',
+    endpoint: '/api/contra',
+    body: (date) => ({
+      coBook: 'CON',
+      vchDate: date,
+      lines: [
+        { crdr: 'DR', acCode: 'BANK', amount: 321.5, itDesc: 'DRF account check' },
+        { crdr: 'CR', acCode: 'CASH', amount: 321.5 },
+      ],
+    }),
+    tables: ['CONTRA_DATA', 'AC_DATA', 'ROJ_MEL_DATA', 'REMARK_DATA', 'TEMP_BOOK_DATA'],
+  },
+  // A cash receipt in the generic web RECEIPT book (TR_CASH; Cash_Ledr Ac_Ledr.cs:565-583): leg 02 debits cash.
+  'cash-bank': {
+    title: 'Cash/Bank',
+    coBook: 'RCT',
+    endpoint: '/api/receipts',
+    body: (date) => ({
+      coBook: 'RCT',
+      vchDate: date,
+      partyAc: PARTIES.local.code,
+      partyName: PARTIES.local.name,
+      amount: 187.25,
+      mode: 'cash',
+      itDesc: 'DRF account check',
+    }),
+    tables: ['CASH_DATA', 'AC_DATA', 'ROJ_MEL_DATA', 'TEMP_BOOK_DATA'],
+  },
+};
+
+async function familyPostings(ctx, coBook, vchNo) {
   const out = {};
   for (const table of ['AC_DATA', 'ROJ_MEL_DATA', 'TAX_DATA'])
     out[table] = await ctx.rows(
       `SELECT to_jsonb(t) - 'row_id' AS r FROM "${table}" t
-        WHERE tenant_id=$1 AND "CO_CODE"='01' AND "LC_CODE"='01' AND "CO_YEAR"=$2 AND "CO_BOOK"='CON' AND "VCH_NO"=$3
+        WHERE tenant_id=$1 AND "CO_CODE"='01' AND "LC_CODE"='01' AND "CO_YEAR"=$2 AND "CO_BOOK"=$3 AND "VCH_NO"=$4
         ORDER BY to_jsonb(t)::text`,
       YEAR,
+      coBook,
       vchNo,
     );
   return out;
 }
 
-async function checkContra(page) {
+async function checkFamily(page, family) {
   const [response] = await Promise.all([
     page.waitForResponse((value) =>
-      isApi(value, '/utilities/data-refresh/data-refresh-account-contra/preview'),
+      isApi(value, `/utilities/data-refresh/data-refresh-account-${family}/preview`),
     ),
     page.getByRole('button', { name: 'Check vouchers', exact: true }).click(),
   ]);
@@ -386,38 +420,38 @@ async function checkContra(page) {
   return response.json();
 }
 
-async function accountContraLifecycle(ctx) {
-  const { page } = await ctx.session(as(USERS.admin.user, 'data-refresh-account-contra'));
+async function accountFamilyLifecycle(ctx, family) {
+  const spec = ACCOUNT_FAMILIES[family];
+  const operation = `data-refresh-account-${family}`;
+  const { page } = await ctx.session(as(USERS.admin.user, operation));
   await openScreen(page);
   const today = new Date();
   const vchDate = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
-  const created = await page.evaluate(async (date) => {
-    const response = await fetch('/api/contra', {
-      method: 'POST',
-      credentials: 'include',
-      headers: { 'content-type': 'application/json' },
-      body: JSON.stringify({
-        coBook: 'CON',
-        vchDate: date,
-        lines: [
-          { crdr: 'DR', acCode: 'BANK', amount: 321.5, itDesc: 'DRF account check' },
-          { crdr: 'CR', acCode: 'CASH', amount: 321.5 },
-        ],
-      }),
-    });
-    return { status: response.status, body: await response.text() };
-  }, vchDate);
+  const created = await page.evaluate(
+    async ({ endpoint, body }) => {
+      const response = await fetch(endpoint, {
+        method: 'POST',
+        credentials: 'include',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify(body),
+      });
+      return { status: response.status, body: await response.text() };
+    },
+    { endpoint: spec.endpoint, body: spec.body(vchDate) },
+  );
   assert.equal(created.status, 201, created.body);
   const vchNo = String(JSON.parse(created.body).vchNo).padStart(5, '0');
+  const { coBook } = spec;
   const checksum = `${'d'.repeat(48)}${String(Date.now()).slice(-16).padStart(16, '0')}`;
   try {
-    const writer = await contraPostings(ctx, vchNo);
+    const writer = await familyPostings(ctx, coBook, vchNo);
     await exec(
       ctx,
       `UPDATE "AC_DATA" SET "DR_AMT"="DR_AMT"+1
-        WHERE tenant_id=$1 AND "CO_CODE"='01' AND "LC_CODE"='01' AND "CO_YEAR"=$2 AND "CO_BOOK"='CON' AND "VCH_NO"=$3
+        WHERE tenant_id=$1 AND "CO_CODE"='01' AND "LC_CODE"='01' AND "CO_YEAR"=$2 AND "CO_BOOK"=$3 AND "VCH_NO"=$4
           AND "DR_AMT"<>0`,
       YEAR,
+      coBook,
       vchNo,
     );
     await exec(
@@ -434,58 +468,63 @@ async function accountContraLifecycle(ctx) {
       page.getByRole('button', { name: 'Account', exact: true }).click(),
     ]);
     assert.equal(accountResponse.status(), 200, await accountResponse.text());
-    await page.locator('#account-family').selectOption('contra');
-    const first = await checkContra(page);
+    await page.locator('#account-family').selectOption(family);
+    const first = await checkFamily(page, family);
     const differing = first.detail.vouchers.filter((v) =>
       ['differs', 'missing'].includes(v.status),
     );
     assert.deepEqual(
       differing.map((v) => [v.coBook, v.vchNo, v.status]),
-      [['CON', vchNo, 'differs']],
+      [[coBook, vchNo, 'differs']],
     );
     assert.deepEqual(first.diffs, [{ table: 'AC_DATA', insert: 0, update: 1, delete: 0 }]);
-    const row = page.locator(`tr[data-voucher="CON/${vchNo}"]`);
+    const row = page.locator(`tr[data-voucher="${coBook}/${vchNo}"]`);
     await row.getByText('AC_DATA: 0 missing, 0 extra, 1 changed (DR_AMT)').waitFor();
-    await page.locator('#account-reason').fill('repair the damaged contra ledger leg');
+    await page.locator('#account-reason').fill(`repair the damaged ${spec.title} ledger leg`);
     await page.locator('#account-confirmation').fill(first.requiresConfirmation);
     await page.locator('#account-backup').fill(checksum);
     await page.locator('#account-password').fill(process.env.FEATURE_E2E_PASSWORD ?? '');
     const [applyResponse] = await Promise.all([
-      page.waitForResponse((value) =>
-        isApi(value, '/utilities/data-refresh/data-refresh-account-contra/apply'),
-      ),
-      page.getByRole('button', { name: 'Apply Contra repair', exact: true }).click(),
+      page.waitForResponse((value) => isApi(value, `/utilities/data-refresh/${operation}/apply`)),
+      page.getByRole('button', { name: `Apply ${spec.title} repair`, exact: true }).click(),
     ]);
     assert.equal(applyResponse.status(), 200, await applyResponse.text());
     const applied = await applyResponse.json();
     assert.deepEqual(applied.applied, first.diffs);
     await page.getByText(/Account Refersh Process Complete\./).waitFor();
-    const repaired = await contraPostings(ctx, vchNo);
-    assert.deepEqual(repaired, writer, 'the apply restores the rows the contra writer posted');
-    const second = await checkContra(page);
+    const repaired = await familyPostings(ctx, coBook, vchNo);
+    assert.deepEqual(
+      repaired,
+      writer,
+      `the apply restores the rows the ${spec.title} writer posted`,
+    );
+    const second = await checkFamily(page, family);
     assert.equal(
-      second.detail.vouchers.some((v) => v.vchNo === vchNo && v.coBook === 'CON'),
+      second.detail.vouchers.some((v) => v.vchNo === vchNo && v.coBook === coBook),
       false,
     );
     const [run] = await ctx.rows(
       `SELECT jsonb_array_length(before_rows) n FROM "data_repair_run"
-        WHERE tenant_id=$1 AND operation_id='data-refresh-account-contra' AND state='applied'
+        WHERE tenant_id=$1 AND operation_id=$2 AND state='applied'
         ORDER BY row_id DESC LIMIT 1`,
+      operation,
     );
     assert.equal(Number(run.n), 1);
     return { vchNo, first, applied, second, writer, repaired };
   } finally {
     await ctx.owner.$transaction(async (tx) => {
       await tx.$executeRawUnsafe(`SET LOCAL "app.allow_repair_purge"='on'`);
-      for (const table of CONTRA_TABLES)
+      for (const table of spec.tables)
         await tx.$executeRawUnsafe(
-          `DELETE FROM "${table}" WHERE tenant_id=$1 AND "CO_CODE"='01' AND "CO_BOOK"='CON' AND "VCH_NO"=$2`,
+          `DELETE FROM "${table}" WHERE tenant_id=$1 AND "CO_CODE"='01' AND "CO_BOOK"=$2 AND "VCH_NO"=$3`,
           ctx.tenantId,
+          coBook,
           vchNo,
         );
       await tx.$executeRawUnsafe(
-        `DELETE FROM "data_repair_run" WHERE tenant_id=$1 AND operation_id='data-refresh-account-contra'`,
+        `DELETE FROM "data_repair_run" WHERE tenant_id=$1 AND operation_id=$2`,
         ctx.tenantId,
+        operation,
       );
       await tx.$executeRawUnsafe(
         `DELETE FROM "company_backup_run" WHERE tenant_id=$1 AND checksum=$2`,
@@ -506,6 +545,8 @@ export const dataRefresh = {
     'web/apps/api/src/modules/utilities/dataRepairOps.ts',
     'web/apps/api/src/modules/utilities/dataRefreshOps.ts',
     'web/apps/api/src/modules/shared/postingAccounts.ts',
+    'web/apps/api/src/modules/utilities/accountRefresh.ts',
+    'web/apps/api/src/modules/finance/cashBankRefresh.ts',
     'web/apps/api/src/routes/dataRepair.ts',
     'web/apps/web/app/(app)/utilities/data-refresh/page.tsx',
     'web/apps/web/app/(app)/utilities/data-repair/page.tsx',
@@ -1207,7 +1248,7 @@ export const dataRefresh = {
       'journey.account-full-builder',
       'T18',
       'MS_UPDATE.cs:2334-2669; playbook J23',
-      'Partly built: per the owner decision of 27 Nov 2026 Account is check-and-repair per voucher family, and Contra and Fine Jv apply (case account.contra-check-and-repair); the other families remain. The desktop Account button deletes AC_DATA, ROJ_MEL_DATA, TAX_DATA, DHRN_DATA and re-posts every voucher of the year through about 120 builder methods (Ac_Ledr 55, Ac_Rojmel 44, Ac_Tax 48; MS_UPDATE.cs:2401-2663). The web writes those rows inside each voucher save with its own posting rules, so an equal rebuild needs a per-voucher-type re-posting engine the web does not have. D-REF-3 (owner, 2 Nov 2026) says ship preview-only when the effect cannot be reproduced exactly. The proven prefix (book flags, clearing dates, bank reconciliation) is applied by the advanced operation ledger-normalise, covered by dataRepair.db.test.ts. Owner question: approve a re-posting engine, or accept preview-only for good.',
+      'Partly built: per the owner decision of 27 Nov 2026 Account is check-and-repair per voucher family, and Contra, Fine Jv and Cash/Bank apply (cases account.contra-check-and-repair and account.cash-bank-check-and-repair); the other families remain. The desktop Account button deletes AC_DATA, ROJ_MEL_DATA, TAX_DATA, DHRN_DATA and re-posts every voucher of the year through about 120 builder methods (Ac_Ledr 55, Ac_Rojmel 44, Ac_Tax 48; MS_UPDATE.cs:2401-2663). The web writes those rows inside each voucher save with its own posting rules, so an equal rebuild needs a per-voucher-type re-posting engine the web does not have. D-REF-3 (owner, 2 Nov 2026) says ship preview-only when the effect cannot be reproduced exactly. The proven prefix (book flags, clearing dates, bank reconciliation) is applied by the advanced operation ledger-normalise, covered by dataRepair.db.test.ts. Owner question: approve a re-posting engine, or accept preview-only for good.',
     ),
     blocked(
       'journey.stock-full-builder',
@@ -1284,9 +1325,24 @@ export const dataRefresh = {
       'mutation',
       'Owner decision 2026-11-27 (docs/handbook/web/data-refresh.md): Account is check-and-repair per family; MS_UPDATE.cs:2334-2669 with Contra_Ledr Ac_Ledr.cs:840-848 and Contra_Rojmel Ac_Rojmel.cs:336-340',
       async (ctx) => {
-        const result = await accountContraLifecycle(ctx);
+        const result = await accountFamilyLifecycle(ctx, 'contra');
         return {
           observation: `Contra ${result.vchNo}: the check showed the damaged DR_AMT, the apply restored the writer's rows, the second check did not list it`,
+          expected: result.first.diffs,
+          database: { writer: result.writer, repaired: result.repaired },
+          downstream: { secondCheck: result.second.detail.summary },
+        };
+      },
+    ),
+    C(
+      'account.cash-bank-check-and-repair',
+      'T07',
+      'mutation',
+      'Owner decision 2026-11-27 (docs/handbook/web/data-refresh.md): Account is check-and-repair per family; MS_UPDATE.cs:2470-2476 with Cash_Ledr Ac_Ledr.cs:565-583 and Cash_Rojmel Ac_Rojmel.cs:179-193',
+      async (ctx) => {
+        const result = await accountFamilyLifecycle(ctx, 'cash-bank');
+        return {
+          observation: `Cash/Bank receipt RCT/${result.vchNo}: the check showed the damaged DR_AMT, the apply restored the writer's rows, the second check did not list it`,
           expected: result.first.diffs,
           database: { writer: result.writer, repaired: result.repaired },
           downstream: { secondCheck: result.second.detail.summary },
