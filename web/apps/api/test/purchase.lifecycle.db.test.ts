@@ -364,7 +364,7 @@ databaseDescribe('database-backed purchase voucher lifecycle', () => {
             itCode: 'LOOSE',
             netWt: 1,
             touch: 100,
-            metalAmount: 366746,
+            metalAmount: 200000,
             labourType: 'fixed',
             labourFixed: 100,
             otherAmount: 20,
@@ -377,13 +377,13 @@ databaseDescribe('database-backed purchase voucher lifecycle', () => {
         return;
       }
       const saved = await attempt;
-      // 366866 + 11005.98 = 377871.98; whole-rupee TCS = 378.
+      // 200120 + 3% 6003.60 = 206123.60; whole-rupee TCS = 206.
       const [h] = await owner.$queryRawUnsafe<any[]>(
         `SELECT "TCS_AMT"::float tcs,"TOT_AMT"::float total,"BILL_OS"::float os FROM "PR_DATA" WHERE tenant_id=$1 AND "VCH_NO"=$2`,
         TENANT,
         String(saved.vchNo).padStart(5, '0'),
       );
-      expect(h).toEqual({ tcs: 378, total: 378249.98, os: 378249.98 });
+      expect(h).toEqual({ tcs: 206, total: 206329.6, os: 206329.6 });
       const legs = await owner.$queryRawUnsafe<any[]>(
         `SELECT "AC_CODE" ac,"LD_CODE" ld,"DR_AMT"::float dr,"CR_AMT"::float cr,"LEDR_KEY" k FROM "AC_DATA" WHERE tenant_id=$1 AND "VCH_NO"=$2`,
         TENANT,
@@ -392,11 +392,11 @@ databaseDescribe('database-backed purchase voucher lifecycle', () => {
       expect(legs.find((l) => String(l.k).endsWith('07'))).toMatchObject({
         ac: taxAccount,
         ld: 'SUPP',
-        dr: 378,
+        dr: 206,
         cr: 0,
       });
       expect(legs.find((l) => l.ac === 'CTRL')).toMatchObject({
-        dr: withLabour === 'Y' ? 366866 : 366746,
+        dr: withLabour === 'Y' ? 200120 : 200000,
         cr: 0,
       });
       if (withLabour === 'N')
