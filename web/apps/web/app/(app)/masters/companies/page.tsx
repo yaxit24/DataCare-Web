@@ -35,6 +35,8 @@ const selects: [string, string, string[]][] = [
   ['WORK_TYPE', 'Work Type', ['Retail', 'WhSales']],
   ['METAL_TYPE', 'Metal Type', ['Gold', 'Silver', 'Other']],
 ];
+// rpt_xml/Company.xml:88-153 page-header texts, in their left-to-right order, over the :190-250 detail fields.
+const printColumns = ['CO_CODE', 'CO_NAME', 'CO_ADD1', 'CO_ADD2', 'CO_STATE', 'CO_CITY'];
 const blank = (): Record<string, string> => ({
   CO_CODE: '',
   ...Object.fromEntries(fields.map(([key]) => [key, ''])),
@@ -67,6 +69,7 @@ export default function CompanyPage() {
   const [year, setYear] = useState('');
   const [opDate, setOpDate] = useState('');
   const [clDate, setClDate] = useState('');
+  const [printRows, setPrintRows] = useState<Record<string, string>[] | null>(null);
   const load = async () => setCompanies(await get('/context/companies'));
   const open = async (code: string) => {
     setForm(hydrate(await get(`/company-identity/${encodeURIComponent(code)}`)));
@@ -190,7 +193,56 @@ export default function CompanyPage() {
         >
           Delete
         </button>
+        <button
+          disabled={busy}
+          onClick={() =>
+            act(async () => {
+              // MS_COMPANY.cs:6776-6790: Company.RPT for the logged-in company; the API answers the Print right.
+              const out = await get<{ rows: Record<string, string>[] }>('/company-identity/print');
+              setPrintRows(out.rows);
+            })
+          }
+        >
+          Print
+        </button>
       </div>
+      {printRows && (
+        <section className="panel" data-testid="company-print" aria-label="Company print">
+          <div className="row" style={{ justifyContent: 'space-between' }}>
+            {/* rpt_xml/Company.xml:165 PrintDate in the page header, :287 PageNumber in the page footer. */}
+            <span data-testid="company-print-date">
+              {new Date().toLocaleDateString('en-GB').replace(/-/g, '/')}
+            </span>
+            <div className="row" style={{ gap: 8 }}>
+              <button type="button" className="ghost" onClick={() => window.print()}>
+                Print now
+              </button>
+              <button type="button" className="ghost" onClick={() => setPrintRows(null)}>
+                Close
+              </button>
+            </div>
+          </div>
+          <table className="grid">
+            <thead>
+              <tr>
+                {printColumns.map((key) => (
+                  <th key={key}>{key}</th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {printRows.map((row) => (
+                <tr key={row.CO_CODE}>
+                  {printColumns.map((key) => (
+                    <td key={key}>{row[key] ?? ''}</td>
+                  ))}
+                </tr>
+              ))}
+            </tbody>
+          </table>
+          <div data-testid="company-print-page">1</div>
+        </section>
+      )}
       <div className="row" style={{ alignItems: 'start' }}>
         <section className="panel">
           <label htmlFor="company-search">Search company</label>

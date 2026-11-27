@@ -173,9 +173,10 @@ describe('route policy registry', () => {
     // voucher zoom of Tag Stock and of the HuId Report (RP_TAG.cs:8917 DGV_DoubleClick) adds GET /reports/tag-stock/zoom
     // and GET /reports/huid/zoom; report metal defaults adds one: 832 + 4 = 836.
     // The Sales Invoice Apr No import adds GET /sales/approval-help and GET /sales/approval-import: 836 + 2 = 838.
-    // Data Import (UT_IMPORT Lite Soft) adds its preview and apply: 840.
-    expect(routes).toHaveLength(840);
-    expect(new Set(routes.map((route) => `${route.method} ${route.path}`)).size).toBe(840);
+    // Data Import (UT_IMPORT Lite Soft) adds its preview and apply: 840. The Company print adds
+    // GET /company-identity/print: 841.
+    expect(routes).toHaveLength(841);
+    expect(new Set(routes.map((route) => `${route.method} ${route.path}`)).size).toBe(841);
 
     const policies = routes.map((route) => ({
       ...route,
@@ -253,6 +254,22 @@ describe('route policy registry', () => {
       expect(routePolicyFor('GET', base)).toMatchObject({ form, action: 'read' });
       expect(routePolicyFor('PUT', base)).toMatchObject({ form, action: 'update' });
       expect(routePolicyFor('DELETE', base)).toMatchObject({ form, action: 'delete' });
+      expect(routePolicyFor('GET', `${base}/print`)).toMatchObject({ form, action: 'print' });
+    }
+  });
+
+  it('makes every bill print whose desktop BtnPrint checks FRM_PRINT a print action', () => {
+    // TR_SALE.cs:16248-16254, TR_PURC.cs:13541-13548, TR_SALE_RTN.cs:15045-15052, TR_OTH_PURC.cs:3958-3966 and
+    // TR_WH_SALE.cs:13658-13660 (opened as Wh Quotation by MDI_FORM.cs:8149-8156). A GET is a read otherwise, so a
+    // user with view rights but no print right could print the bill.
+    for (const [form, base] of [
+      ['Sales/Sales Invoice', '/sales/:vchNo'],
+      ['Purchase/Purchase Invoice', '/purchases/:vchNo'],
+      ['Sales/Sales Return', '/sales-returns/:vchNo'],
+      ['Purchase/Other Income', '/other-income/:vchNo'],
+      ['Purchase/Other Purchase', '/other-purchase/:vchNo'],
+      ['Sales/Wholesale Quotation', '/wholesale-quotations/:vchNo'],
+    ] as const) {
       expect(routePolicyFor('GET', `${base}/print`)).toMatchObject({ form, action: 'print' });
     }
   });

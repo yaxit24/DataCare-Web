@@ -971,6 +971,7 @@ route('Masters/Item Stock Limits', [
 ]);
 route('Masters/Companies', [
   'GET /company-identity/states',
+  'GET /company-identity/print',
   'GET /company-identity/:code',
   'POST /company-identity',
   'PUT /company-identity',
@@ -1179,6 +1180,7 @@ const PRINT_ROUTES = new Set([
   // No Print Rights....." without it (G225). Restore stays admin-only and contained.
   'GET /backup',
   'GET /years/print',
+  'GET /company-identity/print',
   'GET /masters/party-master/print',
   'GET /masters/employee-master/print',
   'GET /masters/tax-master/print',
@@ -1202,8 +1204,16 @@ const PRINT_ROUTES = new Set([
   'GET /purchases/invoice',
   'GET /purchase-quotations/quotation',
   'GET /karigar/issue-voucher',
-  // TR_WH_SALE.cs:13658-13660: Wh Sales print needs USER_SET.FRM_PRINT.
+  // TR_WH_SALE.cs:13658-13660: Wh Sales print needs USER_SET.FRM_PRINT; Wh Quotation is the same form.
   'GET /wholesale-sales/:vchNo/print',
+  'GET /wholesale-quotations/:vchNo/print',
+  // BtnPrint_Click refuses "You Have No Print Rights....." without FRM_PRINT: TR_SALE.cs:16248-16254,
+  // TR_PURC.cs:13541-13548, TR_SALE_RTN.cs:15045-15052, TR_OTH_PURC.cs:3958-3966 (Other Income and Other Purchase).
+  'GET /sales/:vchNo/print',
+  'GET /purchases/:vchNo/print',
+  'GET /sales-returns/:vchNo/print',
+  'GET /other-income/:vchNo/print',
+  'GET /other-purchase/:vchNo/print',
   'GET /repair-receipts/:vchNo/print',
   'GET /repair-karigar-issues/:vchNo/print',
   'GET /repair-karigar-receipts/:vchNo/print',
