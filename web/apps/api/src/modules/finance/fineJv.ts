@@ -17,6 +17,7 @@ import {
   postVoucherTx,
   reverseVoucherTx,
   type LedgerLine,
+  type PostInput,
 } from '../posting/posting.js';
 import { sqlStr } from '../posting/lineLegs.js';
 import {
@@ -355,6 +356,106 @@ async function rebuildRemarksTx(
   }
 }
 
+/** What the posting of one Fine JV voucher needs besides its CONTRA_DATA rows. */
+export interface FineJvPostingContext {
+  key: ReturnType<typeof voucherKey>;
+  book: { shortName: string; mainBook: string; dataType: string };
+  metal: string;
+  voucherDate: Date;
+  /** A Date from the writer, or the stored text when Data Refresh re-derives (exact in any time zone). */
+  voucherTime: Date | string;
+  hiddenVoucherNo: string;
+  mainUser: string;
+}
+
+/**
+ * The posting of one Fine JV from its CONTRA_DATA rows: the rows, one AC_DATA leg per CR_FINE row
+ * (`STR(SR_NO)+'03'`, `+`) and per DR_FINE row (`+'04'`, `-`) (Contra_Ledr, Ac_Ledr.cs:846-848) and the day book
+ * (Contra_Rojmel, Ac_Rojmel.cs:342-344). Pure: the writer posts it, and Data Refresh re-derives it from the stored
+ * rows to check them. REMARK_DATA is rebuilt separately (rebuildRemarksTx), as Vch_Remark is.
+ */
+export function fineJvPostInput(rows: SourceRow[], ctx: FineJvPostingContext): PostInput {
+  const { key, book } = ctx;
+  const ledgerBase = {
+    ...key,
+    VCH_TYPE: book.shortName,
+    VCH_DATE: ctx.voucherDate,
+    BOOK_NAME: book.mainBook,
+    IT_TYPE: ctx.metal,
+    FINE_RATE: 0,
+    DR_AMT: 0,
+    CR_AMT: 0,
+    HD_VCH_NO: ctx.hiddenVoucherNo,
+    MAIN_USER: ctx.mainUser || null,
+    DATA_TYPE: book.dataType,
+    DATA_TRFR: 'N',
+    ENTRY_TIME: ctx.voucherTime,
+  };
+  const ledger: LedgerLine[] = rows.flatMap((row) => [
+    ...(num(row.CR_FINE)
+      ? [
+          {
+            ...ledgerBase,
+            legKeySuffix: `${sqlStr(num(row.SR_NO))}03`,
+            AC_CODE: row.AC_CODE,
+            LD_CODE: row.LD_CODE,
+            SIGN: '+',
+            FINE_WT: row.CR_FINE,
+            IT_DESC: row.IT_DESC,
+          },
+        ]
+      : []),
+    ...(num(row.DR_FINE)
+      ? [
+          {
+            ...ledgerBase,
+            legKeySuffix: `${sqlStr(num(row.SR_NO))}04`,
+            AC_CODE: row.AC_CODE,
+            LD_CODE: row.LD_CODE,
+            SIGN: '-',
+            FINE_WT: row.DR_FINE,
+            IT_DESC: row.IT_DESC,
+          },
+        ]
+      : []),
+  ]);
+  const rojmelRows = rows.flatMap((row) =>
+    buildFineJvRojmel(
+      {
+        scope: { coCode: key.CO_CODE, lcCode: key.LC_CODE, coYear: key.CO_YEAR },
+        key,
+        coBook: String(key.CO_BOOK),
+        vchNo: String(key.VCH_NO),
+        vchDate: ctx.voucherDate,
+        vchType: book.shortName,
+        bookName: book.mainBook,
+        // Ac_Rojmel.cs:342-344 copies each CONTRA_DATA row's AC_NAME and BOOK_DATA.DATA_TYPE.
+        partyName: row.AC_NAME as string,
+        partyCode: '',
+      },
+      [
+        {
+          lineNo: num(row.SR_NO),
+          acCode: row.AC_CODE as string,
+          ldCode: row.LD_CODE as string,
+          metal: rojmelMetalFor(ctx.metal),
+          creditFine: num(row.CR_FINE),
+          debitFine: num(row.DR_FINE),
+          description: (row.IT_DESC as string) || undefined,
+        },
+      ],
+    ).map((dayBookRow) => ({ ...dayBookRow, DATA_TYPE: book.dataType })),
+  );
+  return {
+    bookName: book.mainBook,
+    ledger: { table: 'AC_DATA', lines: ledger },
+    writes: [
+      { table: 'CONTRA_DATA', rows },
+      ...(rojmelRows.length ? [{ table: 'ROJ_MEL_DATA', rows: rojmelRows }] : []),
+    ],
+  };
+}
+
 async function writeTx(
   tx: any,
   ctx: {
@@ -418,88 +519,19 @@ async function writeTx(
       },
     ];
   });
-  const ledgerBase = {
-    ...key,
-    VCH_TYPE: book.shortName,
-    VCH_DATE: identity.voucherDate,
-    BOOK_NAME: book.mainBook,
-    IT_TYPE: metal,
-    FINE_RATE: 0,
-    DR_AMT: 0,
-    CR_AMT: 0,
-    HD_VCH_NO: identity.hiddenVoucherNo,
-    MAIN_USER: identity.mainUser || null,
-    DATA_TYPE: book.dataType,
-    DATA_TRFR: 'N',
-    ENTRY_TIME: identity.voucherTime,
-  };
-  const ledger: LedgerLine[] = rows.flatMap((row) => [
-    ...(row.CR_FINE
-      ? [
-          {
-            ...ledgerBase,
-            legKeySuffix: `${sqlStr(row.SR_NO)}03`,
-            AC_CODE: row.AC_CODE,
-            LD_CODE: row.LD_CODE,
-            SIGN: '+',
-            FINE_WT: row.CR_FINE,
-            IT_DESC: row.IT_DESC,
-          },
-        ]
-      : []),
-    ...(row.DR_FINE
-      ? [
-          {
-            ...ledgerBase,
-            legKeySuffix: `${sqlStr(row.SR_NO)}04`,
-            AC_CODE: row.AC_CODE,
-            LD_CODE: row.LD_CODE,
-            SIGN: '-',
-            FINE_WT: row.DR_FINE,
-            IT_DESC: row.IT_DESC,
-          },
-        ]
-      : []),
-  ]);
-  const complete = completeFinanceScope(scope);
-  const rojmelRows = rows.flatMap((row) =>
-    buildFineJvRojmel(
-      {
-        scope: { coCode: complete.coCode, lcCode: complete.lcCode, coYear: complete.coYear },
-        key,
-        coBook: String(key.CO_BOOK),
-        vchNo: String(key.VCH_NO),
-        vchDate: identity.voucherDate,
-        vchType: book.shortName,
-        bookName: book.mainBook,
-        // Ac_Rojmel.cs:342-344 copies each CONTRA_DATA row's AC_NAME and BOOK_DATA.DATA_TYPE.
-        partyName: row.AC_NAME,
-        partyCode: '',
-      },
-      [
-        {
-          lineNo: row.SR_NO,
-          acCode: row.AC_CODE,
-          ldCode: row.LD_CODE,
-          metal: rojmelMetalFor(metal),
-          creditFine: row.CR_FINE,
-          debitFine: row.DR_FINE,
-          description: row.IT_DESC || undefined,
-        },
-      ],
-    ).map((dayBookRow) => ({ ...dayBookRow, DATA_TYPE: book.dataType })),
-  );
+  const posting = fineJvPostInput(rows, {
+    key,
+    book,
+    metal,
+    voucherDate: identity.voucherDate,
+    voucherTime: identity.voucherTime,
+    hiddenVoucherNo: identity.hiddenVoucherNo,
+    mainUser: identity.mainUser,
+  });
   // TR_CONTRA.cs:2742-2753: TEMP_BOOK_DATA.BOOK_NAME is FormName, the BOOK_DATA.BOOK_NAME picked by
   // CurBookHelp (DC_Main.cs:1495-1531, TR_CONTRA.cs:2307).
   await insertHiddenIdentityTx(tx, scope, identity, book.name);
-  await postVoucherTx(tx, scope.tenantId, {
-    bookName: book.mainBook,
-    ledger: { table: 'AC_DATA', lines: ledger },
-    writes: [
-      { table: 'CONTRA_DATA', rows },
-      ...(rojmelRows.length ? [{ table: 'ROJ_MEL_DATA', rows: rojmelRows }] : []),
-    ],
-  });
+  await postVoucherTx(tx, scope.tenantId, posting);
   await rebuildRemarksTx(tx, scope, identity.voucherNo, book, rows, ctx.masterNames);
   return { vchNo: identity.vchNo };
 }

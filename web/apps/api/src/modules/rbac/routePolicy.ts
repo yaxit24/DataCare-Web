@@ -124,6 +124,8 @@ route('Utilities/Data Refresh', [
   'POST /utilities/data-refresh/:id/preview',
   'POST /utilities/data-refresh/:id/apply',
   'GET /utilities/data-refresh/runs',
+  // Account check-and-repair's per-voucher list, a page at a time (same Print boundary).
+  'GET /utilities/data-refresh/account/:family/vouchers',
 ]);
 // Desktop MS_UPDATE maintenance console. Preview and apply rewrite historical data, so the whole console is
 // admin-only in the registry rather than by handler comment, and the actions are classified for what they do:
@@ -1176,6 +1178,7 @@ const PRINT_ROUTES = new Set([
   'POST /utilities/data-refresh/:id/preview',
   'POST /utilities/data-refresh/:id/apply',
   'GET /utilities/data-refresh/runs',
+  'GET /utilities/data-refresh/account/:family/vouchers',
   // UT_BKP.cs:942-965, :1203-1210: Backup reads USER_SET FRM_PRINT under the caption Data Backup and answers "You Have
   // No Print Rights....." without it (G225). Restore stays admin-only and contained.
   'GET /backup',
