@@ -14,6 +14,7 @@ import { RateTicker } from './RateTicker';
 import { useGridKeyboard } from './GridKeyboard';
 import { todayLocal } from '../lib/localDate';
 import { openDocument } from '../lib/openDocument';
+import { useTenantFeature } from './BusinessScope';
 
 interface MLine {
   partyAc: string;
@@ -34,6 +35,10 @@ export default function PaymentForm({ kind }: { kind: 'receipt' | 'payment' }) {
   const [partyName, setPartyName] = useState('');
   const [amount, setAmount] = useState('');
   const [mode, setMode] = useState('cash');
+  // CARD/UPI are a web extension behind the tenant's plan flag (default on); off, the modes are the desktop TR_CASH
+  // book's own cash or bank (TR_CASH.cs:1743-1797). A loaded voucher saved by card/UPI still shows its mode.
+  const cardUpiFeature = useTenantFeature('cashBankCardUpi');
+  const cardUpiShown = cardUpiFeature || mode === 'card' || mode === 'upi';
   // The configured book the voucher is numbered and posted in. The desktop fixes it before the form
   // opens (CurBookHelp by MAIN_BOOK). Without it every save was refused with HTTP 400
   // (PARITY-EVALUATION-2026-09-28 D1).
@@ -283,8 +288,8 @@ export default function PaymentForm({ kind }: { kind: 'receipt' | 'payment' }) {
             <select aria-label="Mode" value={mode} onChange={(e) => setMode(e.target.value)}>
               <option value="cash">CASH</option>
               <option value="bank">BANK</option>
-              <option value="card">CARD</option>
-              <option value="upi">UPI</option>
+              {cardUpiShown && <option value="card">CARD</option>}
+              {cardUpiShown && <option value="upi">UPI</option>}
               <option value="cheque">CHEQUE</option>
             </select>
           </div>

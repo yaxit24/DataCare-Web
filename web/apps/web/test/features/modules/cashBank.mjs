@@ -1,4 +1,5 @@
 import assert from 'node:assert/strict';
+import { randomUUID } from 'node:crypto';
 import { FIXTURE_MANIFEST, PARTIES, USERS } from '../fixtures/catalogue.mjs';
 
 /**
@@ -43,10 +44,6 @@ const C = (id, group, kind, source, run, extra = {}) => ({
           : ['browser', 'expected'],
   run,
   ...extra,
-});
-const pending = (name, group, reason) => ({
-  ...C(`${name}.pending`, group, 'read-only', `Playbook ${group}`, async () => ({})),
-  blocked: reason,
 });
 
 async function openForm(page, path) {
@@ -577,10 +574,130 @@ export const cashBank = {
         };
       },
     ),
-    pending(
-      'settlement',
+    C(
+      'settlement.card-upi-plan-flag',
       'T06',
-      'STOPPED for an owner call, not a test gap. TR_CASH (the form behind all four menus) has no card or UPI mode: the book alone decides cash or bank (TR_CASH.cs:1743-1797), the grid has Chq No, Clearing Dt, Charges, Kasar and Amount only, and Save writes CASH_DATA alone (:2995-3060), never CARD_DATA or UPI_DATA. Card settlement is the separate Pro menu Card Rec (TR_CARD_REC, CARD ADJUST books), whose commission is Math.Round(card × % / 100) to a whole rupee and ADDED to the card amount (TR_CARD_REC.cs:3796-3799); TR_UPI_REC is opened by no form. The web CARD/UPI modes on these screens (finance.ts postReceipt) subtract a 2-place commission and write CARD_DATA/UPI_DATA into the receipt book, so no desktop rule gives this case an expected value.',
+      'mutation',
+      'TR_CASH (the form behind all four menus) has no card or UPI mode: the book alone decides cash or bank (TR_CASH.cs:1743-1797) and Save writes CASH_DATA alone (:2995-3060). WEB EXTENSION (owner rule 2026-11-27): CARD/UPI stay on the web screens behind the per-tenant plan flag tenant_feature cashBankCardUpi, default on. Off = desktop TR_CASH (no CARD/UPI mode on screen or API, a bank receipt writes CASH_DATA only); on = the web modes, a card receipt adding CARD_DATA and a UPI receipt UPI_DATA beside its CASH_DATA row',
+      async (ctx) => {
+        const flag = (enabled) =>
+          ctx.owner.$executeRawUnsafe(
+            `INSERT INTO tenant_feature(tenant_id,feature,enabled) VALUES ($1,'cashBankCardUpi',$2)
+             ON CONFLICT (tenant_id,feature) DO UPDATE SET enabled=$2`,
+            ctx.tenantId,
+            enabled,
+          );
+        // The CARD/UPI inputs carry a visible label in their .field box but no aria-label.
+        const boxed = (page, label) =>
+          page.locator('.field', { has: page.getByText(label, { exact: true }) }).locator('input');
+        const modes = async (page) =>
+          page.getByLabel('Mode', { exact: true }).locator('option').allTextContents();
+        const pickBank = async (page) => {
+          const bank = page.getByLabel('Bank account', { exact: true });
+          await bank.fill(PARTIES.bank.code);
+          await bank
+            .locator('xpath=..')
+            .getByText(PARTIES.bank.code, { exact: true })
+            .first()
+            .waitFor();
+          await bank.press('Enter');
+        };
+        const detail = async (vchNo) =>
+          (
+            await ctx.rows(
+              `SELECT (SELECT count(*) FROM "CASH_DATA" WHERE tenant_id=$1 AND "CO_BOOK"='${RECEIPT_BOOK}' AND "VCH_NO"=$2)::int cash,
+                      (SELECT count(*) FROM "CARD_DATA" WHERE tenant_id=$1 AND "CO_BOOK"='${RECEIPT_BOOK}' AND "VCH_NO"=$2)::int card,
+                      (SELECT count(*) FROM "UPI_DATA" WHERE tenant_id=$1 AND "CO_BOOK"='${RECEIPT_BOOK}' AND "VCH_NO"=$2)::int upi`,
+              vchNo,
+            )
+          )[0];
+        const receiptBy = async (page, mode, extra = async () => {}) => {
+          await openForm(page, '/txn/receipt?mode=BANK');
+          await page.getByLabel('Mode', { exact: true }).selectOption(mode);
+          await pickBank(page);
+          await pickParty(page, PARTIES.local.code);
+          await page.getByLabel('Amount', { exact: true }).fill('1200');
+          await extra();
+          const response = await save(page, 'Save Receipt');
+          assert.equal(response.status(), 201, await response.text());
+          return { response, vchNo: String((await response.json()).vchNo).padStart(5, '0') };
+        };
+        try {
+          // Flag OFF: the desktop TR_CASH form.
+          await flag(false);
+          const off = await ctx.session();
+          await openForm(off.page, '/txn/receipt?mode=BANK');
+          assert.deepEqual(
+            await modes(off.page),
+            ['CASH', 'BANK', 'CHEQUE'],
+            'receipt: no CARD/UPI',
+          );
+          await openForm(off.page, '/txn/payment?mode=BANK');
+          assert.deepEqual(
+            await modes(off.page),
+            ['CASH', 'BANK', 'CHEQUE'],
+            'payment: no CARD/UPI',
+          );
+          const bank = await receiptBy(off.page, 'bank');
+          assert.deepEqual(
+            await detail(bank.vchNo),
+            { cash: 1, card: 0, upi: 0 },
+            'CASH_DATA only',
+          );
+          // The API refuses the mode too: the screen's own request, replayed with mode card under a new key.
+          const before = await receiptCount(ctx);
+          const request = bank.response.request();
+          const body = JSON.parse(request.postData() ?? '{}');
+          const headers = { ...request.headers(), 'idempotency-key': randomUUID() };
+          delete headers['content-length'];
+          for (const mode of ['card', 'upi']) {
+            const refused = await off.page.request.post(request.url(), {
+              headers,
+              data: { ...body, mode },
+            });
+            const text = await refused.text();
+            assert.equal(refused.status(), 400, text);
+            assert.match(text, new RegExp(`the ${mode.toUpperCase()} mode is not enabled`));
+            headers['idempotency-key'] = randomUUID();
+          }
+          assert.deepEqual(await receiptCount(ctx), before, 'the refused modes wrote nothing');
+
+          // Flag ON (no row: the default): the web CARD and UPI modes.
+          await ctx.owner.$executeRawUnsafe(
+            `DELETE FROM tenant_feature WHERE tenant_id=$1 AND feature='cashBankCardUpi'`,
+            ctx.tenantId,
+          );
+          const on = await ctx.session();
+          await openForm(on.page, '/txn/receipt?mode=BANK');
+          assert.deepEqual(await modes(on.page), ['CASH', 'BANK', 'CARD', 'UPI', 'CHEQUE']);
+          const card = await receiptBy(on.page, 'card', () =>
+            boxed(on.page, 'Card commission %').fill('1.5'),
+          );
+          assert.deepEqual(await detail(card.vchNo), { cash: 1, card: 1, upi: 0 });
+          const upi = await receiptBy(on.page, 'upi', () =>
+            boxed(on.page, 'UPI txn / VPA').fill('E2E@UPI'),
+          );
+          assert.deepEqual(await detail(upi.vchNo), { cash: 1, card: 0, upi: 1 });
+          return {
+            observation: `flag off: modes CASH/BANK/CHEQUE, bank receipt ${bank.vchNo} wrote CASH_DATA only, API refused card/upi (400); flag on: card receipt ${card.vchNo} + CARD_DATA, UPI receipt ${upi.vchNo} + UPI_DATA`,
+            expected: {
+              off: { modes: ['CASH', 'BANK', 'CHEQUE'], writes: ['CASH_DATA'], apiCardUpi: 400 },
+              on: { modes: ['CASH', 'BANK', 'CARD', 'UPI', 'CHEQUE'] },
+            },
+            database: {
+              bank: await detail(bank.vchNo),
+              card: await detail(card.vchNo),
+              upi: await detail(upi.vchNo),
+            },
+            downstream: { refusedWrites: 0 },
+          };
+        } finally {
+          await ctx.owner.$executeRawUnsafe(
+            `DELETE FROM tenant_feature WHERE tenant_id=$1 AND feature='cashBankCardUpi'`,
+            ctx.tenantId,
+          );
+        }
+      },
     ),
     C(
       'refusal.date-outside-year',

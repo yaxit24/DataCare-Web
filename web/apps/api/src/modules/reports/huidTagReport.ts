@@ -1,5 +1,6 @@
 import { toIsoDate } from '@datacare/core';
 import { withTxBudget } from '../shared/txBudget.js';
+import { reportDataType } from './reportDataType.js';
 
 /**
  * WP-18 HuId Report dataset — desktop `RP_HUID` (`Tag Stock With Huid`, MDI_FORM.cs:9032 dispatch).
@@ -66,6 +67,12 @@ export interface HuidTagQuery {
   hallmark?: 'all' | 'with' | 'without';
   /** First HuId column that has a match wins (RP_HUID.cs:1669-1689). */
   search?: string;
+  /**
+   * The session data type, bound by the server (app.ts sessionReportQuery), never chosen by the client. A or B adds
+   * `AND C.DATA_TYPE = '<MsDataType>'` (In, RP_HUID.cs:1761) or `AND A.DATA_TYPE` on the MAIN_STOCK movement (Out
+   * :1799, Stock :1838); All (C) adds nothing. A blank row type reads as A (reportDataType.ts).
+   */
+  dataType?: 'A' | 'B';
 }
 
 export interface HuidTagColumn {
@@ -245,7 +252,14 @@ export function parseHuidTagQuery(query: Record<string, unknown>): HuidTagQuery 
   if (!q.product) delete q.product;
   if (!q.group) delete q.group;
   if (!q.search) delete q.search;
+  const dataType = reportDataType(query.dataType);
+  if (dataType) q.dataType = dataType;
   return q;
+}
+
+/** `coalesce(nullif(btrim(<column>),''),'A')='<A|B>'` for a typed session, nothing for All. `column` is trusted. */
+function dataTypeConditions({ q }: BuildInput, column: string): string[] {
+  return q.dataType ? [`coalesce(nullif(btrim(${column}),''),'A')='${q.dataType}'`] : [];
 }
 
 /** Bound parameter builder: every value is `$n`, never concatenated (study weakness 5). */
@@ -349,6 +363,7 @@ function inSql(input: BuildInput, p: Params): string {
     `c."VCH_DATE" >= ${p.push(q.from)}::date`,
     `c."VCH_DATE" <= ${p.push(q.to)}::date`,
     ...itemConditions(input, p),
+    ...dataTypeConditions(input, 'c."DATA_TYPE"'),
   ];
   if (q.acCode) filters.push(`c."AC_CODE"::text=${p.push(q.acCode)}`);
   return `SELECT c."CO_CODE"::text AS "coCode", c."VCH_TYPE" AS "vchTyp", c."VCH_NO" AS "vchNo",
@@ -381,6 +396,7 @@ function outSql(input: BuildInput, p: Params): string {
     `a."VCH_DATE" <= ${p.push(q.to)}::date`,
     `a."ITM_SIGN"::text='-'`,
     ...itemConditions(input, p),
+    ...dataTypeConditions(input, 'a."DATA_TYPE"'),
   ];
   if (q.acCode) filters.push(`a."AC_CODE"::text=${p.push(q.acCode)}`);
   return `SELECT a."CO_CODE"::text AS "coCode", a."VCH_TYPE" AS "vchTyp", a."VCH_NO" AS "vchNo",
@@ -433,7 +449,9 @@ function stockSql(input: BuildInput, p: Params): string {
                      AND m."CO_CODE"::text=${p.push(scope.coCode)}
                      AND m."LC_CODE"::text=${p.push(scope.lcCode)}
                      AND m."CO_YEAR"::text=${p.push(scope.coYear)}
-                     AND m."TAG_NO"::text <> 'N'
+                     AND m."TAG_NO"::text <> 'N'${dataTypeConditions(input, 'm."DATA_TYPE"')
+                       .map((condition) => `\n                     AND ${condition}`)
+                       .join('')}
                    GROUP BY m."CO_CODE", m."LC_CODE", m."TAG_NO", m."VCH_SRNO", m."IT_CODE"
                   HAVING SUM(CASE WHEN m."ITM_SIGN"::text='+'
                                   THEN coalesce(m."VCH_SRNO",0) ELSE -coalesce(m."VCH_SRNO",0) END) > 0

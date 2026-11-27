@@ -9,6 +9,8 @@ import {
   runWithSessionDataType,
 } from './modules/auth/bookDataType.js';
 import { sessionDataType } from './modules/auth/dataTypeAccess.js';
+import { CASH_BANK_CARD_UPI, tenantFeatureEnabledTx } from './modules/rbac/tenantFeatures.js';
+import { withTxBudget } from './modules/shared/txBudget.js';
 import { sessionReportQuery } from './modules/auth/dataTypePolicy.js';
 import type { EditionPolicy } from '@datacare/core';
 import {
@@ -765,8 +767,13 @@ export async function buildApp(opts: BuildOpts): Promise<FastifyInstance> {
     // The company rounding flags let a screen preview a document's totals with the exact arithmetic the
     // server posts (G102/G84). Null when no company is selected yet or settings are ambiguous.
     const roundingFlags = s.coCode ? await loadRoundingFlags(prisma, s.tenantId, s.coCode) : null;
+    const dataTypes = await sessionDataType(prisma, s);
+    const cashBankCardUpi = await withTxBudget(prisma, s.tenantId, 'read', (tx) =>
+      tenantFeatureEnabledTx(tx, s.tenantId, CASH_BANK_CARD_UPI),
+    );
     return {
-      ...(await sessionDataType(prisma, s)),
+      ...dataTypes,
+      features: { ...dataTypes.features, cashBankCardUpi },
       user: s.sub,
       context: contextDescriptor({
         sessionId: s.sid,

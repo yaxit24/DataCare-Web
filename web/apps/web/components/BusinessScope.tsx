@@ -22,22 +22,36 @@ const BusinessScopeContext = createContext<BusinessScope | null>(null);
 const RoundingFlagsContext = createContext<RoundingFlagValues | null>(null);
 /** The running edition code from the session (`/me`, N171/D33); null when the deployment has no edition gate. */
 const EditionContext = createContext<string | null>(null);
+/**
+ * The tenant's plan feature flags from `/me` (`tenant_feature`; a missing flag is ON). Web extensions the desktop does
+ * not have sit behind these; with a flag off the screen behaves as the desktop form.
+ */
+export interface TenantFeatureFlags {
+  dataTypes?: boolean;
+  /** CARD and UPI modes on the Cash/Bank menus (desktop TR_CASH has neither: TR_CASH.cs:1743-1797). */
+  cashBankCardUpi?: boolean;
+}
+const FeaturesContext = createContext<TenantFeatureFlags>({});
 
 export function BusinessScopeProvider({
   scope,
   roundingFlags = null,
   editionCode = null,
+  features = {},
   children,
 }: {
   scope: BusinessScope;
   roundingFlags?: RoundingFlagValues | null;
   editionCode?: string | null;
+  features?: TenantFeatureFlags;
   children: React.ReactNode;
 }) {
   return (
     <BusinessScopeContext.Provider value={scope}>
       <RoundingFlagsContext.Provider value={roundingFlags}>
-        <EditionContext.Provider value={editionCode}>{children}</EditionContext.Provider>
+        <EditionContext.Provider value={editionCode}>
+          <FeaturesContext.Provider value={features}>{children}</FeaturesContext.Provider>
+        </EditionContext.Provider>
       </RoundingFlagsContext.Provider>
     </BusinessScopeContext.Provider>
   );
@@ -66,4 +80,9 @@ export function useRoundingPolicy(): RoundingPolicy {
 /** The running edition code of the session (for example 'L' for Lite), or null when no edition gate is configured. */
 export function useEditionCode(): string | null {
   return useContext(EditionContext);
+}
+
+/** Whether a tenant plan flag is on: anything but an explicit false (the owner's default is on). */
+export function useTenantFeature(name: keyof TenantFeatureFlags): boolean {
+  return useContext(FeaturesContext)[name] !== false;
 }

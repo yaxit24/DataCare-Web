@@ -25,6 +25,7 @@ import {
   assertFinanceVoucherDateTx,
   financeEmployeeTx,
 } from './lifecycle.js';
+import { CASH_BANK_CARD_UPI, tenantFeatureEnabledTx } from '../rbac/tenantFeatures.js';
 import { tenderThresholdDecision } from './tender.js';
 import { FinanceValidationError, gridLinesToSave } from './gridLines.js';
 import {
@@ -365,6 +366,15 @@ const clip = (value: unknown, width: number): string => text(value).slice(0, wid
 async function writeCashVoucherTx(w: CashWrite): Promise<FinanceResult & { total: number }> {
   const { tx, scope, direction, mode, identity } = w;
   const tenantId = scope.tenantId;
+  // CARD/UPI are a web extension behind a plan flag (default on). Off, the form is desktop TR_CASH: the book decides
+  // cash or bank (TR_CASH.cs:1743-1797) and Save writes CASH_DATA only (:2995-3060), so the modes are refused.
+  if (
+    (mode === 'card' || mode === 'upi') &&
+    !(await tenantFeatureEnabledTx(tx, tenantId, CASH_BANK_CARD_UPI))
+  )
+    throw new FinanceValidationError(
+      `the ${mode.toUpperCase()} mode is not enabled for this company; use CASH, BANK or CHEQUE`,
+    );
   const empCode = await financeEmployeeTx(tx, scope, w.empCode);
   await assertFinanceVoucherDateTx(tx, scope, identity.voucherDate);
   // The book first: a receipt must land in a receipt book, a payment in a payment book, matching the mode.
