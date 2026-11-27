@@ -20,11 +20,12 @@ describe('command transaction budgets', () => {
     vi.unstubAllEnvs();
   });
 
-  it('declares the three budget classes from the plan', () => {
+  it('declares the three budget classes from the plan, and the company reset maintenance class', () => {
     expect(COMMAND_TX_BUDGETS).toEqual({
       read: { timeout: 5_000, maxWait: 2_000 },
       voucher: { timeout: 20_000, maxWait: 5_000 },
       heavy: { timeout: 30_000, maxWait: 10_000 },
+      maintenance: { timeout: 300_000, maxWait: 10_000 },
     });
     expect(Object.isFrozen(COMMAND_TX_BUDGETS)).toBe(true);
     expect(Object.isFrozen(COMMAND_TX_BUDGETS.voucher)).toBe(true);

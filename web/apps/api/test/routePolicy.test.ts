@@ -46,6 +46,22 @@ describe('route policy registry', () => {
       action: 'print',
     });
   });
+  it('keeps the company reset admin-only and free of the session company scope', () => {
+    expect(routePolicyFor('GET', '/companies/:coCode/reset/preview')).toEqual({
+      kind: 'form',
+      form: 'Masters/Companies',
+      action: 'read',
+      adminOnly: true,
+      businessScope: false,
+    });
+    expect(routePolicyFor('POST', '/companies/:coCode/reset')).toEqual({
+      kind: 'form',
+      form: 'Masters/Companies',
+      action: 'delete',
+      adminOnly: true,
+      businessScope: false,
+    });
+  });
   it('uses each owning order form and Setting form for new image and lot operations', () => {
     for (const [prefix, form] of [
       ['sales-orders', 'Sales/Sales Order'],
@@ -175,8 +191,9 @@ describe('route policy registry', () => {
     // The Sales Invoice Apr No import adds GET /sales/approval-help and GET /sales/approval-import: 836 + 2 = 838.
     // Data Import (UT_IMPORT Lite Soft) adds its preview and apply: 840. The Company print adds
     // GET /company-identity/print: 841.
-    expect(routes).toHaveLength(841);
-    expect(new Set(routes.map((route) => `${route.method} ${route.path}`)).size).toBe(841);
+    // Company reset (MS_COMPANY Ctrl+R) adds its admin-only preview and reset: 843.
+    expect(routes).toHaveLength(843);
+    expect(new Set(routes.map((route) => `${route.method} ${route.path}`)).size).toBe(843);
 
     const policies = routes.map((route) => ({
       ...route,

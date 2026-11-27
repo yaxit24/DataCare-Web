@@ -233,12 +233,16 @@ databaseDescribe('WP-02A company logical backup/restore', () => {
     // N52 adds api_command_receipt: tenant_id without CO_CODE, so tenant-shared and excluded (Idempotency-Key
     // receipts are transient request state, not company data). WP-33 adds daily_rate_copy_entitlement, also
     // tenant-shared (operator-provisioned, a restore must not grant it): 177 tables, 16 tenant-shared. The data-type
-    // plan flag adds tenant_feature (operator-provisioned, excluded): 178 tables, 17 tenant-shared.
-    expect(document.manifest.tables).toHaveLength(178);
+    // plan flag adds tenant_feature (operator-provisioned, excluded): 178 tables, 17 tenant-shared. The company reset
+    // archive (company_reset_archive, co_code not CO_CODE) is tenant-shared and excluded: 179 tables, 18 tenant-shared.
+    expect(document.manifest.tables).toHaveLength(179);
     expect(document.manifest.tables.filter((table) => table.included)).toHaveLength(160);
     expect(
       document.manifest.tables.filter((table) => table.scope === 'tenant-shared'),
-    ).toHaveLength(17);
+    ).toHaveLength(18);
+    expect(
+      document.manifest.tables.find((table) => table.name === 'company_reset_archive'),
+    ).toMatchObject({ scope: 'tenant-shared', included: false });
     expect(document.manifest.tables.filter((table) => table.scope === 'system')).toHaveLength(1);
     expect(document.manifest.tables.every((table) => table.primaryKey.length > 0)).toBe(true);
     expect(document.manifest.fingerprint).toMatch(/^[a-f0-9]{64}$/);

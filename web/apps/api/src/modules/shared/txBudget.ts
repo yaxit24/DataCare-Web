@@ -19,6 +19,8 @@ import {
  *   read     5 s, 2 s to start   documents, lookups, previews
  *   voucher 20 s, 5 s to start   one voucher's create / edit / delete
  *   heavy   30 s, 10 s to start  multi-voucher and bulk commands
+ *   maintenance 5 min, 10 s to start  a whole-company admin operation that must stay one transaction (the
+ *                                    company reset: about 4 s for 50,000 rows and 20 MB of images measured)
  *
  * A timeout still rolls back the whole transaction. `app.ts` maps it to `503 {error:'transaction-timeout',
  * retryable:true}` with `Retry-After: 1`. Nothing retries automatically. A manual retry of a guarded create
@@ -27,7 +29,7 @@ import {
  * Operators can tune a class with DATACARE_TX_BUDGET_<CLASS>_MS (100 ms to 10 min). Its start wait stays the
  * class default, capped at the new timeout.
  */
-export type TxBudgetClass = 'read' | 'voucher' | 'heavy';
+export type TxBudgetClass = 'read' | 'voucher' | 'heavy' | 'maintenance';
 
 export interface TxBudget {
   readonly timeout: number;
@@ -38,6 +40,7 @@ export const COMMAND_TX_BUDGETS: Readonly<Record<TxBudgetClass, TxBudget>> = Obj
   read: Object.freeze({ timeout: 5_000, maxWait: 2_000 }),
   voucher: Object.freeze({ timeout: 20_000, maxWait: 5_000 }),
   heavy: Object.freeze({ timeout: 30_000, maxWait: 10_000 }),
+  maintenance: Object.freeze({ timeout: 300_000, maxWait: 10_000 }),
 });
 
 export const TX_BUDGET_CLASSES = Object.keys(COMMAND_TX_BUDGETS) as TxBudgetClass[];

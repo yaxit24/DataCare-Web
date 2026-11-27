@@ -11,6 +11,11 @@ import {
   saveCompanyIdentity,
   deleteCompanyIdentity,
 } from '../modules/masters/companyIdentity.js';
+import {
+  CompanyResetError,
+  previewCompanyReset,
+  resetCompany,
+} from '../modules/masters/companyReset.js';
 
 export function registerCompanyIdentityRoutes(
   app: FastifyInstance,
@@ -61,6 +66,10 @@ export function registerCompanyIdentityRoutes(
     } catch (e) {
       if (e instanceof CompanyIdentityError)
         return reply.code(e.statusCode).send({ error: 'company-identity', message: e.message });
+      if (e instanceof CompanyResetError)
+        return reply
+          .code(e.statusCode)
+          .send({ error: 'company-reset', code: e.code, message: e.message });
       if (e instanceof Error && e.name.endsWith('ValidationError'))
         return reply.code(400).send({ error: e.name, message: e.message });
       throw e;
@@ -132,5 +141,73 @@ export function registerCompanyIdentityRoutes(
           (req.query as any).expectedVersion,
         );
       }),
+  );
+  // Ctrl+R "Reset Compnay" (MS_COMPANY.cs:6477-6480): admin-only in the route registry and checked again here.
+  const resetScope = (req: FastifyRequest, reply: FastifyReply) => {
+    const principal = (req as FastifyRequest & { principal?: Principal }).principal;
+    if (!principal?.isAdmin) {
+      void reply.code(403).send({ error: 'forbidden', action: 'delete' });
+      return null;
+    }
+    const s = (req as any).session as {
+      tenantId: string;
+      sid: string;
+      coCode: string;
+      coYear?: string;
+      loginCoCode: string;
+      sub: string;
+    };
+    return {
+      tenantId: s.tenantId,
+      sessionId: s.sid,
+      sessionCoCode: s.coCode,
+      sessionCoYear: s.coYear,
+      loginCoCode: s.loginCoCode,
+      operator: s.sub,
+    };
+  };
+  const codeParam = {
+    type: 'object',
+    required: ['coCode'],
+    properties: { coCode: { type: 'string', minLength: 1, maxLength: 2 } },
+  };
+  app.get(
+    '/companies/:coCode/reset/preview',
+    { ...(auth as any), schema: { params: codeParam } },
+    async (req, reply) => {
+      const scope = resetScope(req, reply);
+      if (!scope) return reply;
+      return run(reply, () =>
+        previewCompanyReset(prisma, scope, String((req.params as any).coCode)),
+      );
+    },
+  );
+  app.post(
+    '/companies/:coCode/reset',
+    {
+      ...(auth as any),
+      schema: {
+        params: codeParam,
+        body: {
+          type: 'object',
+          additionalProperties: false,
+          required: ['coCode', 'coName', 'password', 'reason', 'fingerprint'],
+          properties: {
+            fingerprint: { type: 'string', pattern: '^[a-f0-9]{64}$' },
+            coCode: { type: 'string', maxLength: 2 },
+            coName: { type: 'string', maxLength: 50 },
+            password: { type: 'string', maxLength: 128 },
+            reason: { type: 'string', maxLength: 500 },
+          },
+        },
+      },
+    },
+    async (req, reply) => {
+      const scope = resetScope(req, reply);
+      if (!scope) return reply;
+      return run(reply, () =>
+        resetCompany(prisma, scope, String((req.params as any).coCode), req.body as any),
+      );
+    },
   );
 }

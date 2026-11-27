@@ -1307,8 +1307,10 @@ export async function seedDesktopCompanyMasters(
   tenantId: string,
   coCode: string,
   lcCode = '01',
+  skipTables?: ReadonlySet<string>,
 ): Promise<void> {
   for (const { table, columns, keys, rows } of DESKTOP_COMPANY_MASTERS) {
+    if (skipTables?.has(table)) continue;
     for (const source of rows) {
       const values = source.map((value, index) => {
         const column = columns[index]!;

@@ -2,6 +2,7 @@ import assert from 'node:assert/strict';
 import { SECOND_TENANT, TENANT, purgeCompany } from '../harness.mjs';
 import { changedTables, tenantFingerprint, withWriteFault } from '../faults.mjs';
 import { FIXTURE_MANIFEST, USERS } from '../fixtures/catalogue.mjs';
+import { companyResetCases } from './companyMasterReset.mjs';
 
 /**
  * Frozen Company → Company matrix. WP-07 adds the desktop New/Edit/Save/reopen identity workflow (MS_COMPANY) and
@@ -439,6 +440,9 @@ export const companyMaster = {
     'web/apps/web/test/features/modules/companyMaster.mjs',
     'web/apps/api/src/modules/masters/companyIdentity.ts',
     'web/apps/api/src/routes/companyIdentity.ts',
+    'web/apps/api/src/modules/masters/companyReset.ts',
+    'web/apps/web/components/CompanyResetPanel.tsx',
+    'web/apps/web/test/features/modules/companyMasterReset.mjs',
   ],
   fixtureManifest: FIXTURE_MANIFEST,
   settingsManifest: {
@@ -1588,12 +1592,11 @@ export const companyMaster = {
             assert.equal(await focused(), '-: Save');
             assert.equal(await save.isEnabled(), true, 'Enter on RTGS No re-enables Save');
 
-            // Ctrl+R: the in-page Reset Compnay box explains and changes nothing.
+            // Ctrl+R: the in-page Reset Company panel opens without reloading; the reset cases are in
+            // companyMasterReset.mjs.
             await page.keyboard.press('Control+r');
-            const reset = page.getByRole('dialog', { name: 'Reset Compnay' });
+            const reset = page.getByRole('dialog', { name: 'Reset Company' });
             await reset.waitFor();
-            const resetText = (await reset.textContent()).trim();
-            assert.match(resetText, /Not available on the web/);
             assert.equal(
               await page.getByLabel('Name', { exact: true }).inputValue(),
               'KEYS E2E COMPANY',
@@ -1646,7 +1649,7 @@ export const companyMaster = {
             const after = await company01(ctx);
             assert.deepEqual(after, before, 'no key wrote company 01');
             return {
-              observation: `Enter chain (edit) ${editChain.join(' → ')}; new ${[...newHead, ...newTail.slice(1)].join(' → ')}; Ctrl+O unlocked Company Type and disabled Save until Enter; Ctrl+R showed "${resetText}"; F1 inert`,
+              observation: `Enter chain (edit) ${editChain.join(' → ')}; new ${[...newHead, ...newTail.slice(1)].join(' → ')}; Ctrl+O unlocked Company Type and disabled Save until Enter; Ctrl+R opened the Reset Company panel without reloading; F1 inert`,
               expected:
                 'desktop TabIndex order with the Tax and Bank section switches, ending on Save',
             };
@@ -1718,5 +1721,6 @@ export const companyMaster = {
       'Feature evidence contract requires original Windows runtime comparison for desktop-match credit',
       'Blocked: no original desktop-runtime comparison has been executed; desktop-match remains 0%.',
     ),
+    ...companyResetCases,
   ],
 };

@@ -7216,6 +7216,20 @@ model ApiCommandReceipt {
   @@map("api_command_receipt")
 }
 
+/// Rows deleted by a company reset, one per row, tied to its data_repair_run (deferred FK, immutability trigger and RLS are migration-owned).
+model CompanyResetArchive {
+  rowId     BigInt   @id @default(autoincrement()) @map("row_id")
+  tenantId  String   @map("tenant_id") @db.VarChar(24)
+  runId     BigInt   @map("run_id")
+  coCode    String   @map("co_code") @db.VarChar(12)
+  tableName String   @map("table_name") @db.VarChar(63)
+  rowData   Json     @map("row_data")
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  @@index([tenantId, runId, tableName], map: "company_reset_archive_run_idx")
+  @@map("company_reset_archive")
+}
+
 /// Append-only repair audit evidence. Partial uniqueness, immutability trigger, comments, and RLS remain migration-owned.
 model DataRepairRun {
   rowId             BigInt    @id @default(autoincrement()) @map("row_id")
