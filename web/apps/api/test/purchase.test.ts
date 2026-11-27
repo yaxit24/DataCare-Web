@@ -20,17 +20,17 @@ describe('purchase builders', () => {
       purchaseAc: 'PUR',
       taxAc: 'GST',
       roundAc: 'ROUND',
-      totals: { total: 377872, taxable: 377872, tax: 0, roundOff: 0 },
-      tcs: 378,
+      totals: { total: 200000, taxable: 200000, tax: 0, roundOff: 0 },
+      tcs: 200,
       tcsAc: 'TCSAC',
     });
     expect(lines.find((l) => l.legType === 7)).toMatchObject({
       AC_CODE: 'TCSAC',
       LD_CODE: 'SUPP',
-      DR_AMT: 378,
+      DR_AMT: 200,
       CR_AMT: 0,
     });
-    expect(lines.find((l) => l.AC_CODE === 'SUPP')?.CR_AMT).toBe(378250);
+    expect(lines.find((l) => l.AC_CODE === 'SUPP')?.CR_AMT).toBe(200200);
     expect(ledgerBalance(lines).balanced).toBe(true);
   });
   it('lineFine uses the standard purchase-item policy', () => {

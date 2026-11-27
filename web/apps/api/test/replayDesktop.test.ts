@@ -750,7 +750,7 @@ describe('replay oracle: normalisation and grouping', () => {
     const labour = (desktop: string) => ({
       ...g('SALES', 'SL_DATA', 'LBR_AMT'),
       desktop,
-      web: '6023.00',
+      web: '1234.00',
     });
     expect(lib.buildDifferenceOf(labour('0.00'))).toMatch(/TR_SALE\.cs:15056/);
     expect(lib.buildDifferenceOf(labour('100.00'))).toBeUndefined();
