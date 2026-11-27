@@ -108,3 +108,22 @@ describe('per-form authorization', () => {
     expect(canonicalAllowedForms([{ subMenu: 'Sales', view: false }])).toEqual([]);
   });
 });
+
+it('session form actions honor desktop aliases, first row, view denial and non-Y grants like authorizeFormTx', async () => {
+  const { resolveFormActions } = await import('../src/modules/rbac/formRights.js');
+  const { prisma, tx } = db([
+    { sm: 'Wh Sales', v: 'Y', d: 'N', p: 'TRUE' },
+    { sm: 'Wholesale Sale', v: 'Y', d: 'Y', p: 'N' },
+    { sm: 'Rate Cut', v: 'N', d: 'Y', p: 'Y' },
+  ]);
+  const actions = await resolveFormActions(prisma, { tenantId: 't1', lcCode: '02' }, 'USER1');
+  expect(actions['Sales/Wholesale Sale']).toEqual({ canDelete: false, canPrint: true });
+  expect(actions['Cash / Bank/Rate Cut (price fixing)']).toEqual({
+    canDelete: false,
+    canPrint: false,
+  });
+  const query = tx.$queryRawUnsafe.mock.calls.find((call) =>
+    String(call[0]).includes('FROM "USER_SET"'),
+  );
+  expect(query?.slice(1)).toEqual(['02', 'USER1']);
+});

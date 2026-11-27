@@ -59,7 +59,7 @@ import {
   ScopeError,
   type BusinessScope,
 } from './modules/auth/businessScope.js';
-import { resolveAllowedForms } from './modules/rbac/formRights.js';
+import { resolveAllowedForms, resolveFormActions } from './modules/rbac/formRights.js';
 import {
   authorizeForm,
   FormForbiddenError,
@@ -785,6 +785,9 @@ export async function buildApp(opts: BuildOpts): Promise<FastifyInstance> {
       isAdmin: principal.isAdmin,
       passwordResetRequired: principal.passwordResetRequired,
       allowedForms,
+      formActions: principal.isAdmin
+        ? null
+        : await resolveFormActions(prisma, { tenantId: s.tenantId, lcCode: s.lcCode }, s.sub),
       edition: editionDescriptor(opts.edition),
     };
   });

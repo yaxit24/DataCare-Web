@@ -502,6 +502,7 @@ export interface RateCutAccounts {
 }
 
 export interface RateCutInput {
+  canDeleteRows?: boolean; // server-resolved delete right, never from the request body
   // ---- Party contact snapshot (RATE_CUT_DATA) ----------------------------------------------------
   add1?: string;
   add2?: string;
@@ -2066,7 +2067,7 @@ export async function writeRateCut(
       if (residual) {
         if (input.ksrFineDr === undefined) ksrFineDr = num(prior?.KSR_FINE_DR);
         if (input.ksrFineCr === undefined) ksrFineCr = num(prior?.KSR_FINE_CR);
-        await assertDetailsSent(tx, { tenantId, ...key }, issuedInput);
+        await assertDetailsSent(tx, { tenantId, ...key }, issuedInput, input.canDeleteRows);
       }
       const restores = quotation ? [] : await releaseRateCutTagsTx(tx, tenantId, key);
       if (!quotation) await applyBookingDrawDownTx(tx, tenantId, key, -1);

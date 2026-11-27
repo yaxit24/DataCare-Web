@@ -146,3 +146,31 @@ export async function resolveAllowedForms(
   }
   return [...allowed];
 }
+
+/** Session action rights, with the same first-row rule as authorizeFormTx (TR_WH_SALE.cs:11516-11519). */
+export async function resolveFormActions(
+  prisma: any,
+  scope: { tenantId: string; lcCode: string },
+  userName: string,
+): Promise<Record<string, { canDelete: boolean; canPrint: boolean }>> {
+  return withTxBudget(prisma, scope.tenantId, 'read', async (tx: any) => {
+    const rows = await tx.$queryRawUnsafe(
+      `SELECT "SUB_MENU" sm, "FRM_VIEW" v, "FRM_DELETE" d, "FRM_PRINT" p
+       FROM "USER_SET" WHERE "LC_CODE"=$1 AND "USER_NAME"=$2 ORDER BY row_id`,
+      scope.lcCode,
+      userName,
+    );
+    const actions: Record<string, { canDelete: boolean; canPrint: boolean }> = {};
+    const granted = (value: unknown) =>
+      ['Y', '1', 'TRUE'].includes(String(value ?? '').toUpperCase());
+    for (const row of rows)
+      for (const form of canonicalFormsForRight(String(row.sm ?? ''))) {
+        if (!(form in actions))
+          actions[form] = {
+            canDelete: granted(row.v) && granted(row.d),
+            canPrint: granted(row.v) && granted(row.p),
+          };
+      }
+    return actions;
+  });
+}

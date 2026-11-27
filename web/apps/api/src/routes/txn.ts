@@ -7089,8 +7089,13 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
   app.put('/wholesale-sales/:vchNo', auth, async (req, reply) => {
     if (!guard(req, reply, 'update')) return;
     const b = body(req);
+    const { canDelete } = await formCapabilities(req, 'Sales/Wholesale Sale');
     return run(reply, 200, () =>
-      editWholesaleSale(prisma, rateCutInput(req, b), (req.params as any).vchNo),
+      editWholesaleSale(
+        prisma,
+        { ...rateCutInput(req, b), canDeleteRows: canDelete },
+        (req.params as any).vchNo,
+      ),
     );
   });
   app.delete('/wholesale-sales/:vchNo', auth, async (req, reply) => {

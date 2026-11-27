@@ -42,10 +42,6 @@ const C = (id, group, kind, source, run, extra = {}) => ({
   run,
   ...extra,
 });
-const blocked = (name, group, reason) => ({
-  ...C(`${name}.pending`, group, 'read-only', `Playbook ${group}`, async () => ({})),
-  blocked: reason,
-});
 
 const now = new Date();
 const startYear = now.getMonth() + 1 >= 4 ? now.getFullYear() : now.getFullYear() - 1;
@@ -505,6 +501,61 @@ const LOOSE_ROWS = [
     krconwt: 0,
   },
 ];
+
+/** A view/edit user has no delete or print grant; exercise the actual editor and direct requests. */
+async function restrictedDetails(ctx, checkPrint) {
+  const { page: admin } = await open(ctx);
+  const created = await looseSale(admin);
+  assert.equal(created.status(), 201, await created.text());
+  const no = await voucherOf(created);
+  const before = await slidtl(ctx, no);
+  const downstream = await downstreamOf(ctx, no);
+  const { page } = await open(ctx, as(USERS.printViewer.user));
+  await page.getByLabel('Voucher No', { exact: true }).fill(no);
+  await page.getByRole('button', { name: 'Load', exact: true }).click();
+  await page.getByRole('button', { name: 'Update', exact: true }).waitFor();
+  await openDetail(page);
+  await value(page, 'Pcs detail 1', '2');
+  await page.getByLabel('Pcs detail 1', { exact: true }).press('Control+d');
+  await page.getByRole('alert').filter({ hasText: 'You Have No Rights.....' }).waitFor();
+  await value(page, 'Pcs detail 1', '2');
+  await value(page, 'Pcs detail 2', '2');
+  const payload = created.request().postDataJSON();
+  const me = await (await page.request.get('/api/me')).json();
+  const headers = {
+    'x-session-context-id': me.context.sessionId,
+    'x-session-context-epoch': String(me.context.contextEpoch),
+  };
+  const current = await page.request.get(`/api/wholesale-sales/${no}?coBook=${BOOK}`, { headers });
+  assert.equal(current.status(), 200, await current.text());
+  const version = (await current.json()).version;
+  const removed = {
+    ...payload,
+    expectedVersion: version,
+    lines: payload.lines.map((line, i) => (i ? line : { ...line, details: [] })),
+  };
+  const denied = await page.request.put(`/api/wholesale-sales/${no}`, { data: removed, headers });
+  assert([400, 403].includes(denied.status()), await denied.text());
+  assert.match(await denied.text(), /You Have No Rights/);
+  if (checkPrint) {
+    await page.getByRole('button', { name: 'Print', exact: true }).click();
+    await page.getByRole('alert').filter({ hasText: 'You Have No Print Rights.....' }).waitFor();
+    const print = await page.request.get(
+      `/api/wholesale-sales/${no}/print?coBook=${BOOK}&format=html`,
+      { headers },
+    );
+    assert.equal(print.status(), 403, await print.text());
+  }
+  assert.deepEqual(await slidtl(ctx, no), before);
+  assert.deepEqual(await downstreamOf(ctx, no), downstream);
+  return {
+    observation:
+      'Detail delete refused without removing rows' +
+      (checkPrint ? '; print refused by UI and API' : ''),
+    expected: 'desktop refusal text and unchanged voucher',
+    database: { before, downstream },
+  };
+}
 
 const MSG = {
   defaulter:
@@ -2309,25 +2360,98 @@ export const wholesaleSale = {
         };
       },
     ),
-    blocked(
+    C(
       'rojmel.missing-types-and-silver',
       'T18',
-      'No owner decision on building types 21/23/24/25/28/29-40 for Wh Sales and no IT_TYPE S Wh Sales seed or decision for the silver types; unblocked by that decision plus a silver seed (decision 3).',
+      'mutation',
+      'Ac_Rojmel.cs:243,245,251,259-261: silver header and line rows use slot 8 and silver keys.',
+      async (ctx) => {
+        const { page } = await open(ctx);
+        await page.getByLabel('Date', { exact: true }).fill(DAY);
+        await pick(page, 'Party', PARTIES.local.code);
+        await page.getByLabel('Item Type', { exact: true }).selectOption('S');
+        await pick(page, 'ItCode Issue line 1', ITEMS.silver.code);
+        await page.getByLabel('Pcs Issue line 1', { exact: true }).fill('1');
+        await page.getByLabel('GrWt Issue line 1', { exact: true }).fill('10');
+        await page.getByLabel('Touch Issue line 1', { exact: true }).fill('92.5');
+        await page.getByLabel('1gm Rate', { exact: true }).fill('100');
+        await page.getByLabel('Ac Fine Cr', { exact: true }).fill('9.25');
+        await typeKasar(page, 'Ksr Fine Dr', '0.5');
+        await typeKasar(page, 'Ksr Fine Cr', '0.25');
+        const first = await save(page);
+        assert.equal(first.status(), 201, await first.text());
+        const no = await voucherOf(first);
+        const rows = await rojmelRows(ctx, no);
+        const types = rows.map((r) =>
+          r.key.slice(-2).trim() === '1' ? r.key.slice(-12, -10) : r.key.slice(-2),
+        );
+        assert.deepEqual(types.sort(), ['11', '12', '15', '19', '20']);
+        const slots = await ctx.rows(
+          `SELECT "SR_NO"::int AS sr,"AC_CODE" AS ac FROM "BOOK_DETL" WHERE tenant_id=$1 AND "CO_CODE"='01' AND "LC_CODE"='01' AND "CO_BOOK"='WHS'`,
+        );
+        const slot8 = slots.find((r) => r.sr === 8).ac;
+        const sale = rows.find((r) => r.key.endsWith('12'));
+        assert.equal(sale.ac, slot8);
+        assert.equal(sale.cr, 925);
+        assert.equal(sale.name, '');
+        const line = rows.find((r) => r.key.endsWith('15         1'));
+        assert.equal(line.ld, slot8);
+        assert.equal(line.fine, 9.25);
+        assert.equal(line.sign, '-');
+        return {
+          observation: 'Silver rows 11/12/15/19/20 persisted',
+          expected: { types, amount: 925, fine: 9.25 },
+          database: { rows },
+          downstream: await downstreamOf(ctx, no),
+        };
+      },
     ),
-    blocked(
+    C(
       'refusal.detail-row-delete-right',
       'T06',
-      'The web has no client-side source for UserDelete (rights are enforced by the server on save); unblocked by a session-rights hook, which is another work package.',
+      'refusal',
+      'TR_WH_SALE.cs:7326-7331: no delete right in edit mode leaves the detail row intact.',
+      async (ctx) => restrictedDetails(ctx, false),
     ),
-    blocked(
+    C(
       'rights.detail-delete-and-print',
       'T11',
-      'Its Ctrl+D half needs the same client-side UserDelete source; the direct-POST and print-right halves are covered by rights.clerk-no-wh-sales and output.print-rights.',
+      'refusal',
+      'TR_WH_SALE.cs:7326,13658: delete and print are independently refused by the UI and server.',
+      async (ctx) => restrictedDetails(ctx, true),
     ),
-    blocked(
+    C(
       'retry.detail-row-double-post',
       'T13',
-      'POST /wholesale-sales is not yet idempotency-guarded (NOT_YET_GUARDED in apps/api/test/idempotencyRoutePolicy.test.ts, a WP-04 follow-up); unblocked when that route takes Idempotency-Key.',
+      'mutation',
+      'One command key creates one voucher including its detail rows; a changed payload is refused.',
+      async (ctx) => {
+        const { page } = await open(ctx);
+        const first = await looseSale(page);
+        assert.equal(first.status(), 201, await first.text());
+        assert.match(first.request().headers()['idempotency-key'] ?? '', /^[0-9a-f-]{36}$/);
+        const no = await voucherOf(first);
+        const before = await counts(ctx);
+        const details = await slidtl(ctx, no);
+        const downstream = await downstreamOf(ctx, no);
+        const replay = await page.request.fetch(first.request());
+        assert.equal(replay.status(), 201, await replay.text());
+        assert.equal(replay.headers()['idempotency-replayed'], 'true');
+        assert.deepEqual(await replay.json(), await first.json());
+        const changed = await page.request.fetch(first.request(), {
+          data: { ...first.request().postDataJSON(), vchDesc: 'different retry body' },
+        });
+        assert.equal(changed.status(), 409, await changed.text());
+        assert.deepEqual(await counts(ctx), before);
+        assert.deepEqual(await slidtl(ctx, no), details);
+        assert.deepEqual(await downstreamOf(ctx, no), downstream);
+        return {
+          observation: 'Identical replay returned first voucher; changed body refused with 409',
+          expected: { replay: 201, changed: 409, details: 2 },
+          database: { before, details },
+          downstream,
+        };
+      },
     ),
   ],
 };

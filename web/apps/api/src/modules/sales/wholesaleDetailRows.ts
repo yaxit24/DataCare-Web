@@ -220,7 +220,9 @@ export async function assertDetailsSent(
     VCH_NO: string;
   },
   lines: any[],
+  canDeleteRows?: boolean,
 ): Promise<void> {
+  if (canDeleteRows === false) await assertNoDetailDeletion(tx, key, lines);
   const stored: Array<{ sr: number }> = await tx.$queryRawUnsafe(
     `SELECT DISTINCT "SR_NO"::int AS sr FROM "SL_IDTL"
       WHERE tenant_id=$1 AND "CO_CODE"=$2 AND "LC_CODE"=$3 AND "CO_YEAR"=$4 AND "CO_BOOK"=$5 AND "VCH_NO"=$6
@@ -313,4 +315,33 @@ export async function readStoredDetails(
     bySerial.set(serial, list);
   }
   return bySerial;
+}
+
+/** TR_WH_SALE.cs:7326: checked inside the edit transaction, before reversal, independently of the client. */
+export async function assertNoDetailDeletion(
+  tx: any,
+  key: {
+    tenantId: string;
+    CO_CODE: string;
+    LC_CODE: string;
+    CO_YEAR: string;
+    CO_BOOK: string;
+    VCH_NO: string;
+  },
+  lines: any[],
+): Promise<void> {
+  const stored: Array<{ sr: number; count: number }> = await tx.$queryRawUnsafe(
+    `SELECT "SR_NO"::int AS sr, count(*)::int AS count FROM "SL_IDTL"
+     WHERE tenant_id=$1 AND "CO_CODE"=$2 AND "LC_CODE"=$3 AND "CO_YEAR"=$4 AND "CO_BOOK"=$5 AND "VCH_NO"=$6
+       AND coalesce("TAG_NO",'') IN ('','N') GROUP BY "SR_NO"`,
+    key.tenantId,
+    key.CO_CODE,
+    key.LC_CODE,
+    key.CO_YEAR,
+    key.CO_BOOK,
+    key.VCH_NO,
+  );
+  const plan = await planWholesaleDetails(tx, key.tenantId, key.CO_CODE, lines);
+  if (stored.some((row) => writtenDetails(plan.rows.get(row.sr) ?? []).length < row.count))
+    throw new WholesaleDetailValidationError('You Have No Rights.....');
 }
