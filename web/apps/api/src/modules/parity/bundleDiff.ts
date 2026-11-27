@@ -274,6 +274,21 @@ function diffTable(
         if (list) list.push(row);
         else m.set(k, [row]);
       }
+      // Rows sharing a declared key (AC_DATA's zero-amount fine legs, MAIN_STOCK's lines of one item) pair in a
+      // content order rather than the order each database returned them, so the same set of rows always pairs
+      // row for row (found by the replay oracle on two fine legs of one party).
+      const other = idx === dIndex ? wIndex : dIndex;
+      for (const list of m.values())
+        if (list.length > 1) {
+          const content = new Map(
+            list.map((row) => [row, rowKeyOf('', row, idx, comparedColumns, other)]),
+          );
+          list.sort((a, b) => {
+            const x = content.get(a)!;
+            const y = content.get(b)!;
+            return x < y ? -1 : x > y ? 1 : 0;
+          });
+        }
       return m;
     };
     const dRows = bucket(desktop, dIndex);

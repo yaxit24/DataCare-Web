@@ -5,6 +5,8 @@ import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest';
 import { buildApp } from '../src/app.js';
 import { hashPassword } from '../src/modules/auth/password.js';
 import { seedCompany } from '../src/modules/ops/seedCompany.js';
+import { approvalSaleBill, systemDateIso } from '../src/modules/sales/approvalImport.js';
+import { createSale, deleteSale } from '../src/modules/sales/sales.js';
 import { assertIsolatedTestDatabase } from './support/isolatedDatabase.js';
 import { diffTenant, snapshotTenant } from './support/tenantSnapshot.js';
 
@@ -1563,7 +1565,7 @@ type Cookie = string;
         ISSUE_BOOK,
         issue.voucherNo,
       ),
-    ).toEqual([{ received: 'Y', apr: 'N', transfer: 'Y' }]);
+    ).toEqual([{ received: 'Y', apr: 'N', transfer: 'N' }]); // TR_SALE.cs:16114: APR_ISU only
     const saleDelete = await admin(
       'DELETE',
       `/sales/${sold.json().vchNo}?coBook=SL&expectedVersion=${sold.json().version}`,
@@ -2147,13 +2149,12 @@ type Cookie = string;
     expect(issueView.statusCode, issueView.body).toBe(403);
   });
 
-  it('contains the non-atomic approval billing bridge without an orphan sale and refuses wrong rights', async () => {
-    // Desktop bills approvals through the Sales Invoice Apr No workflow; TR_APR_ISU.cs:6618-6642 only
-    // observes the downstream dependency. Until that cross-form transaction exists, this web-only bridge
-    // must write nothing rather than create a sale and fail while marking the approval in a second tx.
+  it('offers open approvals in Sales Invoice, imports their lines and bills them atomically', async () => {
+    // TR_SALE.cs:20565 Approval Help; :20008 open lines; :20290-20330 rate from the day's RATE_MAST by group;
+    // :20411 APR_IDTL of SR_NO = OLD_SRNO; :16112-16114 closure; :16326-16330 reversal; Ac_Stock.cs:118-121.
     await exec(
       `INSERT INTO "GROUP_MAST"(tenant_id,"CO_CODE","GR_CODE","GR_NAME","SALE_AC")
-       VALUES ($1,'01','APR','Approval items','SALES')`,
+       VALUES ($1,'01','APR','Approval items','SALES') ON CONFLICT DO NOTHING`,
       tenantId,
     );
     await exec(
@@ -2161,49 +2162,295 @@ type Cookie = string;
       tenantId,
       ITEM,
     );
-    const issue = await createIssue();
-    const saleRows = async () =>
-      query<Array<{ table_name: string; rows: number }>>(
-        `SELECT 'AC_DATA' table_name,count(*)::int rows FROM "AC_DATA" WHERE tenant_id=$1
-         UNION ALL SELECT 'SL_DATA',count(*)::int FROM "SL_DATA" WHERE tenant_id=$1
-         UNION ALL SELECT 'SL_DETL',count(*)::int FROM "SL_DETL" WHERE tenant_id=$1
-         ORDER BY table_name`,
-        tenantId,
-      );
-    const before = await saleRows();
-    const payload = {
+    await exec(
+      `DELETE FROM "RATE_MAST" WHERE tenant_id=$1 AND "CO_CODE"='01' AND "GR_CODE"='APR'`,
+      tenantId,
+    );
+    // The rate view is today's (MsSysDate, MS_OPNCOMP.cs:1366-1386), not the back-dated voucher's day.
+    const today = systemDateIso();
+    expect(today).not.toBe(DAY);
+    await exec(
+      `INSERT INTO "RATE_MAST"(tenant_id,"CO_CODE","LC_CODE","VCH_DATE","SR_NO","GR_CODE","GR_RATE")
+       VALUES ($1,'01','01',$2::date,1,'APR',59999.99),($1,'01','01',$3::date,1,'APR',61234.55)`,
+      tenantId,
+      DAY,
+      today,
+    );
+    const first = issueBody().lines[0]!;
+    // Line 1 is rate type G without MRP, so it is priced from today: round(61,234.55 / 10, 2) = 6,123.46.
+    // Line 2 keeps its MRP, so its rate stays blank (TR_SALE.cs:20300).
+    const issue = await createIssue(
+      issueBody({
+        lines: [
+          { ...first, rateType: 'G', mrp: 0 },
+          { ...first, tagNo: TAG2, vchSrno: TAG_SRNO + 1, stones: [] },
+        ],
+      }),
+    );
+    const help = await admin('GET', '/sales/approval-help?coBook=SL');
+    expect(help.statusCode, help.body).toBe(200);
+    expect(help.json()).toEqual([
+      {
+        vchNo: issue.voucherNo,
+        vchDate: DAY,
+        partyName: PARTY_NAME,
+        tagQty: 2,
+        year: YEAR,
+        book: ISSUE_BOOK,
+      },
+    ]);
+    const imported = await admin(
+      'GET',
+      `/sales/approval-import?coBook=SL&aprYear=${YEAR}&aprBook=${ISSUE_BOOK}&aprNo=${issue.voucherNo}`,
+    );
+    expect(imported.statusCode, imported.body).toBe(200);
+    const body = imported.json();
+    expect(body).toMatchObject({ found: true, acCode: PARTY, acName: PARTY_NAME });
+    expect(body.lines).toHaveLength(2);
+    expect(body.lines[0]).toMatchObject({
+      itCode: ITEM,
+      tagNo: TAG,
+      vchSrno: TAG_SRNO,
+      pcs: 1,
+      grossWt: 10.5,
+      netWt: 10,
+      touch: 91.6,
+      rate: 6123.46,
+      rateType: 'G',
+      isuNo: issue.voucherNo,
+      isuYrcd: YEAR,
+      isuDbcd: ISSUE_BOOK,
+      isuSrno: 1,
+    });
+    expect(body.lines[0].stones).toHaveLength(1);
+    expect(body.lines[0].stones[0]).toMatchObject({ IT_CODE: STONE, DM_CODE: 'RD' });
+    expect(body.lines[1]).toMatchObject({ tagNo: TAG2, isuSrno: 2, stones: [] });
+    expect(body.lines[1].rate).toBeUndefined();
+    const missing = await admin(
+      'GET',
+      `/sales/approval-import?coBook=SL&aprYear=${YEAR}&aprBook=${ISSUE_BOOK}&aprNo=99999`,
+    );
+    expect(missing.json()).toMatchObject({ found: false, lines: [] });
+
+    const before = await snapshotTenant(owner, tenantId, APPROVAL_SALE_TABLES);
+    // A line override may not change the source identity; a refusal writes nothing.
+    const refused = await admin('POST', `/tour/${issue.voucherNo}/bill`, {
       coBook: 'SL',
-      acCode: PARTY,
       vchDate: DAY,
       taxRatePct: 0,
       interState: false,
-      lines: [{ itCode: ITEM, pcs: 1, grossWt: 1, netWt: 1, touch: 91.6, rate: 1000 }],
-    };
-    const contained = await admin('POST', `/tour/${issue.voucherNo}/bill`, payload);
-    expect(contained.statusCode, contained.body).toBe(409);
-    expect(contained.json()).toEqual({
-      error: 'approval-billing-unavailable',
-      message:
-        'Approval billing is unavailable until Sales Invoice import and approval closure are atomic.',
+      lines: [{}, {}, {}],
     });
-    expect(await saleRows()).toEqual(before);
+    expect(refused.statusCode, refused.body).toBe(400);
+    expect(diffTenant(before, await snapshotTenant(owner, tenantId, APPROVAL_SALE_TABLES))).toEqual(
+      {
+        added: {},
+        removed: {},
+      },
+    );
+    const billed = await admin('POST', `/tour/${issue.voucherNo}/bill`, {
+      coBook: 'SL',
+      acCode: 'IGNORED',
+      vchDate: DAY,
+      taxRatePct: 0,
+      interState: false,
+      lines: [{}, { rate: 6000, tagNo: 'OTHER' }],
+    });
+    expect(billed.statusCode, billed.body).toBe(201);
+    const sale = billed.json();
+    const saleNo = String(sale.vchNo).padStart(5, '0');
     expect(
       await query(
-        `SELECT "ISU_REC" received FROM "APR_DETL"
-          WHERE tenant_id=$1 AND "CO_BOOK"='TUR' AND "VCH_NO"=$2`,
+        `SELECT "AC_CODE" ac,"ISU_NO" no,"ISU_YRCD" yr,"ISU_DBCD" book FROM "SL_DATA"
+          WHERE tenant_id=$1 AND "CO_BOOK"='SL' AND "VCH_NO"=$2`,
+        tenantId,
+        saleNo,
+      ),
+    ).toEqual([{ ac: PARTY, no: issue.voucherNo, yr: YEAR, book: ISSUE_BOOK }]);
+    expect(
+      await query(
+        `SELECT "TAG_NO" tag,"ITM_RATE"::float8 rate,"ISU_SRNO"::int sr FROM "SL_DETL"
+          WHERE tenant_id=$1 AND "CO_BOOK"='SL' AND "VCH_NO"=$2 ORDER BY "SR_NO"`,
+        tenantId,
+        saleNo,
+      ),
+    ).toEqual([
+      // The writer then applies the company's item-rate rounding (whole rupees on this company).
+      { tag: TAG, rate: 6123, sr: 1 },
+      { tag: TAG2, rate: 6000, sr: 2 },
+    ]);
+    const received = () =>
+      query(
+        `SELECT "ISU_REC" received FROM "APR_DETL" WHERE tenant_id=$1 AND "CO_BOOK"='TUR'
+          AND "VCH_NO"=$2 ORDER BY "SR_NO"`,
         tenantId,
         issue.voucherNo,
+      );
+    expect(await received()).toEqual([{ received: 'Y' }, { received: 'Y' }]);
+    // Ac_Stock.cs:114, :120: the sale's OUT row and the approval stock-back IN row (SR_NO 5) per line.
+    expect(
+      await query(
+        `SELECT "SR_NO"::int sr,"ISR_NO"::int isr,"TR_TYPE" tr,"ITM_SIGN" sign,"TAG_NO" tag
+           FROM "MAIN_STOCK" WHERE tenant_id=$1 AND "CO_BOOK"='SL' AND "VCH_NO"=$2
+          ORDER BY "SR_NO","ISR_NO"`,
+        tenantId,
+        saleNo,
       ),
-    ).toEqual([{ received: 'N' }]);
+    ).toEqual([
+      { sr: 3, isr: 1, tr: 'S', sign: '-', tag: TAG },
+      { sr: 3, isr: 2, tr: 'S', sign: '-', tag: TAG2 },
+      { sr: 5, isr: 1, tr: 'I', sign: '+', tag: TAG },
+      { sr: 5, isr: 2, tr: 'I', sign: '+', tag: TAG2 },
+    ]);
+    // Opening +1, approval -1, approval back +1, sale -1: sold.
+    expect(await stockBalance(TAG)).toBe(0);
+    expect(await stockBalance(TAG2)).toBe(0);
+    expect((await admin('GET', '/sales/approval-help?coBook=SL')).json()).toEqual([]);
+    const again = await admin('POST', `/tour/${issue.voucherNo}/bill`, {
+      coBook: 'SL',
+      vchDate: DAY,
+      taxRatePct: 0,
+      interState: false,
+    });
+    expect(again.statusCode, again.body).toBe(400);
+    expect(again.json().message).toMatch(/no open line/);
 
-    const wrongRights = await request(
-      viewerCookie,
-      'POST',
-      `/tour/${issue.voucherNo}/bill`,
-      payload,
+    const removed = await admin(
+      'DELETE',
+      `/sales/${saleNo}?coBook=SL&expectedVersion=${encodeURIComponent(sale.version)}`,
     );
+    expect(removed.statusCode, removed.body).toBe(200);
+    expect(await received()).toEqual([{ received: 'N' }, { received: 'N' }]);
+    expect(
+      await query(
+        `SELECT "APR_ISU" apr,"APP_TRFR" trfr FROM "BAR_DETL" WHERE tenant_id=$1 AND "TAG_NO"=$2`,
+        tenantId,
+        TAG,
+      ),
+    ).toEqual([{ apr: 'Y', trfr: 'N' }]);
+    // Back on approval: opening +1, approval -1.
+    expect(await stockBalance(TAG)).toBe(0);
+    expect((await admin('GET', '/sales/approval-help?coBook=SL')).json()).toHaveLength(1);
+
+    const wrongRights = await request(viewerCookie, 'POST', `/tour/${issue.voucherNo}/bill`, {
+      coBook: 'SL',
+      vchDate: DAY,
+      taxRatePct: 0,
+      interState: false,
+    });
     expect(wrongRights.statusCode, wrongRights.body).toBe(403);
-    expect(await saleRows()).toEqual(before);
+    expect(await received()).toEqual([{ received: 'N' }, { received: 'N' }]);
+  });
+
+  it('bills a loose approval of the whole stock under NEGATIVE_STK_SALE=N and keeps the stock-back row type A', async () => {
+    // The approval's O/- row (Ac_Stock.cs:60-71) already took the 10 g; the sale's back-in row (:118-121) returns it
+    // before its own OUT row, so the desktop never refuses the import (TR_SALE.cs:10377 checks only typed rows).
+    // Ac_Stock.cs:119 writes that row's DATA_TYPE as the literal 'A' whatever the sale book's type.
+    const setting = await query<Array<{ v: string | null }>>(
+      `SELECT "NEGATIVE_STK_SALE" v FROM "CO_SET_NEW" WHERE tenant_id=$1 AND "CO_CODE"='01'`,
+      tenantId,
+    );
+    const bookTypes = await query<Array<{ t: string; v: string | null }>>(
+      `SELECT 'detl' t,min("DATA_TYPE") v FROM "BOOK_DETL" WHERE tenant_id=$1 AND "CO_BOOK"='SL'
+        UNION ALL SELECT 'data',min("DATA_TYPE") FROM "BOOK_DATA" WHERE tenant_id=$1 AND "CO_BOOK"='SL'`,
+      tenantId,
+    );
+    await exec(
+      `INSERT INTO "GROUP_MAST"(tenant_id,"CO_CODE","GR_CODE","GR_NAME","SALE_AC")
+       VALUES ($1,'01','APL','Loose approval items','SALES') ON CONFLICT DO NOTHING`,
+      tenantId,
+    );
+    await exec(
+      `UPDATE "ITEM_MAST" SET "GR_CODE"='APL' WHERE tenant_id=$1 AND "CO_CODE"='01' AND "IT_CODE"=$2`,
+      tenantId,
+      ITEM,
+    );
+    await exec(
+      `INSERT INTO "MAIN_STOCK"(tenant_id,"CO_CODE","LC_CODE","CO_YEAR","CO_BOOK","VCH_NO","SR_NO","ISR_NO",
+         "VCH_DATE","IT_CODE","TAG_NO","VCH_SRNO","TR_TYPE","ITM_SIGN","ITM_QTY","ITM_PCS","ITM_GWT","ITM_NWT")
+       VALUES ($1,'01','01',$2,'TOP','09009',1,1,$3::date,$4,'N',0,'P','+',1,1,10,10)`,
+      tenantId,
+      YEAR,
+      DAY,
+      ITEM,
+    );
+    const loose = async () =>
+      Number(
+        (
+          await query<Array<{ bal: number }>>(
+            `SELECT coalesce(sum(CASE WHEN "ITM_SIGN"='-' THEN -"ITM_NWT" ELSE "ITM_NWT" END),0)::float8 bal
+               FROM "MAIN_STOCK" WHERE tenant_id=$1 AND "IT_CODE"=$2 AND coalesce("TAG_NO",'N')='N'`,
+            tenantId,
+            ITEM,
+          )
+        )[0]!.bal,
+      );
+    const issue = await createIssue(
+      issueBody({
+        lines: [{ itCode: ITEM, pcs: 1, grossWt: 10, netWt: 10, touch: 91.6, amount: 1000 }],
+      }),
+    );
+    const before = await loose();
+    await exec(
+      `UPDATE "CO_SET_NEW" SET "NEGATIVE_STK_SALE"='N' WHERE tenant_id=$1 AND "CO_CODE"='01'`,
+      tenantId,
+    );
+    await exec(
+      `UPDATE "BOOK_DETL" SET "DATA_TYPE"='B' WHERE tenant_id=$1 AND "CO_BOOK"='SL'`,
+      tenantId,
+    );
+    await exec(
+      `UPDATE "BOOK_DATA" SET "DATA_TYPE"='B' WHERE tenant_id=$1 AND "CO_BOOK"='SL'`,
+      tenantId,
+    );
+    const scope = { tenantId, coCode: '01', lcCode: '01', coYear: YEAR, coBook: 'SL' };
+    const header = { scope, vchDate: DAY, taxRatePct: 0, interState: false, mainUser: ADMIN };
+    try {
+      // An ordinary sale of more loose metal than is left is still refused.
+      await expect(
+        createSale(runtime, { ...header, acCode: PARTY }, [
+          { itCode: ITEM, pcs: 1, grossWt: before + 1, netWt: before + 1, touch: 91.6, rate: 1000 },
+        ]),
+      ).rejects.toThrow(/negative stock is not allowed/);
+      const bill = await approvalSaleBill(runtime, { ...header, acCode: '' }, issue.voucherNo, {
+        lines: [{ rate: 1000 }],
+      });
+      const sold = await createSale(runtime, bill.input, bill.lines);
+      const saleNo = String(sold.vchNo).padStart(5, '0');
+      expect(
+        await query(
+          `SELECT "SR_NO"::int sr,"ITM_SIGN" sign,"DATA_TYPE" dt FROM "MAIN_STOCK"
+            WHERE tenant_id=$1 AND "CO_BOOK"='SL' AND "VCH_NO"=$2 ORDER BY "SR_NO"`,
+          tenantId,
+          saleNo,
+        ),
+      ).toEqual([
+        { sr: 3, sign: '-', dt: 'B' },
+        { sr: 5, sign: '+', dt: 'A' },
+      ]);
+      expect(await loose()).toBeCloseTo(before, 6);
+      await deleteSale(runtime, {
+        scope,
+        vchNo: saleNo,
+        expectedVersion: String((sold as { version?: string }).version),
+      });
+    } finally {
+      await exec(
+        `UPDATE "CO_SET_NEW" SET "NEGATIVE_STK_SALE"=$2 WHERE tenant_id=$1 AND "CO_CODE"='01'`,
+        tenantId,
+        setting[0]?.v ?? null,
+      );
+      await exec(
+        `UPDATE "BOOK_DETL" SET "DATA_TYPE"=$2 WHERE tenant_id=$1 AND "CO_BOOK"='SL'`,
+        tenantId,
+        bookTypes.find((b) => b.t === 'detl')?.v ?? null,
+      );
+      await exec(
+        `UPDATE "BOOK_DATA" SET "DATA_TYPE"=$2 WHERE tenant_id=$1 AND "CO_BOOK"='SL'`,
+        tenantId,
+        bookTypes.find((b) => b.t === 'data')?.v ?? null,
+      );
+    }
   });
 
   it('enforces the separate menu rights, including print rights, on both resources', async () => {

@@ -16,6 +16,12 @@ const LITERAL_TABLES = new Set([
   'BUL_DATA',
   'DG_GOLD_DATA',
 ]);
+/**
+ * A row whose desktop writer hard-codes DATA_TYPE carries it under this key instead of taking its book's type, e.g.
+ * the sale's approval stock-back row (Ac_Stock.cs:119 writes 'A'). A symbol, so it never reaches the INSERT.
+ */
+export const FIXED_DATA_TYPE: unique symbol = Symbol('fixedDataType');
+
 export async function postingDataTypeTx(
   tx: any,
   tenantId: string,
@@ -23,6 +29,8 @@ export async function postingDataTypeTx(
   row: Record<string, unknown>,
   cache?: Map<string, string>,
 ): Promise<string> {
+  const fixed = (row as { [FIXED_DATA_TYPE]?: unknown })[FIXED_DATA_TYPE];
+  if (typeof fixed === 'string') return fixed;
   if (LITERAL_TABLES.has(table)) return 'A';
   if (!BOOK_TABLES.has(table)) return String(row.DATA_TYPE ?? 'A');
   return resolveBookDataTypeTx(tx, tenantId, row, cache);
