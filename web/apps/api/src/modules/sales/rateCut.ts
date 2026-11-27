@@ -2067,7 +2067,7 @@ export async function writeRateCut(
       if (residual) {
         if (input.ksrFineDr === undefined) ksrFineDr = num(prior?.KSR_FINE_DR);
         if (input.ksrFineCr === undefined) ksrFineCr = num(prior?.KSR_FINE_CR);
-        await assertDetailsSent(tx, { tenantId, ...key }, issuedInput, input.canDeleteRows);
+        await assertDetailsSent(tx, { tenantId, ...key }, issuedInput, input);
       }
       const restores = quotation ? [] : await releaseRateCutTagsTx(tx, tenantId, key);
       if (!quotation) await applyBookingDrawDownTx(tx, tenantId, key, -1);

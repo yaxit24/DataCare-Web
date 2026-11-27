@@ -537,6 +537,14 @@ async function restrictedDetails(ctx, checkPrint) {
   const denied = await page.request.put(`/api/wholesale-sales/${no}`, { data: removed, headers });
   assert([400, 403].includes(denied.status()), await denied.text());
   assert.match(await denied.text(), /You Have No Rights/);
+  // TR_WH_SALE.cs:10224: a whole issue line is refused too, not only its detail rows.
+  const lineDropped = await page.request.put(`/api/wholesale-sales/${no}`, {
+    // settleDrAmt keeps the body past the "at least one line or a settlement" check.
+    data: { ...payload, expectedVersion: version, lines: [], settleDrAmt: 1 },
+    headers,
+  });
+  assert([400, 403].includes(lineDropped.status()), await lineDropped.text());
+  assert.match(await lineDropped.text(), /You Have No Rights/);
   if (checkPrint) {
     await page.getByRole('button', { name: 'Print', exact: true }).click();
     await page.getByRole('alert').filter({ hasText: 'You Have No Print Rights.....' }).waitFor();
