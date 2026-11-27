@@ -955,6 +955,7 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
           error: e.code,
           message: e.message,
           ...(e.form === undefined ? {} : { form: e.form, action: e.action }),
+          ...((e as any).details === undefined ? {} : { details: (e as any).details }), // 3B facts
         });
       if (e instanceof VoucherVersionConflictError)
         return reply.code(409).send({ error: e.code, message: e.message });

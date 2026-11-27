@@ -17,6 +17,7 @@ import {
 } from './approvalHelpers.mjs';
 import { rollbackMatrix } from '../faults.mjs';
 import { salesInvoiceResidualCases } from './salesInvoiceResiduals.mjs';
+import { salesInvoiceOrderAdvanceCases } from './salesInvoiceOrderAdvance.mjs';
 
 /**
  * Feature: Sales → Sales Invoice (desktop TR_SALE, opened by MDI_FORM.cs:7918-7919 CurBookHelp("SALES")).
@@ -1432,6 +1433,17 @@ export const salesInvoice = {
       loadVoucher,
       field,
       cell,
+    }),
+    // Owner decision 3B: another customer's / over-open order advance only after a Yes with the facts.
+    ...salesInvoiceOrderAdvanceCases({
+      C,
+      BOOK,
+      LINE_A,
+      openSales,
+      pickParty,
+      fillLine,
+      save,
+      loadVoucher,
     }),
   ],
 };
