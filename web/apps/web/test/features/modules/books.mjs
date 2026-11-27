@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 import { FIXTURE_MANIFEST, ITEMS, USERS } from '../fixtures/catalogue.mjs';
+import { withWriteFault } from '../faults.mjs';
 
 /**
  * Feature: Company → Books (desktop MS_BOOK, web /masters/books). Case ids and expectations are the frozen case list
@@ -436,6 +437,24 @@ const noProvisioned = (legs) =>
     [],
     'no leg on the provisioned slot accounts',
   );
+/** An injected database fault answers 500 and the browser logs exactly that one failed load. */
+function acceptOne500(session, response) {
+  if (response.status() < 500) return;
+  assert.deepEqual(session.consoleErrors, [
+    'Failed to load resource: the server responded with a status of 500 (Internal Server Error)',
+  ]);
+  session.consoleErrors.length = 0;
+}
+async function deleteOnScreen(page) {
+  answerQuestions(page, true);
+  const [response] = await Promise.all([
+    page.waitForResponse(
+      (r) => r.request().method() === 'DELETE' && path(r).startsWith(`/api${API}`),
+    ),
+    button(page, 'Delete').click(),
+  ]);
+  return response;
+}
 const balanced = (legs) =>
   assert.equal(
     Math.round(legs.reduce((s, l) => s + l.dr, 0) * 100),
@@ -1677,11 +1696,48 @@ export const books = {
           };
         }),
     ),
-    blocked(
+    C(
       'delete.atomic',
       'T10',
-      'D3; MS_BOOK.cs:2721-2722 separate deletes not ported',
-      'blocked: needs a fault-injection hook in the isolated test stack (another work package: the failure harness used by T14 in other modules); unblocks when the harness exposes a per-table failpoint.',
+      'mutation',
+      'D3; MS_BOOK.cs:2721-2722 deletes BOOK_DATA and then BOOK_IDTL as separate statements; the web deletes both in one transaction, so a fault on either leaves the book whole, and the same Delete then succeeds',
+      async (ctx) =>
+        withBooks(ctx, async () => {
+          const session = await ctx.session();
+          const { page } = session;
+          await apiBook(
+            page,
+            'Z12',
+            'Zeta Item Sales',
+            'ITEM SALES',
+            ITEM_SALES.map((ac, i) => [i + 1, ac]),
+          );
+          const before = await footprint(ctx);
+          const attempts = [];
+          for (const table of ['BOOK_DATA', 'BOOK_DETL']) {
+            await openScreen(page);
+            await openBook(page, 'Z12');
+            const response = await withWriteFault(ctx, table, 'DELETE', () => deleteOnScreen(page));
+            assert.ok(response.status() >= 400, `fault on ${table}: answered ${response.status()}`);
+            acceptOne500(session, response);
+            assert.deepEqual(await footprint(ctx), before, `fault on ${table}: the book is whole`);
+            attempts.push({ table, status: response.status() });
+          }
+          await openScreen(page);
+          await openBook(page, 'Z12');
+          const response = await deleteOnScreen(page);
+          assert.equal(response.status(), 200, await response.text());
+          await message(page, DELETED);
+          const header = await headerRows(ctx, 'Z12');
+          const slots = await slotRows(ctx, 'Z12');
+          assert.deepEqual([header, slots], [[], []]);
+          return {
+            observation: `faulted deletes ${JSON.stringify(attempts)} kept header and six slots; the same Delete then removed both`,
+            expected: { faulted: 'unchanged', then: DELETED },
+            database: { attempts, header, slots },
+            downstream: { list: await listed(page) },
+          };
+        }),
     ),
     C(
       'cancel.clears',
@@ -1801,11 +1857,63 @@ export const books = {
         }),
     ),
     // ---------------------------------------------------------------- T14/T15
-    blocked(
+    C(
       'rollback.detail-failure-keeps-old',
       'T14',
-      'MS_BOOK.cs:2609, :2611, :2675 separate writes not ported',
-      'blocked: needs a fault-injection point after the header write (see books.delete.atomic); unblocks with the shared failpoint harness.',
+      'mutation',
+      'MS_BOOK.cs:2609, :2611, :2675 write the header, clear BOOK_IDTL and insert the slots as separate statements; the web writes them in one transaction, so a fault on any stage keeps the old header and slots, and the same Save then succeeds',
+      async (ctx) =>
+        withBooks(ctx, async () => {
+          const session = await ctx.session();
+          const { page } = session;
+          await apiBook(
+            page,
+            'Z12',
+            'Zeta Item Sales',
+            'ITEM SALES',
+            ITEM_SALES.map((ac, i) => [i + 1, ac]),
+          );
+          const oldHeader = await headerRows(ctx, 'Z12');
+          const oldSlots = await slotRows(ctx, 'Z12');
+          await openScreen(page);
+          await openBook(page, 'Z12');
+          await label(page, 'Book Name').fill('Zeta Changed');
+          await setAccount(page, 1, M[0]);
+          const before = await footprint(ctx);
+          const attempts = [];
+          for (const [table, operation] of [
+            ['BOOK_DATA', 'UPDATE'],
+            ['BOOK_DETL', 'DELETE'],
+            ['BOOK_DETL', 'INSERT'],
+          ]) {
+            const response = await withWriteFault(ctx, table, operation, () => save(page));
+            assert.ok(
+              response.status() >= 400,
+              `fault on ${operation} ${table}: answered ${response.status()}`,
+            );
+            acceptOne500(session, response);
+            assert.deepEqual(
+              await footprint(ctx),
+              before,
+              `fault on ${operation} ${table}: old header and slots kept`,
+            );
+            attempts.push({ table, operation, status: response.status() });
+          }
+          const response = await save(page);
+          assert.equal(response.status(), 200, await response.text());
+          await saved(page);
+          const header = await headerRows(ctx, 'Z12');
+          const slots = await slotRows(ctx, 'Z12');
+          assert.equal(header[0].name, 'Zeta Changed');
+          assert.equal(slots[0].ac, M[0]);
+          assert.equal(slots.length, oldSlots.length);
+          return {
+            observation: `faults ${JSON.stringify(attempts)} kept ${oldHeader[0].name} and its slots; the same Save then wrote ${header[0].name} with slot 1 ${slots[0].ac}`,
+            expected: { faulted: 'unchanged', then: { name: 'Zeta Changed', slot1: M[0] } },
+            database: { attempts, header, slots },
+            downstream: { oldSlot1: oldSlots[0].ac },
+          };
+        }),
     ),
     C(
       'history.cur-use-no-hides-book',
