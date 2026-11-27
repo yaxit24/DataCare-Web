@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
 import { inflateRawSync } from 'node:zlib';
 import { FIXTURE_MANIFEST, USERS } from '../fixtures/catalogue.mjs';
+import { changedTables, tenantFingerprint, withReadFault } from '../faults.mjs';
 import { salesScreen } from './salesInvoice.mjs';
 
 /**
@@ -174,6 +175,27 @@ async function assertRpGstShell(page) {
   for (const action of DESKTOP_ACTIONS)
     await page.getByRole('button', { name: action, exact: true }).waitFor();
   return section;
+}
+
+/** Open GST Report from the navigation on an existing session's page. */
+async function openOn(page) {
+  await page.goto('/dashboard');
+  await page.getByRole('link', { name: 'GST Report', exact: true }).click();
+  await page.waitForURL('**/reports/gst-report');
+  await assertRpGstShell(page);
+}
+
+/** An injected database fault answers 500; the browser logs exactly those failed loads, which are expected. */
+function expectServerErrors(session, count) {
+  assert.deepEqual(
+    session.consoleErrors,
+    Array.from(
+      { length: count },
+      () =>
+        'Failed to load resource: the server responded with a status of 500 (Internal Server Error)',
+    ),
+  );
+  session.consoleErrors.length = 0;
 }
 
 async function currentObservation(ctx) {
@@ -1476,19 +1498,178 @@ export const gstReport = {
       'RP_GST.cs:3077-3146 rewrites the selected CSV deterministically from visible grid rows',
       { downloads: 2, bytes: 'identical', databaseChanges: 0 },
     ),
-    blocked(
-      'failure.query-or-render-no-write.pending',
+    C(
+      'failure.query-or-render-no-write',
       'T14',
       'refusal',
-      'RP_GST.cs:2640-3031,3148-3817 is a read-only query/render path: no try/catch, no transaction, no table write (WP-19 study G6 settles the expected result: nothing persisted)',
-      'Remaining: faults.mjs injects write faults only (a trigger on a voucher table); a report writes nothing, so a report-read fault needs a new scoped injector (G173 / N166), and a browser-side abort would intercept a business response, which this matrix forbids; a 5xx is also a console error the harness fails on. Executable once the harness injects a report-query fault.',
+      'RP_GST.cs:2640-3031,3148-3817 is a read-only query/render path: no try/catch, no transaction, no table write (WP-19 study G6 settles the expected result: nothing persisted). Web: a database read fault (faults.mjs withReadFault) on TAX_DATA during the Gstr 1 run and during Download PDF',
+      async (ctx) => {
+        const session = await ctx.session();
+        const { page } = session;
+        await saleThroughScreen(ctx, page, 'E2ELOC');
+        await openOn(page);
+        // E2ELOC is a local customer without a GSTIN, so its 63,609 sale is a B2C Small row (classifyB2c,
+        // RP_GST.cs:2683-2702); B2CS reads TAX_DATA like B2B.
+        const section = 'B2CS - B2C Small';
+        await runSection(page, section);
+        const baseline = await screenGrid(page);
+        assert(baseline.rows.length > 0, 'the B2CS grid shows the sale before the fault');
+        const before = await tenantFingerprint(ctx);
+        const alert = page.getByTestId('gst-report-error');
+
+        // 1. The query fails: the run is refused with a message, no grid is left on screen, nothing is written.
+        const run = await withReadFault(ctx, 'TAX_DATA', async () => {
+          const [response] = await Promise.all([
+            page.waitForResponse(
+              (r) =>
+                new URL(r.url()).pathname === '/api/reports/gst-report' &&
+                r.request().method() === 'GET',
+            ),
+            page.getByRole('button', { name: 'Gstr 1', exact: true }).click(),
+          ]);
+          await alert.waitFor();
+          return { status: response.status(), message: await alert.textContent() };
+        });
+        assert.equal(run.fired, true, 'the read fault fired inside the report query');
+        assert.equal(run.result.status, 500, 'the faulted run answers 500');
+        assert.equal(run.result.message, 'Unable to run the GST report.');
+        assert.equal(
+          await page.locator('table.grid').count(),
+          0,
+          'no stale grid after the failure',
+        );
+        expectServerErrors(session, 1);
+        assert.deepEqual(
+          changedTables(before, await tenantFingerprint(ctx)),
+          [],
+          'a failed report query writes nothing',
+        );
+
+        // The fault is gone: the same run shows the same grid as before.
+        await runSection(page, section);
+        assert.deepEqual(await screenGrid(page), baseline, 'the rerun equals the pre-fault grid');
+        assert.equal(await alert.count(), 0, 'the message is cleared by the good run');
+
+        // 2. The print path fails the same way: a message, the grid stays, no file, nothing written.
+        let downloads = 0;
+        const countDownload = () => downloads++;
+        page.on('download', countDownload);
+        const print = await withReadFault(ctx, 'TAX_DATA', async () => {
+          const [response] = await Promise.all([
+            page.waitForResponse(
+              (r) => new URL(r.url()).pathname === '/api/reports/gst-report/export.pdf',
+            ),
+            page.getByRole('button', { name: 'Download PDF', exact: true }).click(),
+          ]);
+          await alert.waitFor();
+          return { status: response.status(), message: await alert.textContent() };
+        });
+        page.off('download', countDownload);
+        assert.equal(print.fired, true, 'the read fault fired inside the print request');
+        assert.equal(print.result.status, 500);
+        assert.equal(print.result.message, 'Unable to run the GST report.');
+        assert.equal(downloads, 0, 'no PDF is delivered');
+        assert.deepEqual(await screenGrid(page), baseline, 'the shown grid is kept');
+        expectServerErrors(session, 1);
+        assert.deepEqual(
+          changedTables(before, await tenantFingerprint(ctx)),
+          [],
+          'a failed print writes nothing',
+        );
+
+        // Fault removed: the same button delivers the PDF.
+        const [download] = await Promise.all([
+          page.waitForEvent('download'),
+          page.getByRole('button', { name: 'Download PDF', exact: true }).click(),
+        ]);
+        assert.match(download.suggestedFilename(), /\.pdf$/);
+        assert.equal(await alert.count(), 0, 'the good print clears the message');
+        await ctx.shot(page, 'failure-query-or-render-no-write');
+        return {
+          observation: `faulted Gstr 1 run → ${run.result.status} "${run.result.message}", faulted print → ${print.result.status}; tenant fingerprint unchanged; rerun grid equals the ${baseline.rows.length}-row baseline; PDF ${download.suggestedFilename()} after the fault`,
+          expected: { status: 500, message: 'Unable to run the GST report.', writes: 0 },
+          database: { changedTables: [] },
+        };
+      },
     ),
-    blocked(
-      'failure.export-sentinels-intact.pending',
+    C(
+      'failure.export-sentinels-intact',
       'T14',
       'refusal',
-      'RP_GST.cs:3077-3146,3819-3943 writes output files/workbooks but no business tables; the Excel catch only shows "Error Exporting to Excel: " (:3925-3935) (WP-19 study G7)',
-      'Remaining: faults.mjs injects write faults only; there is no scoped download/export failure injector (G173 / N166). Executable once it can fail an export mid-stream.',
+      'RP_GST.cs:3077-3146,3819-3943 writes output files/workbooks but no business tables; the Excel catch only shows "Error Exporting to Excel: " (:3925-3935) (WP-19 study G7). Web: a read fault on SL_DETL, which only the last workbook sheet (HSN) reads, fails "Gsrt1 Csv" after B2B..ATADJ were already read',
+      async (ctx) => {
+        const session = await ctx.session();
+        const { page } = session;
+        await saleThroughScreen(ctx, page, 'E2ELOC');
+        await openOn(page);
+        const before = await tenantFingerprint(ctx);
+        const workbookPath = '/api/reports/gst-report/workbook.xlsx';
+        // The button opens the workbook URL in a popup. A 200 workbook becomes a browser download, whose response
+        // body Playwright cannot read, so the bytes are fetched again from the same URL (as output.all-sections-workbook
+        // does); a refused export is an ordinary page whose body is read directly.
+        const clickWorkbook = async () => {
+          const response = page
+            .context()
+            .waitForEvent('response', (r) => new URL(r.url()).pathname === workbookPath, {
+              timeout: 15_000,
+            });
+          const [popup] = await Promise.all([
+            page.waitForEvent('popup'),
+            page.getByRole('button', { name: 'Gsrt1 Csv', exact: true }).click(),
+          ]);
+          const answer = await response;
+          const status = answer.status();
+          const type = answer.headers()['content-type'] ?? '';
+          const body =
+            status === 200
+              ? await (await page.request.get(answer.url())).body()
+              : await answer.body();
+          await popup.close();
+          return { status, type, body };
+        };
+
+        const faulted = await withReadFault(ctx, 'SL_DETL', clickWorkbook, {
+          scansOf: ['TAX_DATA'],
+        });
+        assert.equal(faulted.fired, true, 'the fault fired inside the workbook export');
+        // B2B, B2CL, B2CS, CDNR, CDNUR, EXP, AT, ATADJ and EXEMP come before HSN; each sheet that queries reads
+        // TAX_DATA, so the export was well under way when the HSN read failed.
+        assert.ok(
+          faulted.scans.TAX_DATA >= 5,
+          `earlier sheets read TAX_DATA before the fault: ${JSON.stringify(faulted.scans)}`,
+        );
+        assert.equal(faulted.result.status, 500, 'the export answers 500');
+        assert.doesNotMatch(faulted.result.type, /spreadsheetml/, 'no workbook is delivered');
+        assert.notEqual(
+          faulted.result.body.subarray(0, 2).toString('latin1'),
+          'PK',
+          'no partial XLSX bytes reach the operator',
+        );
+        assert.deepEqual(
+          changedTables(before, await tenantFingerprint(ctx)),
+          [],
+          'every sentinel and business row is intact after the failed export',
+        );
+        // The popup is its own page: its failed load is not a console error of the report screen.
+        assert.deepEqual(session.consoleErrors, []);
+
+        // Fault removed: the same button gives the whole workbook, still writing nothing.
+        const good = await clickWorkbook();
+        assert.equal(good.status, 200);
+        const sheets = readXlsx(good.body);
+        assert.deepEqual(
+          sheets.map((sheet) => sheet.name),
+          ['B2B', 'B2CL', 'B2CS', 'CDNR', 'CDNUR', 'EXP', 'AT', 'ATADJ', 'EXEMP', 'HSN'],
+        );
+        assert.ok(sheets.at(-1).rows.length > 1, 'the HSN sheet carries the sale');
+        assert.deepEqual(changedTables(before, await tenantFingerprint(ctx)), []);
+        await ctx.shot(page, 'failure-export-sentinels-intact');
+        return {
+          observation: `faulted Gsrt1 Csv → ${faulted.result.status} (${faulted.result.type || 'no type'}) after ${faulted.scans.TAX_DATA} TAX_DATA scans; tenant fingerprint unchanged; retry → 200 with ${sheets.length} sheets`,
+          expected: { status: 500, workbook: 'none', writes: 0, retry: 'complete workbook' },
+          database: { changedTables: [] },
+        };
+      },
     ),
 
     desiredCase(
