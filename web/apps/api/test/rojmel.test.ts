@@ -179,8 +179,8 @@ describe('a sale projects to the desktop’s four Rojmel rows', () => {
     }
   });
 
-  it('denormalises the party name onto every row, including the tax row', () => {
-    expect(rows.every((r) => r.AC_NAME === 'A PARTY')).toBe(true);
+  it('names item and party rows but leaves tax blank (Ac_Rojmel.cs:49-56)', () => {
+    expect(rows.map((r) => r.AC_NAME)).toEqual(['A PARTY', 'A PARTY', 'A PARTY', '']);
   });
 
   it('carries weight on metal rows and none on money rows', () => {
