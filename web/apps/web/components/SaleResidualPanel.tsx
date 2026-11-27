@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react';
 import { oldMetalTodayRates } from '@datacare/core';
 import { get, post, ApiError } from '../lib/api';
 import { openDocument } from '../lib/openDocument';
+import { usePrintGate } from '../lib/formRights';
 import {
   duplicateOrderMessage,
   sumRows,
@@ -265,6 +266,7 @@ export function SalePrintChoice({
   const [file, setFile] = useState('');
   const [huid, setHuid] = useState(false);
   const [note, setNote] = useState('');
+  const printGate = usePrintGate('Sales/Sales Invoice', setNote); // TR_SALE.cs:16248-16254
   const scope = `coBook=${encodeURIComponent(coBook)}&coYear=${encodeURIComponent(coYear)}&lcCode=${encodeURIComponent(lcCode)}`;
   useEffect(() => {
     if (!coBook) return;
@@ -313,7 +315,7 @@ export function SalePrintChoice({
         type="button"
         disabled={!vchNo}
         onClick={() =>
-          openDocument(
+          printGate.open(
             `/api/sales/${encodeURIComponent(vchNo)}/print?${scope}&file=${encodeURIComponent(file)}&huid=${huid ? 1 : 0}&format=html&copy=O`,
           )
         }

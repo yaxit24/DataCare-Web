@@ -1,6 +1,7 @@
 'use client';
 import { useEffect, useState } from 'react';
 import { get } from './api';
+import { openDocument } from './openDocument';
 import { useBusinessScope } from '../components/BusinessScope';
 
 type Actions = { canDelete: boolean; canPrint: boolean };
@@ -31,4 +32,12 @@ export function useFormRights(form: string): Actions {
     };
   }, [scope, form]);
   return loaded?.scope === scope ? loaded.rights : denied;
+}
+
+/** A bill's Print: opens the document only with USER_SET.FRM_PRINT, else hands the desktop message to `deny`. */
+export function usePrintGate(form: string, deny: (message: string) => void) {
+  const { canPrint } = useFormRights(form);
+  const open = (url: string) =>
+    canPrint ? openDocument(url) : deny('You Have No Print Rights.....');
+  return { canPrint, open };
 }
