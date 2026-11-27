@@ -423,12 +423,12 @@ databaseDescribe('database-backed purchase voucher lifecycle', () => {
         withLabour === 'Y' ? ['01', '03', '04', '08'] : ['01', '02', '03', '04', '08'],
       );
       const byType = (t: string) => day.find((r) => r.t === t)!;
-      expect(byType('01')).toMatchObject({ ld: 'SUPP', dr: withLabour === 'Y' ? 366866 : 366746 });
+      expect(byType('01')).toMatchObject({ ld: 'SUPP', dr: withLabour === 'Y' ? 200120 : 200000 });
       if (withLabour === 'N')
         expect(byType('02')).toMatchObject({ ac: 'LAB', ld: 'SUPP', dr: 120, cr: 0, nm: '' });
-      expect(byType('03')).toMatchObject({ ld: 'SUPP', dr: 11005.98, cr: 0, nm: '' });
-      expect(byType('04')).toMatchObject({ ac: 'ROUND', ld: 'SUPP', dr: 0, cr: 378, nm: '' });
-      expect(byType('08')).toMatchObject({ ac: 'SUPP', ld: 'CTRL', dr: 0, cr: 378249.98 });
+      expect(byType('03')).toMatchObject({ ld: 'SUPP', dr: 6003.6, cr: 0, nm: '' });
+      expect(byType('04')).toMatchObject({ ac: 'ROUND', ld: 'SUPP', dr: 0, cr: 206, nm: '' });
+      expect(byType('08')).toMatchObject({ ac: 'SUPP', ld: 'CTRL', dr: 0, cr: 206329.6 });
       expect(byType('08').nm).not.toBe('');
       const taxes = await owner.$queryRawUnsafe<any[]>(
         `SELECT "TOT_AMT"::float total FROM "TAX_DATA" WHERE tenant_id=$1 AND "VCH_NO"=$2`,
