@@ -133,14 +133,36 @@ const shift = (iso, days) => {
 };
 const dmy = (iso) => iso.split('-').reverse().join('/');
 const recentRow = async (page, vchNo) => {
-  // The list renders after the screen's own reads; wait for its toggle in either state before reading it, or a slow
-  // render leaves the list collapsed and the row never appears.
-  const either = page.getByRole('button', { name: /^[▸▾] Recent vouchers$/ });
-  await either.waitFor();
-  const toggle = page.getByRole('button', { name: '▸ Recent vouchers', exact: true });
-  if (await toggle.isVisible().catch(() => false)) await toggle.click();
+  // A save returns before the screen is done with it: it still prints the voucher (TR_CONTRA.cs:2902) and reloads
+  // the list. Wait until the Save button is enabled again, then open the list and confirm it is open.
+  await page.locator('button[data-save-mnemonic]:enabled').waitFor();
+  const opened = page.getByRole('button', { name: '▾ Recent vouchers', exact: true });
+  const closed = page.getByRole('button', { name: '▸ Recent vouchers', exact: true });
+  await opened.or(closed).waitFor();
+  for (let i = 0; i < 3 && !(await opened.isVisible()); i++) {
+    if (await closed.isVisible()) await closed.click();
+    await opened.waitFor({ timeout: 2_000 }).catch(() => {});
+  }
+  await opened.waitFor({ timeout: 1_000 });
+  // The list loads once when it opens. A load that fails under a busy database (the read's 2 s start wait, 503
+  // transaction-timeout) leaves its message and no rows, and the list never retries by itself; the operator presses
+  // Refresh. Do the same, then read the row the page shows.
   const cell = page.getByRole('cell', { name: vchNo, exact: true }).last();
-  await cell.waitFor();
+  const panel = opened.locator('xpath=ancestor::div[contains(@class,"panel")][1]');
+  for (let i = 0; i < 6 && !(await cell.isVisible()); i++) {
+    if (
+      await cell.waitFor({ timeout: 4_000 }).then(
+        () => true,
+        () => false,
+      )
+    )
+      break;
+    await panel.getByRole('button', { name: 'Refresh', exact: true }).click();
+  }
+  if (!(await cell.isVisible()))
+    throw new Error(
+      `voucher ${vchNo} is not in the recent list: ${(await panel.innerText()).slice(0, 1500)}`,
+    );
   return cell.locator('xpath=..');
 };
 const loadFromList = async (page, vchNo) => {
