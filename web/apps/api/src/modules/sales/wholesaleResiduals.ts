@@ -26,7 +26,7 @@ export interface RojmelRowsArgs {
   masterName: string;
   vchDesc: string;
   itType: 'G' | 'S';
-  /** Desktop `Wh_Sales_Rojmel` shape (the Wh Sales book, gold). Rate Cut keeps the measured nine-type shape. */
+  /** Desktop `Wh_Sales_Rojmel` shape (the Wh Sales book, gold and silver). Rate Cut keeps the measured nine-type shape. */
   desktopShape: boolean;
   accounts: Record<string, string | undefined>;
   /** BOOK_DETL by SR_NO as stored, blank codes included (see `readBookSlots`). */
@@ -43,6 +43,7 @@ export interface RojmelRowsArgs {
 }
 
 const asLine = (row: Row): WholesaleRojmelLine => ({
+  silverFine: n(row.SILVER_FINE),
   srNo: n(row.SR_NO),
   itType: String(row.IT_TYPE ?? 'G'),
   pcs: n(row.ITM_PCS),
@@ -56,7 +57,7 @@ const asLine = (row: Row): WholesaleRojmelLine => ({
   itCode: String(row.IT_CODE ?? ''),
 });
 
-/** The ROJ_MEL_DATA rows of one voucher: the desktop's own for a gold Wh Sales, else the earlier nine-type builder. */
+/** The ROJ_MEL_DATA rows of one voucher: the desktop's own for a Wh Sales, else the earlier nine-type builder. */
 export function rateCutRojmelRows(a: RojmelRowsArgs): any[] {
   const money2 = (v: unknown): number => round(n(v), 2);
   const f = a.figures as any;
@@ -72,8 +73,16 @@ export function rateCutRojmelRows(a: RojmelRowsArgs): any[] {
     partyCode: a.customer,
   };
   const gold = a.itType === 'G';
-  if (a.desktopShape && gold) {
+  if (a.desktopShape) {
     return buildWholesaleRojmel(ctx, {
+      itType: a.itType,
+      interestFine: n(f.intFine),
+      interestAccount: a.accounts.interestAc,
+      silverFineCr: n(f.slvFineCr),
+      silverFineDr: n(f.slvFineDr),
+      silverAmountCr: n(f.slvAmtCr),
+      silverAmountDr: n(f.slvAmtDr),
+      silverFineRate: n(f.slvFineRate),
       slots: a.slots,
       cardAc: a.cardAc,
       saleChequeAmount: n(f.slChqAmt),
