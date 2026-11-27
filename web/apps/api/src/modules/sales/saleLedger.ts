@@ -28,10 +28,10 @@ type VoucherKey = {
  *     STR(SR_NO)+23/24 old metal :135-137     25/26 cash :139-141     27/28 cash paid, 'M' books :143-145
  *     29/30 cash paid, 'T' books :147-149     31/32 kasar :151-153     33/34 discount :155-157
  *     36/37+STR UPI :161-163
+ *     35 round-off, the book's slot 5 (Cr when ROF_AMT > 0, Dr its absolute value when < 0) :159
  *
  * The 2024-25 data was written by an older build with other codes (party 01, revenue 03, tax 04, bank 09/10, cash
- * 19/20, kasar 25/26, line 02); the owner chose the current source. The UAE-only legs 02-06 are not posted, nor
- * leg 35: the desktop posts it from ROF_AMT, which it stores 0 (see webRoundOff).
+ * 19/20, kasar 25/26, line 02); the owner chose the current source. The UAE-only legs 02-06 are not posted.
  */
 export const SALE_LEG = {
   partyBill: 1,
@@ -61,18 +61,10 @@ export const SALE_LEG = {
   kasar: 32,
   partyDiscount: 33,
   discount: 34,
+  /** The operator-typed round-off SL_DATA.ROF_AMT, one leg on the book's slot 5 (Ac_Ledr.cs:159); see saleRoundingResidue. */
+  roundOff: 35,
   partyUpi: 36,
   upi: 37,
-  /**
-   * The web's round-off leg, which the DESKTOP DOES NOT WRITE.
-   *
-   * The desktop posts leg 35 from SL_DATA.ROF_AMT only when it is non-zero (Ac_Ledr.cs:159), and ROF_AMT is 0.00 on
-   * all 190 real sale headers: the desktop rounds the bill total and posts the sub-rupee residue nowhere, which is
-   * why 89 of its sale vouchers are out of balance by under a rupee. The web balances instead, with this leg. Whether
-   * to keep it, drop it, or post it as 35 is an open owner question (docs/FIRST-REAL-COMPARISON.md 3.4); until then
-   * its code stays 99, outside every desktop code.
-   */
-  webRoundOff: 99,
 } as const;
 
 /** `code + STR(SR_NO)`: the tail of a desktop key that puts the row number AFTER the code (legs 21/22, 36/37). */
@@ -87,35 +79,34 @@ interface SaleSettlement {
 }
 
 /**
- * The amount of the web's round-off leg (SALE_LEG.webRoundOff): whatever balances the party's bill debit against the
- * item, tax and charge credits.
+ * The sale's UNPOSTED rounding, Σ DR − Σ CR of its ledger (OWNER DECISION 1B, 2026-11-27; posting.ts
+ * DesktopRoundingResidue): the party's bill debit (TOT_AMT + DISC_AMT + TDS_AMT, Ac_Ledr.cs:64) less the item, tax and
+ * charge credits and the typed round-off leg 35 (:90-109, :159). The settlement, TDS and discount pairs balance
+ * among themselves, so this is the whole imbalance.
  *
- * On the header path the item leg is SL_DATA.NET_AMT and the party debit TOT_AMT + DISC_AMT, so this is the bill's
- * round-off. On the line path each item leg is its own line's NET_AMT (Ac_Ledr.cs:90), while the bill total is
- * rounded from the ROUNDED net (calc.ts billTotals, TOT_AMT_ROF): with paise on a line and a rupee-rounded bill the
- * two differ by the line nets' rounding, which the desktop leaves unposted. The web carries that residue in the same
- * round-off leg; nothing else about the leg changes.
+ * The desktop rounds TOT_AMT to TOT_AMT_ROF (TR_SALE.cs:19047) but stores in ROF_AMT only the round-off the operator
+ * types (:15051), so the difference is posted nowhere. On the line path each item leg is its line's NET_AMT (:90)
+ * while the bill rounds its NET_AMT first (:18957), which the desktop leaves unposted as well.
  */
-export function saleLedgerRoundOff(
+export function saleRoundingResidue(
   partyDebit: number,
   credits: ReadonlyArray<{ amount: number }>,
+  roundOff: number,
 ): number {
-  return roundTo(partyDebit - credits.reduce((sum, leg) => sum + leg.amount, 0), 3);
-}
-
-/** The round-off leg would carry more than rounding: the item legs do not add up to the bill. */
-export class SaleLedgerResidueError extends Error {
-  constructor(roundOff: number, billRoundOff: number, bound: number) {
-    super(
-      `sale ledger does not agree with the bill total: round-off ${roundOff} against the bill's ${billRoundOff} ` +
-        `(more than the ${bound} that rounding can explain)`,
-    );
-    this.name = 'SaleLedgerResidueError';
-  }
+  return roundTo(partyDebit - credits.reduce((sum, leg) => sum + leg.amount, 0) - roundOff, 3);
 }
 
 /**
- * Build the balanced AC_DATA legs of a sale (pure), keyed as Sales_Ledr keys them (SALE_LEG above).
+ * The most saleRoundingResidue may be: half a TOT_AMT_ROF unit for the bill total's rounding (TR_SALE.cs:19047),
+ * and on the line path another half for the bill NET_AMT's (:18957).
+ */
+export function saleRoundingBound(billTotalDecimals: number, linePath: boolean): number {
+  return roundTo(0.5 * 10 ** -billTotalDecimals * (linePath ? 2 : 1), 6);
+}
+
+/**
+ * Build the AC_DATA legs of a sale (pure), keyed as Sales_Ledr keys them (SALE_LEG above). They balance but for the
+ * bill total's unposted rounding (saleRoundingResidue), as the desktop's do.
  *
  * - `totals.total` is the bill (SL_DATA.TOT_AMT, with hallmark and TCS); `totals.discount` the bill discount. The
  *   party's debit is their sum (Ac_Ledr.cs:64), the discount coming back as the 33/34 pair (:155-157).
@@ -133,18 +124,18 @@ export function buildSaleLedger(p: {
   controlAc?: string;
   rateUnfix?: boolean;
   vchType?: string;
-  totals: Pick<BillTotals, 'total' | 'taxable' | 'tax' | 'roundOff'> &
-    Partial<Pick<BillTotals, 'net' | 'discount'>>;
+  totals: Pick<BillTotals, 'total' | 'taxable' | 'tax'> &
+    Partial<Pick<BillTotals, 'net' | 'discount' | 'roundOff'>>;
   incomeLegs?: LineLeg[];
   charges?: Array<{ legType: number; ac: string; amount: number }>;
   discountAc?: string;
   /** TDS (SL_DATA.TDS_AMT) and the TDS code's tax account: leg 01 adds it back, the 13/14 pair carries it. */
   tds?: SaleSettlement;
   /**
-   * The most the round-off leg may differ from the bill's own round-off (`totals.roundOff`). The difference is the
-   * line nets' rounding into the bill total, so it is bounded; past the bound the save is refused.
+   * SL_DATA.ROF_AMT, the round-off the operator typed (0 when none), and the book's slot-5 account it posts to as leg
+   * 35 (Ac_Ledr.cs:159 `B.SR_NO = 5 AND A.ROF_AMT <> 0`). Nothing else is posted for the bill total's rounding.
    */
-  maxRoundOffResidue?: number;
+  roundOff?: SaleSettlement;
   payments?: {
     cash?: SaleSettlement;
     cheque?: SaleSettlement;
@@ -217,21 +208,13 @@ export function buildSaleLedger(p: {
         CR_AMT: charge.amount,
         SIGN: 'C',
       });
-    const roundOff =
-      p.totals.total === 0
-        ? 0
-        : saleLedgerRoundOff(partyDebit, [...income, { amount: p.totals.tax }, ...charges]);
-    // The round-off leg may carry only rounding: past the caller's bound the item legs disagree with the bill.
-    if (
-      p.maxRoundOffResidue != null &&
-      Math.abs(roundOff - p.totals.roundOff) > p.maxRoundOffResidue + 1e-9
-    )
-      throw new SaleLedgerResidueError(roundOff, p.totals.roundOff, p.maxRoundOffResidue);
+    // Leg 35: slot 5 Cr ROF_AMT when > 0, Dr ABS(ROF_AMT) when < 0, the party as LD_CODE, PARTY_AC_CODE ''.
+    const roundOff = p.roundOff?.amount ?? 0;
     if (roundOff !== 0)
       lines.push({
         ...base,
-        legType: SALE_LEG.webRoundOff,
-        AC_CODE: p.roundAc,
+        legType: SALE_LEG.roundOff,
+        AC_CODE: p.roundOff!.ac,
         LD_CODE: p.acCode,
         DR_AMT: roundOff < 0 ? Math.abs(roundOff) : 0,
         CR_AMT: roundOff > 0 ? roundOff : 0,

@@ -327,6 +327,7 @@ function PlainPurchasePage() {
   const [discountPct, setDiscountPct] = useState('');
   const [tcsPct, setTcsPct] = useState('');
   const [tdsPct, setTdsPct] = useState('');
+  const [roundOff, setRoundOff] = useState(''); // PR_DATA.ROF_AMT, the typed row 4 (TR_PURC.cs:12600)
   const [tdsAmount, setTdsAmount] = useState('');
   const [hmAmount, setHmAmount] = useState('');
   const [hmTaxPct, setHmTaxPct] = useState('');
@@ -422,7 +423,10 @@ function PlainPurchasePage() {
   const taxPrev = previewTotals.tax;
   // TR_PURC.cs:15072: whole-rupee TCS on net before discount plus tax.
   const tcsAmount = roundHalfEven(((previewTotals.net + taxPrev) * n(tcsPct)) / 100, 0);
-  const totalPrev = roundingPolicy.roundBillTotal(taxable + taxPrev + tcsAmount);
+  // Row 4 is the round-off the operator types unless PR_TDS_TAX makes it TDS (TR_PURC.cs:15085); nothing else rounds.
+  const tdsOn = companyFlag(companySettings, 'PR_TDS_TAX', 'N');
+  const rofAmt = tdsOn ? 0 : n(roundOff);
+  const totalPrev = roundingPolicy.roundBillTotal(taxable + taxPrev + tcsAmount + rofAmt);
 
   function newPurchase() {
     setLoadedVchNo('');
@@ -439,6 +443,7 @@ function PlainPurchasePage() {
     setDiscountAmount('');
     setInterState(false);
     setUrd(false);
+    setRoundOff('');
     setLines([blank()]);
     setTender({});
   }
@@ -489,6 +494,7 @@ function PlainPurchasePage() {
       setDiscountPct(str(view.discountPct));
       setTcsPct(str(view.tcsPct));
       setTdsPct(str(view.tdsPct));
+      setRoundOff(str(view.roundOffAmount));
       setTdsAmount(str(view.tdsAmount));
       setHmAmount(str(view.hmAmount));
       setHmTaxPct(str(view.hmTaxPct));
@@ -650,6 +656,7 @@ function PlainPurchasePage() {
         tcsPct: tcsPct ? n(tcsPct) : undefined,
         tcsAmount,
         tdsPct: tdsPct ? n(tdsPct) : undefined,
+        roundOffAmount: rofAmt !== 0 ? rofAmt : undefined,
         tdsAmount: tdsAmount ? n(tdsAmount) : undefined,
         hmAmount: hmAmount ? n(hmAmount) : undefined,
         hmTaxPct: hmTaxPct ? n(hmTaxPct) : undefined,
@@ -1141,6 +1148,12 @@ function PlainPurchasePage() {
                 <label>TDS Amt</label>
                 <input value={tdsAmount} onChange={(e) => setTdsAmount(e.target.value)} />
               </div>
+              {!tdsOn && (
+                <div className="field">
+                  <label>Round Off</label>
+                  <input value={roundOff} onChange={(e) => setRoundOff(e.target.value)} />
+                </div>
+              )}
               <div className="field">
                 <label>Hallmark Amt</label>
                 <input value={hmAmount} onChange={(e) => setHmAmount(e.target.value)} />

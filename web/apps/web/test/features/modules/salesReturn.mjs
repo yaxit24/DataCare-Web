@@ -182,10 +182,14 @@ const counts = async (ctx) =>
               (SELECT count(*) FROM "MAIN_STOCK" WHERE tenant_id=$1 AND "CO_BOOK"='${BOOK}')::int stk`,
     )
   )[0];
+/**
+ * Balanced but for the return bill's whole-rupee rounding, which is posted nowhere: the desktop return stores ROF_AMT 0
+ * (TR_SALE_RTN.cs:12538) and posts no round-off leg (Ac_Ledr.cs:1321; owner decision 1B, 2026-11-27).
+ */
 const balanced = (rows) => {
   const dr = rows.reduce((s, r) => s + r.dr, 0);
   const cr = rows.reduce((s, r) => s + r.cr, 0);
-  return dr > 0 && Math.abs(dr - cr) < 0.005;
+  return dr > 0 && Math.abs(dr - cr) <= 0.5 + 1e-9;
 };
 const credit = (rows, ac) =>
   Math.round(rows.filter((r) => r.ac === ac).reduce((s, r) => s + r.cr - r.dr, 0) * 100) / 100;
