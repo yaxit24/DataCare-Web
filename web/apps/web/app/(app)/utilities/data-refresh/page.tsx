@@ -1,6 +1,7 @@
 'use client';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { ApiError, get, post } from '../../../../lib/api';
+import { AccountCheck, type AccountFamily } from './AccountCheck';
 
 const ORDER = [
   'data-refresh-account',
@@ -68,6 +69,7 @@ const errorText = (error: unknown, fallback: string) =>
 
 export default function DataRefreshPage() {
   const [operations, setOperations] = useState<Operation[]>([]);
+  const [accountFamilies, setAccountFamilies] = useState<AccountFamily[]>([]);
   const [runs, setRuns] = useState<RunRow[]>([]);
   const [active, setActive] = useState<Operation | null>(null);
   const [preview, setPreview] = useState<Preview | null>(null);
@@ -90,11 +92,14 @@ export default function DataRefreshPage() {
 
   useEffect(() => {
     Promise.all([
-      get<{ operations: Operation[] }>('/utilities/data-refresh/operations'),
+      get<{ operations: Operation[]; accountFamilies?: AccountFamily[] }>(
+        '/utilities/data-refresh/operations',
+      ),
       get<{ runs: RunRow[] }>('/utilities/data-refresh/runs').catch(() => ({ runs: [] })),
     ])
       .then(([catalog, history]) => {
         setOperations(catalog.operations);
+        setAccountFamilies(catalog.accountFamilies ?? []);
         setRuns(history.runs);
       })
       .catch((error) =>
@@ -275,6 +280,9 @@ export default function DataRefreshPage() {
             <button type="button" className="primary" disabled={busy !== null} onClick={runApply}>
               Apply {CAPTIONS[active.id as (typeof ORDER)[number]]}
             </button>
+          )}
+          {active.id === 'data-refresh-account' && accountFamilies.length > 0 && (
+            <AccountCheck families={accountFamilies} disabled={busy !== null} onRun={loadRuns} />
           )}
         </section>
       )}

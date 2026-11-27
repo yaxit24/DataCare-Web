@@ -253,4 +253,9 @@ export const EXPECTED_MIGRATIONS: ReadonlyArray<{
     name: '20261126140000_web_tds_ledger',
     checksum: 'bbad5418ec64dcfca04dd3150c7795bfc807783555418c13476ddad5ec3560b5',
   },
+  {
+    // Data Refresh > Account check-and-repair keeps the replaced rows on the run record (MS_UPDATE.cs:2334-2669).
+    name: '20261127130000_data_repair_before_rows',
+    checksum: '4ad81e3644cccdda687c18cea1c9f48936699cf6d06b92a57532703db9daf9ff',
+  },
 ];
