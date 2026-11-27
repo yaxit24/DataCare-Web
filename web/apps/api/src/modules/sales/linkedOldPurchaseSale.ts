@@ -287,7 +287,7 @@ export function linkedOldPurchaseHook(
     });
     if (!isEdit && existing.length)
       throw new SaleValidationError(
-        `Purchase ${existing.map(refName).join(', ')} is already linked to sale ${scope.coBook}/${saleVoucherNo}, left by a sale that was not saved; remove that link before saving this sale`,
+        `Purchase ${existing.map(refName).join(', ')} is already linked to sale ${scope.coBook}/${saleVoucherNo}, left by a sale that was not saved; open purchase ${existing.map(refName).join(', ')} and use Delete this stray purchase before saving this sale`,
       );
     if (!existing.length && !request) return undefined;
     // TR_PURC.cs:13724-13740: the party is the sale's, the cash party 00045 becoming 00050; the date is the sale's.

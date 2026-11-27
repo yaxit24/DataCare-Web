@@ -2,6 +2,8 @@ import { type StoneSubDetailInput } from '../shared/stoneSubDetail.js';
 import { DESKTOP_MESSAGES } from '../shared/desktopMessages.js';
 import {
   linkedPurchaseRefusal,
+  isSaleLinkedPurchase,
+  purchaseSaleLinkStateTx,
   persistedSaleLink,
   sameSaleLink,
   SALE_LINK_COLUMNS,
@@ -2030,11 +2032,7 @@ function purchaseLinkFromInput(input: PurchaseInput): PurchaseSourceLink {
   };
 }
 
-/**
- * The purchase workflow a configured book posts under. TR_PURC serves PURCHASE and CON PUR books; TR_PURC_HM
- * also serves TAG PURCHASE books ("Tag Wise Purc", MDI_FORM.cs:8540-8541) and posts them through the same
- * purchase routines. Anything else keeps the PURCHASE policy, which then refuses the book's MAIN_BOOK.
- */
+/** TR_PURC_HM serves TAG PURCHASE (MDI_FORM.cs:8540-8541); unknown books retain the rejecting PURCHASE policy. */
 function purchaseWorkflowFor(
   mainBook: string,
 ): 'PURCHASE' | 'TAG PURCHASE' | 'CONSIGNMENT PURCHASE' {
@@ -2043,7 +2041,10 @@ function purchaseWorkflowFor(
   return 'PURCHASE';
 }
 
-async function purchaseMainBookTx(tx: any, scope: CompletePurchaseScope): Promise<string> {
+export async function purchaseMainBookTx(
+  tx: any,
+  scope: { tenantId: string; coCode: string; lcCode: string; coBook?: string },
+): Promise<string> {
   const rows: Array<{ MAIN_BOOK: unknown }> = await tx.$queryRawUnsafe(
     `SELECT "MAIN_BOOK" FROM "BOOK_DATA"
       WHERE tenant_id=$1 AND "CO_CODE"=$2 AND "LC_CODE"=$3 AND "CO_BOOK"=$4
@@ -2364,6 +2365,7 @@ export async function getPurchaseTx(
   }
   return {
     ...purchaseHeaderView(headers[0]!, await hasWebRoundOffLegTx(tx, params)),
+    linkedSale: await purchaseSaleLinkStateTx(tx, scope, headers[0]!),
     lines: details.map((row) => purchaseLineView(row, stonesBySrNo.get(num(row.SR_NO)) ?? [])),
     tags: tags.map(purchaseTagView),
     version: await purchaseVersionTx(tx, scope, voucherNo), // N51: sent back as expectedVersion
@@ -2651,7 +2653,7 @@ export async function editPurchaseTx(
   await assertPeriodOpen(tx, scope.tenantId, {
     ledger: { table: 'AC_DATA', lines: [{ CO_CODE: scope.coCode, VCH_DATE: requestedDate }] },
   });
-  const linked = text(persisted.SL_BILL_NO) && !isConsignmentPurchase;
+  const linked = isSaleLinkedPurchase(mainBook, persisted);
   if (linked && !sameSaleLink(persistedSaleLink(persisted), linkedSale))
     throw new PurchaseValidationError(linkedPurchaseRefusal(persisted));
 
@@ -2710,7 +2712,6 @@ export async function editPurchaseTx(
   }
   return { ...result, version: await purchaseVersionTx(tx, scope, voucherNo) };
 }
-
 /** Reverse a purchase and write the desktop TR_PURC 1-header + N-detail DELETE_DATA audit. */
 export async function deletePurchase(
   prisma: any,
@@ -2721,7 +2722,6 @@ export async function deletePurchase(
     deletePurchaseTx(tx, input),
   );
 }
-
 /** The delete path inside a caller's transaction; `linkedSale` as for editPurchaseTx. */
 export async function deletePurchaseTx(
   tx: any,
@@ -2753,7 +2753,7 @@ export async function deletePurchaseTx(
   await assertPeriodOpen(tx, tenantId, {
     ledger: { table: 'AC_DATA', lines: [{ CO_CODE: scope.coCode, VCH_DATE: header.VCH_DATE }] },
   });
-  const linked = text(header.SL_BILL_NO) && !isConsignmentPurchase;
+  const linked = isSaleLinkedPurchase(deleteMainBook, header);
   if (linked && !sameSaleLink(persistedSaleLink(header), linkedSale))
     throw new PurchaseValidationError(linkedPurchaseRefusal(header));
   const details: Array<Record<string, unknown>> = await tx.$queryRawUnsafe(

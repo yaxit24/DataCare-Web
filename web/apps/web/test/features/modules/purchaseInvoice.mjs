@@ -1,3 +1,4 @@
+import { salesScreen } from './salesInvoice.mjs';
 import assert from 'node:assert/strict';
 import {
   FIXTURE_MANIFEST,
@@ -461,6 +462,9 @@ export const purchaseInvoice = {
     'web/apps/web/app/(app)/txn/purchase-hm/page.tsx',
     'web/apps/web/app/(app)/txn/tag-wise-purc/page.tsx',
     'web/apps/web/lib/purchaseCarry.ts',
+    'web/apps/web/components/PurchaseSaleLink.tsx',
+    'web/apps/api/src/modules/purchase/strayLink.ts',
+    'web/apps/api/src/modules/purchase/linkedSale.ts',
     'web/apps/api/src/modules/purchase/purchase.ts',
     'web/apps/api/src/modules/purchase/purchaseHallmark.ts',
     'web/apps/api/src/modules/purchase/purchaseReopen.ts',
@@ -1148,49 +1152,168 @@ export const purchaseInvoice = {
       'refusal.linked-sale-delete',
       'T10',
       'refusal',
-      'A purchase booked against a sale (PR_DATA SL_BILL_*, TR_PURC.cs:12647-12650) cannot be deleted from the purchase screen; the refusal names the sale to open (TR_PURC.cs:13443-13447, owner decision 2B)',
+      'TR_PURC.cs:13443-13447; owner 2B: linked purchases are read-only and open their sale.',
+      async (ctx) => {
+        const { page } = await ctx.session();
+        await salesScreen.openSales(page);
+        await salesScreen.pickParty(page, PARTIES.local.code);
+        await salesScreen.fillLine(page, 0, salesScreen.LINE_A);
+        const saleResponse = await salesScreen.save(page);
+        assert.equal(saleResponse.status(), 201, await saleResponse.text());
+        const saleNo = String((await saleResponse.json()).vchNo).padStart(5, '0');
+        const vchNo = await createOne(ctx, page);
+        // Synthetic imported desktop link: vouchers themselves were created through the real screens.
+        await ctx.owner.$executeRawUnsafe(
+          `UPDATE "PR_DATA" SET "SL_BILL_NO"=$3,"SL_BILL_LC"="LC_CODE","SL_BILL_YRCD"="CO_YEAR","SL_BILL_DBCD"='SL'
+            WHERE tenant_id=$1 AND "CO_BOOK"='${BOOK}' AND "VCH_NO"=$2`,
+          ctx.tenantId,
+          vchNo,
+          saleNo,
+        );
+        const before = await purchaseWriteSet(ctx, vchNo);
+        await page.goto(`/txn/purchase?coBook=${BOOK}&vchNo=${vchNo}`);
+        const banner = page.getByTestId('purchase-sale-link');
+        await banner
+          .getByText(`Old gold taken on sale SL/${saleNo} — edit it from that sale`, {
+            exact: true,
+          })
+          .waitFor();
+        assert.equal(
+          await page.getByRole('button', { name: 'Update Purchase', exact: true }).isDisabled(),
+          true,
+        );
+        assert.equal(await field(page, 'Supplier Name').isDisabled(), true);
+        assert.equal(await cell(page, 0, 4).isDisabled(), true);
+        assert.equal(
+          await page.getByRole('button', { name: 'Delete', exact: true }).first().isDisabled(),
+          true,
+        );
+        assert.equal(await page.getByLabel('Voucher No', { exact: true }).isEnabled(), true);
+        assert.equal(
+          await page.getByRole('button', { name: 'Load', exact: true }).isEnabled(),
+          true,
+        );
+        assert.equal(
+          await page.getByRole('button', { name: 'Exit', exact: true }).isEnabled(),
+          true,
+        );
+        await ctx.shot(page, 'linked-purchase-read-only');
+        await banner.getByRole('button', { name: 'Open sale', exact: true }).click();
+        await page
+          .getByTestId('sales-loaded')
+          .filter({ hasText: `Loaded #${saleNo}` })
+          .waitFor();
+        assert.deepEqual(await purchaseWriteSet(ctx, vchNo), before);
+        return {
+          observation: `purchase ${vchNo} read-only; Open sale loaded SL/${saleNo}`,
+          expected: 'read-only link and exact sale zoom',
+          database: { unchanged: true },
+        };
+      },
+    ),
+    C(
+      'delete.stray-sale-link',
+      'T10',
+      'mutation',
+      'TR_PURC.cs:16024 F1 LInkVchDelete, owner adaptation: only a missing sale, with confirmation.',
       async (ctx) => {
         const { page } = await ctx.session();
         const vchNo = await createOne(ctx, page);
-        const link = (no, lc, yr, book) =>
-          ctx.owner.$executeRawUnsafe(
-            `UPDATE "PR_DATA" SET "SL_BILL_NO"=$3,"SL_BILL_LC"=$4,"SL_BILL_YRCD"=$5,"SL_BILL_DBCD"=$6
-              WHERE tenant_id=$1 AND "CO_BOOK"='${BOOK}' AND "VCH_NO"=$2`,
-            ctx.tenantId,
-            vchNo,
-            no,
-            lc,
-            yr,
-            book,
-          );
-        const [{ yr }] = await ctx.rows(
-          `SELECT "CO_YEAR" yr FROM "PR_DATA" WHERE tenant_id=$1 AND "CO_BOOK"='${BOOK}' AND "VCH_NO"=$2`,
+        const missing = '9999999999';
+        const [{ n }] = await ctx.rows(
+          `SELECT count(*)::int n FROM "SL_DATA" WHERE tenant_id=$1 AND "CO_BOOK"='SL' AND "VCH_NO"=$2`,
+          missing,
+        );
+        assert.equal(n, 0, 'synthetic stray target must be absent');
+        await ctx.owner.$executeRawUnsafe(
+          `UPDATE "PR_DATA" SET "SL_BILL_NO"=$3,"SL_BILL_LC"="LC_CODE","SL_BILL_YRCD"="CO_YEAR","SL_BILL_DBCD"='SL'
+            WHERE tenant_id=$1 AND "CO_BOOK"='${BOOK}' AND "VCH_NO"=$2`,
+          ctx.tenantId,
+          vchNo,
+          missing,
+        );
+        const before = await purchaseWriteSet(ctx, vchNo);
+        const sentinel = await sentinelSnapshot(ctx.owner);
+        const [{ hidden }] = await ctx.rows(
+          `SELECT "HD_VCH_NO" hidden FROM "PR_DATA" WHERE tenant_id=$1 AND "CO_BOOK"='${BOOK}' AND "VCH_NO"=$2`,
           vchNo,
         );
-        await link('00077', '01', yr, 'SL');
-        try {
-          const before = await purchaseWriteSet(ctx, vchNo);
-          await page.getByRole('button', { name: 'New', exact: true }).click();
-          await loadVoucher(page, vchNo);
-          const [response] = await Promise.all([
-            page.waitForResponse(
-              (r) => r.request().method() === 'DELETE' && /\/api\/purchases\//.test(r.url()),
-            ),
-            page.getByRole('button', { name: 'Delete', exact: true }).first().click(),
-          ]);
-          assert.equal(response.status(), 400, await response.text());
-          const body = await response.json();
-          assert.equal(body.message, 'Linked with sale SL/00077; open that sale');
-          await page.getByText('Linked with sale SL/00077; open that sale').first().waitFor();
-          assert.deepEqual(await purchaseWriteSet(ctx, vchNo), before);
-          return {
-            observation: `delete of ${vchNo} answered 400 "${body.message}"; write set unchanged`,
-            expected: 'refused, naming the sale',
-            database: { header: before.header },
-          };
-        } finally {
-          await link(null, null, null, null);
+        await page.goto(`/txn/purchase?coBook=${BOOK}&vchNo=${vchNo}`);
+        const banner = page.getByTestId('purchase-sale-link');
+        await banner
+          .getByText(`Linked to sale SL/${missing}, which does not exist`, { exact: true })
+          .waitFor();
+        assert.equal(
+          await page.getByRole('button', { name: 'Update Purchase', exact: true }).isDisabled(),
+          true,
+        );
+        const open = () =>
+          banner.getByRole('button', { name: 'Delete this stray purchase…', exact: true }).click();
+        await open();
+        const dialog = page.getByRole('dialog', { name: 'Delete stray purchase', exact: true });
+        await dialog.waitFor();
+        assert((await dialog.innerText()).includes(`${BOOK}/${vchNo}`));
+        assert(
+          (await dialog.innerText()).includes(
+            Number(before.header[0].tot).toLocaleString('en-IN', {
+              minimumFractionDigits: 2,
+              maximumFractionDigits: 2,
+            }),
+          ),
+        );
+        await dialog.getByRole('button', { name: 'Cancel', exact: true }).click();
+        assert.deepEqual(await purchaseWriteSet(ctx, vchNo), before);
+        await open();
+        await ctx.shot(page, 'stray-purchase-confirmation');
+        const [deleted] = await Promise.all([
+          page.waitForResponse(
+            (r) => r.request().method() === 'POST' && r.url().includes('/delete-stray-link'),
+          ),
+          dialog.getByRole('button', { name: 'Confirm delete', exact: true }).click(),
+        ]);
+        assert.equal(deleted.status(), 200, await deleted.text());
+        await banner.waitFor({ state: 'detached' });
+        for (const table of [
+          'PR_DATA',
+          'PR_DETL',
+          'PR_IDTL',
+          'BAR_DATA',
+          'BAR_DETL',
+          'BAR_IDTL',
+          'SL_PR_DETL',
+          'ITM_LOT_DETL',
+          'MAIN_STOCK',
+          'AC_DATA',
+          'TAX_DATA',
+          'BILL_OS_DATA',
+          'ROJ_MEL_DATA',
+          'DM_DATA',
+          'LOT_DETL',
+          'REMARK_DATA',
+        ]) {
+          const [{ n }] = await ctx.rows(
+            `SELECT count(*)::int n FROM "${table}" WHERE tenant_id=$1 AND "CO_BOOK"='${BOOK}' AND "VCH_NO"=$2`,
+            vchNo,
+          );
+          assert.equal(n, 0, table);
         }
+        const [{ n: temp }] = await ctx.rows(
+          `SELECT count(*)::int n FROM "TEMP_BOOK_DATA" WHERE tenant_id=$1 AND "CO_BOOK"='${BOOK}' AND "VCH_NO"=$2`,
+          hidden,
+        );
+        assert.equal(temp, 0);
+        const [{ n: audit }] = await ctx.rows(
+          `SELECT count(*)::int n FROM "DELETE_DATA" WHERE tenant_id=$1 AND "CO_BOOK"='${BOOK}' AND "VCH_NO"=$2`,
+          vchNo,
+        );
+        assert.equal(audit, 2);
+        assert.deepEqual(await sentinelSnapshot(ctx.owner), sentinel);
+        return {
+          observation: `stray purchase ${vchNo} cancelled unchanged, then fully deleted`,
+          expected: 'confirmation then complete reversal',
+          database: { audit, temp },
+          downstream: { remaining: 0 },
+        };
       },
     ),
 
