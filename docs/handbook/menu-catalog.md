@@ -23,17 +23,17 @@ Capabilities: C create, R reopen a saved voucher, E edit it, D delete it, P prin
 | Company | 16 | 0 | 14 | 1 | 1 | 0 | 14 | 1 | 1 |
 | Master | 23 | 0 | 23 | 0 | 0 | 0 | 14 | 9 | 0 |
 | Transaction | 24 | 0 | 24 | 0 | 0 | 0 | 13 | 11 | 0 |
-| ExtraTran | 21 | 0 | 20 | 0 | 0 | 1 | 10 | 11 | 0 |
-| Karigar | 15 | 0 | 10 | 4 | 0 | 1 | 9 | 6 | 0 |
-| Dhiran | 12 | 0 | 5 | 5 | 0 | 2 | 0 | 12 | 0 |
+| ExtraTran | 21 | 0 | 21 | 0 | 0 | 0 | 10 | 11 | 0 |
+| Karigar | 15 | 0 | 11 | 4 | 0 | 0 | 9 | 6 | 0 |
+| Dhiran | 12 | 0 | 6 | 5 | 0 | 1 | 0 | 12 | 0 |
 | Scheme | 11 | 0 | 6 | 5 | 0 | 0 | 9 | 2 | 0 |
 | Mfg | 4 | 0 | 1 | 3 | 0 | 0 | 0 | 4 | 0 |
 | Report | 26 | 0 | 0 | 26 | 0 | 0 | 21 | 5 | 0 |
 | More | 12 | 0 | 0 | 12 | 0 | 0 | 12 | 0 | 0 |
 | Analysis | 8 | 0 | 0 | 8 | 0 | 0 | 8 | 0 | 0 |
 | Other | 24 | 0 | 23 | 0 | 1 | 0 | 21 | 3 | 0 |
-| Crm | 2 | 0 | 0 | 1 | 0 | 1 | 0 | 2 | 0 |
-| **All** | **198** | **0** | **126** | **65** | **2** | **5** | **131** | **66** | **1** |
+| Crm | 2 | 0 | 1 | 1 | 0 | 0 | 0 | 2 | 0 |
+| **All** | **198** | **0** | **130** | **65** | **2** | **1** | **131** | **66** | **1** |
 
 ## Completion-register corrections
 
@@ -67,7 +67,7 @@ None. Slice N85 (gap G71) corrected the register to this catalog; `pnpm register
 - **Looks:** Search grid beside group code, name and main-group fields; standard Print/Save/Cancel/Delete/Exit bar.
 - **Writes:** AC_GROUP, BOOK_IDTL.
 - **Web:** `/masters/ac-groups`; `GET /masters/:name`, `POST /masters/:name`, `PUT /masters/:name`, `DELETE /masters/:name`. Can: create, reopen, edit, delete, list.
-- **Remaining:** Generic CRUD only; desktop conditional fields, reference guards, Print, F1 help and keyboard order are unproven against the desktop.
+- **Remaining:** Generic CRUD only; desktop conditional fields, reference guards, Print, F1 help and keyboard order are unproven against the desktop. Open: no matching browser feature module in web/apps/web/test/features/modules/.
 - **Owners:** X10, N60, G62, N77.
 - **Evidence:** [KB_master.md:134-145](../../project-memory/video-research/_kb/KB_master.md#L134-L145).
 
@@ -110,8 +110,8 @@ None. Slice N85 (gap G71) corrected the register to this catalog; `pnpm register
 - **Does:** Creates the company identity and seeds its year, masters, settings and operating parameters.
 - **Looks:** Search list plus address, country/state/city, work type, metal type, tax and bank fields.
 - **Writes:** CO_MAST, CO_SET, CO_SET_NEW, AC_GROUP, BOOK_DATA, LOCT_MAST, MENU_DATA.
-- **Web:** `/masters/companies`, `/admin/provision`; `GET /context/companies`, `GET /masters/:name`, `POST /masters/:name`, `PUT /masters/:name`, `DELETE /masters/:name`, `POST /admin/companies/:coCode/provision`. Can: create, reopen, edit, delete, list.
-- **Remaining:** Milestone 1 blocks generic CO_MAST create/update/delete/CSV business mutations before the master transaction; authenticated rejection audits remain expected. It provides a dedicated tenant-scoped read-only Company list with executable admin, restricted-user and cross-tenant scope evidence. The rich identity form, dedicated versioned writer, first-year and 17-family provisioning, Company.RPT print, and an accepted safe-delete decision remain.
+- **Web:** `/masters/companies`, `/admin/provision`; `GET /context/companies`, `GET /masters/:name`, `POST /masters/:name`, `PUT /masters/:name`, `DELETE /masters/:name`, `POST /admin/companies/:coCode/provision`, `GET /company-identity/states`, `GET /company-identity/:code`, `POST /company-identity`, `PUT /company-identity`, `DELETE /company-identity/:code`. Can: create, reopen, edit, delete, list.
+- **Remaining:** Open: Company.RPT layout, complete first-year/17-family provisioning and clone equivalence, downstream policy effects and desktop-runtime comparison remain unverified; companyMaster contains blocked cases. Generic CO_MAST business writes remain blocked. Dedicated company identity create/edit with version checks and guarded soft deletion now exist. Closed: read-only identity surface, absent rich identity form and dedicated versioned writer; soft-delete implementation exists but does not itself establish owner acceptance. Evidence: web/apps/web/app/(app)/masters/companies/page.tsx, web/apps/api/src/routes/companyIdentity.ts, web/apps/api/src/modules/masters/companyIdentity.ts.
 - **Owners:** G38, G39, N58, X10, N77.
 - **Evidence:** [KB_master.md:45-75](../../project-memory/video-research/_kb/KB_master.md#L45-L75), [MS_YEAR.cs:1504-1595](../../unified/src/csharp/DataCareNext/MS_YEAR.cs#L1504-L1595), [company-master.md](../../docs/handbook/web/company-master.md).
 
@@ -131,7 +131,7 @@ None. Slice N85 (gap G71) corrected the register to this catalog; `pnpm register
 - **Does:** Rebuilds or repairs derived ledger, stock, schema, image, scheme and manufacturing data.
 - **Looks:** Six operator actions in desktop tab order: Account, Stock, Field Update, Approval Adj, Image Data and Old Field; each opens an audited preview and only Approval Adj can apply in PR-1.
 - **Writes:** APR_DETL, SL_DETL, RATE_CUT_ISU, BAR_DETL, AC_DATA, MAIN_STOCK, BOOK_DATA, CASH_DATA, BANK_RECONCILE, TAG_IMAGE_DATA.
-- **Web:** `/utilities/data-refresh`, `/utilities/data-repair`; `POST /utilities/data-refresh`, `GET /utilities/data-repair/operations`, `POST /utilities/data-repair/:id/preview`, `POST /utilities/data-repair/:id/apply`. Can: create, list.
+- **Web:** `/utilities/data-refresh`, `/utilities/data-repair`; `POST /utilities/data-refresh`, `GET /utilities/data-repair/operations`, `POST /utilities/data-repair/:id/preview`, `POST /utilities/data-repair/:id/apply`, `POST /utilities/data-refresh/:id/preview`, `POST /utilities/data-refresh/:id/apply`. Can: create, list.
 - **Remaining:** Approval Adj has full preview/apply, exact two-table write-set, audit, rollback and replay proof. Account and Stock are explicit preview-only classifications until their complete builder graphs are proved; Field Update and Old Field await PR-2 classification; Image Data is a verified no-op (D-REF-3 class b: the desktop action is schema work the migrations own); the six actions need the caption's Print right (G225) through /utilities/data-refresh/*; the full Account and Stock rebuilds, the Old Field classification and desktop-runtime comparison remain open.
 - **Owners:** X27, P11-01, X06, N26, G225, N212.
 - **Evidence:** [MS_UPDATE.cs:2042-3047](../../unified/src/csharp/DataCareNext/MS_UPDATE.cs#L2042-L3047), [MS_UPDATE.cs:8809-9038](../../unified/src/csharp/DataCareNext/MS_UPDATE.cs#L8809-L9038), [data-refresh.md](../../docs/handbook/web/data-refresh.md).
@@ -143,7 +143,7 @@ None. Slice N85 (gap G71) corrected the register to this catalog; `pnpm register
 - **Looks:** Company-like searchable form with address, tax and bank fields.
 - **Writes:** LOCT_MAST, BOOK_DATA, BOOK_DETL, TABLE_MAST, MENU_DATA.
 - **Web:** `/masters/locations`; `GET /masters/:name`, `POST /masters/:name`, `PUT /masters/:name`, `DELETE /masters/:name`. Can: create, reopen, edit, delete, list.
-- **Remaining:** Book cloning for a new location, the location 00 convention, dependent-delete guards and Print remain.
+- **Remaining:** Book cloning for a new location, the location 00 convention, dependent-delete guards and Print remain. Open: no matching browser feature module in web/apps/web/test/features/modules/.
 - **Owners:** G38, G39, G41, N58, N59, X10.
 - **Evidence:** [MS_LOCT.cs:3612-3614](../../unified/src/csharp/DataCareNext/MS_LOCT.cs#L3612-L3614).
 
@@ -163,8 +163,8 @@ None. Slice N85 (gap G71) corrected the register to this catalog; `pnpm register
 - **Does:** Configures menu tiles: sequence, captions, short names and visibility.
 - **Looks:** Editable six-column tile grid; the web shows a read-only tile table.
 - **Writes:** CO_SET_NEW, TILE_DATA.
-- **Web:** `/utilities/window-tiles`; `GET /utilities/window-tiles`, `GET /utilities/window-tiles/:tileName`. Can: reopen, list.
-- **Remaining:** Web cannot create, reorder, rename, hide or delete tiles; rights presentation and layout remain.
+- **Web:** `/utilities/window-tiles`; `GET /utilities/window-tiles`, `GET /utilities/window-tiles/:tileName`, `POST /utilities/window-tiles`. Can: reopen, list.
+- **Remaining:** Web cannot create, reorder, rename, hide or delete tiles; rights presentation and layout remain. Open: no matching browser feature module in web/apps/web/test/features/modules/.
 - **Owners:** X29, X10, N77.
 - **Evidence:** [page.tsx:25-109](../../web/apps/web/app/%28app%29/utilities/window-tiles/page.tsx#L25-L109).
 
@@ -197,7 +197,7 @@ None. Slice N85 (gap G71) corrected the register to this catalog; `pnpm register
 - **Looks:** Grid of trade name/type, item type and linked sale/purchase/open/close accounts.
 - **Writes:** BAL_GR.
 - **Web:** `/masters/trade`; `GET /masters/:name`, `POST /masters/:name`, `PUT /masters/:name`, `DELETE /masters/:name`. Can: create, reopen, edit, delete, list.
-- **Remaining:** Account relationships, closing-stock consumption, Print and statement reconciliation are unproven.
+- **Remaining:** Account relationships, closing-stock consumption, Print and statement reconciliation are unproven. Open: no matching browser feature module in web/apps/web/test/features/modules/.
 - **Owners:** G44, N60, X10, X26, N77.
 - **Evidence:** [module-map.json:1132-1142](../../project-memory/catalogs/module-map.json#L1132-L1142).
 
@@ -279,7 +279,7 @@ None. Slice N85 (gap G71) corrected the register to this catalog; `pnpm register
 - **Looks:** Group Code with the group name, type, trade type and HSN code over the Sr. / Pr Code / Pr Name / MinStk / Y/N grid; Print, Save, Cancel, Delete and Exit along the bottom.
 - **Writes:** ITEM_MAST, PRODUCT_MAST, GROUP_MAST.
 - **Web:** `/masters/auto-item`; `GET /masters/auto-item`, `GET /masters/auto-item/groups`, `POST /masters/auto-item`. Can: create.
-- **Remaining:** The web schema has no TAX_FREE_ITEM or EMP_COM_PRC column; desktop-runtime comparison remains.
+- **Remaining:** Open: desktop-runtime comparison remains. The previously listed missing schema columns are now present and written with desktop defaults. Closed: absent TAX_FREE_ITEM and EMP_COM_PRC columns. Evidence: web/packages/db/prisma/schema.prisma, web/apps/api/src/modules/masters/autoItem.ts.
 - **Owners:** G55, N69, X10, G225, N212, G232, N219.
 - **Evidence:** [MS_AUTO_ITEM.cs:1640-3493](../../unified/src/csharp/DataCareNext/MS_AUTO_ITEM.cs#L1640-L3493).
 
@@ -290,7 +290,7 @@ None. Slice N85 (gap G71) corrected the register to this catalog; `pnpm register
 - **Looks:** Simple searchable code/name master.
 - **Writes:** TABLE_MAST.
 - **Web:** `/masters/counters`; `GET /masters/:name`, `POST /masters/:name`, `PUT /masters/:name`, `DELETE /masters/:name`. Can: create, reopen, edit, delete, list.
-- **Remaining:** Branch and default-counter rules, referenced deletion, Print and provisioning equality remain.
+- **Remaining:** Branch and default-counter rules, referenced deletion, Print and provisioning equality remain. Open: no matching browser feature module in web/apps/web/test/features/modules/.
 - **Owners:** X10, G38, N58, N77.
 - **Evidence:** [KB_master.md:194-211](../../project-memory/video-research/_kb/KB_master.md#L194-L211).
 
@@ -301,7 +301,7 @@ None. Slice N85 (gap G71) corrected the register to this catalog; `pnpm register
 - **Looks:** Book/product header, parent design grid, component sub-grid and image panel.
 - **Writes:** DESIGN_DETL, DESIGN_IDTL, TAG_IMAGE_DATA.
 - **Web:** `/masters/design-book`; `GET /masters/design-book`, `POST /masters/design-book`, `PUT /masters/design-book`, `DELETE /masters/design-book`, `GET /masters/design-book/image`. Can: create, reopen, edit, delete, list.
-- **Remaining:** Source-triggered calculations, configured grid defaults, downstream specification and image transfer, legacy migration and Print remain.
+- **Remaining:** Source-triggered calculations, configured grid defaults, downstream specification and image transfer, legacy migration and Print remain. Open: no matching browser feature module in web/apps/web/test/features/modules/.
 - **Owners:** X11, G46, N63, N77, X25, G71, N85.
 - **Evidence:** [page.tsx:406-517](../../web/apps/web/app/%28app%29/masters/design-book/page.tsx#L406-L517).
 
@@ -312,7 +312,7 @@ None. Slice N85 (gap G71) corrected the register to this catalog; `pnpm register
 - **Looks:** Search grid with code, name, sale/purchase rates and cut/clarity controls.
 - **Writes:** DM_MAST.
 - **Web:** `/masters/diamonds`; `GET /masters/:name`, `POST /masters/:name`, `PUT /masters/:name`, `DELETE /masters/:name`. Can: create, reopen, edit, delete, list.
-- **Remaining:** Grading and rate conditionals, reference guards, Print and help/keyboard behaviour remain.
+- **Remaining:** Grading and rate conditionals, reference guards, Print and help/keyboard behaviour remain. Open: no matching browser feature module in web/apps/web/test/features/modules/.
 - **Owners:** X10, G38, N58, N77.
 - **Evidence:** [MS_DM.cs:1579-1815](../../unified/src/csharp/DataCareNext/MS_DM.cs#L1579-L1815).
 
@@ -323,7 +323,7 @@ None. Slice N85 (gap G71) corrected the register to this catalog; `pnpm register
 - **Looks:** Item header; size, weight, ghat, labour and rate grid with a saved summary.
 - **Writes:** DM_SIZE.
 - **Web:** `/masters/diamond-sizes`; `GET /masters/diamond-sizes`, `POST /masters/diamond-sizes`, `DELETE /masters/diamond-sizes`. Can: create, reopen, edit, delete, list.
-- **Remaining:** Print, exact keyboard/focus order and conditional validations remain; no side-by-side grid certification.
+- **Remaining:** Print, exact keyboard/focus order and conditional validations remain; no side-by-side grid certification. Open: no matching browser feature module in web/apps/web/test/features/modules/.
 - **Owners:** X10, N77, X25.
 - **Evidence:** [page.tsx:56-145](../../web/apps/web/app/%28app%29/masters/diamond-sizes/page.tsx#L56-L145).
 
@@ -378,7 +378,7 @@ None. Slice N85 (gap G71) corrected the register to this catalog; `pnpm register
 - **Looks:** Old-to-new item matrix by group and product; the web uses a simple touch master table.
 - **Writes:** ITEM_MAST, TOUCH_MAST.
 - **Web:** `/masters/touch`; `GET /masters/:name`, `POST /masters/:name`, `PUT /masters/:name`, `DELETE /masters/:name`. Can: create, reopen, edit, delete, list.
-- **Remaining:** Generic TOUCH_MAST CRUD lacks the bulk matrix, propagation, old/new semantics and Print.
+- **Remaining:** Generic TOUCH_MAST CRUD lacks the bulk matrix, propagation, old/new semantics and Print. Open: no matching browser feature module in web/apps/web/test/features/modules/.
 - **Owners:** X10, X08, N77.
 - **Evidence:** [MS_AUTO_ITEM.cs:2450-2660](../../unified/src/csharp/DataCareNext/MS_AUTO_ITEM.cs#L2450-L2660).
 
@@ -389,7 +389,7 @@ None. Slice N85 (gap G71) corrected the register to this catalog; `pnpm register
 - **Looks:** Item/design header, ten-column weight and labour grid and a saved summary.
 - **Writes:** ITM_WT_MAST.
 - **Web:** `/masters/item-stock-limits`; `GET /masters/item-stock-limits`, `POST /masters/item-stock-limits`, `DELETE /masters/item-stock-limits`. Can: create, reopen, edit, delete, list.
-- **Remaining:** Print, focus/keyboard rules and key semantics need side-by-side validation.
+- **Remaining:** Print, focus/keyboard rules and key semantics need side-by-side validation. Open: no matching browser feature module in web/apps/web/test/features/modules/.
 - **Owners:** X10, N77, X25.
 - **Evidence:** [page.tsx:66-172](../../web/apps/web/app/%28app%29/masters/item-stock-limits/page.tsx#L66-L172).
 
@@ -400,7 +400,7 @@ None. Slice N85 (gap G71) corrected the register to this catalog; `pnpm register
 - **Looks:** Group filter with an old-to-new item grid plus a weight-slab editor.
 - **Writes:** ITEM_MAST, BAR_DETL, BAR_IDTL, TOUCH_MAST.
 - **Web:** `/masters/labour-update`; `GET /labour-update`, `POST /labour-update`, `GET /labour-slabs`, `POST /labour-slabs`. Can: reopen, edit, list.
-- **Remaining:** The update changes four item columns only; unsold-tag propagation, labour-master mode, preview/audit and Print remain.
+- **Remaining:** The update changes four item columns only; unsold-tag propagation, labour-master mode, preview/audit and Print remain. Open: no matching browser feature module in web/apps/web/test/features/modules/.
 - **Owners:** G55, N69, X10.
 - **Evidence:** [MS_AUTO_ITEM.cs:2450-2660](../../unified/src/csharp/DataCareNext/MS_AUTO_ITEM.cs#L2450-L2660).
 
@@ -411,7 +411,7 @@ None. Slice N85 (gap G71) corrected the register to this catalog; `pnpm register
 - **Looks:** The Labour old-to-new matrix with discount columns.
 - **Writes:** ITEM_MAST, BAR_DETL, BAR_IDTL.
 - **Web:** `/masters/labour-update`; `GET /labour-update`, `POST /labour-update`. Can: reopen, edit, list.
-- **Remaining:** No distinct Labour Disc mode or tag propagation; preview/audit and Print remain.
+- **Remaining:** No distinct Labour Disc mode or tag propagation; preview/audit and Print remain. Open: no matching browser feature module in web/apps/web/test/features/modules/.
 - **Owners:** G55, N69, X10.
 - **Evidence:** [MS_AUTO_ITEM.cs:2450-2660](../../unified/src/csharp/DataCareNext/MS_AUTO_ITEM.cs#L2450-L2660).
 
@@ -422,7 +422,7 @@ None. Slice N85 (gap G71) corrected the register to this catalog; `pnpm register
 - **Looks:** Search grid with labour code/value, cut, clarity, product and group.
 - **Writes:** LBR_MAST, BAR_DETL.
 - **Web:** `/masters/labour`; `GET /masters/:name`, `POST /masters/:name`, `PUT /masters/:name`, `DELETE /masters/:name`. Can: create, reopen, edit, delete, list.
-- **Remaining:** Product/group semantics, tag propagation, reference guards and Print remain.
+- **Remaining:** Product/group semantics, tag propagation, reference guards and Print remain. Open: no matching browser feature module in web/apps/web/test/features/modules/.
 - **Owners:** X10, G38, N58, N77.
 - **Evidence:** [MS_LBR_TYPE.cs:1473-1718](../../unified/src/csharp/DataCareNext/MS_LBR_TYPE.cs#L1473-L1718).
 
@@ -433,7 +433,7 @@ None. Slice N85 (gap G71) corrected the register to this catalog; `pnpm register
 - **Looks:** Voucher/date, party/item/lot grid, weights and label-print controls.
 - **Writes:** ITM_LOT_DETL, MAIN_STOCK, BAR_DATA, TAG_PRINT_DATA.
 - **Web:** `/txn/item-lot`; `POST /stock/item-lot`, `GET /stock/item-lot/:vchNo`, `PUT /stock/item-lot/:vchNo`, `DELETE /stock/item-lot/:vchNo`. Can: create, reopen, edit, delete.
-- **Remaining:** Label print, versions, recent list, lot lineage and hidden fields remain.
+- **Remaining:** Label print, versions, recent list, lot lineage and hidden fields remain. Open: no matching browser feature module in web/apps/web/test/features/modules/.
 - **Owners:** X18, G27, N51, X25, N77, G71, N85.
 - **Evidence:** [TR_ITM_LOT.md:1-19](../../project-memory/catalogs/forms/TR_ITM_LOT.md#L1-L19).
 
@@ -466,7 +466,7 @@ None. Slice N85 (gap G71) corrected the register to this catalog; `pnpm register
 - **Looks:** Point name/type/amount/minimum/status fields plus an eligible-account grid.
 - **Writes:** POINT_MAST, POINT_MEMB.
 - **Web:** `/masters/points`; `GET /masters/:name`, `POST /masters/:name`, `PUT /masters/:name`, `DELETE /masters/:name`. Can: create, reopen, edit, delete, list.
-- **Remaining:** Eligible-account child rows, concurrent redemption safety and Print remain.
+- **Remaining:** Eligible-account child rows, concurrent redemption safety and Print remain. Open: no matching browser feature module in web/apps/web/test/features/modules/.
 - **Owners:** X10, G31, N53, N77.
 - **Evidence:** [MS_POINT.cs:1275-2353](../../unified/src/csharp/DataCareNext/MS_POINT.cs#L1275-L2353).
 
@@ -488,7 +488,7 @@ None. Slice N85 (gap G71) corrected the register to this catalog; `pnpm register
 - **Looks:** Search grid beside a single Style Name field.
 - **Writes:** MODEL_MAST.
 - **Web:** `/masters/models`; `GET /masters/:name`, `POST /masters/:name`, `PUT /masters/:name`, `DELETE /masters/:name`. Can: create, reopen, edit, delete, list.
-- **Remaining:** The menu points at column settings instead of MODEL_MAST; after the correction, Print, help and layout remain.
+- **Remaining:** The menu points at column settings instead of MODEL_MAST; after the correction, Print, help and layout remain. Open: no matching browser feature module in web/apps/web/test/features/modules/.
 - **Owners:** G71, N85, X10, X29, N77.
 - **Evidence:** [MS_STYLE.cs:1103-1110](../../unified/src/csharp/DataCareNext/MS_STYLE.cs#L1103-L1110).
 
@@ -498,7 +498,7 @@ None. Slice N85 (gap G71) corrected the register to this catalog; `pnpm register
 - **Does:** Creates barcoded opening tags with components, costs, images and counter identity.
 - **Looks:** Voucher/date/print header; rich tag grid, component sub-grid, totals, image and label controls.
 - **Writes:** BAR_DETL, BAR_IDTL, MAIN_STOCK, DM_DATA, LOT_DETL, TAG_IMAGE_DATA, TAG_PRINT_DATA, SRNO_MAST.
-- **Web:** `/txn/tag-opening`; `POST /stock/tag-opening`, `GET /stock/tag-opening/:vchNo`, `PUT /stock/tag-opening/:vchNo`, `DELETE /stock/tag-opening/:vchNo`. Can: create, reopen, edit, delete.
+- **Web:** `/txn/tag-opening`; `POST /stock/tag-opening`, `GET /stock/tag-opening/:vchNo`, `PUT /stock/tag-opening/:vchNo`, `DELETE /stock/tag-opening/:vchNo`, `POST /stock/tag-opening/:vchNo/print`. Can: create, reopen, edit, delete.
 - **Remaining:** Rights, two-session, retry, rollback and counter-mandatory cases are pending; tag label print is missing, and the karigar block (G217) is not yet filled from orders, manufacturing or a lot, nor hidden by MsUserKrTouchHide; the COL_MAST grid layout remains.
 - **Owners:** X18, G46, N63, G54, N68, N62, N77, G71, N85, G214, G215, G216, N203, G217, N204.
 - **Evidence:** [KB_master.md:187-217](../../project-memory/video-research/_kb/KB_master.md#L187-L217).
@@ -549,7 +549,7 @@ None. Slice N85 (gap G71) corrected the register to this catalog; `pnpm register
 - **Does:** Records one or many bank disbursements to parties or expense accounts, with cheque identity and kasar.
 - **Looks:** Voucher/date header; account, cheque, amount and kasar grid; employee/description footer; cheque print.
 - **Writes:** PAY_DATA, PAY_DETL, AC_DATA, ROJ_MEL_DATA, REMARK_DATA, TEMP_BOOK_DATA.
-- **Web:** `/txn/payment?mode=BANK`; `POST /payments`, `POST /payments/multi`, `GET /payments/:vchNo`, `DELETE /payments/:vchNo`, `GET /finance/payment-voucher`. Can: create, print.
+- **Web:** `/txn/payment?mode=BANK`; `POST /payments`, `POST /payments/multi`, `GET /payments/:vchNo`, `DELETE /payments/:vchNo`, `GET /finance/payment-voucher`, `PUT /payments/:vchNo`, `DELETE /payments/multi/:vchNo`. Can: create, print.
 - **Remaining:** Browser cases prove the screen opens in bank mode and that a Bank Payment with kasar posts 07/08 amount and 09/10 kasar legs (N232, G244; it used to be refused on the ledger key). Reopen, edit, delete and reprint are proven only on Cash Received, which shares the form. The Charges column (BANK_CHARGES, legs 11/12), Clearing Dt, versions, copies and a desktop-runtime comparison remain. The N52 Idempotency-Key guard covers the shared routes; no bank-mode replay case yet.
 - **Owners:** G50, N64, X16, N51, G29, N52, N74, G244, N232.
 - **Evidence:** [KB_transaction.md:176-200](../../project-memory/video-research/_kb/KB_transaction.md#L176-L200).
@@ -560,7 +560,7 @@ None. Slice N85 (gap G71) corrected the register to this catalog; `pnpm register
 - **Does:** Records bank, cheque, card and UPI receipts and credits the paying party.
 - **Looks:** Voucher/date header; account, cheque, amount and kasar grid; bank/employee footer and print dialog.
 - **Writes:** CASH_DATA, AC_DATA, ROJ_MEL_DATA, CARD_DATA, UPI_DATA, REMARK_DATA, TEMP_BOOK_DATA.
-- **Web:** `/txn/receipt?mode=BANK`; `POST /receipts`, `POST /receipts/multi`, `GET /receipts/:vchNo`, `DELETE /receipts/:vchNo`, `GET /finance/receipt-voucher`. Can: create, print.
+- **Web:** `/txn/receipt?mode=BANK`; `POST /receipts`, `POST /receipts/multi`, `GET /receipts/:vchNo`, `DELETE /receipts/:vchNo`, `GET /finance/receipt-voucher`, `PUT /receipts/:vchNo`, `DELETE /receipts/multi/:vchNo`. Can: create, print.
 - **Remaining:** Browser cases prove bank and cheque receipts are created and that the screen opens in bank mode. Reopen, edit, delete and reprint are proven only on Cash Received, which shares the form. The Charges column (BANK_CHARGES, legs 05/06), Clearing Dt, per-bank slots, card and UPI modes (no TR_CASH counterpart; owner call, G244), copies and a desktop-runtime comparison remain. The N52 Idempotency-Key guard covers the shared routes; no bank-mode replay case yet.
 - **Owners:** G50, N64, X16, N51, G29, N52, N74, G244, N232.
 - **Evidence:** [KB_transaction.md:176-200](../../project-memory/video-research/_kb/KB_transaction.md#L176-L200).
@@ -572,7 +572,7 @@ None. Slice N85 (gap G71) corrected the register to this catalog; `pnpm register
 - **Looks:** Booking grid; the web shows book, party, amount type, fine weight, rate, advance and totals.
 - **Writes:** BUL_DATA, AC_DATA, ROJ_MEL_DATA, REMARK_DATA, TEMP_BOOK_DATA.
 - **Web:** `/txn/bullion`; `POST /bullion/booking`, `DELETE /bullion/:vchNo`. Can: create.
-- **Remaining:** Three booking families share one unfiltered create-only page; read, edit, print, premium and rate basis, allocation and configured books remain.
+- **Remaining:** Three booking families share one unfiltered create-only page; read, edit, print, premium and rate basis, allocation and configured books remain. Open: no matching browser feature module in web/apps/web/test/features/modules/.
 - **Owners:** G43, N62, G54, N68, X16, N59.
 - **Evidence:** [module-map.json:2282-2298](../../project-memory/catalogs/module-map.json#L2282-L2298).
 
@@ -583,7 +583,7 @@ None. Slice N85 (gap G71) corrected the register to this catalog; `pnpm register
 - **Looks:** Large bullion header with allocation, rate, tax and settlement grids.
 - **Writes:** RATE_CUT_DATA, RATE_CUT_ISU, RATE_CUT_REC, RATE_CUT_ISU_REC, BUL_DATA, MAIN_STOCK, AC_DATA, ROJ_MEL_DATA, TAX_DATA.
 - **Web:** `/txn/bullion-sale`; `POST /bullion-sales`, `GET /bullion-sales/:vchNo`, `PUT /bullion-sales/:vchNo`, `DELETE /bullion-sales/:vchNo`. Can: create.
-- **Remaining:** Lifecycle APIs exist but the page only creates; lossless reopen, allocation branches, configured books and accounts and documents remain.
+- **Remaining:** Open: lossless reopen, allocation branches, configured books/accounts and documents need verification; no dedicated browser feature module. Closed: create-only UI; load/update/delete controls exist. Evidence: web/apps/web/app/(app)/txn/bullion-sale/page.tsx.
 - **Owners:** G53, N67, X13, X16, N59, N74.
 - **Evidence:** [module-map.json:2299-2346](../../project-memory/catalogs/module-map.json#L2299-L2346).
 
@@ -593,7 +593,7 @@ None. Slice N85 (gap G71) corrected the register to this catalog; `pnpm register
 - **Does:** Records one or many cash payments to parties or expense accounts, with optional kasar.
 - **Looks:** Voucher/date header; multi-line account, amount and kasar grid; description/employee footer; print dialog.
 - **Writes:** PAY_DATA, PAY_DETL, AC_DATA, ROJ_MEL_DATA, REMARK_DATA, TEMP_BOOK_DATA.
-- **Web:** `/txn/payment`; `POST /payments`, `POST /payments/multi`, `GET /payments/:vchNo`, `DELETE /payments/:vchNo`. Can: create, print.
+- **Web:** `/txn/payment`; `POST /payments`, `POST /payments/multi`, `GET /payments/:vchNo`, `DELETE /payments/:vchNo`, `PUT /payments/:vchNo`, `DELETE /payments/multi/:vchNo`. Can: create, print.
 - **Remaining:** Browser cases prove a payment is created with the right ledger legs and that a replayed save request answers the first payment and posts nothing (N52). Reopen, edit, delete and reprint are proven on Cash Received, which shares the form, and have no case of their own on the Payment screen. Versions, multi-line fields, copies and account roles remain.
 - **Owners:** G50, N64, X16, N51, G29, N52, N74.
 - **Evidence:** [KB_transaction.md:112-139](../../project-memory/video-research/_kb/KB_transaction.md#L112-L139).
@@ -604,7 +604,7 @@ None. Slice N85 (gap G71) corrected the register to this catalog; `pnpm register
 - **Does:** Records one or many cash receipts, credits parties and enforces the cash-limit policy.
 - **Looks:** Voucher/date header; multi-line account, amount and kasar grid; description/employee footer; print dialog.
 - **Writes:** CASH_DATA, AC_DATA, ROJ_MEL_DATA, REMARK_DATA, TEMP_BOOK_DATA.
-- **Web:** `/txn/receipt`; `POST /receipts`, `POST /receipts/multi`, `GET /receipts/:vchNo`, `DELETE /receipts/:vchNo`. Can: create, print.
+- **Web:** `/txn/receipt`; `POST /receipts`, `POST /receipts/multi`, `GET /receipts/:vchNo`, `DELETE /receipts/:vchNo`, `PUT /receipts/:vchNo`, `DELETE /receipts/multi/:vchNo`. Can: create, print.
 - **Remaining:** Browser cases (cash-bank module, 22 of 23 applicable pass, 1 blocked) prove create with kasar, the multi-line grid's TR_CASH totals row and one CASH_DATA row per line (N232), reopen from the recent list and Vch No, edit, unchanged save, delete with audit, reprint, the cash-limit and out-of-year refusals, a double click saving one voucher, a replayed save request answering the first voucher (N52 Idempotency-Key) and a rolled-back ledger fault. Still open: card and UPI modes have no TR_CASH counterpart (T06 blocked for an owner call, G244), copies and a desktop-runtime comparison.
 - **Owners:** G50, N64, G29, N52, X16, N51, N74, G244, N232.
 - **Evidence:** [KB_transaction.md:112-139](../../project-memory/video-research/_kb/KB_transaction.md#L112-L139).
@@ -626,8 +626,8 @@ None. Slice N85 (gap G71) corrected the register to this catalog; `pnpm register
 - **Does:** Creates electronic credit notes that reverse financial and tax effects and manage the IRN state.
 - **Looks:** Date/party/reference/ledger header, item-tax grid, totals, print copies and IRN actions.
 - **Writes:** SL_DATA, SL_DETL, SL_IDTL, AC_DATA, ROJ_MEL_DATA, MAIN_STOCK, TAX_DATA, E_DATA.
-- **Web:** `/txn/e-crnt-note`; `GET /e-credit-notes`, `POST /e-credit-notes`, `GET /e-credit-notes/:vchNo`, `PUT /e-credit-notes/:vchNo`, `DELETE /e-credit-notes/:vchNo`, `GET /e-credit-notes/:vchNo/print`, `POST /e-credit-notes/:vchNo/irn/cancel`. Can: create, reopen, edit, delete, print, list.
-- **Remaining:** Tagged return, amount override, TCS/TDS branches, live provider retry/cancel, Crystal layout and a full write-set comparison remain.
+- **Web:** `/txn/e-crnt-note`; `GET /e-credit-notes`, `POST /e-credit-notes`, `GET /e-credit-notes/:vchNo`, `PUT /e-credit-notes/:vchNo`, `DELETE /e-credit-notes/:vchNo`, `GET /e-credit-notes/:vchNo/print`, `POST /e-credit-notes/:vchNo/irn/cancel`, `GET /e-credit-notes/:vchNo/entry`. Can: create, reopen, edit, delete, print, list.
+- **Remaining:** Tagged return, amount override, TCS/TDS branches, live provider retry/cancel, Crystal layout and a full write-set comparison remain. Open: no matching browser feature module in web/apps/web/test/features/modules/.
 - **Owners:** X15, N16, X28, N74, X25.
 - **Evidence:** [EBillEntry.tsx:57-72](../../web/apps/web/components/EBillEntry.tsx#L57-L72).
 
@@ -637,8 +637,8 @@ None. Slice N85 (gap G71) corrected the register to this catalog; `pnpm register
 - **Does:** Creates outward electronic invoices with GST/TCS/TDS, stock effects and the IRN lifecycle.
 - **Looks:** Date/party/reference/ledger header, item-tax grid, totals, print copies and IRN actions.
 - **Writes:** SL_DATA, SL_DETL, SL_IDTL, AC_DATA, ROJ_MEL_DATA, MAIN_STOCK, TAX_DATA, E_DATA.
-- **Web:** `/txn/e-invoice`; `GET /e-invoices`, `POST /e-invoices`, `GET /e-invoices/:vchNo`, `PUT /e-invoices/:vchNo`, `DELETE /e-invoices/:vchNo`, `GET /e-invoices/:vchNo/print`, `POST /e-invoices/:vchNo/irn`, `POST /e-invoices/:vchNo/irn/cancel`. Can: create, reopen, edit, delete, print, list.
-- **Remaining:** Tagged sale and amount-override branches, live provider state, the threshold write-set differential and EInvoice layouts remain.
+- **Web:** `/txn/e-invoice`; `GET /e-invoices`, `POST /e-invoices`, `GET /e-invoices/:vchNo`, `PUT /e-invoices/:vchNo`, `DELETE /e-invoices/:vchNo`, `GET /e-invoices/:vchNo/print`, `POST /e-invoices/:vchNo/irn`, `POST /e-invoices/:vchNo/irn/cancel`, `GET /e-invoices/:vchNo/entry`. Can: create, reopen, edit, delete, print, list.
+- **Remaining:** Tagged sale and amount-override branches, live provider state, the threshold write-set differential and EInvoice layouts remain. Open: no matching browser feature module in web/apps/web/test/features/modules/.
 - **Owners:** X15, N16, X28, N74, X25.
 - **Evidence:** [EBillEntry.tsx:181-242](../../web/apps/web/components/EBillEntry.tsx#L181-L242).
 
@@ -649,7 +649,7 @@ None. Slice N85 (gap G71) corrected the register to this catalog; `pnpm register
 - **Looks:** Purchase-style header, rich item/component grid, totals and a quotation document.
 - **Writes:** PR_DATA, PR_DETL, PR_IDTL, SL_PR_DETL, TEMP_BOOK_DATA.
 - **Web:** `/txn/purchase-quotation`; `POST /purchase-quotations`, `GET /purchase-quotations/:vchNo`, `PUT /purchase-quotations/:vchNo`, `DELETE /purchase-quotations/:vchNo`, `GET /purchase-quotations/quotation`. Can: create, reopen, edit, delete, print, list.
-- **Remaining:** An unchanged reopen loses fields; quotation-to-purchase conversion, Crystal layout and versions remain.
+- **Remaining:** An unchanged reopen loses fields; quotation-to-purchase conversion, Crystal layout and versions remain. Open: no matching browser feature module in web/apps/web/test/features/modules/.
 - **Owners:** G46, N63, X12, G16, N46, X14, N74.
 - **Evidence:** [KB_transaction.md:240-265](../../project-memory/video-research/_kb/KB_transaction.md#L240-L265).
 
@@ -660,7 +660,7 @@ None. Slice N85 (gap G71) corrected the register to this catalog; `pnpm register
 - **Looks:** Booking grid; the web shows book, party, amount type, fine weight, rate, advance and totals.
 - **Writes:** BUL_DATA, AC_DATA, ROJ_MEL_DATA, REMARK_DATA, TEMP_BOOK_DATA.
 - **Web:** `/txn/bullion`; `POST /bullion/booking`, `DELETE /bullion/:vchNo`. Can: create.
-- **Remaining:** Purchase, sale and local modes share one create-only page; read, edit, print, rate bases, allocation and reversal remain.
+- **Remaining:** Purchase, sale and local modes share one create-only page; read, edit, print, rate bases, allocation and reversal remain. Open: no matching browser feature module in web/apps/web/test/features/modules/.
 - **Owners:** G43, N62, G54, N68, X16, N59.
 - **Evidence:** [module-map.json:2282-2298](../../project-memory/catalogs/module-map.json#L2282-L2298).
 
@@ -670,7 +670,7 @@ None. Slice N85 (gap G71) corrected the register to this catalog; `pnpm register
 - **Does:** Records supplier purchases with taxes, settlement, components and stock or tag receipts.
 - **Looks:** Voucher/party header, rich item and component grids, totals/tender panel, images and document controls.
 - **Writes:** PR_DATA, PR_DETL, PR_IDTL, BAR_DETL, MAIN_STOCK, DM_DATA, AC_DATA, ROJ_MEL_DATA, TAX_DATA, SL_PR_DETL, LOT_DETL.
-- **Web:** `/txn/purchase`; `POST /purchases`, `GET /purchases/:vchNo`, `PUT /purchases/:vchNo`, `DELETE /purchases/:vchNo`, `GET /purchases/invoice`. Can: create, reopen, edit, delete, print, list.
+- **Web:** `/txn/purchase`; `POST /purchases`, `GET /purchases/:vchNo`, `PUT /purchases/:vchNo`, `DELETE /purchases/:vchNo`, `GET /purchases/invoice`, `GET /purchases/:vchNo/print`. Can: create, reopen, edit, delete, print, list.
 - **Remaining:** WP-28 (N244/G256): lossless reopen and edit (every stored value read back, unmodelled columns and the stored IT_TYPE kept), the hallmark receive columns (HM_ID_AMT, header HM_AMT half to even, HM_TAX_CODE, ITM_COLOR, EMP_CODE; hallmark ids 2-4, weights and tag band on TAG PURCHASE books), a server-side purchase book family and one entry that follows PURC_WITH_HMTAX are built. Open: the employee-code book shortcut, WITH_STOCK blank to Y, the TAG PURCHASE BAR_DATA/SRNO_MAST/TAG_SET write set, the 95-column Enter walk, the DATA_TYPE book filter, tender/source chains, Crystal variants, the Next25 columns and a browser run of record.
 - **Owners:** X12, G46, N63, G43, N62, N32, N74, G70, N84, N244, G256.
 - **Evidence:** [KB_transaction.md:240-265](../../project-memory/video-research/_kb/KB_transaction.md#L240-L265).
@@ -693,7 +693,7 @@ None. Slice N85 (gap G71) corrected the register to this catalog; `pnpm register
 - **Looks:** Party header, issue and receive grids, fine-rate/conversion band and a payment/received settlement matrix.
 - **Writes:** RATE_CUT_DATA, RATE_CUT_ISU, RATE_CUT_REC, RATE_CUT_ISU_REC, MAIN_STOCK, SL_IDTL, DM_DATA, AC_DATA, ROJ_MEL_DATA, TAX_DATA.
 - **Web:** `/txn/rate-cut`; `POST /rate-cut`, `GET /rate-cut/:vchNo`, `PUT /rate-cut/:vchNo`, `DELETE /rate-cut/:vchNo`. Can: create, reopen, edit, delete.
-- **Remaining:** Rojmel, stone and stock branches, negative-stock refusal, account roles, versions, list, Print and accountant reconciliation remain.
+- **Remaining:** Open: Rojmel/stone/stock branches, negative-stock refusal, configured account roles, versions, Print and accountant reconciliation remain unverified; no dedicated browser feature module. Closed: absent saved list; WholesaleVoucherForm renders VoucherList for the rate-cut workflow. Evidence: web/apps/web/app/(app)/txn/rate-cut/page.tsx, web/apps/web/components/WholesaleVoucherForm.tsx.
 - **Owners:** G15, N45, X16, N59, N74, G70, N84.
 - **Evidence:** [WholesaleVoucherForm.tsx:30-56](../../web/apps/web/components/WholesaleVoucherForm.tsx#L30-L56).
 
@@ -704,7 +704,7 @@ None. Slice N85 (gap G71) corrected the register to this catalog; `pnpm register
 - **Looks:** Booking grid; the web shows book, party, amount type, fine weight, rate, advance and totals.
 - **Writes:** BUL_DATA, AC_DATA, ROJ_MEL_DATA, REMARK_DATA, TEMP_BOOK_DATA.
 - **Web:** `/txn/bullion`; `POST /bullion/booking`, `DELETE /bullion/:vchNo`. Can: create.
-- **Remaining:** The booking modes share one create-only page; read, edit, delete, print, premium and rate bases, allocation and reversal remain.
+- **Remaining:** The booking modes share one create-only page; read, edit, delete, print, premium and rate bases, allocation and reversal remain. Open: no matching browser feature module in web/apps/web/test/features/modules/.
 - **Owners:** G43, N62, G54, N68, X16, N59.
 - **Evidence:** [module-map.json:2282-2298](../../project-memory/catalogs/module-map.json#L2282-L2298).
 
@@ -714,8 +714,8 @@ None. Slice N85 (gap G71) corrected the register to this catalog; `pnpm register
 - **Does:** Invoices tagged and loose jewellery with labour, tax, old-metal exchange, order/approval allocation, tenders and outstanding.
 - **Looks:** Voucher/party header, item, charge and old-metal grids, a 16-field tender panel, totals, item image and print controls.
 - **Writes:** SL_DATA, SL_DETL, SL_IDTL, SL_PR_DETL, MAIN_STOCK, DM_DATA, AC_DATA, ROJ_MEL_DATA, TAX_DATA, BILL_OS_DATA.
-- **Web:** `/txn/sales`, `/txn/hallmark-sale`; `POST /sales`, `GET /sales/:vchNo`, `PUT /sales/:vchNo`, `DELETE /sales/:vchNo`, `GET /sales/invoice`, `GET /vouchers/recent`. Can: create, reopen, edit, delete, print, list.
-- **Remaining:** Lossless reopen on the Sales Invoice screen (the Hallmark Sale screen is lossless since N40), configured companion columns and books, tender/source branches, old-metal header vs detail valuation (G83), tax codes on web-provisioned companies (G82), Crystal variants, COL_MAST layout and the printed date year remain. Percentage labour and the line precision follow CommPassTotal (N235/G247); the registration-serial branches are not modelled.
+- **Web:** `/txn/sales`, `/txn/hallmark-sale`; `POST /sales`, `GET /sales/:vchNo`, `PUT /sales/:vchNo`, `DELETE /sales/:vchNo`, `GET /sales/invoice`, `GET /vouchers/recent`, `GET /sales/:vchNo/print`. Can: create, reopen, edit, delete, print, list.
+- **Remaining:** Open: configured companion columns and books, tender/source branches, old-metal header versus detail valuation (G83), tax-code selection on provisioned companies (G82), Crystal variants, COL_MAST layout, printed date year and registration-serial branches remain unverified. Percentage labour/line precision follow CommPassTotal. Lossless behavior has source implementation but still needs desktop-runtime comparison. Closed: absent lossless Sales Invoice reopen/unchanged-save implementation; saleRead and settleEditedHeader preserve persisted columns. Evidence: web/apps/api/src/modules/sales/saleRead.ts, web/apps/api/src/modules/sales/saleResiduals.ts, web/apps/web/app/(app)/txn/sales/page.tsx.
 - **Owners:** X13, G46, N63, G45, N40, G42, N61, G43, N62, N56, N73, N74, N77, G82, G83, G247, N235.
 - **Evidence:** [KB_transaction.md:43-109](../../project-memory/video-research/_kb/KB_transaction.md#L43-L109).
 
@@ -725,7 +725,7 @@ None. Slice N85 (gap G71) corrected the register to this catalog; `pnpm register
 - **Does:** Captures customer specifications, images, locked pricing, delivery date and advances before fulfilment.
 - **Looks:** Sales-like item, component and old-metal grids with an advance panel, delivery date, images and order document.
 - **Writes:** SL_ORD_DATA, SL_ORD_DETL, SL_ORD_IDTL, SL_ORD_ADJ, SL_PR_DETL, AC_DATA, ROJ_MEL_DATA, UPI_DATA, TAG_IMAGE_DATA.
-- **Web:** `/txn/sales-order`; `GET /sales-orders`, `POST /sales-orders`, `GET /sales-orders/:vchNo`, `PUT /sales-orders/:vchNo`, `DELETE /sales-orders/:vchNo`, `GET /sales/order-confirmation`. Can: create, reopen, edit, delete, print, list.
+- **Web:** `/txn/sales-order`; `GET /sales-orders`, `POST /sales-orders`, `GET /sales-orders/:vchNo`, `PUT /sales-orders/:vchNo`, `DELETE /sales-orders/:vchNo`, `GET /sales/order-confirmation`, `GET /sales-orders/:vchNo/image`, `POST /sales-orders/:vchNo/image`, `DELETE /sales-orders/:vchNo/image`, `GET /sales-orders/:vchNo/adjustment`. Can: create, reopen, edit, delete, print, list.
 - **Remaining:** Partial delivery, manufacturing and invoice conversion, reservation/refund, the order document and the non-Lite scheme path (a MEMB ADJUST voucher from the Scheme Amt cell) need acceptance.
 - **Owners:** G14, N44, G16, N46, X14, N77, X25, G206, N197, N222, N226, N230.
 - **Evidence:** [KB_transaction.md:208-235](../../project-memory/video-research/_kb/KB_transaction.md#L208-L235), [TR_SALE_ORD.cs:9520-9556](../../unified/src/csharp/DataCareNext/TR_SALE_ORD.cs#L9520-L9556), [TR_SALE_ORD.cs:9421-9475](../../unified/src/csharp/DataCareNext/TR_SALE_ORD.cs#L9421-L9475), [Ac_Rojmel.cs:19](../../unified/src/csharp/DataCareNext/Ac_Rojmel.cs#L19).
@@ -736,7 +736,7 @@ None. Slice N85 (gap G71) corrected the register to this catalog; `pnpm register
 - **Does:** Imports a prior invoice, credits or refunds the customer and restores returned stock, tax and outstanding.
 - **Looks:** Credit-note header with source bill; return, component and received-tag grids; refund/credit totals and document.
 - **Writes:** SL_DATA, SL_DETL_RTN, SL_IDTL, BAR_DETL, MAIN_STOCK, DM_DATA, AC_DATA, ROJ_MEL_DATA, TAX_DATA, BILL_OS_DATA, USER_DATA.
-- **Web:** `/txn/sale-return`; `POST /sales-returns`, `GET /sales-returns/:vchNo`, `PUT /sales-returns/:vchNo`, `DELETE /sales-returns/:vchNo`, `GET /sales-returns/import`, `PUT /sales-returns/:vchNo/incoming-metadata`, `PUT /sales-returns/:vchNo/incoming-numeric`, `GET /sales/credit-note`. Can: create, reopen, edit, delete, print, list.
+- **Web:** `/txn/sale-return`; `POST /sales-returns`, `GET /sales-returns/:vchNo`, `PUT /sales-returns/:vchNo`, `DELETE /sales-returns/:vchNo`, `GET /sales-returns/import`, `PUT /sales-returns/:vchNo/incoming-metadata`, `PUT /sales-returns/:vchNo/incoming-numeric`, `GET /sales/credit-note`, `GET /sales-returns/:vchNo/incoming`, `GET /sales-returns/:vchNo/incoming-replay-state`, `POST /sales-returns/:vchNo/incoming-replay`, `GET /sales-returns/:vchNo/incoming-bill-replay-state`, `POST /sales-returns/:vchNo/incoming-bill-replay`, `GET /sales-returns/:vchNo/incoming-labour-replay-state`, `POST /sales-returns/:vchNo/incoming-labour-observation`, `POST /sales-returns/:vchNo/incoming-labour-replay`, `GET /sales-returns/:vchNo/print`. Can: create, reopen, edit, delete, print, list.
 - **Remaining:** WP-27 (N242/G254) added the lossless versioned edit from the New return form, the desktop save refusals and Import admissibility; create p95 is 269 ms in the load profile. Open: the RTN_* header columns (G246), the UAE branch, print template choice (G127), a browser run of record and desktop-runtime comparison.
 - **Owners:** X13, G26, N50, G46, N63, G30, N53, N51, N77, G71, N85, N242, G254.
 - **Evidence:** [KB_transaction.md:144-171](../../project-memory/video-research/_kb/KB_transaction.md#L144-L171).
@@ -748,7 +748,7 @@ None. Slice N85 (gap G71) corrected the register to this catalog; `pnpm register
 - **Looks:** Sales-style header, item/charge/old-metal grids, totals and a quotation document.
 - **Writes:** SL_DATA, SL_DETL, SL_IDTL, SL_PR_DETL, TEMP_BOOK_DATA.
 - **Web:** `/txn/sales-quotation`; `POST /sales-quotations`, `GET /sales-quotations/:vchNo`, `PUT /sales-quotations/:vchNo`, `DELETE /sales-quotations/:vchNo`, `GET /sales-quotations/quotation`. Can: create, reopen, edit, delete, print, list.
-- **Remaining:** An unchanged reopen loses fields; quotation-to-sale conversion, the Crystal template and versions remain.
+- **Remaining:** An unchanged reopen loses fields; quotation-to-sale conversion, the Crystal template and versions remain. Open: no matching browser feature module in web/apps/web/test/features/modules/.
 - **Owners:** G46, N63, X13, G16, N46, X14, N74.
 - **Evidence:** [KB_transaction.md:43-91](../../project-memory/video-research/_kb/KB_transaction.md#L43-L91).
 
@@ -759,7 +759,7 @@ None. Slice N85 (gap G71) corrected the register to this catalog; `pnpm register
 - **Looks:** Book/date/location/employee header and a basic or extended item/tag/weight/labour grid.
 - **Writes:** INOUT_DATA, INOUT_DETL, INOUT_IDTL, MAIN_STOCK, BAR_DETL, DM_DATA, AC_DATA, ROJ_MEL_DATA.
 - **Web:** `/txn/stock-in`; `POST /stock/in`, `GET /stock/in/:vchNo`, `PUT /stock/in/:vchNo`, `DELETE /stock/in/:vchNo`. Can: create, reopen, edit, delete.
-- **Remaining:** No document or recent list; diamond sub-detail, versions, configured identities and COL_MAST layout remain.
+- **Remaining:** No document or recent list; diamond sub-detail, versions, configured identities and COL_MAST layout remain. Open: no matching browser feature module in web/apps/web/test/features/modules/.
 - **Owners:** X18, G54, N68, N51, N59, N77.
 - **Evidence:** [StockInoutForm.tsx:225-261](../../web/apps/web/components/StockInoutForm.tsx#L225-L261).
 
@@ -770,7 +770,7 @@ None. Slice N85 (gap G71) corrected the register to this catalog; `pnpm register
 - **Looks:** Book/date/location/employee header and a basic or extended item/tag/weight/labour grid.
 - **Writes:** INOUT_DATA, INOUT_DETL, INOUT_IDTL, MAIN_STOCK, BAR_DETL, DM_DATA, AC_DATA, ROJ_MEL_DATA.
 - **Web:** `/txn/stock-out`; `POST /stock/out`, `GET /stock/out/:vchNo`, `PUT /stock/out/:vchNo`, `DELETE /stock/out/:vchNo`. Can: create, reopen, edit, delete.
-- **Remaining:** No document or recent list; diamond sub-detail, versions, configured identities and COL_MAST layout remain.
+- **Remaining:** No document or recent list; diamond sub-detail, versions, configured identities and COL_MAST layout remain. Open: no matching browser feature module in web/apps/web/test/features/modules/.
 - **Owners:** X18, G54, N68, N51, N59, N77.
 - **Evidence:** [StockInoutForm.tsx:419-486](../../web/apps/web/components/StockInoutForm.tsx#L419-L486).
 
@@ -781,7 +781,7 @@ None. Slice N85 (gap G71) corrected the register to this catalog; `pnpm register
 - **Looks:** Wholesale party header, issue/receive grids, fine/conversion and settlement bands, plus Print.
 - **Writes:** RATE_CUT_DATA, RATE_CUT_ISU, RATE_CUT_REC, TEMP_BOOK_DATA.
 - **Web:** `/txn/wholesale-quotation`; `POST /wholesale-quotations`, `GET /wholesale-quotations/:vchNo`, `PUT /wholesale-quotations/:vchNo`, `DELETE /wholesale-quotations/:vchNo`, `GET /wholesale-quotations/:vchNo/print`. Can: create, reopen, edit, delete, print.
-- **Remaining:** The lifecycle exists (N38); conversion to a wholesale sale, a recent list, template certification and desktop comparison remain.
+- **Remaining:** Open: conversion to a wholesale sale, template certification and desktop comparison remain. Closed: absent recent list; the shared form renders VoucherList and a quotation Print action. Evidence: web/apps/web/app/(app)/txn/wholesale-quotation/page.tsx, web/apps/web/components/WholesaleVoucherForm.tsx. Open: no matching browser feature module in web/apps/web/test/features/modules/.
 - **Owners:** N38, G16, N46, X14, N74.
 - **Evidence:** [10-gap-register-2026-10-01.md:46](../../docs/master-parity-plan-2026-09-29/10-gap-register-2026-10-01.md#L46).
 
@@ -803,7 +803,7 @@ None. Slice N85 (gap G71) corrected the register to this catalog; `pnpm register
 - **Looks:** Voucher/party header, return item/tag grid, totals and settlement fields.
 - **Writes:** BAR_DATA, BAR_DETL, BAR_IDTL, MAIN_STOCK, DM_DATA, AC_DATA, ROJ_MEL_DATA, TAX_DATA, RATE_CUT_ISU_REC.
 - **Web:** `/txn/wholesale-sale-return`; `POST /sales/wholesale-sale-return`, `GET /sales/wholesale-sale-return/:vchNo`, `PUT /sales/wholesale-sale-return/:vchNo`, `DELETE /sales/wholesale-sale-return/:vchNo`. Can: create, reopen, edit, delete.
-- **Remaining:** No Print or list; stone, settlement, stock-reversal, role, version and layout branches remain.
+- **Remaining:** No Print or list; stone, settlement, stock-reversal, role, version and layout branches remain. Open: no matching browser feature module in web/apps/web/test/features/modules/.
 - **Owners:** G15, N45, X13, X16, N51, N59, N74, N77.
 - **Evidence:** [TR_WH_SALE_RTN.md:1-31](../../project-memory/catalogs/forms/TR_WH_SALE_RTN.md#L1-L31).
 
@@ -816,7 +816,7 @@ None. Slice N85 (gap G71) corrected the register to this catalog; `pnpm register
 | Approval Isu | `TR_APR_ISU` | `/txn/tour` | `C R E D P -` | PARTIAL | P1-core |
 | Approval Rtn | `TR_APR_ISU` | `/txn/tour-return` | `C R E D P -` | PARTIAL | P1-core |
 | Bill Wise Rec | `TR_BILL_TO` | `/txn/bill-to-bill` | `C - - - - -` | PARTIAL | P1-core |
-| Card Rec | `TR_CARD_REC` | — | `- - - - - -` | MISSING | P1-core |
+| Card Rec | `TR_CARD_REC` | `/txn/card-receipt` | `- - - - - -` | PARTIAL | P1-core |
 | Consi Isu | `TR_APR_ISU` | `/txn/tour` | `C - - - - -` | PARTIAL | P1-edition |
 | Consi Purc | `TR_PR_SL_UAE` | `/txn/consi-purchase` | `C R E D P L` | PARTIAL | P1-edition |
 | Consi Rec | `TR_APR_ISU` | `/txn/tour-return` | `C - - - - -` | PARTIAL | P1-edition |
@@ -840,7 +840,7 @@ None. Slice N85 (gap G71) corrected the register to this catalog; `pnpm register
 - **Looks:** Voucher/date, from/to locations and books, amount grid, employee, description and totals.
 - **Writes:** LOCT_AMT, AC_DATA, ROJ_MEL_DATA, REMARK_DATA.
 - **Web:** `/txn/location-amount`; `POST /finance/location-amount`, `GET /finance/location-amount/:vchNo`, `PUT /finance/location-amount/:vchNo`, `DELETE /finance/location-amount/:vchNo`. Can: create, reopen, edit, delete.
-- **Remaining:** No saved list or print; configured identity, versions, idempotency and a ledger/Rojmel comparison remain.
+- **Remaining:** No saved list or print; configured identity, versions, idempotency and a ledger/Rojmel comparison remain. Open: no matching browser feature module in web/apps/web/test/features/modules/.
 - **Owners:** X16, P06-02, N51, N52.
 - **Evidence:** [TR_LOCT_AMT.initcomp.json](../../web/apps/api/form-specs/TR_LOCT_AMT.initcomp.json).
 
@@ -851,7 +851,7 @@ None. Slice N85 (gap G71) corrected the register to this catalog; `pnpm register
 - **Looks:** Voucher/date, from/to locations and books, amount grid, employee, description and totals.
 - **Writes:** LOCT_AMT, AC_DATA, ROJ_MEL_DATA, REMARK_DATA.
 - **Web:** `/txn/location-amount`; `POST /finance/location-amount`, `GET /finance/location-amount/:vchNo`, `PUT /finance/location-amount/:vchNo`, `DELETE /finance/location-amount/:vchNo`. Can: create, reopen, edit, delete.
-- **Remaining:** No saved list or print; configured identity, versions, idempotency and the mirrored-transfer comparison remain.
+- **Remaining:** No saved list or print; configured identity, versions, idempotency and the mirrored-transfer comparison remain. Open: no matching browser feature module in web/apps/web/test/features/modules/.
 - **Owners:** X16, P06-02, N51, N52.
 - **Evidence:** [TR_LOCT_AMT.initcomp.json](../../web/apps/api/form-specs/TR_LOCT_AMT.initcomp.json).
 
@@ -861,7 +861,7 @@ None. Slice N85 (gap G71) corrected the register to this catalog; `pnpm register
 - **Does:** Places tagged goods with a party on approval while the business keeps ownership.
 - **Looks:** Desktop: voucher/party/employee header, item and stone grids, image panel, totals and print. Web: the persisted header, full audited item fields, hydrated stone grid, totals and print; image id is stored but no image panel is rendered.
 - **Writes:** APR_DATA, APR_DETL, APR_IDTL, MAIN_STOCK, BAR_DETL, DM_DATA.
-- **Web:** `/txn/tour`; `POST /tour/issue`, `GET /tour/:vchNo`, `PUT /tour/:vchNo`, `DELETE /tour/:vchNo`, `GET /tour/:vchNo/print`. Can: create, reopen, edit, delete, print.
+- **Web:** `/txn/tour`; `POST /tour/issue`, `GET /tour/:vchNo`, `PUT /tour/:vchNo`, `DELETE /tour/:vchNo`, `GET /tour/:vchNo/print`, `GET /tour/:vchNo/lines`, `POST /tour/:vchNo/bill`. Can: create, reopen, edit, delete, print.
 - **Remaining:** Verified by DB/HTTP and browser-unit/feature cases: APR ISU identity and audited custody lifecycle; return creation and every return mutation require the exact stable source and item-scoped BAR instance; issue/return changes serialize; missing line and stone IDs append above retained maxima and invalid explicit IDs are refused; LDisc derives DISC_AMT and NET_AMT is one decimal; stone codes are trimmed and ITEM_MAST checked. /sales uses OLD_SRNO, exact party/item/tag/instance/quantity matching, the locked BAR row and atomic consume/release; tagged mismatch is no-write and tagged success plus a gapped source are DB-tested. The hidden /tour/:vchNo/bill route remains a no-write 409. Open: the Sales Invoice screen still has no Apr No selector/import control, so successful tagged approval consumption and sale-delete reopening are DB-tested but not operator-driven; Wh Sales approval continuation; desktop licence-expiry state; the approval image panel and APR_IMG_PRINT/AprBillImg branch; idempotent create and lost-acknowledgement recovery; a per-table fault matrix (a fault on the last write, REMARK_DATA, is browser-proven to roll back issue and return); repeated Crystal page headers, footers and page numbers; an independent original-Windows runtime comparison; operator sign-off and parent acceptance.
 - **Owners:** N22, X17, P05-05, N62, X07, G225, N212, G242, N229.
 - **Evidence:** [TR_APR_ISU.cs:5788-6772](../../unified/src/csharp/DataCareNext/TR_APR_ISU.cs#L5788-L6772).
@@ -872,7 +872,7 @@ None. Slice N85 (gap G71) corrected the register to this catalog; `pnpm register
 - **Does:** Returns unsold approval goods, restores availability and closes the issued quantities.
 - **Looks:** Desktop: source selector, party/employee/date header, returned item and stone grids, image panel, totals and print. Web: source selector, persisted names/time, audited read-only item/stone data, totals and print; no image panel.
 - **Writes:** APR_DATA, APR_DETL, APR_IDTL, MAIN_STOCK, BAR_DETL, DM_DATA.
-- **Web:** `/txn/tour-return`; `GET /tour/:vchNo/lines`, `POST /tour/return`, `GET /tour/return/:vchNo`, `PUT /tour/return/:vchNo`, `DELETE /tour/return/:vchNo`, `GET /tour/return/:vchNo/print`. Can: create, reopen, edit, delete, print.
+- **Web:** `/txn/tour-return`; `GET /tour/:vchNo/lines`, `POST /tour/return`, `GET /tour/return/:vchNo`, `PUT /tour/return/:vchNo`, `DELETE /tour/return/:vchNo`, `GET /tour/return/:vchNo/print`, `GET /tour/:vchNo`, `PUT /tour/:vchNo`, `DELETE /tour/:vchNo`, `GET /tour/:vchNo/print`, `POST /tour/:vchNo/bill`. Can: create, reopen, edit, delete, print.
 - **Remaining:** Verified by DB/HTTP and browser-unit/feature cases: APR RTN identity, exact requested OLD_SRNO source matching and exact TAG_NO + VCH_SRNO + IT_CODE BAR locking before create; unchanged PUT validates before no-op; return/source operations serialize and checked reversals fail closed. Return OLD_SRNO remains separate from source ISU_SRNO; line and stone IDs append above retained maxima; invalid explicit IDs, whitespace/unknown stones and duplicate sources are 400/no-write. Read-only hydration, partial closure, I/+ stock/DM effects, audit, rights and AprBill output remain covered. Open: the Sales Invoice screen still has no Apr No selector/import control, so successful tagged approval consumption and sale-delete reopening are DB-tested but not operator-driven; Wh Sales approval continuation; desktop licence-expiry state; the approval image panel and APR_IMG_PRINT/AprBillImg branch; idempotent create and lost-acknowledgement recovery; a per-table fault matrix (a fault on the last write, REMARK_DATA, is browser-proven to roll back issue and return); repeated Crystal page headers, footers and page numbers; an independent original-Windows runtime comparison; operator sign-off and parent acceptance.
 - **Owners:** N22, X17, N59, N62, X07, G225, N212, G242, N229.
 - **Evidence:** [TR_APR_ISU.cs:5788-6772](../../unified/src/csharp/DataCareNext/TR_APR_ISU.cs#L5788-L6772).
@@ -884,7 +884,7 @@ None. Slice N85 (gap G71) corrected the register to this catalog; `pnpm register
 - **Looks:** Party header, outstanding-bill grid with receipt/kasar columns, tender grid, old-metal grid and totals.
 - **Writes:** CASH_DATA, BILL_OS_DATA, AC_DATA, ROJ_MEL_DATA, MAIN_STOCK, SL_PR_DETL.
 - **Web:** `/txn/bill-to-bill`; `GET /bill-to-bill/open`, `POST /bill-to-bill/settle`, `DELETE /bill-to-bill/:vchNo`. Can: create.
-- **Remaining:** Settles open bills but has no saved read, edit or print; the old-metal/detail footprint and browser reversal remain.
+- **Remaining:** Settles open bills but has no saved read, edit or print; the old-metal/detail footprint and browser reversal remain. Open: no matching browser feature module in web/apps/web/test/features/modules/.
 - **Owners:** G54, N68, X16, P06-03.
 - **Evidence:** [TR_BILL_TO.initcomp.json](../../web/apps/api/form-specs/TR_BILL_TO.initcomp.json).
 
@@ -894,8 +894,8 @@ None. Slice N85 (gap G71) corrected the register to this catalog; `pnpm register
 - **Does:** Adjusts card proceeds and acquirer commissions, optionally settling a linked bill or loan.
 - **Looks:** No grid: party/bill references, card amount, two commission bands, bank net, cash paid and outstanding.
 - **Writes:** CARD_DATA, AC_DATA, ROJ_MEL_DATA, DHRN_DATA, MAIN_STOCK.
-- **Web:** no screen; no API. Can: none.
-- **Remaining:** No CARD ADJUST workflow: commission bands, bill/loan settlement, CARD_DATA writes and the voucher lifecycle are absent.
+- **Web:** `/txn/card-receipt`; `POST /card-receipts`, `GET /card-receipts/:vchNo`, `PUT /card-receipts/:vchNo`, `DELETE /card-receipts/:vchNo`. Can: none.
+- **Remaining:** Open: the screen has no bill/loan settlement selectors, commission-amount overrides or voucher print; no dedicated browser feature module. Commission-band/settings parity and the complete settlement write set remain unverified. Closed: absent CARD ADJUST page, CARD_DATA writer and saved CRUD; percentage commission inputs and server calculation exist. Evidence: web/apps/web/app/(app)/txn/card-receipt/page.tsx, web/apps/api/src/routes/txn.ts, web/apps/api/src/modules/finance/cardReceipt.ts.
 - **Owners:** G56, N70, X16, P06-01, G71, N85.
 - **Evidence:** [TR_CARD_REC.initcomp.json](../../web/apps/api/form-specs/TR_CARD_REC.initcomp.json).
 
@@ -905,8 +905,8 @@ None. Slice N85 (gap G71) corrected the register to this catalog; `pnpm register
 - **Does:** Issues owned goods to a consignee while tracking external custody and availability.
 - **Looks:** Party/reference header, tagged item and stone grids, image panel, employee/remarks, totals and print.
 - **Writes:** APR_DATA, APR_DETL, APR_IDTL, MAIN_STOCK, BAR_DETL, DM_DATA.
-- **Web:** `/txn/tour`; `POST /tour/issue`, `DELETE /tour/:vchNo`. Can: create.
-- **Remaining:** The shared issue page does not enforce CON ISU or provide the saved lifecycle, consignee settlement, partial return/sale and documents.
+- **Web:** `/txn/tour`; `POST /tour/issue`, `DELETE /tour/:vchNo`, `GET /tour/:vchNo`, `PUT /tour/:vchNo`, `GET /tour/:vchNo/lines`, `GET /tour/:vchNo/print`, `POST /tour/:vchNo/bill`. Can: create.
+- **Remaining:** The shared issue page does not enforce CON ISU or provide the saved lifecycle, consignee settlement, partial return/sale and documents. Open: no matching browser feature module in web/apps/web/test/features/modules/.
 - **Owners:** N22, X17, P05-05, N62, X07.
 - **Evidence:** [KB_transaction.md:331-357](../../project-memory/video-research/_kb/KB_transaction.md#L331-L357).
 
@@ -917,7 +917,7 @@ None. Slice N85 (gap G71) corrected the register to this catalog; `pnpm register
 - **Looks:** Supplier/source header, purchase and component grids, tender panel, totals, images and voucher list.
 - **Writes:** PR_DATA, PR_DETL, PR_IDTL, APR_DETL, MAIN_STOCK, AC_DATA, TAX_DATA, ROJ_MEL_DATA.
 - **Web:** `/txn/consi-purchase`; `POST /consignment-purchases`, `GET /consignment-purchases/:vchNo`, `PUT /consignment-purchases/:vchNo`, `DELETE /consignment-purchases/:vchNo`, `GET /consignment-purchases/open-receipts`. Can: create, reopen, edit, delete, print, list.
-- **Remaining:** The full UI exists, but an unchanged save can lose fields; source residuals, custody linkage and the Crystal output remain.
+- **Remaining:** The full UI exists, but an unchanged save can lose fields; source residuals, custody linkage and the Crystal output remain. Open: no matching browser feature module in web/apps/web/test/features/modules/.
 - **Owners:** G46, N63, X12, P01-04, N22, X17.
 - **Evidence:** [page.tsx:629-851](../../web/apps/web/app/%28app%29/txn/consi-purchase/page.tsx#L629-L851).
 
@@ -927,8 +927,8 @@ None. Slice N85 (gap G71) corrected the register to this catalog; `pnpm register
 - **Does:** Receives goods from a consignor into tracked custody without ordinary purchase ownership.
 - **Looks:** Source/party header, tagged item and component grids, images, employee, remarks, totals and print.
 - **Writes:** APR_DATA, APR_DETL, APR_IDTL, MAIN_STOCK, BAR_DETL, DM_DATA.
-- **Web:** `/txn/tour-return`; `GET /tour/:vchNo/lines`, `POST /tour/return`. Can: create.
-- **Remaining:** The approval-return surface does not establish CON REC ownership, the source lifecycle, documents or the later purchase conversion.
+- **Web:** `/txn/tour-return`; `GET /tour/:vchNo/lines`, `POST /tour/return`, `GET /tour/:vchNo`, `PUT /tour/:vchNo`, `DELETE /tour/:vchNo`, `GET /tour/return/:vchNo`, `PUT /tour/return/:vchNo`, `DELETE /tour/return/:vchNo`, `GET /tour/:vchNo/print`, `GET /tour/return/:vchNo/print`, `POST /tour/:vchNo/bill`. Can: create.
+- **Remaining:** The approval-return surface does not establish CON REC ownership, the source lifecycle, documents or the later purchase conversion. Open: no matching browser feature module in web/apps/web/test/features/modules/.
 - **Owners:** N22, X17, N59, N62, X07.
 - **Evidence:** [KB_transaction.md:331-357](../../project-memory/video-research/_kb/KB_transaction.md#L331-L357).
 
@@ -938,8 +938,8 @@ None. Slice N85 (gap G71) corrected the register to this catalog; `pnpm register
 - **Does:** Posts salary and payroll amounts, deductions and the payment account against an employee.
 - **Looks:** Voucher/date and employee header above line and totals grids, narration, book balance, print and cheque print.
 - **Writes:** EMP_DATA, AC_DATA, ROJ_MEL_DATA, REMARK_DATA.
-- **Web:** `/txn/employee-jv`; `POST /employee-jv`, `DELETE /employee-jv/:vchNo`. Can: create.
-- **Remaining:** Create only; the configured book, saved lifecycle, line/rate/day-hour semantics and print are missing.
+- **Web:** `/txn/employee-jv`; `POST /employee-jv`, `DELETE /employee-jv/:vchNo`, `GET /employee-jv/:vchNo`, `PUT /employee-jv/:vchNo`. Can: create.
+- **Remaining:** Open: line/rate/day-hour semantics, configured-book equivalence and print remain unverified or incomplete; no dedicated browser feature module. Closed: create-only and absent saved lifecycle; load/update and VoucherList delete exist. Evidence: web/apps/web/app/(app)/txn/employee-jv/page.tsx.
 - **Owners:** X16, P06-02, N62, X07.
 - **Evidence:** [TR_EMP_JV.initcomp.json](../../web/apps/api/form-specs/TR_EMP_JV.initcomp.json).
 
@@ -960,8 +960,8 @@ None. Slice N85 (gap G71) corrected the register to this catalog; `pnpm register
 - **Does:** Purchases pure metal on fine weight with tax and optional rate-fixing allocations.
 - **Looks:** Party/item-type header, fine lines, component and bill-total grids, settlement band and account balances.
 - **Writes:** CUT_DATA, CUT_DETL, CUT_STK_DETL, MAIN_STOCK, RATE_CUT_ISU, AC_DATA, TAX_DATA, ROJ_MEL_DATA.
-- **Web:** `/txn/fine-sale`; `POST /fine-sale`, `DELETE /fine-sale/:vchNo`. Can: create.
-- **Remaining:** Create-only shared page; the saved lifecycle, fixing/source rows, configured accounting, documents and exact bases remain.
+- **Web:** `/txn/fine-sale`; `POST /fine-sale`, `DELETE /fine-sale/:vchNo`, `GET /fine-sale/:vchNo`, `PUT /fine-sale/:vchNo`. Can: create.
+- **Remaining:** Open: fixing/source and rate-cut rows, exact bases, configured-account equivalence, document output and edition branches remain unverified; no dedicated browser feature module. Closed: create-only and absent saved lifecycle; shared fine-sale load/update/delete/list exist. Evidence: web/apps/web/app/(app)/txn/fine-sale/page.tsx.
 - **Owners:** N17, X16, P06-04, N51, X05.
 - **Evidence:** [TR_FINE_SL_PR.md:12-22](../../web-implementation-spec/03_Modules/11_Bullion_Tour_VP/TR_FINE_SL_PR.md#L12-L22).
 
@@ -971,8 +971,8 @@ None. Slice N85 (gap G71) corrected the register to this catalog; `pnpm register
 - **Does:** Sells pure metal on fine weight with tax and rate-fixing settlement.
 - **Looks:** Party/item-type header, fine lines, component and bill-total grids, settlement band and account balances.
 - **Writes:** CUT_DATA, CUT_DETL, CUT_STK_DETL, MAIN_STOCK, RATE_CUT_ISU, AC_DATA, TAX_DATA, ROJ_MEL_DATA.
-- **Web:** `/txn/fine-sale`; `POST /fine-sale`, `DELETE /fine-sale/:vchNo`. Can: create.
-- **Remaining:** Create-only shared page; the saved lifecycle, rate-cut rows, configured accounts, print and the hidden-edition behaviour remain.
+- **Web:** `/txn/fine-sale`; `POST /fine-sale`, `DELETE /fine-sale/:vchNo`, `GET /fine-sale/:vchNo`, `PUT /fine-sale/:vchNo`. Can: create.
+- **Remaining:** Open: fixing/source and rate-cut rows, exact bases, configured-account equivalence, document output and edition branches remain unverified; no dedicated browser feature module. Closed: create-only and absent saved lifecycle; shared fine-sale load/update/delete/list exist. Evidence: web/apps/web/app/(app)/txn/fine-sale/page.tsx.
 - **Owners:** N17, X16, P06-04, N51, X05.
 - **Evidence:** [TR_FINE_SL_PR.md:87-122](../../web-implementation-spec/03_Modules/11_Bullion_Tour_VP/TR_FINE_SL_PR.md#L87-L122).
 
@@ -983,7 +983,7 @@ None. Slice N85 (gap G71) corrected the register to this catalog; `pnpm register
 - **Looks:** Customer header plus labour, component, order, old-metal, UPI and totals grids with dual-tax and fine panels.
 - **Writes:** LBR_DATA, LBR_ISU_DETL, LBR_REC_DETL, AC_DATA, MAIN_STOCK, TAX_DATA, BILL_OS_DATA, ROJ_MEL_DATA.
 - **Web:** `/txn/labour-sale`; `POST /labour-invoice`, `GET /labour-invoice/:vchNo`, `DELETE /labour-invoice/:vchNo`. Can: create, delete, list.
-- **Remaining:** Create, list and delete only; no reopen, edit or print; order gold, received material, tenders, components and rounding remain.
+- **Remaining:** Create, list and delete only; no reopen, edit or print; order gold, received material, tenders, components and rounding remain. Open: no matching browser feature module in web/apps/web/test/features/modules/.
 - **Owners:** X13, P05-02, N15, X07.
 - **Evidence:** [TR_SALE_LBR.initcomp.json](../../web/apps/api/form-specs/TR_SALE_LBR.initcomp.json).
 
@@ -994,7 +994,7 @@ None. Slice N85 (gap G71) corrected the register to this catalog; `pnpm register
 - **Looks:** Purchase-family party header with item/component, tax, payment, image and totals panels.
 - **Writes:** KR_DATA, KR_DETL, KR_IDTL, MAIN_STOCK, AC_DATA, ROJ_MEL_DATA.
 - **Web:** `/txn/old-item-sales`; `POST /old-item-sales`, `GET /old-item-sales/:vchNo`, `PUT /old-item-sales/:vchNo`, `DELETE /old-item-sales/:vchNo`. Can: create.
-- **Remaining:** The API lifecycle exists but the shared Karigar form only creates; reopen, edit, delete, list and print remain.
+- **Remaining:** Open: desktop grid/field completeness, configured book/account roles, source/settlement chains and exact print parity remain unverified; no dedicated browser feature module. Closed: create-only UI and absent reopen/edit/delete/list; KarigarForm enables lifecycle for karigar and old-item-sales. Evidence: web/apps/web/app/(app)/txn/old-item-sales/page.tsx, web/apps/web/components/KarigarForm.tsx.
 - **Owners:** G53, N67, X12, P04-02, N51.
 - **Evidence:** [page.tsx](../../web/apps/web/app/%28app%29/txn/old-item-sales/page.tsx).
 
@@ -1005,7 +1005,7 @@ None. Slice N85 (gap G71) corrected the register to this catalog; `pnpm register
 - **Looks:** Party/bill header, tax-rich item grid, settlement totals, balances, image area and voucher actions.
 - **Writes:** PAY_DATA, PAY_DETL, AC_DATA, TAX_DATA, ROJ_MEL_DATA, REMARK_DATA.
 - **Web:** `/txn/other-purchase`; `POST /other-purchase`, `GET /other-purchase/:vchNo`, `PUT /other-purchase/:vchNo`, `DELETE /other-purchase/:vchNo`, `GET /other-purchase/:vchNo/print`. Can: create, reopen, edit, delete, print.
-- **Remaining:** The configured lifecycle landed (N33) but there is no saved list; desktop field, write-set and Crystal acceptance remain.
+- **Remaining:** The configured lifecycle landed (N33) but there is no saved list; desktop field, write-set and Crystal acceptance remain. Open: no matching browser feature module in web/apps/web/test/features/modules/.
 - **Owners:** N33, G03, G17, X12, P04-02.
 - **Evidence:** [TR_OTH_PURC.initcomp.json](../../web/apps/api/form-specs/TR_OTH_PURC.initcomp.json).
 
@@ -1016,7 +1016,7 @@ None. Slice N85 (gap G71) corrected the register to this catalog; `pnpm register
 - **Looks:** Party/bill header, tax-rich line grid, settlement totals, balances, image area and voucher actions.
 - **Writes:** PAY_DATA, PAY_DETL, AC_DATA, TAX_DATA, ROJ_MEL_DATA, REMARK_DATA.
 - **Web:** `/txn/other-income`; `POST /other-income`, `GET /other-income/:vchNo`, `PUT /other-income/:vchNo`, `DELETE /other-income/:vchNo`, `GET /other-income/:vchNo/print`. Can: create, reopen, edit, delete, print.
-- **Remaining:** No saved list; the tax/tender write set and the EInvOthIncom layout need acceptance.
+- **Remaining:** No saved list; the tax/tender write set and the EInvOthIncom layout need acceptance. Open: no matching browser feature module in web/apps/web/test/features/modules/.
 - **Owners:** N33, G03, G17, X12, N43, X25.
 - **Evidence:** [TR_OTH_PURC.initcomp.json](../../web/apps/api/form-specs/TR_OTH_PURC.initcomp.json).
 
@@ -1027,7 +1027,7 @@ None. Slice N85 (gap G71) corrected the register to this catalog; `pnpm register
 - **Looks:** Party/bill header, commission/tax line grid, payment fields, balances, totals and voucher buttons.
 - **Writes:** PAY_DATA, PAY_DETL, AC_DATA, TAX_DATA, ROJ_MEL_DATA, REMARK_DATA.
 - **Web:** `/txn/other-commission`; `POST /other-commission`, `GET /other-commission/:vchNo`, `PUT /other-commission/:vchNo`, `DELETE /other-commission/:vchNo`. Can: create, reopen, edit, delete.
-- **Remaining:** No saved list or print; commission/tax/tender calculations, versions and the desktop comparison remain.
+- **Remaining:** No saved list or print; commission/tax/tender calculations, versions and the desktop comparison remain. Open: no matching browser feature module in web/apps/web/test/features/modules/.
 - **Owners:** X16, P06-06, X25, P10-05.
 - **Evidence:** [TR_OTH_COMM.initcomp.json](../../web/apps/api/form-specs/TR_OTH_COMM.initcomp.json).
 
@@ -1037,7 +1037,7 @@ None. Slice N85 (gap G71) corrected the register to this catalog; `pnpm register
 - **Does:** Purchases already tagged or hallmarked items with HUID, components, costs, tax and stock intake.
 - **Looks:** Supplier/bill header, 95-column receive band, tag/HUID and stone grids, image panel, totals and print.
 - **Writes:** BAR_DATA, BAR_DETL, BAR_IDTL, MAIN_STOCK, AC_DATA, TAX_DATA, DM_DATA, LOT_DETL, TAG_SET.
-- **Web:** `/txn/tag-wise-purc`; `POST /purchases`, `GET /purchases/:vchNo`, `PUT /purchases/:vchNo`, `DELETE /purchases/:vchNo`, `GET /purchases/invoice`. Can: create, reopen, edit, delete, print, list.
+- **Web:** `/txn/tag-wise-purc`; `POST /purchases`, `GET /purchases/:vchNo`, `PUT /purchases/:vchNo`, `DELETE /purchases/:vchNo`, `GET /purchases/invoice`, `GET /purchases/:vchNo/print`. Can: create, reopen, edit, delete, print, list.
 - **Remaining:** WP-28 (N244/G256): /txn/tag-wise-purc opens the hallmark layout on TAG PURCHASE books only; hallmark ids 2-4, their weights and the tag band are stored per line and BAR_DETL net, rate, amount, cost and margin come from the tag band; an unchanged reopen and save is lossless. Open: the BAR_DATA/SRNO_MAST/TAG_SET write set, the 95-column Enter walk, tag and bill print templates and a browser run of record.
 - **Owners:** N32, G02, G19, X12, G46, N63, N244, G256.
 - **Evidence:** [TR_PURC_HM.initcomp.json](../../web/apps/api/form-specs/TR_PURC_HM.initcomp.json).
@@ -1049,7 +1049,7 @@ None. Slice N85 (gap G71) corrected the register to this catalog; `pnpm register
 - **Looks:** Voucher/book/date header above a source year/book/voucher, party, carrier, receipt, kasar and description grid.
 - **Writes:** VP_ADJ_DATA, RATE_CUT_DATA, AC_DATA, ROJ_MEL_DATA.
 - **Web:** `/txn/vp-adjustment`; `POST /finance/vp-adjustment`, `GET /finance/vp-adjustment/:vchNo`, `PUT /finance/vp-adjustment/:vchNo`, `DELETE /finance/vp-adjustment/:vchNo`. Can: create, reopen, edit, delete.
-- **Remaining:** No saved list or print; source residuals, concurrency, refund and accounting acceptance remain.
+- **Remaining:** No saved list or print; source residuals, concurrency, refund and accounting acceptance remain. Open: no matching browser feature module in web/apps/web/test/features/modules/.
 - **Owners:** N22, X17, P05-05, X16, P06-03.
 - **Evidence:** [page.tsx:175-325](../../web/apps/web/app/%28app%29/txn/vp-adjustment/page.tsx#L175-L325).
 
@@ -1060,7 +1060,7 @@ None. Slice N85 (gap G71) corrected the register to this catalog; `pnpm register
 - **Looks:** Party/carrier/bill header, tag/item and component grids, charge/insurance controls, balances and totals.
 - **Writes:** RATE_CUT_DATA, RATE_CUT_ISU, SL_IDTL, MAIN_STOCK, AC_DATA, ROJ_MEL_DATA, DM_DATA.
 - **Web:** `/txn/vp-parcel`; `POST /sales/vp-parcel`, `GET /sales/vp-parcel/:vchNo`, `PUT /sales/vp-parcel/:vchNo`, `DELETE /sales/vp-parcel/:vchNo`. Can: create, reopen, edit, delete.
-- **Remaining:** No saved list or parcel document; custody lineage, partial collection/refund and calculations remain.
+- **Remaining:** No saved list or parcel document; custody lineage, partial collection/refund and calculations remain. Open: no matching browser feature module in web/apps/web/test/features/modules/.
 - **Owners:** N22, X17, P05-05, X25, P10-05.
 - **Evidence:** [TR_VP.initcomp.json](../../web/apps/api/form-specs/TR_VP.initcomp.json).
 
@@ -1081,7 +1081,7 @@ None. Slice N85 (gap G71) corrected the register to this catalog; `pnpm register
 | Stock Rec | `TR_TOUR` | `/txn/tour-return` | `C - - - - -` | PARTIAL | P1-edition |
 | Tour Order | `TR_TOUR_ORD` | `/txn/tour-order` | `C R E D P L` | PARTIAL | P1-edition |
 | Tour Report | `RP_TOUR_ZOOM` | `/reports/tour-report` | `- - - - P L` | REPORT | P1-edition |
-| Tour Sales | `TR_TOUR_SALE` | — | `- - - - - -` | MISSING | P1-edition |
+| Tour Sales | `TR_TOUR_SALE` | `/txn/tour-sales` | `- - - - - -` | PARTIAL | P1-edition |
 | Tour Tag | `RP_TOUR_ZOOM` | `/reports/tour-tag` | `- - - - P L` | REPORT | P1-edition |
 
 ### Cust Repar Isu
@@ -1091,7 +1091,7 @@ None. Slice N85 (gap G71) corrected the register to this catalog; `pnpm register
 - **Looks:** Customer header and balance, ready-repair grid, add/less weight and labour columns, bill/settlement panel and print.
 - **Writes:** REP_DATA, REP_DETL, AC_DATA, ROJ_MEL_DATA, TAX_DATA, REMARK_DATA.
 - **Web:** `/txn/repair-customer-issue`; `GET /repair-customer-issues`, `POST /repair-customer-issues`, `GET /repair-customer-issues/:vchNo`, `PUT /repair-customer-issues/:vchNo`, `DELETE /repair-customer-issues/:vchNo`, `GET /repair-customer-issues/:vchNo/print`, `GET /repair-customer-issues/open-lines`. Can: create, reopen, edit, delete, print.
-- **Remaining:** Document CRUD exists; connected custody, partial completion, settlement/refund, stage reversal, images/history and a saved list remain.
+- **Remaining:** Document CRUD exists; connected custody, partial completion, settlement/refund, stage reversal, images/history and a saved list remain. Open: no matching browser feature module in web/apps/web/test/features/modules/.
 - **Owners:** N22, X17, P05-07.
 - **Evidence:** [page.tsx:478-768](../../web/apps/web/app/%28app%29/txn/repair-customer-issue/page.tsx#L478-L768).
 
@@ -1102,7 +1102,7 @@ None. Slice N85 (gap G71) corrected the register to this catalog; `pnpm register
 - **Looks:** Customer/address header, repair item grid, charges and totals, image capture, balances and voucher actions.
 - **Writes:** REP_DATA, REP_DETL, AC_DATA, ROJ_MEL_DATA, TAX_DATA, REMARK_DATA.
 - **Web:** `/txn/repair-receipt`; `GET /repair-receipts`, `POST /repair-receipts`, `GET /repair-receipts/:vchNo`, `PUT /repair-receipts/:vchNo`, `DELETE /repair-receipts/:vchNo`, `GET /repair-receipts/:vchNo/print`. Can: create, reopen, edit, delete, print.
-- **Remaining:** Document CRUD exists; full intake fields, partial downstream stages, custody conservation, image/device history and a saved list remain.
+- **Remaining:** Document CRUD exists; full intake fields, partial downstream stages, custody conservation, image/device history and a saved list remain. Open: no matching browser feature module in web/apps/web/test/features/modules/.
 - **Owners:** N22, X17, P05-07.
 - **Evidence:** [TR_REP_REC.initcomp.json](../../web/apps/api/form-specs/TR_REP_REC.initcomp.json).
 
@@ -1113,7 +1113,7 @@ None. Slice N85 (gap G71) corrected the register to this catalog; `pnpm register
 - **Looks:** Party/order reference, design item and component grids, images, employee/remarks, totals and print.
 - **Writes:** APR_DATA, APR_DETL, APR_IDTL, MFG_DETL, MAIN_STOCK, BAR_DETL, DM_DATA.
 - **Web:** `/txn/mfg-order-issue`; `POST /mfg/order-issue`, `GET /mfg/order-issue/:vchNo`, `PUT /mfg/order-issue/:vchNo`, `DELETE /mfg/order-issue/:vchNo`. Can: create.
-- **Remaining:** The UI only creates and the API writes generic MFG rows; the desktop uses the APR-family write set, family book, lifecycle and design lineage.
+- **Remaining:** The UI only creates and the API writes generic MFG rows; the desktop uses the APR-family write set, family book, lifecycle and design lineage. Open: no matching browser feature module in web/apps/web/test/features/modules/.
 - **Owners:** G57, N71, X23, P08-01.
 - **Evidence:** [11-audit-implementation-plan-2026-10-01.md:97](../../docs/master-parity-plan-2026-09-29/11-audit-implementation-plan-2026-10-01.md#L97).
 
@@ -1124,7 +1124,7 @@ None. Slice N85 (gap G71) corrected the register to this catalog; `pnpm register
 - **Looks:** Voucher/date/karigar-balance header and a 16-column metal grid with gross, net, touch, wastage and fine totals.
 - **Writes:** KR_DATA, KR_DETL, KR_IDTL, MFG_ISU_REC, MAIN_STOCK, AC_DATA, ROJ_MEL_DATA, DM_DATA.
 - **Web:** `/txn/karigar-issue`; `POST /karigar/issue`, `GET /karigar/issue/:vchNo`, `PUT /karigar/issue/:vchNo`, `DELETE /karigar/issue/:vchNo`, `GET /karigar/issue-voucher`. Can: create, print.
-- **Remaining:** Service CRUD exists but the UI only creates; the desktop grid, party balances, saved lifecycle and the correct print and book remain.
+- **Remaining:** Open: desktop grid/field completeness, configured book/account roles, source/settlement chains and exact print parity remain unverified; no dedicated browser feature module. Closed: create-only UI and absent reopen/edit/delete/list; KarigarForm enables lifecycle for karigar and old-item-sales. Evidence: web/apps/web/app/(app)/txn/karigar-issue/page.tsx, web/apps/web/components/KarigarForm.tsx.
 - **Owners:** G53, N67, X23, P08-02.
 - **Evidence:** [KB_karigar.md:23-46](../../project-memory/video-research/_kb/KB_karigar.md#L23-L46).
 
@@ -1135,7 +1135,7 @@ None. Slice N85 (gap G71) corrected the register to this catalog; `pnpm register
 - **Looks:** Purchase-family header and grids for ornaments, stones, labour, barcodes, totals, tenders and images.
 - **Writes:** KR_DATA, KR_DETL, KR_IDTL, BAR_DATA, BAR_DETL, MAIN_STOCK, AC_DATA, TAX_DATA, ROJ_MEL_DATA.
 - **Web:** `/txn/karigar-receive`; `POST /karigar/receive`, `GET /karigar/receive/:vchNo`, `PUT /karigar/receive/:vchNo`, `DELETE /karigar/receive/:vchNo`. Can: create.
-- **Remaining:** API CRUD exists but the UI only creates; receive, stone, barcode and labour fields, reopen/edit/delete/print and settlement remain.
+- **Remaining:** Open: desktop grid/field completeness, configured book/account roles, source/settlement chains and exact print parity remain unverified; no dedicated browser feature module. Closed: create-only UI and absent reopen/edit/delete/list; KarigarForm enables lifecycle for karigar and old-item-sales. Evidence: web/apps/web/app/(app)/txn/karigar-receive/page.tsx, web/apps/web/components/KarigarForm.tsx.
 - **Owners:** G53, N67, X23, P08-02.
 - **Evidence:** [KB_karigar.md:24-66](../../project-memory/video-research/_kb/KB_karigar.md#L24-L66).
 
@@ -1146,7 +1146,7 @@ None. Slice N85 (gap G71) corrected the register to this catalog; `pnpm register
 - **Looks:** Karigar/source-repair header, issue-line grid, balances, images, remarks and voucher actions.
 - **Writes:** REP_DATA, REP_DETL, AC_DATA, ROJ_MEL_DATA, TAX_DATA, REMARK_DATA.
 - **Web:** `/txn/repair-karigar-issue`; `GET /repair-karigar-issues`, `POST /repair-karigar-issues`, `GET /repair-karigar-issues/:vchNo`, `PUT /repair-karigar-issues/:vchNo`, `DELETE /repair-karigar-issues/:vchNo`, `GET /repair-karigar-issues/:vchNo/print`, `GET /repair-karigar-issues/open-lines`. Can: create, reopen, edit, delete, print.
-- **Remaining:** Voucher CRUD exists; partial issue, source quantities, custody/image lineage, downstream guards, a saved list and a connected journey remain.
+- **Remaining:** Voucher CRUD exists; partial issue, source quantities, custody/image lineage, downstream guards, a saved list and a connected journey remain. Open: no matching browser feature module in web/apps/web/test/features/modules/.
 - **Owners:** N22, X17, P05-07.
 - **Evidence:** [TR_REP_REC.initcomp.json](../../web/apps/api/form-specs/TR_REP_REC.initcomp.json).
 
@@ -1157,7 +1157,7 @@ None. Slice N85 (gap G71) corrected the register to this catalog; `pnpm register
 - **Looks:** Karigar/source-issue header, receipt grid with weight and labour fields, balances, images, totals and print.
 - **Writes:** REP_DATA, REP_DETL, AC_DATA, ROJ_MEL_DATA, TAX_DATA, REMARK_DATA.
 - **Web:** `/txn/repair-karigar-receipt`; `GET /repair-karigar-receipts`, `POST /repair-karigar-receipts`, `GET /repair-karigar-receipts/:vchNo`, `PUT /repair-karigar-receipts/:vchNo`, `DELETE /repair-karigar-receipts/:vchNo`, `GET /repair-karigar-receipts/:vchNo/print`. Can: create, reopen, edit, delete, print.
-- **Remaining:** Voucher CRUD exists; partial receipts, measured conservation, labour settlement, delivery guards, a saved list and a complete journey remain.
+- **Remaining:** Voucher CRUD exists; partial receipts, measured conservation, labour settlement, delivery guards, a saved list and a complete journey remain. Open: no matching browser feature module in web/apps/web/test/features/modules/.
 - **Owners:** N22, X17, P05-07.
 - **Evidence:** [TR_REP_REC.initcomp.json](../../web/apps/api/form-specs/TR_REP_REC.initcomp.json).
 
@@ -1187,8 +1187,8 @@ None. Slice N85 (gap G71) corrected the register to this catalog; `pnpm register
 - **Does:** Issues stock to an employee or touring salesperson while tracking custody.
 - **Looks:** Voucher/date/employee header, source reference, item and component grids, images, remarks and totals.
 - **Writes:** APR_DATA, APR_DETL, APR_IDTL, MAIN_STOCK, BAR_DETL.
-- **Web:** `/txn/tour`; `POST /tour/issue`, `DELETE /tour/:vchNo`. Can: create.
-- **Remaining:** The shared page only creates and does not enforce EMP ISU; reopen/edit/delete/print and employee custody continuity remain.
+- **Web:** `/txn/tour`; `POST /tour/issue`, `DELETE /tour/:vchNo`, `GET /tour/:vchNo`, `PUT /tour/:vchNo`, `GET /tour/:vchNo/lines`, `GET /tour/:vchNo/print`, `POST /tour/:vchNo/bill`. Can: create.
+- **Remaining:** The shared page only creates and does not enforce EMP ISU; reopen/edit/delete/print and employee custody continuity remain. Open: no matching browser feature module in web/apps/web/test/features/modules/.
 - **Owners:** N22, X17, P05-05, N62, X07.
 - **Evidence:** [TR_TOUR.initcomp.json](../../web/apps/api/form-specs/TR_TOUR.initcomp.json).
 
@@ -1198,8 +1198,8 @@ None. Slice N85 (gap G71) corrected the register to this catalog; `pnpm register
 - **Does:** Receives unsold stock back from an employee and closes the issued custody quantities.
 - **Looks:** Original-issue reference, employee/date header, returned item and component grids, images and fine totals.
 - **Writes:** APR_DATA, APR_DETL, APR_IDTL, MAIN_STOCK, BAR_DETL.
-- **Web:** `/txn/tour-return`; `GET /tour/:vchNo/lines`, `POST /tour/return`. Can: create.
-- **Remaining:** The approval-return writer does not establish the EMP REC book or mode; saved lifecycle, partial reconciliation, print and reversal remain.
+- **Web:** `/txn/tour-return`; `GET /tour/:vchNo/lines`, `POST /tour/return`, `GET /tour/:vchNo`, `PUT /tour/:vchNo`, `DELETE /tour/:vchNo`, `GET /tour/return/:vchNo`, `PUT /tour/return/:vchNo`, `DELETE /tour/return/:vchNo`, `GET /tour/:vchNo/print`, `GET /tour/return/:vchNo/print`, `POST /tour/:vchNo/bill`. Can: create.
+- **Remaining:** The approval-return writer does not establish the EMP REC book or mode; saved lifecycle, partial reconciliation, print and reversal remain. Open: no matching browser feature module in web/apps/web/test/features/modules/.
 - **Owners:** N22, X17, N59, N62, X07.
 - **Evidence:** [TR_TOUR.initcomp.json](../../web/apps/api/form-specs/TR_TOUR.initcomp.json).
 
@@ -1209,8 +1209,8 @@ None. Slice N85 (gap G71) corrected the register to this catalog; `pnpm register
 - **Does:** Creates touring-sales orders with specifications, components, images, advances and delivery intent.
 - **Looks:** Customer/address header, order, component, old-metal and settlement grids, delivery date, images and a saved-order list.
 - **Writes:** SL_ORD_DATA, SL_ORD_DETL, SL_ORD_IDTL, SL_PR_DETL, SL_ORD_ADJ, AC_DATA, ROJ_MEL_DATA.
-- **Web:** `/txn/tour-order`; `GET /tour-orders`, `POST /tour-orders`, `GET /tour-orders/:vchNo`, `PUT /tour-orders/:vchNo`, `DELETE /tour-orders/:vchNo`, `GET /tour-orders/confirmation`. Can: create, reopen, edit, delete, print, list.
-- **Remaining:** The saved lifecycle is strong; calculations, tenders and old metal, reservation, partial delivery, production conversion and business acceptance remain.
+- **Web:** `/txn/tour-order`; `GET /tour-orders`, `POST /tour-orders`, `GET /tour-orders/:vchNo`, `PUT /tour-orders/:vchNo`, `DELETE /tour-orders/:vchNo`, `GET /tour-orders/confirmation`, `GET /tour-orders/:vchNo/image`, `POST /tour-orders/:vchNo/image`, `DELETE /tour-orders/:vchNo/image`. Can: create, reopen, edit, delete, print, list.
+- **Remaining:** The saved lifecycle is strong; calculations, tenders and old metal, reservation, partial delivery, production conversion and business acceptance remain. Open: no matching browser feature module in web/apps/web/test/features/modules/.
 - **Owners:** X14, P05-04, N22, N44, G71, N85.
 - **Evidence:** [TR_TOUR_ORD.initcomp.json](../../web/apps/api/form-specs/TR_TOUR_ORD.initcomp.json).
 
@@ -1230,8 +1230,8 @@ None. Slice N85 (gap G71) corrected the register to this catalog; `pnpm register
 - **Does:** Bills tour stock, consumes the issued quantities and settles customer, employee, tax and tenders.
 - **Looks:** A 115-control sale form with six item, component and old-metal grids, conversion/fine panels, settlement and print.
 - **Writes:** RATE_CUT_DATA, RATE_CUT_ISU, RATE_CUT_REC, APR_DETL, BAR_DETL, SL_IDTL, MAIN_STOCK, AC_DATA, TAX_DATA, ROJ_MEL_DATA.
-- **Web:** no screen; no API. Can: none.
-- **Remaining:** The approval billing bridge is not TR_TOUR_SALE; entry, lifecycle, tenders, stock and accounting effects and the document are absent.
+- **Web:** `/txn/tour-sales`; `POST /tour-sales`, `GET /tour-sales/:vchNo`, `PUT /tour-sales/:vchNo`, `DELETE /tour-sales/:vchNo`. Can: none.
+- **Remaining:** Open: Tour Sales has no dedicated browser feature module; the shared form only enables print for wholesale sale/quotation. Tour-specific tenders, custody/source chains and desktop accounting/stock equivalence remain unverified. Closed: absent Tour Sales entry and lifecycle; TOUR SALES book guard and shared wholesale posting engine exist. Evidence: web/apps/web/app/(app)/txn/tour-sales/page.tsx, web/apps/web/components/WholesaleVoucherForm.tsx, web/apps/api/src/routes/crm.ts, web/apps/api/src/modules/sales/tourSale.ts.
 - **Owners:** G56, N70, X17, P05-05, G71, N85.
 - **Evidence:** [TR_TOUR_SALE.initcomp.json](../../web/apps/api/form-specs/TR_TOUR_SALE.initcomp.json).
 
@@ -1252,7 +1252,7 @@ None. Slice N85 (gap G71) corrected the register to this catalog; `pnpm register
 | Dhiran Report | `RP_DHRN_LOAN` | `/reports/dhiran-report` | `- - - - P L` | REPORT | P1-edition |
 | Dhrn Due | `RP_DHRN_OS` | `/reports/dhrn-outstanding` | `- - - - P L` | REPORT | P1-edition |
 | Dhrn Issue | `TR_DHRN_ISU` | `/txn/dhrn-issue` | `C - - - - -` | PARTIAL | P1-edition |
-| Dhrn Os Letter | `TR_DHRN_INTREC` | — | `- - - - - -` | MISSING | P1-edition |
+| Dhrn Os Letter | `TR_DHRN_INTREC` | `/txn/dhrn-os-letter` | `- - - - - -` | PARTIAL | P1-edition |
 | Dhrn Rec | `TR_DHRN_REC` | `/txn/dhrn-receipt` | `C - - - - -` | PARTIAL | P1-edition |
 | Intrest All | `RP_DHRN_OS` | `/reports/dhrn-outstanding` | `- - - - P L` | REPORT | P1-edition |
 | Intrest Isu All | `RP_DHRN_OS` | `/reports/dhrn-outstanding` | `- - - - P L` | REPORT | P1-edition |
@@ -1290,8 +1290,8 @@ None. Slice N85 (gap G71) corrected the register to this catalog; `pnpm register
 - **Does:** Advances a secured pledge loan and records collateral packets, valuation, custody and terms.
 - **Looks:** Voucher and borrower-image header, loan type, packet, due/interest fields, item grid and totals.
 - **Writes:** DHRN_ISU_DATA, DHRN_ISU_DETL, DHRN_DATA, AC_DATA, MAIN_STOCK, ROJ_MEL_DATA, AC_IMAGE.
-- **Web:** `/txn/dhrn-issue`; `POST /dhrn/issue`, `GET /dhrn/:isuNo/outstanding`. Can: create.
-- **Remaining:** Create only; saved reopen/edit/delete/print, packet residuals, interest/date variants and a dependency-safe collateral release are absent.
+- **Web:** `/txn/dhrn-issue`; `POST /dhrn/issue`, `GET /dhrn/:isuNo/outstanding`, `GET /dhrn/issue/:isuNo`, `PUT /dhrn/issue/:isuNo`, `DELETE /dhrn/issue/:isuNo`. Can: create.
+- **Remaining:** Open: packet residuals, interest/date variants, dependency-safe collateral release and exact document output remain unverified; no dedicated browser feature module. Closed: create-only and absent saved reopen/edit/delete; explicit load/update and VoucherList delete now exist. Evidence: web/apps/web/app/(app)/txn/dhrn-issue/page.tsx, web/apps/api/src/routes/crm.ts.
 - **Owners:** G51, N65, X24, P09-01.
 - **Evidence:** [TR_DHRN_ISU.initcomp.json](../../web/apps/api/form-specs/TR_DHRN_ISU.initcomp.json).
 
@@ -1301,8 +1301,8 @@ None. Slice N85 (gap G71) corrected the register to this catalog; `pnpm register
 - **Does:** Creates and prints a borrower outstanding letter without posting interest accounting.
 - **Looks:** Borrower/issue reference, date and computed principal and interest fields; loan-type controls are hidden.
 - **Writes:** DHRN_REC_DATA, DHRN_REC_DETL.
-- **Web:** no screen; no API. Can: none.
-- **Remaining:** The web prints a khata report (GET /dhrn/khata) instead of an OS LETTER voucher with a saved lifecycle and the DhrnOsLetter template.
+- **Web:** `/txn/dhrn-os-letter`; `GET /dhrn/os-letter`. Can: none.
+- **Remaining:** Open: the page generates a stateless outstanding letter, not the OS LETTER voucher dispatched to TR_DHRN_INTREC at MDI_FORM.cs:9583-9594. Saved OS LETTER create/reopen/edit/delete, the DhrnOsLetter template and a dedicated browser feature module remain absent. The web page comment incorrectly calls this desktop menu RP_DHRN_OS. Closed: absent page and dedicated letter endpoint; HTML/PDF outstanding-letter output exists. This does not close the desktop voucher gap. Evidence: web/apps/web/app/(app)/txn/dhrn-os-letter/page.tsx, web/apps/api/src/routes/crm.ts, web/apps/api/src/modules/dhrn/dhrnOsLetter.ts.
 - **Owners:** G51, N65, X24, G60, N75.
 - **Evidence:** [TR_DHRN_INTREC.cs:4770-4930](../../unified/src/csharp/DataCareNext/TR_DHRN_INTREC.cs#L4770-L4930).
 
@@ -1312,8 +1312,8 @@ None. Slice N85 (gap G71) corrected the register to this catalog; `pnpm register
 - **Does:** Receives principal and interest, adjusts the pledge and releases eligible collateral packets.
 - **Looks:** Issue selector, packet and dates, principal/interest/kasar/rate-cut panels, collateral grid and totals.
 - **Writes:** DHRN_REC_DATA, DHRN_REC_DETL, DHRN_DATA, DHRN_ISU_DATA, AC_DATA, MAIN_STOCK, ROJ_MEL_DATA.
-- **Web:** `/txn/dhrn-receipt`; `POST /dhrn/receipt`, `GET /dhrn/:isuNo/outstanding`. Can: create.
-- **Remaining:** Create only; exact repayment, interest, kasar and rate-cut rules, partial packet release, reopen/edit/delete/print and guards remain.
+- **Web:** `/txn/dhrn-receipt`; `POST /dhrn/receipt`, `GET /dhrn/:isuNo/outstanding`, `GET /dhrn/receipt/:vchNo`, `PUT /dhrn/receipt/:vchNo`, `DELETE /dhrn/receipt/:vchNo`. Can: create.
+- **Remaining:** Open: exact repayment, interest, kasar/rate-cut rules, partial packet release, guards and receipt print remain unverified; no dedicated browser feature module. Closed: create-only and absent saved reopen/edit/delete; explicit load/update and VoucherList delete now exist. Evidence: web/apps/web/app/(app)/txn/dhrn-receipt/page.tsx, web/apps/api/src/routes/crm.ts.
 - **Owners:** G51, N65, X24, P09-01.
 - **Evidence:** [TR_DHRN_REC.initcomp.json](../../web/apps/api/form-specs/TR_DHRN_REC.initcomp.json).
 
@@ -1345,8 +1345,8 @@ None. Slice N85 (gap G71) corrected the register to this catalog; `pnpm register
 - **Does:** Collects pledge interest without reducing principal, using the configured day, month and compound rules.
 - **Looks:** Borrower/issue reference with dates, months/days, compound toggle, interest, kasar, pending and rate-cut fields.
 - **Writes:** DHRN_REC_DATA, DHRN_REC_DETL, DHRN_DATA, AC_DATA, MAIN_STOCK, ROJ_MEL_DATA.
-- **Web:** `/txn/dhrn-interest`; `POST /dhrn/interest`, `GET /dhrn/:isuNo/outstanding`. Can: create.
-- **Remaining:** Create-only simplified screen; configured monthly/daily/compound rules, overrides, rate-cut and kasar, saved lifecycle and receipt print remain.
+- **Web:** `/txn/dhrn-interest`; `POST /dhrn/interest`, `GET /dhrn/:isuNo/outstanding`, `GET /dhrn/interest/:vchNo`, `PUT /dhrn/interest/:vchNo`, `DELETE /dhrn/interest/:vchNo`. Can: create.
+- **Remaining:** Open: configured monthly/daily/compound rules, overrides, rate-cut, kasar and the interest receipt document (Khata-Vahi is a different output) remain unverified; no dedicated browser feature module. Closed: create-only and absent saved reopen/edit/delete; explicit load/update and VoucherList delete now exist. Evidence: web/apps/web/app/(app)/txn/dhrn-interest/page.tsx, web/apps/api/src/routes/crm.ts.
 - **Owners:** G51, N65, X24, P09-01.
 - **Evidence:** [TR_DHRN_INTREC.initcomp.json](../../web/apps/api/form-specs/TR_DHRN_INTREC.initcomp.json).
 
@@ -1357,7 +1357,7 @@ None. Slice N85 (gap G71) corrected the register to this catalog; `pnpm register
 - **Looks:** Loan labels replace the pledge labels; issue reference, date/month/day, interest and payment fields.
 - **Writes:** DHRN_REC_DATA, DHRN_REC_DETL, DHRN_DATA, AC_DATA, MAIN_STOCK, ROJ_MEL_DATA.
 - **Web:** no screen; no API. Can: none.
-- **Remaining:** The shared web page posts pledge interest only; the LOAN INT ENTRY direction, settings, saved lifecycle and document are absent.
+- **Remaining:** Open: no page implements LOAN INT ENTRY (MDI_FORM.cs:9617-9628). The related /txn/dhrn-interest page restricts BookSelect to INTREST RECIVED and represents pledge interest, not the loan-direction mode; its CRUD is not evidence of Loan Intrest coverage. Loan-specific settings, lifecycle, document and feature module remain missing. No closure: reviewed the candidate shared interest page; its book-family restriction excludes this menu. Evidence: web/apps/web/app/(app)/txn/dhrn-interest/page.tsx, web/apps/api/src/modules/dhrn/dhrnInterest.ts.
 - **Owners:** G51, N65, X24, G71, N85.
 - **Evidence:** [TR_DHRN_INTREC.cs:4265-4365](../../unified/src/csharp/DataCareNext/TR_DHRN_INTREC.cs#L4265-L4365).
 
@@ -1367,8 +1367,8 @@ None. Slice N85 (gap G71) corrected the register to this catalog; `pnpm register
 - **Does:** Records a monetary loan issued outward with its principal and interest ledger direction.
 - **Looks:** Party/source-loan selector, loan type, amount, interest dates and rates, adjustments and repayment totals.
 - **Writes:** DHRN_REC_DATA, DHRN_REC_DETL, DHRN_DATA, DHRN_ISU_DATA, AC_DATA, ROJ_MEL_DATA.
-- **Web:** `/txn/loan-issue`; `POST /loan/issue`, `GET /loan/:isuNo/outstanding`. Can: create.
-- **Remaining:** Create only; book and direction, interest variants, residuals, reopen/edit/delete/print and metal side effects need certification.
+- **Web:** `/txn/loan-issue`; `POST /loan/issue`, `GET /loan/:isuNo/outstanding`, `GET /loan/issue/:vchNo`, `PUT /loan/issue/:vchNo`, `DELETE /loan/issue/:vchNo`. Can: create.
+- **Remaining:** Open: book/direction parity, interest variants, residuals, metal side effects and receipt print remain unverified; no dedicated browser feature module. Closed: create-only and absent saved reopen/edit/delete; explicit load/update and VoucherList delete now exist. Evidence: web/apps/web/app/(app)/txn/loan-issue/page.tsx, web/apps/api/src/routes/crm.ts.
 - **Owners:** G51, N65, X24.
 - **Evidence:** [TR_DHRN_REC.initcomp.json](../../web/apps/api/form-specs/TR_DHRN_REC.initcomp.json).
 
@@ -1378,8 +1378,8 @@ None. Slice N85 (gap G71) corrected the register to this catalog; `pnpm register
 - **Does:** Records a monetary loan received by the business, with the principal direction reversed.
 - **Looks:** Lender/image header, loan type, amount, dates, rate, due and descriptive fields with an item grid.
 - **Writes:** DHRN_ISU_DATA, DHRN_ISU_DETL, DHRN_DATA, AC_DATA, ROJ_MEL_DATA.
-- **Web:** `/txn/loan-received`; `POST /loan/received`, `GET /loan/:isuNo/outstanding`. Can: create.
-- **Remaining:** Create only; exact direction, interest and collateral variants, reopen/edit/delete/print and metal effects need side-by-side proof.
+- **Web:** `/txn/loan-received`; `POST /loan/received`, `GET /loan/:isuNo/outstanding`, `GET /loan/received/:isuNo`, `PUT /loan/received/:isuNo`, `DELETE /loan/received/:isuNo`. Can: create.
+- **Remaining:** Open: exact direction, interest/collateral variants, metal effects and document parity remain unverified; no dedicated browser feature module. Closed: create-only and absent saved reopen/edit/delete; explicit load/update and VoucherList delete now exist. Evidence: web/apps/web/app/(app)/txn/loan-received/page.tsx, web/apps/api/src/routes/crm.ts.
 - **Owners:** G51, N65, X24.
 - **Evidence:** [TR_DHRN_ISU.initcomp.json](../../web/apps/api/form-specs/TR_DHRN_ISU.initcomp.json).
 
@@ -1437,7 +1437,7 @@ None. Slice N85 (gap G71) corrected the register to this catalog; `pnpm register
 - **Looks:** Voucher/book/date header and a multi-line scheme/member/account grid with gold weight and rate, adjustment, bonus and less.
 - **Writes:** AD_ADJ, AD_OS, AD_MEMB, AC_DATA, ROJ_MEL_DATA, REMARK_DATA.
 - **Web:** `/txn/scheme-gold-adjust`; `POST /scheme/gold-adjust`, `GET /scheme/gold-adjust/:vchNo`, `DELETE /scheme/gold-adjust/:vchNo`. Can: create, reopen, delete.
-- **Remaining:** Create, load and delete exist; a loaded voucher cannot be edited; print, list, atomic redemption, expiry and rounding variants remain.
+- **Remaining:** Create, load and delete exist; a loaded voucher cannot be edited; print, list, atomic redemption, expiry and rounding variants remain. Open: no matching browser feature module in web/apps/web/test/features/modules/.
 - **Owners:** N23, X24, P09-04, N51, X05.
 - **Evidence:** [page.tsx:220-285](../../web/apps/web/app/%28app%29/txn/scheme-gold-adjust/page.tsx#L220-L285).
 
@@ -1448,7 +1448,7 @@ None. Slice N85 (gap G71) corrected the register to this catalog; `pnpm register
 - **Looks:** Voucher/date header and compact member-adjustment line and totals grids with employee and opening balance.
 - **Writes:** AD_ADJ, AD_OS, AD_MEMB, AC_DATA, ROJ_MEL_DATA, REMARK_DATA.
 - **Web:** `/txn/scheme`; `POST /scheme/maturity`, `GET /scheme/maturity/:vchNo`, `DELETE /scheme/maturity/:vchNo`. Can: create.
-- **Remaining:** The UI only creates; no saved reopen/edit/delete/print, full arrears/prepayment/bonus/gold/refund branches or concurrent-maturity guard.
+- **Remaining:** The UI only creates; no saved reopen/edit/delete/print, full arrears/prepayment/bonus/gold/refund branches or concurrent-maturity guard. Open: no matching browser feature module in web/apps/web/test/features/modules/.
 - **Owners:** N23, X24, P09-04, N51.
 - **Evidence:** [TR_MEMB_ADJ.initcomp.json](../../web/apps/api/form-specs/TR_MEMB_ADJ.initcomp.json).
 
@@ -1458,8 +1458,8 @@ None. Slice N85 (gap G71) corrected the register to this catalog; `pnpm register
 - **Does:** Collects monthly instalments from one or many scheme members with cash, bank and UPI detail.
 - **Looks:** Scheme/voucher header, multi-member receipt grid, member list, UPI grid, totals and a passbook button.
 - **Writes:** AD_DATA, AD_OS, AC_DATA, ROJ_MEL_DATA, UPI_DATA, USER_DATA.
-- **Web:** `/txn/scheme`; `POST /scheme/installment`, `GET /scheme/installment/:vchNo`, `DELETE /scheme/installment/:vchNo`. Can: create.
-- **Remaining:** The UI only creates; the multi-member grid, saved reopen/edit/delete/print, tender identity and a lossless instalment history remain.
+- **Web:** `/txn/scheme`; `POST /scheme/installment`, `GET /scheme/installment/:vchNo`, `DELETE /scheme/installment/:vchNo`, `PUT /scheme/installment/:vchNo`. Can: create.
+- **Remaining:** The UI only creates; the multi-member grid, saved reopen/edit/delete/print, tender identity and a lossless instalment history remain. Open: no matching browser feature module in web/apps/web/test/features/modules/.
 - **Owners:** G52, N66, X24, P09-03.
 - **Evidence:** [TR_MEMB_ENT.initcomp.json](../../web/apps/api/form-specs/TR_MEMB_ENT.initcomp.json).
 
@@ -1470,7 +1470,7 @@ None. Slice N85 (gap G71) corrected the register to this catalog; `pnpm register
 - **Looks:** The normal entry grids with opening-book semantics and passbook controls.
 - **Writes:** AD_DATA, AD_OS, AC_DATA, ROJ_MEL_DATA, UPI_DATA, USER_DATA.
 - **Web:** `/txn/scheme`; `POST /scheme/opening`, `DELETE /scheme/opening/:vchNo`. Can: create.
-- **Remaining:** A create toggle only; no saved read/edit/delete/print, multi-member opening grid, historical-term continuation or posting comparison.
+- **Remaining:** A create toggle only; no saved read/edit/delete/print, multi-member opening grid, historical-term continuation or posting comparison. Open: no matching browser feature module in web/apps/web/test/features/modules/.
 - **Owners:** G52, N66, X24, N27, X30.
 - **Evidence:** [TR_MEMB_ENT.initcomp.json](../../web/apps/api/form-specs/TR_MEMB_ENT.initcomp.json).
 
@@ -1481,7 +1481,7 @@ None. Slice N85 (gap G71) corrected the register to this catalog; `pnpm register
 - **Looks:** Three-tab member form: identity/address/contact, dates/KYC/nominee, bank/reference, balances, photo/QR and a list.
 - **Writes:** AD_MEMB.
 - **Web:** `/txn/scheme`; `POST /scheme/enroll`, `DELETE /scheme/enroll`. Can: create.
-- **Remaining:** Enrolment can create a member, but there is no AD_MEMB master list, edit, delete or print; the web 'Members' list shows loyalty POINT data.
+- **Remaining:** Enrolment can create a member, but there is no AD_MEMB master list, edit, delete or print; the web 'Members' list shows loyalty POINT data. Open: no matching browser feature module in web/apps/web/test/features/modules/.
 - **Owners:** G52, N66, X24, G71, N85.
 - **Evidence:** [MS_MEMB.initcomp.json](../../web/apps/api/form-specs/MS_MEMB.initcomp.json).
 
@@ -1513,7 +1513,7 @@ None. Slice N85 (gap G71) corrected the register to this catalog; `pnpm register
 - **Looks:** Search list plus code/name and scheme amount/month/type/bonus/account/heading/remark/image fields.
 - **Writes:** AD_MAST.
 - **Web:** `/masters/schemes`; `GET /masters/:name`, `POST /masters/:name`, `PUT /masters/:name`, `DELETE /masters/:name`. Can: create, reopen, edit, delete, list.
-- **Remaining:** Generic CRUD exposes the columns; mode defaults, image/reset actions, dependency guards, print, term continuation and the Next25 AD_MAST.BANK_AC column remain.
+- **Remaining:** Generic CRUD exposes the columns; mode defaults, image/reset actions, dependency guards, print, term continuation and the Next25 AD_MAST.BANK_AC column remain. Open: no matching browser feature module in web/apps/web/test/features/modules/.
 - **Owners:** X24, P09-03, X10, G70, N84.
 - **Evidence:** [MS_PRODUCT.initcomp.json](../../web/apps/api/form-specs/MS_PRODUCT.initcomp.json).
 
@@ -1576,7 +1576,7 @@ None. Slice N85 (gap G71) corrected the register to this catalog; `pnpm register
 - **Looks:** A single large process grid with an inline editor and Save/Delete/Print/Menu Reset/Entry Delete controls.
 - **Writes:** MFG_MAST, BOOK_DATA, MENU_DATA, USER_SET.
 - **Web:** `/masters/mfg`; `GET /masters/:name`, `POST /masters/:name`, `PUT /masters/:name`, `DELETE /masters/:name`. Can: create, reopen, edit, delete, list.
-- **Remaining:** Generic MFG_MAST CRUD omits the process-grid side effects on books, menus and orders, entry deletion, print and stage-family acceptance.
+- **Remaining:** Generic MFG_MAST CRUD omits the process-grid side effects on books, menus and orders, entry deletion, print and stage-family acceptance. Open: no matching browser feature module in web/apps/web/test/features/modules/.
 - **Owners:** G57, N71, X23, P08-01, X10.
 - **Evidence:** [MS_MFG_MAST.initcomp.json](../../web/apps/api/form-specs/MS_MFG_MAST.initcomp.json).
 
@@ -2183,7 +2183,7 @@ None. Slice N85 (gap G71) corrected the register to this catalog; `pnpm register
 - **Looks:** Month dates and a bank selector above cheque rows, running balances, clearance dates and a balance-check action.
 - **Writes:** AC_DATA, CASH_DATA, SL_DATA, PR_DATA, AD_DATA, UPI_DATA.
 - **Web:** `/txn/bank-recon`; `GET /bank-recon`, `POST /bank-recon/clear`. Can: edit, list.
-- **Remaining:** No Print, per-row running balance or the F1-today clearance shortcut; a side-by-side reconciliation remains.
+- **Remaining:** No Print, per-row running balance or the F1-today clearance shortcut; a side-by-side reconciliation remains. Open: no matching browser feature module in web/apps/web/test/features/modules/.
 - **Owners:** X16, P06-01, X07, N29, X33.
 - **Evidence:** [KB_other.md:430-491](../../project-memory/video-research/_kb/KB_other.md#L430-L491).
 
@@ -2194,7 +2194,7 @@ None. Slice N85 (gap G71) corrected the register to this catalog; `pnpm register
 - **Looks:** Voucher/date header and tag lines with source and destination counter, weights and totals.
 - **Writes:** BAR_CAN_DATA, BAR_CAN_DETL, BAR_DETL, MAIN_STOCK, TAG_IMAGE_DATA.
 - **Web:** `/txn/counter-transfer`; `POST /stock/counter-transfer`, `DELETE /stock/counter-transfer/:vchNo`. Can: create, delete.
-- **Remaining:** Create and delete exist; configured-book validation, saved browse/edit/print, identity and the cross-counter comparison are incomplete.
+- **Remaining:** Create and delete exist; configured-book validation, saved browse/edit/print, identity and the cross-counter comparison are incomplete. Open: no matching browser feature module in web/apps/web/test/features/modules/.
 - **Owners:** X18, P07-01, G40, G41, N59, N25.
 - **Evidence:** [TR_PHYSTK.cs:4468-4588](../../unified/src/csharp/DataCareNext/TR_PHYSTK.cs#L4468-L4588).
 
@@ -2216,7 +2216,7 @@ None. Slice N85 (gap G71) corrected the register to this catalog; `pnpm register
 - **Looks:** Utility panel with transfer/reset/opening/bar-data actions, selectors and status/progress controls.
 - **Writes:** SL_DATA, PR_DATA, BAR_DATA, BAR_DETL, AC_MAST.
 - **Web:** `/utilities/data-export`; `GET /utilities/data-export/preview`, `GET /utilities/data-export/download`, `POST /utilities/data-export/mark-exported`, `POST /utilities/data-export/reset-flags`. Can: edit, print, list.
-- **Remaining:** DATA_TRFR packaging and flags exist, but not every transfer/opening/retransfer branch or a target-database artifact comparison.
+- **Remaining:** DATA_TRFR packaging and flags exist, but not every transfer/opening/retransfer branch or a target-database artifact comparison. Open: no matching browser feature module in web/apps/web/test/features/modules/.
 - **Owners:** N26, X27, P11-01.
 - **Evidence:** [UT_EXPORT.cs:1259-2278](../../unified/src/csharp/DataCareNext/UT_EXPORT.cs#L1259-L2278).
 
@@ -2227,7 +2227,7 @@ None. Slice N85 (gap G71) corrected the register to this catalog; `pnpm register
 - **Looks:** Dense maintenance dashboard of source/company/year/date selectors and import/reset buttons.
 - **Writes:** AC_MAST, ITEM_MAST, BAR_DATA, BAR_DETL, SL_DATA, PR_DATA.
 - **Web:** `/masters/accounts`; `POST /masters/:name/import`. Can: create.
-- **Remaining:** Only generic master-row import exists; historical vouchers, openings, tag/stock, scheme/loan and restartable conversion are absent.
+- **Remaining:** Only generic master-row import exists; historical vouchers, openings, tag/stock, scheme/loan and restartable conversion are absent. Open: no matching browser feature module in web/apps/web/test/features/modules/.
 - **Owners:** N26, X27, P11-01, X10, P03-05.
 - **Evidence:** [UT_IMPORT.cs:3457-4363](../../unified/src/csharp/DataCareNext/UT_IMPORT.cs#L3457-L4363).
 
@@ -2238,7 +2238,7 @@ None. Slice N85 (gap G71) corrected the register to this catalog; `pnpm register
 - **Looks:** From/to dates and a compact export panel.
 - **Writes:** SL_DATA, SL_DETL, AC_MAST, ITEM_MAST, BOOK_DATA.
 - **Web:** `/utilities/e-invoice`; `GET /einvoice/export.xlsx`. Can: print.
-- **Remaining:** Workbook sheets exist, but the desktop columns, fixed-book behaviour, formatting and artifact equality are uncertified.
+- **Remaining:** Workbook sheets exist, but the desktop columns, fixed-book behaviour, formatting and artifact equality are uncertified. Open: no matching browser feature module in web/apps/web/test/features/modules/.
 - **Owners:** N26, X27, N57, G37.
 - **Evidence:** [UT_E_INVOICE.cs:1285-1465](../../unified/src/csharp/DataCareNext/UT_E_INVOICE.cs#L1285-L1465).
 
@@ -2249,7 +2249,7 @@ None. Slice N85 (gap G71) corrected the register to this catalog; `pnpm register
 - **Looks:** Import/reset dashboard; the web adds an as-of date, impact counts and typed confirmation.
 - **Writes:** SL_DATA, BAR_DATA, BAR_DETL, MAIN_STOCK, APR_DETL.
 - **Web:** `/utilities/estimate-reset`; `POST /utilities/estimate-reset/preview`, `POST /utilities/estimate-reset/apply`. Can: delete, list.
-- **Remaining:** The scoped reset is implemented; registration-specific branches and a full reference-graph and recovery comparison remain.
+- **Remaining:** The scoped reset is implemented; registration-specific branches and a full reference-graph and recovery comparison remain. Open: no matching browser feature module in web/apps/web/test/features/modules/.
 - **Owners:** N26, X27, P11-01.
 - **Evidence:** [page.tsx:41-185](../../web/apps/web/app/%28app%29/utilities/estimate-reset/page.tsx#L41-L185).
 
@@ -2259,8 +2259,8 @@ None. Slice N85 (gap G71) corrected the register to this catalog; `pnpm register
 - **Does:** Bulk-updates making rate, labour percentage, MRP and wastage for items and existing tags.
 - **Looks:** Group selector above old/new labour, percentage, MRP and wastage columns.
 - **Writes:** ITEM_MAST, BAR_DETL, BAR_IDTL, GROUP_MAST, PRODUCT_MAST.
-- **Web:** `/masters/labour-update`; `GET /labour-update`, `POST /labour-update`. Can: edit, list.
-- **Remaining:** Changes four ITEM_MAST fields only; unsold-tag propagation, labour-master modes and multi-slab semantics remain.
+- **Web:** `/masters/labour-update`; `GET /labour-update`, `POST /labour-update`, `GET /labour-slabs`, `POST /labour-slabs`. Can: edit, list.
+- **Remaining:** Open: unsold-tag propagation, labour-master modes and desktop multi-slab semantic parity remain unverified; the page exposes item updates and ITM_WT_MAST weight slabs. Closed: claim that the screen changes only four ITEM_MAST columns; slab read/save controls also exist. Evidence: web/apps/web/app/(app)/masters/labour-update/page.tsx. Open: no matching browser feature module in web/apps/web/test/features/modules/.
 - **Owners:** G55, N69, X10, P03-02.
 - **Evidence:** [KB_other.md:375-429](../../project-memory/video-research/_kb/KB_other.md#L375-L429).
 
@@ -2270,8 +2270,8 @@ None. Slice N85 (gap G71) corrected the register to this catalog; `pnpm register
 - **Does:** Posts book-driven ledger adjustments with narration and balancing amount and metal effects.
 - **Looks:** Voucher/date header, account adjustment grid, employee/description fields and amount/metal totals.
 - **Writes:** LDR_ADJ_DATA, AC_DATA, ROJ_MEL_DATA, REMARK_DATA, TEMP_BOOK_DATA.
-- **Web:** `/txn/ledger-adjust`; `POST /ledger-adjust`, `DELETE /ledger-adjust/:vchNo`. Can: create.
-- **Remaining:** Create only; configured-book enforcement, saved read/edit/delete/print and the desktop write-set comparison remain.
+- **Web:** `/txn/ledger-adjust`; `POST /ledger-adjust`, `DELETE /ledger-adjust/:vchNo`, `GET /ledger-adjust/:vchNo`, `PUT /ledger-adjust/:vchNo`. Can: create.
+- **Remaining:** Open: configured-book enforcement, voucher print and complete desktop ledger/Rojmel write-set comparison remain unverified; no dedicated browser feature module. Closed: create-only and absent saved read/edit/delete; load/update and VoucherList delete exist. Evidence: web/apps/web/app/(app)/txn/ledger-adjust/page.tsx.
 - **Owners:** X16, P06-02, G40, G41, N59, G71, N85.
 - **Evidence:** [TR_LEDR_ADJ.initcomp.json](../../web/apps/api/form-specs/TR_LEDR_ADJ.initcomp.json).
 
@@ -2281,7 +2281,7 @@ None. Slice N85 (gap G71) corrected the register to this catalog; `pnpm register
 - **Does:** Creates generated tags with item, counter, design, weights, components, HUID and image data.
 - **Looks:** Voucher header, rich tag grid, stone sub-grid, totals, print-template controls and image tools.
 - **Writes:** BAR_DATA, BAR_DETL, BAR_IDTL, MAIN_STOCK, TAG_IMAGE_DATA, TAG_SET, DM_DATA.
-- **Web:** `/txn/tag-opening`; `POST /stock/tag-opening`, `GET /stock/tag-opening/:vchNo`, `PUT /stock/tag-opening/:vchNo`, `DELETE /stock/tag-opening/:vchNo`. Can: create, reopen, edit, delete.
+- **Web:** `/txn/tag-opening`; `POST /stock/tag-opening`, `GET /stock/tag-opening/:vchNo`, `PUT /stock/tag-opening/:vchNo`, `DELETE /stock/tag-opening/:vchNo`, `POST /stock/tag-opening/:vchNo/print`. Can: create, reopen, edit, delete.
 - **Remaining:** Rights, two-session, retry, rollback and counter-mandatory cases are pending; tag label print is missing, and the karigar block (G217) is not yet filled from orders, manufacturing or a lot, nor hidden by MsUserKrTouchHide.
 - **Owners:** G46, N63, G54, N68, X18, G71, N85, G214, G215, G216, N203, G217, N204.
 - **Evidence:** [TR_TAG_OPBL.md](../../project-memory/catalogs/forms/TR_TAG_OPBL.md).
@@ -2304,7 +2304,7 @@ None. Slice N85 (gap G71) corrected the register to this catalog; `pnpm register
 - **Looks:** Voucher/date scanning grid with Reset Stock and Report; an All/Diff discrepancy grid.
 - **Writes:** BAR_CAN_DATA, BAR_CAN_DETL, BAR_DETL, MAIN_STOCK, APR_DETL.
 - **Web:** `/txn/physical-stock`; `POST /stock/physical-stock`, `GET /stock/physical-stock/:vchNo`, `PUT /stock/physical-stock/:vchNo`, `DELETE /stock/physical-stock/:vchNo`. Can: create, reopen, edit, delete.
-- **Remaining:** Count vouchers exist; snapshot/finalisation policy, Out/Approval classification, reset/reversal and report consistency are not accepted.
+- **Remaining:** Count vouchers exist; snapshot/finalisation policy, Out/Approval classification, reset/reversal and report consistency are not accepted. Open: no matching browser feature module in web/apps/web/test/features/modules/.
 - **Owners:** N20, X22, P07-06, G71, N85.
 - **Evidence:** [KB_other.md:214-276](../../project-memory/video-research/_kb/KB_other.md#L214-L276).
 
@@ -2315,7 +2315,7 @@ None. Slice N85 (gap G71) corrected the register to this catalog; `pnpm register
 - **Looks:** Account, remark, entry and reminder dates and a saved-reminder list with voucher actions.
 - **Writes:** REM_DATA, TEMP_BOOK_DATA, AC_MAST, EMP_MAST.
 - **Web:** `/utilities/reminder-entry`; `GET /reminder-entries`, `POST /reminder-entries`, `DELETE /reminder-entries/:vchNo`. Can: create, delete, list.
-- **Remaining:** Create, list and delete exist; reopen/edit/print, exact numbering and scheduled reminder ownership need verification.
+- **Remaining:** Create, list and delete exist; reopen/edit/print, exact numbering and scheduled reminder ownership need verification. Open: no matching browser feature module in web/apps/web/test/features/modules/.
 - **Owners:** X29, P11-05, N29, X33.
 - **Evidence:** [KB_other.md:557-584](../../project-memory/video-research/_kb/KB_other.md#L557-L584).
 
@@ -2326,7 +2326,7 @@ None. Slice N85 (gap G71) corrected the register to this catalog; `pnpm register
 - **Looks:** Recipient/filter grid, message-template editor, language/options panel and send controls.
 - **Writes:** MSG_MAST, AC_MAST, AD_MEMB, ADD_MAST, LEDR_AC_DATA, AC_DATA.
 - **Web:** `/integrations`; `POST /integrations/notify`. Can: create.
-- **Remaining:** Generic notify omits campaign filters, templates and history; an unconfigured provider can report a simulated delivery as sent.
+- **Remaining:** Generic notify omits campaign filters, templates and history; an unconfigured provider can report a simulated delivery as sent. Open: no matching browser feature module in web/apps/web/test/features/modules/.
 - **Owners:** G33, N54, X28, P11-03, N25.
 - **Evidence:** [UT_SMS.cs:3218-3222](../../unified/src/csharp/DataCareNext/UT_SMS.cs#L3218-L3222).
 
@@ -2348,7 +2348,7 @@ None. Slice N85 (gap G71) corrected the register to this catalog; `pnpm register
 - **Looks:** Voucher header and a certificate grid with colour, purity, size, certificate number, remarks, charges and image.
 - **Writes:** BAR_CAN_DATA, BAR_CAN_DETL, BAR_DETL, TAG_IMAGE_DATA, TEMP_BOOK_DATA.
 - **Web:** `/txn/stone-dm-cf`; `POST /stock/stone-dm-cf`, `GET /stock/stone-dm-cf/:vchNo`, `PUT /stock/stone-dm-cf/:vchNo`, `DELETE /stock/stone-dm-cf/:vchNo`, `GET /stock/stone-dm-cf/source-list`. Can: create, reopen, edit, delete, print.
-- **Remaining:** The lifecycle exists; file-share image import and the DiamondSf Crystal certificate need artifact and device comparison.
+- **Remaining:** The lifecycle exists; file-share image import and the DiamondSf Crystal certificate need artifact and device comparison. Open: no matching browser feature module in web/apps/web/test/features/modules/.
 - **Owners:** N25, X28, P11-02, G60, N75, X25.
 - **Evidence:** [TR_PHYSTK.cs:2014-2048](../../unified/src/csharp/DataCareNext/TR_PHYSTK.cs#L2014-L2048).
 
@@ -2359,7 +2359,7 @@ None. Slice N85 (gap G71) corrected the register to this catalog; `pnpm register
 - **Looks:** Voucher/date/account/employee header and a tag adjustment grid with description and totals.
 - **Writes:** BAR_CAN_DATA, BAR_CAN_DETL, BAR_CAN_IDTL, BAR_DETL, MAIN_STOCK.
 - **Web:** `/txn/tag-adjust`; `POST /stock/tag-adjust`, `GET /stock/tag-adjust/:vchNo`, `PUT /stock/tag-adjust/:vchNo`, `DELETE /stock/tag-adjust/:vchNo`. Can: create, reopen, edit, delete.
-- **Remaining:** CRUD exists but no saved list or print; source-derived behaviour and the non-restoring delete need artifact and business acceptance.
+- **Remaining:** CRUD exists but no saved list or print; source-derived behaviour and the non-restoring delete need artifact and business acceptance. Open: no matching browser feature module in web/apps/web/test/features/modules/.
 - **Owners:** X18, P07-01, P07-02, N29, X33.
 - **Evidence:** [TR_TAG_CAN.initcomp.json](../../web/apps/api/form-specs/TR_TAG_CAN.initcomp.json).
 
@@ -2392,7 +2392,7 @@ None. Slice N85 (gap G71) corrected the register to this catalog; `pnpm register
 - **Looks:** Parent-tag grid, child output and component grids, image controls and absorption/settlement totals.
 - **Writes:** LBR_DATA, LBR_ISU_DETL, LBR_REC_DETL, BAR_DATA, BAR_DETL, BAR_IDTL, MAIN_STOCK, AC_DATA, ROJ_MEL_DATA, DM_DATA.
 - **Web:** `/txn/tag-split`; `GET /stock/tag-split`, `POST /stock/tag-split`, `GET /stock/tag-split/:vchNo`, `PUT /stock/tag-split/:vchNo`, `DELETE /stock/tag-split/:vchNo`, `GET /stock/tag-split/source`. Can: create, reopen, edit, delete, list.
-- **Remaining:** The engineering lifecycle passed (N19); expected rows are source-derived, child numbering intentionally differs, and desktop, business and label acceptance remain.
+- **Remaining:** The engineering lifecycle passed (N19); expected rows are source-derived, child numbering intentionally differs, and desktop, business and label acceptance remain. Open: no matching browser feature module in web/apps/web/test/features/modules/.
 - **Owners:** N19, X20, P07-04, N25, N75.
 - **Evidence:** [TR_TAG_SPLIT.cs:9960-10770](../../unified/src/csharp/DataCareNext/TR_TAG_SPLIT.cs#L9960-L10770).
 
@@ -2403,7 +2403,7 @@ None. Slice N85 (gap G71) corrected the register to this catalog; `pnpm register
 - **Looks:** Voucher/date scan grid with tag weights and the destination item, a component sub-grid and totals.
 - **Writes:** BAR_CAN_DATA, BAR_CAN_DETL, BAR_CAN_IDTL, BAR_DETL, BAR_IDTL, MAIN_STOCK.
 - **Web:** `/txn/tag-transfer`; `GET /stock/tag-transfer`, `POST /stock/tag-transfer`, `GET /stock/tag-transfer/:vchNo`, `PUT /stock/tag-transfer/:vchNo`, `DELETE /stock/tag-transfer/:vchNo`, `GET /stock/tag-transfer/source`. Can: create, reopen, edit, delete, list.
-- **Remaining:** The full web lifecycle exists (N18), but the expected BAR_CAN and stock rows are source-derived without desktop replay or business acceptance.
+- **Remaining:** The full web lifecycle exists (N18), but the expected BAR_CAN and stock rows are source-derived without desktop replay or business acceptance. Open: no matching browser feature module in web/apps/web/test/features/modules/.
 - **Owners:** N18, X18, P07-03.
 - **Evidence:** [KB_other.md:322-374](../../project-memory/video-research/_kb/KB_other.md#L322-L374).
 
@@ -2425,7 +2425,7 @@ None. Slice N85 (gap G71) corrected the register to this catalog; `pnpm register
 - **Looks:** Book/range/new-number selectors with a preview grid and guarded apply controls.
 - **Writes:** SL_DATA, SL_DETL, SL_IDTL, PR_DATA, PR_DETL, PR_IDTL, BILL_OS_DATA, CASH_DATA, UPI_DATA, RATE_CUT_DATA.
 - **Web:** `/utilities/voucher-renumber`; `GET /utilities/vch-renumber/preview`, `POST /utilities/vch-renumber/apply`. Can: edit, list.
-- **Remaining:** Preview/apply exists; the ownership graph, collisions, interruption/retry, rollback, audit and post-renumber report integrity remain.
+- **Remaining:** Preview/apply exists; the ownership graph, collisions, interruption/retry, rollback, audit and post-renumber report integrity remain. Open: no matching browser feature module in web/apps/web/test/features/modules/.
 - **Owners:** N26, X27, P11-01.
 - **Evidence:** [UT_VCH_RE_NUMBR.cs:1898-2013](../../unified/src/csharp/DataCareNext/UT_VCH_RE_NUMBR.cs#L1898-L2013).
 
@@ -2436,7 +2436,7 @@ None. Slice N85 (gap G71) corrected the register to this catalog; `pnpm register
 - **Looks:** Recipient/filter grid, template/message/media controls, preview and send/status panels.
 - **Writes:** MSG_MAST, AC_MAST, AD_MEMB, LEDR_AC_DATA, POINT_MAST, AC_DATA.
 - **Web:** `/integrations`; `POST /integrations/notify`. Can: create.
-- **Remaining:** Generic notify omits campaign selection, template/media lifecycle, delivery history and webhooks and truthful failure/retry states.
+- **Remaining:** Generic notify omits campaign selection, template/media lifecycle, delivery history and webhooks and truthful failure/retry states. Open: no matching browser feature module in web/apps/web/test/features/modules/.
 - **Owners:** G33, N54, X28, P11-03, N25.
 - **Evidence:** [UT_WAPP_WITH_API.initcomp.json](../../web/apps/api/form-specs/UT_WAPP_WITH_API.initcomp.json).
 
@@ -2444,7 +2444,7 @@ None. Slice N85 (gap G71) corrected the register to this catalog; `pnpm register
 
 | Menu | Desktop form | Web screen | C R E D P L | Status | Phase |
 |---|---|---|---|---|---|
-| Cust Entry | `UT_CUST_ENTRY` | — | `- - - - - -` | MISSING | P1-edition |
+| Cust Entry | `UT_CUST_ENTRY` | `/txn/customer-entry` | `- - - - - -` | PARTIAL | P1-edition |
 | Cust Report | `RP_CUST_CRM` | `/reports/customer-crm` | `- - - - P L` | REPORT | P1-edition |
 
 ### Cust Entry
@@ -2453,8 +2453,8 @@ None. Slice N85 (gap G71) corrected the register to this catalog; `pnpm register
 - **Does:** Records customer interactions, item interest, employee assignment and follow-up remarks.
 - **Looks:** Employee and voucher/date header, item-remark field, customer rows and an item-detail totals grid.
 - **Writes:** CUST_DATA, CUST_DETL, EMP_MAST, AC_MAST, ITEM_MAST.
-- **Web:** no screen; no API. Can: none.
-- **Remaining:** No web equivalent of the UT_CUST_ENTRY create/reopen/edit/delete/print workflow; the register maps a report instead.
+- **Web:** `/txn/customer-entry`; `POST /crm/customer-entries`, `GET /crm/customer-entries/:employeeCode/:vchNo`, `PUT /crm/customer-entries/:employeeCode/:vchNo`, `DELETE /crm/customer-entries/:employeeCode/:vchNo`. Can: none.
+- **Remaining:** Open: the employee-scoped customer-entry CRUD page has no Print control or dedicated browser feature module; desktop layout, numbering, item-history/reminder downstream effects and exact persisted-row parity remain unverified. Closed: absent UT_CUST_ENTRY create/reopen/edit/delete workflow. Evidence: web/apps/web/app/(app)/txn/customer-entry/page.tsx, web/apps/api/src/routes/crm.ts, web/apps/api/src/modules/crm/customerEntry.ts.
 - **Owners:** G56, N70, X29, P11-05, G71, N85.
 - **Evidence:** [UT_CUST_ENTRY.cs:1944-2110](../../unified/src/csharp/DataCareNext/UT_CUST_ENTRY.cs#L1944-L2110).
 
