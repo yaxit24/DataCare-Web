@@ -42,6 +42,9 @@ export interface IdempotentRoute {
 
 /** Every voucher create guarded so far. Literal paths: the route-policy test matches them to registrations. */
 export const IDEMPOTENT_CREATE_ROUTES: readonly IdempotentRoute[] = Object.freeze([
+  // Owner decision 2B: the retail sale writes its linked URD purchase in the same transaction; a replayed save must
+  // not post a second sale or a second purchase.
+  { method: 'POST', url: '/sales', status: 201, menus: ['Transaction/Sales'] },
   { method: 'POST', url: '/wholesale-sales', status: 201, menus: ['Transaction/Wh Sales'] },
   { method: 'POST', url: '/sales-orders', status: 201, menus: ['Transaction/Sales Order'] },
   { method: 'POST', url: '/tour/issue', status: 201, menus: ['Transaction/Approval Isu'] },

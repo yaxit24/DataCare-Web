@@ -78,6 +78,7 @@ import {
   normalizePurchaseExplicitFine,
   billTotals,
   toIsoDate,
+  dotNetRoundDouble,
   type LabourType,
   type BillTotals,
 } from '@datacare/core';
@@ -232,6 +233,7 @@ export interface PurchaseInput {
   taxCode?: string;
   interState: boolean; // checked against persisted AC_MAST.AC_GST_TYPE; never authoritative
   urd?: boolean; // unregistered-dealer purchase — no input GST (tax forced to 0)
+  linkedCashParty?: boolean; // set only by linkedOldPurchaseSale.ts, never from a request body
   rateUnfix?: boolean; // PR_DATA.RATE_UNFIX; gates the workflow-specific fine ledger policy
   purchaseAc?: string; // purchase expense ledger (default 'PURCHASE')
   taxAc?: string; // GST input ledger (default 'GST-INPUT')
@@ -878,6 +880,12 @@ async function writePurchaseTx(
       throw new PurchaseValidationError(`${label} does not match BOOK_DETL configuration`);
     return configured;
   };
+  // TR_PURC.cs:15087-15090: a sale's linked purchase on 00050 is paid in cash, Round([0,3]-[1,3]+[2,3]-[9,3], 0).
+  if (input.linkedCashParty && input.acCode === '00050')
+    input = {
+      ...input,
+      cashAmt: dotNetRoundDouble(totals.taxable + totals.tax - num(input.kasar), 0),
+    };
   const controlAc =
     isPurchaseQuotation || totals.total + tcs === 0
       ? purchaseAc
@@ -2307,49 +2315,59 @@ export async function getPurchase(
   requestedVoucherNo: number | string,
 ): Promise<Record<string, unknown>> {
   completePurchaseScope(scope);
+  return withTxBudget(prisma, scope.tenantId, 'read', (tx: any) =>
+    getPurchaseTx(tx, scope, requestedVoucherNo),
+  );
+}
+
+/** The purchase read inside a caller's transaction (the sale's linked old-gold read). */
+export async function getPurchaseTx(
+  tx: any,
+  scope: VoucherScope,
+  requestedVoucherNo: number | string,
+) {
+  completePurchaseScope(scope);
   const voucherNo = formatVoucherNo(requestedVoucherNo);
-  return withTxBudget(prisma, scope.tenantId, 'read', async (tx: any) => {
-    const params = purchaseParams(scope, voucherNo);
-    const where = `WHERE tenant_id=$1 AND "CO_CODE"=$2 AND "LC_CODE"=$3 AND "CO_YEAR"=$4
+  const params = purchaseParams(scope, voucherNo);
+  const where = `WHERE tenant_id=$1 AND "CO_CODE"=$2 AND "LC_CODE"=$3 AND "CO_YEAR"=$4
           AND "CO_BOOK"=$5 AND "VCH_NO"=$6`;
-    // WP-28 (D6): every column, as the desktop reopens (TR_PURC_HM.cs:7216 `SELECT *`); see purchaseReopen.ts.
-    const headers: Array<Record<string, unknown>> = await tx.$queryRawUnsafe(
-      `SELECT *,"VCH_DATE"::text AS "VCH_DATE_TEXT" FROM "PR_DATA" ${where}`,
-      ...params,
+  // WP-28 (D6): every column, as the desktop reopens (TR_PURC_HM.cs:7216 `SELECT *`); see purchaseReopen.ts.
+  const headers: Array<Record<string, unknown>> = await tx.$queryRawUnsafe(
+    `SELECT *,"VCH_DATE"::text AS "VCH_DATE_TEXT" FROM "PR_DATA" ${where}`,
+    ...params,
+  );
+  if (headers.length !== 1) {
+    throw new PurchaseValidationError(
+      headers.length
+        ? `purchase voucher is ambiguous: ${voucherNo}`
+        : `purchase voucher not found: ${voucherNo}`,
     );
-    if (headers.length !== 1) {
-      throw new PurchaseValidationError(
-        headers.length
-          ? `purchase voucher is ambiguous: ${voucherNo}`
-          : `purchase voucher not found: ${voucherNo}`,
-      );
-    }
-    const details: Array<Record<string, unknown>> = await tx.$queryRawUnsafe(
-      `SELECT * FROM "PR_DETL" ${where} ORDER BY "SR_NO"`,
-      ...params,
-    );
-    const tags: Array<Record<string, unknown>> = await tx.$queryRawUnsafe(
-      `SELECT * FROM "BAR_DETL" ${where} ORDER BY "SR_NO"`,
-      ...params,
-    );
-    // Stone sub-detail (PR_IDTL): an edit rebuilds it from the request, so the reader must return every row.
-    const stoneRows: Array<Record<string, unknown>> = await tx.$queryRawUnsafe(
-      `SELECT * FROM "PR_IDTL" ${where} ORDER BY "SR_NO","ISR_NO"`,
-      ...params,
-    );
-    const stonesBySrNo = new Map<number, Array<Record<string, unknown>>>();
-    for (const row of stoneRows) {
-      const list = stonesBySrNo.get(num(row.SR_NO)) ?? [];
-      list.push(purchaseStoneView(row));
-      stonesBySrNo.set(num(row.SR_NO), list);
-    }
-    return {
-      ...purchaseHeaderView(headers[0]!, await hasWebRoundOffLegTx(tx, params)),
-      lines: details.map((row) => purchaseLineView(row, stonesBySrNo.get(num(row.SR_NO)) ?? [])),
-      tags: tags.map(purchaseTagView),
-      version: await purchaseVersionTx(tx, scope, voucherNo), // N51: sent back as expectedVersion
-    };
-  });
+  }
+  const details: Array<Record<string, unknown>> = await tx.$queryRawUnsafe(
+    `SELECT * FROM "PR_DETL" ${where} ORDER BY "SR_NO"`,
+    ...params,
+  );
+  const tags: Array<Record<string, unknown>> = await tx.$queryRawUnsafe(
+    `SELECT * FROM "BAR_DETL" ${where} ORDER BY "SR_NO"`,
+    ...params,
+  );
+  // Stone sub-detail (PR_IDTL): an edit rebuilds it from the request, so the reader must return every row.
+  const stoneRows: Array<Record<string, unknown>> = await tx.$queryRawUnsafe(
+    `SELECT * FROM "PR_IDTL" ${where} ORDER BY "SR_NO","ISR_NO"`,
+    ...params,
+  );
+  const stonesBySrNo = new Map<number, Array<Record<string, unknown>>>();
+  for (const row of stoneRows) {
+    const list = stonesBySrNo.get(num(row.SR_NO)) ?? [];
+    list.push(purchaseStoneView(row));
+    stonesBySrNo.set(num(row.SR_NO), list);
+  }
+  return {
+    ...purchaseHeaderView(headers[0]!, await hasWebRoundOffLegTx(tx, params)),
+    lines: details.map((row) => purchaseLineView(row, stonesBySrNo.get(num(row.SR_NO)) ?? [])),
+    tags: tags.map(purchaseTagView),
+    version: await purchaseVersionTx(tx, scope, voucherNo), // N51: sent back as expectedVersion
+  };
 }
 
 export interface ConsignmentReceiptFilter {

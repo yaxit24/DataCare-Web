@@ -70,11 +70,13 @@ function requireLink(link: SaleLink): SaleLink {
 /**
  * Every purchase linked to a sale, by an exact match on all four SL_BILL_* columns (never the desktop's
  * date/amount/party heuristic, TR_SALE.cs:15840-15852). Only MAIN_BOOK PURCHASE books: a CON PUR purchase reuses the
- * same columns for its consignment receipt (TR_PR_SL_UAE) and is never a sale link. Rows are locked.
+ * same columns for its consignment receipt (TR_PR_SL_UAE) and is never a sale link. Rows are locked unless a reader
+ * passes `lock: false`.
  */
 export async function findLinkedPurchasesTx(
   tx: any,
   saleKey: SaleKey,
+  opts: { lock?: boolean } = {},
 ): Promise<LinkedPurchaseRef[]> {
   const link = requireLink(saleKey);
   const rows: Array<Record<string, unknown>> = await tx.$queryRawUnsafe(
@@ -88,7 +90,7 @@ export async function findLinkedPurchasesTx(
                      WHERE b.tenant_id=p.tenant_id AND b."CO_CODE"=p."CO_CODE" AND b."LC_CODE"=p."LC_CODE"
                        AND btrim(b."CO_BOOK")=btrim(p."CO_BOOK")
                        AND upper(btrim(coalesce(b."MAIN_BOOK",'')))='PURCHASE')
-      ORDER BY p."LC_CODE",p."CO_YEAR",p."CO_BOOK",p."VCH_NO" FOR UPDATE`,
+      ORDER BY p."LC_CODE",p."CO_YEAR",p."CO_BOOK",p."VCH_NO"${opts.lock === false ? '' : ' FOR UPDATE'}`,
     saleKey.tenantId,
     saleKey.coCode,
     link.saleBillNo,

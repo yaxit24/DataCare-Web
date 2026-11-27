@@ -88,6 +88,13 @@ import { clearedSaleLegsTx, restoreSaleClearingTx } from './saleBankClearing.js'
 import { SALE_LEG, buildSaleLedger, saleRoundingBound, saleRoundingResidue } from './saleLedger.js';
 
 export { SALE_LEG, buildSaleLedger, saleRoundingResidue };
+import { deleteLinkedPurchasesForSaleTx } from '../purchase/linkedPurchase.js';
+import {
+  linkedCashPartyRefusal,
+  linkedSaleCashAmount,
+  type LinkedOldMetal,
+  type LinkedSaleHook,
+} from './linkedOldMetal.js';
 import {
   consumeSaleReferencesTx,
   lockApprovalSaleReferencesTx,
@@ -479,6 +486,8 @@ export interface SaleResult {
    * "no margin".
    */
   billProfit?: { total: number; lines: { basis: string; cost: number; profit: number }[] };
+  /** The linked URD purchases written with this save (linkedOldPurchaseSale.ts). */
+  linkedOldPurchases?: LinkedOldMetal['purchases'];
 }
 
 /**
@@ -498,6 +507,8 @@ interface WriteSaleContext {
   persistedHeader?: Record<string, unknown>;
   /** User performing the edit (desktop NEW_USER); the original stays in MAIN_USER/USER_NAME. */
   editingUser?: string | null;
+  /** Old Gold / Old Silver of the linked URD purchases, read back from the stored purchases (linkedOldPurchaseSale.ts). */
+  linkedOldMetal?: LinkedOldMetal;
 }
 
 export function completeSaleScope(
@@ -1419,10 +1430,13 @@ async function writeSaleTx(
   }));
   // TR_SALE.cs:19343-19351: type G is gold, every other type is silver; weights are net weights.
   const oldMetalTotals = oldMetalHeaderTotals(valuedOldMetal);
-  const oldGoldAmount = oldMetalTotals.goldAmt;
-  const oldSilverAmount = oldMetalTotals.silverAmt;
-  const oldGoldWeight = oldMetalTotals.goldWt;
-  const oldSilverWeight = oldMetalTotals.silverWt;
+  // A linked URD purchase fills MSG2_TOTAL[9|10, 2..3] (TR_SALE.cs:16482-16497) and has no sale ledger leg: the
+  // purchase's own Purc_Ledr credits the party. The writer refuses an in-bill row of the same metal beside it.
+  const linked = ctx.linkedOldMetal;
+  const oldGoldAmount = round2s(oldMetalTotals.goldAmt + num(linked?.goldAmt));
+  const oldSilverAmount = round2s(oldMetalTotals.silverAmt + num(linked?.silverAmt));
+  const oldGoldWeight = round3s(oldMetalTotals.goldWt + num(linked?.goldWt));
+  const oldSilverWeight = round3s(oldMetalTotals.silverWt + num(linked?.silverWt));
 
   const header = {
     ...key,
@@ -1561,6 +1575,30 @@ async function writeSaleTx(
   const billOS = round2s(
     grandWithTcs - paidNow - kasar - orderAdjust - creditNoteAdjust + cashPaidAmt,
   );
+  // TR_SALE.cs:19125-19150: with linked old metal the 00045 cash is the desktop's own figure, refused otherwise.
+  const cashRefusal =
+    linked &&
+    linkedCashPartyRefusal({
+      ...{ bookType: saleBookTypes.bookType, acCode: input.acCode, cashAmt, cashPaid: cashPaidAmt },
+      ...{ oldAmt: round2s(num(linked.goldAmt) + num(linked.silverAmt)), total: grandWithTcs },
+      ...{ advance: orderAdjust, kasar, upi: upiAmt, digits: linked.cashDigits },
+    });
+  if (cashRefusal) throw new SaleValidationError(cashRefusal);
+  // TR_SALE.cs:15071-15080: on a T book the cash party 00045 stores (and Sales_Ledr posts) CASH_AMT grossed up by the
+  // linked old amounts; applied only with a linked purchase (linkedOldMetal.ts).
+  const postedCash = linked
+    ? linkedSaleCashAmount({
+        bookType: saleBookTypes.bookType,
+        acCode: input.acCode,
+        cashAmt,
+        oldAmt: round2s(num(linked.goldAmt) + num(linked.silverAmt)),
+        total: grandWithTcs,
+        advance: orderAdjust,
+        kasar,
+      })
+    : cashAmt;
+  if (!isSalesQuotation && postedCash !== 0 && cashAmt === 0)
+    cashAc = await resolveBookAccountTx(tx, input.scope, bookPolicy, 2);
   // TR_SALE.cs: MsDefaulterAc = 'Y' AND outstanding > 0 -> credit to a flagged party is blocked.
   // The flag is read from the persisted account (AC_MAST.DEFAULTER_AC), never from the request.
   if (!isSalesQuotation && round2s(billOS) > 0) {
@@ -1660,7 +1698,7 @@ async function writeSaleTx(
         discountAc,
         roundOff: { ac: discountAc, amount: roundOffAmt },
         payments: {
-          cash: { ac: cashAc, amount: cashAmt },
+          cash: { ac: cashAc, amount: postedCash },
           cheque: { ac: bankAc, amount: chequeAmt },
           card: { ac: cardAc, amount: cardLegs },
           upi: upiLegs,
@@ -1707,7 +1745,7 @@ async function writeSaleTx(
   }
 
   Object.assign(header, {
-    CASH_AMT: cashAmt,
+    CASH_AMT: postedCash,
     CARD_AMT: cardAmt,
     UPI_AMT: upiAmt,
     CHQ_AMT: chequeAmt,
@@ -2208,6 +2246,7 @@ export async function createSale(
   prisma: any,
   input: SaleInput,
   lines: SaleLineInput[],
+  linkedHook?: LinkedSaleHook,
 ): Promise<SaleResult> {
   completeSaleScope(input.scope);
   const scope = input.scope;
@@ -2216,16 +2255,20 @@ export async function createSale(
     const vchNo = await nextVoucherNoTx(tx, scope);
     // TR_SALE.cs:14209,15151 allocates a five-digit hidden number from TEMP_BOOK_DATA without year.
     const hdVchNo = await nextHiddenVoucherNoTx(tx, scope);
+    const no = formatVoucherNo(vchNo); // N51: the screen keeps the version for its first edit or delete
+    // The linked URD purchases are written under the allocated sale key before the sale (linkedOldPurchaseSale.ts).
+    const linked = await linkedHook?.(tx, no, false);
     const saved = await writeSaleTx(tx, input, lines, {
       vchNo,
       hdVchNo,
       mainUser: String(input.mainUser ?? '').trim(),
       persistedClock: undefined,
       isEdit: false,
+      linkedOldMetal: linked,
     });
-    const no = formatVoucherNo(vchNo); // N51: the screen keeps the version for its first edit or delete
     return {
       ...saved,
+      ...(linked ? { linkedOldPurchases: linked.purchases } : {}),
       version: await voucherVersionTx(tx, SALE_WRITE_TABLES, versionKeyOf(scope, no)),
     };
   });
@@ -2494,6 +2537,7 @@ export async function editSale(
   lines: SaleLineInput[],
   requestedVoucherNo: number | string,
   expectedVersion: string,
+  linkedHook?: LinkedSaleHook,
 ): Promise<SaleResult> {
   completeSaleScope(input.scope);
   const scope = input.scope;
@@ -2527,6 +2571,7 @@ export async function editSale(
         lines: [{ CO_CODE: input.scope.coCode, VCH_DATE: requestedDate }],
       },
     });
+    const linked = await linkedHook?.(tx, voucherNo, true); // after the header lock and the version check
 
     const hiddenVoucherNo = formatVoucherNo(text(persisted.HD_VCH_NO));
     // A cleared bank leg keeps its clearing across the rewrite (saleBankClearing.ts).
@@ -2551,11 +2596,13 @@ export async function editSale(
       // Desktop compares the FULL reloaded header (SELECT * FROM SL_DATA).
       persistedHeader: priorHeaderRow,
       editingUser: input.mainUser ?? null,
+      linkedOldMetal: linked,
     });
     await restoreSaleClearingTx(tx, scope.tenantId, keyOf(scope, voucherNo), clearedLegs);
     // N51: the screen keeps the new version for its next save or delete.
     return {
       ...saved,
+      ...(linked ? { linkedOldPurchases: linked.purchases } : {}),
       version: await voucherVersionTx(tx, SALE_WRITE_TABLES, versionKeyOf(scope, voucherNo)),
     };
   });
@@ -2591,6 +2638,20 @@ export async function deleteSale(prisma: any, input: DeleteSaleInput): Promise<{
         lines: [{ CO_CODE: input.scope.coCode, VCH_DATE: header.VCH_DATE }],
       },
     });
+    // TR_SALE.cs:16159-16175: the linked URD purchases go with the sale, by the exact SL_BILL_* key and the full
+    // purchase delete path, in this transaction and after the sale header lock above.
+    await deleteLinkedPurchasesForSaleTx(
+      tx,
+      {
+        tenantId,
+        coCode: scope.coCode,
+        saleBillNo: voucherNo,
+        saleBillLc: scope.lcCode,
+        saleBillYear: scope.coYear,
+        saleBillBook: scope.coBook,
+      },
+      input.deleteUser,
+    );
     const details: Array<Record<string, unknown>> = await tx.$queryRawUnsafe(
       `SELECT "SR_NO","IT_CODE","TAG_NO","NET_AMT","IT_TYPE","ITM_NWT"
          FROM "SL_DETL"
