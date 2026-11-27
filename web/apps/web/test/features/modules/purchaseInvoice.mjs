@@ -74,7 +74,10 @@ const EXPECT_ROUND = {
   tax: 1753.98,
   cgst: 876.99,
   sgst: 876.99,
-  roundOff: 0.02,
+  // Owner decision 1B (2026-11-27): ROF_AMT is only the typed round-off (TR_PURC.cs:12600) and the bill total's own
+  // rounding (60,219.98 -> 60,220) is posted nowhere, so the supplier's credit exceeds the debits by it.
+  roundOff: 0,
+  unposted: 0.02,
   total: 60220,
 };
 
@@ -244,10 +247,11 @@ const counts = async (ctx) =>
               (SELECT count(*) FROM "MAIN_STOCK" WHERE tenant_id=$1 AND "CO_BOOK"='${BOOK}')::int stk`,
     )
   )[0];
-const balanced = (rows) => {
+/** Σ CR − Σ DR is `off`: 0, or the bill total's unposted rounding (decision 1B). */
+const balanced = (rows, off = 0) => {
   const dr = rows.reduce((s, r) => s + r.dr, 0);
   const cr = rows.reduce((s, r) => s + r.cr, 0);
-  return dr > 0 && Math.abs(dr - cr) < 0.005;
+  return dr > 0 && Math.abs(cr - dr - off) < 0.005;
 };
 const supplierCredit = (rows, ac) =>
   rows.filter((r) => r.ac === ac).reduce((s, r) => s + r.cr - r.dr, 0);
@@ -633,7 +637,10 @@ export const purchaseInvoice = {
             max_net: EXPECT_ROUND.net,
           });
           const g = await ledger(ctx, vchNo);
-          assert(balanced(g), `ledger must balance: ${JSON.stringify(g)}`);
+          assert(
+            balanced(g, EXPECT_ROUND.unposted),
+            `ledger off by the unposted rounding only: ${JSON.stringify(g)}`,
+          );
           assert.equal(supplierCredit(g, PARTIES.local.code), EXPECT_ROUND.total);
           const rojmel = await ctx.rows(
             `SELECT btrim("AC_CODE"::text) ac,btrim(coalesce("IT_CODE"::text,'')) item,

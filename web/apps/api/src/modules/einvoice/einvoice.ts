@@ -64,6 +64,11 @@ export interface SaleForIrn {
   vchDate: Date | string;
   interState: boolean;
   roundOff?: number;
+  /**
+   * SL_DATA.TOT_AMT. When given the payload follows TR_SL_EBILL.cs:9230-9231: RndOffAmt 0 and TotInvVal = TOT_AMT, so
+   * the IRN total is the bill's own total even when its rounding is posted nowhere (owner decision 1B, 2026-11-27).
+   */
+  billTotal?: number;
   /** TR_SL_EBILL.JsonGen: E CRNT sends CRN, every other e-bill path sends INV. */
   docType?: IrnDocType;
 }
@@ -143,7 +148,8 @@ export function buildIrnPayload(args: {
 
   const sum = (k: 'AssAmt' | 'IgstAmt' | 'CgstAmt' | 'SgstAmt' | 'TotItemVal'): number =>
     round2(itemList.reduce((s, it) => s + (it[k] as number), 0));
-  const rnd = round2(sale.roundOff ?? 0);
+  const fromHeader = sale.billTotal != null;
+  const rnd = fromHeader ? 0 : round2(sale.roundOff ?? 0);
 
   return {
     Version: '1.1',
@@ -160,7 +166,7 @@ export function buildIrnPayload(args: {
       Discount: 0,
       OthChrg: 0,
       RndOffAmt: rnd,
-      TotInvVal: round2(sum('TotItemVal') + rnd),
+      TotInvVal: fromHeader ? round2(sale.billTotal!) : round2(sum('TotItemVal') + rnd),
     },
   };
 }
@@ -842,6 +848,7 @@ export async function submitIrnForSale(
     vchDate: hdr.VCH_DATE,
     interState,
     roundOff: N(hdr.ROF_AMT),
+    billTotal: hdr.TOT_AMT != null ? N(hdr.TOT_AMT) : undefined,
     docType: args.docType ?? 'INV',
   };
   const payload = buildIrnPayload({ seller, buyer, sale, items });

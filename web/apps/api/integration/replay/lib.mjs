@@ -445,6 +445,8 @@ export function saleRequest(v, ctx = {}) {
     interState: str(h.AC_GST_TYPE).toUpperCase() === 'I',
     rateUnfix: str(h.RATE_UNFIX).toUpperCase() === 'Y' || undefined,
     kasarAmount: nz(h.KASAR_AMT),
+    // ROF_AMT is the round-off the operator typed (TR_SALE.cs:15051), an input like kasar.
+    roundOffAmount: nz(h.ROF_AMT),
     crDays: nz(h.CR_DAYS),
     empCode: opt(h.EMP_CODE),
     bankAc: num(h.CHQ_AMT) ? opt(h.BANK_AC) : undefined,
@@ -570,6 +572,7 @@ export function purchaseRequest(v, ctx = {}) {
     chequeAmt: nz(h.CHQ_AMT),
     bankAc: num(h.CHQ_AMT) ? opt(h.BANK_AC) : undefined,
     kasar: nz(h.KASAR_AMT),
+    roundOffAmount: nz(h.ROF_AMT), // the typed round-off (TR_PURC.cs:12600)
     lines: lines.map((l) => ({
       itCode: str(l.IT_CODE),
       metal: metalOf(l.IT_TYPE),

@@ -4,9 +4,10 @@ import { formatVoucherNo, nextVoucherNoTx, type VoucherScope } from '../vouchers
 import {
   postVoucherTx,
   reverseVoucherTx,
-  assertBalanced,
+  assertVoucherBalanced,
   assertPeriodOpen,
   insertRowTx,
+  returnRoundingResidue,
   type LedgerLine,
 } from '../posting/posting.js';
 import {
@@ -100,7 +101,11 @@ function keyOf(s: VoucherScope, vchNo: number): VoucherKey {
   };
 }
 
-/** Reverse-of-sale ledger with desktop per-group income legs and actual contra accounts. */
+/**
+ * Reverse-of-sale ledger with desktop per-group income legs and actual contra accounts. No round-off leg: the desktop
+ * return stores ROF_AMT 0 (TR_SALE_RTN.cs:12538) and SaleReturn_Ledr posts none (Ac_Ledr.cs:1321), so the bill total's
+ * rounding is posted nowhere (owner decision 1B, 2026-11-27; returnRoundingResidue).
+ */
 export function buildReturnLedger(p: {
   key: VoucherKey;
   acCode: string;
@@ -109,7 +114,7 @@ export function buildReturnLedger(p: {
   roundAc: string;
   controlAc?: string;
   vchType?: string;
-  totals: Pick<BillTotals, 'total' | 'taxable' | 'tax' | 'roundOff'>;
+  totals: Pick<BillTotals, 'total' | 'taxable' | 'tax'> & Partial<Pick<BillTotals, 'roundOff'>>;
   incomeLegs?: { ac: string; amount: number }[];
 }): LedgerLine[] {
   const base = { ...p.key, VCH_TYPE: p.vchType ?? 'SRTN' };
@@ -144,24 +149,6 @@ export function buildReturnLedger(p: {
       DR_AMT: p.totals.tax,
       CR_AMT: 0,
       SIGN: 'D',
-    });
-  if (p.totals.roundOff > 0)
-    lines.push({
-      ...base,
-      AC_CODE: p.roundAc,
-      LD_CODE: p.acCode,
-      DR_AMT: p.totals.roundOff,
-      CR_AMT: 0,
-      SIGN: 'D',
-    });
-  else if (p.totals.roundOff < 0)
-    lines.push({
-      ...base,
-      AC_CODE: p.roundAc,
-      LD_CODE: p.acCode,
-      DR_AMT: 0,
-      CR_AMT: Math.abs(p.totals.roundOff),
-      SIGN: 'C',
     });
   return lines;
 }
@@ -416,7 +403,7 @@ export async function createSaleReturn(
     }
     let roundAc = controlAc;
     let kasarAc = controlAc;
-    if (totals.roundOff !== 0 || round2(num(input.kasar)) !== 0) {
+    if (round2(num(input.kasar)) !== 0) {
       const configured = await resolveBookAccountTx(tx, input.scope, bookPolicy, 3);
       if (
         (input.roundAc && input.roundAc.trim() !== configured) ||
@@ -527,7 +514,7 @@ export async function createSaleReturn(
       CGST_TAX: totals.cgst,
       SGST_TAX: totals.sgst,
       IGST_TAX: totals.igst,
-      ROF_AMT: totals.roundOff,
+      ROF_AMT: 0, // TR_SALE_RTN.cs:12538
       TOT_AMT: totals.total,
       VCH_TIME: vchDate,
       ENTRY_TIME: vchDate,
@@ -560,7 +547,8 @@ export async function createSaleReturn(
       },
     );
     ledger.push(...refund.legs);
-    assertBalanced(ledger);
+    const roundingResidue = returnRoundingResidue(-totals.roundOff);
+    assertVoucherBalanced(ledger, roundingResidue);
     Object.assign(header, {
       CASH_AMT: refund.cashAmt,
       CHQ_AMT: round2(num(input.chequeAmt)),
@@ -690,6 +678,7 @@ export async function createSaleReturn(
     await postVoucherTx(tx, tenantId, {
       ledger: { table: 'AC_DATA', lines: ledger },
       bookName: bookPolicy.bookName,
+      desktopRoundingResidue: roundingResidue,
       writes: [
         { table: 'SL_DATA', rows: [header] },
         { table: 'SL_DETL_RTN', rows: detl },

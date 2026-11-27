@@ -36,7 +36,7 @@ import { assertVoucherVersionTx, versionKeyOf, voucherVersionTx } from '../vouch
 import {
   postVoucherTx,
   reverseVoucherTx,
-  assertBalanced,
+  assertVoucherBalanced,
   assertPeriodOpen,
   insertRowTx,
   type LedgerLine,
@@ -72,6 +72,7 @@ import {
   type LineAmountType,
 } from '../shared/settingsBehavior.js';
 import { purchaseBookItemTypeTx, purchaseTcsAccountTx, purchaseTcsTotals } from './purchaseTcs.js';
+import { hasWebRoundOffLegTx } from '../shared/legacyRoundOff.js';
 import {
   purchaseLineAmounts,
   normalizePurchaseExplicitFine,
@@ -235,6 +236,7 @@ export interface PurchaseInput {
   purchaseAc?: string; // purchase expense ledger (default 'PURCHASE')
   taxAc?: string; // GST input ledger (default 'GST-INPUT')
   roundAc?: string;
+  roundOffAmount?: number; // PR_DATA.ROF_AMT, the typed totals row 4 (TR_PURC.cs:12600); purchaseTcsTotals
   // Hallmark purchase (TR_PURC_HM): a hallmarking charge on the bought items + its own input GST.
   hmAmount?: number; // HM_AMT — hallmark charge (0/absent ⇒ a normal purchase)
   hmChargeAc?: string; // hallmark-expense ledger (default 'HMCHRG')
@@ -394,7 +396,7 @@ export function buildPurchaseLedger(p: {
   if (p.totals.roundOff > 0)
     lines.push({
       ...base,
-      legType: PURC_LEG.webRoundOff,
+      legType: PURC_LEG.roundOff,
       AC_CODE: p.roundAc,
       LD_CODE: p.acCode,
       DR_AMT: p.totals.roundOff,
@@ -404,7 +406,7 @@ export function buildPurchaseLedger(p: {
   else if (p.totals.roundOff < 0)
     lines.push({
       ...base,
-      legType: PURC_LEG.webRoundOff,
+      legType: PURC_LEG.roundOff,
       AC_CODE: p.roundAc,
       LD_CODE: p.acCode,
       DR_AMT: 0,
@@ -539,8 +541,8 @@ const PURC_LEG = {
   settleCash: 17,
   kasarParty: 18,
   kasar: 19,
-  /** The web's round-off leg, which the desktop does not write. Same reasoning as the sale family's 99. */
-  webRoundOff: 99,
+  /** The typed round-off PR_DATA.ROF_AMT on slot 3 (Ac_Ledr.cs:460); nothing posts the bill total's own rounding. */
+  roundOff: 26,
 } as const;
 
 function keyOf(s: VoucherScope, vchNo: number | string): VoucherKey {
@@ -852,7 +854,8 @@ async function writePurchaseTx(
   const hmCgst = interState ? 0 : roundingPolicy.roundTaxAmount(hmTax / 2);
   const hmSgst = interState ? 0 : roundingPolicy.roundTaxAmount(hmTax - hmCgst);
   const hmIgst = interState ? hmTax : 0;
-  const withTcs = purchaseTcsTotals(totals, num(input.tcsPct), roundingPolicy.roundBillTotal);
+  const typedRoundOff = behavior.purchaseTdsEnabled ? 0 : round2(num(input.roundOffAmount));
+  const withTcs = purchaseTcsTotals(totals, num(input.tcsPct), roundingPolicy, typedRoundOff);
   const { tcs, billWithTcs } = withTcs;
   const ledgerTotals = { ...totals, total: withTcs.total, roundOff: withTcs.roundOff };
   const grandTotal = roundingPolicy.roundBillTotal(billWithTcs + hmAmt + hmTax);
@@ -889,7 +892,7 @@ async function writePurchaseTx(
   }
   let roundAc = requestedRoundAc ?? controlAc;
   let kasarAc = input.kasarAc ?? controlAc;
-  if (!isPurchaseQuotation && (ledgerTotals.roundOff !== 0 || round2(num(input.kasar)) !== 0)) {
+  if (!isPurchaseQuotation && (withTcs.roundOff !== 0 || round2(num(input.kasar)) !== 0)) {
     const configured = await resolveBookAccountTx(tx, input.scope, bookPolicy, 3);
     roundAc = validateConfiguredAccount('round account', requestedRoundAc, configured);
     kasarAc = validateConfiguredAccount('kasar account', input.kasarAc, configured);
@@ -1447,7 +1450,7 @@ async function writePurchaseTx(
       SIGN: 'C',
     }); // Cr supplier (HM owed)
   }
-  assertBalanced(ledger); // money legs only — metal legs (DR=CR=0) are appended below and never unbalance it
+  assertVoucherBalanced(ledger, withTcs.residue); // money legs only — metal legs (DR=CR=0) are appended below and never unbalance it
 
   // Settlement/tender (F2 payoutLegs): pay the supplier now → Dr supplier / Cr cash|bank + kasar (discount received).
   // No tender ⇒ no legs ⇒ full payable (unchanged). Self-balanced pairs keep the ledger balanced.
@@ -1761,6 +1764,7 @@ async function writePurchaseTx(
     bookName: bookPolicy.bookName,
     // Lets the poster stamp PARTY_AC_CODE on the supplier's own leg only, which is the desktop's rule.
     partyAc: input.acCode,
+    desktopRoundingResidue: withTcs.residue,
     writes: [
       { table: 'PR_DATA', rows: [header] },
       { table: 'PR_DETL', rows: detl },
@@ -2340,7 +2344,7 @@ export async function getPurchase(
       stonesBySrNo.set(num(row.SR_NO), list);
     }
     return {
-      ...purchaseHeaderView(headers[0]!),
+      ...purchaseHeaderView(headers[0]!, await hasWebRoundOffLegTx(tx, params)),
       lines: details.map((row) => purchaseLineView(row, stonesBySrNo.get(num(row.SR_NO)) ?? [])),
       tags: tags.map(purchaseTagView),
       version: await purchaseVersionTx(tx, scope, voucherNo), // N51: sent back as expectedVersion

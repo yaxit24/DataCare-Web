@@ -684,7 +684,7 @@ databaseDescribe('database-backed purchase voucher lifecycle', () => {
       cgst: 876.99,
       sgst: 876.99,
       igst: 0,
-      round_off: 0.02,
+      round_off: 0, // only a typed round-off is stored (TR_PURC.cs:12600; owner decision 1B)
       total: 60220,
       bill_os: 60220,
       stock_sign: '+',
@@ -717,10 +717,11 @@ databaseDescribe('database-backed purchase voucher lifecycle', () => {
         { ac: 'SUPP', dr: 0, cr: 60220 },
         { ac: 'PURCAC', dr: 58466, cr: 0 },
         { ac: 'GSTLED', dr: 1753.98, cr: 0 },
-        { ac: 'ROUND', dr: 0.02, cr: 0 },
       ]),
     );
-    expect(ledger.reduce((sum, row) => sum + row.dr, 0)).toBeCloseTo(60220, 2);
+    // 60,219.98 rounds to 60,220 and the 0.02 is posted nowhere, as on the desktop (owner decision 1B).
+    expect(ledger.some((row) => row.ac === 'ROUND')).toBe(false);
+    expect(ledger.reduce((sum, row) => sum + row.dr, 0)).toBeCloseTo(60219.98, 2);
     expect(ledger.reduce((sum, row) => sum + row.cr, 0)).toBeCloseTo(60220, 2);
 
     const rojmel = (await owner.$queryRawUnsafe(
@@ -749,6 +750,121 @@ databaseDescribe('database-backed purchase voucher lifecycle', () => {
         expect.objectContaining({ ac: 'SUPP', item: '', dr: 0, cr: 60220 }),
       ]),
     );
+  }, 30_000);
+
+  /**
+   * Owner decision 1B (2026-11-27): PR_DATA.ROF_AMT is only the typed round-off (TR_PURC.cs:12600), added before the
+   * bill total's rounding (:15085) and posted as leg 26 on slot 3 (Ac_Ledr.cs:460); the total's own rounding is not.
+   */
+  it('posts only a typed round-off, as leg 26 on slot 3, and leaves the total rounding unposted', async () => {
+    // Row 4 is the round-off only when PR_TDS_TAX is not 'Y' (TR_PURC.cs:12590-12600).
+    await owner.$executeRawUnsafe(
+      `UPDATE "CO_SET_NEW" SET "TOT_AMT_ROF"=0,"PR_TDS_TAX"='N' WHERE tenant_id=$1`,
+      TENANT,
+    );
+    const save = (roundOffAmount?: number) =>
+      createPurchase(
+        runtime,
+        purchaseInput({ cashAmt: 0, cardAmt: 0, chequeAmt: 0, roundOffAmount }),
+        [{ itCode: 'LOOSE', netWt: 1, touch: 100, metalAmount: 1010 }],
+      );
+    const read = async (vchNo: number) => {
+      const vch = String(vchNo).padStart(5, '0');
+      const [h] = await owner.$queryRawUnsafe<any[]>(
+        `SELECT "TAX_AMT"::float tax,"ROF_AMT"::float rof,"TOT_AMT"::float tot FROM "PR_DATA"
+          WHERE tenant_id=$1 AND "CO_BOOK"=$2 AND "VCH_NO"=$3`,
+        TENANT,
+        BOOK,
+        vch,
+      );
+      const legs = await owner.$queryRawUnsafe<any[]>(
+        `SELECT right(rtrim("LEDR_KEY"),2) leg,btrim("AC_CODE"::text) ac,"DR_AMT"::float dr,"CR_AMT"::float cr
+           FROM "AC_DATA" WHERE tenant_id=$1 AND "CO_BOOK"=$2 AND "VCH_NO"=$3`,
+        TENANT,
+        BOOK,
+        vch,
+      );
+      const off = Math.round(legs.reduce((t, l) => t + l.dr - l.cr, 0) * 100) / 100 || 0;
+      return { h, legs, off };
+    };
+    // 1,010 + 3% 30.30 = 1,040.30 rounds to 1,040: ROF_AMT 0, no round-off leg, the ledger 0.30 over on the debit side.
+    const plain = await read((await save()).vchNo);
+    expect(plain.h).toEqual({ tax: 30.3, rof: 0, tot: 1040 });
+    expect(plain.legs.some((l) => l.leg === '26' || l.leg === '99' || l.ac === 'ROUND')).toBe(
+      false,
+    );
+    expect(plain.off).toBe(0.3);
+    // A typed -0.30: 1,040.00 exactly; leg 26 credits slot 3 ABS(ROF_AMT) and the voucher balances.
+    const typed = await read((await save(-0.3)).vchNo);
+    expect(typed.h).toEqual({ tax: 30.3, rof: -0.3, tot: 1040 });
+    expect(typed.legs.filter((l) => l.leg === '26')).toEqual([
+      { leg: '26', ac: 'ROUND', dr: 0, cr: 0.3 },
+    ]);
+    expect(typed.off).toBe(0);
+    // A typed +0.70: Round(1,041.00) = 1,041; leg 26 debits slot 3.
+    const up = await read((await save(0.7)).vchNo);
+    expect(up.h).toMatchObject({ rof: 0.7, tot: 1041 });
+    expect(up.legs.filter((l) => l.leg === '26')).toEqual([
+      { leg: '26', ac: 'ROUND', dr: 0.7, cr: 0 },
+    ]);
+    expect(up.off).toBe(0);
+    expect(
+      ((await getPurchase(runtime, scope, (await save(0.7)).vchNo)) as any).roundOffAmount,
+    ).toBe(0.7);
+  }, 30_000);
+
+  it("reopens an old web purchase's computed round-off as 0 and re-saves it without the '99' leg", async () => {
+    await owner.$executeRawUnsafe(
+      `UPDATE "CO_SET_NEW" SET "TOT_AMT_ROF"=0,"PR_TDS_TAX"='N' WHERE tenant_id=$1`,
+      TENANT,
+    );
+    const input = purchaseInput({ cashAmt: 0, cardAmt: 0, chequeAmt: 0 });
+    const lines = [{ itCode: 'LOOSE', netWt: 1, touch: 100, metalAmount: 1010 }];
+    const created = await createPurchase(runtime, input, lines);
+    const vch = String(created.vchNo).padStart(5, '0');
+    // The previous web stored the computed -0.30 and posted it as its own leg '99' (synthetic copy).
+    await owner.$executeRawUnsafe(
+      `UPDATE "PR_DATA" SET "ROF_AMT"=-0.3 WHERE tenant_id=$1 AND "CO_BOOK"=$2 AND "VCH_NO"=$3`,
+      TENANT,
+      BOOK,
+      vch,
+    );
+    await owner.$executeRawUnsafe(
+      `INSERT INTO "AC_DATA"(tenant_id,"CO_CODE","LC_CODE","CO_YEAR","CO_BOOK","VCH_NO","VCH_TYPE","LEDR_KEY",
+         "AC_CODE","LD_CODE","DR_AMT","CR_AMT","SIGN")
+       VALUES ($1,$2,$3,$4,$5,$6,'PURC',$7,'ROUND','SUPP',0,0.3,'C')`,
+      TENANT,
+      CO,
+      LC,
+      YEAR,
+      BOOK,
+      vch,
+      `${CO}${LC}${YEAR}${BOOK}${vch}99`,
+    );
+    const view: any = await getPurchase(runtime, scope, created.vchNo);
+    expect(view.roundOffAmount).toBe(0);
+    await editPurchase(
+      runtime,
+      { ...input, roundOffAmount: view.roundOffAmount },
+      lines,
+      created.vchNo,
+      view.version,
+    );
+    const [h] = await owner.$queryRawUnsafe<any[]>(
+      `SELECT "ROF_AMT"::float rof,"TOT_AMT"::float tot FROM "PR_DATA"
+        WHERE tenant_id=$1 AND "CO_BOOK"=$2 AND "VCH_NO"=$3`,
+      TENANT,
+      BOOK,
+      vch,
+    );
+    expect(h).toEqual({ rof: 0, tot: 1040 });
+    const legs = await owner.$queryRawUnsafe<any[]>(
+      `SELECT right(rtrim("LEDR_KEY"),2) leg FROM "AC_DATA" WHERE tenant_id=$1 AND "CO_BOOK"=$2 AND "VCH_NO"=$3`,
+      TENANT,
+      BOOK,
+      vch,
+    );
+    expect(legs.some((l) => l.leg === '99' || l.leg === '26')).toBe(false);
   }, 30_000);
 
   it('rejects and fully rolls back edit after a created tag was sold', async () => {

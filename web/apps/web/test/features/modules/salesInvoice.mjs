@@ -378,6 +378,53 @@ export const salesInvoice = {
     ),
 
     C(
+      'create.typed-round-off',
+      'T07',
+      'mutation',
+      'Owner decision 1B: ROF_AMT is the typed row 4 (TR_SALE.cs:15051), added before TOT_AMT_ROF (:19047); leg 35 on slot 5 (Ac_Ledr.cs:159), day-book row 22 (Ac_Rojmel.cs:102)',
+      async (ctx) => {
+        const { page } = await ctx.session();
+        await openSales(page);
+        await pickParty(page, PARTIES.local.code);
+        await fillLine(page, 0, LINE_A);
+        await page.getByText('Desktop settlement and invoice fields').click();
+        // 65,517.27 - 0.27 = 65,517.00.
+        await field(page, 'Round Off').fill('-0.27');
+        await field(page, 'Cash ₹').fill('65517');
+        const response = await save(page);
+        assert.equal(response.status(), 201, await response.text());
+        const vchNo = String((await response.json()).vchNo).padStart(5, '0');
+        const [h] = await ctx.rows(
+          `SELECT "TOT_AMT"::float tot,"ROF_AMT"::float rof FROM "SL_DATA"
+            WHERE tenant_id=$1 AND "CO_BOOK"='${BOOK}' AND "VCH_NO"=$2`,
+          vchNo,
+        );
+        assert.deepEqual(h, { tot: 65517, rof: -0.27 });
+        const leg35 = await ctx.rows(
+          `SELECT btrim("AC_CODE"::text) ac,"DR_AMT"::float dr,"CR_AMT"::float cr FROM "AC_DATA"
+            WHERE tenant_id=$1 AND "CO_BOOK"='${BOOK}' AND "VCH_NO"=$2 AND right(rtrim("LEDR_KEY"),2)='35'`,
+          vchNo,
+        );
+        assert.deepEqual(leg35, [{ ac: 'DISCOUNT', dr: 0.27, cr: 0 }]);
+        const g = await ledger(ctx, vchNo);
+        assert(balanced(g), `a typed round-off balances the voucher: ${JSON.stringify(g)}`);
+        const day = await ctx.rows(
+          `SELECT "DR_AMT"::float dr FROM "ROJ_MEL_DATA"
+            WHERE tenant_id=$1 AND "CO_BOOK"='${BOOK}' AND "VCH_NO"=$2 AND substr("LEDR_KEY",22,2)='22'`,
+          vchNo,
+        );
+        assert.deepEqual(day, [{ dr: -0.27 }]);
+        await ctx.shot(page, 'saved');
+        return {
+          observation: `voucher ${vchNo}: TOT_AMT ${h.tot}, ROF_AMT ${h.rof}; leg 35 Dr 0.27 on slot 5; day-book row 22`,
+          expected: { tot: 65517, rof: -0.27, leg35: { ac: 'DISCOUNT', dr: 0.27 } },
+          database: { header: h, leg35, ledger: g },
+          downstream: { dayBookRoundOffRow: day },
+        };
+      },
+    ),
+
+    C(
       'create.single-line-cash',
       'T07',
       'mutation',
