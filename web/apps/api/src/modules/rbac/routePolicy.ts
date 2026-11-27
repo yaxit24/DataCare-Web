@@ -141,6 +141,12 @@ route('Utilities/Data Export', [
   'POST /utilities/data-export/mark-exported',
   'POST /utilities/data-export/reset-flags',
 ]);
+// Desktop UT_IMPORT Lite Soft (Other → Data Import). The menu caption's FRM_VIEW opens it (MDI_FORM.cs:7034-7046) and
+// BtnLite_Click checks nothing more (UT_IMPORT.cs:8413-8445): preview reads, import creates (both on View, G225).
+route('Utilities/Data Import', [
+  'POST /utilities/data-import/lite/preview',
+  'POST /utilities/data-import/lite/apply',
+]);
 route('Utilities/Estimate Reset', [
   'POST /utilities/estimate-reset/preview',
   'POST /utilities/estimate-reset/apply',
@@ -1313,6 +1319,7 @@ const READ_POST_ROUTES = new Set([
   'POST /sales-returns/:vchNo/incoming-replay',
   'POST /year-end/preview',
   'POST /utilities/estimate-reset/preview',
+  'POST /utilities/data-import/lite/preview',
   // Reads only: the framework asserts a preview writes nothing, and the diff it returns is what the operator
   // reviews before any apply exists.
   'POST /utilities/data-repair/:id/preview',

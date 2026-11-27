@@ -84,6 +84,11 @@ const GUARDED: Record<string, { page: string; sends: RegExp }> = {
     page: 'app/(app)/txn/tag-opening/page.tsx',
     sends: /postCommand<[^>]*>\(\s*'\/stock\/tag-opening',\s*body,\s*command\.key\s*\)/,
   },
+  'POST /utilities/data-import/lite/apply': {
+    page: 'app/(app)/utilities/data-import/page.tsx',
+    sends:
+      /postCommand<[^>]*>\(\s*'\/utilities\/data-import\/lite\/apply',[\s\S]*?command\.key,?\s*\)/,
+  },
 };
 
 /** WP-04 follow-ups, in the plan's order first (Contra, Sales, Sales Order, ... Tag Cancel), then the rest. */
@@ -194,7 +199,9 @@ function voucherCreateRoutes(): string[] {
       if (
         policy?.kind === 'form' &&
         policy.action === 'create' &&
-        !/^(Masters\/|Utilities\/|@master$)/.test(String(policy.form)) &&
+        // A utility that writes business data in one command (Data Import) is listed in GUARDED by name.
+        (!/^(Masters\/|Utilities\/|@master$)/.test(String(policy.form)) ||
+          `POST ${match[3]}` in GUARDED) &&
         !REPLAY_SAFE.has(`POST ${match[3]}`)
       )
         found.add(`POST ${match[3]}`);

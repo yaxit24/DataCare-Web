@@ -60,6 +60,7 @@ import { gstReport } from './modules/gstReport.mjs';
 import { approvalIssue } from './modules/approvalIssue.mjs';
 import { approvalReturn } from './modules/approvalReturn.mjs';
 import { approvalReportRp } from './modules/approvalReportRp.mjs';
+import { dataImport } from './modules/dataImport.mjs';
 import { runSurface } from './surface/runner.mjs';
 
 /**
@@ -121,6 +122,7 @@ const MODULES = [
   approvalIssue,
   approvalReturn,
   approvalReportRp,
+  dataImport,
 ];
 
 const artifacts = resolve(webRoot, 'test-results/feature-e2e');

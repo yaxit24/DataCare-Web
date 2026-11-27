@@ -1,0 +1,642 @@
+import { createHash } from 'node:crypto';
+import { withTxBudget } from '../shared/txBudget.js';
+import {
+  type ImportIssue,
+  type LitePlan,
+  type LiteStep,
+  type SkippedOpening,
+  planLiteImport,
+  skippedTotal,
+} from './dataImportLite.js';
+import { SOURCE_TABLES, type SourceReader, openImportSource } from './dataImportSource.js';
+import {
+  dayBefore,
+  deleteCompanyTx,
+  importedTagsAreStockTx,
+  insertRowsTx,
+  itemOpeningStock,
+  tagOpeningStock,
+  writeOpeningsTx,
+} from './dataImportWrite.js';
+
+/**
+ * Other → Data Import (desktop UT_IMPORT "Old Softwar Import", UT_IMPORT.cs:3187), the "Lite Soft" button only
+ * (BtnLite_Click, UT_IMPORT.cs:8413-8445; D-IMP-1).
+ *
+ * The desktop runs five steps one statement at a time with no transaction and first deletes what it replaces. The web
+ * (D-IMP-2) reads the file, previews the rows per step, refuses a company that already holds vouchers, openings or
+ * tags, and on the operator's Yes writes all five steps in ONE transaction: a failure anywhere leaves the company as it
+ * was. The same file must give the same preview (`previewHash`), and a retried request with the same Idempotency-Key
+ * answers the first result.
+ *
+ * After the five steps the desktop sets HDD_MAST.REF_NO = 'S', YEAR_MAST.OP_DATE = today and LOCT_MAST.TRY_DATE =
+ * today + 10 (UT_IMPORT.cs:8438-8441). REF_NO and TRY_DATE are licence / trial state and are not ported (D-IMP-4);
+ * OP_DATE is. The desktop then exits (Application.Exit, :8444); the web signs the operator out.
+ *
+ * The desktop import writes no MAIN_STOCK and no ledger legs: the stock and account refresh rebuilds them from the
+ * imported rows (Ac_Stock.cs:11-34 Itm_Opbl_Stk / Tag_Opbl_Stk; Ac_Ledr.cs:9-28 AcOp_Ledr). The web has no
+ * deferred refresh, so the same rows are posted in the same transaction, exactly as those routines build them.
+ */
+
+/**
+ * The named system accounts a provisioned web company carries (seedCompany.ts SYSTEM_ACCOUNTS). Lite_AcMast's delete of
+ * `AC_CODE >= '00101'` keeps them, as the desktop keeps its installer accounts 00001-00100. dataImport.db.test.ts checks
+ * that every account a fresh company is provisioned with is in this list.
+ */
+export const SYSTEM_ACCOUNT_CODES: readonly string[] = Object.freeze([
+  'WALKIN',
+  'CASH',
+  'BANK',
+  'SALES',
+  'PURCHASE',
+  'GST',
+  'GSTINPUT',
+  'ROUNDOFF',
+  'KASAR',
+  'TCS',
+  'TDS',
+  'HMCHRG',
+  'OLDGOLD',
+  'OG',
+  'OS',
+  'INTINC',
+  'BULLION',
+  'FINESALE',
+  'FINEPURC',
+  'OTHSALE',
+  'OLDSLVPR',
+  'OTHPURC',
+  'DHRN',
+  'CAPITAL',
+  'ORDADV',
+  'LBRINC',
+  'LBREXP',
+  'SLVSALE',
+  'SLVPURC',
+  'OTHCHRG',
+  'CARDCOMM',
+  'FINEKSR',
+  'DISCOUNT',
+  'BRANCH',
+]);
+
+export const DATA_IMPORT_MESSAGES = {
+  QUESTION: 'Are You Sure To Import Old Software Data In Next Software ?', // UT_IMPORT.cs:8422
+  COMPLETE: 'Process Are Complete....', // UT_IMPORT.cs:8443
+  HAS_DATA:
+    'This company already has vouchers, openings or tags. Old Software Import is only for a new company; nothing was imported.',
+  STALE:
+    'The file or the company changed after the preview. Preview the file again; nothing was imported.',
+  HAS_ERRORS: 'The file has rows that cannot be imported (listed below); nothing was imported.',
+  SKIPPED:
+    'Some opening balances have no web account and would not be imported. Confirm them on the screen; nothing was imported.',
+  BUSY: 'Another Old Software Import is being read or written for this company. Try again when it finishes.',
+} as const;
+
+export interface DataImportScope {
+  tenantId: string;
+  coCode: string;
+  lcCode: string;
+  coYear: string;
+  user: string;
+}
+
+export class DataImportError extends Error {
+  constructor(
+    readonly code:
+      | 'has-data'
+      | 'stale-preview'
+      | 'row-errors'
+      | 'no-year'
+      | 'file'
+      | 'skipped-unacknowledged'
+      | 'busy',
+    message: string,
+    readonly detail?: unknown,
+  ) {
+    super(message);
+    this.name = 'DataImportError';
+  }
+}
+
+/**
+ * Tables whose rows in the company mean it is not new (D-IMP-2): vouchers, openings, tags and stock. companyDataTx also
+ * refuses on ANY table of the company that holds a voucher number (every voucher and document header and detail) and
+ * on any row elsewhere that names an account or item the import would delete.
+ */
+export const COMPANY_DATA_TABLES = [
+  'AC_DATA',
+  'OP_DATA',
+  'ITM_OPBL',
+  'BAR_DATA',
+  'BAR_DETL',
+  'BAR_IDTL',
+  'MAIN_STOCK',
+  'SL_DATA',
+  'PR_DATA',
+] as const;
+
+export interface StepPreview {
+  step: LiteStep;
+  title: string;
+  desktopSource: string;
+  /** Rows the step writes, per table. */
+  writes: Record<string, number>;
+  /** Existing rows of the company the step replaces, per table. */
+  replaces: Record<string, number>;
+}
+
+export interface DataImportPreview {
+  fileName: string;
+  fileSha256: string;
+  format: 'mdb' | 'fixture';
+  sourceTables: Record<string, number>;
+  ignoredTables: string[];
+  steps: StepPreview[];
+  errors: ImportIssue[];
+  warnings: ImportIssue[];
+  /** Why the company is refused, or null. */
+  refusal: string | null;
+  companyData: Record<string, number>;
+  /** Installer-account balances with no web account: not imported; must be acknowledged when skippedTotal > 0. */
+  skipped: SkippedOpening[];
+  skippedTotal: number;
+  /** The YEAR_MAST.OP_DATE the import will set (today), ISO. */
+  newOpeningDate: string;
+  question: string;
+  previewHash: string;
+}
+
+export interface DataImportResult extends DataImportPreview {
+  applied: true;
+  message: string;
+}
+
+const STEP_INFO: Record<LiteStep, { title: string; desktopSource: string }> = {
+  Lite_AcMast: { title: 'Account Master', desktopSource: 'UT_IMPORT.cs:8694-8780' },
+  Wh_Item: { title: 'Item Master', desktopSource: 'UT_IMPORT.cs:4241-4328' },
+  WH_AcOpbl: { title: 'Party Opning', desktopSource: 'UT_IMPORT.cs:4330-4363' },
+  Lite_BarData: { title: 'Bar Data', desktopSource: 'UT_IMPORT.cs:8447-8692' },
+  WH_ItOpbl: { title: 'Item Opning', desktopSource: 'UT_IMPORT.cs:3887-3965' },
+};
+
+/** Today in the business time zone (the desktop's DateAndTime.Now on the shop's PC). */
+export function businessToday(): string {
+  const zone = process.env.PRINT_TIME_ZONE?.trim() || 'Asia/Kolkata';
+  try {
+    return new Intl.DateTimeFormat('en-CA', { timeZone: zone }).format(new Date());
+  } catch {
+    return new Date().toISOString().slice(0, 10);
+  }
+}
+
+const iso = (v: unknown): string | null => {
+  if (v instanceof Date) return v.toISOString().slice(0, 10);
+  const s = String(v ?? '');
+  return /^\d{4}-\d{2}-\d{2}/.test(s) ? s.slice(0, 10) : null;
+};
+
+async function yearTx(tx: any, s: DataImportScope): Promise<{ opDate: string; clDate: string }> {
+  const rows: any[] = await tx.$queryRawUnsafe(
+    `SELECT "OP_DATE"::text op, "CL_DATE" cl FROM "YEAR_MAST" WHERE tenant_id=$1 AND "CO_CODE"=$2 AND "CO_YEAR"=$3 LIMIT 1`,
+    s.tenantId,
+    s.coCode,
+    s.coYear,
+  );
+  const opDate = iso(rows[0]?.op);
+  const clDate = iso(rows[0]?.cl);
+  if (!opDate || !clDate)
+    throw new DataImportError('no-year', `Year ${s.coYear} has no opening or closing date.`);
+  return { opDate, clDate };
+}
+
+async function countTx(tx: any, s: DataImportScope, table: string, where = ''): Promise<number> {
+  const rows: any[] = await tx.$queryRawUnsafe(
+    `SELECT count(*)::int n FROM "${table}" WHERE tenant_id=$1 AND "CO_CODE"=$2${where}`,
+    s.tenantId,
+    s.coCode,
+  );
+  return Number(rows[0]?.n ?? 0);
+}
+
+/** AC_MAST rows Lite_AcMast replaces: the desktop's `AC_CODE >= '00101'` (UT_IMPORT.cs:8696), minus the web's system accounts. */
+const REPLACED_ACCOUNTS = ` AND "AC_CODE" >= '00101' AND NOT ("AC_CODE" = ANY($3::text[]))`;
+
+async function replacedAccountsTx(tx: any, s: DataImportScope): Promise<number> {
+  const rows: any[] = await tx.$queryRawUnsafe(
+    `SELECT count(*)::int n FROM "AC_MAST" WHERE tenant_id=$1 AND "CO_CODE"=$2${REPLACED_ACCOUNTS}`,
+    s.tenantId,
+    s.coCode,
+    [...SYSTEM_ACCOUNT_CODES],
+  );
+  return Number(rows[0]?.n ?? 0);
+}
+
+/** Replaced masters: their own rows do not make the company "not new". */
+const REPLACED_MASTERS = new Set([
+  'AC_MAST',
+  'AC_MAST_SRNO',
+  'PRODUCT_MAST',
+  'GROUP_MAST',
+  'TABLE_MAST',
+  'ITEM_MAST',
+]);
+
+let shapeCache: { voucher: string[]; account: string[]; item: string[] } | undefined;
+
+/** Tenant tables of a company, by the columns that make them documents or references (schema read once). */
+async function tableShapesTx(tx: any): Promise<NonNullable<typeof shapeCache>> {
+  if (shapeCache) return shapeCache;
+  const rows: any[] = await tx.$queryRawUnsafe(
+    `SELECT c.table_name t, bool_or(c.column_name='VCH_NO') v, bool_or(c.column_name='AC_CODE') a, bool_or(c.column_name='IT_CODE') i
+       FROM information_schema.columns c
+      WHERE c.table_schema='public'
+      GROUP BY c.table_name
+     HAVING bool_or(c.column_name='tenant_id') AND bool_or(c.column_name='CO_CODE')
+      ORDER BY 1`,
+  );
+  const keep = (pick: (r: any) => boolean) =>
+    rows.filter((r) => pick(r) && !REPLACED_MASTERS.has(r.t)).map((r) => String(r.t));
+  shapeCache = { voucher: keep((r) => r.v), account: keep((r) => r.a), item: keep((r) => r.i) };
+  return shapeCache;
+}
+
+/**
+ * Why the company is not new, as table -> rows (only non-zero). D-IMP-2 refuses a company with any of:
+ *  - a row in a table that carries a voucher number (VCH_NO): every voucher, receipt, order, repair, customer entry...;
+ *  - a row in COMPANY_DATA_TABLES (openings, tags, stock);
+ *  - a row anywhere else naming an account the import deletes (non-system, >= '00101') or an item it deletes.
+ */
+async function companyDataTx(tx: any, s: DataImportScope): Promise<Record<string, number>> {
+  const shapes = await tableShapesTx(tx);
+  const out: Record<string, number> = {};
+  const add = (key: string, n: number) => {
+    if (n > 0) out[key] = (out[key] ?? 0) + n;
+  };
+  for (const table of new Set([...COMPANY_DATA_TABLES, ...shapes.voucher]))
+    add(table, await countTx(tx, s, table));
+  for (const table of shapes.account) {
+    if (out[table]) continue;
+    const rows: any[] = await tx.$queryRawUnsafe(
+      `SELECT count(*)::int n FROM "${table}" WHERE tenant_id=$1 AND "CO_CODE"=$2
+         AND coalesce("AC_CODE",'') >= '00101' AND NOT ("AC_CODE" = ANY($3::text[]))`,
+      s.tenantId,
+      s.coCode,
+      [...SYSTEM_ACCOUNT_CODES],
+    );
+    add(`${table}.AC_CODE`, Number(rows[0]?.n ?? 0));
+  }
+  for (const table of shapes.item) {
+    if (out[table]) continue;
+    const rows: any[] = await tx.$queryRawUnsafe(
+      `SELECT count(*)::int n FROM "${table}" t WHERE t.tenant_id=$1 AND t."CO_CODE"=$2
+         AND EXISTS (SELECT 1 FROM "ITEM_MAST" i WHERE i.tenant_id=$1 AND i."CO_CODE"=$2 AND i."IT_CODE"=t."IT_CODE")`,
+      s.tenantId,
+      s.coCode,
+    );
+    add(`${table}.IT_CODE`, Number(rows[0]?.n ?? 0));
+  }
+  return out;
+}
+
+/** varchar lengths of the written columns, so an over-long source value is a row error, not a failed insert. */
+let limitsCache: Map<string, number> | undefined;
+async function columnLimitsTx(tx: any, tables: string[]): Promise<Map<string, number>> {
+  if (limitsCache) return limitsCache;
+  const rows: any[] = await tx.$queryRawUnsafe(
+    `SELECT table_name t, column_name c, character_maximum_length l FROM information_schema.columns
+      WHERE table_schema='public' AND table_name = ANY($1::text[]) AND character_maximum_length IS NOT NULL`,
+    tables,
+  );
+  limitsCache = new Map(rows.map((r) => [`${r.t}.${r.c}`, Number(r.l)]));
+  return limitsCache;
+}
+
+const STEP_TABLE_ROWS: Array<{
+  step: LiteStep;
+  table: string;
+  pick: (p: LitePlan) => Record<string, unknown>[];
+  key: string;
+}> = [
+  { step: 'Lite_AcMast', table: 'AC_MAST', pick: (p) => p.accounts, key: 'AC_CODE' },
+  {
+    step: 'Lite_AcMast',
+    table: 'AC_MAST_SRNO',
+    pick: (p) => (p.accountSrno ? [p.accountSrno] : []),
+    key: 'AC_CODE',
+  },
+  { step: 'Wh_Item', table: 'PRODUCT_MAST', pick: (p) => p.products, key: 'PR_CODE' },
+  { step: 'Wh_Item', table: 'GROUP_MAST', pick: (p) => p.groups, key: 'GR_CODE' },
+  { step: 'Wh_Item', table: 'TABLE_MAST', pick: (p) => p.tables, key: 'TABLE_CODE' },
+  { step: 'Wh_Item', table: 'ITEM_MAST', pick: (p) => p.items, key: 'IT_CODE' },
+  { step: 'Lite_BarData', table: 'BAR_DATA', pick: (p) => p.barData, key: 'VCH_NO' },
+  { step: 'Lite_BarData', table: 'BAR_DETL', pick: (p) => p.barDetl, key: 'TAG_NO' },
+  { step: 'Lite_BarData', table: 'BAR_IDTL', pick: (p) => p.barIdtl, key: 'TAG_NO' },
+  { step: 'WH_ItOpbl', table: 'ITM_OPBL', pick: (p) => p.itemOpenings, key: 'IT_CODE' },
+];
+
+function lengthErrors(plan: LitePlan, limits: Map<string, number>): ImportIssue[] {
+  const out: ImportIssue[] = [];
+  for (const { step, table, pick, key } of STEP_TABLE_ROWS)
+    pick(plan).forEach((row, i) => {
+      for (const [column, value] of Object.entries(row)) {
+        if (typeof value !== 'string') continue;
+        const limit = limits.get(`${table}.${column}`);
+        if (limit !== undefined && value.length > limit)
+          out.push({
+            step,
+            table,
+            row: i + 1,
+            key: String(row[key] ?? ''),
+            reason: `${column} "${value}" is longer than ${limit} characters.`,
+          });
+      }
+    });
+  plan.accounts.forEach((row, i) => {
+    if (SYSTEM_ACCOUNT_CODES.includes(String(row.AC_CODE)))
+      out.push({
+        step: 'Lite_AcMast',
+        table: 'AC_MAST',
+        row: i + 1,
+        key: String(row.AC_CODE),
+        reason: `Account code ${String(row.AC_CODE)} is a system account of the web chart.`,
+      });
+  });
+  return out;
+}
+
+function stepsOf(
+  plan: LitePlan,
+  replaces: Record<string, number>,
+  tagStock: boolean,
+): StepPreview[] {
+  const writes: Record<LiteStep, Record<string, number>> = {
+    Lite_AcMast: {
+      AC_MAST: plan.accounts.length,
+      AC_MAST_SRNO: plan.accountSrno ? 1 : 0,
+      CO_SET: 1,
+    },
+    Wh_Item: {
+      PRODUCT_MAST: plan.products.length,
+      GROUP_MAST: plan.groups.length,
+      TABLE_MAST: plan.tables.length,
+      ITEM_MAST: plan.items.length,
+    },
+    WH_AcOpbl: {
+      OP_DATA: plan.openings.length,
+      AC_DATA: plan.openings.reduce(
+        (n, o) => n + [o.amount, o.gold, o.silver].filter((v) => v !== 0).length,
+        0,
+      ),
+    },
+    Lite_BarData: {
+      BAR_DATA: plan.barData.length,
+      BAR_DETL: plan.barDetl.length,
+      BAR_IDTL: plan.barIdtl.length,
+      MAIN_STOCK: tagStock ? plan.barDetl.length : 0,
+    },
+    WH_ItOpbl: { ITM_OPBL: plan.itemOpenings.length, MAIN_STOCK: plan.itemOpenings.length },
+  };
+  const replaced: Record<LiteStep, string[]> = {
+    Lite_AcMast: ['AC_MAST', 'AC_MAST_SRNO'],
+    Wh_Item: ['PRODUCT_MAST', 'GROUP_MAST', 'TABLE_MAST', 'ITEM_MAST'],
+    WH_AcOpbl: [],
+    Lite_BarData: [],
+    WH_ItOpbl: [],
+  };
+  return (Object.keys(STEP_INFO) as LiteStep[]).map((step) => ({
+    step,
+    ...STEP_INFO[step],
+    writes: writes[step],
+    replaces: Object.fromEntries(replaced[step].map((t) => [t, replaces[t] ?? 0])),
+  }));
+}
+
+type Year = { opDate: string; clDate: string };
+
+/** The pure plan, made outside any transaction (it can be large). */
+function planOf(source: SourceReader, s: DataImportScope, year: Year): LitePlan {
+  return planLiteImport(source, {
+    coCode: s.coCode,
+    lcCode: s.lcCode,
+    coYear: s.coYear,
+    clDate: year.clDate,
+    opDate: year.opDate,
+    user: s.user.slice(0, 15),
+  });
+}
+
+/** The company-side checks and counts of a plan, in the caller's transaction, and the preview they give. */
+async function previewTx(
+  tx: any,
+  s: DataImportScope,
+  source: SourceReader,
+  plan: LitePlan,
+  year: Year,
+  file: { name: string; sha256: string },
+): Promise<{ preview: DataImportPreview; tagStock: boolean }> {
+  const errors = [...plan.errors];
+  if (!errors.length)
+    errors.push(
+      ...lengthErrors(
+        plan,
+        await columnLimitsTx(
+          tx,
+          STEP_TABLE_ROWS.map((r) => r.table),
+        ),
+      ),
+    );
+  const companyData = await companyDataTx(tx, s);
+  const hasData = Object.keys(companyData).length > 0;
+  const replaces: Record<string, number> = {
+    AC_MAST: await replacedAccountsTx(tx, s),
+    AC_MAST_SRNO: plan.accountSrno ? await countTx(tx, s, 'AC_MAST_SRNO') : 0,
+    PRODUCT_MAST: await countTx(tx, s, 'PRODUCT_MAST'),
+    GROUP_MAST: await countTx(tx, s, 'GROUP_MAST'),
+    TABLE_MAST: await countTx(tx, s, 'TABLE_MAST'),
+    ITEM_MAST: await countTx(tx, s, 'ITEM_MAST'),
+  };
+  const tagStock = await importedTagsAreStockTx(tx, s);
+  const sourceTables: Record<string, number> = {};
+  for (const t of SOURCE_TABLES) {
+    const rows = source.rows(t);
+    if (rows) sourceTables[t] = rows.length;
+  }
+  const steps = stepsOf(plan, replaces, tagStock);
+  const newOpeningDate = businessToday();
+  const skipped = plan.skipped;
+  const body = {
+    file: file.sha256,
+    scope: [s.tenantId, s.coCode, s.lcCode, s.coYear],
+    steps,
+    errors: errors.length,
+    warnings: plan.warnings.length,
+    skipped,
+    companyData,
+    year,
+    newOpeningDate,
+  };
+  const previewHash = createHash('sha256').update(JSON.stringify(body)).digest('hex');
+  return {
+    tagStock,
+    preview: {
+      fileName: file.name,
+      fileSha256: file.sha256,
+      format: source.format,
+      sourceTables,
+      ignoredTables: source
+        .tableNames()
+        .filter((t) => !(SOURCE_TABLES as string[]).includes(t))
+        .sort(),
+      steps,
+      errors: errors.slice(0, 200),
+      warnings: plan.warnings.slice(0, 200),
+      refusal: hasData ? DATA_IMPORT_MESSAGES.HAS_DATA : null,
+      companyData,
+      skipped,
+      skippedTotal: skippedTotal(skipped),
+      newOpeningDate,
+      question: DATA_IMPORT_MESSAGES.QUESTION,
+      previewHash,
+    },
+  };
+}
+
+async function sourceOf(bytes: Uint8Array, tenantId: string): Promise<SourceReader> {
+  try {
+    return await openImportSource(bytes, { tenantId });
+  } catch (error: any) {
+    if (error?.name === 'SourceFileError')
+      throw new DataImportError(error.busy ? 'busy' : 'file', error.message);
+    throw error;
+  }
+}
+
+const sha256 = (bytes: Uint8Array) => createHash('sha256').update(bytes).digest('hex');
+
+async function readYear(prisma: any, s: DataImportScope): Promise<Year> {
+  return withTxBudget(prisma, s.tenantId, 'read', (tx: any) => yearTx(tx, s));
+}
+
+/** Read the file and show what each step would write. Writes nothing. */
+export async function previewLiteImport(
+  prisma: any,
+  s: DataImportScope,
+  file: { name: string; bytes: Uint8Array },
+): Promise<DataImportPreview> {
+  const source = await sourceOf(file.bytes, s.tenantId);
+  const fileSha = sha256(file.bytes);
+  const year = await readYear(prisma, s);
+  const plan = planOf(source, s, year);
+  return withTxBudget(
+    prisma,
+    s.tenantId,
+    'read',
+    async (tx: any) =>
+      (await previewTx(tx, s, source, plan, year, { name: file.name, sha256: fileSha })).preview,
+  );
+}
+
+/**
+ * Write the five steps in one transaction after the operator's Yes. The file is read and planned before the
+ * transaction; inside it, under the company's import lock, the year, the company checks and the preview hash are
+ * worked out again, so anything that changed since the preview refuses the import.
+ */
+export async function applyLiteImport(
+  prisma: any,
+  s: DataImportScope,
+  file: { name: string; bytes: Uint8Array },
+  previewHash: string,
+  opts: { acknowledgeSkipped?: boolean } = {},
+): Promise<DataImportResult> {
+  const source = await sourceOf(file.bytes, s.tenantId);
+  const fileSha = sha256(file.bytes);
+  const year = await readYear(prisma, s);
+  const plan = planOf(source, s, year);
+  return withTxBudget(prisma, s.tenantId, 'heavy', async (tx: any) => {
+    // One import per company at a time; a second request waits here and then finds the company no longer new.
+    await tx.$executeRawUnsafe(
+      'SELECT pg_advisory_xact_lock(hashtext($1))',
+      `data-import|${s.tenantId}|${s.coCode}`,
+    );
+    const now = await yearTx(tx, s);
+    if (now.opDate !== year.opDate || now.clDate !== year.clDate)
+      throw new DataImportError('stale-preview', DATA_IMPORT_MESSAGES.STALE);
+    const { preview, tagStock } = await previewTx(tx, s, source, plan, year, {
+      name: file.name,
+      sha256: fileSha,
+    });
+    if (preview.refusal)
+      throw new DataImportError('has-data', preview.refusal, { companyData: preview.companyData });
+    if (preview.errors.length)
+      throw new DataImportError('row-errors', DATA_IMPORT_MESSAGES.HAS_ERRORS, {
+        errors: preview.errors,
+      });
+    if (previewHash !== preview.previewHash)
+      throw new DataImportError('stale-preview', DATA_IMPORT_MESSAGES.STALE);
+    if (preview.skippedTotal > 0 && opts.acknowledgeSkipped !== true)
+      throw new DataImportError('skipped-unacknowledged', DATA_IMPORT_MESSAGES.SKIPPED, {
+        skipped: preview.skipped,
+        skippedTotal: preview.skippedTotal,
+      });
+
+    // UT_IMPORT.cs:8439-8440: YEAR_MAST.OP_DATE = today for every year of the company. Set first, so the opening legs
+    // and item-opening stock take the date the desktop's refresh after the import gives them (OP_DATE - 1).
+    const today = preview.newOpeningDate;
+    await tx.$executeRawUnsafe(
+      `UPDATE "YEAR_MAST" SET "OP_DATE"=$3 WHERE tenant_id=$1 AND "CO_CODE"=$2`,
+      s.tenantId,
+      s.coCode,
+      today,
+    );
+    const user = s.user.slice(0, 15);
+
+    // Step 1 Lite_AcMast (:8694-8780)
+    await deleteCompanyTx(tx, s, 'AC_MAST', REPLACED_ACCOUNTS, [...SYSTEM_ACCOUNT_CODES]);
+    await insertRowsTx(tx, 'AC_MAST', s.tenantId, plan.accounts);
+    if (plan.accountSrno) {
+      await deleteCompanyTx(tx, s, 'AC_MAST_SRNO');
+      await insertRowsTx(tx, 'AC_MAST_SRNO', s.tenantId, [plan.accountSrno]);
+    }
+    await tx.$executeRawUnsafe(
+      `UPDATE "CO_SET" SET "VB_IMPORT"='Y' WHERE tenant_id=$1 AND "CO_CODE"=$2`,
+      s.tenantId,
+      s.coCode,
+    ); // :8778
+
+    // Step 2 Wh_Item (:4241-4328): each master is deleted for the company and filled from the file
+    for (const [table, rows] of [
+      ['PRODUCT_MAST', plan.products],
+      ['GROUP_MAST', plan.groups],
+      ['TABLE_MAST', plan.tables],
+      ['ITEM_MAST', plan.items],
+    ] as const) {
+      await deleteCompanyTx(tx, s, table);
+      await insertRowsTx(tx, table, s.tenantId, rows);
+    }
+
+    // Step 3 WH_AcOpbl (:4330-4363): OP_DATA and AcOp_Ledr's legs, as the Party Opening writer makes them, batched
+    await deleteCompanyTx(tx, s, 'OP_DATA');
+    await writeOpeningsTx(tx, s, plan.openings, user);
+
+    // Step 4 Lite_BarData (:8447-8692) and its Tag_Opbl_Stk stock rows (Ac_Stock.cs:24, opening-book tags only)
+    for (const table of ['BAR_DATA', 'BAR_DETL', 'BAR_IDTL']) await deleteCompanyTx(tx, s, table);
+    await insertRowsTx(tx, 'BAR_DATA', s.tenantId, plan.barData);
+    await insertRowsTx(tx, 'BAR_DETL', s.tenantId, plan.barDetl);
+    await insertRowsTx(tx, 'BAR_IDTL', s.tenantId, plan.barIdtl);
+    if (tagStock)
+      await insertRowsTx(tx, 'MAIN_STOCK', s.tenantId, plan.barDetl.map(tagOpeningStock));
+
+    // Step 5 WH_ItOpbl (:3887-3965) and its Itm_Opbl_Stk stock rows
+    await deleteCompanyTx(tx, s, 'ITM_OPBL');
+    await insertRowsTx(tx, 'ITM_OPBL', s.tenantId, plan.itemOpenings);
+    const stockDate = dayBefore(today);
+    await insertRowsTx(
+      tx,
+      'MAIN_STOCK',
+      s.tenantId,
+      plan.itemOpenings.map((row) => itemOpeningStock(row, stockDate)),
+    );
+    return { ...preview, applied: true as const, message: DATA_IMPORT_MESSAGES.COMPLETE };
+  });
+}
