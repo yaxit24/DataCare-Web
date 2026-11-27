@@ -174,8 +174,9 @@ describe('route policy registry', () => {
     // and GET /reports/huid/zoom; report metal defaults adds one: 832 + 4 = 836.
     // The Sales Invoice Apr No import adds GET /sales/approval-help and GET /sales/approval-import: 836 + 2 = 838.
     // Data Import (UT_IMPORT Lite Soft) adds its preview and apply: 840.
-    expect(routes).toHaveLength(840);
-    expect(new Set(routes.map((route) => `${route.method} ${route.path}`)).size).toBe(840);
+    // The linked old-gold purchase adds GET and POST /settings/urd-books (Utilities/Settings): 842.
+    expect(routes).toHaveLength(842);
+    expect(new Set(routes.map((route) => `${route.method} ${route.path}`)).size).toBe(842);
 
     const policies = routes.map((route) => ({
       ...route,

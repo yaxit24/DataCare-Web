@@ -245,6 +245,7 @@ import { registerTaxMasterRoutes } from './taxMaster.js';
 import { registerAutoItemRoutes } from './autoItem.js';
 import { registerGroupMasterRoutes } from './groupMaster.js';
 import { registerCompanyIdentityRoutes } from './companyIdentity.js';
+import { registerUrdBookSettingsRoutes } from './urdBookSettings.js';
 import { registerProductMasterRoutes } from './productMaster.js';
 import { registerMasterScreenRoutes } from './masterScreens.js';
 import { registerWholesaleSaleRoutes } from './wholesaleSale.js';
@@ -1113,6 +1114,7 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
   registerGroupMasterRoutes(app, extraRouteHelpers, formCapabilities);
   registerProductMasterRoutes(app, extraRouteHelpers, formCapabilities);
   registerCompanyIdentityRoutes(app, extraRouteHelpers);
+  registerUrdBookSettingsRoutes(app, extraRouteHelpers);
   registerTagPrintScreenRoutes(app, extraRouteHelpers, formCapabilities);
   registerMasterScreenRoutes(app, extraRouteHelpers, formCapabilities);
   registerWholesaleSaleRoutes(app, extraRouteHelpers);

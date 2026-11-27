@@ -108,6 +108,8 @@ export const settingsEffects = {
   inputs: [
     'web/apps/web/test/features/faults.mjs',
     'web/apps/web/app/(app)/settings/page.tsx',
+    'web/apps/web/components/UrdBookSettings.tsx',
+    'web/apps/api/src/modules/purchase/urdBook.ts',
     'web/apps/api/src/modules/settings/settingsCatalog.ts',
     'web/apps/api/src/modules/shared/settingsBehavior.ts',
     'web/apps/api/src/modules/sales/sales.ts',
@@ -604,6 +606,79 @@ export const settingsEffects = {
         } finally {
           await mustSet(page, 'CO_SET.CASH_LIMIT', oldCash ?? '');
           await mustSet(page, 'CO_SET_NEW.TOT_AMT_ROF', oldRound ?? '');
+        }
+      },
+    ),
+    C(
+      'urd-books.choose-and-restore',
+      'T15',
+      'mutation',
+      'Old gold purchase books (owner decision 2B; desktop hardcodes 043/044, TR_SALE.cs:18756-18842): a web company with no URD book is told to choose one; the chosen PURCHASE book is stored in company_urd_book and resolved; the same book for both metals is refused; "(automatic)" restores the rule',
+      async (ctx) => {
+        const { page } = await ctx.session();
+        const storedBooks = async () =>
+          (
+            await ctx.rows(
+              `SELECT gold_book g, silver_book s FROM "company_urd_book" WHERE tenant_id=$1 AND "CO_CODE"='01'`,
+            )
+          )[0] ?? { g: null, s: null };
+        const saveBooks = async () => {
+          const [response] = await Promise.all([
+            page.waitForResponse(
+              (r) =>
+                new URL(r.url()).pathname === '/api/settings/urd-books' &&
+                r.request().method() === 'POST',
+            ),
+            page.getByRole('button', { name: 'Save Old Gold Books', exact: true }).click(),
+          ]);
+          return response;
+        };
+        const before = await storedBooks();
+        await page.goto('/settings');
+        await page.getByRole('heading', { name: 'Old Gold Purchase Books', exact: true }).waitFor();
+        const goldNote = page.getByTestId('urd-gold-resolved');
+        const initial = await goldNote.innerText();
+        assert.match(
+          initial,
+          /Create a Gold URD Purchase book in Books \/ Series .*or choose one in Settings/,
+        );
+        try {
+          await page.locator('#urd-gold-book').selectOption('PR');
+          const saved = await saveBooks();
+          assert.equal(saved.status(), 200, await saved.text());
+          await page.getByText('Saved old gold purchase books').waitFor();
+          const chosen = await storedBooks();
+          assert.equal(String(chosen.g).trim(), 'PR');
+          const resolved = await goldNote.innerText();
+          assert.match(resolved, /^In use at location \d+: PR .*\(chosen here\)$/);
+
+          await page.locator('#urd-silver-book').selectOption('PR');
+          const refused = await saveBooks();
+          assert.equal(refused.status(), 400);
+          await page
+            .locator('form[aria-labelledby="urd-books-title"] .msg.err')
+            .filter({ hasText: 'must differ' })
+            .waitFor();
+          assert.deepEqual(await storedBooks(), chosen);
+          await ctx.shot(page, 'urd-books');
+          return {
+            observation: `initial "${initial}"; stored gold ${chosen.g}; "${resolved}"; same book for silver refused`,
+            expected: 'PR stored and resolved; duplicate refused',
+            database: { before, chosen },
+            downstream: { resolved },
+          };
+        } finally {
+          await page.goto('/settings');
+          await page
+            .getByRole('heading', { name: 'Old Gold Purchase Books', exact: true })
+            .waitFor();
+          await page
+            .locator('#urd-gold-book')
+            .selectOption(before.g ? String(before.g).trim() : '');
+          await page
+            .locator('#urd-silver-book')
+            .selectOption(before.s ? String(before.s).trim() : '');
+          assert.equal((await saveBooks()).status(), 200);
         }
       },
     ),
