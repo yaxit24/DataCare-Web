@@ -13,6 +13,26 @@ import { billTotals, resolveRoundingPolicy } from '@datacare/core';
 const key = { CO_CODE: '01', LC_CODE: '01', CO_YEAR: '2024', CO_BOOK: 'PUR', VCH_NO: '1' };
 
 describe('purchase builders', () => {
+  it('posts TCS debit leg 07 against the supplier (Ac_Ledr.cs:434)', () => {
+    const lines = buildPurchaseLedger({
+      key,
+      acCode: 'SUPP',
+      purchaseAc: 'PUR',
+      taxAc: 'GST',
+      roundAc: 'ROUND',
+      totals: { total: 377872, taxable: 377872, tax: 0, roundOff: 0 },
+      tcs: 378,
+      tcsAc: 'TCSAC',
+    });
+    expect(lines.find((l) => l.legType === 7)).toMatchObject({
+      AC_CODE: 'TCSAC',
+      LD_CODE: 'SUPP',
+      DR_AMT: 378,
+      CR_AMT: 0,
+    });
+    expect(lines.find((l) => l.AC_CODE === 'SUPP')?.CR_AMT).toBe(378250);
+    expect(ledgerBalance(lines).balanced).toBe(true);
+  });
   it('lineFine uses the standard purchase-item policy', () => {
     expect(lineFine({ itCode: 'I1', netWt: 10, touch: 91.6 })).toBe(9.16);
     expect(lineFine({ itCode: 'I1', fineWt: 5 })).toBe(5); // explicit wins

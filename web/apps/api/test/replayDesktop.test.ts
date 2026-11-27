@@ -746,6 +746,14 @@ describe('replay oracle: normalisation and grouping', () => {
     ).toMatch(/0\.000/);
     expect(lib.buildDifferenceOf(g('WH SALES', 'RATE_CUT_ISU', 'ITM_FINE'))).toBeUndefined();
     expect(lib.buildDifferenceOf(g('WH SALES', 'RATE_CUT_ISU', 'ITM_AMT'))).toBeUndefined();
+    // Sale header labour: only the data build's 0 against a source total is a build difference.
+    const labour = (desktop: string) => ({
+      ...g('SALES', 'SL_DATA', 'LBR_AMT'),
+      desktop,
+      web: '6023.00',
+    });
+    expect(lib.buildDifferenceOf(labour('0.00'))).toMatch(/TR_SALE\.cs:15056/);
+    expect(lib.buildDifferenceOf(labour('100.00'))).toBeUndefined();
     // The scheme row 05 only: an unpaired row of any other key stays a defect.
     expect(
       lib.buildDifferenceOf(g('SALES ORDER', 'ROJ_MEL_DATA', '*', 'row-count (known rows)')),
@@ -986,5 +994,53 @@ describe('known desktop build differences', () => {
       ['row-count', 1, false],
       ['value', 1, false],
     ]);
+  });
+});
+
+describe('replay input corrections from the current desktop', () => {
+  it('keeps piece, gross and kilogram labour bases', () => {
+    expect(lib.labourOf({ LBR_TYPE: 'P', LBR_RATE: 25, LBR_PRC: 3 })).toEqual({
+      labourType: 'per_piece',
+      labourRate: 25,
+    });
+    for (const type of ['G', 'K'])
+      expect(lib.labourOf({ LBR_TYPE: type, LBR_RATE: 20 })).toEqual({
+        labourType: type,
+        labourRate: 20,
+      });
+  });
+  it('sends the typed purchase amount only when it differs from the rate product', () => {
+    const line = { ITM_FINE: 2, ITM_RATE: 100, ITM_AMT: 175 };
+    expect(lib.typedAmountOf(line)).toEqual({ metalAmount: 175 });
+    expect(lib.typedAmountOf({ ...line, ITM_AMT: 200 })).toEqual({});
+    expect(lib.typedAmountOf({ ...line, ITM_GWT: 3, ITM_AMT: 300 }, 'G')).toEqual({});
+    expect(lib.typedAmountOf({ ...line, ITM_NWT: 3, ITM_GHT_WT: 0.5, ITM_AMT: 350 }, 'N')).toEqual(
+      {},
+    );
+    expect(lib.typedAmountOf({ ...line, URD_RATE_TYPE: 'N', ITM_NWT: 3, ITM_AMT: 300 })).toEqual(
+      {},
+    );
+    expect(
+      lib.typedAmountOf({ ...line, ITM_FINE: 25, RATE_TYPE: '1', ITM_RATE: 1, ITM_AMT: 2 }),
+    ).toEqual({});
+    expect(lib.typedAmountOf({ ...line, ITM_FINE: 2000, RATE_TYPE: 'K', ITM_AMT: 200 })).toEqual(
+      {},
+    );
+
+    expect(lib.typedAmountOf({ ITM_PCS: 3, RATE_TYPE: 'P', ITM_RATE: 100, ITM_AMT: 300 })).toEqual(
+      {},
+    );
+  });
+  it('retains edited karigar net, old-metal other weight and supplied stones', () => {
+    const v = voucher('SALES', '001', {
+      SL_DATA: [{ AC_CODE: 'CUST' }],
+      SL_DETL: [{ SR_NO: 1, IT_CODE: 'G', TAG_NO: 'T', ITM_GWT: 8, KR_NET_WT: 0 }],
+      SL_PR_DETL: [{ CO_BOOK: '001', ITM_OTH_WT: 2 }],
+      SL_IDTL: [{ SR_NO: 1, ISR_NO: 1, IT_CODE: 'D', IT_GWT: 0.5, IT_AMT: 100 }],
+    });
+    const r = lib.saleRequest(v, { tag: () => ({ ITM_GWT: 10, KR_NET_WT: 9 }) });
+    expect(r.body.lines[0].karigarNetWt).toBe(0);
+    expect(r.body.oldGold[0].otherWt).toBe(2);
+    expect(r.body.lines[0].stones).toMatchObject([{ IT_CODE: 'D', IT_GWT: 0.5, IT_AMT: 100 }]);
   });
 });

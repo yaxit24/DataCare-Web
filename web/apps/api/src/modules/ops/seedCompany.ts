@@ -255,6 +255,9 @@ const BOOKS: {
     workflow: 'PURCHASE',
     acCode: 'PURCHASE',
     slots: PURCHASE_BOOK_SLOTS,
+    // A book over every metal, like the desktop 'Other Purchase' book: each line posts to its group's PURC_AC
+    // (Ac_Ledr.cs:410-421); a G or S book posts to BOOK_DETL slot 1.
+    itmType: 'A',
   },
   // Desktop TR_PURC_HM 'Tag Wise Purc' book (MDI_FORM.cs:8540) — a TAG PURCHASE book posts through the
   // same Purc_* routines as PURCHASE, so a fresh company can use the hallmark-purchase screen (G02).
@@ -265,6 +268,9 @@ const BOOKS: {
     inout: 'I',
     acCode: 'PURCHASE',
     slots: PURCHASE_BOOK_SLOTS,
+    // A book over every metal, like the desktop 'Other Purchase' book: each line posts to its group's PURC_AC
+    // (Ac_Ledr.cs:410-421); a G or S book posts to BOOK_DETL slot 1.
+    itmType: 'A',
   },
   // Desktop TR_OTH_PURC books: 375 OTINC 'OTH INC' (I) and 355 OTEXP 'OTH EXP' (O). Without them a fresh
   // company opened Other Income / Other Expenses to "No active books" (G03/G17, provisioning gap).

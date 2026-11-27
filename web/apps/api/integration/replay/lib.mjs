@@ -279,11 +279,11 @@ export function cashRequest(v) {
   };
 }
 
-/** LBR_TYPE 'N' with a rate is per gram; with only an amount it is a typed (fixed) amount; 'P' is a percentage. */
+/** LBR_TYPE 'N' with a rate is per gram; with only an amount it is a typed (fixed) amount; 'P' is per piece. */
 export function labourOf(line) {
   const type = str(line.LBR_TYPE).toUpperCase();
-  if (type === 'P')
-    return { labourType: 'percentage', labourRate: nz(line.LBR_PRC ?? line.LBR_RATE) };
+  if (type === 'P') return { labourType: 'per_piece', labourRate: num(line.LBR_RATE) };
+  if (type === 'G' || type === 'K') return { labourType: type, labourRate: num(line.LBR_RATE) };
   // The labour-amount cell is computed as Math.Round((net + ghat) x rate) (net x rate when LBR_WITH_GHT is 'N';
   // TR_SALE.cs:11084-11127) but open for typing. A stored amount that neither product rounds to was typed: it is sent
   // as the amount, with the rate the grid showed beside it, as the page posts a typed amount.
@@ -318,6 +318,27 @@ export function typedFineOf(line) {
   return Math.abs(computed - num(line.ITM_FINE)) > 0.0005 ? { fineWt: num(line.ITM_FINE) } : {};
 }
 
+/** TR_PURC.cs:7167-7193: the rate basis and the typeable item-amount cell. */
+export function typedAmountOf(line, amountType = 'F') {
+  const basis =
+    str(line.URD_RATE_TYPE) === 'N'
+      ? num(line.ITM_NWT) + num(line.ITM_GHT_WT)
+      : amountType === 'G'
+        ? num(line.ITM_GWT)
+        : amountType === 'N'
+          ? num(line.ITM_NWT) + num(line.ITM_GHT_WT)
+          : num(line.ITM_FINE);
+  const type = str(line.RATE_TYPE);
+  const rate = num(line.ITM_RATE);
+  const product =
+    type === 'P'
+      ? num(line.ITM_PCS) * rate
+      : (basis * rate) / (type === '1' ? 10 : type === 'K' ? 1000 : 1);
+  const floor = Math.floor(product);
+  const rounded = product - floor === 0.5 ? floor + (floor % 2) : Math.round(product);
+  return Math.abs(rounded - num(line.ITM_AMT)) > 0.5 ? { metalAmount: num(line.ITM_AMT) } : {};
+}
+
 const metalOf = (v) => {
   const t = str(v).toUpperCase();
   return t === 'G' || t === 'S' ? t : undefined;
@@ -332,6 +353,51 @@ const tagOf = (v) => {
  * as the page's tag pick fills them, never from the desktop's SL_DETL output. `ctx.tag(tagNo, vchSrno)` returns the
  * BAR_DETL row or undefined.
  */
+// Sales accepts the reopened SL_IDTL column names (saleResiduals.ts stoneRowsFor).
+const saleStone = (row) =>
+  Object.fromEntries(
+    [
+      'TAG_NO',
+      'VCH_SRNO',
+      'ISR_NO',
+      'IT_CODE',
+      'IT_TYPE',
+      'DM_CODE',
+      'DM_SIZE',
+      'DM_SFNO',
+      'DM_LEB',
+      'IT_PCS',
+      'IT_PCS_WT',
+      'KR_WT',
+      'KR_LESS_PRC',
+      'IT_GWT',
+      'IT_CON_PRC',
+      'IT_CON_WT',
+      'IT_RATE_TYPE',
+      'IT_RATE',
+      'IT_AMT',
+      'IT_LBR_RATE',
+      'IT_LBR_AMT',
+      'IT_NET_AMT',
+      'KR_CON_PRC',
+      'KR_CON_WT',
+      'KR_RATE',
+      'KR_AMT',
+      'KR_LBR_RATE',
+      'KR_LBR_AMT',
+      'KR_NET_AMT',
+      'DM_ORIGIN',
+      'DM_REMARK',
+      'DM_COLOR',
+      'DM_NAME',
+      'KR_RATE_TYPE',
+      'IT_DISC_PRC',
+      'IT_DISC_AMT',
+    ]
+      .filter((key) => key in row)
+      .map((key) => [key, row[key]]),
+  );
+
 export function saleRequest(v, ctx = {}) {
   const h = (v.tables.SL_DATA ?? [])[0];
   if (!h) throw new ReplayBuildError('no SL_DATA header');
@@ -355,7 +421,7 @@ export function saleRequest(v, ctx = {}) {
       description: opt(o.IT_DESC),
       pcs: num(o.ITM_PCS),
       grossWt: num(o.ITM_GWT),
-      otherWt: nz(o.ITM_OTH),
+      otherWt: nz(o.ITM_OTH_WT),
       netWt: num(o.ITM_NWT),
       touch: num(o.ITM_TOUCH),
       conversionPct: nz(o.CON_PRC),
@@ -426,7 +492,16 @@ export function saleRequest(v, ctx = {}) {
         hallmarkId4Wt: nz(l.HM_ID4_WT),
         tagGrossWt: tag ? nz(tag.ITM_GWT) : undefined,
         tagNetWt: tag ? nz(tag.ITM_NWT) : undefined,
-        karigarNetWt: tag ? nz(tag.KR_NET_WT) : undefined,
+        // TR_SALE.cs:10325-10334: changing gross weight changes the entered karigar net.
+        karigarNetWt: tag
+          ? num(l.ITM_GWT) !== num(tag.ITM_GWT)
+            ? num(l.KR_NET_WT)
+            : nz(tag.KR_NET_WT)
+          : undefined,
+        stones: (v.tables.SL_IDTL ?? [])
+          .filter((s) => num(s.SR_NO) === num(l.SR_NO))
+          .sort((a, b) => num(a.ISR_NO) - num(b.ISR_NO))
+          .map(saleStone),
         karigarTouch: tag ? nz(tag.KR_TOUCH) : undefined,
         karigarWestPct: tag ? nz(tag.KR_WEST_PRC) : undefined,
         karigarFine: tag ? nz(tag.KR_FINE) : undefined,
@@ -465,7 +540,7 @@ export function purchaseStone(r) {
   };
 }
 
-export function purchaseRequest(v) {
+export function purchaseRequest(v, ctx = {}) {
   const h = (v.tables.PR_DATA ?? [])[0];
   if (!h) throw new ReplayBuildError('no PR_DATA header');
   const lines = [...(v.tables.PR_DETL ?? [])].sort(bySr);
@@ -508,6 +583,7 @@ export function purchaseRequest(v) {
       westPct: nz(l.ITM_WEST_PRC),
       ghtWt: nz(l.ITM_GHT_WT),
       ...typedFineOf(l),
+      ...typedAmountOf(l, ctx.purchaseAmountType),
       rate: num(l.ITM_RATE),
       otherAmount: nz(l.OTH_AMT),
       withStock: opt(l.WITH_STOCK),
@@ -856,7 +932,7 @@ export function buildRequest(v, ctx) {
     case 'SALES':
       return saleRequest(v, ctx);
     case 'PURCHASE':
-      return purchaseRequest(v);
+      return purchaseRequest(v, ctx);
     case 'SALES ORDER':
       return salesOrderRequest(v);
     case 'WH SALES':
@@ -1133,6 +1209,9 @@ export function buildDifferenceOf(difference) {
     return before && before === saleKeyRole(web, 'web')
       ? `sale LEDR_KEY renumbered, same role ${before.replace(/#$/, '')} (Ac_Ledr.cs:61-172)`
       : undefined;
+  }
+  if (table === 'SL_DATA' && column === 'LBR_AMT' && Number(desktop) === 0) {
+    return 'sale header labour: the data build wrote 0, the source writes the line labour total (TR_SALE.cs:15056)';
   }
   if (table === 'MAIN_STOCK' && column === 'SR_NO') {
     const pair = `${Number(desktop)}>${Number(web)}`;

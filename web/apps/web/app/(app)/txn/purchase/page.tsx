@@ -26,6 +26,7 @@ import {
 } from '../../../../lib/companySettings';
 import {
   billTotals,
+  roundHalfEven,
   fineFor,
   normalizePurchaseExplicitFine,
   purchaseAmountType,
@@ -325,7 +326,6 @@ function PlainPurchasePage() {
   const [creditDays, setCreditDays] = useState('');
   const [discountPct, setDiscountPct] = useState('');
   const [tcsPct, setTcsPct] = useState('');
-  const [tcsAmount, setTcsAmount] = useState('');
   const [tdsPct, setTdsPct] = useState('');
   const [tdsAmount, setTdsAmount] = useState('');
   const [hmAmount, setHmAmount] = useState('');
@@ -420,7 +420,9 @@ function PlainPurchasePage() {
   );
   const taxable = previewTotals.taxable;
   const taxPrev = previewTotals.tax;
-  const totalPrev = previewTotals.total;
+  // TR_PURC.cs:15072: whole-rupee TCS on net before discount plus tax.
+  const tcsAmount = roundHalfEven(((previewTotals.net + taxPrev) * n(tcsPct)) / 100, 0);
+  const totalPrev = roundingPolicy.roundBillTotal(taxable + taxPrev + tcsAmount);
 
   function newPurchase() {
     setLoadedVchNo('');
@@ -486,7 +488,6 @@ function PlainPurchasePage() {
       setCreditDays(str(view.creditDays));
       setDiscountPct(str(view.discountPct));
       setTcsPct(str(view.tcsPct));
-      setTcsAmount(str(view.tcsAmount));
       setTdsPct(str(view.tdsPct));
       setTdsAmount(str(view.tdsAmount));
       setHmAmount(str(view.hmAmount));
@@ -647,7 +648,7 @@ function PlainPurchasePage() {
         creditDays: creditDays ? n(creditDays) : undefined,
         discountPct: discountPct ? n(discountPct) : undefined,
         tcsPct: tcsPct ? n(tcsPct) : undefined,
-        tcsAmount: tcsAmount ? n(tcsAmount) : undefined,
+        tcsAmount,
         tdsPct: tdsPct ? n(tdsPct) : undefined,
         tdsAmount: tdsAmount ? n(tdsAmount) : undefined,
         hmAmount: hmAmount ? n(hmAmount) : undefined,
@@ -1130,7 +1131,7 @@ function PlainPurchasePage() {
               </div>
               <div className="field">
                 <label>TCS Amt</label>
-                <input value={tcsAmount} onChange={(e) => setTcsAmount(e.target.value)} />
+                <input value={tcsAmount} readOnly />
               </div>
               <div className="field">
                 <label>TDS %</label>
