@@ -1526,7 +1526,7 @@ export const purchaseInvoice = {
       'settings.labour-to-slot-4',
       'T15',
       'mutation',
-      "Ac_Ledr.cs:419-421: with PURC_WITH_LBR = N a line's labour posts to the purchase book's slot 4; a provisioned book has it (G184)",
+      "Ac_Ledr.cs:419-421: with PURC_WITH_LBR = N a gold or silver book (ITM_TYPE not A) posts a line's labour to its slot 4; a provisioned book has it (G184)",
       async (ctx) => {
         const { page } = await ctx.session();
         const setLabourSetting = async (value) => {
@@ -1549,6 +1549,13 @@ export const purchaseInvoice = {
         const [{ before }] = await ctx.rows(
           `SELECT coalesce("PURC_WITH_LBR",'') before FROM "CO_SET" WHERE tenant_id=$1 AND "CO_CODE"='01'`,
         );
+        const [{ itemType }] = await ctx.rows(
+          `SELECT coalesce("ITM_TYPE",'') "itemType" FROM "BOOK_DATA" WHERE tenant_id=$1 AND "CO_CODE"='01' AND "CO_BOOK"='${BOOK}'`,
+        );
+        // An all-metal 'A' book keeps labour in each line's group leg whatever the setting (Ac_Ledr.cs:410).
+        await ctx.rows(
+          `UPDATE "BOOK_DATA" SET "ITM_TYPE"='G' WHERE tenant_id=$1 AND "CO_CODE"='01' AND "CO_BOOK"='${BOOK}'`,
+        );
         await setLabourSetting('N');
         try {
           const vchNo = await createOne(ctx, page); // 20 g x 150 making = 3,000 labour
@@ -1570,6 +1577,10 @@ export const purchaseInvoice = {
           };
         } finally {
           await setLabourSetting(before === 'N' ? 'N' : 'Y');
+          await ctx.rows(
+            `UPDATE "BOOK_DATA" SET "ITM_TYPE"=nullif($2,'') WHERE tenant_id=$1 AND "CO_CODE"='01' AND "CO_BOOK"='${BOOK}'`,
+            itemType,
+          );
         }
       },
     ),

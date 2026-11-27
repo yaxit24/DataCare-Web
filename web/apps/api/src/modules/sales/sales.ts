@@ -1440,14 +1440,8 @@ async function writeSaleTx(
     TDS_CODE: tdsEnabled ? (input.tdsCode ?? '') : '',
     TDS_PRC: tdsPct,
     TDS_AMT: tdsAmt,
-    // The desktop does NOT total line labour onto the header. Measured: SL_DATA.LBR_AMT is 0.00 on all 190
-    // real sale headers, while 100 of those vouchers carry labour on their SL_DETL lines - so the column is
-    // not a roll-up, and summing into it was an interpretation rather than an observation.
-    //
-    // Nothing in the web reads SL_DATA.LBR_AMT (line labour is read from SL_DETL and MAIN_STOCK), so matching
-    // the desktop here costs nothing. If a header-level labour charge is ever added as an input it belongs
-    // here, but no such value appears anywhere in the real data.
-    LBR_AMT: 0,
+    // TR_SALE.cs:15056: MSG_TOT[0,27] is the sum of line labour.
+    LBR_AMT: round2s(computed.reduce((sum, c) => sum + c.calc.labour, 0)),
     OTH_AMT: round2s(computed.reduce((sum, c) => sum + num(c.in.otherAmount), 0)),
     TOT_AMT: totals.total,
     CARD_COM_AMT: round2s(num(input.cardCommissionAmount)),

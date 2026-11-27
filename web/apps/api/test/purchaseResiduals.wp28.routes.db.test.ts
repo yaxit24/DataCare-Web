@@ -153,6 +153,11 @@ const SILVER_FULL = { ...SILVER, hmIdAmount: 40, itmColor: 'WHT' };
     runtime = new PrismaClient();
     await wipe();
     await seedCompany(runtime, tenantId, '01');
+    // The TCS code's account, TAX_MAST SR_NO 0 (Ac_Ledr.cs:434): the purchase refuses a TCS amount without one.
+    await owner.$executeRawUnsafe(
+      `INSERT INTO "TAX_MAST"(tenant_id,"CO_CODE","TAX_CODE","SR_NO","TAX_NAME","TAX_AC") VALUES ($1,'01','T1',0,'TCS','TCSLED')`,
+      tenantId,
+    );
     await exec(
       `INSERT INTO "GROUP_MAST"(tenant_id,"CO_CODE","GR_CODE","GR_NAME","SALE_AC","PURC_AC")
        VALUES ($1,'01','E1','WP28 GOLD','SALES','PURCHASE'),($1,'01','E2','WP28 SILVER','SLVSALE','SLVPURC')`,
@@ -250,7 +255,7 @@ const SILVER_FULL = { ...SILVER, hmIdAmount: 40, itmColor: 'WHT' };
         creditDays: 30,
         discountPct: 2,
         discountAmount: 100,
-        tcsCode: 'TC1',
+        tcsCode: 'T1',
         tcsPct: 1,
         tcsAmount: 10,
         tdsCode: 'TD1',

@@ -253,4 +253,9 @@ export const EXPECTED_MIGRATIONS: ReadonlyArray<{
     name: '20261126140000_web_tds_ledger',
     checksum: 'bbad5418ec64dcfca04dd3150c7795bfc807783555418c13476ddad5ec3560b5',
   },
+  {
+    // The web-provisioned purchase books PR and TPR take ITM_TYPE 'A', the all-metal book (Ac_Ledr.cs:410-421).
+    name: '20261127120000_web_purchase_item_type',
+    checksum: '1d481c016b642d7b147bad49924c208b334e03c2c9b8661991f04a75078e8d0d',
+  },
 ];

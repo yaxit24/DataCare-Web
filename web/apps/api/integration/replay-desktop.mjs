@@ -189,7 +189,13 @@ async function main() {
     const tags = new Map();
     for (const r of barCols.length ? await desktop.allRows('BAR_DETL', barCols) : [])
       tags.set(`${String(r.TAG_NO).trim()}|${Number(r.VCH_SRNO ?? 0)}`, r);
+    const purchaseSettings = await desktop.allRows('CO_SET', ['CO_CODE', 'PR_AMT_TYPE']);
     const ctx = {
+      purchaseAmountType:
+        String(
+          purchaseSettings.find((r) => String(r.CO_CODE).trim() === scope.coCode)?.PR_AMT_TYPE ??
+            'F',
+        ).trim() || 'F',
       tag: (tagNo, vchSrno) =>
         tags.get(`${tagNo}|${Number(vchSrno ?? 0)}`) ??
         [...tags.values()].find((r) => String(r.TAG_NO).trim() === tagNo),

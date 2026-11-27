@@ -223,6 +223,18 @@ databaseDescribe('sale writes what the desktop writes', () => {
     );
 
   /** Oracle A2, A8, A10, A14: PARTY_AC_CODE, LDR_NAME, kasar keys and the header's typed/default columns. */
+  it('totals line labour onto SL_DATA (TR_SALE.cs:15056)', async () => {
+    const sale = await createSale(runtime, saleInput('TX'), [
+      looseLine({ labourType: 'fixed', labourFixed: 125 }),
+      looseLine({ labourType: 'fixed', labourFixed: 75 }),
+    ]);
+    const [header] = await rows(
+      `SELECT "LBR_AMT"::float labour FROM "SL_DATA" WHERE tenant_id=$1 AND "CO_BOOK"='TX' AND "VCH_NO"=$2`,
+      String(sale.vchNo).padStart(5, '0'),
+    );
+    expect(header?.labour).toBe(200);
+  });
+
   it('keys and names the ledger legs as Sales_Ledr does', async () => {
     const sale = await createSale(runtime, saleInput('TX', { cashAmt: 1000, kasarAmount: 5 }), [
       looseLine(),

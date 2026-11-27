@@ -185,6 +185,13 @@ databaseDescribe('database-backed purchase voucher lifecycle', () => {
       TENANT,
       CO,
     );
+    // A TCS code's account: TAX_MAST SR_NO 0 (Ac_Ledr.cs:434).
+    await owner.$executeRawUnsafe(
+      `INSERT INTO "TAX_MAST"(tenant_id,"CO_CODE","TAX_CODE","SR_NO","TAX_NAME","TAX_AC")
+       VALUES ($1,$2,'T1',0,'TCS','TCSLED')`,
+      TENANT,
+      CO,
+    );
     await owner.$executeRawUnsafe(
       `INSERT INTO "GROUP_MAST"(tenant_id,"CO_CODE","GR_CODE","GR_NAME","SALE_AC","PURC_AC")
        VALUES ($1,$2,'G01','Gold','SALEAC','PURCAC')`,
@@ -200,9 +207,9 @@ databaseDescribe('database-backed purchase voucher lifecycle', () => {
     await owner.$executeRawUnsafe(
       `INSERT INTO "BOOK_DATA"(
          tenant_id,"CO_CODE","LC_CODE","CO_BOOK","BOOK_NAME","BOOK_SNAME","MAIN_BOOK",
-         "BOOK_INOUT","CUR_USE","BOOK_TBL_NAME")
-       VALUES ($1,$2,$3,'PUR','Configured Purchase Book','CPB','PURCHASE','I','Y','PR_DATA'),
-              ($1,$2,$3,'SAL','Configured Sales Book','CSB','SALES','O','Y','SL_DATA')`,
+         "BOOK_INOUT","CUR_USE","BOOK_TBL_NAME","ITM_TYPE")
+       VALUES ($1,$2,$3,'PUR','Configured Purchase Book','CPB','PURCHASE','I','Y','PR_DATA','A'),
+              ($1,$2,$3,'SAL','Configured Sales Book','CSB','SALES','O','Y','SL_DATA','A')`,
       TENANT,
       CO,
       LC,
@@ -266,6 +273,152 @@ databaseDescribe('database-backed purchase voucher lifecycle', () => {
     if (owner) await owner.$disconnect();
   });
 
+  it('adds TCS before the final half-even bill rounding (TR_PURC.cs:15082)', async () => {
+    await owner.$executeRawUnsafe(
+      `UPDATE "CO_SET_NEW" SET "TOT_AMT_ROF"=0 WHERE tenant_id=$1`,
+      TENANT,
+    );
+    const saved = await createPurchase(
+      runtime,
+      purchaseInput({ tcsCode: 'T1', tcsPct: 1, cashAmt: 0, cardAmt: 0, chequeAmt: 0 }),
+      [{ itCode: 'LOOSE', netWt: 1, touch: 100, metalAmount: 50 }],
+    );
+    // Net 50 + tax 3% 1.50 = 51.50; TCS Round(0.515, 0) = 1; 52.50 rounds half-even to 52.
+    expect(saved.totals.total).toBe(52);
+    const [h] = await owner.$queryRawUnsafe<any[]>(
+      `SELECT "TCS_AMT"::float tcs,"TOT_AMT"::float total,"BILL_OS"::float os FROM "PR_DATA" WHERE tenant_id=$1 AND "VCH_NO"=$2`,
+      TENANT,
+      String(saved.vchNo).padStart(5, '0'),
+    );
+    expect(h).toEqual({ tcs: 1, total: 52, os: 52 });
+  });
+
+  it.each([
+    [250, 2],
+    [350, 4],
+  ])('rounds TCS half-even on %s (TR_PURC.cs:15072)', async (amount, expectedTcs) => {
+    const saved = await createPurchase(
+      runtime,
+      purchaseInput({
+        taxRatePct: 0,
+        tcsCode: 'T1',
+        tcsPct: 1,
+        cashAmt: 0,
+        cardAmt: 0,
+        chequeAmt: 0,
+      }),
+      [{ itCode: 'LOOSE', netWt: 1, touch: 100, metalAmount: amount }],
+    );
+    const [h] = await owner.$queryRawUnsafe<any[]>(
+      `SELECT "TCS_AMT"::float tcs,"TOT_AMT"::float total FROM "PR_DATA" WHERE tenant_id=$1 AND "VCH_NO"=$2`,
+      TENANT,
+      String(saved.vchNo).padStart(5, '0'),
+    );
+    expect(h).toEqual({ tcs: expectedTcs, total: amount + expectedTcs });
+  });
+
+  it.each([
+    ['Y', 'ROUND'],
+    ['N', 'ROUND'],
+    ['Y', ''],
+  ])(
+    'computes TCS and posts a non-A book (labour %s, TCS account "%s")',
+    async (withLabour, taxAccount) => {
+      await owner.$executeRawUnsafe(
+        `UPDATE "BOOK_DATA" SET "ITM_TYPE"='G' WHERE tenant_id=$1 AND "CO_BOOK"='PUR'`,
+        TENANT,
+      );
+      await owner.$executeRawUnsafe(
+        `INSERT INTO "TAX_MAST" (tenant_id,"CO_CODE","TAX_CODE","SR_NO","TAX_AC") VALUES ($1,$2,'TC',0,'ROUND')`,
+        TENANT,
+        CO,
+      );
+      await owner.$executeRawUnsafe(
+        `UPDATE "CO_SET" SET "PURC_WITH_LBR"=$2 WHERE tenant_id=$1`,
+        TENANT,
+        withLabour,
+      );
+      await owner.$executeRawUnsafe(
+        `UPDATE "TAX_MAST" SET "TAX_AC"=$2 WHERE tenant_id=$1 AND "TAX_CODE"='TC'`,
+        TENANT,
+        taxAccount,
+      );
+      await owner.$executeRawUnsafe(
+        `INSERT INTO "BOOK_DETL" (tenant_id,"CO_CODE","LC_CODE","CO_BOOK","SR_NO","AC_CODE","MAIN_BOOK","BOOK_INOUT") VALUES ($1,$2,$3,'PUR',4,'LAB','PURCHASE','I')`,
+        TENANT,
+        CO,
+        LC,
+      );
+      const attempt = createPurchase(
+        runtime,
+        purchaseInput({
+          tcsCode: 'TC',
+          tcsPct: 0.1,
+          tcsAmount: 999,
+          cashAmt: 0,
+          cardAmt: 0,
+          chequeAmt: 0,
+        }),
+        [
+          {
+            itCode: 'LOOSE',
+            netWt: 1,
+            touch: 100,
+            metalAmount: 200000,
+            labourType: 'fixed',
+            labourFixed: 100,
+            otherAmount: 20,
+          },
+        ],
+      );
+      // A TCS code without a tax account is refused: the desktop would post no TCS leg (Ac_Ledr.cs:434).
+      if (!taxAccount) {
+        await expect(attempt).rejects.toThrow('TCS code TC has no tax account in the Tax master');
+        return;
+      }
+      const saved = await attempt;
+      // 200120 + 3% 6003.60 = 206123.60; whole-rupee TCS = 206.
+      const [h] = await owner.$queryRawUnsafe<any[]>(
+        `SELECT "TCS_AMT"::float tcs,"TOT_AMT"::float total,"BILL_OS"::float os FROM "PR_DATA" WHERE tenant_id=$1 AND "VCH_NO"=$2`,
+        TENANT,
+        String(saved.vchNo).padStart(5, '0'),
+      );
+      expect(h).toEqual({ tcs: 206, total: 206329.6, os: 206329.6 });
+      const legs = await owner.$queryRawUnsafe<any[]>(
+        `SELECT "AC_CODE" ac,"LD_CODE" ld,"DR_AMT"::float dr,"CR_AMT"::float cr,"LEDR_KEY" k FROM "AC_DATA" WHERE tenant_id=$1 AND "VCH_NO"=$2`,
+        TENANT,
+        String(saved.vchNo).padStart(5, '0'),
+      );
+      expect(legs.find((l) => String(l.k).endsWith('07'))).toMatchObject({
+        ac: taxAccount,
+        ld: 'SUPP',
+        dr: 206,
+        cr: 0,
+      });
+      expect(legs.find((l) => l.ac === 'CTRL')).toMatchObject({
+        dr: withLabour === 'Y' ? 200120 : 200000,
+        cr: 0,
+      });
+      if (withLabour === 'N')
+        expect(legs.find((l) => l.ac === 'LAB')).toMatchObject({
+          ac: 'LAB',
+          ld: 'SUPP',
+          dr: 120,
+          cr: 0,
+        });
+      expect(saved.totals.total).toBe(h.total);
+      expect(legs.some((l) => l.ac === 'PURCAC')).toBe(false);
+      expect(legs.reduce((n, l) => n + l.dr - l.cr, 0)).toBeCloseTo(0, 2);
+      const taxes = await owner.$queryRawUnsafe<any[]>(
+        `SELECT "TOT_AMT"::float total FROM "TAX_DATA" WHERE tenant_id=$1 AND "VCH_NO"=$2`,
+        TENANT,
+        String(saved.vchNo).padStart(5, '0'),
+      );
+      expect(taxes.length).toBeGreaterThan(0);
+      expect(taxes.every((r) => r.total === h.total)).toBe(true);
+    },
+  );
+
   /**
    * G02 / N32. "Tag Wise Purc" opens TR_PURC_HM on a TAG PURCHASE book (MDI_FORM.cs:8540-8541) and the form
    * posts it through the same Purc_Ledr / Purc_Rojmel / Purc_GST / Purc_Stk routines as a PURCHASE book
@@ -274,8 +427,8 @@ databaseDescribe('database-backed purchase voucher lifecycle', () => {
   it('posts a TAG PURCHASE book exactly like a PURCHASE book, and supports reopen and delete', async () => {
     await owner.$executeRawUnsafe(
       `INSERT INTO "BOOK_DATA"(tenant_id,"CO_CODE","LC_CODE","CO_BOOK","BOOK_NAME","BOOK_SNAME","MAIN_BOOK",
-         "BOOK_INOUT","CUR_USE","BOOK_TBL_NAME")
-       VALUES ($1,$2,$3,'TPR','Tag Wise Purchase','CPB','TAG PURCHASE','I','Y','PR_DATA')`,
+         "BOOK_INOUT","CUR_USE","BOOK_TBL_NAME","ITM_TYPE")
+       VALUES ($1,$2,$3,'TPR','Tag Wise Purchase','CPB','TAG PURCHASE','I','Y','PR_DATA','A')`,
       TENANT,
       CO,
       LC,
@@ -830,7 +983,7 @@ databaseDescribe('database-backed purchase voucher lifecycle', () => {
         cardAc: 'CARDAC',
         creditDays: 21,
         discountPct: 1.5,
-        tcsCode: 'TCS1',
+        tcsCode: 'T1',
         tcsPct: 0.1,
         tcsAmount: 12.34,
         tdsCode: 'TDS1',
@@ -864,9 +1017,9 @@ databaseDescribe('database-backed purchase voucher lifecycle', () => {
     expect(String(row.CARD_AC ?? '').trim()).toBe('CARDAC');
     expect(row.cr_days).toBe(21);
     expect(row.disc_prc).toBeCloseTo(1.5, 2);
-    expect(String(row.TCS_CODE ?? '').trim()).toBe('TCS1');
+    expect(String(row.TCS_CODE ?? '').trim()).toBe('T1');
     expect(row.tcs_prc).toBeCloseTo(0.1, 2);
-    expect(row.tcs_amt).toBeCloseTo(12.34, 2);
+    expect(row.tcs_amt).toBe(1); // TR_PURC.cs:15072: Round((1200 + 36) × 0.1%, 0).
     expect(String(row.TDS_CODE ?? '').trim()).toBe('TDS1');
     expect(row.tds_prc).toBeCloseTo(0.2, 2);
     expect(row.tds_amt).toBeCloseTo(56.78, 2);
@@ -1567,8 +1720,8 @@ databaseDescribe('database-backed purchase voucher lifecycle', () => {
   it('a TAG PURCHASE edit keeps an unchanged tag STK_DATE; a changed tag and a plain purchase take the new date', async () => {
     await owner.$executeRawUnsafe(
       `INSERT INTO "BOOK_DATA"(tenant_id,"CO_CODE","LC_CODE","CO_BOOK","BOOK_NAME","BOOK_SNAME","MAIN_BOOK",
-         "BOOK_INOUT","CUR_USE","BOOK_TBL_NAME")
-       VALUES ($1,$2,$3,'TPS','Tag Wise Purchase S','CPS','TAG PURCHASE','I','Y','PR_DATA')`,
+         "BOOK_INOUT","CUR_USE","BOOK_TBL_NAME","ITM_TYPE")
+       VALUES ($1,$2,$3,'TPS','Tag Wise Purchase S','CPS','TAG PURCHASE','I','Y','PR_DATA','A')`,
       TENANT,
       CO,
       LC,
