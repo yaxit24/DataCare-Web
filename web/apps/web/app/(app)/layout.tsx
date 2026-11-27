@@ -75,6 +75,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
       scope={{ coCode: session.coCode, lcCode: session.lcCode, coYear: session.coYear }}
       roundingFlags={session.roundingFlags ?? null}
       editionCode={session.edition?.code ?? null}
+      features={session.features}
     >
       <Shell session={session} contextStale={contextState.status === 'stale'}>
         {contextState.status === 'stale' && (

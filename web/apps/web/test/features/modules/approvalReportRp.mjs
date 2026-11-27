@@ -905,24 +905,80 @@ export const approvalReportRp = {
       'filters.data-type-setting-source',
       'T02',
       'read-only',
-      'RP_ALL.cs:8186 {{if (Operators.CompareString(DC_Main.MsDataType, "A", false) == 0)}}; RP_ALL.cs:8190 (B); RP_ALL.cs:8192 {{{BOOK_DATA.DATA_TYPE}}}. The setting source is the login: MS_OPNCOMP.cs:1459-1463 {{DC_Main.MsDataType = "C"; if (MsSoftType == "A" | MsSoftType == "E") DC_Main.MsDataType = "A";}}: a Lite login runs with MsDataType C (the A/B choice of MDI_FORM.cs:12720-12757 is Advance/Enterprise only, WP-35 D3), and the web session of a Lite login is data type C (LOGIN_MAST.DATA_TYPE_DEFAULT \'C\'), so neither branch appends a DATA_TYPE condition',
+      'RP_ALL.cs:8186-8192 {{if (Operators.CompareString(DC_Main.MsDataType, "A", false) == 0) … {BOOK_DATA.DATA_TYPE}}}: the setting is the session data type (owner decision 2026-11-25, data-type access: LOGIN_MAST DATA_TYPE_ALLOW/DEFAULT, Ctrl+B/Ctrl+C switch). app.ts binds it into every /reports/* query (sessionReportQuery) and approvalQuery.ts appends bk."DATA_TYPE" = <type> for A/B only; All (C) appends nothing',
       async (ctx) =>
         withFixture(ctx, async () => {
-          const page = await openReport(ctx);
-          const me = await (await page.request.get('/api/me')).json();
-          assert.equal(me.dataType, 'C', 'a Lite session runs with data type C');
-          // The approval book is B-typed for this run: an A or B condition would drop its vouchers, C keeps them.
-          await ctx.rows(
-            `UPDATE "BOOK_DATA" SET "DATA_TYPE"='B' WHERE tenant_id=$1 AND "CO_BOOK"=$2 AND "LC_CODE"='01'`,
-            BOOK,
-          );
-          const run = await runMode(page, 'issue', { Book: BOOK });
-          assert.equal(run.query.get('dataType'), null, 'the client sends no data type');
-          assertCodes(await readGrid(page), ['AV1', 'AV2'], ['AV3']);
-          return {
-            observation: `session data type ${me.dataType}; the B-typed book's AV1 and AV2 are listed (no DATA_TYPE condition)`,
-            expected: { dataType: 'C', listed: ['AV1', 'AV2'] },
+          const session = await ctx.session(as(USERS.admin.user, 'apr-datatype'));
+          const { page } = session;
+          const fixtureTags = LINES.filter(inScope).map((l) => l.tag);
+          const bookType = (type) =>
+            ctx.rows(
+              `UPDATE "BOOK_DATA" SET "DATA_TYPE"=$2 WHERE tenant_id=$1 AND "CO_BOOK"=$3 AND "LC_CODE"='01'`,
+              type,
+              BOOK,
+            );
+          const open = async () => {
+            await page.goto('/dashboard');
+            await page.getByRole('link', { name: 'Approval Report', exact: true }).click();
+            await page.waitForURL('**/reports/approval-report', { timeout: 8000 });
+            await page.getByRole('heading', { name: 'Approval Rpt', exact: true }).waitFor();
           };
+          const run = async () => {
+            await field(page, 'From').fill(FROM);
+            await field(page, 'To').fill(isoToday());
+            const received = page.waitForResponse(
+              (r) => new URL(r.url()).pathname === API_PATH && r.request().method() === 'GET',
+              { timeout: 15000 },
+            );
+            await panelButton(page, 'issue').click();
+            const response = await received;
+            assert.equal(response.status(), 200, await response.text());
+            const tags = rowsOf(await response.json())
+              .map((cells) => cells.tagNo)
+              .filter((tag) => fixtureTags.includes(tag));
+            return { url: response.url(), tags: [...new Set(tags)].sort() };
+          };
+          try {
+            // All (C): no predicate, the A book's lines show.
+            await open();
+            const all = await run();
+            assert.deepEqual(all.tags, [...new Set(fixtureTags)].sort(), 'All shows every line');
+            // Ctrl+B: the session is B; the fixture book is A, so its lines are filtered out.
+            await page.goto('/dashboard');
+            // The shortcut listens only once /me has loaded (the badge is up).
+            await page.getByTestId('data-type-badge').filter({ hasText: /^All$/ }).waitFor();
+            await page.keyboard.press('Control+b');
+            await page.getByTestId('data-type-badge').filter({ hasText: /^B$/ }).waitFor();
+            await open();
+            const bSession = await run();
+            assert.deepEqual(bSession.tags, [], 'a B session hides the A book');
+            // The client cannot choose: a request asking for A (or All) still answers with the session's B.
+            const forged = await page.request.get(
+              `${API_PATH}?fromDate=${FROM}&toDate=${isoToday()}&dataType=A`,
+            );
+            assert.equal(forged.status(), 200);
+            assert.deepEqual(
+              rowsOf(await forged.json()).filter((c) => fixtureTags.includes(c.tagNo)),
+              [],
+              'a forged dataType=A is replaced by the session type',
+            );
+            // The same book marked B: the B session now shows exactly those lines.
+            await bookType('B');
+            const bBook = await run();
+            assert.deepEqual(bBook.tags, all.tags, 'the B session shows the B book');
+            await ctx.shot(page, 'filters-data-type-setting-source');
+            return {
+              observation: `All: ${all.tags.join(',')}; B session over A book: none (forged dataType=A ignored); B session over B book: ${bBook.tags.join(',')}`,
+              expected: { all: all.tags, bOverA: [], bOverB: all.tags },
+            };
+          } finally {
+            await bookType('A');
+            await ctx.owner.$executeRawUnsafe(
+              `UPDATE auth_session SET revoked_at=clock_timestamp(),revoke_reason='test-cleanup' WHERE tenant_id=$1 AND session_id IN (SELECT session_id FROM auth_session WHERE tenant_id=$1 AND login_name=$2 AND data_type<>'C')`,
+              ctx.tenantId,
+              USERS.admin.user,
+            );
+          }
         }),
     ),
 

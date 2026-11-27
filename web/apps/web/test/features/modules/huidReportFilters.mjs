@@ -1,5 +1,6 @@
 import assert from 'node:assert/strict';
-import { cleanHuid, seedHuid } from './huidSeed.mjs';
+import { USERS } from '../fixtures/catalogue.mjs';
+import { cleanHuid, huidUser, seedHuid } from './huidSeed.mjs';
 /**
  * Feature: Report → HuId Report (RP_HUID.cs, /reports/huid), part A: T01, T02, T03, T06. Expected values are the desktop
  * rules applied to huidSeed.mjs, never read back from the app. The page does not exist yet; selectors follow the WP-18 page
@@ -153,6 +154,65 @@ const stockTo = (ctx, to, check) =>
   });
 
 export const filterCases = [
+  C(
+    'huid-report.config.data-type-filter',
+    'T15',
+    'RP_HUID.cs:1761 {{Interaction.IIf(Operators.CompareString(DC_Main.MsDataType, "C", false) == 0, (object)"", (object)("AND C.DATA_TYPE = \'" + DC_Main.MsDataType + "\'"))}}; MsDataType is the session data type (MDI_FORM.cs:12732-12740; web owner decision 2026-11-25: LOGIN_MAST DATA_TYPE_ALLOW/DEFAULT, Ctrl+B / Ctrl+C / badge switch, bound into every /reports/* query by app.ts sessionReportQuery). A blank row type reads as A (reportDataType.ts)',
+    (ctx) =>
+      withCase(ctx, async () => {
+        const typed = { 'TG-001': '', 'TG-003': 'A', 'TG-002': 'B', 'TG-005': 'B' };
+        for (const [tag, type] of Object.entries(typed))
+          await ctx.owner.$executeRawUnsafe(
+            `UPDATE "BAR_DETL" SET "DATA_TYPE"=$3 WHERE tenant_id=$1 AND "TAG_NO"=$2 AND "LC_CODE"='09'`,
+            ctx.tenantId,
+            tag,
+            type,
+          );
+        const { page } = await ctx.session({
+          ...huidUser(USERS.admin.user),
+          slot: 'huid-datatype',
+        });
+        const badge = page.getByTestId('data-type-badge');
+        const inView = async () => {
+          await open(page);
+          await setFilters(page, WINDOW);
+          await runView(page, 'In Tag');
+          return readTags(page);
+        };
+        try {
+          // All (C): no data-type condition, the ten Gold tags of the window.
+          await page.goto('/dashboard');
+          await badge.filter({ hasText: /^All$/ }).waitFor();
+          await inView();
+          await expectTags(page, GOLD_WINDOW);
+          // B: only the B rows.
+          await page.goto('/dashboard');
+          // The shortcut listens only once /me has loaded (the badge is up), as in usersRights data-type.shell-switch.
+          await badge.filter({ hasText: /^All$/ }).waitFor();
+          await page.keyboard.press('Control+b');
+          await badge.filter({ hasText: /^B$/ }).waitFor();
+          await inView();
+          await expectTags(page, ['TG-002', 'TG-005']);
+          // A (the badge returns to A): the A row and the blank one.
+          await badge.click();
+          await page.waitForLoadState('load');
+          await page.getByTestId('data-type-badge').waitFor({ state: 'detached' });
+          await inView();
+          await expectTags(page, ['TG-001', 'TG-003']);
+          return {
+            observation:
+              'In view: All → 10 Gold tags; B → TG-002, TG-005; A → TG-001 (blank) and TG-003',
+            expected: { all: GOLD_WINDOW, B: ['TG-002', 'TG-005'], A: ['TG-001', 'TG-003'] },
+          };
+        } finally {
+          await ctx.owner.$executeRawUnsafe(
+            `UPDATE auth_session SET revoked_at=clock_timestamp(),revoke_reason='test-cleanup' WHERE tenant_id=$1 AND session_id IN (SELECT session_id FROM auth_session WHERE tenant_id=$1 AND login_name=$2 AND data_type<>'C')`,
+            ctx.tenantId,
+            USERS.admin.user,
+          );
+        }
+      }),
+  ),
   // T01 Entry and defaults
   C(
     'huid-report.entry.menu-opens-three-views',

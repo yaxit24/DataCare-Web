@@ -924,6 +924,8 @@ export default function TagOpeningPage() {
                           leaveKarigar(i);
                         }}
                         aria-label={`Tag opening ${field} row ${i + 1}`}
+                        // The counter cell is a 3-character box (TR_TAG_OPBL.cs:5712-5714), as BAR_DETL.TBL_CODE is.
+                        maxLength={field === 'tblCode' ? 3 : undefined}
                         value={line[field]}
                         onChange={(e) => setLine(i, field, e.target.value)}
                         style={{ width, textAlign: field === 'tblCode' ? undefined : 'right' }}

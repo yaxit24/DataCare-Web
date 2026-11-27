@@ -356,4 +356,30 @@ describe.runIf(RUN)('tag opening survives a reopen-and-save unchanged', () => {
     )) as Array<{ net: number }>;
     expect(Number(onHand[0]?.net), 'a re-save must not admit the ornament twice').toBe(1);
   });
+
+  it('bounds the counter code to the desktop cell length (TR_TAG_OPBL.cs:5712-5714)', async () => {
+    // The desktop counter cell (mSG column 6) takes at most 3 characters (TEXT_ENTRY.MaxLength = 3), and
+    // BtnSave_Click writes it as typed into BAR_DETL.TBL_CODE varchar(3) (:10957). A longer value reached the
+    // writer in a browser run (an async lookup moved the focus into the counter cell while the operator typed a
+    // weight) and the save failed with "value too long for type character varying(3)".
+    const saved = (await tagOpening(runtime, {
+      scope,
+      vchDate: DAY,
+      mainUser: 'roundtrip-user',
+      lines: [{ ...richLine, tblCode: '00110.5' }],
+    } as never)) as { vchNo: number };
+    const rows = (await withTenant(owner, TENANT, (tx) =>
+      tx.$queryRawUnsafe(
+        `SELECT 'D' src, "TBL_CODE" ctr FROM "BAR_DETL" WHERE tenant_id=$1 AND "VCH_NO"=$2
+         UNION ALL SELECT 'S', "TBL_CODE" FROM "MAIN_STOCK" WHERE tenant_id=$1 AND "VCH_NO"=$2
+         ORDER BY 1`,
+        TENANT,
+        String(saved.vchNo).padStart(5, '0'),
+      ),
+    )) as Array<{ src: string; ctr: string }>;
+    expect(rows).toEqual([
+      { src: 'D', ctr: '001' },
+      { src: 'S', ctr: '001' },
+    ]);
+  });
 });

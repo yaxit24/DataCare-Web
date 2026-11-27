@@ -17,6 +17,11 @@
    "menu": "—",
    "reason": "Web catalogue of the desktop form layouts, not a desktop menu."
   },
+  "/masters/accounts": {
+   "edition": "L",
+   "menu": "—",
+   "reason": "Generic account list (Masters → Accounts) with its CSV Import / Export. It served Other → Data Import until the desktop UT_IMPORT screen (/utilities/data-import) existed; it keeps the Lite edition it had through that menu."
+  },
   "/masters/conversions": {
    "edition": "E",
    "menu": "—",
@@ -287,25 +292,10 @@
    "menu": "Transaction/Cash Received",
    "reason": "Multi-party receipt mode of TR_CASH (Cash and Bank Received)."
   },
-  "/txn/card-receipt": {
-   "edition": "P",
-   "menu": "ExtraTran/Card Rec",
-   "reason": "TR_CARD_REC, the Card Rec menu (Pro)."
-  },
   "/txn/cheque-print": {
    "edition": "L",
    "menu": "Transaction/Bank Payment",
    "reason": "Cheque printing (MS_PRINT) for bank payments."
-  },
-  "/txn/customer-entry": {
-   "edition": "A",
-   "menu": "Crm/Cust Entry",
-   "reason": "UT_CUST_ENTRY, the Cust Entry menu (Advance)."
-  },
-  "/txn/dhrn-os-letter": {
-   "edition": "P",
-   "menu": "Dhiran/Dhrn Os Letter",
-   "reason": "RP_DHRN_OS, a Dhiran menu (Pro)."
   },
   "/txn/estimate": {
    "edition": "L",
@@ -386,11 +376,6 @@
    "edition": "L",
    "menu": "Report/Tag Stock",
    "reason": "Stock and tag browser over the Tag Stock report data."
-  },
-  "/txn/tour-sales": {
-   "edition": "E",
-   "menu": "Karigar/Tour Sales",
-   "reason": "TR_TOUR_SALE, the Tour Sales menu (Enterprise)."
   },
   "/utilities": {
    "edition": "platform",

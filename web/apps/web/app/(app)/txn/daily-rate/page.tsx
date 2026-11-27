@@ -63,6 +63,13 @@ export default function DailyRatePage() {
   const [days, setDays] = useState<Day[] | null>(null);
   const [msg, setMsg] = useState<{ kind: 'ok' | 'err'; text: string } | null>(null);
   const [busy, setBusy] = useState(false);
+  /**
+   * A day is being read. The desktop's DISPLAY_DATA (MS_RATE.cs:1752-1832) runs on the UI thread, so nothing typed can
+   * land while it reads; here the read is asynchronous, so the rates, the employee and the grid are read-only until the
+   * day arrives, otherwise its answer overwrote what the operator had typed meanwhile (a rate typed right after the
+   * date was blanked and Enter on the silver rate priced only the silver rows).
+   */
+  const [loading, setLoading] = useState(true);
   // The day the screen shows; a load for an earlier date that answers late is dropped.
   const shown = useRef('');
   // CLEAR_DATA puts the date back to today without reading it: the day is read when the cursor leaves the date.
@@ -71,9 +78,11 @@ export default function DailyRatePage() {
 
   const load = useCallback(async (d: string) => {
     shown.current = d;
+    setLoading(true);
     try {
       const r = await get<any>(`/daily-rate?date=${encodeURIComponent(d)}`);
       if (shown.current !== d) return;
+      setLoading(false);
       const h = {
         goldRate: f2(r.goldRate),
         silverRate: f2(r.silverRate),
@@ -95,6 +104,8 @@ export default function DailyRatePage() {
       setForeign(!!r.foreignRates);
       setRows(r.groups ?? []);
     } catch (e) {
+      if (shown.current !== d) return;
+      setLoading(false);
       setRows([]);
       setMsg({ kind: 'err', text: errText(e, 'failed to load') });
     }
@@ -116,6 +127,7 @@ export default function DailyRatePage() {
    */
   function clearData() {
     shown.current = '';
+    setLoading(false);
     const today = todayLocal();
     skipLoad.current = today === date ? null : today;
     setHeader(blankHeader);
@@ -222,6 +234,7 @@ export default function DailyRatePage() {
         inputMode="decimal"
         onChange={(e) => setH(key, e.target.value)}
         onKeyDown={enter(key, last)}
+        readOnly={loading}
         style={{ width: 130, textAlign: 'right' }}
       />
     </div>
@@ -236,7 +249,7 @@ export default function DailyRatePage() {
           {msg.text}
         </div>
       )}
-      <form className="panel" onSubmit={submit}>
+      <form className="panel" onSubmit={submit} aria-busy={loading}>
         <div className="row">
           <div className="field">
             <label htmlFor="daily-rate-date">Vch Date</label>
@@ -282,6 +295,7 @@ export default function DailyRatePage() {
               onPick={(picked) => setEmpName(String(picked.name || ''))}
               ariaLabel="Employee"
               resolveTypedCode
+              readOnly={loading}
             />
             {empName && (
               <span className="muted" style={{ fontSize: 12 }}>
@@ -351,6 +365,7 @@ export default function DailyRatePage() {
                     value={r[key] === 0 ? '' : String(r[key])}
                     inputMode="decimal"
                     onChange={(e) => setCell(i, key, e.target.value)}
+                    readOnly={loading}
                     style={{ width: 100, textAlign: 'right' }}
                   />
                 </td>
@@ -406,7 +421,7 @@ export default function DailyRatePage() {
           >
             Cancel
           </button>
-          <button className="primary" data-save-mnemonic disabled={busy || !rows.length}>
+          <button className="primary" data-save-mnemonic disabled={busy || loading || !rows.length}>
             {busy ? 'Saving…' : 'Save'}
           </button>
         </div>

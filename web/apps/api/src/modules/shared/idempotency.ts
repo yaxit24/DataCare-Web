@@ -42,6 +42,7 @@ export interface IdempotentRoute {
 
 /** Every voucher create guarded so far. Literal paths: the route-policy test matches them to registrations. */
 export const IDEMPOTENT_CREATE_ROUTES: readonly IdempotentRoute[] = Object.freeze([
+  { method: 'POST', url: '/wholesale-sales', status: 201, menus: ['Transaction/Wh Sales'] },
   { method: 'POST', url: '/sales-orders', status: 201, menus: ['Transaction/Sales Order'] },
   { method: 'POST', url: '/tour/issue', status: 201, menus: ['Transaction/Approval Isu'] },
   { method: 'POST', url: '/tour/return', status: 201, menus: ['Transaction/Approval Rtn'] },
@@ -82,6 +83,13 @@ export const IDEMPOTENT_CREATE_ROUTES: readonly IdempotentRoute[] = Object.freez
     url: '/stock/tag-opening',
     status: 201,
     menus: ['Master/Tag Opening', 'Transaction/Only Tag Entry'],
+  },
+  // Other → Data Import (UT_IMPORT Lite Soft): a retried import answers the first result instead of importing twice.
+  {
+    method: 'POST',
+    url: '/utilities/data-import/lite/apply',
+    status: 200,
+    menus: ['Other/Data Import'],
   },
 ]);
 
