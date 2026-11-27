@@ -8,7 +8,7 @@ import {
 } from '../../../../components/ExtendedGrid';
 import { useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { del, get, post, put, ApiError } from '../../../../lib/api';
+import { del, get, ApiError } from '../../../../lib/api';
 import { usePrintGate } from '../../../../lib/formRights';
 import { useBusinessScope, useRoundingPolicy } from '../../../../components/BusinessScope';
 import { BookSelect } from '../../../../components/BookSelect';
@@ -40,6 +40,7 @@ import {
   useOldMetalTodayRates,
 } from '../../../../components/SaleResidualPanel';
 import * as wp26 from '../../../../lib/saleResidual';
+import { useOrderAdvanceConfirm } from '../../../../components/OrderAdvanceConfirm';
 
 /** BOOK_DATA.MAIN_BOOK values the retail sale writer accepts (sales.ts, workflowPolicy.SALES). */
 const SALE_MAIN_BOOKS = ['SALES'];
@@ -369,6 +370,7 @@ export default function SalesEntryPage() {
   const [loadedVchNo, setLoadedVchNo] = useState('');
   const [loadedVersion, setLoadedVersion] = useState(''); // N51 (D17): sent on update and delete
   const [err, setErr] = useState('');
+  const orderAdvance = useOrderAdvanceConfirm(); // owner decision 3B
   const printGate = usePrintGate('Sales/Sales Invoice', setErr); // TR_SALE.cs:16248-16254
   const [busy, setBusy] = useState(false);
   const cashRef = useRef<HTMLInputElement>(null);
@@ -472,6 +474,7 @@ export default function SalesEntryPage() {
     setKasar('');
     setOrdNo('');
     setOrdAmt('');
+    orderAdvance.load(null);
     setCrDays('');
     setEmpCode('');
     setDiscountPct('');
@@ -553,6 +556,7 @@ export default function SalesEntryPage() {
       setKasar(str(view.kasarAmount));
       setOrdNo(String(view.orderRef?.ordNo ?? ''));
       setOrdAmt(str(view.orderRef?.adjustAmt));
+      orderAdvance.load(view);
       setCrDays(str(view.crDays));
       setEmpCode(String(view.empCode ?? ''));
       setDiscountPct(str(view.discountPct));
@@ -641,7 +645,6 @@ export default function SalesEntryPage() {
     try {
       const oldGold = ogRows
         .filter((o) => ogAmt(o) > 0)
-
         .map((o) => ({
           itCode: o.itCode || (o.metal === 'S' ? 'OS' : 'OG'),
           pcs: n(o.pcs),
@@ -790,12 +793,9 @@ export default function SalesEntryPage() {
             ...saleGridRowLabour(l),
           })),
       };
-      const saved = loadedVchNo
-        ? await put<{ vchNo: number; totals: Totals; billProfit?: SaleProfit }>(
-            `/sales/${encodeURIComponent(loadedVchNo)}`,
-            { ...body, expectedVersion: loadedVersion },
-          )
-        : await post<{ vchNo: number; totals: Totals; billProfit?: SaleProfit }>('/sales', body);
+      type Saved = { vchNo: number; totals: Totals; billProfit?: SaleProfit };
+      const saved = await orderAdvance.saveSale<Saved>(loadedVchNo, loadedVersion, body);
+      if (!saved) return; // No: nothing saved, back at the order amount
       setResult(saved);
       const savedNo = String(saved.vchNo).padStart(5, '0');
       setLoadedVersion((saved as { version?: string }).version ?? ''); // N51: create and update return it
@@ -1184,6 +1184,7 @@ export default function SalesEntryPage() {
           ))}
         </div>
 
+        {orderAdvance.node}
         <SaleResidualPanel
           value={residual}
           onChange={(next, t) => {
