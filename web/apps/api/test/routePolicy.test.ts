@@ -172,8 +172,10 @@ describe('route policy registry', () => {
     // Inventory residuals: the Tag Stock Print window (RP_TAG.cs:8578, :8755) adds GET /reports/tag-stock/print; the
     // voucher zoom of Tag Stock and of the HuId Report (RP_TAG.cs:8917 DGV_DoubleClick) adds GET /reports/tag-stock/zoom
     // and GET /reports/huid/zoom; report metal defaults adds one: 832 + 4 = 836.
-    expect(routes).toHaveLength(837);
-    expect(new Set(routes.map((route) => `${route.method} ${route.path}`)).size).toBe(837);
+    // The Sales Invoice Apr No import adds GET /sales/approval-help and GET /sales/approval-import, and the Company
+    // print adds GET /company-identity/print: 836 + 2 + 1 = 839.
+    expect(routes).toHaveLength(839);
+    expect(new Set(routes.map((route) => `${route.method} ${route.path}`)).size).toBe(839);
 
     const policies = routes.map((route) => ({
       ...route,

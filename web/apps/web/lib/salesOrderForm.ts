@@ -496,6 +496,8 @@ export function salesOrderPayload(
     calculated[field] = raw ? Number(raw) : undefined;
   }
   calculated.dirtyFields = [...dirtyFields];
+  // The Bill No box is always sent, blank included, so clearing it clears the saved bill (TR_SALE_ORD.cs:9115).
+  calculated.billNo = String(header.billNo ?? '').trim();
   // Every grid row is sent; the server keeps those with an account and an amount, as TotAmt does.
   calculated.upiRows = upiRows.map((row, index) => {
     const raw = row.amount.trim();

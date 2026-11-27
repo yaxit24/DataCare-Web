@@ -18,8 +18,8 @@
  * 5. Bundles, the diff and a report go to ORACLE_OUT_DIR, which must be OUTSIDE the repository: the desktop rows are
  *    real business data. Standard output carries counts and codes only.
  *
- * Options: --book <family|book>[,...]   SALES, PURCHASE, CASH/BANK, CONTRA, FINE JV (and the families without a
- *                                        builder: SALES ORDER, WH SALES, RATE CUT) or a book code such as 026.
+ * Options: --book <family|book>[,...]   SALES, PURCHASE, CASH/BANK, CONTRA, FINE JV, SALES ORDER, WH SALES (and the family without a
+ *                                        builder: RATE CUT) or a book code such as 026.
  *          --limit N                     at most N vouchers per family (the first N in replay order).
  */
 import { randomBytes } from 'node:crypto';
@@ -344,10 +344,15 @@ async function main() {
               .placeholder(phTable, tenant, { ...scope, coBook: v.book }, ph)
               .catch(() => undefined)
           : undefined;
+        const hd = (voucher.tables[FAMILIES[v.family].header] ?? [])[0]?.HD_VCH_NO;
+        const removeHd = await web
+          .hiddenPlaceholder(tenant, { ...scope, coBook: v.book }, hd)
+          .catch(() => undefined);
         try {
           return await call(request.method, request.path, request.body);
         } finally {
           if (removePh) await removePh();
+          if (removeHd) await removeHd();
         }
       };
       try {
@@ -449,6 +454,7 @@ async function main() {
           tables,
         },
         desktopTables,
+        side,
       );
     };
     const bundle = (side, cases, source) => ({

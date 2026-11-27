@@ -218,7 +218,7 @@ export async function consumeSaleReferencesTx(
     }
     if (source.barRowId !== undefined && source.tagIdentity) {
       const barAffected = await tx.$executeRawUnsafe(
-        `UPDATE "BAR_DETL" SET "APR_ISU"='N',"APP_TRFR"='Y'
+        `UPDATE "BAR_DETL" SET "APR_ISU"='N'
           WHERE tenant_id=$1 AND row_id=$2 AND "CO_CODE"=$3 AND "LC_CODE"=$4
             AND "TAG_NO"=$5 AND coalesce("VCH_SRNO",0)::numeric=$6::numeric
             AND coalesce("IT_CODE"::text,'')=coalesce($7::text,'')`,
@@ -237,10 +237,11 @@ export async function consumeSaleReferencesTx(
       }
     }
   }
+  // TR_SALE.cs:16114 sets only APR_ISU = 'N' (the sale save never writes APP_TRFR; its delete clears it, :16330).
   // TR_SALE.cs:16113 marks ordinary sold tags too. Keep that path separate: approval-referenced
   // rows above update only their locked BAR row, while live-stock rows follow the saved sale identity.
   await tx.$executeRawUnsafe(
-    `UPDATE "BAR_DETL" b SET "APR_ISU"='N',"APP_TRFR"='Y' FROM "SL_DETL" s
+    `UPDATE "BAR_DETL" b SET "APR_ISU"='N' FROM "SL_DETL" s
       WHERE b.tenant_id=$1 AND s.tenant_id=$1 AND s."CO_CODE"=$2 AND s."LC_CODE"=$3
         AND s."CO_YEAR"=$4 AND s."CO_BOOK"=$5 AND s."VCH_NO"=$6
         AND nullif(btrim(coalesce(s."ISU_NO"::text,'')),'') IS NULL

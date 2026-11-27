@@ -1,6 +1,11 @@
 import type { FastifyInstance, FastifyRequest } from 'fastify';
 import type { CrmRouteHelpers } from './crm.js';
-import { deleteSale, editSale, getSale } from '../modules/sales/sales.js';
+import { createSale, deleteSale, editSale, getSale } from '../modules/sales/sales.js';
+import {
+  approvalSaleBill,
+  saleApprovalHelp,
+  saleApprovalImport,
+} from '../modules/sales/approvalImport.js';
 import { requiredVersion } from '../modules/vouchers/version.js';
 import { salePrintFiles, setSalePrintDefault } from '../modules/sales/salePrintChoice.js';
 
@@ -29,6 +34,34 @@ export function registerSaleVoucherRoutes(
     return run(reply, 200, () =>
       setSalePrintDefault(prisma, scopeOf(req), String(body(req).file ?? '')),
     );
+  });
+  // TR_SALE.cs:20562-20590 "A" (Approval Help): the open APR ISU vouchers of the session location.
+  app.get('/sales/approval-help', auth as any, async (req, reply) => {
+    if (!guard(req, reply, 'view')) return;
+    return run(reply, 200, () => saleApprovalHelp(prisma, scopeOf(req)));
+  });
+  // TR_SALE.cs:20008-20050, :20120-20520: the open lines of one approval, as Sales Invoice lines.
+  app.get('/sales/approval-import', auth as any, async (req, reply) => {
+    if (!guard(req, reply, 'view')) return;
+    const q = req.query as Record<string, string | undefined>;
+    return run(reply, 200, () =>
+      saleApprovalImport(prisma, scopeOf(req), {
+        // Not year/book: those names are the session scope keys (businessScope.ts enforceRequestScope).
+        year: String(q.aprYear ?? ''),
+        book: String(q.aprBook ?? ''),
+        vchNo: String(q.aprNo ?? ''),
+      }),
+    );
+  });
+  // The import and the save in one request: createSale's transaction locks and closes every source line, so a
+  // refusal leaves neither a sale nor a closed approval behind.
+  app.post('/tour/:vchNo/bill', auth as any, async (req, reply) => {
+    if (!guard(req, reply, 'create')) return;
+    const b = body(req);
+    return run(reply, 201, async () => {
+      const bill = await approvalSaleBill(prisma, saleInput(req, b), (req.params as any).vchNo, b);
+      return createSale(prisma, bill.input, bill.lines);
+    });
   });
   app.get('/sales/:vchNo', auth as any, async (req, reply) => {
     if (!guard(req, reply, 'view')) return;

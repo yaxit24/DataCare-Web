@@ -399,6 +399,220 @@ describe('replay oracle: request rebuild', () => {
     ]);
   });
 
+  it('rebuilds a sales order from its grid, tenders, old metal and components, typed labour only', () => {
+    const h = {
+      CO_YEAR: '2024-2025',
+      AC_CODE: 'C9',
+      AC_NAME: 'SYN CUST',
+      VCH_DATE: '2024-05-03T00:00:00.000Z',
+      BILL_NO: '',
+      TAX_CODE: 'GS',
+      TAX_PRC: 0,
+      CASH_AMT: 5000,
+      CHQ_AMT: 2000,
+      BANK_AC: 'B1',
+      CHQ_NO: '123',
+      SCHM_AMT: 300,
+      DEL_DATE: '2024-05-20T00:00:00.000Z',
+      NET_AMT: 9999,
+      ADV_AMT: 7300,
+    };
+    const lines = [
+      {
+        SR_NO: 2,
+        OLD_SRNO: 2,
+        IT_CODE: 'RNG',
+        TAG_NO: 'N',
+        ITM_PCS: 1,
+        ITM_GWT: 10,
+        ITM_NWT: 10,
+        ITM_TOUCH: 91.6,
+        ITM_RATE: 6000,
+        LBR_TYPE: 'N',
+        LBR_RATE: 400,
+        LBR_AMT: 4000,
+        RATE_FIX: 'Y',
+        ORD_DEL_DATE: '2024-05-20T00:00:00.000Z',
+        KR_NET_WT: 10,
+        KR_FINE: 10,
+        ITM_FINE: 9.16,
+        ITM_AMT: 54960,
+      },
+      {
+        SR_NO: 1,
+        OLD_SRNO: 1,
+        IT_CODE: 'CHN',
+        ITM_PCS: 1,
+        ITM_GWT: 5,
+        ITM_NWT: 5,
+        LBR_TYPE: 'N',
+        LBR_RATE: 300,
+        LBR_AMT: 1777,
+        ORD_DEL_DATE: '2024-06-01T00:00:00.000Z',
+      },
+    ];
+    const comps = [{ SR_NO: 2, ISR_NO: 1, IT_CODE: 'DM', IT_TYPE: 'D', IT_PCS: 2, IT_RATE: 50 }];
+    const old = [
+      {
+        CO_BOOK: '020',
+        SR_NO: 1,
+        IT_CODE: 'OG',
+        ITM_GWT: 3,
+        ITM_OTH: 0.5,
+        ITM_TOUCH: 80,
+        ITM_FINE: 2,
+        ITM_RATE_TYPE: 'F',
+        ITM_RATE: 6000,
+        NET_AMT: 12000,
+      },
+      { CO_BOOK: '026', SR_NO: 1, IT_CODE: 'XX' },
+    ];
+    const r = lib.salesOrderRequest(
+      voucher('SALES ORDER', '020', {
+        SL_ORD_DATA: [h],
+        SL_ORD_DETL: lines,
+        SL_ORD_IDTL: comps,
+        SL_PR_DETL: old,
+      }),
+    );
+    expect(r).toMatchObject({ method: 'POST', path: '/sales-orders' });
+    expect(r.body).toMatchObject({
+      coBook: '020',
+      acCode: 'C9',
+      vchDate: '2024-05-03',
+      taxCode: 'GS',
+      taxRatePct: 0,
+      advanceAmount: 5000,
+      chequeAmount: 2000,
+      bankAc: 'B1',
+      chequeNo: '123',
+      schemeAmount: 300,
+      deliveryDate: '2024-05-20',
+    });
+    // Computed or defaulted: the bill number (blank), the header totals and the advance are the web's to derive.
+    for (const k of ['billNo', 'netAmount', 'cardAmount']) expect(r.body).not.toHaveProperty(k);
+    expect(r.body.lines.map((l: any) => l.srNo)).toEqual([1, 2]);
+    const [chain, ring] = r.body.lines;
+    // 5 g x 300 = 1500, but 1777 was stored: a typed labour amount.
+    expect(chain).toMatchObject({
+      labourRate: 300,
+      labourAmount: 1777,
+      orderDeliveryDate: '2024-06-01',
+    });
+    expect(chain.components).toEqual([]);
+    expect(ring).toMatchObject({
+      labourRate: 400,
+      rateFix: 'Y',
+      karigarNetWt: 10,
+      karigarFine: 10,
+    });
+    for (const k of ['labourAmount', 'orderDeliveryDate', 'tagNo', 'oldSrNo', 'fine', 'itemAmount'])
+      expect(ring).not.toHaveProperty(k);
+    expect(ring.components).toEqual([{ isrNo: 1, itCode: 'DM', itType: 'D', pcs: 2, rate: 50 }]);
+    // Only the order book's own old metal row; fine follows the touch and the amount follows the rate.
+    expect(r.body.oldMetalRows).toEqual([
+      { itCode: 'OG', grossWt: 3, otherWt: 0.5, touch: 80, rateType: 'F', rate: 6000 },
+    ]);
+  });
+
+  it('sends an old metal amount and fine only where the grid did not compute them', () => {
+    expect(
+      lib.orderOldMetal({
+        IT_CODE: 'OS',
+        ITM_GWT: 100,
+        ITM_FINE: 70,
+        ITM_RATE_TYPE: 'N',
+        ITM_RATE: 70,
+        NET_AMT: 7100,
+      }),
+    ).toEqual({ itCode: 'OS', grossWt: 100, fine: 70, rateType: 'N', rate: 70, netAmt: 7100 });
+  });
+
+  it('rebuilds a wholesale sale: issue and receive grids, settlement inputs, tenders, formula cells left out', () => {
+    const h = {
+      CO_YEAR: '2024-2025',
+      AC_CODE: 'W1',
+      VCH_DATE: '2025-03-12T00:00:00.000Z',
+      IT_TYPE: 'G',
+      CONV_PRC: 100,
+      FINE_RATE: 8900,
+      CR_FINE: 11.06,
+      DR_AMT: 98434,
+      KSR_FINE_CR: 0.004,
+      SL_CASH_AMT: 95000,
+      SL_KASAR_AMT: 34,
+      PR_KASAR_AMT: 200,
+      SL_NET_AMT: 98434,
+      EMP_CODE: '001',
+    };
+    const isu = [
+      {
+        SR_NO: 2,
+        IT_CODE: 'FG',
+        ITM_REMARK: 'SYN ITEM',
+        TAG_NO: 'N',
+        ITM_GWT: 75.03,
+        ITM_NWT: 75.043,
+        TAG_GWT: 75.03,
+        TAG_NWT: 75.043,
+        ITM_FINE: 75.043,
+        RATE_TYPE: 'G',
+        LBR_TYPE: '',
+        KR_NET_WT: 75.03,
+        PR_CODE: 'FN',
+      },
+      {
+        SR_NO: 1,
+        IT_CODE: 'OG',
+        ITM_GWT: 10,
+        ITM_NWT: 10,
+        TAG_GWT: 10,
+        TAG_NWT: 10,
+        ITM_TOUCH: 90,
+        LBR_TYPE: 'N',
+        LBR_AMT: 150,
+      },
+    ];
+    const rec = [{ SR_NO: 1, IT_CODE: 'FG', ITM_GWT: 10, ITM_NWT: 10, TAG_NWT: 10, OTH_AMT: 1200 }];
+    const r = lib.wholesaleSaleRequest(
+      voucher('WH SALES', '034', { RATE_CUT_DATA: [h], RATE_CUT_ISU: isu, RATE_CUT_REC: rec }),
+    );
+    expect(r).toMatchObject({ method: 'POST', path: '/wholesale-sales' });
+    expect(r.body).toMatchObject({
+      coBook: '034',
+      acCode: 'W1',
+      itType: 'G',
+      convPct: 100,
+      fineRate: 8900,
+      settleCrFine: 11.06,
+      ksrFineCr: 0.004,
+      empCode: '001',
+      pay: { cash: 95000, kasar: 34 },
+      receivedPay: { kasar: 200 },
+    });
+    // The money legs and totals follow from the fine and the rate.
+    for (const k of ['settleDrAmt', 'settleCrAmt', 'billNo']) expect(r.body).not.toHaveProperty(k);
+    const [og, fg] = r.body.lines;
+    expect(og).toEqual({
+      itCode: 'OG',
+      grossWt: 10,
+      touch: 90,
+      lbrType: 'N',
+      lbrAmt: 150,
+    });
+    // Net typed above gross is sent, the tag weights equal to the line's are not, a cleared labour type is kept.
+    expect(fg).toMatchObject({ itCode: 'FG', itemName: 'SYN ITEM', netWt: 75.043, lbrType: '' });
+    for (const k of ['tagNo', 'tagGrossWt', 'tagNetWt', 'fine', 'krNetWt'])
+      expect(fg).not.toHaveProperty(k);
+    expect(r.body.receivedLines).toEqual([
+      { itCode: 'FG', grossWt: 10, othAmt: 1200, lbrType: '' },
+    ]);
+    expect(lib.REPLAYABLE.has('WH SALES') && lib.REPLAYABLE.has('SALES ORDER')).toBe(true);
+    expect(lib.buildRequest({ ...voucher('WH SALES', '034', { RATE_CUT_DATA: [h] }) }).path).toBe(
+      '/wholesale-sales',
+    );
+  });
+
   // TR_PURC.cs:7312 computes the Fine cell, :7138-7146 and :7225-7231 let the operator type over it, :13122 saves it.
   it('sends a purchase fine only when the stored cell is not the grid formula (the operator typed it)', () => {
     const base = { ITM_NWT: 2, ITM_TOUCH: 85, ITM_WEST_PRC: 0 };
@@ -496,6 +710,129 @@ describe('replay oracle: normalisation and grouping', () => {
     expect(n.tables.BILL_OS_DATA.columns.map((x: any) => x.name)).toEqual(['BILL_NO', 'BILL_AMT']);
     // The input case is not modified.
     expect(c.tables.CASH_DATA.columns).toHaveLength(5);
+  });
+
+  it('drops print and scheme staging tables and compares a later-rewritten column at its save-time value', () => {
+    const c = {
+      caseId: 'y',
+      description: '',
+      voucher: { book: '020', vchNo: '00001' },
+      tables: {
+        SL_ORD_DETL: table(['IT_CODE', 'ORD_REC_AMT'], [['RNG', 5000]]),
+        RATE_CUT_ISU_REC: table(['IT_CODE'], [['X']]),
+        FINE_DATA: table(['AC_CODE'], [['C1']]),
+      },
+    };
+    const known = new Set(['SL_ORD_DETL', 'RATE_CUT_ISU_REC', 'FINE_DATA']);
+    const d = lib.normaliseCase(c, known, 'desktop');
+    expect(Object.keys(d.tables)).toEqual(['SL_ORD_DETL']);
+    expect(d.tables.SL_ORD_DETL.rows).toEqual([['RNG', 0]]);
+    // The web side is compared as written.
+    expect(lib.normaliseCase(c, known, 'web').tables.SL_ORD_DETL.rows).toEqual([['RNG', 5000]]);
+  });
+
+  it('marks a named column of a known build difference, and only that column', () => {
+    const g = (family: string, table: string, column: string, kind = 'value') => ({
+      family,
+      table,
+      column,
+      kind,
+    });
+    expect(lib.buildDifferenceOf(g('SALES ORDER', 'SL_ORD_DETL', 'TAG_NO'))).toMatch(/:9208-9215/);
+    expect(lib.buildDifferenceOf(g('SALES ORDER', 'SL_ORD_DETL', 'ITM_FINE'))).toBeUndefined();
+    // The fine rounding is a build difference only within 0.005.
+    expect(
+      lib.buildDifferenceOf(g('WH SALES', 'RATE_CUT_ISU', 'ITM_FINE', 'value-within-tolerance')),
+    ).toMatch(/0\.000/);
+    expect(lib.buildDifferenceOf(g('WH SALES', 'RATE_CUT_ISU', 'ITM_FINE'))).toBeUndefined();
+    expect(lib.buildDifferenceOf(g('WH SALES', 'RATE_CUT_ISU', 'ITM_AMT'))).toBeUndefined();
+    // The scheme row 05 only: an unpaired row of any other key stays a defect.
+    expect(
+      lib.buildDifferenceOf(g('SALES ORDER', 'ROJ_MEL_DATA', '*', 'row-count (known rows)')),
+    ).toMatch(/:19/);
+    expect(
+      lib.buildDifferenceOf(g('SALES ORDER', 'ROJ_MEL_DATA', '*', 'row-count')),
+    ).toBeUndefined();
+  });
+
+  it('groups a scheme row 05 and a small fine rounding apart, and anything else as a defect', () => {
+    const tbl = (table: string, extra: Record<string, unknown>) => ({
+      table,
+      presentOn: 'both',
+      desktopRows: 1,
+      webRows: 1,
+      missingRows: [],
+      extraRows: [],
+      missingColumns: [],
+      differences: [],
+      ...extra,
+    });
+    const report = {
+      cases: [
+        {
+          caseId: 'o1',
+          tables: [
+            tbl('ROJ_MEL_DATA', {
+              webRows: 2,
+              extraRows: ['LEDR_KEY=01002024-202502000001' + '05'],
+            }),
+          ],
+        },
+        {
+          caseId: 'o2',
+          tables: [
+            tbl('ROJ_MEL_DATA', {
+              desktopRows: 2,
+              missingRows: ['LEDR_KEY=01002024-202502000002' + '01'],
+            }),
+          ],
+        },
+        {
+          caseId: 'w1',
+          tables: [
+            tbl('RATE_CUT_ISU', {
+              differences: [
+                { column: 'ITM_FINE', rowKey: 'k', desktop: '54.480', web: '54.483' },
+                { column: 'ITM_FINE', rowKey: 'k2', desktop: '54.480', web: '54.500' },
+              ],
+            }),
+          ],
+        },
+      ],
+    };
+    const fam: Record<string, string> = { o1: 'SALES ORDER', o2: 'SALES ORDER', w1: 'WH SALES' };
+    const groups = lib.groupDifferences(report, (id: string) => fam[id]);
+    const by = (kind: string) => groups.find((x: any) => x.kind === kind);
+    expect(by('row-count (known rows)').buildDifference).toMatch(/row 05/);
+    expect(by('row-count').buildDifference).toBeUndefined();
+    expect(by('value-within-tolerance').buildDifference).toMatch(/2 decimals/);
+    expect(by('value').buildDifference).toBeUndefined();
+  });
+
+  it('pairs rows that share a declared key by content, whatever order each database returned them in', () => {
+    const leg = (key: string, fine: number) => ['P1', 0, 0, key, fine];
+    const ac = (rows: unknown[][]) =>
+      table(['AC_CODE', 'DR_AMT', 'CR_AMT', 'LEDR_KEY', 'FINE_WT'], rows);
+    const b = (side: 'desktop' | 'web', rows: unknown[][]): ParityBundle => ({
+      kind: 'datacare.parity-bundle/1.0',
+      side,
+      capturedAt: '2026-01-01T00:00:00Z',
+      source: { engine: side === 'desktop' ? 'sqlserver' : 'postgres', database: 'synthetic' },
+      scope: { coCode: '01' },
+      cases: [
+        {
+          caseId: 'WH SALES:034/00001',
+          description: '',
+          voucher: { book: '034', vchNo: '00001' },
+          tables: { AC_DATA: ac(rows) },
+        },
+      ],
+    });
+    const d = diffBundles(
+      b('desktop', [leg('k27', 0.004), leg('k29', 10)]),
+      b('web', [leg('k29', 10), leg('k27', 0.004)]),
+    );
+    expect(d.cases[0]!.matched).toBe(true);
   });
 
   const bundle = (side: 'desktop' | 'web', rows: unknown[][]): ParityBundle => ({
