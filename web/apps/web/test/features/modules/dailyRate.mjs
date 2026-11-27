@@ -49,10 +49,6 @@ const C = (id, group, kind, source, run, extra = {}) => ({
   run,
   ...extra,
 });
-const blocked = (id, group, source, reason) => ({
-  ...C(id, group, 'read-only', source, async () => ({})),
-  blocked: reason,
-});
 const notApplicable = (name, group, source, reason) => ({
   ...C(`${name}.not-applicable`, group, 'read-only', source, async () => ({})),
   applicable: false,
@@ -936,11 +932,39 @@ export const dailyRate = {
       },
     ),
     // ---- WP-33 residuals ------------------------------------------------------------------------------------
-    blocked(
+    C(
       'entry.shortcut-rights',
       'T01',
-      'MDI_FORM.cs:12526-12528 and :14395-14405: Ctrl+F1 opens Daily Rate behind view rights.',
-      'Ctrl+F1 is bound to /txn/daily-rate (FormKeys, navigation covered by browser.smoke.mjs), but this module does not yet drive the chord or the view-right refusal text; the 403 behind it is covered by scope.no-rights-user.',
+      'refusal',
+      'MDI_FORM.cs:12526-12528, :14395-14405: Ctrl+F1 opens Daily Rate; view rights refuse with desktop text.',
+      async (ctx) => {
+        await ensureWorld(ctx);
+        const { page } = await ctx.session();
+        await page.goto('/dashboard');
+        await page.getByRole('main').waitFor();
+        await page.keyboard.press('Control+F1');
+        await page.waitForURL('**/txn/daily-rate');
+        await dayShown(page);
+        await label(page, 'Touch R22').waitFor();
+        const before = await allRates(ctx);
+        const clerk = await ctx.session(as(USERS.clerk.user));
+        await clerk.page.goto('/txn/sales');
+        await clerk.page.getByRole('main').waitFor();
+        await clerk.page.keyboard.press('Control+F1');
+        await clerk.page.waitForURL('**/txn/daily-rate');
+        await clerk.page
+          .getByRole('alert')
+          .filter({ hasText: 'You Have No Rights.....' })
+          .waitFor();
+        assert.equal(await label(clerk.page, 'Touch R22').count(), 0);
+        assert.deepEqual(await allRates(ctx), before);
+        return {
+          observation:
+            'Ctrl+F1 opened the rate grid for admin and displayed the desktop refusal for clerk',
+          expected: 'You Have No Rights.....',
+          database: { unchanged: true },
+        };
+      },
     ),
     C(
       'field.net-rate-route',
@@ -976,12 +1000,18 @@ export const dailyRate = {
         };
       },
     ),
-    blocked(
-      'field.copy-optional-projection',
-      'T02',
-      'MS_RATE.cs:1945: the copy projects the optional rate and metadata columns unchanged.',
-      'Database-layer case: it runs in apps/api/test/dailyRate.copy.db.test.ts (all 26 projected columns, NULL versus zero), not in the browser module, and a UAE form cannot be driven from the non-UAE fixture company.',
-    ),
+    {
+      ...C(
+        'field.copy-optional-projection',
+        'T02',
+        'read-only',
+        'MS_RATE.cs:1945: optional copy projection.',
+        async () => ({}),
+      ),
+      applicable: false,
+      reason:
+        'DB-layer coverage: apps/api/test/dailyRate.copy.db.test.ts asserts all 26 projected columns including NULL versus zero. The UAE form is not reachable from this non-UAE browser fixture.',
+    },
     C(
       'children.destination-ownership',
       'T05',
@@ -1467,11 +1497,48 @@ export const dailyRate = {
         };
       },
     ),
-    blocked(
+    C(
       'copy.cross-year-collision',
       'T15',
-      'MS_RATE.cs:1944-1945 names no CO_YEAR in either statement.',
-      'External owner or policy decision required: when company and date collide across CO_YEAR, replace all years, isolate the active year, or refuse? Unblocks when the choice and its exact row footprint are recorded. (RATE_MAST here has no CO_YEAR in its key, so the collision is not constructible until the choice also fixes the key.)',
+      'mutation',
+      'MS_RATE.cs:1944-1945: destination delete and source projection omit CO_YEAR; year is copied as data.',
+      async (ctx) => {
+        await resetWorld(ctx, true);
+        const date = todayLocal();
+        const year = await fiscalYearOf(ctx);
+        const otherYear = year === '1900' ? '1901' : '1900';
+        // The key excludes CO_YEAR: an old-year destination occupies the SAME key that the copy will insert.
+        await ctx.owner.$executeRawUnsafe(
+          `INSERT INTO "RATE_MAST"(tenant_id,"CO_CODE","LC_CODE","CO_YEAR","VCH_DATE","SR_NO","GR_CODE","GR_RATE")
+           VALUES ('feature-e2e','01','01',$1,$2::date,1,'R18',123)`,
+          otherYear,
+          date,
+        );
+        const before = await rowsAt(ctx, '01', date);
+        assert.equal(before[0].yr, otherYear);
+        const page = await open(ctx, date, AT_00);
+        await priceDay(page);
+        assert.equal((await save(page, date)).status(), 201);
+        const all = await allRates(ctx);
+        const source = all.filter((r) => r.lc === '00' && r.d === date);
+        assert.equal(source.length, 3);
+        for (const lc of ['01', '02']) {
+          const destination = all.filter((r) => r.lc === lc && r.d === date);
+          assert.deepEqual(
+            destination,
+            source.map((r) => ({ ...r, lc })),
+          );
+          assert.ok(destination.every((r) => r.yr === year));
+        }
+        await reopen(page, date);
+        assert.equal(Number(await label(page, 'Rate10gm R18').inputValue()), 54000);
+        return {
+          observation: 'old-year destination was replaced at the colliding key',
+          expected: 'all destinations equal source including CO_YEAR',
+          database: { before, rows: all },
+          downstream: { reopenedRate: 54000 },
+        };
+      },
     ),
     ...[
       ['0-eligible', 0],
@@ -1610,11 +1677,71 @@ export const dailyRate = {
         };
       },
     ),
-    blocked(
+    C(
       'keyboard.grid-and-escape',
       'T17',
-      'MS_RATE.cs:2149-2161, :2178-2259: Enter/arrow movement through the grid editor and Escape commit then close.',
-      'The web grid is a table of ordinary inputs with no desktop Enter-advance or Escape-commit handling and no close-on-Escape; that is a Daily Rate form-keyboard slice outside the three residuals (copy, session, labels). Alt+S is covered by keyboard.alt-s-saves.',
+      'read-only',
+      'MS_RATE.cs:2149-2161, :2178-2259: Enter advances; Escape commits to Save then closes.',
+      async (ctx) => {
+        await resetWorld(ctx, false);
+        const { page } = await ctx.session(AT_00);
+        await page.goto('/dashboard');
+        await page.getByRole('main').waitFor();
+        await page.keyboard.press('Control+F1');
+        await page.waitForURL('**/txn/daily-rate');
+        await dayShown(page);
+        const focused = async (name) =>
+          assert.equal(
+            await label(page, name).evaluate((el) => el === document.activeElement),
+            true,
+            name,
+          );
+        await label(page, 'Touch R18').fill('76');
+        await page.keyboard.press('Enter');
+        await focused('Tax% R18');
+        await page.keyboard.press('Enter');
+        await focused('Rate10gm R18');
+        await label(page, 'Rate10gm R18').fill('12345');
+        await page.keyboard.press('Enter');
+        await focused('Rate10gm R22');
+        await label(page, 'PrRate R22').focus();
+        await page.keyboard.press('Enter');
+        await focused('Rate10gm RSV');
+        await page.keyboard.press('ArrowUp');
+        await focused('Rate10gm R22');
+        await page.keyboard.press('ArrowRight');
+        await focused('TaxRate R22');
+        await page.keyboard.press('Enter');
+        await focused('PrTouch R22');
+        await page.keyboard.press('Enter');
+        await focused('PrRate R22');
+        await label(page, 'Rate10gm RSV').focus();
+        await page.keyboard.press('Enter');
+        assert.equal(
+          await page
+            .getByRole('button', { name: 'Save', exact: true })
+            .evaluate((el) => el === document.activeElement),
+          true,
+        );
+        await label(page, 'Rate10gm R22').fill('45678');
+        await page.keyboard.press('Escape');
+        assert.equal(await label(page, 'Rate10gm R22').inputValue(), '45678');
+        assert.equal(await label(page, 'Rate10gm R18').inputValue(), '12345');
+        assert.equal(await label(page, 'Touch R18').inputValue(), '76');
+        assert.equal(
+          await page
+            .getByRole('button', { name: 'Save', exact: true })
+            .evaluate((el) => el === document.activeElement),
+          true,
+        );
+        await page.keyboard.press('Escape');
+        await page.waitForURL((url) => url.pathname === '/dashboard');
+        return {
+          observation:
+            'Enter and arrows moved focus; Escape retained edits and focused Save; second Escape closed',
+          expected: 'desktop grid navigation and commit then close',
+        };
+      },
     ),
     C(
       'downstream.copy-reopen-display',

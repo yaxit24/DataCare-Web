@@ -2158,15 +2158,48 @@ export const salesOrder = {
         };
       },
     ),
-    {
-      ...C(
-        'config.setting-variant',
-        'T15',
-        'mutation',
-        'Playbook T15: SL_AMT_TYPE F or G changes the metal basis (TR_SALE_ORD.cs:6560-6672)',
-        async () => ({}),
-      ),
-      blocked: 'No settings-variant company in the catalogue yet (G174 / N166).',
-    },
+    C(
+      'config.setting-variant',
+      'T15',
+      'mutation',
+      'TR_SALE_ORD.cs:6571-6627 (DC_Main.MsSlAmtType = CO_SET.SL_AMT_TYPE, flipped in the case as salesInvoiceResiduals config.setting-change does): F prices the fine (net + ghat) × (touch + wastage) / 100 = 9.160, G the gross 10.25, at 6,123.45 rounded to whole rupees (:6672); labour stays net × rate (:6858); tax and total round to whole rupees (:11340-11342)',
+      async (ctx) => {
+        const [saved] = await ctx.rows(
+          `SELECT "SL_AMT_TYPE" t FROM "CO_SET" WHERE tenant_id=$1 AND "CO_CODE"='01'`,
+        );
+        const set = (value) =>
+          ctx.owner.$executeRawUnsafe(
+            `UPDATE "CO_SET" SET "SL_AMT_TYPE"=$2 WHERE tenant_id=$1 AND "CO_CODE"='01'`,
+            ctx.tenantId,
+            value,
+          );
+        // F: round(9.16 × 6,123.45 = 56,090.802) = 56,091; + 2,375 = 58,466; tax round(1,753.98) = 1,754; total 60,220.
+        // G: round(10.25 × 6,123.45 = 62,765.3625) = 62,765; + 2,375 = 65,140; tax round(1,954.2) = 1,954; total 67,094.
+        const expected = {
+          F: { metal: 56091, labour: 2375, line: 58466, tax: 1754, total: 60220 },
+          G: { metal: 62765, labour: 2375, line: 65140, tax: 1954, total: 67094 },
+        };
+        const stored = {};
+        try {
+          for (const type of ['F', 'G']) {
+            await set(type);
+            const { page } = await ctx.session(); // the screen opens under the flipped setting
+            const vchNo = await createOrder(ctx, page, { lines: [LINE_O] });
+            const [h] = await header(ctx, vchNo);
+            const [l] = await lines(ctx, vchNo);
+            stored[type] = { metal: l.amt, labour: l.lbr, line: l.net, tax: h.tax, total: h.tot };
+          }
+          assert.deepEqual(stored, expected);
+          return {
+            observation: `F ${JSON.stringify(stored.F)}; G ${JSON.stringify(stored.G)} (N is create.amounts: ${EXPECT_O.metal})`,
+            expected,
+            database: stored,
+            downstream: { totals: [stored.F.total, stored.G.total] },
+          };
+        } finally {
+          await set(saved?.t ?? null);
+        }
+      },
+    ),
   ],
 };
