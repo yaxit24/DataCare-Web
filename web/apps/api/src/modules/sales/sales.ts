@@ -62,7 +62,7 @@ import {
   type SaleResidualInput,
 } from './saleResiduals.js';
 import { getSale } from './saleRead.js';
-import { saleOldMetalStockRow, saleStockRow } from './saleStockRows.js';
+import { saleApprovalStockRow, saleOldMetalStockRow, saleStockRow } from './saleStockRows.js';
 export { getSale };
 import { fineWt } from '../shared/fine.js';
 import { resolveBookAccountTx, resolveBookPolicyTx } from '../shared/bookPolicy.js';
@@ -1074,12 +1074,20 @@ async function writeSaleTx(
    */
   if (!isSalesQuotation && !behavior.negativeStockSale) {
     const looseByItem = new Map<string, number>();
+    // A line billed from an Approval Isu is already out of stock on the approval's O/- row
+    // (Ac_Stock.cs:60-71), and this sale puts it back first (Ac_Stock.cs:118-121) before its own OUT
+    // row. The desktop never refuses such a line on import: its check runs only on a typed row
+    // (TR_SALE.cs:10377, column 63 = 'A') against MAIN_STOCK (:13194), and the import fills the grid
+    // without it (:20060-20520). So the approval weight is credited back to what is available.
+    const approvalBackIn = new Map<string, number>();
     for (const line of lines) {
       if (line.tagNo) continue;
       const itCode = String(line.itCode ?? '').trim();
       if (!itCode) continue;
       const weight = num(line.netWt) || num(line.grossWt);
       looseByItem.set(itCode, (looseByItem.get(itCode) ?? 0) + weight);
+      if (String(line.isuNo ?? '').trim())
+        approvalBackIn.set(itCode, (approvalBackIn.get(itCode) ?? 0) + num(line.netWt));
     }
     for (const [itCode, required] of looseByItem) {
       if (!(required > 0)) continue;
@@ -1095,7 +1103,7 @@ async function writeSaleTx(
         key.LC_CODE,
         itCode,
       );
-      const available = Number(rows[0]?.bal ?? 0);
+      const available = Number(rows[0]?.bal ?? 0) + (approvalBackIn.get(itCode) ?? 0);
       // 1e-6 absorbs the numeric(n,3) representation, not a real shortfall.
       if (required - available > 1e-6) {
         throw new SaleValidationError(
@@ -1885,6 +1893,17 @@ async function writeSaleTx(
       { key, vchDate: voucherDate, bookPolicy, acCode: input.acCode, mainUser: ctx.mainUser },
     ),
   );
+  // Ac_Stock.cs:118-121: a line billed from an Approval Isu first comes back in from the approval.
+  for (const d of detailRows.filter((row) => text(row.ISU_NO) !== ''))
+    mainStock.push(
+      saleApprovalStockRow(d, {
+        key,
+        vchDate: voucherDate,
+        bookPolicy,
+        acCode: input.acCode,
+        mainUser: ctx.mainUser,
+      }),
+    );
 
   // TR_SALE.cs:14209,15151: hidden book numbering is a separate TEMP_BOOK_DATA sequence.
   await insertRowTx(tx, 'TEMP_BOOK_DATA', tenantId, {

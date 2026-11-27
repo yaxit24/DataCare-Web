@@ -1,3 +1,4 @@
+import { utilityRefusalText } from './modules/rbac/utilityRefusal.js';
 import { registerDataTypeRoute } from './routes/dataType.js';
 import {
   assertBooksMatchSessionType,
@@ -574,14 +575,9 @@ export async function buildApp(opts: BuildOpts): Promise<FastifyInstance> {
       }
       if (error instanceof FormForbiddenError) {
         const message =
-          /^(\/company-identity|\/years|\/balance-transfer|\/backup|\/utilities\/data-refresh|\/utilities\/data-import)/.test(
-            req.routeOptions.url ?? '',
-          )
-            ? error.action === 'print'
-              ? 'You Have No Print Rights.....'
-              : 'You Have No Rights.....'
-            : (finePrintRefusalText(req.routeOptions.url ?? '', error.action) ??
-              tagOpeningRefusalText(req.routeOptions.url ?? '', error.action));
+          utilityRefusalText(req.routeOptions.url ?? '', error.action) ??
+          finePrintRefusalText(req.routeOptions.url ?? '', error.action) ??
+          tagOpeningRefusalText(req.routeOptions.url ?? '', error.action);
         return reply.code(403).send({
           error: 'forbidden',
           form: error.form,

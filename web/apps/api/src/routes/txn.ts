@@ -1424,6 +1424,7 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
     return run(reply, 201, () => createSale(prisma, saleInput(req, b), b.lines ?? []));
   });
   // GET, PUT and DELETE /sales/:vchNo carry the version token (N51) and live in routes/saleVoucher.ts.
+  // The Apr No import and POST /tour/:vchNo/bill live there too (TR_SALE.cs:20008-20050).
   registerSaleVoucherRoutes(app, { ...extraRouteHelpers, saleInput });
   // G125 (Stage E): the retail Tax Invoice print (desktop SaleBillA4Gst.rpt). Every sale needs a
   // printable bill; builds the shared GST-bill HTML and renders it to PDF (or returns raw HTML).
@@ -7944,16 +7945,5 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
         toYear: b.toYear,
       }),
     );
-  });
-  app.post('/tour/:vchNo/bill', auth, async (req, reply) => {
-    if (!guard(req, reply, 'create')) return;
-    // The desktop imports an approval inside Sales Invoice. The former web bridge committed createSale
-    // before trying to close APR_DETL in a second transaction, so any second-step refusal orphaned a
-    // sale. Keep this route fail-closed until one transaction can enforce both form authorities.
-    return reply.code(409).send({
-      error: 'approval-billing-unavailable',
-      message:
-        'Approval billing is unavailable until Sales Invoice import and approval closure are atomic.',
-    });
   });
 }

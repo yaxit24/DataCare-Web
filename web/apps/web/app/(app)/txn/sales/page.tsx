@@ -30,6 +30,7 @@ import {
 import { billTotals, lineNet as lineNetAmount } from '@datacare/core';
 import { saleBillTotal } from '../../../../lib/saleBillTotal';
 import { SaleTdsAmount } from '../../../../components/SaleTdsAmount';
+import { SaleApprovalImport, useSaleApprovalNo } from '../../../../components/SaleApprovalImport';
 import { todayLocal } from '../../../../lib/localDate';
 import { openDocument } from '../../../../lib/openDocument';
 import {
@@ -340,9 +341,7 @@ export default function SalesEntryPage() {
   const [address3, setAddress3] = useState('');
   const [city, setCity] = useState('');
   const [mobile, setMobile] = useState('');
-  const [issueNo, setIssueNo] = useState('');
-  const [issueYear, setIssueYear] = useState('');
-  const [issueBook, setIssueBook] = useState('');
+  const apr = useSaleApprovalNo(); // Apr No (TR_SALE.cs:14377-14379, :15310-15313)
   const [description, setDescription] = useState('');
   const [ornamentIssued, setOrnamentIssued] = useState(true);
   // Old-gold / old-silver EXCHANGE grid (metal taken in against the sale) — backend createSale.oldGold[]
@@ -492,9 +491,7 @@ export default function SalesEntryPage() {
     setAddress3('');
     setCity('');
     setMobile('');
-    setIssueNo('');
-    setIssueYear('');
-    setIssueBook('');
+    apr.reset();
     setDescription('');
     setOrnamentIssued(true);
     setOgRows([]);
@@ -575,9 +572,7 @@ export default function SalesEntryPage() {
       setAddress3(String(view.address3 ?? ''));
       setCity(String(view.city ?? ''));
       setMobile(String(view.mobile ?? ''));
-      setIssueNo(String(view.issueNo ?? ''));
-      setIssueYear(String(view.issueYear ?? ''));
-      setIssueBook(String(view.issueBook ?? ''));
+      apr.load(view);
       setDescription(String(view.description ?? ''));
       setOrnamentIssued(view.ornamentIssued !== false);
       setResidual(wp26.saleResidualFromView(view));
@@ -700,9 +695,7 @@ export default function SalesEntryPage() {
         address3: address3 || undefined,
         city: city || undefined,
         mobile: mobile || undefined,
-        issueNo: issueNo || undefined,
-        issueYear: issueYear || undefined,
-        issueBook: issueBook || undefined,
+        ...apr.body(),
         description: description || undefined,
         ornamentIssued,
         cashAmt: cashAmt ? n(cashAmt) : undefined,
@@ -904,6 +897,12 @@ export default function SalesEntryPage() {
                 }}
               />
             </div>
+            <SaleApprovalImport
+              apr={apr}
+              party={{ setAcCode, setAcName, setInterState }}
+              blank={blank}
+              onLines={setLines}
+            />
             <div className="field">
               <label>Customer Name</label>
               <input value={acName} onChange={(e) => setAcName(e.target.value)} />
@@ -1020,9 +1019,6 @@ export default function SalesEntryPage() {
                 ['Address 3', address3, setAddress3],
                 ['City', city, setCity],
                 ['Mobile', mobile, setMobile],
-                ['Issue No', issueNo, setIssueNo],
-                ['Issue Year', issueYear, setIssueYear],
-                ['Issue Book', issueBook, setIssueBook],
                 ['Description', description, setDescription],
               ].map(([label, value, setter]) => (
                 <div className="field" key={String(label)}>

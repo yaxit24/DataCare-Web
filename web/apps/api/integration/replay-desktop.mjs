@@ -18,8 +18,8 @@
  * 5. Bundles, the diff and a report go to ORACLE_OUT_DIR, which must be OUTSIDE the repository: the desktop rows are
  *    real business data. Standard output carries counts and codes only.
  *
- * Options: --book <family|book>[,...]   SALES, PURCHASE, CASH/BANK, CONTRA, FINE JV (and the families without a
- *                                        builder: SALES ORDER, WH SALES, RATE CUT) or a book code such as 026.
+ * Options: --book <family|book>[,...]   SALES, PURCHASE, CASH/BANK, CONTRA, FINE JV, SALES ORDER, WH SALES (and the family without a
+ *                                        builder: RATE CUT) or a book code such as 026.
  *          --limit N                     at most N vouchers per family (the first N in replay order).
  */
 import { randomBytes } from 'node:crypto';
@@ -31,6 +31,7 @@ import { connectDesktop } from './replay/desktop.mjs';
 import { connectWeb } from './replay/web.mjs';
 import {
   FAMILIES,
+  withHiddenBookRows,
   REPLAYABLE,
   ReplayBuildError,
   buildRequest,
@@ -167,9 +168,14 @@ async function main() {
     );
 
     const desktopVoucherTables = desktop.voucherTables().filter((t) => web.meta.has(t) || true);
+    let desktopTempRows = [];
     const golden = new Map(); // "book|vch" -> { TABLE: rows[] }
     for (const t of desktopVoucherTables) {
       const rows = await desktop.rowsForBooks(desktop.meta.get(t).name, replayBooks, scope);
+      if (t === 'TEMP_BOOK_DATA') {
+        desktopTempRows = rows;
+        continue;
+      }
       for (const r of rows) {
         const k = `${String(r.CO_BOOK).trim()}|${String(r.VCH_NO).trim()}`;
         if (!wanted.has(k)) continue;
@@ -338,10 +344,15 @@ async function main() {
               .placeholder(phTable, tenant, { ...scope, coBook: v.book }, ph)
               .catch(() => undefined)
           : undefined;
+        const hd = (voucher.tables[FAMILIES[v.family].header] ?? [])[0]?.HD_VCH_NO;
+        const removeHd = await web
+          .hiddenPlaceholder(tenant, { ...scope, coBook: v.book }, hd)
+          .catch(() => undefined);
         try {
           return await call(request.method, request.path, request.body);
         } finally {
           if (removePh) await removePh();
+          if (removeHd) await removeHd();
         }
       };
       try {
@@ -400,9 +411,15 @@ async function main() {
     /* ---- 5. compare ---------------------------------------------------------------------------- */
     const desktopTables = new Set(desktop.meta.keys());
     const replayed = results.filter((r) => r.status === 'REPLAYED');
+    let webTempRows = [];
     const webRows = new Map();
     for (const t of web.voucherTables()) {
-      for (const r of await web.rowsForBooks(t, tenant, replayBooks, scope)) {
+      const rows = await web.rowsForBooks(t, tenant, replayBooks, scope);
+      if (t === 'TEMP_BOOK_DATA') {
+        webTempRows = rows;
+        continue;
+      }
+      for (const r of rows) {
         const k = `${String(r.CO_BOOK).trim()}|${String(r.VCH_NO).trim()}`;
         const g = webRows.get(k) ?? {};
         (g[t.toUpperCase()] ??= []).push(r);
@@ -415,7 +432,11 @@ async function main() {
     });
     const mkCase = (side, r) => {
       const key = side === 'desktop' ? `${r.book}|${r.desktopVchNo}` : `${r.book}|${r.webVchNo}`;
-      const src = side === 'desktop' ? (golden.get(key) ?? {}) : (webRows.get(key) ?? {});
+      const src = withHiddenBookRows(
+        side === 'desktop' ? (golden.get(key) ?? {}) : (webRows.get(key) ?? {}),
+        FAMILIES[r.family].header,
+        side === 'desktop' ? desktopTempRows : webTempRows,
+      );
       const tables = {};
       for (const [t, rows] of Object.entries(src)) {
         const columns = side === 'desktop' ? desktop.meta.get(t).columns : web.cols(t);
@@ -433,6 +454,7 @@ async function main() {
           tables,
         },
         desktopTables,
+        side,
       );
     };
     const bundle = (side, cases, source) => ({

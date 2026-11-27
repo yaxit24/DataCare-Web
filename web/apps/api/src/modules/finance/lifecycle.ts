@@ -200,6 +200,9 @@ export async function editIdentityTx(
     requestedDate: Date;
     checkRequestedDate?: boolean;
     extraColumns?: readonly string[];
+    /** Refuse with this text when the saved voucher has no hidden number (a legacy cash payment grid). Only the
+     * cash/bank payment edit opts in: Other Income/Expense/Commission also live in PAY_DATA and may be blank. */
+    blankHiddenRefusal?: string;
   },
 ): Promise<{ identity: VoucherIdentity; persisted: Record<string, unknown> }> {
   const complete = completeFinanceScope(options.scope);
@@ -231,6 +234,10 @@ export async function editIdentityTx(
     await assertPeriodOpen(tx, options.scope.tenantId, {
       ledger: { table: 'AC_DATA', lines: [{ CO_CODE: options.scope.coCode, VCH_DATE: date }] },
     });
+  }
+  // Refused before replaceWriteSetTx deletes anything, for callers that cannot rebuild a voucher without its identity.
+  if (options.blankHiddenRefusal && !text(persisted.HD_VCH_NO)) {
+    throw new FinanceLifecycleValidationError(options.blankHiddenRefusal);
   }
   const hiddenVoucherNo = formatVoucherNo(text(persisted.HD_VCH_NO));
   return {

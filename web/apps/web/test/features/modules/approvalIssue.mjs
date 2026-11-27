@@ -1,8 +1,11 @@
 import assert from 'node:assert/strict';
 import { FIXTURE_MANIFEST, USERS } from '../fixtures/catalogue.mjs';
 import {
+  APPROVAL_IMPORT_PROMPT,
   DAY,
   ISSUE_BOOK,
+  billApprovalInSales,
+  deleteSaleInScreen,
   RETURN_BOOK,
   TENANT,
   approvalRows,
@@ -43,10 +46,6 @@ const C = (id, group, kind, source, run, extra = {}) => ({
           : ['browser', 'expected'],
   run,
   ...extra,
-});
-const blocked = (id, group, reason) => ({
-  ...C(`${id}.pending`, group, 'read-only', `Playbook ${group}`, async () => ({})),
-  blocked: reason,
 });
 const notApplicable = (id, group, source, reason) => ({
   ...C(`${id}.not-applicable`, group, 'read-only', source, async () => ({})),
@@ -750,10 +749,49 @@ export const approvalIssue = {
         };
       },
     ),
-    blocked(
+    C(
       'downstream-sale',
       'T18',
-      'Approval Return is covered by its own module; the retained-item Sales Apr No journey and reversal remain open.',
+      'mutation',
+      "TR_SALE.cs:20050 imports the retained items, :16112 {{UPDATE APR_DETL SET APR_DETL.ISU_REC = 'Y'}}, :16326 {{UPDATE APR_DETL SET APR_DETL.ISU_REC = 'N'}} and :16328 {{BAR_DETL.APR_ISU = 'Y'}} on the sale's delete; the web refuses deleting a billed issue (approvalVoucher.ts DELETE_SALE)",
+      async (ctx) => {
+        const tag = await seedApprovalTag(ctx, 'AIB');
+        const issue = await createIssue(ctx, tag.tag, 'retained by customer');
+        const sale = await billApprovalInSales(issue.page, issue);
+        assert.equal(sale.prompt, APPROVAL_IMPORT_PROMPT);
+        const billed = {
+          approval: await approvalRows(ctx, ISSUE_BOOK, issue.voucherNo),
+          tag: await tagState(ctx, tag.tag),
+        };
+        assert.equal(billed.approval[0].received, 'Y');
+        assert.equal(billed.tag.apr, 'N');
+        assert.equal(billed.tag.balance, 0, 'sold: the approval stock-back row and the sale row');
+        const viewer = await openApproval(ctx, 'issue');
+        await reopenApproval(viewer.page, 'issue', issue.voucherNo);
+        const [refused] = await Promise.all([
+          viewer.page.waitForResponse((r) => isApi(r, 'DELETE', `/tour/${issue.voucherNo}`)),
+          viewer.page.getByTestId('approval-issue-delete').click(),
+        ]);
+        assert.equal(refused.status(), 400);
+        assert.equal(
+          (await refused.json()).message,
+          'You Cant Delete this Voucher Because This Voucher Use In Sales....',
+        );
+        await deleteSaleInScreen(issue.page, sale.vchNo);
+        const reversed = {
+          approval: await approvalRows(ctx, ISSUE_BOOK, issue.voucherNo),
+          tag: await tagState(ctx, tag.tag),
+        };
+        assert.equal(reversed.approval[0].received, 'N');
+        // Back out on approval: opening +1, approval -1; the sale's two stock rows are gone.
+        assert.deepEqual(reversed.tag, { apr: 'Y', transfer: 'N', balance: 0 });
+        return {
+          observation: `issue ${issue.voucherNo} billed by sale ${sale.vchNo}, delete refused, sale deleted`,
+          expected: 'ISU_REC Y then N; tag sold then back on approval',
+          database: { billed, reversed },
+          downstream: { issueDeleteWhileBilled: 400 },
+        };
+      },
     ),
   ],
 };

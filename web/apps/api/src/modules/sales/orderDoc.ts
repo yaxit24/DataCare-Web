@@ -179,7 +179,8 @@ export function orderHtml(header: any, lines: any[], ctx: OrderCtx = {}): string
 
   const mob = h.MOBILE ?? p.AC_MOBILE;
   const meta: DocMeta[] = [
-    { k: 'Order No', v: String(h.BILL_NO ?? h.VCH_NO ?? '') },
+    // BILL_NO is the typed bill box, blank on most orders (TR_SALE_ORD.cs:9115): the voucher number stands in.
+    { k: 'Order No', v: String((String(h.BILL_NO ?? '').trim() || h.VCH_NO) ?? '') },
     { k: 'Order Date', v: dt(h.VCH_DATE) },
     { k: 'Delivery Date', v: dt(h.DEL_DATE) },
     { k: 'Book / Vch', v: `${h.CO_BOOK ?? ''} / ${h.VCH_NO ?? ''}` },
