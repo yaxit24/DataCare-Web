@@ -1202,6 +1202,8 @@ const PRINT_ROUTES = new Set([
   'GET /purchases/invoice',
   'GET /purchase-quotations/quotation',
   'GET /karigar/issue-voucher',
+  // TR_WH_SALE.cs:13658-13660: Wh Sales print needs USER_SET.FRM_PRINT.
+  'GET /wholesale-sales/:vchNo/print',
   'GET /repair-receipts/:vchNo/print',
   'GET /repair-karigar-issues/:vchNo/print',
   'GET /repair-karigar-receipts/:vchNo/print',

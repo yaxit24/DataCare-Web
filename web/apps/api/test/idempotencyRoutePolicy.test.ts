@@ -25,6 +25,10 @@ const here = dirname(fileURLToPath(import.meta.url));
 const web = resolve(here, '../../web');
 
 const GUARDED: Record<string, { page: string; sends: RegExp }> = {
+  'POST /wholesale-sales': {
+    page: 'components/WholesaleVoucherForm.tsx',
+    sends: /postCommand<[^>]*>\(\s*cfg\.endpoint,\s*body,\s*command\.key\s*\)/,
+  },
   'POST /sales-orders': {
     page: 'app/(app)/txn/sales-order/page.tsx',
     sends:
@@ -94,7 +98,6 @@ const NOT_YET_GUARDED = [
   'POST /sales-returns',
   'POST /purchases',
   'POST /purchase-returns',
-  'POST /wholesale-sales',
   'POST /bill-to-bill/settle',
   'POST /bullion-sales',
   'POST /bullion/booking',

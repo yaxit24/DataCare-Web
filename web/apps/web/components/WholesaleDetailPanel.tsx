@@ -41,11 +41,13 @@ const COLUMNS: Array<{ field: DetailField; label: string; width: number; text?: 
 ];
 
 export function WholesaleDetailPanel({
+  mayDelete,
   lineNo,
   rows,
   onChange,
   onClose,
 }: {
+  mayDelete?: () => boolean;
   lineNo: number;
   rows: DetailRow[];
   onChange: (rows: DetailRow[]) => void;
@@ -86,14 +88,6 @@ export function WholesaleDetailPanel({
       event.preventDefault();
       event.stopPropagation();
       onClose();
-      return;
-    }
-    if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === 'd') {
-      event.preventDefault();
-      // TR_WH_SALE.cs:7331. The right to delete is enforced where the save is: the server refuses an edit by a
-      // user without it ("You Have No Rights.....").
-      if (!window.confirm('This Row Record will Removed permantley ?')) return;
-      onChange(visible.filter((_, i) => i !== index));
       return;
     }
     if (event.key !== 'Enter') return;
@@ -155,6 +149,17 @@ export function WholesaleDetailPanel({
       role="region"
       aria-label={`Item detail Issue line ${lineNo}`}
       data-testid="wholesale-detail-panel"
+      onKeyDownCapture={(event) => {
+        if (!(event.ctrlKey || event.metaKey) || event.key.toLowerCase() !== 'd') return;
+        const row = (event.target as HTMLElement).closest<HTMLElement>('[data-detail-row]');
+        if (!row) return;
+        event.preventDefault();
+        event.stopPropagation();
+        // TR_WH_SALE.cs:7326-7331: the refusal precedes confirmation, including lookup cells.
+        if (mayDelete && !mayDelete()) return;
+        if (!window.confirm('This Row Record will Removed permantley ?')) return;
+        onChange(visible.filter((_, i) => i !== Number(row.dataset.detailRow)));
+      }}
     >
       <div className="toolbar" style={{ justifyContent: 'space-between' }}>
         <h3 style={{ margin: 0 }}>Item detail — issue line {lineNo}</h3>
