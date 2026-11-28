@@ -18,6 +18,7 @@ import { FIXTURE_MANIFEST, ITEMS, PARTIES, USERS } from '../fixtures/catalogue.m
  * Each case seeds its own live tag (BAR_DETL + MAIN_STOCK '+', as a tag opening would) so cases never share a tag.
  */
 const BOOK = 'WHS';
+const QUOTE_BOOK = 'WHQ';
 const as = (user, slot) => ({
   user,
   slot,
@@ -2427,6 +2428,73 @@ export const wholesaleSale = {
       'refusal',
       'TR_WH_SALE.cs:7326,13658: delete and print are independently refused by the UI and server.',
       async (ctx) => restrictedDetails(ctx, true),
+    ),
+    C(
+      'rights.quotation-print-needs-frm-print',
+      'T11',
+      'refusal',
+      'MDI_FORM.cs:8149-8156 opens TR_WH_SALE as Wh Quotation; TR_WH_SALE.cs:13658-13660 answers "You Have No Print Rights....." without that caption\'s FRM_PRINT.',
+      async (ctx) => {
+        const openQuotation = async (credentials) => {
+          const { page } = await ctx.session(credentials);
+          await page.goto('/txn/wholesale-quotation');
+          await page.getByRole('heading', { name: 'Wholesale Quotation', exact: true }).waitFor();
+          const book = page.getByRole('combobox', { name: 'Configured book', exact: true });
+          for (let i = 0; i < 50 && (await book.inputValue()) !== QUOTE_BOOK; i++)
+            await page.waitForTimeout(100);
+          assert.equal(await book.inputValue(), QUOTE_BOOK, 'the provisioned WH QUOT book');
+          return page;
+        };
+        const admin = await openQuotation();
+        await admin.getByLabel('Date', { exact: true }).fill(DAY);
+        await pick(admin, 'Party', PARTIES.local.code);
+        await pick(admin, 'ItCode Issue line 1', ITEMS.gold.code);
+        await admin.getByLabel('Pcs Issue line 1', { exact: true }).fill('1');
+        await admin.getByLabel('GrWt Issue line 1', { exact: true }).fill('5');
+        await admin.getByLabel('Touch Issue line 1', { exact: true }).fill('91.6');
+        const [created] = await Promise.all([
+          admin.waitForResponse(
+            (r) =>
+              new URL(r.url()).pathname === '/api/wholesale-quotations' &&
+              r.request().method() === 'POST',
+          ),
+          admin.locator('button[data-save-mnemonic]').click(),
+        ]);
+        assert.equal(created.status(), 201, await created.text());
+        const no = await voucherOf(created);
+        const quotation = async () =>
+          ctx.rows(
+            `SELECT "VCH_NO","AC_CODE","SL_NET_AMT"::float8 AS net FROM "RATE_CUT_DATA"
+              WHERE tenant_id=$1 AND "CO_BOOK"='${QUOTE_BOOK}' AND "VCH_NO"=$2`,
+            no,
+          );
+        const before = await quotation();
+        assert.equal(before.length, 1, 'the quotation is stored');
+
+        const viewer = await openQuotation(as(USERS.printViewer.user));
+        let popups = 0;
+        viewer.context().on('page', () => popups++);
+        const box = viewer.getByLabel('Voucher No', { exact: true });
+        await box.fill(String(Number(no)));
+        await box.press('Enter');
+        await text(viewer, 'wholesale-quotation-status', `Loaded voucher ${no}`);
+        await viewer.getByRole('button', { name: 'Print', exact: true }).click();
+        await viewer
+          .getByRole('alert')
+          .filter({ hasText: 'You Have No Print Rights.....' })
+          .waitFor();
+        assert.equal(popups, 0, 'no document window opens');
+        const url = `/api/wholesale-quotations/${no}/print?coBook=${QUOTE_BOOK}&format=html`;
+        const status = (await viewer.request.get(url)).status();
+        assert.equal(status, 403, url);
+        const after = await quotation();
+        assert.deepEqual(after, before);
+        return {
+          observation: `print-less user saw the message; ${url} answered ${status}`,
+          expected: 'message, no window, 403 from the quotation print route; quotation unchanged',
+          database: { before, after },
+        };
+      },
     ),
     C(
       'retry.detail-row-double-post',

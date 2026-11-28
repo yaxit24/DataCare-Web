@@ -177,7 +177,6 @@ export function insertRowTx(
   tenantId: string,
   data: Record<string, unknown>,
 ): Promise<unknown> {
-  const defaults = desktopColumnDefaults[table];
   /**
    * A supplied value wins — EXCEPT an explicit `null` on a column the desktop never leaves NULL.
    *
@@ -198,12 +197,31 @@ export function insertRowTx(
    *
    * Columns ABSENT from the spec are untouched: the desktop does leave those NULL, and `null` remains meaningful.
    */
+  return insertMaterializedRowTx(tx, table, tenantId, withDesktopColumnDefaults(table, data));
+}
+
+/** The row `insertRowTx` would write: the measured desktop defaults under the caller's values. */
+export function withDesktopColumnDefaults(
+  table: string,
+  data: Record<string, unknown>,
+): Record<string, unknown> {
+  const defaults = desktopColumnDefaults[table];
   const row: Record<string, unknown> = defaults ? { ...defaults, ...data } : data;
   if (defaults) {
     for (const [col, fallback] of Object.entries(defaults)) {
       if (row[col] === null) row[col] = fallback;
     }
   }
+  return row;
+}
+
+/** INSERT a row that is already complete (defaults applied); every key is a column. */
+export function insertMaterializedRowTx(
+  tx: any,
+  table: string,
+  tenantId: string,
+  row: Record<string, unknown>,
+): Promise<unknown> {
   const cols = Object.keys(row);
   const colSql = ['tenant_id', ...cols.map(q)].join(',');
   const ph = cols.map((_, i) => '$' + (i + 2)).join(',');
@@ -584,10 +602,23 @@ export const PROVENANCE_TABLE_RULES = {
 /** The provenance column names, exported for tests and the depth audit. */
 export const PROVENANCE_COLUMN_NAMES = PROVENANCE_COLUMNS;
 
-/** Post a voucher's writes within an EXISTING transaction (used by sales/purchase composition). */
-export async function postVoucherTx(tx: any, tenantId: string, input: PostInput): Promise<void> {
-  assertVoucherBalanced(input.ledger.lines, input.desktopRoundingResidue);
-  await assertPeriodOpen(tx, tenantId, input);
+/** One final row of a posting, in the order `postVoucherTx` inserts it. */
+export interface MaterializedRow {
+  table: string;
+  row: Record<string, unknown>;
+}
+
+/**
+ * The exact rows `postVoucherTx` would INSERT for `input`, in insert order, with every column the posting layer
+ * fills (DATA_TYPE, provenance, ledger enrichment, the measured desktop defaults) already applied. Reads book and
+ * schema metadata only: no write, no balance or period check. Data Refresh compares stored postings with these.
+ */
+export async function materializeVoucherRowsListTx(
+  tx: any,
+  tenantId: string,
+  input: PostInput,
+): Promise<MaterializedRow[]> {
+  const out: MaterializedRow[] = [];
   // One BOOK_DETL / BOOK_DATA lookup per book for the whole posting, not one per row.
   const bookTypes = new Map<string, string>();
   for (const w of input.writes ?? []) {
@@ -597,12 +628,13 @@ export async function postVoucherTx(tx: any, tenantId: string, input: PostInput)
       const withDataType = stampDt
         ? { ...r, DATA_TYPE: await postingDataTypeTx(tx, tenantId, w.table, r, bookTypes) }
         : r;
-      await insertRowTx(
-        tx,
-        w.table,
-        tenantId,
-        applyProvenance(withDataType, tableColumns, w.table),
-      );
+      out.push({
+        table: w.table,
+        row: withDesktopColumnDefaults(
+          w.table,
+          applyProvenance(withDataType, tableColumns, w.table),
+        ),
+      });
     }
   }
   // The voucher's date, as written on its own rows: the ledger legs inherit it when they do not
@@ -697,8 +729,35 @@ export async function postVoucherTx(tx: any, tenantId: string, input: PostInput)
             voucherTime,
           )
         : (columns as typeof line);
-    await insertRowTx(tx, input.ledger.table, tenantId, row);
+    out.push({
+      table: input.ledger.table,
+      row: withDesktopColumnDefaults(input.ledger.table, row),
+    });
   }
+  return out;
+}
+
+/** `materializeVoucherRowsListTx` grouped by table (insert order kept within a table). */
+export async function materializeVoucherRowsTx(
+  tx: any,
+  tenantId: string,
+  input: PostInput,
+): Promise<Map<string, Record<string, unknown>[]>> {
+  const byTable = new Map<string, Record<string, unknown>[]>();
+  for (const { table, row } of await materializeVoucherRowsListTx(tx, tenantId, input)) {
+    const rows = byTable.get(table) ?? [];
+    rows.push(row);
+    byTable.set(table, rows);
+  }
+  return byTable;
+}
+
+/** Post a voucher's writes within an EXISTING transaction (used by sales/purchase composition). */
+export async function postVoucherTx(tx: any, tenantId: string, input: PostInput): Promise<void> {
+  assertVoucherBalanced(input.ledger.lines, input.desktopRoundingResidue);
+  await assertPeriodOpen(tx, tenantId, input);
+  for (const { table, row } of await materializeVoucherRowsListTx(tx, tenantId, input))
+    await insertMaterializedRowTx(tx, table, tenantId, row);
 }
 
 /**
