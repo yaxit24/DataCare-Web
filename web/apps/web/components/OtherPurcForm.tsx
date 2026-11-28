@@ -9,6 +9,7 @@ import { useGridKeyboard } from './GridKeyboard';
 import { ApiError, del, get, post, put } from '../lib/api';
 import { todayLocal } from '../lib/localDate';
 import { openDocument } from '../lib/openDocument';
+import { usePrintGate } from '../lib/formRights';
 
 /**
  * Desktop TR_OTH_PURC. "Other Income" opens it on an OTH INC book and "Other Expenses" on an OTH EXP book
@@ -22,6 +23,7 @@ const MODE = {
   'OTH INC': {
     endpoint: '/other-income',
     title: 'Other Income',
+    form: 'Purchase/Other Income',
     party: 'Customer',
     ledger: 'Income ledger',
     settle: 'Receipt totals',
@@ -31,6 +33,7 @@ const MODE = {
   'OTH EXP': {
     endpoint: '/other-purchase',
     title: 'Other Expenses',
+    form: 'Purchase/Other Purchase',
     party: 'Supplier',
     ledger: 'Expense ledger',
     settle: 'Payment totals',
@@ -125,6 +128,7 @@ export function OtherPurcForm({ mode }: { mode: OtherPurcMode }) {
   const [rows, setRows] = useState<IncomeLine[]>([blankLine()]);
   const [saved, setSaved] = useState<SaveResult | null>(null);
   const [error, setError] = useState('');
+  const printGate = usePrintGate(cfg.form, setError); // TR_OTH_PURC.cs:3958-3966
   const [busy, setBusy] = useState(false);
 
   const message = (caught: unknown, fallback: string) =>
@@ -373,7 +377,7 @@ export function OtherPurcForm({ mode }: { mode: OtherPurcMode }) {
             type="button"
             disabled={busy || !loadedVoucherNo}
             onClick={() =>
-              openDocument(
+              printGate.open(
                 `/api${cfg.endpoint}/${encodeURIComponent(loadedVoucherNo)}/print?coBook=${encodeURIComponent(coBook)}&format=html`,
               )
             }

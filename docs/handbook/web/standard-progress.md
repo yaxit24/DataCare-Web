@@ -7,9 +7,9 @@ Order (D31, D32): every Lite menu works end to end like the desktop first, then 
 | Tier | Menus | With a feature module | Module with no open defect | Done |
 |---|---:|---:|---:|---:|
 | Lite (first, D32) | 49 | 43 | 42 | 0 |
-| Basic (added by Basic) | 29 | 1 | 1 | 0 |
-| Standard (added by Standard) | 36 | 1 | 1 | 0 |
-| **Standard total** | **114** | **45** | **44** | **0** |
+| Basic (added by Basic) | 29 | 2 | 2 | 0 |
+| Standard (added by Standard) | 36 | 2 | 2 | 0 |
+| **Standard total** | **114** | **47** | **46** | **0** |
 
 ## Lite — 49 menus (first, D32)
 
@@ -71,7 +71,7 @@ Order (D31, D32): every Lite menu works end to end like the desktop first, then 
 |---|---|---|---|---|---|---|
 | Company | Account Group | `/masters/ac-groups` | PARTIAL | — | no module | — |
 | Company | Trade Master | `/masters/trade` | PARTIAL | — | no module | — |
-| Company | Setting | `/settings` | PARTIAL | — | no module | — |
+| Company | Setting | `/settings` | PARTIAL | settings-effects | module green | — |
 | Company | Year Select | `/select` | PARTIAL | company-open | module green | — |
 | ExtraTran | Labour Work | `/txn/labour-sale` | PARTIAL | — | no module | — |
 | ExtraTran | Other Expenses | `/txn/other-purchase` | PARTIAL | — | no module | — |
@@ -103,7 +103,7 @@ Order (D31, D32): every Lite menu works end to end like the desktop first, then 
 
 | Tab | Menu | Web routes | Catalog | Feature module | State | Open gaps |
 |---|---|---|---|---|---|---|
-| Company | Setting Main | `/settings` | PARTIAL | — | no module | — |
+| Company | Setting Main | `/settings` | PARTIAL | settings-effects | module green | — |
 | ExtraTran | Old Item Sales | `/txn/old-item-sales` | PARTIAL | — | no module | — |
 | ExtraTran | Bill Wise Rec | `/txn/bill-to-bill` | PARTIAL | — | no module | — |
 | ExtraTran | Vp Parcel | `/txn/vp-parcel` | PARTIAL | — | no module | — |

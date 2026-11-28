@@ -7,6 +7,7 @@ import {
   COMPANY_FIELDS,
   CompanyIdentityError,
   getCompanyIdentity,
+  companyPrintRows,
   saveCompanyIdentity,
   deleteCompanyIdentity,
 } from '../modules/masters/companyIdentity.js';
@@ -73,6 +74,11 @@ export function registerCompanyIdentityRoutes(
       ),
     ),
   );
+  // MS_COMPANY.cs:6776-6790: the Print right (USER_SET FRM_PRINT, "You Have No Print Rights.....") and the session
+  // company's Company.RPT row.
+  app.get('/company-identity/print', auth as any, async (req) => ({
+    rows: await companyPrintRows(prisma, scopeOf(req).tenantId, scopeOf(req).coCode),
+  }));
   app.get('/company-identity/:code', auth as any, async (req, reply) => {
     return run(reply, async () => {
       await accessible(req, (req.params as any).code);

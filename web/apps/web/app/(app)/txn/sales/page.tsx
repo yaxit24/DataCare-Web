@@ -9,6 +9,7 @@ import {
 import { useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { del, get, ApiError } from '../../../../lib/api';
+import { usePrintGate } from '../../../../lib/formRights';
 import { useBusinessScope, useRoundingPolicy } from '../../../../components/BusinessScope';
 import { BookSelect } from '../../../../components/BookSelect';
 import { LookupPicker } from '../../../../components/LookupPicker';
@@ -370,6 +371,7 @@ export default function SalesEntryPage() {
   const [loadedVersion, setLoadedVersion] = useState(''); // N51 (D17): sent on update and delete
   const [err, setErr] = useState('');
   const orderAdvance = useOrderAdvanceConfirm(); // owner decision 3B
+  const printGate = usePrintGate('Sales/Sales Invoice', setErr); // TR_SALE.cs:16248-16254
   const [busy, setBusy] = useState(false);
   const cashRef = useRef<HTMLInputElement>(null);
   // Desktop parity: TR_SALE's main item grid (MSG) exposes every operator-typed field as a grid
@@ -828,7 +830,7 @@ export default function SalesEntryPage() {
           onPrint={
             loadedVchNo
               ? () =>
-                  openDocument(
+                  printGate.open(
                     `/api/sales/invoice?coBook=${encodeURIComponent(coBook)}&coYear=${encodeURIComponent(coYear)}&vchNo=${encodeURIComponent(loadedVchNo)}&format=html&copy=O`,
                   )
               : undefined
@@ -1471,7 +1473,7 @@ export default function SalesEntryPage() {
               type="button"
               className="ghost"
               onClick={() =>
-                openDocument(
+                printGate.open(
                   `/api/sales/invoice?coBook=${encodeURIComponent(coBook)}&coYear=${encodeURIComponent(coYear)}&vchNo=${encodeURIComponent(String(result.vchNo))}`,
                 )
               }
@@ -1530,6 +1532,7 @@ export default function SalesEntryPage() {
           `/api/sales/invoice?coBook=${encodeURIComponent(coBook)}&coYear=${encodeURIComponent(coYear)}&vchNo=${encodeURIComponent(v)}&format=html&copy=O`
         }
         reloadKey={result?.vchNo}
+        canPrint={printGate.canPrint}
       />
     </div>
   );

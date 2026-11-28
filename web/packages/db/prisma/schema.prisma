@@ -7236,6 +7236,7 @@ model DataRepairRun {
   appliedAt         DateTime? @map("applied_at") @db.Timestamptz(6)
   backupReference   String?   @map("backup_reference") @db.VarChar(64)
   reauthenticatedAt DateTime? @map("reauthenticated_at") @db.Timestamptz(6)
+  beforeRows        Json?     @map("before_rows")
 
   @@index([tenantId, operationId, createdAt(sort: Desc)], map: "data_repair_run_tenant_op_idx")
   @@map("data_repair_run")

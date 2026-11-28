@@ -4,8 +4,8 @@ import { withTxBudget } from '../shared/txBudget.js';
 import { voucherVersionTx, versionKeyOf } from '../vouchers/version.js';
 import { formatVoucherNo, type VoucherScope } from '../vouchers/numbering.js';
 import { readSaleResidualsTx, stonesByLine } from './saleResiduals.js';
-import { readOrderAdvanceNotesTx } from './orderAdvanceConfirm.js';
 import { hasWebRoundOffLegTx } from '../shared/legacyRoundOff.js';
+import { readOrderAdvanceNotesTx } from './orderAdvanceConfirm.js';
 import { SALE_WRITE_TABLES, SaleValidationError, completeSaleScope, saleParams } from './sales.js';
 
 /**
