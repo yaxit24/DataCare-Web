@@ -2,7 +2,8 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
-import { ApiError, post, put } from '../lib/api';
+import { ApiError, postCommand, put } from '../lib/api';
+import { useIdempotencyKey } from '../lib/idempotencyKey';
 
 /**
  * Owner decision 3B (2026-11-27): the Sales Invoice may adjust another customer's order advance, or more than the
@@ -10,8 +11,9 @@ import { ApiError, post, put } from '../lib/api';
  * `order-advance-confirm` and the facts in `details` (apps/api/src/modules/sales/orderAdvanceConfirm.ts); Yes sends
  * the same save again with `orderAdvanceAck` naming exactly those facts, No returns to the order amount.
  *
- * The retail sale create is not an idempotency-guarded route (POST /sales sends no Idempotency-Key), and a refused
- * save keeps no receipt anyway, so the resend is the same request plus the acknowledgement.
+ * The retail sale create sends the draft's Idempotency-Key (N52; owner decision 2B writes the linked URD purchase in
+ * the same transaction, so a replay must post neither twice). A refused save keeps no receipt, so the resend with
+ * the acknowledgement under the same key is a new save; the key is renewed only after a successful save.
  */
 export interface OrderAdvanceFacts {
   orderKey: string;
@@ -71,16 +73,17 @@ function focusOrderAmount(ordNo: string) {
 /** The retail sale save: PUT over a loaded voucher (with its version), else POST; `extra` adds the acknowledgement. */
 export const saleSaveRequest =
   <T,>(vchNo: string, version: string, body: Record<string, unknown>) =>
-  (extra: Record<string, unknown>) =>
+  (extra: Record<string, unknown>, key: string) =>
     vchNo
       ? put<T>(`/sales/${encodeURIComponent(vchNo)}`, {
           ...body,
           ...extra,
           expectedVersion: version,
         })
-      : post<T>('/sales', { ...body, ...extra });
+      : postCommand<T>('/sales', { ...body, ...extra }, key);
 
 export function useOrderAdvanceConfirm() {
+  const command = useIdempotencyKey();
   const [asking, setAsking] = useState<(Refusal & { answer: (yes: boolean) => void }) | null>(null);
   const [notes, setNotes] = useState<string[]>([]);
   const marker = useRef<HTMLSpanElement>(null);
@@ -93,11 +96,15 @@ export function useOrderAdvanceConfirm() {
   }, [asking]);
 
   /** Run the save; on the 3B refusal ask, and on Yes resend with the acknowledgement. Null when the operator says No. */
-  async function save<T>(send: (extra: Record<string, unknown>) => Promise<T>): Promise<T | null> {
+  async function save<T>(
+    send: (extra: Record<string, unknown>, key: string) => Promise<T>,
+  ): Promise<T | null> {
     let extra: Record<string, unknown> = {};
     for (;;) {
       try {
-        return await send(extra);
+        const saved = await send(extra, command.key);
+        command.renew();
+        return saved;
       } catch (e) {
         const refusal = refusalOf(e);
         if (!refusal) throw e;
