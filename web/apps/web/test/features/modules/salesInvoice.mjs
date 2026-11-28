@@ -389,8 +389,8 @@ export const salesInvoice = {
         await fillLine(page, 0, LINE_A);
         await page.getByText('Desktop settlement and invoice fields').click();
         // 65,517.27 - 0.27 = 65,517.00.
+        // On account, not cash: cash here would add to the shared party's cash-received total (cash limit).
         await field(page, 'Round Off').fill('-0.27');
-        await field(page, 'Cash ₹').fill('65517');
         const response = await save(page);
         assert.equal(response.status(), 201, await response.text());
         const vchNo = String((await response.json()).vchNo).padStart(5, '0');
