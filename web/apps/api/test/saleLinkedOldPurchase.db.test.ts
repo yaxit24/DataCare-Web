@@ -1,3 +1,4 @@
+import { deleteStrayPurchase } from '../src/modules/purchase/strayLink.js';
 import type { FastifyInstance } from 'fastify';
 import { PrismaClient, withTenant } from '@datacare/db';
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest';
@@ -398,6 +399,127 @@ d('Sale with a linked old-gold purchase (owner decision 2B, PR2)', () => {
     );
   });
 
+  it.each(['PURCHASE', 'TAG PURCHASE'])(
+    'stray deletion on %s refuses a live sale, checks version, and reverses the complete purchase only',
+    async (mainBook) => {
+      const saved = await create(sale(), { gold: goldPurchase() as any });
+      const [pr] = await purchases('043');
+      const sentinelSale = await create(sale(), { gold: goldPurchase(12345) as any });
+      // Synthetic imported TAG PURCHASE: retain a real purchase write set and legacy SL_BILL_*.
+      await owner.$executeRawUnsafe(
+        `UPDATE "BOOK_DATA" SET "MAIN_BOOK"=$2 WHERE tenant_id=$1 AND "CO_BOOK"='043'`,
+        TENANT,
+        mainBook,
+      );
+      const ps = { ...scope, coBook: '043' };
+      const view = await getPurchase(prisma, ps, pr.VCH_NO);
+      expect(view.linkedSale).toMatchObject({ exists: true, saleBillNo: fmt(saved.vchNo) });
+      const input = {
+        scope: ps,
+        vchNo: pr.VCH_NO,
+        expectedVersion: String(view.version),
+        deleteUser: 'og2clerk',
+      };
+      await expect(deleteStrayPurchase(prisma, input)).rejects.toThrow(
+        `Linked with sale SL/${fmt(saved.vchNo)}; delete it from the sale`,
+      );
+      expect(await count('PR_DATA', '043')).toBe(2);
+      await owner.$executeRawUnsafe(
+        `DELETE FROM "SL_DATA" WHERE tenant_id=$1 AND "CO_BOOK"='SL' AND "VCH_NO"=$2`,
+        TENANT,
+        fmt(saved.vchNo),
+      );
+      expect((await getPurchase(prisma, ps, pr.VCH_NO)).linkedSale).toMatchObject({
+        exists: false,
+      });
+      await expect(
+        deleteStrayPurchase(prisma, { ...input, expectedVersion: 'stale' }),
+      ).rejects.toThrow();
+      expect(await count('PR_DATA', '043')).toBe(2);
+      const sentinel = (await purchases('043')).find(
+        (p) => p.SL_BILL_NO === fmt(sentinelSale.vchNo),
+      );
+      const sentinelBefore = await getPurchase(prisma, ps, sentinel.VCH_NO);
+      await expect(deleteStrayPurchase(prisma, input)).resolves.toEqual({ reversed: true });
+      for (const table of [
+        'PR_DATA',
+        'PR_DETL',
+        'PR_IDTL',
+        'BAR_DATA',
+        'BAR_DETL',
+        'BAR_IDTL',
+        'SL_PR_DETL',
+        'ITM_LOT_DETL',
+        'MAIN_STOCK',
+        'AC_DATA',
+        'TAX_DATA',
+        'BILL_OS_DATA',
+        'ROJ_MEL_DATA',
+        'DM_DATA',
+        'LOT_DETL',
+        'REMARK_DATA',
+      ]) {
+        expect(
+          (
+            await rows(
+              `SELECT count(*)::int n FROM "${table}" WHERE tenant_id=$T AND "CO_CODE"=$1
+        AND "LC_CODE"=$2 AND "CO_YEAR"=$3 AND "CO_BOOK"='043' AND "VCH_NO"=$4`,
+              CO,
+              LC,
+              YEAR,
+              pr.VCH_NO,
+            )
+          )[0].n,
+          table,
+        ).toBe(0);
+      }
+      expect(await getPurchase(prisma, ps, sentinel.VCH_NO)).toEqual(sentinelBefore);
+      expect(
+        (
+          await rows(
+            `SELECT count(*)::int n FROM "TEMP_BOOK_DATA" WHERE tenant_id=$T AND "CO_BOOK"='043' AND "VCH_NO"=$1`,
+            view.hiddenVoucherNo,
+          )
+        )[0].n,
+      ).toBe(0);
+      expect(
+        (
+          await rows(
+            `SELECT count(*)::int n FROM "DELETE_DATA" WHERE tenant_id=$T AND "CO_BOOK"='043' AND "VCH_NO"=$1`,
+            pr.VCH_NO,
+          )
+        )[0].n,
+      ).toBe(2);
+    },
+  );
+
+  it('stray deletion leaves a CON PUR receipt reference untouched', async () => {
+    const saved = await create(sale(), { gold: goldPurchase() as any });
+    const [pr] = await purchases('043');
+    await owner.$executeRawUnsafe(
+      `DELETE FROM "SL_DATA" WHERE tenant_id=$1 AND "CO_BOOK"='SL' AND "VCH_NO"=$2`,
+      TENANT,
+      fmt(saved.vchNo),
+    );
+    await owner.$executeRawUnsafe(
+      `UPDATE "BOOK_DATA" SET "MAIN_BOOK"='CON PUR' WHERE tenant_id=$1 AND "CO_BOOK"='043'`,
+      TENANT,
+    );
+    const ps = { ...scope, coBook: '043' };
+    const before = await getPurchase(prisma, ps, pr.VCH_NO);
+    expect(before.linkedSale).toBeNull();
+    await expect(
+      deleteStrayPurchase(prisma, {
+        scope: ps,
+        vchNo: pr.VCH_NO,
+        expectedVersion: String(before.version),
+        deleteUser: 'og2clerk',
+      }),
+    ).rejects.toThrow('This purchase has no sale link');
+    expect(await getPurchase(prisma, ps, pr.VCH_NO)).toEqual(before);
+    expect(await count('DELETE_DATA', '043')).toBe(0);
+  });
+
   it('the request parser drops the urd flag and the link fields; the server sets them', () => {
     const parsed = linkedOldPurchaseRequest(
       {
@@ -580,6 +702,7 @@ d('Sale with a linked old-gold purchase through HTTP: rights, idempotency, read'
     for (const [login, menus] of [
       ['og2both', ['Sales', 'Purchase']],
       ['og2sale', ['Sales']],
+      ['og2nodelete', ['Sales', 'Purchase']],
     ] as const) {
       await owner.$executeRawUnsafe(
         `INSERT INTO "LOGIN_MAST"(tenant_id,"CO_CODE","LOGIN_NAME","LOGIN_PWD","LOGIN_CATG","USER_UPDATE","USER_DELETE","USER_PRINT","PASSWORD_RESET_REQUIRED")
@@ -602,7 +725,11 @@ d('Sale with a linked old-gold purchase through HTTP: rights, idempotency, read'
       secret: 'linked-old-gold-route-test-signing-secret-32+',
       secureCookies: false,
     });
-    for (const login of ['og2both', 'og2sale']) {
+    await owner.$executeRawUnsafe(
+      `UPDATE "USER_SET" SET "FRM_DELETE"='N' WHERE tenant_id=$1 AND "USER_NAME"='og2nodelete'`,
+      TENANT,
+    );
+    for (const login of ['og2both', 'og2sale', 'og2nodelete']) {
       const response = await app.inject({
         method: 'POST',
         url: '/auth/login',
@@ -701,6 +828,57 @@ d('Sale with a linked old-gold purchase through HTTP: rights, idempotency, read'
     expect(put.json().linkedOldPurchases).toEqual([
       expect.objectContaining({ metal: 'G', coBook: '043', created: false }),
     ]);
+  });
+
+  it('stray-link route enforces Purchase delete rights, schema and live-sale refusal', async () => {
+    const created = await post('og2both', body());
+    expect(created.statusCode, created.body).toBe(201);
+    const [pr] = await rows(
+      `SELECT "VCH_NO" FROM "PR_DATA" WHERE tenant_id=$1 AND "CO_BOOK"='043' AND "SL_BILL_NO"=$2`,
+      fmt(created.json().vchNo),
+    );
+    const read = await app.inject({
+      method: 'GET',
+      url: `/purchases/${pr.VCH_NO}?coBook=043`,
+      headers: { cookie: cookies.og2both! },
+    });
+    expect(read.statusCode, read.body).toBe(200);
+    const url = `/purchases/${pr.VCH_NO}/delete-stray-link?coBook=043&expectedVersion=${encodeURIComponent(read.json().version)}`;
+    const denied = await app.inject({
+      method: 'POST',
+      url,
+      headers: { cookie: cookies.og2nodelete! },
+      payload: {},
+    });
+    expect(denied.statusCode, denied.body).toBe(403);
+    const invalid = await app.inject({
+      method: 'POST',
+      url,
+      headers: { cookie: cookies.og2both! },
+      payload: { bypass: true },
+    });
+    expect(invalid.statusCode, invalid.body).toBe(400);
+    const live = await app.inject({
+      method: 'POST',
+      url,
+      headers: { cookie: cookies.og2both! },
+      payload: {},
+    });
+    expect(live.statusCode, live.body).toBe(400);
+    expect(live.json().message).toContain('; delete it from the sale');
+    await owner.$executeRawUnsafe(
+      `DELETE FROM "SL_DATA" WHERE tenant_id=$1 AND "CO_BOOK"='SL' AND "VCH_NO"=$2`,
+      TENANT,
+      fmt(created.json().vchNo),
+    );
+    const removed = await app.inject({
+      method: 'POST',
+      url,
+      headers: { cookie: cookies.og2both! },
+      payload: {},
+    });
+    expect(removed.statusCode, removed.body).toBe(200);
+    expect(removed.json()).toEqual({ reversed: true });
   });
 
   it('refuses a non-T book with 400', async () => {

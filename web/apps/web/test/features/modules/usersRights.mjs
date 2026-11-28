@@ -883,6 +883,8 @@ export const usersRights = {
       async (ctx) => {
         const s = await ctx.session();
         await openUsers(s.page);
+        // Let the screen's own loads finish first, so a late one is not counted as sent by Print.
+        await s.page.waitForLoadState('networkidle');
         const before = s.requests.length;
         await s.page.getByRole('button', { name: 'Print', exact: true }).click();
         await s.page.waitForTimeout(500);
@@ -1032,15 +1034,33 @@ export const usersRights = {
           await page.goto('/dashboard');
           const badge = page.getByTestId('data-type-badge');
           await badge.filter({ hasText: /^All$/ }).waitFor();
-          // The page reloads after a switch, so wait on the badge text rather than on the load event.
-          await page.keyboard.press('Control+b');
+          // The badge can render before the page's key handler is attached, so a press may be lost: press until the
+          // switch request goes out. The page reloads after a switch, so wait on the badge text, not the load event.
+          const pressUntilSwitch = async (key, type) => {
+            for (let attempt = 0; attempt < 5; attempt += 1) {
+              const sent = page
+                .waitForRequest(
+                  (r) =>
+                    r.method() === 'POST' &&
+                    r.url().includes('/auth/data-type') &&
+                    (r.postData() ?? '').includes(`"type":"${type}"`),
+                  { timeout: 3000 },
+                )
+                .then(() => true)
+                .catch(() => false);
+              await page.keyboard.press(key);
+              if (await sent) return;
+            }
+            throw new Error(`${key} never sent the switch to data type ${type}`);
+          };
+          await pressUntilSwitch('Control+b', 'B');
           await badge.filter({ hasText: /^B$/ }).waitFor();
           const audit = await ctx.rows(
             `SELECT path FROM audit_log WHERE tenant_id=$1 AND action='DATA_TYPE' AND login_name=$2 ORDER BY id DESC LIMIT 1`,
             USERS.admin.user,
           );
           assert.equal(audit[0]?.path, '/auth/data-type/B');
-          await page.keyboard.press('Control+c');
+          await pressUntilSwitch('Control+c', 'C');
           await badge.filter({ hasText: /^All$/ }).waitFor();
           return {
             observation: 'Ctrl+B showed the B badge and wrote an audit row; Ctrl+C returned to All',

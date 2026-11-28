@@ -178,8 +178,9 @@ describe('route policy registry', () => {
     // GET /utilities/data-refresh/account/:family/vouchers: 842.
     // The linked old-gold purchase adds GET and POST /settings/urd-books (Utilities/Settings): 844.
     // The Sales screen's linked old-gold modal reads its URD book under Sales Invoice (GET /sales/urd-books): 845.
-    expect(routes).toHaveLength(845);
-    expect(new Set(routes.map((route) => `${route.method} ${route.path}`)).size).toBe(845);
+    // Stray old-gold purchase removal uses the Purchase delete right: 846.
+    expect(routes).toHaveLength(846);
+    expect(new Set(routes.map((route) => `${route.method} ${route.path}`)).size).toBe(846);
 
     const policies = routes.map((route) => ({
       ...route,
@@ -1221,5 +1222,14 @@ describe('desktop Print-right boundary of the Company utilities (G225)', () => {
         form: 'Company/Balance TrFr',
         action: 'create',
       });
+  });
+});
+
+it('stray-link POST requires Purchase delete, never create', () => {
+  expect(routePolicyFor('POST', '/purchases/:vchNo/delete-stray-link')).toMatchObject({
+    kind: 'form',
+    form: 'Purchase/Purchase Invoice',
+    action: 'delete',
+    businessScope: true,
   });
 });

@@ -1,7 +1,10 @@
+import { PURCHASE_FAMILY_MAIN_BOOKS } from './purchaseHallmark.js';
+import { purchaseMainBookTx } from './purchase.js';
+
 /**
  * The sale a purchase is booked against: PR_DATA / PR_DETL SL_BILL_NO, SL_BILL_LC, SL_BILL_YRCD, SL_BILL_DBCD
  * (TR_PURC.cs:12647-12650, :12766-12769). Pure helpers shared by the purchase writer and linkedPurchase.ts, kept out of
- * purchase.ts (size ceiling) and free of its imports.
+ * purchase.ts (size ceiling) with the canonical book lookup shared with purchase.ts.
  */
 export interface SaleLink {
   saleBillNo: string;
@@ -75,4 +78,45 @@ export function withSaleLink<T extends Partial<SaleLink>>(input: T, link: SaleLi
     saleBillYear: link?.saleBillYear,
     saleBillBook: link?.saleBillBook,
   };
+}
+
+// TR_PURC.cs:13443-13447; CON PUR uses SL_BILL_* for a receipt, not a sale.
+export function isSaleLinkedPurchase(mainBook: string, header: Record<string, unknown>): boolean {
+  const book = text(mainBook).toUpperCase();
+  return (
+    book !== 'CON PUR' &&
+    (PURCHASE_FAMILY_MAIN_BOOKS as readonly string[]).includes(book) &&
+    text(header.SL_BILL_NO) !== ''
+  );
+}
+
+/** Use the same active, unambiguous book configuration as edit/delete enforcement. */
+export async function purchaseSaleLinkStateTx(
+  tx: any,
+  scope: { tenantId: string; coCode: string; lcCode: string; coBook?: string },
+  header: Record<string, unknown>,
+) {
+  const link = persistedSaleLink(header);
+  if (!link.saleBillNo) return null;
+  const mainBook = await purchaseMainBookTx(tx, scope);
+  if (!isSaleLinkedPurchase(mainBook, header)) return null;
+  return { ...link, exists: await linkedSaleExistsTx(tx, scope, link) };
+}
+
+export async function linkedSaleExistsTx(
+  tx: any,
+  scope: { tenantId: string; coCode: string },
+  link: SaleLink,
+): Promise<boolean> {
+  const rows = await tx.$queryRawUnsafe(
+    `SELECT 1 FROM "SL_DATA" WHERE tenant_id=$1 AND "CO_CODE"=$2 AND "LC_CODE"=$3
+      AND "CO_YEAR"=$4 AND "CO_BOOK"=$5 AND "VCH_NO"=$6 LIMIT 1`,
+    scope.tenantId,
+    scope.coCode,
+    link.saleBillLc,
+    link.saleBillYear,
+    link.saleBillBook,
+    link.saleBillNo,
+  );
+  return rows.length > 0;
 }

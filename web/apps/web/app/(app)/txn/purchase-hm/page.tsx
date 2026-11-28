@@ -1,6 +1,7 @@
 'use client';
 import { useVoucherZoom } from '../../../../lib/voucherZoom';
 import { useEffect, useState } from 'react';
+import { PurchaseSaleLink, PurchaseEntryFields } from '../../../../components/PurchaseSaleLink';
 import { usePathname, useRouter } from 'next/navigation';
 import { del, get, post, put, ApiError } from '../../../../lib/api';
 import { BookSelect } from '../../../../components/BookSelect';
@@ -580,6 +581,7 @@ export default function HallmarkPurchasePage() {
 
   async function submit(e: React.FormEvent) {
     e.preventDefault();
+    if (loadedView?.linkedSale) return;
     setMsg(null);
     setRes(null);
     if (!coBook) {
@@ -672,332 +674,353 @@ export default function HallmarkPurchasePage() {
         Hallmark Purchase <span className="muted">— TR_PURC_HM (HUID + hallmark charge)</span>
       </h1>
       {msg && <div className={`msg ${msg.kind}`}>{msg.text}</div>}
-      <form onSubmit={submit}>
-        <div className="panel">
-          <div className="row">
-            <div className="field">
-              <label>Book</label>
-              <BookSelect
-                value={coBook}
-                onChange={setCoBook}
-                family={tagBook ? 'tag-purchase' : 'purchase'}
-              />
+      <PurchaseSaleLink
+        view={loadedView}
+        book={coBook}
+        voucher={loadedVchNo}
+        version={loadedVersion}
+        onClear={newVoucher}
+      >
+        <form onSubmit={submit}>
+          <div className="panel">
+            <div className="row">
+              <div className="field">
+                <label>Book</label>
+                <BookSelect
+                  value={coBook}
+                  onChange={setCoBook}
+                  family={tagBook ? 'tag-purchase' : 'purchase'}
+                />
+              </div>
+              <div className="field">
+                <label>Voucher No</label>
+                <input
+                  aria-label="Voucher No"
+                  value={voucherLookup}
+                  onChange={(e) => setVoucherLookup(e.target.value)}
+                  placeholder="00001"
+                />
+              </div>
+              <button
+                type="button"
+                className="ghost"
+                disabled={busy || !coBook}
+                onClick={() => void loadVoucher()}
+              >
+                Load
+              </button>
+              {loadedVchNo && (
+                <>
+                  <span className="msg ok" data-testid="purchase-hm-loaded">
+                    Loaded #{loadedVchNo}
+                  </span>
+                  <button
+                    type="button"
+                    className="danger"
+                    disabled={busy || !!loadedView?.linkedSale}
+                    onClick={deleteVoucher}
+                  >
+                    Delete
+                  </button>
+                  <button
+                    type="button"
+                    className="ghost"
+                    onClick={() =>
+                      openDocument(
+                        `/api/purchases/invoice?coBook=${encodeURIComponent(coBook)}&coYear=${encodeURIComponent(coYear)}&vchNo=${encodeURIComponent(loadedVchNo)}&format=html`,
+                      )
+                    }
+                  >
+                    Print
+                  </button>
+                </>
+              )}
+              <button type="button" className="ghost" disabled={busy} onClick={newVoucher}>
+                New
+              </button>
             </div>
-            <div className="field">
-              <label>Voucher No</label>
-              <input
-                aria-label="Voucher No"
-                value={voucherLookup}
-                onChange={(e) => setVoucherLookup(e.target.value)}
-                placeholder="00001"
-              />
+          </div>
+          <PurchaseEntryFields view={loadedView}>
+            <div className="panel">
+              <div className="row">
+                <div className="field" style={{ flex: 2 }}>
+                  <label>Supplier</label>
+                  <LookupPicker
+                    entity="accounts"
+                    value={f.acCode}
+                    onChange={(v) => set('acCode', v)}
+                    onPick={(r) => {
+                      if (!f.acName) set('acName', String(r.name || ''));
+                    }}
+                  />
+                </div>
+                <div className="field">
+                  <label>Supplier Name</label>
+                  <input value={f.acName} onChange={(e) => set('acName', e.target.value)} />
+                </div>
+                <div className="field">
+                  <label>Vch Date</label>
+                  <input
+                    type="date"
+                    aria-label="Vch Date"
+                    value={f.vchDate}
+                    onChange={(e) => set('vchDate', e.target.value)}
+                  />
+                </div>
+                <div className="field">
+                  <label>Bill No</label>
+                  <input value={f.billNo} onChange={(e) => set('billNo', e.target.value)} />
+                </div>
+                <div className="field">
+                  <label>Tax %</label>
+                  <input value={f.taxRatePct} onChange={(e) => set('taxRatePct', e.target.value)} />
+                </div>
+                <div className="field">
+                  <label>Hallmark chg ₹</label>
+                  <input
+                    aria-label="Hallmark charge"
+                    value={linesCarryHm ? hmAmt.toFixed(2) : f.hmCharge}
+                    readOnly={linesCarryHm}
+                    onChange={(e) => set('hmCharge', e.target.value)}
+                  />
+                </div>
+                <div className="field">
+                  <label>HM Tax Code</label>
+                  <input
+                    aria-label="HM Tax Code"
+                    maxLength={2}
+                    value={f.hmTaxCode}
+                    onChange={(e) => set('hmTaxCode', e.target.value)}
+                    style={{ width: 48 }}
+                  />
+                </div>
+                <div className="field">
+                  <label>HM Tax %</label>
+                  <input
+                    aria-label="HM Tax %"
+                    value={f.hmTaxPct}
+                    onChange={(e) => set('hmTaxPct', e.target.value)}
+                    style={{ width: 56 }}
+                  />
+                </div>
+                <div className="field">
+                  <label>Inter-state</label>
+                  <select
+                    value={f.interState ? 'y' : 'n'}
+                    onChange={(e) => set('interState', e.target.value === 'y')}
+                  >
+                    <option value="n">No (CGST+SGST)</option>
+                    <option value="y">Yes (IGST)</option>
+                  </select>
+                </div>
+              </div>
             </div>
-            <button
-              type="button"
-              className="ghost"
-              disabled={busy || !coBook}
-              onClick={() => void loadVoucher()}
-            >
-              Load
-            </button>
-            {loadedVchNo && (
-              <>
-                <span className="msg ok" data-testid="purchase-hm-loaded">
-                  Loaded #{loadedVchNo}
-                </span>
-                <button type="button" className="danger" disabled={busy} onClick={deleteVoucher}>
-                  Delete
-                </button>
+
+            <div className="panel" style={{ overflow: 'auto' }}>
+              <h2>Hallmarked Items</h2>
+              <GridModeToggle
+                full={fullGrid}
+                setFull={setFullGrid}
+                extendedCount={extendedLineFields.length}
+                testId="purchase-hm-grid-mode"
+              />
+              <table className="grid" onKeyDown={handleGridKey}>
+                <thead>
+                  <tr>
+                    <th>Item</th>
+                    <th>Tag</th>
+                    <th>HUID</th>
+                    <th className="num">Pcs</th>
+                    <th className="num">Gross</th>
+                    <th className="num">Net</th>
+                    <th className="num">Touch</th>
+                    <th className="num">Rate</th>
+                    <th className="num">Making/g</th>
+                    <th className="num">Net Amt</th>
+                    <ExtendedHeaderCells full={fullGrid} fields={extendedLineFields} />
+                    {tagBook && <ExtendedHeaderCells full fields={tagBandFields} />}
+                    <th></th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {rows.map((r, i) => (
+                    <tr key={i}>
+                      <td>
+                        <LookupPicker
+                          entity="items"
+                          value={r.itCode}
+                          onChange={(v) => setRow(i, 'itCode', v)}
+                          style={{ width: 90 }}
+                        />
+                      </td>
+                      <td>
+                        <LookupPicker
+                          entity="tags"
+                          value={r.tagNo}
+                          onChange={(v) => setRow(i, 'tagNo', v)}
+                          style={{ width: 100 }}
+                        />
+                      </td>
+                      <td>
+                        <input
+                          value={r.huid}
+                          maxLength={6}
+                          onChange={(e) => setRow(i, 'huid', e.target.value)}
+                          placeholder="6-char"
+                          style={{ width: 80 }}
+                        />
+                      </td>
+                      <td className="num">
+                        <input
+                          value={r.pcs}
+                          onChange={(e) => setRow(i, 'pcs', e.target.value)}
+                          style={{ width: 48, textAlign: 'right' }}
+                        />
+                      </td>
+                      <td className="num">
+                        <input
+                          value={r.grossWt}
+                          onChange={(e) => setRow(i, 'grossWt', e.target.value)}
+                          style={{ width: 70, textAlign: 'right' }}
+                        />
+                      </td>
+                      <td className="num">
+                        <input
+                          value={r.netWt}
+                          onChange={(e) => setRow(i, 'netWt', e.target.value)}
+                          style={{ width: 70, textAlign: 'right' }}
+                        />
+                      </td>
+                      <td className="num">
+                        <input
+                          value={r.touch}
+                          onChange={(e) => setRow(i, 'touch', e.target.value)}
+                          style={{ width: 56, textAlign: 'right' }}
+                        />
+                      </td>
+                      <td className="num">
+                        <input
+                          value={r.rate}
+                          onChange={(e) => setRow(i, 'rate', e.target.value)}
+                          style={{ width: 76, textAlign: 'right' }}
+                        />
+                      </td>
+                      <td className="num">
+                        <input
+                          value={r.making}
+                          onChange={(e) => setRow(i, 'making', e.target.value)}
+                          style={{ width: 64, textAlign: 'right' }}
+                        />
+                      </td>
+                      <td className="num">
+                        {r.itCode.trim() ? calc(r).toLocaleString('en-IN') : ''}
+                      </td>
+                      <ExtendedBodyCells
+                        full={fullGrid}
+                        fields={extendedLineFields}
+                        line={r}
+                        row={i}
+                        baseColumns={10}
+                        setValue={(row, key, value) => setRow(row, key, value)}
+                      />
+                      {tagBook && (
+                        <ExtendedBodyCells
+                          full
+                          fields={tagBandFields}
+                          line={r}
+                          row={i}
+                          baseColumns={10 + (fullGrid ? extendedLineFields.length : 0)}
+                          setValue={(row, key, value) => setRow(row, key, value)}
+                        />
+                      )}
+                      <td>
+                        <button
+                          type="button"
+                          className="danger"
+                          onClick={() => {
+                            setRows((rs) =>
+                              rs.length > 1 ? rs.filter((_, j) => j !== i) : [blank()],
+                            );
+                            sub.removeLine(i);
+                          }}
+                        >
+                          ×
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+                <tfoot>
+                  <tr>
+                    <td colSpan={9} style={{ textAlign: 'right', fontWeight: 600 }}>
+                      Taxable {hmAmt ? `+ HM ${hmAmt}` : ''} / +tax / Total
+                    </td>
+                    <td className="num">
+                      <b>{taxable.toLocaleString('en-IN')}</b> / {tax.toLocaleString('en-IN')} /{' '}
+                      <b>{grand.toLocaleString('en-IN')}</b>
+                    </td>
+                    <td></td>
+                  </tr>
+                </tfoot>
+              </table>
+              <div className="row" style={{ marginTop: 8, alignItems: 'flex-end' }}>
+                <div className="field">
+                  <label>Stones for line</label>
+                  <select
+                    value={sub.activeLine}
+                    onChange={(e) => sub.setActiveLine(Number(e.target.value))}
+                  >
+                    {rows.map((r, i) => (
+                      <option key={i} value={i}>
+                        {i + 1}
+                        {r.itCode ? ` — ${r.itCode}` : ''}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                <div className="field">
+                  <span className="muted">{sub.totalRows} row(s) on this voucher</span>
+                </div>
+              </div>
+              <SubDetailGrid
+                rows={sub.rowsFor(sub.activeLine)}
+                onRowsChange={(r) => sub.setRowsFor(sub.activeLine, r)}
+                parentLabel={`line ${sub.activeLine + 1}`}
+                desktopSource="TR_PURC_HM / MSG_PR_IDTL (23 cols)"
+              />
+              <div className="toolbar" style={{ marginTop: 10 }}>
                 <button
                   type="button"
                   className="ghost"
-                  onClick={() =>
-                    openDocument(
-                      `/api/purchases/invoice?coBook=${encodeURIComponent(coBook)}&coYear=${encodeURIComponent(coYear)}&vchNo=${encodeURIComponent(loadedVchNo)}&format=html`,
-                    )
-                  }
+                  onClick={() => setRows((rs) => [...rs, blank()])}
                 >
-                  Print
+                  + Add line
                 </button>
-              </>
-            )}
-            <button type="button" className="ghost" disabled={busy} onClick={newVoucher}>
-              New
-            </button>
-          </div>
-          <div className="row">
-            <div className="field" style={{ flex: 2 }}>
-              <label>Supplier</label>
-              <LookupPicker
-                entity="accounts"
-                value={f.acCode}
-                onChange={(v) => set('acCode', v)}
-                onPick={(r) => {
-                  if (!f.acName) set('acName', String(r.name || ''));
-                }}
-              />
-            </div>
-            <div className="field">
-              <label>Supplier Name</label>
-              <input value={f.acName} onChange={(e) => set('acName', e.target.value)} />
-            </div>
-            <div className="field">
-              <label>Vch Date</label>
-              <input
-                type="date"
-                aria-label="Vch Date"
-                value={f.vchDate}
-                onChange={(e) => set('vchDate', e.target.value)}
-              />
-            </div>
-            <div className="field">
-              <label>Bill No</label>
-              <input value={f.billNo} onChange={(e) => set('billNo', e.target.value)} />
-            </div>
-            <div className="field">
-              <label>Tax %</label>
-              <input value={f.taxRatePct} onChange={(e) => set('taxRatePct', e.target.value)} />
-            </div>
-            <div className="field">
-              <label>Hallmark chg ₹</label>
-              <input
-                aria-label="Hallmark charge"
-                value={linesCarryHm ? hmAmt.toFixed(2) : f.hmCharge}
-                readOnly={linesCarryHm}
-                onChange={(e) => set('hmCharge', e.target.value)}
-              />
-            </div>
-            <div className="field">
-              <label>HM Tax Code</label>
-              <input
-                aria-label="HM Tax Code"
-                maxLength={2}
-                value={f.hmTaxCode}
-                onChange={(e) => set('hmTaxCode', e.target.value)}
-                style={{ width: 48 }}
-              />
-            </div>
-            <div className="field">
-              <label>HM Tax %</label>
-              <input
-                aria-label="HM Tax %"
-                value={f.hmTaxPct}
-                onChange={(e) => set('hmTaxPct', e.target.value)}
-                style={{ width: 56 }}
-              />
-            </div>
-            <div className="field">
-              <label>Inter-state</label>
-              <select
-                value={f.interState ? 'y' : 'n'}
-                onChange={(e) => set('interState', e.target.value === 'y')}
-              >
-                <option value="n">No (CGST+SGST)</option>
-                <option value="y">Yes (IGST)</option>
-              </select>
-            </div>
-          </div>
-        </div>
-
-        <div className="panel" style={{ overflow: 'auto' }}>
-          <h2>Hallmarked Items</h2>
-          <GridModeToggle
-            full={fullGrid}
-            setFull={setFullGrid}
-            extendedCount={extendedLineFields.length}
-            testId="purchase-hm-grid-mode"
-          />
-          <table className="grid" onKeyDown={handleGridKey}>
-            <thead>
-              <tr>
-                <th>Item</th>
-                <th>Tag</th>
-                <th>HUID</th>
-                <th className="num">Pcs</th>
-                <th className="num">Gross</th>
-                <th className="num">Net</th>
-                <th className="num">Touch</th>
-                <th className="num">Rate</th>
-                <th className="num">Making/g</th>
-                <th className="num">Net Amt</th>
-                <ExtendedHeaderCells full={fullGrid} fields={extendedLineFields} />
-                {tagBook && <ExtendedHeaderCells full fields={tagBandFields} />}
-                <th></th>
-              </tr>
-            </thead>
-            <tbody>
-              {rows.map((r, i) => (
-                <tr key={i}>
-                  <td>
-                    <LookupPicker
-                      entity="items"
-                      value={r.itCode}
-                      onChange={(v) => setRow(i, 'itCode', v)}
-                      style={{ width: 90 }}
-                    />
-                  </td>
-                  <td>
-                    <LookupPicker
-                      entity="tags"
-                      value={r.tagNo}
-                      onChange={(v) => setRow(i, 'tagNo', v)}
-                      style={{ width: 100 }}
-                    />
-                  </td>
-                  <td>
-                    <input
-                      value={r.huid}
-                      maxLength={6}
-                      onChange={(e) => setRow(i, 'huid', e.target.value)}
-                      placeholder="6-char"
-                      style={{ width: 80 }}
-                    />
-                  </td>
-                  <td className="num">
-                    <input
-                      value={r.pcs}
-                      onChange={(e) => setRow(i, 'pcs', e.target.value)}
-                      style={{ width: 48, textAlign: 'right' }}
-                    />
-                  </td>
-                  <td className="num">
-                    <input
-                      value={r.grossWt}
-                      onChange={(e) => setRow(i, 'grossWt', e.target.value)}
-                      style={{ width: 70, textAlign: 'right' }}
-                    />
-                  </td>
-                  <td className="num">
-                    <input
-                      value={r.netWt}
-                      onChange={(e) => setRow(i, 'netWt', e.target.value)}
-                      style={{ width: 70, textAlign: 'right' }}
-                    />
-                  </td>
-                  <td className="num">
-                    <input
-                      value={r.touch}
-                      onChange={(e) => setRow(i, 'touch', e.target.value)}
-                      style={{ width: 56, textAlign: 'right' }}
-                    />
-                  </td>
-                  <td className="num">
-                    <input
-                      value={r.rate}
-                      onChange={(e) => setRow(i, 'rate', e.target.value)}
-                      style={{ width: 76, textAlign: 'right' }}
-                    />
-                  </td>
-                  <td className="num">
-                    <input
-                      value={r.making}
-                      onChange={(e) => setRow(i, 'making', e.target.value)}
-                      style={{ width: 64, textAlign: 'right' }}
-                    />
-                  </td>
-                  <td className="num">{r.itCode.trim() ? calc(r).toLocaleString('en-IN') : ''}</td>
-                  <ExtendedBodyCells
-                    full={fullGrid}
-                    fields={extendedLineFields}
-                    line={r}
-                    row={i}
-                    baseColumns={10}
-                    setValue={(row, key, value) => setRow(row, key, value)}
-                  />
-                  {tagBook && (
-                    <ExtendedBodyCells
-                      full
-                      fields={tagBandFields}
-                      line={r}
-                      row={i}
-                      baseColumns={10 + (fullGrid ? extendedLineFields.length : 0)}
-                      setValue={(row, key, value) => setRow(row, key, value)}
-                    />
-                  )}
-                  <td>
-                    <button
-                      type="button"
-                      className="danger"
-                      onClick={() => {
-                        setRows((rs) => (rs.length > 1 ? rs.filter((_, j) => j !== i) : [blank()]));
-                        sub.removeLine(i);
-                      }}
-                    >
-                      ×
-                    </button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-            <tfoot>
-              <tr>
-                <td colSpan={9} style={{ textAlign: 'right', fontWeight: 600 }}>
-                  Taxable {hmAmt ? `+ HM ${hmAmt}` : ''} / +tax / Total
-                </td>
-                <td className="num">
-                  <b>{taxable.toLocaleString('en-IN')}</b> / {tax.toLocaleString('en-IN')} /{' '}
-                  <b>{grand.toLocaleString('en-IN')}</b>
-                </td>
-                <td></td>
-              </tr>
-            </tfoot>
-          </table>
-          <div className="row" style={{ marginTop: 8, alignItems: 'flex-end' }}>
-            <div className="field">
-              <label>Stones for line</label>
-              <select
-                value={sub.activeLine}
-                onChange={(e) => sub.setActiveLine(Number(e.target.value))}
-              >
-                {rows.map((r, i) => (
-                  <option key={i} value={i}>
-                    {i + 1}
-                    {r.itCode ? ` — ${r.itCode}` : ''}
-                  </option>
-                ))}
-              </select>
-            </div>
-            <div className="field">
-              <span className="muted">{sub.totalRows} row(s) on this voucher</span>
-            </div>
-          </div>
-          <SubDetailGrid
-            rows={sub.rowsFor(sub.activeLine)}
-            onRowsChange={(r) => sub.setRowsFor(sub.activeLine, r)}
-            parentLabel={`line ${sub.activeLine + 1}`}
-            desktopSource="TR_PURC_HM / MSG_PR_IDTL (23 cols)"
-          />
-          <div className="toolbar" style={{ marginTop: 10 }}>
-            <button
-              type="button"
-              className="ghost"
-              onClick={() => setRows((rs) => [...rs, blank()])}
-            >
-              + Add line
-            </button>
-            <span className="spacer" />
-            <button className="primary" data-save-mnemonic disabled={busy}>
-              {busy
-                ? 'Saving…'
-                : loadedVchNo
-                  ? 'Update Hallmark Purchase'
-                  : 'Save Hallmark Purchase'}
-            </button>
-          </div>
-          {res && (
-            <div className="tiles" style={{ marginTop: 10 }}>
-              <div className="tile">
-                <div className="muted">voucher</div>
-                <div className="big kpi">#{res.vchNo}</div>
+                <span className="spacer" />
+                <button className="primary" data-save-mnemonic disabled={busy}>
+                  {busy
+                    ? 'Saving…'
+                    : loadedVchNo
+                      ? 'Update Hallmark Purchase'
+                      : 'Save Hallmark Purchase'}
+                </button>
               </div>
+              {res && (
+                <div className="tiles" style={{ marginTop: 10 }}>
+                  <div className="tile">
+                    <div className="muted">voucher</div>
+                    <div className="big kpi">#{res.vchNo}</div>
+                  </div>
+                </div>
+              )}
             </div>
-          )}
-        </div>
-      </form>
+          </PurchaseEntryFields>
+        </form>
+      </PurchaseSaleLink>
       <VoucherList
         table="PR_DATA"
         book={coBook}
-        deleteBase="/purchases"
+        deleteBase={loadedView?.linkedSale ? undefined : '/purchases'}
         printHref={(v) =>
           `/api/purchases/invoice?coBook=${encodeURIComponent(coBook)}&coYear=${encodeURIComponent(coYear)}&vchNo=${encodeURIComponent(v)}&format=html`
         }
