@@ -53,13 +53,36 @@ Defaults chosen with the decision:
 
 Families and their state (`ACCOUNT_REFRESH_VERIFIED` in `web/apps/api/src/modules/utilities/accountRefresh.ts`): a family's apply is enabled only once every write-set fixture of it, saved through the normal writer, previews clean (`accountRefresh.db.test.ts`) and, for families whose books also hold desktop-shaped rows, a replay of real desktop vouchers (`pnpm oracle:replay`) checks with no `differs`; any other family previews and shows "apply not available until verified".
 
-| Family    | Operation                        | Builders re-used                                                                                                   | Apply |
-| --------- | -------------------------------- | ------------------------------------------------------------------------------------------------------------------ | ----- |
-| Contra    | `data-refresh-account-contra`    | `contraPostInput` (Contra_Ledr `Ac_Ledr.cs:840-848`, Contra_Rojmel `Ac_Rojmel.cs:336-340`)                         | yes   |
-| Fine Jv   | `data-refresh-account-fine-jv`   | `fineJvPostInput` (Contra_Ledr `Ac_Ledr.cs:846-848`, Contra_Rojmel `Ac_Rojmel.cs:342-344`)                         | yes   |
-| Cash/Bank | `data-refresh-account-cash-bank` | `cashBankPostInput` (Cash_Ledr / Bank_Ledr `Ac_Ledr.cs:565-610`, Cash_Rojmel / Bank_Rojmel `Ac_Rojmel.cs:179-219`) | yes   |
+| Family    | Operation                        | Builders re-used                                                                                                       | Check | Apply                 |
+| --------- | -------------------------------- | ---------------------------------------------------------------------------------------------------------------------- | ----- | --------------------- |
+| Contra    | `data-refresh-account-contra`    | `contraPostInput` (Contra_Ledr `Ac_Ledr.cs:840-848`, Contra_Rojmel `Ac_Rojmel.cs:336-340`)                             | yes   | yes                   |
+| Fine Jv   | `data-refresh-account-fine-jv`   | `fineJvPostInput` (Contra_Ledr `Ac_Ledr.cs:846-848`, Contra_Rojmel `Ac_Rojmel.cs:342-344`)                             | yes   | yes                   |
+| Cash/Bank | `data-refresh-account-cash-bank` | `cashBankPostInput` (Cash_Ledr / Bank_Ledr `Ac_Ledr.cs:565-610`, Cash_Rojmel / Bank_Rojmel `Ac_Rojmel.cs:179-219`)     | yes   | yes                   |
+| Purchase  | `data-refresh-account-purchase`  | `purchasePostInput` (Purc_Ledr `Ac_Ledr.cs:377-476`, Purc_Rojmel `Ac_Rojmel.cs:115-177`, Purc_GST `Ac_Tax.cs:111-132`) | yes   | **no — preview only** |
 
-The expected postings are derived from the stored `CONTRA_DATA` rows as they are, the way the desktop's builders read them, not re-gridded through the form. `REMARK_DATA` (rebuilt by the desktop's `Vch_Remark`, `MS_UPDATE.cs:2370-2373`) is not part of this check. The classification preview above stays on the Account button; the family checks are picked on the Account preview's "Account check and repair" panel. Next: the Purchase family.
+Purchase checks inward `PURCHASE`, `TAG PURCHASE` and `CON PUR` stored `PR_DATA`/`PR_DETL`
+through the same pure posting builder as the writer. Apply remains disabled pending complete
+fixture, browser and authorized stored-desktop verification. Purchase Return, Other Purchase,
+quotations and B2B/UAE are outside this slice.
+
+Purchase reports **unverified**, with no repair target, for incompatible/ambiguous source identities,
+serials or amounts; missing masters; tax split or taxable-book incompatibility; linked/partial sale
+references outside CON PUR; exact legacy leg 99 or nonzero ROF with lost typed-leg evidence;
+unrecorded UPI/outstanding residuals, negative tenders, missing bank/card accounts or incomplete
+positional HM/payment legs; unrecoverable day-book labour-rate histories; and observable book,
+group, labour, tax/TCS, hallmark or TDS configuration drift. Complete HM debit/credit evidence can
+recover a custom charge account. An account mismatch is conservatively unverified because the
+stored rows cannot distinguish an old setting from tampering. TCS uses its saved amount.
+
+Coverage limitation: enumeration follows **current** BOOK_DATA membership. A book moved out of
+these families (or out of inward direction) is not covered; a clean summary is not proof that such
+books were checked. Source/posting book-name disagreement inside enumerated books is refused.
+There are no save-time configuration snapshots: complete deletion of postings can erase evidence
+of historical settings or request-only overrides. Expected rows use current configuration for the
+supported subset; this limitation is another reason Purchase apply remains disabled. No stock,
+tag, lot or sale source is changed by checking.
+
+The expected postings are derived from the stored `CONTRA_DATA` rows as they are, the way the desktop's builders read them, not re-gridded through the form. `REMARK_DATA` (rebuilt by the desktop's `Vch_Remark`, `MS_UPDATE.cs:2370-2373`) is not part of this check. The classification preview above stays on the Account button; the family checks are picked on the Account preview's "Account check and repair" panel. Purchase reads the persisted purchase header and details.
 
 #### Cash/Bank
 
@@ -114,4 +137,4 @@ Every statement of the desktop handler is schema work in a side database: it cre
 
 `/utilities/data-repair` remains the advanced operation/history console. Preview-only operations publish neutral authority metadata: no confirmation, reason, reauthentication or backup requirement. Both consoles independently gate Apply and authority inputs on `applyAvailable`, and direct API calls are refused with `code: preview-only` before a transaction starts.
 
-PR-2 must classify Field Update and Old Field statement by statement. Account check-and-repair must be extended family by family (Purchase next); Stock's builder graph remains unproved (see KIRO-REPORT.md of the company-utils-blocked branch), and Old Field must be classified. No current record claims FULL, accepted, verified desktop parity, or a non-zero desktop match.
+PR-2 must classify Field Update and Old Field statement by statement. Account check-and-repair must be extended family by family (Purchase currently previews only); Stock's builder graph remains unproved (see KIRO-REPORT.md of the company-utils-blocked branch), and Old Field must be classified. No current record claims FULL, accepted, verified desktop parity, or a non-zero desktop match.

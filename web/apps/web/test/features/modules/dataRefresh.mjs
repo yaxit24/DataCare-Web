@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import { FIXTURE_MANIFEST, PARTIES, USERS } from '../fixtures/catalogue.mjs';
+import { FIXTURE_MANIFEST, ITEMS, PARTIES, USERS } from '../fixtures/catalogue.mjs';
 import { holdAdvisoryLock } from '../harness.mjs';
 import { changedTables, tenantFingerprint } from '../faults.mjs';
 
@@ -363,6 +363,30 @@ async function approvalLifecycle(ctx, inspect) {
  * the next check. `spec` names the family, its book, the save request and the tables to clean up.
  */
 const ACCOUNT_FAMILIES = {
+  purchase: {
+    title: 'Purchase',
+    coBook: 'PR',
+    endpoint: '/api/purchases',
+    applies: false,
+    body: (date) => ({
+      coBook: 'PR',
+      vchDate: date,
+      acCode: PARTIES.local.code,
+      taxRatePct: 0,
+      interState: false,
+      lines: [{ itCode: ITEMS.gold.code, pcs: 1, netWt: 1, touch: 100, metalAmount: 100 }],
+    }),
+    tables: [
+      'PR_DATA',
+      'PR_DETL',
+      'PR_IDTL',
+      'MAIN_STOCK',
+      'AC_DATA',
+      'ROJ_MEL_DATA',
+      'TAX_DATA',
+      'TEMP_BOOK_DATA',
+    ],
+  },
   contra: {
     title: 'Contra',
     coBook: 'CON',
@@ -1366,6 +1390,21 @@ export const dataRefresh = {
           expected: result.first.diffs,
           database: { writer: result.writer, repaired: result.repaired },
           downstream: { secondCheck: result.second.detail.summary },
+        };
+      },
+    ),
+    C(
+      'account.purchase-preview-only',
+      'T07',
+      'mutation',
+      'Purc_Ledr Ac_Ledr.cs:377-476; Purc_Rojmel Ac_Rojmel.cs:115-177; Purc_GST Ac_Tax.cs:111-132; Purchase apply remains disabled',
+      async (ctx) => {
+        const result = await accountFamilyLifecycle(ctx, 'purchase');
+        return {
+          observation: `Purchase PR/${result.vchNo}: preview detected the damaged amount; Apply was unavailable and direct apply refused`,
+          expected: result.first.diffs,
+          database: { writer: result.writer, unchangedDamaged: result.repaired },
+          downstream: { preview: result.second.detail.summary },
         };
       },
     ),
