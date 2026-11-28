@@ -29,7 +29,7 @@ import {
   saleGridRowLabour,
 } from '../../../../lib/lineRecalc';
 import { billTotals, lineNet as lineNetAmount } from '@datacare/core';
-import { saleBillTotal } from '../../../../lib/saleBillTotal';
+import { r2, saleBillTotal } from '../../../../lib/saleBillTotal';
 import { SaleTdsAmount } from '../../../../components/SaleTdsAmount';
 import { SaleApprovalImport, useSaleApprovalNo } from '../../../../components/SaleApprovalImport';
 import { todayLocal } from '../../../../lib/localDate';
@@ -218,7 +218,6 @@ const ogBlank = (): OgRow => ({
 });
 const n = (v: string) => Number(v || 0);
 const str = (v: unknown) => (v == null || Number(v) === 0 ? '' : String(v));
-const r2 = (x: number) => Math.round((x + 1e-9) * 100) / 100;
 /**
  * P7 dead cells removed, found by scripts/check-dead-cells.mjs.
  *
@@ -328,6 +327,7 @@ export default function SalesEntryPage() {
   const [tcsCode, setTcsCode] = useState('');
   const [tdsCode, setTdsCode] = useState('');
   const [tdsPct, setTdsPct] = useState('');
+  const [roundOff, setRoundOff] = useState(''); // ROF_AMT, the typed row 4 (TR_SALE.cs:15051)
   const [cardAc, setCardAc] = useState('');
   const [bankAc, setBankAc] = useState('');
   const [chequeNo, setChequeNo] = useState('');
@@ -440,14 +440,14 @@ export default function SalesEntryPage() {
   const oldGoldVal = r2(ogRows.reduce((s, o) => s + ogAmt(o), 0));
   const hmAmt = n(hmCharge);
   const tdsOn = companyFlag(companySettings, 'SL_TDS_TAX', 'N');
-  const bill = saleBillTotal(
+  const rofOn = !tdsOn && !headerExtra.rateUnfix; // row 4 is TDS under SL_TDS_TAX; an unfixed sale refuses it
+  const { total: totalPrev, ...bill } = saleBillTotal(
     itemTotals,
     hmAmt,
-    [tdsPct, taxRatePct, tcsPct].map(n),
+    [tdsPct, taxRatePct, tcsPct, rofOn ? roundOff : ''].map(n),
     tdsOn,
     roundingPolicy.roundBillTotal,
   );
-  const totalPrev = bill.total;
   const kasarAmt = n(kasar);
   const paid = r2(n(cashAmt) + n(cardAmt) + n(upiAmt) + n(chequeAmt) + oldGoldVal);
   const balanceDue = r2(totalPrev - paid - kasarAmt - n(ordAmt) - n(currentAdjustmentAmount)); // TR_SALE.cs:19390
@@ -471,6 +471,7 @@ export default function SalesEntryPage() {
     setChequeAmt('');
     setHmCharge('');
     setTcsPct('');
+    setRoundOff('');
     setKasar('');
     setOrdNo('');
     setOrdAmt('');
@@ -563,6 +564,7 @@ export default function SalesEntryPage() {
       setTcsCode(String(view.tcsCode ?? ''));
       setTdsCode(String(view.tdsCode ?? ''));
       setTdsPct(str(view.tdsPct));
+      setRoundOff(str(view.roundOffAmount));
       setCardAc(String(view.cardAc ?? ''));
       setBankAc(String(view.bankAc ?? ''));
       setChequeNo(String(view.chequeNo ?? ''));
@@ -677,6 +679,7 @@ export default function SalesEntryPage() {
         tcsCode: tcsCode || undefined,
         tdsCode: tdsCode || undefined,
         tdsPct: tdsPct ? n(tdsPct) : undefined,
+        roundOffAmount: rofOn && n(roundOff) !== 0 ? n(roundOff) : undefined,
         hallmarkAmount: hmAmt > 0 ? hmAmt : undefined,
         tcsPct: n(tcsPct) > 0 ? n(tcsPct) : undefined,
         kasarAmount: kasarAmt > 0 ? kasarAmt : undefined,
@@ -1006,6 +1009,7 @@ export default function SalesEntryPage() {
                 ['TCS Code', tcsCode, setTcsCode],
                 ['TDS Code', tdsCode, setTdsCode],
                 ['TDS %', tdsPct, setTdsPct],
+                ...(rofOn ? [['Round Off', roundOff, setRoundOff]] : []),
                 ['Cheque Bank A/c', bankAc, setBankAc],
                 ['Card A/c', cardAc, setCardAc],
                 ['Cheque No', chequeNo, setChequeNo],

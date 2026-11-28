@@ -160,20 +160,20 @@ d('fresh company: seeded masters name accounts the company has', () => {
       [{ itCode, pcs: 1, grossWt: 10, netWt: 10, touch: 91.6, rate }] as any,
     );
 
-  it('a sale of a seeded gold ornament posts only to accounts in AC_MAST, whole-rupee with a round-off leg', async () => {
+  it('a sale of a seeded gold ornament posts only to accounts in AC_MAST, whole-rupee without a round-off leg', async () => {
     // CO_SET.ITM_RATE_ROF 0 rounds the rate 6123.45 to 6123 (MS_YEAR.cs:1568): line 10 g x 6,123 = 61,230.00; GST 3% =
-    // 1,836.90; total 63,066.90; TOT_AMT_ROF 0 makes the bill 63,067 and the web's ROUNDOFF leg carries the 0.10
-    // (web/docs/FIRST-REAL-COMPARISON.md section 3.4: the desktop does not write that leg).
+    // 1,836.90; total 63,066.90; TOT_AMT_ROF 0 makes the bill 63,067. No round-off was typed, so the 0.10 is posted
+    // nowhere, as on the desktop (owner decision 1B, web/docs/FIRST-REAL-COMPARISON.md section 3.4).
     const sold = await sell('ORG', 6123.45);
     const legs = await legsOf('SL', sold.vchNo);
     expect(await missingAccounts(legs)).toEqual([]);
     const byAc = Object.fromEntries(legs.map((l) => [l.ac, l]));
     expect(byAc.SALES).toMatchObject({ cr: 61230, dr: 0 });
     expect(byAc.GST).toMatchObject({ cr: 1836.9, dr: 0 });
-    expect(byAc.ROUNDOFF).toMatchObject({ cr: 0.1, dr: 0 });
+    expect(byAc.ROUNDOFF).toBeUndefined();
     // The party leg carries the whole-rupee total.
     expect(legs.find((l) => l.ac === 'FCUST' && l.dr > 0)).toMatchObject({ dr: 63067 });
-    expect(legs.reduce((sum, l) => sum + l.dr - l.cr, 0)).toBeCloseTo(0, 2);
+    expect(legs.reduce((sum, l) => sum + l.dr - l.cr, 0)).toBeCloseTo(0.1, 2);
   });
 
   it('a sale of the old-gold group posts to the OG account', async () => {

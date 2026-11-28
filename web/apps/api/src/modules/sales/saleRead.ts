@@ -4,6 +4,7 @@ import { withTxBudget } from '../shared/txBudget.js';
 import { voucherVersionTx, versionKeyOf } from '../vouchers/version.js';
 import { formatVoucherNo, type VoucherScope } from '../vouchers/numbering.js';
 import { readSaleResidualsTx, stonesByLine } from './saleResiduals.js';
+import { hasWebRoundOffLegTx } from '../shared/legacyRoundOff.js';
 import { readOrderAdvanceNotesTx } from './orderAdvanceConfirm.js';
 import { SALE_WRITE_TABLES, SaleValidationError, completeSaleScope, saleParams } from './sales.js';
 
@@ -121,6 +122,8 @@ export async function getSale(
       tdsCode: text(h.TDS_CODE),
       tdsPct: num(h.TDS_PRC),
       tdsAmount: num(h.TDS_AMT),
+      // A computed ROF_AMT of the old web (its '99' leg) is not a typed round-off (legacyRoundOff.ts).
+      roundOffAmount: (await hasWebRoundOffLegTx(tx, params)) ? 0 : num(h.ROF_AMT),
       kasarAmount: num(h.KASAR_AMT),
       oldGoldAmount: num(h.OLD_GL_AMT),
       billOutstanding: num(h.BILL_OS),
