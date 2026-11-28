@@ -80,7 +80,9 @@ const ACCOUNT_LITERALS = [
  */
 const REMAINING: Readonly<Record<string, number>> = {
   'modules/sales/sales.ts': 6,
-  'modules/purchase/purchase.ts': 3,
+  'modules/purchase/purchase.ts': 1,
+  // The hallmark charge default moved with the posting assembly (it was 2 of purchase.ts's 3).
+  'modules/purchase/purchasePosting.ts': 2,
   'modules/dhrn/dhrn.ts': 1,
   'modules/dhrn/dhrnInterest.ts': 1,
   'modules/finance/billToBill.ts': 5,

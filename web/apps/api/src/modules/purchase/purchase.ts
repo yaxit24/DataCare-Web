@@ -1,3 +1,9 @@
+import { purchasePostInput } from './purchasePosting.js';
+export {
+  buildPurchaseLedger,
+  buildExpenseLegs,
+  buildPurchaseFineLedger,
+} from './purchasePosting.js';
 import { type StoneSubDetailInput } from '../shared/stoneSubDetail.js';
 import { DESKTOP_MESSAGES } from '../shared/desktopMessages.js';
 import {
@@ -38,12 +44,9 @@ import { assertVoucherVersionTx, versionKeyOf, voucherVersionTx } from '../vouch
 import {
   postVoucherTx,
   reverseVoucherTx,
-  assertVoucherBalanced,
   assertPeriodOpen,
   insertRowTx,
-  type LedgerLine,
 } from '../posting/posting.js';
-import { buildLineLegs, lineLegKey, type LineLeg } from '../posting/lineLegs.js';
 import {
   deleteVoucherWriteSetTx,
   nextHiddenVoucherNoTx,
@@ -53,13 +56,11 @@ import {
 import { payoutLegs, receiptLegs } from '../finance/tender.js';
 import { fineFor } from '../shared/finePolicy.js';
 import { resolveTaxPolicyTx } from '../shared/taxPolicy.js';
-import { gstTaxRows } from '../shared/taxDataRows.js';
 import { resolveBookAccountTx, resolveBookPolicyTx } from '../shared/bookPolicy.js';
 import { assertCounterCodes, resolveCounterStockPolicyTx } from '../shared/counterStockPolicy.js';
 import { resolveRoundingPolicyTx } from '../shared/roundingPolicyLoader.js';
 import type { RoundingPolicy } from '../shared/roundingPolicy.js';
-import { rojmelMetalFor } from '../shared/rojmel.js';
-import { buildPurchaseRojmel, purchaseRojmelOptionsTx } from '../shared/purchaseRojmel.js';
+import { purchaseRojmelOptionsTx } from '../shared/purchaseRojmel.js';
 import {
   desktopLabourTypeFor,
   effectiveLabourRate,
@@ -84,12 +85,8 @@ import {
   type LabourType,
   type BillTotals,
 } from '@datacare/core';
-export class PurchaseValidationError extends Error {
-  constructor(msg: string) {
-    super(msg);
-    this.name = 'PurchaseValidationError';
-  }
-}
+import { PurchaseValidationError } from './purchaseValidation.js';
+export { PurchaseValidationError } from './purchaseValidation.js';
 
 export interface PurchaseLineInput extends HallmarkLineInput {
   /** WP-28: the persisted SR_NO this line was reopened from (keeps its unmodelled columns and IT_TYPE). */
@@ -319,235 +316,6 @@ export function computeLine(
   );
   return { fine, metal: amounts.item, labour: amounts.labour, net: amounts.net };
 }
-
-/**
- * Build the balanced double-entry AC_DATA lines for a purchase (pure). Ledger sense is the MIRROR of
- * sales: credit supplier (total), debit purchase (taxable) + input GST (tax) + round-off (Req 11.2/13.1).
- */
-export function buildPurchaseLedger(p: {
-  key: VoucherKey;
-  acCode: string;
-  purchaseAc: string;
-  taxAc: string;
-  roundAc: string;
-  controlAc?: string;
-  vchType?: string;
-  totals: Pick<BillTotals, 'total' | 'taxable' | 'tax' | 'roundOff'>;
-  expenseLegs?: LineLeg[];
-  tcs?: number;
-  tcsAc?: string;
-  /** Non-A books with PURC_WITH_LBR='N': labour/other to slot 4 (Ac_Ledr.cs:419-421). */
-  labourLeg?: { ac: string; amount: number };
-}): LedgerLine[] {
-  const base = { ...p.key, VCH_TYPE: p.vchType ?? 'PURC' };
-  const lines: LedgerLine[] = [];
-  if (p.totals.total + (p.tcs ?? 0) !== 0)
-    lines.push({
-      ...base,
-      AC_CODE: p.acCode,
-      legType: PURC_LEG.party,
-      LD_CODE: p.controlAc ?? p.purchaseAc,
-      DR_AMT: 0,
-      CR_AMT: round2(p.totals.total + (p.tcs ?? 0)),
-      SIGN: 'C',
-    });
-  const expense =
-    p.expenseLegs && p.expenseLegs.length
-      ? p.expenseLegs
-      : [{ ac: p.purchaseAc, amount: p.totals.taxable }];
-  for (const leg of expense)
-    if (leg.amount !== 0)
-      lines.push({
-        ...base,
-        ...lineLegKey(leg, PURC_LEG.purchase), // G176: per-line key on a multi-account bill
-        AC_CODE: leg.ac,
-        LD_CODE: p.acCode,
-        DR_AMT: leg.amount,
-        CR_AMT: 0,
-        SIGN: 'D',
-      });
-  if (p.labourLeg && p.labourLeg.amount !== 0)
-    lines.push({
-      ...base,
-      AC_CODE: p.labourLeg.ac,
-      LD_CODE: p.acCode,
-      DR_AMT: p.labourLeg.amount,
-      CR_AMT: 0,
-      SIGN: 'D',
-    });
-  if (p.totals.tax !== 0)
-    lines.push({
-      ...base,
-      legType: PURC_LEG.tax,
-      AC_CODE: p.taxAc,
-      LD_CODE: p.acCode,
-      DR_AMT: p.totals.tax,
-      CR_AMT: 0,
-      SIGN: 'D',
-    });
-  // Ac_Ledr.cs:434: parent TAX_MAST account, debit TCS, supplier as LD_CODE.
-  if (p.tcs && !p.tcsAc) throw new PurchaseValidationError('TCS posting account is required');
-  if (p.tcs)
-    lines.push({
-      ...base,
-      legType: PURC_LEG.tcs,
-      AC_CODE: p.tcsAc!,
-      LD_CODE: p.acCode,
-      DR_AMT: p.tcs,
-      CR_AMT: 0,
-      SIGN: 'D',
-    });
-  if (p.totals.roundOff > 0)
-    lines.push({
-      ...base,
-      legType: PURC_LEG.roundOff,
-      AC_CODE: p.roundAc,
-      LD_CODE: p.acCode,
-      DR_AMT: p.totals.roundOff,
-      CR_AMT: 0,
-      SIGN: 'D',
-    });
-  else if (p.totals.roundOff < 0)
-    lines.push({
-      ...base,
-      legType: PURC_LEG.roundOff,
-      AC_CODE: p.roundAc,
-      LD_CODE: p.acCode,
-      DR_AMT: 0,
-      CR_AMT: Math.abs(p.totals.roundOff),
-      SIGN: 'C',
-    });
-  return lines;
-}
-
-/** Allocate the bill taxable across distinct per-group expense accounts, proportional to each group's
- *  line-net share; the last account absorbs the rounding remainder so Σ legs == taxable exactly. */
-export function buildExpenseLegs(
-  items: { net: number; ac: string }[],
-  taxable: number,
-  lineNetTotal: number,
-): { ac: string; amount: number }[] {
-  const R2 = (x: number): number => Math.round((x + 1e-9) * 100) / 100;
-  const byAc = new Map<string, number>();
-  for (const it of items) byAc.set(it.ac, R2((byAc.get(it.ac) ?? 0) + it.net));
-  const acs = [...byAc.keys()];
-  // Every item carries a resolved expense account (writer resolves purchaseAc fail-closed, per-group
-  // PURC_AC falls back to it), so acs is never empty here; guard the invariant rather than a literal.
-  if (acs.length <= 1) {
-    const only = acs[0];
-    if (!only) throw new PurchaseValidationError('purchase expense account could not be resolved');
-    return [{ ac: only, amount: R2(taxable) }];
-  }
-  const legs: { ac: string; amount: number }[] = [];
-  let allocated = 0;
-  for (let i = 0; i < acs.length; i++) {
-    const ac = acs[i] as string;
-    const amount =
-      i === acs.length - 1
-        ? R2(taxable - allocated)
-        : lineNetTotal > 0
-          ? R2((taxable * (byAc.get(ac) as number)) / lineNetTotal)
-          : 0;
-    if (i < acs.length - 1) allocated = R2(allocated + amount);
-    legs.push({ ac, amount });
-  }
-  return legs;
-}
-
-export function buildPurchaseFineLedger(p: {
-  key: VoucherKey;
-  acCode: string;
-  purchaseAc: string;
-  vchType?: string;
-  rateUnfix?: boolean;
-  purcAcByItem?: Record<string, string>;
-  lines: Array<{
-    itCode: string;
-    metal?: 'G' | 'S';
-    fine: number;
-    metalAmount: number;
-    otherFineWt?: number;
-    silverFineWt?: number;
-  }>;
-}): LedgerLine[] {
-  if (p.rateUnfix) return [];
-  // ONE FINE LEG PER LINE, not one per metal/account combination.
-  //
-  // Measured on book 035: 42 real type-21 legs across 11 accounts, and voucher 00004 alone has THREE - lines 1,
-  // 2 and 3 carrying 12.712, 11.950 and 3.950, all gold and all against purchase account 00008. Aggregating by
-  // `${metal}|${ldCode}` collapsed those into a single leg of 28.612.
-  //
-  // THE KEY IS A DIFFERENT LAYOUT FROM THE SAME BOOK'S MONEY LEGS. Money legs 01/03/06/16/17 are 23 characters
-  // with the leg type at 22-23; these fine legs are 33 with `<line><leg>` right-aligned in 12 - the cash books'
-  // shape. So one table of one book uses two layouts, chosen by leg type. Real keys:
-  //
-  //     [01002024-202503500004         121]  fine 12.712
-  //     [01002024-202503500004         221]  fine 11.950
-  //     [01002024-202503500004         321]  fine  3.950
-  //
-  // `legKeySuffix` carries it per row, which is why that mechanism is per-LINE rather than per-family.
-  const suffix = (line: number): string =>
-    `${line}${String(FINE_LEG).padStart(2, '0')}`.padStart(12, ' ');
-  const out: LedgerLine[] = [];
-  p.lines.forEach((line, idx) => {
-    if (round2(line.metalAmount) !== 0) return;
-    const metal = line.metal ?? 'G';
-    const ldCode = metal === 'S' ? '00009' : (p.purcAcByItem?.[line.itCode.trim()] ?? p.purchaseAc);
-    const fine =
-      metal === 'S' ? round3(num(line.silverFineWt)) : round3(line.fine + num(line.otherFineWt));
-    if (fine === 0) return;
-    out.push({
-      ...p.key,
-      legKeySuffix: suffix(idx + 1),
-      VCH_TYPE: p.vchType ?? 'PURC',
-      AC_CODE: p.acCode,
-      LD_CODE: ldCode,
-      IT_TYPE: metal,
-      SIGN: '+',
-      FINE_WT: fine,
-      FINE_RATE: 0,
-      DR_AMT: 0,
-      CR_AMT: 0,
-    });
-  });
-  return out;
-}
-
-/**
- * The purchase FINE leg's type code, measured on books 035 and 036: type 21, on all 42 real legs.
- *
- * The money legs use different codes entirely - 01 party Cr, 03 purchase Dr, 06 tax Dr, 16/17 the settlement
- * pair, 18/19 the kasar pair - and they are 23-character keys while these are 33.
- */
-const FINE_LEG = 21;
-
-/**
- * Purchase leg type codes, measured across books 035 and 036.
- *
- *   01 party      Cr   (17)   the bill - the sale's shape with the directions inverted
- *   03 purchase   Dr   (17)   00008 gold / 00009 silver
- *   06 tax 00085  Dr    (2)
- *   16 party Dr / 17 cash Cr   (5)   paying the supplier
- *   18 party Dr / 19 kasar 00042 Cr  (2)   book 036 only
- *   21 fine legs       (42)   weight only, 33-character keys - see buildPurchaseFineLedger
- *
- * NOTE THE TAX CODE. Purchase uses 06 where the SALE family uses 04 for the same role. So the codes are not a
- * universal role map even for identical roles - they are per book, which is the third independent confirmation
- * of that after the cash/bank split and the receipt/payment split.
- */
-const PURC_LEG = {
-  party: 1,
-  purchase: 3,
-  tax: 6,
-  /** TCS (Ac_Ledr.cs:434). The keys here follow the build that wrote the 2024-25 data, which numbers TCS 07. */
-  tcs: 7,
-  settleParty: 16,
-  settleCash: 17,
-  kasarParty: 18,
-  kasar: 19,
-  /** The typed round-off PR_DATA.ROF_AMT on slot 3 (Ac_Ledr.cs:460); nothing posts the bill total's own rounding. */
-  roundOff: 26,
-} as const;
 
 function keyOf(s: VoucherScope, vchNo: number | string): VoucherKey {
   return {
@@ -855,9 +623,6 @@ async function writePurchaseTx(
   const hmTaxApplies = behavior.purchaseWithHallmarkTax;
   const hmTaxPct = hmTaxApplies ? (input.hmTaxPct ?? taxPct) : 0;
   const hmTax = roundingPolicy.roundTaxAmount((hmAmt * hmTaxPct) / 100);
-  const hmCgst = interState ? 0 : roundingPolicy.roundTaxAmount(hmTax / 2);
-  const hmSgst = interState ? 0 : roundingPolicy.roundTaxAmount(hmTax - hmCgst);
-  const hmIgst = interState ? hmTax : 0;
   const typedRoundOff = behavior.purchaseTdsEnabled ? 0 : round2(num(input.roundOffAmount));
   const withTcs = purchaseTcsTotals(totals, num(input.tcsPct), roundingPolicy, typedRoundOff);
   const { tcs, billWithTcs } = withTcs;
@@ -980,17 +745,6 @@ async function writePurchaseTx(
     ),
   );
   const labourOtherTotal = round2(splits.reduce((sum, split) => sum + split.labourOther, 0));
-  const primaryTotal = splits.reduce((sum, split) => sum + split.primary, 0);
-  const expenseLegs = linePathBook
-    ? buildLineLegs(
-        computed.map((c, index) => ({
-          net: splits[index]?.primary ?? 0,
-          ac: purcAcByItem[String(c.in.itCode ?? '').trim()] ?? purchaseAc,
-        })),
-        round2(totals.taxable - labourOtherTotal),
-        primaryTotal,
-      )
-    : [{ ac: controlAc, amount: round2(totals.taxable - labourOtherTotal) }];
   const labourLeg =
     !isPurchaseQuotation && labourOtherTotal !== 0
       ? { ac: await resolveBookAccountTx(tx, input.scope, bookPolicy, 4), amount: labourOtherTotal }
@@ -1418,52 +1172,7 @@ async function writePurchaseTx(
     VCH_DESC: text(input.vchDesc) || null,
   });
 
-  const ledger = buildPurchaseLedger({
-    key,
-    acCode: input.acCode,
-    purchaseAc,
-    taxAc,
-    roundAc,
-    controlAc,
-    vchType: bookPolicy.vchType,
-    totals: ledgerTotals,
-    expenseLegs,
-    tcs,
-    tcsAc,
-    labourLeg,
-  });
-  if (hmAmt > 0) {
-    const hb = { ...key, VCH_TYPE: bookPolicy.vchType };
-    ledger.push({
-      ...hb,
-      AC_CODE: input.hmChargeAc ?? 'HMCHRG',
-      LD_CODE: input.acCode,
-      DR_AMT: hmAmt,
-      CR_AMT: 0,
-      SIGN: 'D',
-    }); // Dr hallmark expense
-    if (hmTax > 0)
-      ledger.push({
-        ...hb,
-        AC_CODE: taxAc,
-        LD_CODE: input.acCode,
-        DR_AMT: hmTax,
-        CR_AMT: 0,
-        SIGN: 'D',
-      }); // Dr input GST on HM
-    ledger.push({
-      ...hb,
-      AC_CODE: input.acCode,
-      LD_CODE: input.hmChargeAc ?? 'HMCHRG',
-      DR_AMT: 0,
-      CR_AMT: round2(hmAmt + hmTax),
-      SIGN: 'C',
-    }); // Cr supplier (HM owed)
-  }
-  assertVoucherBalanced(ledger, withTcs.residue); // money legs only — metal legs (DR=CR=0) are appended below and never unbalance it
-
-  // Settlement/tender (F2 payoutLegs): pay the supplier now → Dr supplier / Cr cash|bank + kasar (discount received).
-  // No tender ⇒ no legs ⇒ full payable (unchanged). Self-balanced pairs keep the ledger balanced.
+  // Preserve the tender helper's component-by-component rounding for stored BILL_OS.
   const tender = isPurchaseQuotation
     ? {
         cashAmt: round2(num(input.cashAmt)),
@@ -1471,7 +1180,7 @@ async function writePurchaseTx(
           num(input.cashAmt) + num(input.chequeAmt) + num(input.cardAmt) + num(input.upiAmt),
         ),
         kasar: round2(num(input.kasar)),
-        legs: [] as LedgerLine[],
+        legs: [],
       }
     : payoutLegs(
         { ...key, VCH_TYPE: bookPolicy.vchType },
@@ -1488,84 +1197,9 @@ async function writePurchaseTx(
           // Measured on books 035/036: the settlement pair is 16 party Dr / 17 cash Cr on 5 real vouchers. The
           // bank and kasar pairs are NOT passed - book 036's kasar pair is 18/19, but no bank settlement appears
           // in this dataset, so those stay on the reserved-band fallback until measured.
-          legs: { cashParty: PURC_LEG.settleParty, cash: PURC_LEG.settleCash },
+          legs: { cashParty: 16, cash: 17 },
         },
       );
-  if (!isPurchaseQuotation) ledger.push(...tender.legs);
-
-  if (!isPurchaseQuotation) {
-    ledger.push(
-      ...buildPurchaseFineLedger({
-        key,
-        acCode: input.acCode,
-        purchaseAc,
-        vchType: bookPolicy.vchType,
-        rateUnfix: input.rateUnfix,
-        purcAcByItem,
-        lines: computed.map((c, idx) => ({
-          itCode: c.in.itCode,
-          metal: lineItemType(idx),
-          fine: c.calc.fine,
-          metalAmount: c.calc.metal,
-          otherFineWt: c.in.otherFineWt,
-          silverFineWt: c.in.silverFineWt,
-        })),
-      }),
-    );
-  }
-
-  // Satellite tables the desktop TR_PURC also writes: tax register (input) + bill outstanding (payable).
-  const r2 = (x: number): number => Math.round((x + 1e-9) * 100) / 100;
-  const taxBase = {
-    ...key,
-    TRAN_TYPE: 'P',
-    BOOK_NAME: bookPolicy.bookName,
-    VCH_DATE: header.VCH_DATE,
-    AC_CODE: input.acCode,
-    PARTY_NAME: supplierName || null,
-    NET_AMT: totals.taxable,
-    DISC_AMT: totals.discount,
-    TOT_AMT: billWithTcs, // Ac_Tax.cs:121-123: PR_DATA.TOT_AMT less HM_AMT and HM_TAX_AMT
-    TAX_SIGN: '-',
-    TAX_CODE: taxPolicy.taxCode,
-  };
-  const taxRows: Record<string, unknown>[] =
-    totals.tax !== 0
-      ? gstTaxRows(taxBase, taxPolicy, {
-          interState,
-          ratePct: taxPct,
-          igst: totals.igst,
-          sgst: totals.sgst,
-          cgst: totals.cgst,
-        })
-      : [];
-  if (hmAmt > 0 && hmTax > 0) {
-    const hmB = { ...taxBase, NET_AMT: hmAmt };
-    if (interState)
-      taxRows.push({
-        ...hmB,
-        SR_NO: taxRows.length + 1,
-        TAX_TYPE: taxPolicy.taxGroup,
-        TAX_PRC: hmTaxPct,
-        TAX_AMT: hmIgst,
-      });
-    else {
-      taxRows.push({
-        ...hmB,
-        SR_NO: taxRows.length + 1,
-        TAX_TYPE: taxPolicy.taxGroup,
-        TAX_PRC: r2(hmTaxPct / 2),
-        TAX_AMT: hmCgst,
-      });
-      taxRows.push({
-        ...hmB,
-        SR_NO: taxRows.length + 1,
-        TAX_TYPE: taxPolicy.taxGroup,
-        TAX_PRC: r2(hmTaxPct / 2),
-        TAX_AMT: hmSgst,
-      });
-    }
-  }
   Object.assign(header, {
     CASH_AMT: tender.cashAmt,
     CHQ_AMT: round2(num(input.chequeAmt)),
@@ -1702,79 +1336,41 @@ async function writePurchaseTx(
     taxAccount: taxAc,
     tcsAccount: tcsAc,
   });
-  const rojmelRows = buildPurchaseRojmel(
+  const posting = purchasePostInput(
+    header,
+    detl.map((row, idx) => ({
+      ...row,
+      // Preserve the existing day-book projection: generated/effective source rates are not its input.
+      LBR_RATE: num(computed[idx]?.in.labourRate),
+    })),
     {
-      scope: { coCode: input.scope.coCode, lcCode: input.scope.lcCode, coYear: key.CO_YEAR },
-      key,
-      coBook: key.CO_BOOK,
-      vchNo: key.VCH_NO,
-      vchDate,
       vchType: bookPolicy.vchType,
       bookName: bookPolicy.bookName,
-      partyName: supplierName || input.acName || '', // AC_MAST name, so a reopen cannot change it (WP-28)
-      partyCode: input.acCode,
-      voucherDescription: text(header.VCH_DESC),
-      partyMasterName: supplierName,
+      purchaseAc,
+      controlAc,
+      taxAc,
+      tcsAc,
+      roundAc,
+      cashAc,
+      kasarAc,
+      hmChargeAc: input.hmChargeAc,
+      partyName: supplierName || input.acName || '',
+      labourAc: labourLeg?.ac,
+      linePathBook,
+      withLabour: behavior.purchaseWithLabour,
+      purcAcByItem,
+      itemNameByItem,
+      taxPolicy,
+      rojmelOptions,
+      roundBillTotal: roundingPolicy.roundBillTotal,
+      roundTaxAmount: roundingPolicy.roundTaxAmount,
+      billTotalDecimals: roundingPolicy.billTotalDecimals,
+      upiAmt: input.upiAmt,
     },
-    computed.map((c, idx) => {
-      const item = String(c.in.itCode ?? '').trim();
-      return {
-        lineNo: idx + 1,
-        revenueAc: purcAcByItem[item] ?? purchaseAc,
-        amount: c.calc.net,
-        // A METAL ROJMEL ROW CARRIES ITS ITEM; A MONEY ROW NEVER DOES.
-        //
-        // Measured on the real Rojmel across the sale and purchase books: every IT_TYPE 'G'/'S' row has
-        // IT_CODE set (240 rows, 0 blank) and every IT_TYPE 'A' money row has it blank (466 rows, 0 set). The
-        // real purchase line rows carry '999' and 'ORG'; the web was writing them blank because this mapping
-        // never passed the field - the sale caller does, so the builder itself was correct.
-        itemCode: item,
-        // The builder's field is `itemName` (it writes IT_DESC from it); `itemDesc` silently did nothing,
-        // since the line type's optional fields make a typo a no-op rather than an error.
-        itemName: itemNameByItem[item] ?? '',
-        metal: rojmelMetalFor(lineItemType(idx)),
-        pcs: num(c.in.pcs),
-        grossWt: num(c.in.grossWt),
-        netWt: num(c.in.netWt),
-        /**
-         * Touch, wastage and fine, which the metal day-book row exists to carry.
-         *
-         * The mapping stopped at gross and net, so the unpriced-metal row was written with `ITM_TOUCH`,
-         * `ITM_WEST` and `ITM_FINE` all zero — the row's whole purpose is the fine weight it books against the
-         * party, and it was booking nothing. Measured on the captured rows: `ITM_FINE` 7.917, `ITM_TOUCH` 92.000,
-         * `ITM_WEST` 3.500 where the web wrote 0.
-         */
-        touch: num(c.in.touch),
-        wastage: num(c.in.westPct),
-        fine: c.calc.fine,
-        otherFine: num(detl[idx]?.ITM_OTH_FINE),
-        silverFine: num(detl[idx]?.SILVER_FINE),
-        rate: num(c.in.rate),
-        itemAmount: c.calc.metal,
-        labourRate: num(c.in.labourRate),
-        labourAmount: c.calc.labour,
-        otherAmount: num(c.in.otherAmount),
-        netAmount: c.calc.net,
-      };
-    }),
-    header,
-    rojmelOptions,
   );
 
-  // LDR_NAME carries PR_DATA.AC_NAME on the party's bill leg (Ac_Ledr.cs:377, leg 01) and on the cash account's
-  // credit when the supplier is paid in cash (Ac_Ledr.cs:454); every other purchase leg writes ''.
-  for (const line of ledger) {
-    if (line.legType === PURC_LEG.party || line.legType === PURC_LEG.settleCash) {
-      line.LDR_NAME = supplierName;
-    }
-  }
-
   await postVoucherTx(tx, tenantId, {
-    ledger: { table: 'AC_DATA', lines: ledger },
-    bookName: bookPolicy.bookName,
-    // Lets the poster stamp PARTY_AC_CODE on the supplier's own leg only, which is the desktop's rule.
-    partyAc: input.acCode,
-    desktopRoundingResidue: withTcs.residue,
+    ...posting,
     writes: [
       { table: 'PR_DATA', rows: [header] },
       { table: 'PR_DETL', rows: detl },
@@ -1782,12 +1378,11 @@ async function writePurchaseTx(
       ...(barDetl.length ? [{ table: 'BAR_DETL', rows: barDetl }] : []),
       ...(barIdtl.length ? [{ table: 'BAR_IDTL', rows: barIdtl }] : []),
       ...(mainStock.length ? [{ table: 'MAIN_STOCK', rows: mainStock }] : []),
-      ...(taxRows.length ? [{ table: 'TAX_DATA', rows: taxRows }] : []),
       // No BILL_OS_DATA: the purchase save never writes it (TR_PURC.cs:12773-13688 BtnSave_Click, and none of
       // Purc_Ledr, Purc_Rojmel, Purc_GST or Purc_Stk). The supplier's unpaid amount is PR_DATA.BILL_OS; BILL_OS_DATA
       // rows belong to the settling voucher (TR_BILL_TO). The desktop year has none under any purchase book although
       // 37 of its 74 purchases carry a BILL_OS.
-      ...(rojmelRows.length ? [{ table: 'ROJ_MEL_DATA', rows: rojmelRows }] : []),
+      ...(posting.writes ?? []),
     ],
   });
 

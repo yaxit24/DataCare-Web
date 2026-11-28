@@ -1,3 +1,4 @@
+import { derivePurchasePostingsTx, PURCHASE_REFRESH_BOOKS } from '../purchase/purchaseRefresh.js';
 import { createHash } from 'node:crypto';
 import {
   assertPeriodOpen,
@@ -340,6 +341,8 @@ async function checkVoucherTx(
   // postings (e.g. the book's settings at save time) and are never written.
   const drift = candidates.filter((c) => c.unverifiedReason);
   candidates = candidates.filter((c) => !c.unverifiedReason);
+  if (!candidates.length)
+    return unverified(drift[0]?.unverifiedReason ?? 'No supported posting derivation');
   let expected = new Map<string, Record<string, unknown>[]>();
   let tables: TableCheck[] = [];
   const compareTx = async (candidate: PostInput) => {
@@ -376,7 +379,9 @@ async function checkVoucherTx(
     return unverified(
       `voucher ${vchNo}: its rows allow ${candidates.length} postings (what it does not record: layout or account) and the stored postings match none of them`,
     );
-  const expectedHash = sha([...expected.entries()].map(([t, rows]) => [t, rows]));
+  const configuration = candidates.map((c) => c.configurationFingerprint).filter(Boolean);
+  const expectedRows = [...expected.entries()].map(([t, rows]) => [t, rows]);
+  const expectedHash = sha(configuration.length ? { expectedRows, configuration } : expectedRows);
   // CLR_DATE is carried over by LEDR_KEY only (MS_UPDATE.cs:2379-2396); a cleared leg with no same-key successor
   // loses its mark, so the preview and the run record say so.
   const expectedKeys = new Set(
@@ -786,3 +791,18 @@ registerAccountRefreshFamily({
 });
 
 export { AccountRefreshDeriveError };
+
+registerAccountRefreshFamily({
+  id: 'purchase',
+  title: 'Purchase',
+  mainBook: PURCHASE_REFRESH_BOOKS,
+  bookFilter: `upper(btrim(coalesce(b."BOOK_INOUT",'')))='I'`,
+  headerTable: 'PR_DATA',
+  // Only these sources derive postings. No stock/tag/reference rows are read or locked.
+  versionTables: ['PR_DATA', 'PR_DETL', 'AC_DATA', 'ROJ_MEL_DATA', 'TAX_DATA'],
+  desktopSource:
+    'Ac_Ledr.cs:377-476 Purc_Ledr; Ac_Rojmel.cs:115-177 Purc_Rojmel; Ac_Tax.cs:111-132 Purc_GST',
+  derive: derivePurchasePostingsTx,
+  // Framework locks PR_DATA FOR UPDATE, the same lock as persistedPurchaseHeaderTx.
+  lock: async () => {},
+});
