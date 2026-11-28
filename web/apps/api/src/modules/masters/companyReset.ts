@@ -1,6 +1,10 @@
 import { createHash, randomUUID } from 'node:crypto';
 import { withTxBudget } from '../shared/txBudget.js';
-import { loadBackupSchemaManifest, orderedCompanyTables } from '../ops/backupManifest.js';
+import {
+  loadBackupSchemaManifest,
+  orderedCompanyTables,
+  type BackupTableManifest,
+} from '../ops/backupManifest.js';
 import { provisionCompanyTx } from '../ops/seedCompany.js';
 import { companyWriteLockKey } from '../shared/companyWriteScope.js';
 import {
@@ -208,15 +212,26 @@ async function census(
   tenantId: string,
   coCode: string,
   year: string | null,
-  tables: string[],
+  tables: BackupTableManifest[],
 ) {
   const rows: { t: string; d: number; k: number; x: string | null }[] = await tx.$queryRawUnsafe(
     tables
-      .map((table, i) => {
+      .map((manifest, i) => {
+        const table = manifest.name;
+        // Hash binary content before row text conversion; never expand image bytes into hex.
+        const rowText = manifest.columns.some((column) => column.dataType === 'bytea')
+          ? `ROW(${manifest.columns
+              .map((column) =>
+                column.dataType === 'bytea'
+                  ? `md5(z.${quote(column.name)})`
+                  : `z.${quote(column.name)}`,
+              )
+              .join(',')})::text`
+          : 'z::text';
         const remove = removes(table) ?? 'false';
         const reference = KEEP_REFERENCES.find(([name]) => name === table);
         const hashed = removes(table)
-          ? 'z::text'
+          ? rowText
           : reference
             ? `coalesce(${quote(reference[1])}::text, '')`
             : null;
@@ -229,7 +244,7 @@ async function census(
     tenantId,
     coCode,
     year,
-    ...tables,
+    ...tables.map((table) => table.name),
   );
   return rows.map((row) => ({ t: row.t, d: Number(row.d), k: Number(row.k), x: row.x ?? '' }));
 }
@@ -237,8 +252,9 @@ async function census(
 async function plan(tx: any, scope: CompanyResetScope, coCode: string) {
   const company = await companyRow(tx, scope.tenantId, coCode);
   const year = await keptYear(tx, scope, coCode);
-  const tables = await companyTables(tx);
-  const counted = await census(tx, scope.tenantId, coCode, year, tables);
+  const manifests = orderedCompanyTables(await loadBackupSchemaManifest(tx)).reverse();
+  const tables = manifests.map((table) => table.name);
+  const counted = await census(tx, scope.tenantId, coCode, year, manifests);
   const kept = counted
     .filter((row) => row.k > 0)
     .map((row) => ({ table: row.t, rows: row.k }))
@@ -286,7 +302,7 @@ export function previewCompanyReset(
   return withTxBudget(
     prisma,
     scope.tenantId,
-    'heavy',
+    'maintenance',
     async (tx: any) => (await plan(tx, scope, coCode)).summary,
   );
 }

@@ -41,6 +41,26 @@ describe('page-pinned API transport (controlled fetch; no real HTTP/browser acce
     expect(headersAt(index).get('x-session-context-epoch')).toBe(context.contextEpoch);
   };
 
+  it.each(['company-busy', 'transaction-timeout'])(
+    'shows the human %s message and retains its code',
+    async (code) => {
+      api.pinPageContext(A);
+      const body = { error: code, message: 'Try again in a moment.', retryable: true };
+      fetcher.mockImplementation(async () => response(body, 503));
+      for (const request of [() => api.get('/orders'), () => api.getDownload('/backup')]) {
+        const result = await settle(request());
+        expect(result.error).toBeInstanceOf(api.ApiError);
+        expect(result.error).toMatchObject({ message: body.message, status: 503, body });
+      }
+      for (const message of [undefined, '', '  ', 123]) {
+        expect(new api.ApiError(code, 503, { error: code, message }).message).toBe(code);
+      }
+      expect(
+        new api.ApiError('other-code', 400, { error: 'other-code', message: 'Other' }).message,
+      ).toBe('other-code');
+    },
+  );
+
   it('A01 GET/POST/PUT/DELETE carry page headers while complete business payload bytes stay unchanged', async () => {
     api.pinPageContext(A);
     fetcher.mockImplementation(async () => response({ ok: true }));

@@ -1,3 +1,5 @@
+import { companyWriteLockKey } from '../src/modules/shared/companyWriteScope.js';
+import { isTransactionTimeout } from '../src/modules/shared/txBudget.js';
 import { PrismaClient } from '@datacare/db';
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest';
 import {
@@ -223,6 +225,50 @@ databaseDescribe('WP-02A company logical backup/restore', () => {
     await owner?.$disconnect();
     await runtime?.$disconnect();
   });
+
+  it.each(['exclusive', 'shared'] as const)(
+    'restore waits boundedly for a %s company write lock without changing data',
+    async (mode) => {
+      await seedBase();
+      const document = await backupCompany(runtime, TENANT_A, COMPANY_A);
+      let release!: () => void;
+      const held = new Promise<void>((resolve) => (release = resolve));
+      let locked!: () => void;
+      const ready = new Promise<void>((resolve) => (locked = resolve));
+      const holder = owner.$transaction(
+        async (tx) => {
+          await tx.$executeRawUnsafe(
+            `SELECT ${mode === 'shared' ? 'pg_advisory_xact_lock_shared' : 'pg_advisory_xact_lock'}(hashtextextended($1, 0))`,
+            companyWriteLockKey(TENANT_A, COMPANY_A),
+          );
+          locked();
+          await held;
+        },
+        { timeout: 25_000 },
+      );
+      try {
+        await Promise.race([ready, holder]);
+        const started = Date.now();
+        const error = await restoreCompany(
+          runtime,
+          { tenantId: TENANT_A, companyCode: COMPANY_A },
+          document,
+        ).then(
+          () => null,
+          (error: unknown) => error,
+        );
+        expect(error).not.toBeNull();
+        expect(isTransactionTimeout(error)).toBe(true);
+        expect(Date.now() - started).toBeLessThan(20_000);
+      } finally {
+        release();
+        await holder;
+      }
+      expect(checksums(await backupCompany(runtime, TENANT_A, COMPANY_A))).toEqual(
+        checksums(document),
+      );
+    },
+  );
 
   it('classifies the complete live schema and seals a lossless v2 document', async () => {
     await seedBase();

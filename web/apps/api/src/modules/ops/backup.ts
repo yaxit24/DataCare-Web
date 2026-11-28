@@ -1,6 +1,7 @@
 import { Prisma, type PrismaClient } from '@datacare/db';
 import { withTenant, type Tx } from '@datacare/db';
 import { withTxBudget } from '../shared/txBudget.js';
+import { companyWriteLockKey } from '../shared/companyWriteScope.js';
 import { resolveSettingsBehaviorTx } from '../shared/settingsBehavior.js';
 import {
   COMPANY_BACKUP_KIND,
@@ -408,6 +409,14 @@ export async function restoreCompany(
     target.tenantId,
     async (tx) => {
       await tx.$executeRawUnsafe(`SET LOCAL TIME ZONE 'UTC'`);
+      // Same exclusive company key as reset, before restore's advisory and table locks.
+      // An in-flight writer/reset gets 10 seconds to finish, then the API returns a retryable 503.
+      await tx.$executeRawUnsafe(`SELECT set_config('lock_timeout', '10s', true)`);
+      await tx.$executeRawUnsafe(
+        'SELECT pg_advisory_xact_lock(hashtextextended($1, 0))',
+        companyWriteLockKey(target.tenantId, target.companyCode),
+      );
+      await tx.$executeRawUnsafe(`SELECT set_config('lock_timeout', '0', true)`);
       await lockRestoreTables(tx, target, prepared);
       const liveManifest = await loadBackupSchemaManifest(tx);
       if (

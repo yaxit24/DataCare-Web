@@ -363,6 +363,37 @@ type Cookie = string;
     expect(await runs()).toEqual([]);
   });
 
+  it('fingerprints binary content, including same-length changes, without changing row counts', async () => {
+    await exec(
+      `INSERT INTO "IMAGE_DATA"(tenant_id,"CO_CODE","LC_CODE","TAG_NO","TAG_IMAGE")
+       VALUES ($1,'02','01','RESET-HASH',decode('00ff','hex'))`,
+      tenantId,
+    );
+    try {
+      const fingerprint = await fingerprintOf('02');
+      await exec(
+        `UPDATE "IMAGE_DATA" SET "TAG_IMAGE"=decode('01ff','hex')
+         WHERE tenant_id=$1 AND "CO_CODE"='02' AND "TAG_NO"='RESET-HASH'`,
+        tenantId,
+      );
+      expect(await fingerprintOf('02')).not.toBe(fingerprint);
+      const response = await reset({ fingerprint });
+      expect(response.statusCode, response.body).toBe(409);
+      expect(response.json().code).toBe('stale-preview');
+      await exec(
+        `UPDATE "IMAGE_DATA" SET "TAG_IMAGE"=decode('00ff','hex')
+         WHERE tenant_id=$1 AND "CO_CODE"='02' AND "TAG_NO"='RESET-HASH'`,
+        tenantId,
+      );
+      expect(await fingerprintOf('02')).toBe(fingerprint);
+    } finally {
+      await exec(
+        `DELETE FROM "IMAGE_DATA" WHERE tenant_id=$1 AND "CO_CODE"='02' AND "TAG_NO"='RESET-HASH'`,
+        tenantId,
+      );
+    }
+  });
+
   it('holds off only the reset company: its writes are refused, other companies and tenants write on', async () => {
     // Hold company 02's write key exclusively, as a running reset of 02 does.
     let release!: () => void;
