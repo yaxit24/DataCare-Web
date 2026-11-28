@@ -4,7 +4,6 @@ import { DEFAULT_CASH_LIMIT, resolveSettingsBehaviorTx } from '../shared/setting
 import { requirePostingAccount, resolveBookSlotAccountTx } from '../shared/postingAccounts.js';
 import { formatVoucherNo, type VoucherScope } from '../vouchers/numbering.js';
 import {
-  assertBalanced,
   assertPeriodOpen,
   postVoucherTx,
   reverseVoucherTx,
@@ -28,12 +27,7 @@ import {
 import { CASH_BANK_CARD_UPI, tenantFeatureEnabledTx } from '../rbac/tenantFeatures.js';
 import { tenderThresholdDecision } from './tender.js';
 import { FinanceValidationError, gridLinesToSave } from './gridLines.js';
-import {
-  cashLedgerLegs,
-  cashRojmelRows,
-  type CashGridRow,
-  type CashLayout,
-} from './cashBankLegs.js';
+import { cashBankPostInput, type CashGridRow, type CashLayout } from './cashBankLegs.js';
 
 export { FinanceValidationError };
 
@@ -70,6 +64,26 @@ const FINANCE_BOOK_FAMILIES = {
   receipt: { 'CASH REC': 'cash', 'BANK REC': 'bank', RECEIPT: 'any' },
   payment: { 'CASH PAY': 'cash', 'BANK PAY': 'bank', PAYMENT: 'any' },
 } as const satisfies Record<CashDirection, Record<string, 'cash' | 'bank' | 'any'>>;
+
+/** Every MAIN_BOOK a TR_CASH voucher is written to (Data Refresh > Account scans these books). */
+export const CASH_BANK_MAIN_BOOKS = [
+  ...Object.keys(FINANCE_BOOK_FAMILIES.receipt),
+  ...Object.keys(FINANCE_BOOK_FAMILIES.payment),
+];
+
+/** The direction and layout a book's MAIN_BOOK fixes, or null outside the receipt/payment family. */
+export function cashBookFamily(
+  mainBook: string,
+): { direction: CashDirection; layout: 'cash' | 'bank' | 'any' } | null {
+  const upper = mainBook.trim().toUpperCase();
+  for (const direction of ['receipt', 'payment'] as const) {
+    const layout = (FINANCE_BOOK_FAMILIES[direction] as Record<string, 'cash' | 'bank' | 'any'>)[
+      upper
+    ];
+    if (layout) return { direction, layout };
+  }
+  return null;
+}
 
 type FinanceDirection = CashDirection;
 type FinanceBook = Awaited<ReturnType<typeof configuredBookTx>> & {
@@ -442,9 +456,7 @@ async function writeCashVoucherTx(w: CashWrite): Promise<FinanceResult & { total
     scope: { coCode: scope.coCode, lcCode: scope.lcCode, coYear: scope.coYear },
     accounts: { settle: settleAc, kasar: kasarAc, charges: chargesAc },
   };
-  const ledger = cashLedgerLegs(facts, rows);
-  assertBalanced(ledger);
-  const rojmelRows = cashRojmelRows(facts, rows);
+  const posting = cashBankPostInput(facts, rows);
   // REC_AC_CODE is not a TR_CASH column (TR_CASH.cs:3016-3062 never sets it; only Bill To Bill does,
   // TR_BILL_TO.cs:4789). The web keeps it ONLY when the settlement account is not the one the book names in slot 1,
   // which is the one thing a reopened voucher could not otherwise recover (a generic book's bank account, or an
@@ -485,17 +497,13 @@ async function writeCashVoucherTx(w: CashWrite): Promise<FinanceResult & { total
   });
   const writes: VoucherWrite[] = [{ table: 'CASH_DATA', rows: cashRows }];
   if (w.detail) writes.push(...(await w.detail({ key, settleAc })));
-  if (rojmelRows.length) writes.push({ table: 'ROJ_MEL_DATA', rows: rojmelRows });
+  writes.push(...(posting.writes ?? []));
   await insertHiddenIdentityTx(tx, scope, identity, book.name);
   // The lock date is the VOUCHER's, not the clearing date the bank legs may be dated on (TR_CASH.cs:2943).
   await assertPeriodOpen(tx, tenantId, {
     ledger: { table: 'AC_DATA', lines: [{ CO_CODE: scope.coCode, VCH_DATE: vchDate }] },
   });
-  await postVoucherTx(tx, tenantId, {
-    ledger: { table: 'AC_DATA', lines: ledger },
-    bookName: book.mainBook,
-    writes,
-  });
+  await postVoucherTx(tx, tenantId, { ...posting, writes });
   return { vchNo: identity.vchNo, total: totalAmt };
 }
 
@@ -686,7 +694,7 @@ export async function postPaymentLines(
 }
 
 /** Every table a TR_CASH voucher writes: rebuilt on an edit, removed on a delete (TR_CASH.cs:3217-3223). */
-const CASH_WRITE_TABLES = [
+export const CASH_WRITE_TABLES = [
   'CASH_DATA',
   'CARD_DATA',
   'UPI_DATA',
