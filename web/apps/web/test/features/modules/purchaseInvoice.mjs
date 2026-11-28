@@ -1137,6 +1137,56 @@ export const purchaseInvoice = {
       },
     ),
 
+    C(
+      'refusal.linked-sale-delete',
+      'T10',
+      'refusal',
+      'A purchase booked against a sale (PR_DATA SL_BILL_*, TR_PURC.cs:12647-12650) cannot be deleted from the purchase screen; the refusal names the sale to open (TR_PURC.cs:13443-13447, owner decision 2B)',
+      async (ctx) => {
+        const { page } = await ctx.session();
+        const vchNo = await createOne(ctx, page);
+        const link = (no, lc, yr, book) =>
+          ctx.owner.$executeRawUnsafe(
+            `UPDATE "PR_DATA" SET "SL_BILL_NO"=$3,"SL_BILL_LC"=$4,"SL_BILL_YRCD"=$5,"SL_BILL_DBCD"=$6
+              WHERE tenant_id=$1 AND "CO_BOOK"='${BOOK}' AND "VCH_NO"=$2`,
+            ctx.tenantId,
+            vchNo,
+            no,
+            lc,
+            yr,
+            book,
+          );
+        const [{ yr }] = await ctx.rows(
+          `SELECT "CO_YEAR" yr FROM "PR_DATA" WHERE tenant_id=$1 AND "CO_BOOK"='${BOOK}' AND "VCH_NO"=$2`,
+          vchNo,
+        );
+        await link('00077', '01', yr, 'SL');
+        try {
+          const before = await purchaseWriteSet(ctx, vchNo);
+          await page.getByRole('button', { name: 'New', exact: true }).click();
+          await loadVoucher(page, vchNo);
+          const [response] = await Promise.all([
+            page.waitForResponse(
+              (r) => r.request().method() === 'DELETE' && /\/api\/purchases\//.test(r.url()),
+            ),
+            page.getByRole('button', { name: 'Delete', exact: true }).first().click(),
+          ]);
+          assert.equal(response.status(), 400, await response.text());
+          const body = await response.json();
+          assert.equal(body.message, 'Linked with sale SL/00077; open that sale');
+          await page.getByText('Linked with sale SL/00077; open that sale').first().waitFor();
+          assert.deepEqual(await purchaseWriteSet(ctx, vchNo), before);
+          return {
+            observation: `delete of ${vchNo} answered 400 "${body.message}"; write set unchanged`,
+            expected: 'refused, naming the sale',
+            database: { header: before.header },
+          };
+        } finally {
+          await link(null, null, null, null);
+        }
+      },
+    ),
+
     C('print.bill', 'T16', 'output', 'TR_PURC print: the saved purchase bill', async (ctx) => {
       const { page } = await ctx.session();
       const vchNo = await createOne(ctx, page);

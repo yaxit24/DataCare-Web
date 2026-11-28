@@ -156,6 +156,9 @@ route('Utilities/Estimate Reset', [
 route('Utilities/Settings', [
   'GET /settings',
   'POST /settings',
+  // Linked old-gold purchase (owner decision 2B): the per-company Gold/Silver URD purchase book.
+  'GET /settings/urd-books',
+  'POST /settings/urd-books',
   'GET /integrations/device-settings',
   'POST /integrations/scale-reading',
   'GET /integrations/readiness',
@@ -1308,6 +1311,7 @@ const UPDATE_POST_ROUTES = new Set([
   'POST /utilities/data-export/mark-exported',
   'POST /utilities/data-export/reset-flags',
   'POST /settings',
+  'POST /settings/urd-books',
   'POST /accounts/:acCode/opening',
   'POST /labour-update',
   'POST /labour-slabs',

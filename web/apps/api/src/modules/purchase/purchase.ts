@@ -1,11 +1,20 @@
 import { type StoneSubDetailInput } from '../shared/stoneSubDetail.js';
 import { DESKTOP_MESSAGES } from '../shared/desktopMessages.js';
+import {
+  linkedPurchaseRefusal,
+  persistedSaleLink,
+  sameSaleLink,
+  SALE_LINK_COLUMNS,
+  withSaleLink,
+  type SaleLink,
+} from './linkedSale.js';
 import { withTxBudget } from '../shared/txBudget.js';
 import {
   assertPurchaseFamilyBook,
   carryUnownedColumns,
   hallmarkDetailColumns,
   hallmarkHeaderAmount,
+  hallmarkLineSignature,
   tagBandBarColumns,
   type HallmarkLineInput,
 } from './purchaseHallmark.js';
@@ -574,72 +583,6 @@ interface WritePurchaseContext {
   persistedLines?: Map<number, Record<string, unknown>>;
   /** This voucher's BAR_DETL rows read before the rewrite, by SR_NO (TR_PURC_HM keeps an unchanged tag's STK_DATE). */
   persistedTags?: Map<number, Record<string, unknown>>;
-}
-
-/**
- * TR_PURC_HM's "this line changed" test on save (TR_PURC_HM.cs:8185-8195), over the PR_DETL columns the reopen loads
- * into the grid (TR_PURC_HM.cs:7467-7586, TAG PURCHASE). The desktop compares a SUM of the weight/amount columns
- * (each read at its grid format, the sum at 0.000; TAG_NWT and TAG_FINE count twice; TAG_NWT falls back to ITM_NWT)
- * and a concatenation of the text columns (HM_ID4 twice, HM_ID3 not at all), exactly as written there.
- */
-function hallmarkLineSignature(row: Record<string, unknown>): string {
-  const v = (column: string, places: number) => Number(num(row[column]).toFixed(places));
-  const tagNwt = v('TAG_NWT', 3) || v('ITM_NWT', 3);
-  const tagFine = v('TAG_FINE', 2);
-  const sum =
-    // :8186 cols 9,10,12,21,41,45
-    v('BAG_WT', 3) +
-    num(row.ITM_PCS) +
-    v('ITM_GWT', 3) +
-    v('ITM_FINE', 3) +
-    tagNwt +
-    tagFine +
-    // :8187 cols 27,30,31,34,35
-    v('LBR_PRC', 2) +
-    v('LBR_AMT', 2) +
-    v('OTH_AMT', 2) +
-    v('TAG_COST', 2) +
-    v('ITM_MRP', 2) +
-    // :8188 cols 57,59,61,63,80
-    v('HM_ID_WT', 3) +
-    v('HM_ID2_WT', 3) +
-    v('HM_ID3_WT', 3) +
-    v('HM_ID4_WT', 3) +
-    num(row.OLD_SRNO) +
-    // :8189 cols 40,41,43,44,51
-    v('TAG_OTH_WT', 3) +
-    tagNwt +
-    v('TAG_TOUCH', 2) +
-    v('TAG_WEST_PRC', 2) +
-    v('TAG_OTH_AMT', 2) +
-    // :8190 cols 45,48,49,50,54
-    tagFine +
-    v('TAG_LBR_PRC', 2) +
-    v('TAG_LBR_RATE', 2) +
-    v('TAG_LBR_AMT', 2) +
-    v('TAG_MRP', 2) +
-    // :8191 cols 46,47,52,53
-    v('TAG_IT_RATE', 2) +
-    v('TAG_IT_AMT', 2) +
-    v('TAG_TOT_COST', 2) +
-    v('TAG_MARGIN_PRC', 2);
-  // :8193-8194 cols 1,4,5,8,3 then 55,58,62,62,86,56
-  const words = [
-    'IT_CODE',
-    'TBL_CODE',
-    'DESIGN_NO',
-    'ITM_SIZE',
-    'TAG_NO',
-    'HM_ID',
-    'HM_ID2',
-    'HM_ID4',
-    'HM_ID4',
-    'DESIGN_IMG_ID',
-    'KR_NAME',
-  ]
-    .map((column) => text(row[column]))
-    .join('');
-  return `${sum.toFixed(3)}|${words}`;
 }
 
 function completePurchaseScope(
@@ -1882,40 +1825,52 @@ export async function createPurchase(
   lines: PurchaseLineInput[],
 ): Promise<PurchaseResult> {
   completePurchaseScope(input.scope);
+  return withTxBudget(prisma, input.scope.tenantId, 'voucher', (tx: any) =>
+    createPurchaseTx(tx, input, lines),
+  );
+}
+
+/** The create path inside a caller's transaction (also the linked old-gold purchase, linkedPurchase.ts). */
+export async function createPurchaseTx(
+  tx: any,
+  input: PurchaseInput,
+  lines: PurchaseLineInput[],
+  linkedSale?: SaleLink,
+): Promise<PurchaseResult & { version: string }> {
+  completePurchaseScope(input.scope);
   // Fail with the field name rather than a DecimalError 500 (see requirePurchaseNumber).
   input.taxRatePct = requirePurchaseNumber(input.taxRatePct, 'taxRatePct');
   const scope = input.scope;
-  return withTxBudget(prisma, scope.tenantId, 'voucher', async (tx: any) => {
-    const mainBook = await purchaseMainBookTx(tx, scope);
-    assertPurchaseFamilyBook(mainBook, scope.coBook); // WP-28 D7: refused on the server, not only in the list
-    const isConsignmentPurchase = mainBook === 'CON PUR';
-    let writeInput = input;
-    let writeLines = lines;
-    if (isConsignmentPurchase) {
-      const normalized = normalizeConsignmentPurchaseInput(input, lines);
-      await assertConsignmentPurchaseSourceOpenTx(tx, normalized.input, normalized.lines);
-      writeInput = normalized.input;
-      writeLines = normalized.lines;
-    }
-    // TR_PURC.cs:12911 allocates the main number from PR_DATA with year in scope.
-    const vchNo = await nextVoucherNoTx(tx, scope);
-    // TR_PURC.cs:12100,12108,12923,12927 allocate hidden numbering without fiscal year.
-    const hdVchNo = await nextHiddenVoucherNoTx(tx, scope);
-    const result = await writePurchaseTx(tx, writeInput, writeLines, {
-      vchNo,
-      hdVchNo,
-      mainUser: String(writeInput.mainUser ?? '').trim(),
-      persistedClock: undefined,
-      isEdit: false,
-    });
-    if (isConsignmentPurchase) {
-      await applyConsignmentPurchaseAdjustmentsTx(tx, scope, formatVoucherNo(result.vchNo), 1);
-    }
-    return {
-      ...result,
-      version: await purchaseVersionTx(tx, scope, formatVoucherNo(result.vchNo)),
-    };
+  const mainBook = await purchaseMainBookTx(tx, scope);
+  assertPurchaseFamilyBook(mainBook, scope.coBook); // WP-28 D7: refused on the server, not only in the list
+  const isConsignmentPurchase = mainBook === 'CON PUR';
+  // A sale link is set only by the linked old-gold path (linkedPurchase.ts), never from a request.
+  let writeInput = isConsignmentPurchase ? input : withSaleLink(input, linkedSale);
+  let writeLines = lines;
+  if (isConsignmentPurchase) {
+    const normalized = normalizeConsignmentPurchaseInput(input, lines);
+    await assertConsignmentPurchaseSourceOpenTx(tx, normalized.input, normalized.lines);
+    writeInput = normalized.input;
+    writeLines = normalized.lines;
+  }
+  // TR_PURC.cs:12911 allocates the main number from PR_DATA with year in scope.
+  const vchNo = await nextVoucherNoTx(tx, scope);
+  // TR_PURC.cs:12100,12108,12923,12927 allocate hidden numbering without fiscal year.
+  const hdVchNo = await nextHiddenVoucherNoTx(tx, scope);
+  const result = await writePurchaseTx(tx, writeInput, writeLines, {
+    vchNo,
+    hdVchNo,
+    mainUser: String(writeInput.mainUser ?? '').trim(),
+    persistedClock: undefined,
+    isEdit: false,
   });
+  if (isConsignmentPurchase) {
+    await applyConsignmentPurchaseAdjustmentsTx(tx, scope, formatVoucherNo(result.vchNo), 1);
+  }
+  return {
+    ...result,
+    version: await purchaseVersionTx(tx, scope, formatVoucherNo(result.vchNo)),
+  };
 }
 
 /** Create a persisted TR_PURC `PR QUOT` voucher without ledger, tax, stock, rojmel, bill-OS or lot postings. */
@@ -2031,7 +1986,7 @@ const PURCHASE_WRITE_TABLES = [
   'REMARK_DATA',
 ] as const;
 /** N51 (D17): the version covers the write set above; check it after the header lock, before any write. */
-const purchaseVersionTx = (tx: any, scope: VoucherScope, vchNo: string) =>
+export const purchaseVersionTx = (tx: any, scope: VoucherScope, vchNo: string) =>
   voucherVersionTx(tx, PURCHASE_WRITE_TABLES, versionKeyOf(scope, vchNo));
 const assertPurchaseVersionTx = (tx: any, scope: VoucherScope, vchNo: string, expected?: string) =>
   assertVoucherVersionTx(tx, PURCHASE_WRITE_TABLES, versionKeyOf(scope, vchNo), expected ?? '');
@@ -2596,123 +2551,142 @@ export async function editPurchase(
   expectedVersion: string,
 ): Promise<PurchaseResult> {
   completePurchaseScope(input.scope);
+  return withTxBudget(prisma, input.scope.tenantId, 'voucher', (tx: any) =>
+    editPurchaseTx(tx, input, lines, requestedVoucherNo, expectedVersion),
+  );
+}
+
+/**
+ * The edit path inside a caller's transaction. `linkedSale` is the linked old-gold bypass (linkedPurchase.ts): a
+ * purchase linked to a sale is rewritten only when the caller names that exact sale; otherwise it stays refused.
+ */
+export async function editPurchaseTx(
+  tx: any,
+  input: PurchaseInput,
+  lines: PurchaseLineInput[],
+  requestedVoucherNo: number | string,
+  expectedVersion: string,
+  linkedSale?: SaleLink,
+): Promise<PurchaseResult & { version: string }> {
+  completePurchaseScope(input.scope);
   // Fail with the field name rather than a DecimalError 500 (see requirePurchaseNumber).
   input.taxRatePct = requirePurchaseNumber(input.taxRatePct, 'taxRatePct');
   const scope = input.scope;
   const voucherNo = formatVoucherNo(requestedVoucherNo);
-  return withTxBudget(prisma, scope.tenantId, 'voucher', async (tx: any) => {
-    const mainBook = await purchaseMainBookTx(tx, scope);
-    assertPurchaseFamilyBook(mainBook, scope.coBook); // WP-28 D7
-    const isConsignmentPurchase = mainBook === 'CON PUR';
-    const persisted = await persistedPurchaseHeaderTx(tx, scope, voucherNo, ['SL_BILL_NO']);
-    await assertPurchaseVersionTx(tx, scope, voucherNo, expectedVersion); // G170: before any write
-    // WP-28: an edit without a date keeps the STORED date; it never defaults to today.
-    if (!input.vchDate) input = { ...input, vchDate: persisted.VCH_DATE as Date };
-    const requestedDate = new Date(input.vchDate as Date | string);
-    // Full prior header for the USER_DATA edit audit, read BEFORE the write set is replaced.
-    const priorHeaderRow: Record<string, unknown> | undefined = (
-      await tx.$queryRawUnsafe(
-        `SELECT * FROM "PR_DATA" WHERE "CO_CODE"=$1 AND "LC_CODE"=$2 AND "CO_YEAR"=$3
-           AND "CO_BOOK"=$4 AND "VCH_NO"=$5 LIMIT 1`,
-        scope.coCode,
-        scope.lcCode,
-        scope.coYear,
-        scope.coBook,
-        voucherNo,
-      )
-    )[0];
-    // TR_PURC.cs `ItCodeLock`: a line that already produced a tag has its item code frozen, because the
-    // tag is in stock under that item. Compared against the PERSISTED detail rows, never the request.
-    // WP-28 (D6, D12): the whole persisted rows, kept for the writer by SR_NO.
-    const priorLines: Array<Record<string, unknown>> = await tx.$queryRawUnsafe(
-      `SELECT * FROM "PR_DETL"
-           WHERE "CO_CODE"=$1 AND "LC_CODE"=$2 AND "CO_YEAR"=$3 AND "CO_BOOK"=$4 AND "VCH_NO"=$5
-           ORDER BY "SR_NO"`,
+  const mainBook = await purchaseMainBookTx(tx, scope);
+  assertPurchaseFamilyBook(mainBook, scope.coBook); // WP-28 D7
+  const isConsignmentPurchase = mainBook === 'CON PUR';
+  const persisted = await persistedPurchaseHeaderTx(tx, scope, voucherNo, SALE_LINK_COLUMNS);
+  await assertPurchaseVersionTx(tx, scope, voucherNo, expectedVersion); // G170: before any write
+  // WP-28: an edit without a date keeps the STORED date; it never defaults to today.
+  if (!input.vchDate) input = { ...input, vchDate: persisted.VCH_DATE as Date };
+  const requestedDate = new Date(input.vchDate as Date | string);
+  // Full prior header for the USER_DATA edit audit, read BEFORE the write set is replaced.
+  const priorHeaderRow: Record<string, unknown> | undefined = (
+    await tx.$queryRawUnsafe(
+      `SELECT * FROM "PR_DATA" WHERE "CO_CODE"=$1 AND "LC_CODE"=$2 AND "CO_YEAR"=$3
+         AND "CO_BOOK"=$4 AND "VCH_NO"=$5 LIMIT 1`,
       scope.coCode,
       scope.lcCode,
       scope.coYear,
       scope.coBook,
       voucherNo,
-    );
-    for (const prior of priorLines) {
-      const tagNo = String(prior.TAG_NO ?? '').trim();
-      if (!tagNo || tagNo === 'N') continue; // untagged lines may still change item
-      const srNo = Number(prior.SR_NO);
-      const incoming = lines[srNo - 1];
-      if (!incoming) continue;
-      const before = String(prior.IT_CODE ?? '').trim();
-      const after = String(incoming.itCode ?? '').trim();
-      if (after && before && after !== before) {
-        throw new PurchaseValidationError(DESKTOP_MESSAGES.ITEM_CODE_LOCKED_IN_EDIT);
-      }
+    )
+  )[0];
+  // TR_PURC.cs `ItCodeLock`: a line that already produced a tag has its item code frozen, because the
+  // tag is in stock under that item. Compared against the PERSISTED detail rows, never the request.
+  // WP-28 (D6, D12): the whole persisted rows, kept for the writer by SR_NO.
+  const priorLines: Array<Record<string, unknown>> = await tx.$queryRawUnsafe(
+    `SELECT * FROM "PR_DETL"
+         WHERE "CO_CODE"=$1 AND "LC_CODE"=$2 AND "CO_YEAR"=$3 AND "CO_BOOK"=$4 AND "VCH_NO"=$5
+         ORDER BY "SR_NO"`,
+    scope.coCode,
+    scope.lcCode,
+    scope.coYear,
+    scope.coBook,
+    voucherNo,
+  );
+  for (const prior of priorLines) {
+    const tagNo = String(prior.TAG_NO ?? '').trim();
+    if (!tagNo || tagNo === 'N') continue; // untagged lines may still change item
+    const srNo = Number(prior.SR_NO);
+    const incoming = lines[srNo - 1];
+    if (!incoming) continue;
+    const before = String(prior.IT_CODE ?? '').trim();
+    const after = String(incoming.itCode ?? '').trim();
+    if (after && before && after !== before) {
+      throw new PurchaseValidationError(DESKTOP_MESSAGES.ITEM_CODE_LOCKED_IN_EDIT);
     }
+  }
 
-    // Fail closed before any source flags or voucher rows move: both old and requested dates matter.
-    await assertPeriodOpen(tx, scope.tenantId, {
-      ledger: {
-        table: 'AC_DATA',
-        lines: [{ CO_CODE: scope.coCode, VCH_DATE: persisted.VCH_DATE }],
-      },
-    });
-    await assertPeriodOpen(tx, scope.tenantId, {
-      ledger: { table: 'AC_DATA', lines: [{ CO_CODE: scope.coCode, VCH_DATE: requestedDate }] },
-    });
-    if (text(persisted.SL_BILL_NO) && !isConsignmentPurchase) {
-      throw new PurchaseValidationError('purchase is linked to a sale bill and cannot be edited');
-    }
-
-    const persistedTagSrnos = await assertPurchaseTagsUnconsumedTx(tx, scope, voucherNo, 'edited');
-    const hiddenVoucherNo = formatVoucherNo(text(persisted.HD_VCH_NO));
-    await releasePurchaseReferencesTx(tx, scope, voucherNo);
-    let writeInput = input;
-    let writeLines = lines;
-    if (isConsignmentPurchase) {
-      await applyConsignmentPurchaseAdjustmentsTx(tx, scope, voucherNo, -1);
-      const normalized = normalizeConsignmentPurchaseInput(input, lines);
-      await assertConsignmentPurchaseSourceOpenTx(tx, normalized.input, normalized.lines);
-      writeInput = normalized.input;
-      writeLines = normalized.lines;
-    }
-    // The tags as stored before the rewrite (TR_PURC_HM keeps an unchanged tag's STK_DATE, see keptStkDate).
-    const priorTags: Array<Record<string, unknown>> = await tx.$queryRawUnsafe(
-      `SELECT "SR_NO","TAG_NO","STK_DATE" FROM "BAR_DETL"
-           WHERE tenant_id=$1 AND "CO_CODE"=$2 AND "LC_CODE"=$3 AND "CO_YEAR"=$4 AND "CO_BOOK"=$5 AND "VCH_NO"=$6
-           ORDER BY "SR_NO"`,
-      scope.tenantId,
-      scope.coCode,
-      scope.lcCode,
-      scope.coYear,
-      scope.coBook,
-      voucherNo,
-    );
-    // TR_PURC.cs:12939-12944,13252,13297-13299,13548 replaces the full write set and temp row.
-    // Desktop edit never writes DELETE_DATA.
-    await deleteVoucherWriteSetTx(tx, {
-      tables: PURCHASE_WRITE_TABLES,
-      key: { scope, voucherNo },
-      tempBook: { voucherNo: hiddenVoucherNo },
-    });
-    // TR_PURC.cs:12134-12135,12234,13051,13066,13148,13173 preserve no/user/clock.
-    const result = await writePurchaseTx(tx, writeInput, writeLines, {
-      vchNo: Number(voucherNo),
-      hdVchNo: hiddenVoucherNo,
-      mainUser: text(persisted.MAIN_USER),
-      persistedClock: persisted.VCH_CLOCK,
-      isEdit: true,
-      // Desktop compares the FULL reloaded header (SELECT * FROM PR_DATA); the projection used for
-      // identity is too narrow to diff against.
-      persistedHeader: priorHeaderRow,
-      editingUser: input.mainUser ?? null,
-      // Keeps each tag's identity across the rewrite; see WritePurchaseContext.persistedTagSrnos.
-      persistedTagSrnos,
-      persistedLines: new Map(priorLines.map((row) => [num(row.SR_NO), row])),
-      persistedTags: new Map(priorTags.map((row) => [num(row.SR_NO), row])),
-    });
-    if (isConsignmentPurchase) {
-      await applyConsignmentPurchaseAdjustmentsTx(tx, scope, voucherNo, 1);
-    }
-    return { ...result, version: await purchaseVersionTx(tx, scope, voucherNo) };
+  // Fail closed before any source flags or voucher rows move: both old and requested dates matter.
+  await assertPeriodOpen(tx, scope.tenantId, {
+    ledger: {
+      table: 'AC_DATA',
+      lines: [{ CO_CODE: scope.coCode, VCH_DATE: persisted.VCH_DATE }],
+    },
   });
+  await assertPeriodOpen(tx, scope.tenantId, {
+    ledger: { table: 'AC_DATA', lines: [{ CO_CODE: scope.coCode, VCH_DATE: requestedDate }] },
+  });
+  const linked = text(persisted.SL_BILL_NO) && !isConsignmentPurchase;
+  if (linked && !sameSaleLink(persistedSaleLink(persisted), linkedSale))
+    throw new PurchaseValidationError(linkedPurchaseRefusal(persisted));
+
+  const persistedTagSrnos = await assertPurchaseTagsUnconsumedTx(tx, scope, voucherNo, 'edited');
+  const hiddenVoucherNo = formatVoucherNo(text(persisted.HD_VCH_NO));
+  await releasePurchaseReferencesTx(tx, scope, voucherNo);
+  // The stored sale link is kept as stored; a request can neither add, change nor drop it.
+  let writeInput = isConsignmentPurchase
+    ? input
+    : withSaleLink(input, linked ? persistedSaleLink(persisted) : undefined);
+  let writeLines = lines;
+  if (isConsignmentPurchase) {
+    await applyConsignmentPurchaseAdjustmentsTx(tx, scope, voucherNo, -1);
+    const normalized = normalizeConsignmentPurchaseInput(input, lines);
+    await assertConsignmentPurchaseSourceOpenTx(tx, normalized.input, normalized.lines);
+    writeInput = normalized.input;
+    writeLines = normalized.lines;
+  }
+  // The tags as stored before the rewrite (TR_PURC_HM keeps an unchanged tag's STK_DATE, see keptStkDate).
+  const priorTags: Array<Record<string, unknown>> = await tx.$queryRawUnsafe(
+    `SELECT "SR_NO","TAG_NO","STK_DATE" FROM "BAR_DETL"
+         WHERE tenant_id=$1 AND "CO_CODE"=$2 AND "LC_CODE"=$3 AND "CO_YEAR"=$4 AND "CO_BOOK"=$5 AND "VCH_NO"=$6
+         ORDER BY "SR_NO"`,
+    scope.tenantId,
+    scope.coCode,
+    scope.lcCode,
+    scope.coYear,
+    scope.coBook,
+    voucherNo,
+  );
+  // TR_PURC.cs:12939-12944,13252,13297-13299,13548 replaces the full write set and temp row.
+  // Desktop edit never writes DELETE_DATA.
+  await deleteVoucherWriteSetTx(tx, {
+    tables: PURCHASE_WRITE_TABLES,
+    key: { scope, voucherNo },
+    tempBook: { voucherNo: hiddenVoucherNo },
+  });
+  // TR_PURC.cs:12134-12135,12234,13051,13066,13148,13173 preserve no/user/clock.
+  const result = await writePurchaseTx(tx, writeInput, writeLines, {
+    vchNo: Number(voucherNo),
+    hdVchNo: hiddenVoucherNo,
+    mainUser: text(persisted.MAIN_USER),
+    persistedClock: persisted.VCH_CLOCK,
+    isEdit: true,
+    // Desktop compares the FULL reloaded header (SELECT * FROM PR_DATA); the projection used for
+    // identity is too narrow to diff against.
+    persistedHeader: priorHeaderRow,
+    editingUser: input.mainUser ?? null,
+    // Keeps each tag's identity across the rewrite; see WritePurchaseContext.persistedTagSrnos.
+    persistedTagSrnos,
+    persistedLines: new Map(priorLines.map((row) => [num(row.SR_NO), row])),
+    persistedTags: new Map(priorTags.map((row) => [num(row.SR_NO), row])),
+  });
+  if (isConsignmentPurchase) {
+    await applyConsignmentPurchaseAdjustmentsTx(tx, scope, voucherNo, 1);
+  }
+  return { ...result, version: await purchaseVersionTx(tx, scope, voucherNo) };
 }
 
 /** Reverse a purchase and write the desktop TR_PURC 1-header + N-detail DELETE_DATA audit. */
@@ -2721,97 +2695,107 @@ export async function deletePurchase(
   input: DeletePurchaseInput,
 ): Promise<{ reversed: true }> {
   completePurchaseScope(input.scope);
+  return withTxBudget(prisma, input.scope.tenantId, 'voucher', (tx: any) =>
+    deletePurchaseTx(tx, input),
+  );
+}
+
+/** The delete path inside a caller's transaction; `linkedSale` as for editPurchaseTx. */
+export async function deletePurchaseTx(
+  tx: any,
+  input: DeletePurchaseInput,
+  linkedSale?: SaleLink,
+): Promise<{ reversed: true }> {
+  completePurchaseScope(input.scope);
   const scope = input.scope;
   const tenantId = scope.tenantId;
   const voucherNo = formatVoucherNo(input.vchNo);
   const key = keyOf(scope, voucherNo);
-  return withTxBudget(prisma, tenantId, 'voucher', async (tx: any) => {
-    const deleteMainBook = await purchaseMainBookTx(tx, scope);
-    const isConsignmentPurchase = deleteMainBook === 'CON PUR';
-    const bookPolicy = await resolveBookPolicyTx(tx, scope, purchaseWorkflowFor(deleteMainBook));
-    const configuredBookName = await configuredPurchaseBookNameTx(tx, scope);
-    const header = await persistedPurchaseHeaderTx(tx, scope, voucherNo, [
-      'AC_CODE',
-      'AC_NAME',
-      'TOT_AMT',
-      'CASH_AMT',
-      'CARD_AMT',
-      'CHQ_AMT',
-      'IT_TYPE',
-      'PARTY_FINE',
-      'VCH_DESC',
-      'SL_BILL_NO',
-    ]);
-    await assertPurchaseVersionTx(tx, scope, voucherNo, input.expectedVersion); // G170
-    await assertPeriodOpen(tx, tenantId, {
-      ledger: { table: 'AC_DATA', lines: [{ CO_CODE: scope.coCode, VCH_DATE: header.VCH_DATE }] },
-    });
-    if (text(header.SL_BILL_NO) && !isConsignmentPurchase) {
-      throw new PurchaseValidationError('purchase is linked to a sale bill and cannot be deleted');
-    }
-    const details: Array<Record<string, unknown>> = await tx.$queryRawUnsafe(
-      `SELECT "SR_NO","IT_CODE","NET_AMT","IT_TYPE","ITM_FINE"
-         FROM "PR_DETL"
-        WHERE tenant_id=$1 AND "CO_CODE"=$2 AND "LC_CODE"=$3 AND "CO_YEAR"=$4
-          AND "CO_BOOK"=$5 AND "VCH_NO"=$6 ORDER BY "SR_NO" FOR UPDATE`,
-      ...purchaseParams(scope, voucherNo),
-    );
-    await assertPurchaseTagsUnconsumedTx(tx, scope, voucherNo, 'deleted');
-    await releasePurchaseReferencesTx(tx, scope, voucherNo);
-    if (isConsignmentPurchase) {
-      await applyConsignmentPurchaseAdjustmentsTx(tx, scope, voucherNo, -1);
-    }
-    await reverseVoucherTx(tx, tenantId, { tables: [...PURCHASE_WRITE_TABLES], key });
-    await tx.$executeRawUnsafe(
-      `DELETE FROM "TEMP_BOOK_DATA" WHERE tenant_id=$1 AND "CO_CODE"=$2 AND "LC_CODE"=$3
-        AND "CO_BOOK"=$4 AND "VCH_NO"=$5`,
-      tenantId,
-      scope.coCode,
-      scope.lcCode,
-      scope.coBook,
-      text(header.HD_VCH_NO),
-    );
-    const deletedAt = new Date();
-    const common = {
-      ...key,
-      VCH_DATE: header.VCH_DATE,
-      VCH_TIME: header.VCH_TIME,
-      DELETE_DATE: deletedAt,
-      DELETE_TIME: deletedAt,
-      VCH_TYPE: bookPolicy.vchType,
-      BOOK_NAME: configuredBookName,
-      AC_CODE: header.AC_CODE,
-      AC_NAME: header.AC_NAME,
-      HD_VCH_NO: header.HD_VCH_NO,
-      MAIN_USER: header.MAIN_USER,
-      DELETE_USER: input.deleteUser ?? 'system',
-    };
-    // TR_PURC.cs:13861: one header row; tender debit excludes UPI and description is 149 chars.
+  const deleteMainBook = await purchaseMainBookTx(tx, scope);
+  const isConsignmentPurchase = deleteMainBook === 'CON PUR';
+  const bookPolicy = await resolveBookPolicyTx(tx, scope, purchaseWorkflowFor(deleteMainBook));
+  const configuredBookName = await configuredPurchaseBookNameTx(tx, scope);
+  const header = await persistedPurchaseHeaderTx(tx, scope, voucherNo, [
+    'AC_CODE',
+    'AC_NAME',
+    'TOT_AMT',
+    'CASH_AMT',
+    'CARD_AMT',
+    'CHQ_AMT',
+    'IT_TYPE',
+    'PARTY_FINE',
+    'VCH_DESC',
+    ...SALE_LINK_COLUMNS,
+  ]);
+  await assertPurchaseVersionTx(tx, scope, voucherNo, input.expectedVersion); // G170
+  await assertPeriodOpen(tx, tenantId, {
+    ledger: { table: 'AC_DATA', lines: [{ CO_CODE: scope.coCode, VCH_DATE: header.VCH_DATE }] },
+  });
+  const linked = text(header.SL_BILL_NO) && !isConsignmentPurchase;
+  if (linked && !sameSaleLink(persistedSaleLink(header), linkedSale))
+    throw new PurchaseValidationError(linkedPurchaseRefusal(header));
+  const details: Array<Record<string, unknown>> = await tx.$queryRawUnsafe(
+    `SELECT "SR_NO","IT_CODE","NET_AMT","IT_TYPE","ITM_FINE"
+       FROM "PR_DETL"
+      WHERE tenant_id=$1 AND "CO_CODE"=$2 AND "LC_CODE"=$3 AND "CO_YEAR"=$4
+        AND "CO_BOOK"=$5 AND "VCH_NO"=$6 ORDER BY "SR_NO" FOR UPDATE`,
+    ...purchaseParams(scope, voucherNo),
+  );
+  await assertPurchaseTagsUnconsumedTx(tx, scope, voucherNo, 'deleted');
+  await releasePurchaseReferencesTx(tx, scope, voucherNo);
+  if (isConsignmentPurchase) {
+    await applyConsignmentPurchaseAdjustmentsTx(tx, scope, voucherNo, -1);
+  }
+  await reverseVoucherTx(tx, tenantId, { tables: [...PURCHASE_WRITE_TABLES], key });
+  await tx.$executeRawUnsafe(
+    `DELETE FROM "TEMP_BOOK_DATA" WHERE tenant_id=$1 AND "CO_CODE"=$2 AND "LC_CODE"=$3
+      AND "CO_BOOK"=$4 AND "VCH_NO"=$5`,
+    tenantId,
+    scope.coCode,
+    scope.lcCode,
+    scope.coBook,
+    text(header.HD_VCH_NO),
+  );
+  const deletedAt = new Date();
+  const common = {
+    ...key,
+    VCH_DATE: header.VCH_DATE,
+    VCH_TIME: header.VCH_TIME,
+    DELETE_DATE: deletedAt,
+    DELETE_TIME: deletedAt,
+    VCH_TYPE: bookPolicy.vchType,
+    BOOK_NAME: configuredBookName,
+    AC_CODE: header.AC_CODE,
+    AC_NAME: header.AC_NAME,
+    HD_VCH_NO: header.HD_VCH_NO,
+    MAIN_USER: header.MAIN_USER,
+    DELETE_USER: input.deleteUser ?? 'system',
+  };
+  // TR_PURC.cs:13861: one header row; tender debit excludes UPI and description is 149 chars.
+  await insertRowTx(tx, 'DELETE_DATA', tenantId, {
+    ...common,
+    SR_NO: 0,
+    VCH_VAL_DR: round2(num(header.CASH_AMT) + num(header.CARD_AMT) + num(header.CHQ_AMT)),
+    VCH_VAL_CR: num(header.TOT_AMT),
+    FINE_TYPE: text(header.IT_TYPE),
+    VCH_FINE_DR: 0,
+    VCH_FINE_CR: num(header.PARTY_FINE),
+    VCH_DESC: text(header.VCH_DESC).slice(0, 149),
+  });
+  // TR_PURC.cs:13863: one credit/fine audit row per PR_DETL line.
+  for (const detail of details) {
     await insertRowTx(tx, 'DELETE_DATA', tenantId, {
       ...common,
-      SR_NO: 0,
-      VCH_VAL_DR: round2(num(header.CASH_AMT) + num(header.CARD_AMT) + num(header.CHQ_AMT)),
-      VCH_VAL_CR: num(header.TOT_AMT),
-      FINE_TYPE: text(header.IT_TYPE),
+      SR_NO: num(detail.SR_NO),
+      VCH_VAL_DR: 0,
+      VCH_VAL_CR: num(detail.NET_AMT),
+      FINE_TYPE: text(detail.IT_TYPE),
       VCH_FINE_DR: 0,
-      VCH_FINE_CR: num(header.PARTY_FINE),
-      VCH_DESC: text(header.VCH_DESC).slice(0, 149),
+      VCH_FINE_CR: num(detail.ITM_FINE),
+      VCH_DESC: `ItCode/${text(detail.IT_CODE)}`.slice(0, 150),
     });
-    // TR_PURC.cs:13863: one credit/fine audit row per PR_DETL line.
-    for (const detail of details) {
-      await insertRowTx(tx, 'DELETE_DATA', tenantId, {
-        ...common,
-        SR_NO: num(detail.SR_NO),
-        VCH_VAL_DR: 0,
-        VCH_VAL_CR: num(detail.NET_AMT),
-        FINE_TYPE: text(detail.IT_TYPE),
-        VCH_FINE_DR: 0,
-        VCH_FINE_CR: num(detail.ITM_FINE),
-        VCH_DESC: `ItCode/${text(detail.IT_CODE)}`.slice(0, 150),
-      });
-    }
-    return { reversed: true };
-  });
+  }
+  return { reversed: true };
 }
 
 /** Delete a TR_PURC `PR QUOT` voucher and preserve the desktop delete audit trail. */

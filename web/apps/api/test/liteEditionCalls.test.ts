@@ -25,6 +25,7 @@ const HIGHER_ONLY = new Set([
   'components/KarigarForm.tsx', // karigar and job-work screens (Basic)
   'components/RepairImagePanel.tsx', // repair screens (Standard)
   'components/TagSplitForm.tsx', // Tag Split (Advance)
+  'components/UrdBookSettings.tsx', // Company Settings → Old Gold Purchase Books (Utilities/Settings, Basic)
 ]);
 
 function declaredRoutes(): Array<{ method: string; path: string; pattern: RegExp }> {
