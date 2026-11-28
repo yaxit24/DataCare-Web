@@ -108,10 +108,10 @@ export interface AccountRefreshFamily {
 /**
  * Families whose apply is enabled. A family is listed only after every write-set fixture of it, saved through the
  * normal writer, previews clean (accountRefresh.db.test.ts) and a replay of real desktop vouchers checks with no
- * `differs`; every other family is preview-only. Cash/Bank passes the first and waits for the second
- * (docs/handbook/web/data-refresh.md). The set is read on every preview and apply.
+ * `differs`; every other family is preview-only. Cash/Bank passed both on 28 Nov 2026 (289 real desktop vouchers,
+ * loaded as stored, all match; docs/handbook/web/data-refresh.md). The set is read on every preview and apply.
  */
-export const ACCOUNT_REFRESH_VERIFIED: ReadonlySet<string> = new Set(['contra', 'fine-jv']);
+export const ACCOUNT_REFRESH_VERIFIED: ReadonlySet<string> = new Set(['contra', 'fine-jv', 'cash-bank']);
 
 export type VoucherStatus = 'match' | 'differs' | 'missing' | 'orphan' | 'locked' | 'unverified';
 
@@ -249,6 +249,16 @@ function keyed(
   return out;
 }
 
+/**
+ * Desktop text keeps the spaces typed around it (a narration or party name padded by the old CHAR columns) while the
+ * web trims what it writes; a value that differs only in leading or trailing spaces is not a posting fault, so it is
+ * no reason to rewrite the voucher (real desktop Cash/Bank replay, 28 Nov 2026).
+ */
+function sameValue(have: unknown, want: unknown): boolean {
+  if (typeof have === 'string' && typeof want === 'string') return have.trim() === want.trim();
+  return JSON.stringify(have) === JSON.stringify(want);
+}
+
 function compareTable(
   table: string,
   keyCol: string,
@@ -268,7 +278,7 @@ function compareTable(
     // Only the columns the writer sets are compared; the rest are the database's own defaults.
     for (const col of Object.keys(want)) {
       if (IGNORED.has(col)) continue;
-      if (JSON.stringify(have[col] ?? null) !== JSON.stringify(want[col] ?? null))
+      if (!sameValue(have[col] ?? null, want[col] ?? null))
         check.changed.push({ key, col, stored: have[col] ?? null, expected: want[col] ?? null });
     }
   }

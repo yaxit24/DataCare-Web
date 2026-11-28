@@ -57,7 +57,7 @@ Families and their state (`ACCOUNT_REFRESH_VERIFIED` in `web/apps/api/src/module
 | --------- | -------------------------------- | ------------------------------------------------------------------------------------------------------------------ | --------------- |
 | Contra    | `data-refresh-account-contra`    | `contraPostInput` (Contra_Ledr `Ac_Ledr.cs:840-848`, Contra_Rojmel `Ac_Rojmel.cs:336-340`)                         | yes             |
 | Fine Jv   | `data-refresh-account-fine-jv`   | `fineJvPostInput` (Contra_Ledr `Ac_Ledr.cs:846-848`, Contra_Rojmel `Ac_Rojmel.cs:342-344`)                         | yes             |
-| Cash/Bank | `data-refresh-account-cash-bank` | `cashBankPostInput` (Cash_Ledr / Bank_Ledr `Ac_Ledr.cs:565-610`, Cash_Rojmel / Bank_Rojmel `Ac_Rojmel.cs:179-219`) | not yet (below) |
+| Cash/Bank | `data-refresh-account-cash-bank` | `cashBankPostInput` (Cash_Ledr / Bank_Ledr `Ac_Ledr.cs:565-610`, Cash_Rojmel / Bank_Rojmel `Ac_Rojmel.cs:179-219`) | yes             |
 
 The expected postings are derived from the stored `CONTRA_DATA` rows as they are, the way the desktop's builders read them, not re-gridded through the form. `REMARK_DATA` (rebuilt by the desktop's `Vch_Remark`, `MS_UPDATE.cs:2370-2373`) is not part of this check. The classification preview above stays on the Account button; the family checks are picked on the Account preview's "Account check and repair" panel. Next: the Purchase family.
 
@@ -75,7 +75,7 @@ What `CASH_DATA` does not record is never guessed:
 
 Which rows qualify for repair: every voucher whose `CASH_DATA` rows carry `ENTRY_TYPE 'C'` and a hidden number. That includes desktop-shaped rows (blank `REC_AC_CODE`, settled to slot 1) and receipts and payments the web saved with older writer code (between commits `ca32023f` and `f43e0a1f`). If such an older voucher's postings differ from today's builder, the apply re-posts it into today's shape with the same accounts (settlement, kasar and charges as the voucher posted them); the replaced rows stay in the run record.
 
-Apply is not enabled yet. Every write-set fixture checks clean (`accountRefreshCashBank.db.test.ts`, which also proves the apply with the family added to the allowlist, and `accountRefreshCashBankTz.db.test.ts` under Asia/Kolkata), but the replay of real desktop cash and bank vouchers followed by this check has not been run. `cash-bank` joins `ACCOUNT_REFRESH_VERIFIED` once that run shows no `differs`.
+Apply is enabled. Every write-set fixture checks clean (`accountRefreshCashBank.db.test.ts`, `accountRefreshCashBankTz.db.test.ts` under Asia/Kolkata), and on 28 Nov 2026 the check ran over the real desktop year twice: once over the 289 cash and bank vouchers replayed through the web writers (289 match), and once over the same 289 vouchers loaded exactly as the desktop stored them (289 match). The second run first showed 40 vouchers differing only in leading or trailing spaces of `IT_DESC` / `AC_NAME`, which the desktop keeps and the web trims; text that differs only in those spaces is now compared equal for every family, so such a voucher is not rewritten.
 
 Bank reconciliation writes only `AC_DATA.CLR_DATE` (`bankRecon.ts`), which the check ignores and the apply carries by `LEDR_KEY`, including a cleared mark removed (NULL). A bank leg's ledger date is the row's clearing date, so a changed `CASH_DATA.CLR_DATE` re-dates the leg and changes its key-stable row only; a cleared leg whose key the voucher no longer posts is warned about in the preview and in the run record. `BANK_RECONCILE` is not touched.
 

@@ -393,8 +393,7 @@ const ACCOUNT_FAMILIES = {
       itDesc: 'DRF account check',
     }),
     tables: ['CASH_DATA', 'AC_DATA', 'ROJ_MEL_DATA', 'TEMP_BOOK_DATA'],
-    // Preview-only until a replay of real desktop vouchers checks clean (docs/handbook/web/data-refresh.md).
-    applies: false,
+    applies: true,
   },
 };
 
@@ -1267,7 +1266,7 @@ export const dataRefresh = {
       'journey.account-full-builder',
       'T18',
       'MS_UPDATE.cs:2334-2669; playbook J23',
-      'Partly built: per the owner decision of 27 Nov 2026 Account is check-and-repair per voucher family, and Contra and Fine Jv apply (case account.contra-check-and-repair) while Cash/Bank previews only until a desktop replay check (case account.cash-bank-check-and-repair); the other families remain. The desktop Account button deletes AC_DATA, ROJ_MEL_DATA, TAX_DATA, DHRN_DATA and re-posts every voucher of the year through about 120 builder methods (Ac_Ledr 55, Ac_Rojmel 44, Ac_Tax 48; MS_UPDATE.cs:2401-2663). The web writes those rows inside each voucher save with its own posting rules, so an equal rebuild needs a per-voucher-type re-posting engine the web does not have. D-REF-3 (owner, 2 Nov 2026) says ship preview-only when the effect cannot be reproduced exactly. The proven prefix (book flags, clearing dates, bank reconciliation) is applied by the advanced operation ledger-normalise, covered by dataRepair.db.test.ts. Owner question: approve a re-posting engine, or accept preview-only for good.',
+      'Partly built: per the owner decision of 27 Nov 2026 Account is check-and-repair per voucher family, and Contra and Fine Jv apply (case account.contra-check-and-repair) and Cash/Bank apply too after its real desktop replay check (case account.cash-bank-check-and-repair); the other families remain. The desktop Account button deletes AC_DATA, ROJ_MEL_DATA, TAX_DATA, DHRN_DATA and re-posts every voucher of the year through about 120 builder methods (Ac_Ledr 55, Ac_Rojmel 44, Ac_Tax 48; MS_UPDATE.cs:2401-2663). The web writes those rows inside each voucher save with its own posting rules, so an equal rebuild needs a per-voucher-type re-posting engine the web does not have. D-REF-3 (owner, 2 Nov 2026) says ship preview-only when the effect cannot be reproduced exactly. The proven prefix (book flags, clearing dates, bank reconciliation) is applied by the advanced operation ledger-normalise, covered by dataRepair.db.test.ts. Owner question: approve a re-posting engine, or accept preview-only for good.',
     ),
     blocked(
       'journey.stock-full-builder',
@@ -1361,7 +1360,7 @@ export const dataRefresh = {
       async (ctx) => {
         const result = await accountFamilyLifecycle(ctx, 'cash-bank');
         return {
-          observation: `Cash/Bank receipt RCT/${result.vchNo}: the check showed the damaged DR_AMT; the family is preview-only until the desktop replay check, so the screen offered no Apply and a direct apply was refused with no row changed`,
+          observation: `Cash/Bank receipt RCT/${result.vchNo}: the check showed the damaged DR_AMT, Apply rewrote the voucher from its stored entry and the second check matched`,
           expected: result.first.diffs,
           database: { writer: result.writer, repaired: result.repaired },
           downstream: { secondCheck: result.second.detail.summary },

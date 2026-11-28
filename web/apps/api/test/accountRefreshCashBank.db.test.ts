@@ -555,7 +555,6 @@ d('Data Refresh Account check-and-repair (Cash/Bank)', () => {
   }, 180_000);
 
   afterAll(async () => {
-    (ACCOUNT_REFRESH_VERIFIED as Set<string>).delete('cash-bank');
     if (RUN) await wipe();
     await owner.$disconnect();
     await runtime.$disconnect();
@@ -589,18 +588,36 @@ d('Data Refresh Account check-and-repair (Cash/Bank)', () => {
     });
     expect(p.clean).toBe(true);
     expect(p.diffs).toEqual([]);
-    // Not on the allowlist until a replay of real desktop vouchers checks clean (data-refresh.md): preview only.
-    expect(p.applyAvailable).toBe(false);
-    expect(p.blockedReason).toMatch(/not available until the family is verified/);
-    await expect(apply(p.previewHash)).rejects.toMatchObject({ code: 'preview-only' });
-    // The rest of this file proves the apply the allowlist would enable.
-    (ACCOUNT_REFRESH_VERIFIED as Set<string>).add('cash-bank');
+    // On the allowlist since the real desktop replay checked clean (data-refresh.md).
+    expect(ACCOUNT_REFRESH_VERIFIED.has('cash-bank')).toBe(true);
+    expect(p.applyAvailable).toBe(true);
     const reasons = Object.fromEntries(
       detail.vouchers.map((v) => [`${v.coBook}/${v.vchNo}`, v.reason ?? '']),
     );
     expect(reasons[`RCT/${foreign[0]!.vchNo}`]).toMatch(/not written by the receipt\/payment form/);
     expect(reasons['PAY/09001']).toMatch(/PAY_DATA/);
     expect(reasons[`CRC/${foreign[2]!.vchNo}`]).toMatch(/kasar account cannot be told apart/);
+  });
+
+  it('treats text padded with spaces, as the desktop stores it, as equal', async () => {
+    const { cashReceipt } = fx;
+    const pad = (sql: string) =>
+      exec(
+        `UPDATE "${sql}" SET "IT_DESC"='  '||"IT_DESC"||'   ' WHERE tenant_id=$1 AND "CO_BOOK"=$2 AND "VCH_NO"=$3 AND "IT_DESC"<>''`,
+        T,
+        cashReceipt!.coBook,
+        cashReceipt!.vchNo,
+      );
+    await pad('AC_DATA');
+    await pad('ROJ_MEL_DATA');
+    await expectClean();
+    for (const table of ['AC_DATA', 'ROJ_MEL_DATA'])
+      await exec(
+        `UPDATE "${table}" SET "IT_DESC"=btrim("IT_DESC") WHERE tenant_id=$1 AND "CO_BOOK"=$2 AND "VCH_NO"=$3`,
+        T,
+        cashReceipt!.coBook,
+        cashReceipt!.vchNo,
+      );
   });
 
   it('flags only the damaged vouchers, repairs them to the writer rows and keeps CLR_DATE', async () => {
