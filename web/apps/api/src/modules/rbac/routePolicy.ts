@@ -231,6 +231,8 @@ route('Sales/Sales Invoice', [
   'GET /sales/approval-help',
   'GET /sales/approval-import',
   'POST /tour/:vchNo/bill',
+  // Owner decision 2B: the URD purchase book a T book's Old Gold / Silver row opens (TR_SALE.cs:18756-18842).
+  'GET /sales/urd-books',
 ]);
 route('Sales/Sales Quotation', [
   'POST /sales-quotations',

@@ -21,7 +21,10 @@
         "web/apps/web/components/VoucherList.tsx",
         "web/apps/web/lib/voucherNumberKeys.ts",
         "web/apps/api/src/modules/vouchers/list.ts",
-        "web/apps/api/src/routes/voucherNavigation.ts"
+        "web/apps/api/src/routes/voucherNavigation.ts",
+        "web/apps/web/components/LinkedOldPurchaseModal.tsx",
+        "web/apps/web/components/SaleOldGoldGrid.tsx",
+        "web/apps/api/src/modules/sales/linkedOldPurchaseSale.ts"
       ]
     },
     "salesReport": {
@@ -79,7 +82,8 @@
         "web/apps/api/src/modules/vouchers/list.ts",
         "web/apps/api/src/routes/voucherNavigation.ts",
         "web/apps/api/src/modules/purchase/linkedPurchase.ts",
-        "web/apps/api/src/modules/purchase/linkedSale.ts"
+        "web/apps/api/src/modules/purchase/linkedSale.ts",
+        "web/apps/web/components/PurchaseEntryForm.tsx"
       ]
     },
     "usersRights": {

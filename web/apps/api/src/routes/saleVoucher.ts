@@ -14,6 +14,8 @@ import {
 } from '../modules/sales/approvalImport.js';
 import { requiredVersion } from '../modules/vouchers/version.js';
 import { salePrintFiles, setSalePrintDefault } from '../modules/sales/salePrintChoice.js';
+import { resolveUrdPurchaseBookTx, UrdBookValidationError } from '../modules/purchase/urdBook.js';
+import { withTxBudget } from '../modules/shared/txBudget.js';
 
 /**
  * The retail sale (TR_SALE): create, read, update and delete. The read returns the voucher's `version`; an update sends
@@ -79,6 +81,29 @@ export function registerSaleVoucherRoutes(
     if (!guard(req, reply, 'update')) return;
     return run(reply, 200, () =>
       setSalePrintDefault(prisma, scopeOf(req), String(body(req).file ?? '')),
+    );
+  });
+  // Owner decision 2B: what the Old Gold / Silver row's URD purchase book resolves to (urdBook.ts), or the message
+  // telling the operator how to create one; read under the Sales right, as the operator may not open Settings.
+  app.get('/sales/urd-books', auth as any, async (req, reply) => {
+    if (!guard(req, reply, 'view')) return;
+    const scope = scopeOf(req);
+    return run(reply, 200, () =>
+      withTxBudget(prisma, scope.tenantId, 'read', async (tx: any) => {
+        const resolve = async (metal: 'G' | 'S') => {
+          try {
+            const { coBook, bookName } = await resolveUrdPurchaseBookTx(tx, scope, metal);
+            return { coBook, bookName };
+          } catch (error) {
+            if (error instanceof UrdBookValidationError) return { error: error.message };
+            throw error;
+          }
+        };
+        return {
+          resolved: { gold: await resolve('G'), silver: await resolve('S') },
+          lcCode: scope.lcCode,
+        };
+      }),
     );
   });
   // TR_SALE.cs:20562-20590 "A" (Approval Help): the open APR ISU vouchers of the session location.
