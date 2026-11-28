@@ -9,13 +9,14 @@ import {
   companyFieldId,
   companyFieldKey,
 } from '../../../../lib/companyMasterKeys';
+import { CompanyResetPanel } from '../../../../components/CompanyResetPanel';
 
 // MS_COMPANY.cs:5882-5980,6074-6189. Integration credentials hidden by the desktop are not identity inputs: F1 or a
 // double-click on the name opens them there (GroupBox1 e-invoice portal and ASP logins, pnlUae client secret,
 // :6502-6521,7411-7421); the web keeps them off this screen, so F1 on the name does nothing here.
 // Keyboard (lib/companyMasterKeys.ts): Enter walks the desktop order across the Company/Tax/Bank Detail sections
 // to Save; Ctrl+O unlocks Company Type and disables Save until Enter there or on RTGS No (:6471-6476,6737-6746,
-// 7279-7290); Ctrl+R shows the desktop's "Reset Compnay" box only as an explanation (:6477-6480).
+// 7279-7290); Ctrl+R opens the Reset Company panel for the shown company (:6477-6480; admins only).
 const fields: [string, string, number][] = [
   ['CO_NAME', 'Name', 50],
   ['CO_ADD1', 'Address 1', 50],
@@ -215,29 +216,23 @@ export default function CompanyPage() {
         </div>
       )}
       {resetOpen && (
-        // Ctrl+R (:6477-6480) shows chkResetData "Reset Compnay" (:5318) only where MsMasterResetAllData='Y', a flag
-        // six registration serials set (MS_OPNCOMP.cs:5077-5262). Saved ticked it stores CO_MAST.RTGS_TYPE='Y'
-        // (:6116,6162) and the next login deletes that company's vouchers and masters (Module_Schm.cs:62-110,
-        // MS_LOGIN.cs:575-600). The web has no registration identity and no such wipe, so the box only explains.
-        <section
-          className="panel"
-          role="dialog"
-          aria-modal="true"
-          aria-label="Reset Compnay"
-          onKeyDown={(e) => {
-            if (e.key === 'Escape') setResetOpen(false);
+        // Ctrl+R (:6477-6480) shows chkResetData "Reset Compnay" (:5318) only where MsMasterResetAllData='Y'. Saved
+        // ticked it stores CO_MAST.RTGS_TYPE='Y' (:6116,6162) and the next login deletes the company
+        // (Module_Schm.cs:60-230, MS_LOGIN.cs:581-593). The web clears the shown company's data at once and keeps the
+        // company, admins only, behind a second confirmation (components/CompanyResetPanel.tsx, api modules/masters/companyReset.ts).
+        <CompanyResetPanel
+          coCode={form.CO_CODE ?? ''}
+          onClose={() => setResetOpen(false)}
+          onReset={(ownCompany) => {
+            // The open company's data is gone: reload the whole app at the dashboard so every screen and the
+            // session context start again. Another company: just refresh this page's list.
+            if (ownCompany) window.location.assign('/');
+            else {
+              setMode('view');
+              void load().then(() => open(coCode));
+            }
           }}
-        >
-          <strong>Reset Compnay</strong>
-          <p>
-            Not available on the web. On the desktop this box appears only for a few licences;
-            ticked and saved, it deletes this company&apos;s vouchers and masters at the next login.
-            Nothing has been changed.
-          </p>
-          <button type="button" autoFocus onClick={() => setResetOpen(false)}>
-            Close
-          </button>
-        </section>
+        />
       )}
       <div className="row">
         <button

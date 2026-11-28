@@ -984,6 +984,9 @@ route('Masters/Companies', [
   'POST /company-identity',
   'PUT /company-identity',
   'DELETE /company-identity/:code',
+  // Ctrl+R "Reset Compnay" (MS_COMPANY.cs:6477-6480): admin-only below, and a delete.
+  'GET /companies/:coCode/reset/preview',
+  'POST /companies/:coCode/reset',
 ]);
 route('Masters/Year Create', [
   'GET /years',
@@ -1345,10 +1348,10 @@ const READ_POST_ROUTES = new Set([
   'POST /utilities/data-repair/:id/preview',
 ]);
 
-// A POST that removes or rewrites historical rows is a delete, not a create. Classifying it honestly means a
-// delegated (non-admin) grant of this form could never apply a repair on View alone, which is what the
-// previous `create` classification allowed.
+// A POST that removes or rewrites historical rows is a delete, not a create, so a delegated (non-admin) grant of
+// this form can never apply a repair on View alone, as the previous `create` classification allowed.
 const DELETE_POST_ROUTES = new Set([
+  'POST /companies/:coCode/reset',
   'POST /purchases/:vchNo/delete-stray-link',
   'POST /utilities/data-repair/:id/apply',
   'POST /utilities/estimate-reset/apply',
@@ -1369,6 +1372,9 @@ const ADMIN_ONLY = new Set([
   'POST /admin/users/:loginName/form-rights',
   'POST /admin/users/:loginName/password-reset',
   'POST /admin/companies/:coCode/provision',
+  // A company reset deletes a whole company (MS_COMPANY.cs:6477-6480); the named company is not the session's.
+  'GET /companies/:coCode/reset/preview',
+  'POST /companies/:coCode/reset',
   'GET /utilities/vch-renumber/preview',
   'POST /utilities/vch-renumber/apply',
   'POST /utilities/data-refresh',

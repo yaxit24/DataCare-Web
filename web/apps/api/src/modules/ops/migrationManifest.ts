@@ -268,4 +268,9 @@ export const EXPECTED_MIGRATIONS: ReadonlyArray<{
     name: '20261127140000_company_urd_purchase_book',
     checksum: 'e17eda82c8002b209db6cade6a1b3a1cac0bf6bea1c92be718182be79a47938a',
   },
+  {
+    // Company reset (MS_COMPANY Ctrl+R): tenant-level archive of every row a reset deletes.
+    name: '20261128120000_company_reset_archive',
+    checksum: 'c4bb0df6cb097647101947ce3da6c46a95551e2831c6f0cddae27590bb336e78',
+  },
 ];

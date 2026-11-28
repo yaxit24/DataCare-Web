@@ -108,6 +108,8 @@ function harness() {
     $queryRawUnsafe: vi.fn(async (sqlValue: unknown, ...params: unknown[]) => {
       const sql = String(sqlValue);
       if (sql.includes('"tenant_feature"')) return []; // dataTypes flag: default on
+      // The per-company write key every write transaction takes (companyWriteScope.ts): free here.
+      if (sql.includes('pg_try_advisory_xact_lock_shared')) return [{ ok: true }];
       if (sql.includes('FROM "auth_session"')) {
         return [
           {

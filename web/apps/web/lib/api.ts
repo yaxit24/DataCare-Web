@@ -15,7 +15,13 @@ export class ApiError extends Error {
   status: number;
   body: any;
   constructor(message: string, status: number, body: any) {
-    super(message);
+    super(
+      ['company-busy', 'transaction-timeout'].includes(body?.error) &&
+        typeof body?.message === 'string' &&
+        body.message.trim()
+        ? body.message
+        : message,
+    );
     this.status = status;
     this.body = body;
   }

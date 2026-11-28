@@ -46,6 +46,22 @@ describe('route policy registry', () => {
       action: 'print',
     });
   });
+  it('keeps the company reset admin-only and free of the session company scope', () => {
+    expect(routePolicyFor('GET', '/companies/:coCode/reset/preview')).toEqual({
+      kind: 'form',
+      form: 'Masters/Companies',
+      action: 'read',
+      adminOnly: true,
+      businessScope: false,
+    });
+    expect(routePolicyFor('POST', '/companies/:coCode/reset')).toEqual({
+      kind: 'form',
+      form: 'Masters/Companies',
+      action: 'delete',
+      adminOnly: true,
+      businessScope: false,
+    });
+  });
   it('uses each owning order form and Setting form for new image and lot operations', () => {
     for (const [prefix, form] of [
       ['sales-orders', 'Sales/Sales Order'],
@@ -179,8 +195,9 @@ describe('route policy registry', () => {
     // The linked old-gold purchase adds GET and POST /settings/urd-books (Utilities/Settings): 844.
     // The Sales screen's linked old-gold modal reads its URD book under Sales Invoice (GET /sales/urd-books): 845.
     // Stray old-gold purchase removal uses the Purchase delete right: 846.
-    expect(routes).toHaveLength(846);
-    expect(new Set(routes.map((route) => `${route.method} ${route.path}`)).size).toBe(846);
+    // Company reset (MS_COMPANY Ctrl+R) adds its admin-only preview and reset: 848.
+    expect(routes).toHaveLength(848);
+    expect(new Set(routes.map((route) => `${route.method} ${route.path}`)).size).toBe(848);
 
     const policies = routes.map((route) => ({
       ...route,

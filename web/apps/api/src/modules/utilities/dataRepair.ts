@@ -196,6 +196,18 @@ export const REPAIR_REASON_MIN_LENGTH = 12;
  */
 export const REPAIR_BACKUP_MAX_AGE_MS = 24 * 60 * 60 * 1000;
 
+/** The written reason a destructive change must carry, trimmed; refused below `REPAIR_REASON_MIN_LENGTH`. */
+export function requireReason(input: string | undefined): string {
+  const reason = (input ?? '').trim();
+  if (reason.length < REPAIR_REASON_MIN_LENGTH) {
+    throw new RepairError(
+      'reason-required',
+      `record why this repair is being applied (at least ${REPAIR_REASON_MIN_LENGTH} characters)`,
+    );
+  }
+  return reason;
+}
+
 /** Everything the apply will demand for this operation, in the shape the console needs. */
 export function authorityFor(op: RepairOperation, scope: RepairScope): RepairAuthority {
   const destructive = op.applyAvailable !== false && isDestructive(op);
@@ -301,7 +313,7 @@ export interface RepairApplyInput {
  * same migration path login uses, so a shop that has not yet rotated credentials is not locked out of a
  * repair it is entitled to run.
  */
-async function requireReauthentication(
+export async function requireReauthentication(
   tx: any,
   scope: RepairScope,
   input: RepairApplyInput,
@@ -336,7 +348,7 @@ async function requireReauthentication(
  * operator therefore cannot satisfy this by typing a plausible string, and an old backup cannot be reused to
  * cover rows created after it.
  */
-async function requireBackupReference(
+export async function requireBackupReference(
   tx: any,
   scope: RepairScope,
   input: RepairApplyInput,
@@ -398,13 +410,7 @@ export async function applyRepair(
       `this operation is ${op.risk} risk; type "${authority.confirmation}" to confirm`,
     );
   }
-  const reason = (input.reason ?? '').trim();
-  if (authority.reason && reason.length < REPAIR_REASON_MIN_LENGTH) {
-    throw new RepairError(
-      'reason-required',
-      `record why this repair is being applied (at least ${REPAIR_REASON_MIN_LENGTH} characters)`,
-    );
-  }
+  const reason = authority.reason ? requireReason(input.reason) : (input.reason ?? '').trim();
   return withTxBudget(prisma, scope.tenantId, 'heavy', async (tx: any) => {
     // Authority first: an unauthorised caller must not even hold the operation lock.
     if (authority.reauthentication) await requireReauthentication(tx, scope, input);

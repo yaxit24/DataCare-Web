@@ -104,7 +104,7 @@ import { healthPayload, readiness, type PdfRendererProbe } from './modules/ops/h
 import type { PdfRenderer } from './modules/reports/render.js';
 import { correlationId, requestCompletedFields } from './modules/ops/requestContext.js';
 import { collectDatabaseMetrics, MetricsRegistry, type RouteClass } from './modules/ops/metrics.js';
-import { isTransactionTimeout } from './modules/shared/txBudget.js';
+import { CompanyBusyError, isTransactionTimeout } from './modules/shared/txBudget.js';
 import { loadRoundingFlags } from './modules/shared/roundingPolicyLoader.js';
 import { operationalInvariants } from './modules/ops/invariants.js';
 import {
@@ -116,6 +116,7 @@ import { reportFormForSlug } from './modules/reports/reportAuthorization.js';
 import { finePrintRefusalText } from './modules/reports/ledgerFinePrints.js';
 import { tagOpeningRefusalText } from './modules/stock/tagOpeningPrint.js';
 import { loginRateLimitKey } from './modules/auth/loginRateLimitKey.js';
+import { runWithCompanyWriteScope } from './modules/shared/companyWriteScope.js';
 
 export interface BuildOpts {
   prisma: any;
@@ -213,10 +214,11 @@ export async function buildApp(opts: BuildOpts): Promise<FastifyInstance> {
     // handler runs, after the preHandler hook has authenticated the request.
     const original = routeOptions.handler as (this: unknown, ...args: unknown[]) => unknown;
     routeOptions.handler = function (this: unknown, req: FastifyRequest, reply: FastifyReply) {
-      return runWithSessionDataType(
-        (req as RequestState).session as any,
-        () => original.call(this, req, reply),
-        requestedBooks(req),
+      const session = (req as RequestState).session as any;
+      // ...and in the session company's write scope: its write transactions yield to a reset of that company
+      // (modules/shared/companyWriteScope.ts).
+      return runWithCompanyWriteScope(session, () =>
+        runWithSessionDataType(session, () => original.call(this, req, reply), requestedBooks(req)),
       );
     } as any;
   });
@@ -233,6 +235,12 @@ export async function buildApp(opts: BuildOpts): Promise<FastifyInstance> {
   // Say so with a retryable 503 instead of an opaque 500 (N53). Nothing retries automatically: a manual retry
   // becomes safe once N52 adds idempotency keys. Every other error goes on to Fastify's default handler.
   app.setErrorHandler((error, req, reply) => {
+    // A write to a company while it is being reset: rolled back before writing, retry once the reset ends.
+    if (error instanceof CompanyBusyError)
+      return reply
+        .code(503)
+        .header('Retry-After', '2')
+        .send({ error: 'company-busy', retryable: true, message: error.message });
     if (isTransactionTimeout(error)) {
       req.log.warn({ err: error }, 'transaction budget exceeded; rolled back');
       return reply

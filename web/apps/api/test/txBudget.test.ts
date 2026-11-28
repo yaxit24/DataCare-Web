@@ -3,6 +3,7 @@ import { MetricsRegistry } from '../src/modules/ops/metrics.js';
 import {
   COMMAND_TX_BUDGETS,
   isTransactionTimeout,
+  CompanyBusyError,
   READ_COMMITTED_VOUCHER,
   SERIALIZABLE_VOUCHER,
   SNAPSHOT_READ,
@@ -20,11 +21,12 @@ describe('command transaction budgets', () => {
     vi.unstubAllEnvs();
   });
 
-  it('declares the three budget classes from the plan', () => {
+  it('declares the three budget classes from the plan, and the company reset maintenance class', () => {
     expect(COMMAND_TX_BUDGETS).toEqual({
       read: { timeout: 5_000, maxWait: 2_000 },
       voucher: { timeout: 20_000, maxWait: 5_000 },
       heavy: { timeout: 30_000, maxWait: 10_000 },
+      maintenance: { timeout: 300_000, maxWait: 10_000 },
     });
     expect(Object.isFrozen(COMMAND_TX_BUDGETS)).toBe(true);
     expect(Object.isFrozen(COMMAND_TX_BUDGETS.voucher)).toBe(true);
@@ -72,6 +74,14 @@ describe('command transaction budgets', () => {
     expect(isTransactionTimeout({ code: 'P2010', meta: { code: '55P03' }, message: '' })).toBe(
       true,
     );
+    // A deadlock or serialization failure rolled the whole transaction back too: retryable.
+    expect(isTransactionTimeout({ code: 'P2010', meta: { code: '40P01' }, message: '' })).toBe(
+      true,
+    );
+    expect(isTransactionTimeout({ code: 'P2010', meta: { code: '40001' }, message: '' })).toBe(
+      true,
+    );
+    expect(isTransactionTimeout(new CompanyBusyError())).toBe(true);
     expect(
       isTransactionTimeout({ code: 'P2010', meta: { code: '23505' }, message: 'Raw query failed' }),
     ).toBe(false);

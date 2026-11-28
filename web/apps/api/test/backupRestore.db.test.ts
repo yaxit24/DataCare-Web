@@ -1,3 +1,5 @@
+import { companyWriteLockKey } from '../src/modules/shared/companyWriteScope.js';
+import { isTransactionTimeout } from '../src/modules/shared/txBudget.js';
 import { PrismaClient } from '@datacare/db';
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest';
 import {
@@ -224,6 +226,50 @@ databaseDescribe('WP-02A company logical backup/restore', () => {
     await runtime?.$disconnect();
   });
 
+  it.each(['exclusive', 'shared'] as const)(
+    'restore waits boundedly for a %s company write lock without changing data',
+    async (mode) => {
+      await seedBase();
+      const document = await backupCompany(runtime, TENANT_A, COMPANY_A);
+      let release!: () => void;
+      const held = new Promise<void>((resolve) => (release = resolve));
+      let locked!: () => void;
+      const ready = new Promise<void>((resolve) => (locked = resolve));
+      const holder = owner.$transaction(
+        async (tx) => {
+          await tx.$executeRawUnsafe(
+            `SELECT ${mode === 'shared' ? 'pg_advisory_xact_lock_shared' : 'pg_advisory_xact_lock'}(hashtextextended($1, 0))`,
+            companyWriteLockKey(TENANT_A, COMPANY_A),
+          );
+          locked();
+          await held;
+        },
+        { timeout: 25_000 },
+      );
+      try {
+        await Promise.race([ready, holder]);
+        const started = Date.now();
+        const error = await restoreCompany(
+          runtime,
+          { tenantId: TENANT_A, companyCode: COMPANY_A },
+          document,
+        ).then(
+          () => null,
+          (error: unknown) => error,
+        );
+        expect(error).not.toBeNull();
+        expect(isTransactionTimeout(error)).toBe(true);
+        expect(Date.now() - started).toBeLessThan(20_000);
+      } finally {
+        release();
+        await holder;
+      }
+      expect(checksums(await backupCompany(runtime, TENANT_A, COMPANY_A))).toEqual(
+        checksums(document),
+      );
+    },
+  );
+
   it('classifies the complete live schema and seals a lossless v2 document', async () => {
     await seedBase();
     const document = await backupCompany(runtime, TENANT_A, COMPANY_A);
@@ -235,11 +281,16 @@ databaseDescribe('WP-02A company logical backup/restore', () => {
     // tenant-shared (operator-provisioned, a restore must not grant it): 177 tables, 16 tenant-shared. The data-type
     // plan flag adds tenant_feature (operator-provisioned, excluded): 178 tables, 17 tenant-shared. The linked old-gold
     // purchase adds company_urd_book (tenant_id + CO_CODE, company configuration, included): 179 tables, 161 included.
-    expect(document.manifest.tables).toHaveLength(179);
+    // The company reset archive (company_reset_archive, co_code not CO_CODE) is tenant-shared and excluded: 180 tables,
+    // 18 tenant-shared.
+    expect(document.manifest.tables).toHaveLength(180);
     expect(document.manifest.tables.filter((table) => table.included)).toHaveLength(161);
     expect(
       document.manifest.tables.filter((table) => table.scope === 'tenant-shared'),
-    ).toHaveLength(17);
+    ).toHaveLength(18);
+    expect(
+      document.manifest.tables.find((table) => table.name === 'company_reset_archive'),
+    ).toMatchObject({ scope: 'tenant-shared', included: false });
     expect(document.manifest.tables.filter((table) => table.scope === 'system')).toHaveLength(1);
     expect(document.manifest.tables.every((table) => table.primaryKey.length > 0)).toBe(true);
     expect(document.manifest.fingerprint).toMatch(/^[a-f0-9]{64}$/);
