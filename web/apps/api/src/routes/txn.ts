@@ -245,6 +245,7 @@ import { registerTaxMasterRoutes } from './taxMaster.js';
 import { registerAutoItemRoutes } from './autoItem.js';
 import { registerGroupMasterRoutes } from './groupMaster.js';
 import { registerCompanyIdentityRoutes } from './companyIdentity.js';
+import { registerUrdBookSettingsRoutes } from './urdBookSettings.js';
 import { registerProductMasterRoutes } from './productMaster.js';
 import { registerMasterScreenRoutes } from './masterScreens.js';
 import { registerWholesaleSaleRoutes } from './wholesaleSale.js';
@@ -954,6 +955,7 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
           error: e.code,
           message: e.message,
           ...(e.form === undefined ? {} : { form: e.form, action: e.action }),
+          ...((e as any).details === undefined ? {} : { details: (e as any).details }), // 3B facts
         });
       if (e instanceof VoucherVersionConflictError)
         return reply.code(409).send({ error: e.code, message: e.message });
@@ -1113,6 +1115,7 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
   registerGroupMasterRoutes(app, extraRouteHelpers, formCapabilities);
   registerProductMasterRoutes(app, extraRouteHelpers, formCapabilities);
   registerCompanyIdentityRoutes(app, extraRouteHelpers);
+  registerUrdBookSettingsRoutes(app, extraRouteHelpers);
   registerTagPrintScreenRoutes(app, extraRouteHelpers, formCapabilities);
   registerMasterScreenRoutes(app, extraRouteHelpers, formCapabilities);
   registerWholesaleSaleRoutes(app, extraRouteHelpers);

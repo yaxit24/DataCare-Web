@@ -1,6 +1,7 @@
 'use client';
 import { useState } from 'react';
 import { get, post, put, ApiError } from '../../../../lib/api';
+import { usePrintGate } from '../../../../lib/formRights';
 import {
   billNoForSave,
   derivedCellsToClear,
@@ -271,6 +272,7 @@ function LegacySaleReturnForm() {
   // TR_SALE_RTN.cs:2345 "Vch Date"; a reopened return keeps its stored date (:10104, :12607). Blank = today.
   const [vchDate, setVchDate] = useState('');
   const [err, setErr] = useState('');
+  const printGate = usePrintGate('Sales/Sales Return', setErr); // TR_SALE_RTN.cs:15045-15052
   const [busy, setBusy] = useState(false);
 
   // A changed weight or rate drops a reopened line's stored amount/fine so the server re-prices it (WP-27).
@@ -761,7 +763,7 @@ function LegacySaleReturnForm() {
               type="button"
               className="ghost"
               onClick={() =>
-                openDocument(
+                printGate.open(
                   `/api/sales/credit-note?coBook=${encodeURIComponent(coBook)}&vchNo=${encodeURIComponent(String(result.vchNo))}&format=html`,
                 )
               }
@@ -779,6 +781,7 @@ function LegacySaleReturnForm() {
           `/api/sales/credit-note?coBook=${encodeURIComponent(coBook)}&vchNo=${encodeURIComponent(v)}&format=html`
         }
         reloadKey={result?.vchNo}
+        canPrint={printGate.canPrint}
       />
     </div>
   );

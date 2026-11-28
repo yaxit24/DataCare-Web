@@ -357,6 +357,145 @@ async function approvalLifecycle(ctx, inspect) {
   });
 }
 
+/**
+ * Account check-and-repair on Contra (owner decision 2026-11-27): a contra saved through the normal route, one ledger
+ * amount damaged in the database, found by the screen's check, repaired by its apply, and clean on the next check.
+ */
+const CONTRA_TABLES = ['CONTRA_DATA', 'AC_DATA', 'ROJ_MEL_DATA', 'REMARK_DATA', 'TEMP_BOOK_DATA'];
+async function contraPostings(ctx, vchNo) {
+  const out = {};
+  for (const table of ['AC_DATA', 'ROJ_MEL_DATA', 'TAX_DATA'])
+    out[table] = await ctx.rows(
+      `SELECT to_jsonb(t) - 'row_id' AS r FROM "${table}" t
+        WHERE tenant_id=$1 AND "CO_CODE"='01' AND "LC_CODE"='01' AND "CO_YEAR"=$2 AND "CO_BOOK"='CON' AND "VCH_NO"=$3
+        ORDER BY to_jsonb(t)::text`,
+      YEAR,
+      vchNo,
+    );
+  return out;
+}
+
+async function checkContra(page) {
+  const [response] = await Promise.all([
+    page.waitForResponse((value) =>
+      isApi(value, '/utilities/data-refresh/data-refresh-account-contra/preview'),
+    ),
+    page.getByRole('button', { name: 'Check vouchers', exact: true }).click(),
+  ]);
+  assert.equal(response.status(), 200, await response.text());
+  return response.json();
+}
+
+async function accountContraLifecycle(ctx) {
+  const { page } = await ctx.session(as(USERS.admin.user, 'data-refresh-account-contra'));
+  await openScreen(page);
+  const today = new Date();
+  const vchDate = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+  const created = await page.evaluate(async (date) => {
+    const response = await fetch('/api/contra', {
+      method: 'POST',
+      credentials: 'include',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({
+        coBook: 'CON',
+        vchDate: date,
+        lines: [
+          { crdr: 'DR', acCode: 'BANK', amount: 321.5, itDesc: 'DRF account check' },
+          { crdr: 'CR', acCode: 'CASH', amount: 321.5 },
+        ],
+      }),
+    });
+    return { status: response.status, body: await response.text() };
+  }, vchDate);
+  assert.equal(created.status, 201, created.body);
+  const vchNo = String(JSON.parse(created.body).vchNo).padStart(5, '0');
+  const checksum = `${'d'.repeat(48)}${String(Date.now()).slice(-16).padStart(16, '0')}`;
+  try {
+    const writer = await contraPostings(ctx, vchNo);
+    await exec(
+      ctx,
+      `UPDATE "AC_DATA" SET "DR_AMT"="DR_AMT"+1
+        WHERE tenant_id=$1 AND "CO_CODE"='01' AND "LC_CODE"='01' AND "CO_YEAR"=$2 AND "CO_BOOK"='CON' AND "VCH_NO"=$3
+          AND "DR_AMT"<>0`,
+      YEAR,
+      vchNo,
+    );
+    await exec(
+      ctx,
+      `INSERT INTO "company_backup_run"(tenant_id,co_code,checksum,document_version,generated_at,table_count,row_count,operator)
+       VALUES ($1,'01',$2,1,now(),1,0,$3)`,
+      checksum,
+      USERS.admin.user,
+    );
+    const [accountResponse] = await Promise.all([
+      page.waitForResponse((value) =>
+        isApi(value, '/utilities/data-refresh/data-refresh-account/preview'),
+      ),
+      page.getByRole('button', { name: 'Account', exact: true }).click(),
+    ]);
+    assert.equal(accountResponse.status(), 200, await accountResponse.text());
+    await page.locator('#account-family').selectOption('contra');
+    const first = await checkContra(page);
+    const differing = first.detail.vouchers.filter((v) =>
+      ['differs', 'missing'].includes(v.status),
+    );
+    assert.deepEqual(
+      differing.map((v) => [v.coBook, v.vchNo, v.status]),
+      [['CON', vchNo, 'differs']],
+    );
+    assert.deepEqual(first.diffs, [{ table: 'AC_DATA', insert: 0, update: 1, delete: 0 }]);
+    const row = page.locator(`tr[data-voucher="CON/${vchNo}"]`);
+    await row.getByText('AC_DATA: 0 missing, 0 extra, 1 changed (DR_AMT)').waitFor();
+    await page.locator('#account-reason').fill('repair the damaged contra ledger leg');
+    await page.locator('#account-confirmation').fill(first.requiresConfirmation);
+    await page.locator('#account-backup').fill(checksum);
+    await page.locator('#account-password').fill(process.env.FEATURE_E2E_PASSWORD ?? '');
+    const [applyResponse] = await Promise.all([
+      page.waitForResponse((value) =>
+        isApi(value, '/utilities/data-refresh/data-refresh-account-contra/apply'),
+      ),
+      page.getByRole('button', { name: 'Apply Contra repair', exact: true }).click(),
+    ]);
+    assert.equal(applyResponse.status(), 200, await applyResponse.text());
+    const applied = await applyResponse.json();
+    assert.deepEqual(applied.applied, first.diffs);
+    await page.getByText(/Account Refersh Process Complete\./).waitFor();
+    const repaired = await contraPostings(ctx, vchNo);
+    assert.deepEqual(repaired, writer, 'the apply restores the rows the contra writer posted');
+    const second = await checkContra(page);
+    assert.equal(
+      second.detail.vouchers.some((v) => v.vchNo === vchNo && v.coBook === 'CON'),
+      false,
+    );
+    const [run] = await ctx.rows(
+      `SELECT jsonb_array_length(before_rows) n FROM "data_repair_run"
+        WHERE tenant_id=$1 AND operation_id='data-refresh-account-contra' AND state='applied'
+        ORDER BY row_id DESC LIMIT 1`,
+    );
+    assert.equal(Number(run.n), 1);
+    return { vchNo, first, applied, second, writer, repaired };
+  } finally {
+    await ctx.owner.$transaction(async (tx) => {
+      await tx.$executeRawUnsafe(`SET LOCAL "app.allow_repair_purge"='on'`);
+      for (const table of CONTRA_TABLES)
+        await tx.$executeRawUnsafe(
+          `DELETE FROM "${table}" WHERE tenant_id=$1 AND "CO_CODE"='01' AND "CO_BOOK"='CON' AND "VCH_NO"=$2`,
+          ctx.tenantId,
+          vchNo,
+        );
+      await tx.$executeRawUnsafe(
+        `DELETE FROM "data_repair_run" WHERE tenant_id=$1 AND operation_id='data-refresh-account-contra'`,
+        ctx.tenantId,
+      );
+      await tx.$executeRawUnsafe(
+        `DELETE FROM "company_backup_run" WHERE tenant_id=$1 AND checksum=$2`,
+        ctx.tenantId,
+        checksum,
+      );
+    });
+  }
+}
+
 export const dataRefresh = {
   feature: 'data-refresh',
   title: 'Company → Data Refresh (MS_UPDATE, /utilities/data-refresh)',
@@ -1068,7 +1207,7 @@ export const dataRefresh = {
       'journey.account-full-builder',
       'T18',
       'MS_UPDATE.cs:2334-2669; playbook J23',
-      'Not built, and not an external limit: the desktop Account button deletes AC_DATA, ROJ_MEL_DATA, TAX_DATA, DHRN_DATA and re-posts every voucher of the year through about 120 builder methods (Ac_Ledr 55, Ac_Rojmel 44, Ac_Tax 48; MS_UPDATE.cs:2401-2663). The web writes those rows inside each voucher save with its own posting rules, so an equal rebuild needs a per-voucher-type re-posting engine the web does not have. D-REF-3 (owner, 2 Nov 2026) says ship preview-only when the effect cannot be reproduced exactly. The proven prefix (book flags, clearing dates, bank reconciliation) is applied by the advanced operation ledger-normalise, covered by dataRepair.db.test.ts. Owner question: approve a re-posting engine, or accept preview-only for good.',
+      'Partly built: per the owner decision of 27 Nov 2026 Account is check-and-repair per voucher family, and Contra and Fine Jv apply (case account.contra-check-and-repair); the other families remain. The desktop Account button deletes AC_DATA, ROJ_MEL_DATA, TAX_DATA, DHRN_DATA and re-posts every voucher of the year through about 120 builder methods (Ac_Ledr 55, Ac_Rojmel 44, Ac_Tax 48; MS_UPDATE.cs:2401-2663). The web writes those rows inside each voucher save with its own posting rules, so an equal rebuild needs a per-voucher-type re-posting engine the web does not have. D-REF-3 (owner, 2 Nov 2026) says ship preview-only when the effect cannot be reproduced exactly. The proven prefix (book flags, clearing dates, bank reconciliation) is applied by the advanced operation ledger-normalise, covered by dataRepair.db.test.ts. Owner question: approve a re-posting engine, or accept preview-only for good.',
     ),
     blocked(
       'journey.stock-full-builder',
@@ -1137,6 +1276,21 @@ export const dataRefresh = {
         } finally {
           await exec(ctx, `DELETE FROM "TAG_IMAGE_DATA" WHERE tenant_id=$1 AND "TAG_NO"='DRF-IMG'`);
         }
+      },
+    ),
+    C(
+      'account.contra-check-and-repair',
+      'T07',
+      'mutation',
+      'Owner decision 2026-11-27 (docs/handbook/web/data-refresh.md): Account is check-and-repair per family; MS_UPDATE.cs:2334-2669 with Contra_Ledr Ac_Ledr.cs:840-848 and Contra_Rojmel Ac_Rojmel.cs:336-340',
+      async (ctx) => {
+        const result = await accountContraLifecycle(ctx);
+        return {
+          observation: `Contra ${result.vchNo}: the check showed the damaged DR_AMT, the apply restored the writer's rows, the second check did not list it`,
+          expected: result.first.diffs,
+          database: { writer: result.writer, repaired: result.repaired },
+          downstream: { secondCheck: result.second.detail.summary },
+        };
       },
     ),
   ],

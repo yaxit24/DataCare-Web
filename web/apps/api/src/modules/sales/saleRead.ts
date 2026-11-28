@@ -5,6 +5,7 @@ import { voucherVersionTx, versionKeyOf } from '../vouchers/version.js';
 import { formatVoucherNo, type VoucherScope } from '../vouchers/numbering.js';
 import { readSaleResidualsTx, stonesByLine } from './saleResiduals.js';
 import { hasWebRoundOffLegTx } from '../shared/legacyRoundOff.js';
+import { readOrderAdvanceNotesTx } from './orderAdvanceConfirm.js';
 import { SALE_WRITE_TABLES, SaleValidationError, completeSaleScope, saleParams } from './sales.js';
 
 /**
@@ -152,6 +153,8 @@ export async function getSale(
         ? { ordNo: text(residual.orders[0].ordNo), adjustAmt: num(residual.orders[0].amount) }
         : null,
       orders: residual.orders,
+      // Owner decision 3B: who confirmed another customer's or an over-open order advance, and when.
+      orderAdvanceNotes: await readOrderAdvanceNotesTx(tx, params, residual.orders),
       upiRows: residual.upiRows,
       creditNotes: residual.creditNotes,
       advanceAmount: num(h.ADV_AMT),

@@ -1540,6 +1540,20 @@ async function writeSaleTx(
         input.orders ?? [],
         round2s(grandWithTcs - paidNow - kasar - creditNoteAdjust + cashPaidAmt),
         (msg) => new SaleValidationError(msg),
+        {
+          acCode: input.acCode,
+          acName: text(header.AC_NAME),
+          ack: input.orderAdvanceAck,
+          audit: {
+            tenantId: input.scope.tenantId,
+            key,
+            acCode: input.acCode,
+            vchDate: voucherDate,
+            bookName: bookPolicy.bookName,
+            originalUser: ctx.mainUser,
+            user: ctx.editingUser ?? input.mainUser ?? null,
+          },
+        },
       );
   const orderAdjust = round2s(orderRows.reduce((sum, r) => sum + r.amount, 0));
   // Cash paid back to the customer adds to what they owe (TR_SALE.cs:19386, `+ MSG2_TOTAL[13,3]`), as its ledger

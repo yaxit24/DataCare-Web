@@ -1,6 +1,7 @@
 'use client';
 import { useEffect, useMemo, useState } from 'react';
 import { get, post, ApiError } from '../../../lib/api';
+import { UrdBookSettings } from '../../../components/UrdBookSettings';
 
 interface SettingOption {
   label: string;
@@ -214,6 +215,7 @@ export default function SettingsPage() {
           {saving ? 'Saving…' : dirtyCount ? `Save ${dirtyCount} change(s)` : 'Save Settings'}
         </button>
       </form>
+      <UrdBookSettings />
     </div>
   );
 }

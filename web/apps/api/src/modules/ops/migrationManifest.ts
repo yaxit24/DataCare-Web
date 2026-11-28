@@ -258,4 +258,14 @@ export const EXPECTED_MIGRATIONS: ReadonlyArray<{
     name: '20261127120000_web_purchase_item_type',
     checksum: '1d481c016b642d7b147bad49924c208b334e03c2c9b8661991f04a75078e8d0d',
   },
+  {
+    // Data Refresh > Account check-and-repair keeps the replaced rows on the run record (MS_UPDATE.cs:2334-2669).
+    name: '20261127130000_data_repair_before_rows',
+    checksum: '4ad81e3644cccdda687c18cea1c9f48936699cf6d06b92a57532703db9daf9ff',
+  },
+  {
+    // Linked old-gold purchase: per-company Gold/Silver URD purchase book (TR_SALE.cs:18756-18842 hardcodes 043/044).
+    name: '20261127140000_company_urd_purchase_book',
+    checksum: 'e17eda82c8002b209db6cade6a1b3a1cac0bf6bea1c92be718182be79a47938a',
+  },
 ];

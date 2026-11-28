@@ -1144,6 +1144,56 @@ export const purchaseInvoice = {
       },
     ),
 
+    C(
+      'refusal.linked-sale-delete',
+      'T10',
+      'refusal',
+      'A purchase booked against a sale (PR_DATA SL_BILL_*, TR_PURC.cs:12647-12650) cannot be deleted from the purchase screen; the refusal names the sale to open (TR_PURC.cs:13443-13447, owner decision 2B)',
+      async (ctx) => {
+        const { page } = await ctx.session();
+        const vchNo = await createOne(ctx, page);
+        const link = (no, lc, yr, book) =>
+          ctx.owner.$executeRawUnsafe(
+            `UPDATE "PR_DATA" SET "SL_BILL_NO"=$3,"SL_BILL_LC"=$4,"SL_BILL_YRCD"=$5,"SL_BILL_DBCD"=$6
+              WHERE tenant_id=$1 AND "CO_BOOK"='${BOOK}' AND "VCH_NO"=$2`,
+            ctx.tenantId,
+            vchNo,
+            no,
+            lc,
+            yr,
+            book,
+          );
+        const [{ yr }] = await ctx.rows(
+          `SELECT "CO_YEAR" yr FROM "PR_DATA" WHERE tenant_id=$1 AND "CO_BOOK"='${BOOK}' AND "VCH_NO"=$2`,
+          vchNo,
+        );
+        await link('00077', '01', yr, 'SL');
+        try {
+          const before = await purchaseWriteSet(ctx, vchNo);
+          await page.getByRole('button', { name: 'New', exact: true }).click();
+          await loadVoucher(page, vchNo);
+          const [response] = await Promise.all([
+            page.waitForResponse(
+              (r) => r.request().method() === 'DELETE' && /\/api\/purchases\//.test(r.url()),
+            ),
+            page.getByRole('button', { name: 'Delete', exact: true }).first().click(),
+          ]);
+          assert.equal(response.status(), 400, await response.text());
+          const body = await response.json();
+          assert.equal(body.message, 'Linked with sale SL/00077; open that sale');
+          await page.getByText('Linked with sale SL/00077; open that sale').first().waitFor();
+          assert.deepEqual(await purchaseWriteSet(ctx, vchNo), before);
+          return {
+            observation: `delete of ${vchNo} answered 400 "${body.message}"; write set unchanged`,
+            expected: 'refused, naming the sale',
+            database: { header: before.header },
+          };
+        } finally {
+          await link(null, null, null, null);
+        }
+      },
+    ),
+
     C('print.bill', 'T16', 'output', 'TR_PURC print: the saved purchase bill', async (ctx) => {
       const { page } = await ctx.session();
       const vchNo = await createOne(ctx, page);
@@ -1320,6 +1370,45 @@ export const purchaseInvoice = {
           observation: `clerk: form ${canSave ? 'shown' : 'not shown'}, save ${status ?? 'not attempted'}; nothing written`,
           expected: 'refused, no write',
           database: { before, after: before },
+        };
+      },
+    ),
+
+    C(
+      'rights.print-needs-frm-print',
+      'T11',
+      'refusal',
+      'TR_PURC.cs:13541-13548: BtnPrint answers "You Have No Print Rights....." when USER_SET.FRM_PRINT is not Y.',
+      async (ctx) => {
+        const admin = await ctx.session();
+        const vchNo = await createOne(ctx, admin.page);
+        const before = await header(ctx, vchNo);
+        const viewer = await ctx.session(as(USERS.printViewer.user));
+        // Not openPurchase: the print-less user's Save stays disabled, which this case does not need.
+        await viewer.page.goto('/txn/purchase');
+        await viewer.page.getByRole('heading', { name: 'Purchase Invoice', exact: true }).waitFor();
+        let popups = 0;
+        viewer.page.context().on('page', () => popups++);
+        await viewer.page.getByRole('button', { name: '▸ Recent vouchers', exact: true }).click();
+        const row = viewer.page.locator('table.grid tr', { hasText: vchNo }).last();
+        await row.getByRole('link', { name: 'Print', exact: true }).click();
+        await viewer.page.getByText('You Have No Print Rights.....').waitFor();
+        assert.equal(popups, 0, 'no document window opens');
+        // The server refuses both bill documents on its own, whatever the screen does.
+        const answers = {};
+        for (const url of [
+          `/api/purchases/${vchNo}/print?coBook=${BOOK}&format=html`,
+          `/api/purchases/invoice?coBook=${BOOK}&vchNo=${vchNo}&format=html`,
+        ]) {
+          answers[url] = (await viewer.page.request.get(url)).status();
+          assert.equal(answers[url], 403, url);
+        }
+        const after = await header(ctx, vchNo);
+        assert.deepEqual(after, before);
+        return {
+          observation: `print-less user saw the message and got ${JSON.stringify(answers)}`,
+          expected: 'message, no window, 403 from both print routes; voucher unchanged',
+          database: { before, after },
         };
       },
     ),

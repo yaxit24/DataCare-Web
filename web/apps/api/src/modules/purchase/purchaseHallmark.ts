@@ -270,3 +270,71 @@ export function carryUnownedColumns(
   }
   return { ...carried, ...built, ...blanks };
 }
+
+/**
+ * TR_PURC_HM's "this line changed" test on save (TR_PURC_HM.cs:8185-8195), over the PR_DETL columns the reopen loads
+ * into the grid (TR_PURC_HM.cs:7467-7586, TAG PURCHASE). The desktop compares a SUM of the weight/amount columns
+ * (each read at its grid format, the sum at 0.000; TAG_NWT and TAG_FINE count twice; TAG_NWT falls back to ITM_NWT)
+ * and a concatenation of the text columns (HM_ID4 twice, HM_ID3 not at all), exactly as written there.
+ */
+export function hallmarkLineSignature(row: Record<string, unknown>): string {
+  // purchase.ts's `num` (a junk value stays NaN), kept so the signature is identical to the pre-move one.
+  const num = (value: unknown): number => (value == null ? 0 : Number(value));
+  const v = (column: string, places: number) => Number(num(row[column]).toFixed(places));
+  const tagNwt = v('TAG_NWT', 3) || v('ITM_NWT', 3);
+  const tagFine = v('TAG_FINE', 2);
+  const sum =
+    // :8186 cols 9,10,12,21,41,45
+    v('BAG_WT', 3) +
+    num(row.ITM_PCS) +
+    v('ITM_GWT', 3) +
+    v('ITM_FINE', 3) +
+    tagNwt +
+    tagFine +
+    // :8187 cols 27,30,31,34,35
+    v('LBR_PRC', 2) +
+    v('LBR_AMT', 2) +
+    v('OTH_AMT', 2) +
+    v('TAG_COST', 2) +
+    v('ITM_MRP', 2) +
+    // :8188 cols 57,59,61,63,80
+    v('HM_ID_WT', 3) +
+    v('HM_ID2_WT', 3) +
+    v('HM_ID3_WT', 3) +
+    v('HM_ID4_WT', 3) +
+    num(row.OLD_SRNO) +
+    // :8189 cols 40,41,43,44,51
+    v('TAG_OTH_WT', 3) +
+    tagNwt +
+    v('TAG_TOUCH', 2) +
+    v('TAG_WEST_PRC', 2) +
+    v('TAG_OTH_AMT', 2) +
+    // :8190 cols 45,48,49,50,54
+    tagFine +
+    v('TAG_LBR_PRC', 2) +
+    v('TAG_LBR_RATE', 2) +
+    v('TAG_LBR_AMT', 2) +
+    v('TAG_MRP', 2) +
+    // :8191 cols 46,47,52,53
+    v('TAG_IT_RATE', 2) +
+    v('TAG_IT_AMT', 2) +
+    v('TAG_TOT_COST', 2) +
+    v('TAG_MARGIN_PRC', 2);
+  // :8193-8194 cols 1,4,5,8,3 then 55,58,62,62,86,56
+  const words = [
+    'IT_CODE',
+    'TBL_CODE',
+    'DESIGN_NO',
+    'ITM_SIZE',
+    'TAG_NO',
+    'HM_ID',
+    'HM_ID2',
+    'HM_ID4',
+    'HM_ID4',
+    'DESIGN_IMG_ID',
+    'KR_NAME',
+  ]
+    .map((column) => text(row[column]))
+    .join('');
+  return `${sum.toFixed(3)}|${words}`;
+}
