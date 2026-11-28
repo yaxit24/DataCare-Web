@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { del, get, post, put, ApiError } from '../../../../lib/api';
+import { usePrintGate } from '../../../../lib/formRights';
 import { useBusinessScope } from '../../../../components/BusinessScope';
 import { BookSelect } from '../../../../components/BookSelect';
 import { LookupPicker } from '../../../../components/LookupPicker';
@@ -97,6 +98,7 @@ function PlainPurchasePage() {
   // WP-28 (D6): the stored voucher as read; every value this screen does not show is sent back on save.
   const [loadedView, setLoadedView] = useState<Record<string, unknown> | null>(null);
   const [err, setErr] = useState('');
+  const printGate = usePrintGate('Purchase/Purchase Invoice', setErr); // TR_PURC.cs:13541-13548
   // Desktop purchase header fields (TR_PURC:12982-13056) — party contact, bank/cheque,
   // credit terms, discount, TDS/TCS, hallmark charge and the posting-account overrides.
   const [address1, setAddress1] = useState('');
@@ -675,7 +677,7 @@ function PlainPurchasePage() {
               type="button"
               className="ghost"
               onClick={() =>
-                openDocument(
+                printGate.open(
                   `/api/purchases/invoice?coBook=${encodeURIComponent(coBook)}&coYear=${encodeURIComponent(coYear)}&vchNo=${encodeURIComponent(String(result.vchNo))}&format=html`,
                 )
               }
@@ -705,6 +707,7 @@ function PlainPurchasePage() {
           `/api/purchases/invoice?coBook=${encodeURIComponent(coBook)}&coYear=${encodeURIComponent(coYear)}&vchNo=${encodeURIComponent(v)}&format=html`
         }
         reloadKey={result?.vchNo}
+        canPrint={printGate.canPrint}
       />
       {/* Desktop BtnImgS / BtnImgC / BtnImgD photograph the tag on the current grid row. */}
       <EntityImagePanel
