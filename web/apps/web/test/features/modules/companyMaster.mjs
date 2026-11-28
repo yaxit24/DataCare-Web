@@ -110,6 +110,14 @@ async function open(page, { noRights = false } = {}) {
   }
   await recordShown(page);
 }
+// tCoType is disabled until Ctrl+O (MS_COMPANY.cs:4253,6471-6476), which also disables Save until Enter on it
+// (:7279-7290).
+async function fillCompanyType(page, value) {
+  await page.keyboard.press('Control+o');
+  const box = page.getByLabel('Company Type', { exact: true });
+  await box.fill(value);
+  await box.press('Enter');
+}
 async function headers(page) {
   const response = await page.request.get('/api/me');
   assert.equal(response.status(), 200, await response.text());
@@ -522,7 +530,8 @@ export const companyMaster = {
             'Company Type': 'A',
           };
           for (const [label, value] of Object.entries(values))
-            await page.getByLabel(label, { exact: true }).fill(value);
+            if (label === 'Company Type') await fillCompanyType(page, value);
+            else await page.getByLabel(label, { exact: true }).fill(value);
           await page.getByLabel('Report Header', { exact: true }).selectOption('B');
           await page.getByLabel('Work Type', { exact: true }).selectOption('W');
           await page.getByLabel('Metal Type', { exact: true }).selectOption('S');
@@ -1162,7 +1171,7 @@ export const companyMaster = {
             await open(page);
             await page.getByRole('button', { name: 'Edit', exact: true }).click();
             await page.getByLabel('Name', { exact: true }).fill('ROLLBACK STAGES');
-            await page.getByLabel('Company Type', { exact: true }).fill('A');
+            await fillCompanyType(page, 'A');
             const before = await tenantFingerprint(ctx);
             const attempts = [];
             for (const table of ['CO_MAST', 'BOOK_DATA']) {
@@ -1468,17 +1477,188 @@ export const companyMaster = {
         }
       },
     ),
-    {
-      ...C(
-        'keyboard.full-workflow.pending',
-        'T17',
-        'mutation',
-        'MS_COMPANY.cs:6428-6745,7211-7276 defines full Enter, F1, Ctrl and tab flow',
-        async () => ({}),
-      ),
-      blocked:
-        'Blocked: the web form is one panel, while the desktop Enter chain moves across the TabMenu pages (tJudrection Enter → TabMenu.SelectNextTab and tBankName, :6676-6684; cboRptHader → SelectNextTab and tGstNo, :6740-6744; tRtgsNo Enter enables and focuses Save, :6731-6739), F1 on the name opens the hidden GroupBox1/pnlUae credential panels (:6498-6511, eMastData), Ctrl+O re-enables Company Type and disables Save (:6469-6474) and Ctrl+R shows the reset box (:6475-6478). Porting it needs the TabMenu page split and the credential panels the web deliberately hides (companies/page.tsx header), a product change larger than this test package; the Enter-opens-company half is company-master.keyboard.enter-opens-company.',
-    },
+    C(
+      'keyboard.full-workflow',
+      'T17',
+      'read-only',
+      'MS_COMPANY.cs Enter chain by TabIndex (Pnl1 0-16, Pnl2 17-21, Pnl3 22-25) with tCoCode/tCoName → cboWithOldCoMast (:6483-6534), cboWithOldCoMast → tCoName or tAddress1 (:7303-7320), tStateCode → TState (:7209-7251), cboRptHader → SelectNextTab and tGstNo (:6748-6752), tJudrection → SelectNextTab and tBankName (:6656-6665), tRtgsNo → Save (:6737-6746); Ctrl+O and Ctrl+R (:6471-6480); tCoType Enter → Save (:7279-7290); F1 on the name opens credential panels the web keeps hidden (:6502-6521)',
+      async (ctx) => {
+        await ctx.owner.$executeRawUnsafe(
+          `INSERT INTO "STATE_MAST"(tenant_id,"STATE_CODE","STATE_NAME") VALUES ($1,'Z1','ZETA E2E STATE')`,
+          TENANT,
+        );
+        try {
+          return await keepCompany01(ctx, async (before) => {
+            const { page } = await ctx.session();
+            await open(page);
+            // The focused control's accessible label and the section (fieldset legend) holding it.
+            const focused = () =>
+              page.evaluate(() => {
+                const el = document.activeElement;
+                const label =
+                  el?.getAttribute('aria-label') ?? el?.labels?.[0]?.textContent ?? el?.textContent;
+                // The shell wraps every page in a legend-less fieldset; a section is one with its own legend.
+                const legend = el
+                  ?.closest('fieldset:has(> legend)')
+                  ?.querySelector(':scope > legend')?.textContent;
+                return `${legend ?? '-'}: ${String(label).trim()}`;
+              });
+            const walk = async (limit = 40) => {
+              const seen = [await focused()];
+              // Stop on any Save: one more Enter would press it.
+              for (let i = 0; i < limit && !seen.at(-1).endsWith(': Save'); i++) {
+                await page.keyboard.press('Enter');
+                seen.push(await focused());
+              }
+              return seen;
+            };
+            const save = page.getByRole('button', { name: 'Save', exact: true });
+            const D = (label) => `Company Detail: ${label}`;
+            const T = (label) => `Tax Detail: ${label}`;
+            const B = (label) => `Bank Detail: ${label}`;
+            const tail = [
+              D('Work Type'),
+              D('Metal Type'),
+              D('Report Header'),
+              T('GST No'),
+              T('CST No'),
+              T('PAN No'),
+              T('Dhiran No'),
+              T('Jurisdiction'),
+              B('Bank Name'),
+              B('Bank Area'),
+              B('Bank Account No'),
+              B('RTGS No'),
+            ];
+
+            // Edit: the whole chain from Code to Save, across both section switches.
+            await page.getByRole('button', { name: 'Edit', exact: true }).click();
+            await page.getByLabel('Name', { exact: true }).fill('KEYS E2E COMPANY');
+            await page.getByLabel('State Code', { exact: true }).fill('Z1');
+            await page.getByLabel('State', { exact: true }).fill('');
+            await page.locator('#company-code').focus();
+            const editChain = await walk();
+            assert.deepEqual(editChain, [
+              D('Code'),
+              D('Name'),
+              D('Address 1'),
+              D('Address 2'),
+              D('Address 3'),
+              D('Country'),
+              D('State Code'),
+              D('State'),
+              D('City'),
+              D('Pin Code'),
+              D('Phone'),
+              D('Phone 2'),
+              D('Mobile'),
+              D('Mobile 2'),
+              D('Email'),
+              ...tail,
+              '-: Save',
+            ]);
+            assert.equal(
+              await page.getByLabel('State', { exact: true }).inputValue(),
+              'ZETA E2E STATE',
+              'a known state code fills the State box',
+            );
+
+            // F1 on the name: the credential panels stay hidden, focus stays.
+            await page.getByLabel('Name', { exact: true }).focus();
+            await page.keyboard.press('F1');
+            assert.equal(await focused(), D('Name'));
+            assert.equal(await page.getByRole('dialog').count(), 0);
+
+            // Ctrl+O: Company Type unlocked and focused, Save disabled until Enter there.
+            const type = page.getByLabel('Company Type', { exact: true });
+            assert.equal(await type.isDisabled(), true, 'Company Type starts disabled');
+            assert.equal(await save.isEnabled(), true);
+            await page.keyboard.press('Control+o');
+            assert.equal(await focused(), D('Company Type'));
+            assert.equal(await type.isDisabled(), false);
+            assert.equal(await save.isDisabled(), true, 'Ctrl+O disables Save');
+            await page.keyboard.press('Enter');
+            assert.equal(await focused(), '-: Save');
+            assert.equal(await save.isEnabled(), true, 'Enter on Company Type re-enables Save');
+            // RTGS No Enter is the other way back to Save.
+            await page.keyboard.press('Control+o');
+            assert.equal(await save.isDisabled(), true);
+            await page.getByLabel('RTGS No', { exact: true }).focus();
+            await page.keyboard.press('Enter');
+            assert.equal(await focused(), '-: Save');
+            assert.equal(await save.isEnabled(), true, 'Enter on RTGS No re-enables Save');
+
+            // Ctrl+R: the in-page Reset Compnay box explains and changes nothing.
+            await page.keyboard.press('Control+r');
+            const reset = page.getByRole('dialog', { name: 'Reset Compnay' });
+            await reset.waitFor();
+            const resetText = (await reset.textContent()).trim();
+            assert.match(resetText, /Not available on the web/);
+            assert.equal(
+              await page.getByLabel('Name', { exact: true }).inputValue(),
+              'KEYS E2E COMPANY',
+              'Ctrl+R did not reload the page',
+            );
+            await reset.getByRole('button', { name: 'Close', exact: true }).click();
+            assert.equal(await page.getByRole('dialog').count(), 0);
+            await page.getByRole('button', { name: 'Cancel', exact: true }).click();
+            await page.waitForFunction(
+              (name) => document.querySelector('#company-CO_NAME')?.value === name,
+              before.CO_NAME ?? '',
+            );
+
+            // New: Code → With Old Company Master → blank Name refused → Name → With Old → Address 1; RTGS No → the
+            // Year Create boxes → Save.
+            await page.getByRole('button', { name: 'New', exact: true }).click();
+            await page.locator('#company-code').focus();
+            const newHead = [await focused()];
+            for (let i = 0; i < 2; i++) {
+              await page.keyboard.press('Enter');
+              newHead.push(await focused());
+            }
+            await page.keyboard.press('Enter');
+            newHead.push(await focused());
+            await shownMessage(page, 'Please Insert Co Name ...');
+            await page.keyboard.type('KEYS NEW');
+            for (let i = 0; i < 2; i++) {
+              await page.keyboard.press('Enter');
+              newHead.push(await focused());
+            }
+            assert.deepEqual(newHead, [
+              D('Code'),
+              'Year Create: With Old Company Master',
+              D('Name'),
+              D('Name'),
+              'Year Create: With Old Company Master',
+              D('Address 1'),
+            ]);
+            await page.getByLabel('RTGS No', { exact: true }).focus();
+            const newTail = await walk(6);
+            assert.deepEqual(newTail, [
+              B('RTGS No'),
+              'Year Create: Year',
+              'Year Create: Opening Date',
+              'Year Create: Closing Date',
+              '-: Save',
+            ]);
+            await page.getByRole('button', { name: 'Cancel', exact: true }).click();
+            await recordShown(page);
+            const after = await company01(ctx);
+            assert.deepEqual(after, before, 'no key wrote company 01');
+            return {
+              observation: `Enter chain (edit) ${editChain.join(' → ')}; new ${[...newHead, ...newTail.slice(1)].join(' → ')}; Ctrl+O unlocked Company Type and disabled Save until Enter; Ctrl+R showed "${resetText}"; F1 inert`,
+              expected:
+                'desktop TabIndex order with the Tax and Bank section switches, ending on Save',
+            };
+          });
+        } finally {
+          await ctx.owner.$executeRawUnsafe(
+            `DELETE FROM "STATE_MAST" WHERE tenant_id=$1 AND "STATE_CODE"='Z1'`,
+            TENANT,
+          );
+        }
+      },
+    ),
     C(
       'journey.login-new-company-voucher.pending',
       'T18',
