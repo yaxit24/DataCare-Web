@@ -190,10 +190,13 @@ describe('route policy registry', () => {
     // and GET /reports/huid/zoom; report metal defaults adds one: 832 + 4 = 836.
     // The Sales Invoice Apr No import adds GET /sales/approval-help and GET /sales/approval-import: 836 + 2 = 838.
     // Data Import (UT_IMPORT Lite Soft) adds its preview and apply: 840. The Company print adds
-    // GET /company-identity/print: 841.
-    // Company reset (MS_COMPANY Ctrl+R) adds its admin-only preview and reset: 843.
-    expect(routes).toHaveLength(843);
-    expect(new Set(routes.map((route) => `${route.method} ${route.path}`)).size).toBe(843);
+    // GET /company-identity/print: 841. Data Refresh > Account check-and-repair adds its paged voucher list
+    // GET /utilities/data-refresh/account/:family/vouchers: 842.
+    // The linked old-gold purchase adds GET and POST /settings/urd-books (Utilities/Settings): 844.
+    // The Sales screen's linked old-gold modal reads its URD book under Sales Invoice (GET /sales/urd-books): 845.
+    // Company reset (MS_COMPANY Ctrl+R) adds its admin-only preview and reset: 847.
+    expect(routes).toHaveLength(847);
+    expect(new Set(routes.map((route) => `${route.method} ${route.path}`)).size).toBe(847);
 
     const policies = routes.map((route) => ({
       ...route,
@@ -1216,6 +1219,7 @@ describe('desktop Print-right boundary of the Company utilities (G225)', () => {
       ['POST', '/utilities/data-refresh/:id/preview'],
       ['POST', '/utilities/data-refresh/:id/apply'],
       ['GET', '/utilities/data-refresh/runs'],
+      ['GET', '/utilities/data-refresh/account/:family/vouchers'],
     ] as const)
       expect(routePolicyFor(method, path), `${method} ${path}`).toMatchObject({
         form: 'Utilities/Data Refresh',

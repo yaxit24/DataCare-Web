@@ -279,10 +279,12 @@ databaseDescribe('WP-02A company logical backup/restore', () => {
     // N52 adds api_command_receipt: tenant_id without CO_CODE, so tenant-shared and excluded (Idempotency-Key
     // receipts are transient request state, not company data). WP-33 adds daily_rate_copy_entitlement, also
     // tenant-shared (operator-provisioned, a restore must not grant it): 177 tables, 16 tenant-shared. The data-type
-    // plan flag adds tenant_feature (operator-provisioned, excluded): 178 tables, 17 tenant-shared. The company reset
-    // archive (company_reset_archive, co_code not CO_CODE) is tenant-shared and excluded: 179 tables, 18 tenant-shared.
-    expect(document.manifest.tables).toHaveLength(179);
-    expect(document.manifest.tables.filter((table) => table.included)).toHaveLength(160);
+    // plan flag adds tenant_feature (operator-provisioned, excluded): 178 tables, 17 tenant-shared. The linked old-gold
+    // purchase adds company_urd_book (tenant_id + CO_CODE, company configuration, included): 179 tables, 161 included.
+    // The company reset archive (company_reset_archive, co_code not CO_CODE) is tenant-shared and excluded: 180 tables,
+    // 18 tenant-shared.
+    expect(document.manifest.tables).toHaveLength(180);
+    expect(document.manifest.tables.filter((table) => table.included)).toHaveLength(161);
     expect(
       document.manifest.tables.filter((table) => table.scope === 'tenant-shared'),
     ).toHaveLength(18);
@@ -293,7 +295,7 @@ databaseDescribe('WP-02A company logical backup/restore', () => {
     expect(document.manifest.tables.every((table) => table.primaryKey.length > 0)).toBe(true);
     expect(document.manifest.fingerprint).toMatch(/^[a-f0-9]{64}$/);
     expect(document.checksum).toMatch(/^[a-f0-9]{64}$/);
-    expect(Object.keys(document.tables)).toHaveLength(160);
+    expect(Object.keys(document.tables)).toHaveLength(161);
     const accountManifest = document.manifest.tables.find((table) => table.name === 'AC_MAST')!;
     const imageManifest = document.manifest.tables.find((table) => table.name === 'ENTITY_IMAGE')!;
     expect(accountManifest).toMatchObject({ rlsEnabled: true, rlsForced: true });

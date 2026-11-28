@@ -21,7 +21,10 @@
         "web/apps/web/components/VoucherList.tsx",
         "web/apps/web/lib/voucherNumberKeys.ts",
         "web/apps/api/src/modules/vouchers/list.ts",
-        "web/apps/api/src/routes/voucherNavigation.ts"
+        "web/apps/api/src/routes/voucherNavigation.ts",
+        "web/apps/web/components/LinkedOldPurchaseModal.tsx",
+        "web/apps/web/components/SaleOldGoldGrid.tsx",
+        "web/apps/api/src/modules/sales/linkedOldPurchaseSale.ts"
       ]
     },
     "salesReport": {
@@ -77,7 +80,10 @@
         "web/apps/web/components/VoucherList.tsx",
         "web/apps/web/lib/voucherNumberKeys.ts",
         "web/apps/api/src/modules/vouchers/list.ts",
-        "web/apps/api/src/routes/voucherNavigation.ts"
+        "web/apps/api/src/routes/voucherNavigation.ts",
+        "web/apps/api/src/modules/purchase/linkedPurchase.ts",
+        "web/apps/api/src/modules/purchase/linkedSale.ts",
+        "web/apps/web/components/PurchaseEntryForm.tsx"
       ]
     },
     "usersRights": {
@@ -487,6 +493,14 @@
       "covers": [
         "web/apps/web/app/(app)/masters/year-create/",
         "web/apps/api/src/modules/masters/year.ts"
+      ]
+    },
+    "settingsEffects": {
+      "covers": [
+        "web/apps/web/app/(app)/settings/page.tsx",
+        "web/apps/web/components/UrdBookSettings.tsx",
+        "web/apps/api/src/modules/purchase/urdBook.ts",
+        "web/apps/api/src/routes/urdBookSettings.ts"
       ]
     }
   }

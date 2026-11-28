@@ -711,14 +711,15 @@ databaseDescribe('database-backed transaction integrity', () => {
       line_net: 58466,
       net: 58466,
       tax: 1753.98,
-      round_off: 0.02,
+      // Owner decision 1B (2026-11-27): no automatic round-off; the 0.02 of rounding is posted nowhere.
+      round_off: 0,
       total: 60220,
       sign: '-',
       stock_item: 56091,
       stock_net: 58466,
       tax_rows: 1753.98,
       ledger_dr: 60220,
-      ledger_cr: 60220,
+      ledger_cr: 60219.98,
     });
     expect(Number(amounts?.rojmel_rows)).toBeGreaterThan(0);
   });

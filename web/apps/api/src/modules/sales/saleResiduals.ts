@@ -2,6 +2,15 @@ import { oldMetalRateTypeError, round } from '@datacare/core';
 import { SessionCommandError } from '../auth/sessionContextCommand.js';
 import { formatVoucherNo, type VoucherScope } from '../vouchers/numbering.js';
 import { openAdvanceOfOrderTx } from './orderCancel.js';
+import {
+  assertOrderAdvanceAcks,
+  orderAdvanceFacts,
+  parseOrderAdvanceAck,
+  recordOrderAdvanceConfirmTx,
+  type OrderAdvanceAck,
+  type OrderAdvanceAuditContext,
+  type OrderAdvanceFacts,
+} from './orderAdvanceConfirm.js';
 
 /**
  * WP-26 (N243, G255): the Sales Invoice (TR_SALE) parts the web writer did not carry: the UPI grid (`UPI_DATA`),
@@ -45,6 +54,8 @@ export interface SaleResidualInput {
   upiRows?: SaleUpiRow[];
   creditNotes?: SaleCreditNoteRow[];
   orders?: SaleOrderRow[];
+  /** Owner decision 3B: the operator's Yes to another customer's or an over-open order advance. */
+  orderAdvanceAck?: OrderAdvanceAck[];
 }
 
 const num = (v: unknown): number => {
@@ -64,6 +75,7 @@ export function saleResidualInput(b: Record<string, any>): SaleResidualInput {
     upiRows: list<SaleUpiRow>(b.upiRows),
     creditNotes: list<SaleCreditNoteRow>(b.creditNotes),
     orders: list<SaleOrderRow>(b.orders),
+    orderAdvanceAck: parseOrderAdvanceAck(b.orderAdvanceAck),
   };
 }
 
@@ -185,11 +197,22 @@ async function lockSaleOrdersTx(tx: any, scope: VoucherScope, rows: readonly Sal
   }
 }
 
+/** The sale's party, the operator's acknowledgements and the audit target of a confirmed order advance. */
+export interface SaleOrderConfirm {
+  acCode: string;
+  acName: string;
+  ack?: readonly OrderAdvanceAck[];
+  audit: OrderAdvanceAuditContext;
+}
+
 /**
  * Check each order row against the order's open advance, locking the order (same lock as the order cancel, so a
- * sale and a cancel never use one advance twice). The desktop has no lock (single user); a row asking more than
- * is open is a 409 conflict (hosted-service safety add, cases.md `concurrency.order-advance-double-use`).
- * A legacy `orderRef` without an amount takes the open advance up to `remaining` (the old web behaviour).
+ * sale and a cancel never use one advance twice). The desktop has no lock (single user). A row on another customer's
+ * order, or asking more than is open, is refused with the facts (409 `order-advance-confirm`) unless the request
+ * acknowledges exactly those facts (owner decision 3B, orderAdvanceConfirm.ts); a confirmed row is written as the
+ * desktop writes it and recorded in USER_DATA. A legacy `orderRef` without an amount takes the open advance up to
+ * `remaining` (the old web behaviour). ORD_AC_CODE is always the order's own party (TR_SALE.cs:7264, :7289; written :15536), never
+ * the request's, since it decides the 21/22 legs (Ac_Ledr.cs:131-133).
  */
 export async function checkSaleOrdersTx(
   tx: any,
@@ -197,8 +220,10 @@ export async function checkSaleOrdersTx(
   rows: readonly SaleOrderRow[],
   remaining: number,
   fail: (msg: string) => Error,
+  confirm: SaleOrderConfirm,
 ): Promise<CheckedOrderRow[]> {
   const out: CheckedOrderRow[] = [];
+  const flagged: OrderAdvanceFacts[] = [];
   let left = remaining;
   await lockSaleOrdersTx(tx, scope, rows);
   for (const row of rows) {
@@ -214,24 +239,24 @@ export async function checkSaleOrdersTx(
     const amount = r2(
       row.amount == null ? Math.max(0, Math.min(order.openAmt, left)) : num(row.amount),
     );
-    if (amount > order.openAmt + TOLERANCE)
-      throw new SessionCommandError(
-        'order-advance-conflict',
-        409,
-        `order ${ordNo} has ${order.openAmt.toFixed(2)} advance open; ${amount.toFixed(2)} cannot be adjusted`,
-      );
     left = r2(left - amount);
     if (amount === 0) continue;
+    const facts = orderAdvanceFacts(order, order.openAmt, amount, confirm);
+    if (facts) flagged.push(facts);
     out.push({
       ordNo,
       amount,
-      ordBook: text(row.ordBook) || order.ordBook,
-      ordYear: text(row.ordYear) || order.ordYear,
-      ordLc: text(row.ordLc) || scope.lcCode,
-      ordAcCode: text(row.ordAcCode) || order.acCode,
-      ordHdVchNo: text(row.ordHdVchNo) || order.hdVchNo,
+      // The order's key as the server read it, never the request's: the order was looked up at this location
+      // (ordersWithAdvanceTx), whose open advance the check used (TR_SALE.cs:7266, :7290: ORD_LC = MLc_code).
+      ordBook: order.ordBook,
+      ordYear: order.ordYear,
+      ordLc: scope.lcCode,
+      ordAcCode: order.acCode,
+      ordHdVchNo: order.hdVchNo,
     });
   }
+  assertOrderAdvanceAcks(flagged, confirm.ack);
+  if (flagged.length) await recordOrderAdvanceConfirmTx(tx, confirm.audit, flagged);
   return out;
 }
 

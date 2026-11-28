@@ -23,7 +23,7 @@ import {
 } from '../vouchers/lifecycle.js';
 import { issueTagTx, restoreTagTx } from '../stock/stock.js';
 import {
-  assertBalanced,
+  assertVoucherBalanced,
   assertPeriodOpen,
   insertRowTx,
   postVoucherTx,
@@ -52,7 +52,7 @@ import {
 import { resolveTaxPolicyTx } from '../shared/taxPolicy.js';
 import { postedSaleLine, withSaleGhat } from './saleLinePosting.js';
 import { gstTaxRows } from '../shared/taxDataRows.js';
-import { oldMetalHeaderTotals, round as roundTo } from '@datacare/core';
+import { oldMetalHeaderTotals } from '@datacare/core';
 import {
   checkSaleOrdersTx,
   resolveSaleTenders,
@@ -85,9 +85,16 @@ import { partyCashReceivedTx } from '../finance/finance.js';
 import { tenderThresholdDecision } from '../finance/tender.js';
 import type { LineLeg } from '../posting/lineLegs.js';
 import { clearedSaleLegsTx, restoreSaleClearingTx } from './saleBankClearing.js';
-import { SALE_LEG, buildSaleLedger, saleLedgerRoundOff } from './saleLedger.js';
+import { SALE_LEG, buildSaleLedger, saleRoundingBound, saleRoundingResidue } from './saleLedger.js';
 
-export { SALE_LEG, buildSaleLedger, saleLedgerRoundOff };
+export { SALE_LEG, buildSaleLedger, saleRoundingResidue };
+import { deleteLinkedPurchasesForSaleTx } from '../purchase/linkedPurchase.js';
+import {
+  linkedCashPartyRefusal,
+  linkedSaleCashAmount,
+  type LinkedOldMetal,
+  type LinkedSaleHook,
+} from './linkedOldMetal.js';
 import {
   consumeSaleReferencesTx,
   lockApprovalSaleReferencesTx,
@@ -239,6 +246,12 @@ export interface SaleInput extends SaleResidualInput {
   tdsCode?: string;
   tdsPct?: number;
   tdsAmount?: number;
+  /**
+   * SL_DATA.ROF_AMT: the round-off the operator types in the totals grid's row 4 when SL_TDS_TAX is not 'Y'
+   * (TR_SALE.cs:15044-15051). It enters the bill total before its rounding (:19047) and posts as leg 35. 0 / absent
+   * is the usual case: the bill total's own rounding is then posted nowhere (owner decision 1B, 2026-11-27).
+   */
+  roundOffAmount?: number;
   kasarAmount?: number;
   kasarAc?: string; // Kasar write-off (Dr KASAR), reduces the customer's outstanding; default 'KASAR'
   // Point-of-sale settlement (desktop SL_DATA: CASH_AMT/CARD_AMT/UPI_AMT/CHQ_AMT/OLD_GL_AMT/BILL_OS).
@@ -473,6 +486,8 @@ export interface SaleResult {
    * "no margin".
    */
   billProfit?: { total: number; lines: { basis: string; cost: number; profit: number }[] };
+  /** The linked URD purchases written with this save (linkedOldPurchaseSale.ts). */
+  linkedOldPurchases?: LinkedOldMetal['purchases'];
 }
 
 /**
@@ -492,6 +507,8 @@ interface WriteSaleContext {
   persistedHeader?: Record<string, unknown>;
   /** User performing the edit (desktop NEW_USER); the original stays in MAIN_USER/USER_NAME. */
   editingUser?: string | null;
+  /** Old Gold / Old Silver of the linked URD purchases, read back from the stored purchases (linkedOldPurchaseSale.ts). */
+  linkedOldMetal?: LinkedOldMetal;
 }
 
 export function completeSaleScope(
@@ -833,7 +850,6 @@ async function writeSaleTx(
   const hmCgst = interState ? 0 : roundingPolicy.roundTaxAmount(hmTax / 2);
   const hmSgst = interState ? 0 : roundingPolicy.roundTaxAmount(hmTax - hmCgst);
   const hmIgst = interState ? hmTax : 0;
-  const grandTotal = roundingPolicy.roundBillTotal(totals.total + hmAmt + hmTax);
   // TCS (collected on the bill, billed to the customer) + Kasar (round-off/write-off, reduces receivable).
   const tcsPct = num(input.tcsPct);
   const tcs =
@@ -853,12 +869,17 @@ async function writeSaleTx(
     tdsPct !== 0 && totals.net !== 0
       ? dotNetRoundDouble(((totals.net - totals.discount) * tdsPct) / 100, 0)
       : 0;
-  const tdsGross = totals.net + totals.tax + hmAmt + hmTax + tcs - tdsAmt - totals.discount;
-  const grandWithTcs = tdsEnabled
-    ? roundingPolicy.roundBillTotal(tdsGross)
-    : roundingPolicy.roundBillTotal(grandTotal + tcs);
-  // The bill's own round-off: the totals' one, or under TDS the TOT_AMT rounding the desktop leaves unposted.
-  const billRoundOff = tdsEnabled ? roundTo(grandWithTcs - tdsGross, 3) : totals.roundOff;
+  // Row 4 is otherwise the typed round-off, ROF_AMT (TR_SALE.cs:15051); under TDS ROF_AMT is 0 (:15044).
+  const roundOffAmt = tdsEnabled || isSalesQuotation ? 0 : round2s(num(input.roundOffAmount));
+  if (roundOffAmt !== 0 && input.rateUnfix)
+    throw new SaleValidationError(
+      'an unfixed sale posts no bill leg, so a round-off on it would leave its ledger unbalanced',
+    );
+  // TOT_AMT = Round(net + tax + TCS + row 4 - discount, TOT_AMT_ROF), row 4 adding the round-off or taking TDS off
+  // (TR_SALE.cs:19039, :19047), with the hallmark charge and its tax.
+  const billGross =
+    totals.net + totals.tax + hmAmt + hmTax + tcs + roundOffAmt - tdsAmt - totals.discount;
+  const grandWithTcs = roundingPolicy.roundBillTotal(billGross);
   // TDS posts to the TDS code's parent-row tax account (Ac_Ledr.cs:112-114 join TAX_MAST `D.SR_NO = 0` on
   // `A.TDS_CODE`). A web-provisioned company leaves TAX_AC unset (seedCompany.ts TAXES), so an unset or absent one
   // falls back to the provisioned TDS ledger, as TCS and the tax leg fall back to theirs.
@@ -875,13 +896,6 @@ async function writeSaleTx(
     tdsAc = text(rows[0]?.ac) || 'TDS';
   }
 
-  /**
-   * How far the round-off leg may stray from the bill's round-off. Beyond totals.roundOff it carries only the line
-   * nets' rounding into the bill: the net (calc.ts billTotals), the taxable after a discount, the bill with hallmark
-   * and the bill with TCS each round once to TOT_AMT_ROF, at most half a unit each, plus a paisa per line.
-   */
-  const maxRoundOffResidue =
-    4 * 0.5 * 10 ** -roundingPolicy.billTotalDecimals + 0.01 * computed.length;
   // A 100% discount leaves TOT_AMT 0 with priced items: Sales_Ledr then skips the party leg (Ac_Ledr.cs:64
   // `A.TOT_AMT <> 0`) but still credits the lines (:90) and tax (:94), an unbalanced voucher the web refuses.
   if (
@@ -1014,18 +1028,26 @@ async function writeSaleTx(
   // 6 labour income, 7 cash purchase, 8 scheme bonus. The Rojmel's advance row names slot 4.
   let advanceAc = '';
   let kasarAc = input.kasarAc ?? controlAc;
-  // The web's round-off leg balances the party's debit (TOT_AMT + DISC_AMT) against the item, tax and charge credits.
-  const ledgerRoundOff = saleLedgerRoundOff(round2s(grandWithTcs + totals.discount + tdsAmt), [
-    ...(incomeLegs ?? [{ amount: totals.net }]),
-    { amount: totals.tax },
-    { amount: hmAmt },
-    { amount: hmTax },
-    { amount: tcs },
-  ]);
-  if (
-    !isSalesQuotation &&
-    (billRoundOff !== 0 || ledgerRoundOff !== 0 || kasar !== 0 || pointValue !== 0)
-  ) {
+  // The bill total's rounding the desktop posts nowhere (owner decision 1B; saleLedger.ts saleRoundingResidue): the
+  // ledger is accepted off by exactly this, within the bound of the desktop's rounding steps.
+  const roundingResidue = {
+    amount:
+      isSalesQuotation || input.rateUnfix || grandWithTcs === 0
+        ? 0
+        : saleRoundingResidue(
+            round2s(grandWithTcs + totals.discount + tdsAmt),
+            [
+              ...(incomeLegs ?? [{ amount: totals.net }]),
+              { amount: totals.tax },
+              { amount: hmAmt },
+              { amount: hmTax },
+              { amount: tcs },
+            ],
+            roundOffAmt,
+          ),
+    bound: saleRoundingBound(roundingPolicy.billTotalDecimals, linePathBook),
+  };
+  if (!isSalesQuotation && (kasar !== 0 || pointValue !== 0)) {
     const configured = await resolveBookAccountTx(tx, input.scope, bookPolicy, 3);
     roundAc = validateConfiguredAccount('round account', requestedRoundAc, configured);
     kasarAc = validateConfiguredAccount('kasar account', input.kasarAc, configured);
@@ -1408,10 +1430,13 @@ async function writeSaleTx(
   }));
   // TR_SALE.cs:19343-19351: type G is gold, every other type is silver; weights are net weights.
   const oldMetalTotals = oldMetalHeaderTotals(valuedOldMetal);
-  const oldGoldAmount = oldMetalTotals.goldAmt;
-  const oldSilverAmount = oldMetalTotals.silverAmt;
-  const oldGoldWeight = oldMetalTotals.goldWt;
-  const oldSilverWeight = oldMetalTotals.silverWt;
+  // A linked URD purchase fills MSG2_TOTAL[9|10, 2..3] (TR_SALE.cs:16482-16497) and has no sale ledger leg: the
+  // purchase's own Purc_Ledr credits the party. The writer refuses an in-bill row of the same metal beside it.
+  const linked = ctx.linkedOldMetal;
+  const oldGoldAmount = round2s(oldMetalTotals.goldAmt + num(linked?.goldAmt));
+  const oldSilverAmount = round2s(oldMetalTotals.silverAmt + num(linked?.silverAmt));
+  const oldGoldWeight = round3s(oldMetalTotals.goldWt + num(linked?.goldWt));
+  const oldSilverWeight = round3s(oldMetalTotals.silverWt + num(linked?.silverWt));
 
   const header = {
     ...key,
@@ -1433,7 +1458,7 @@ async function writeSaleTx(
     CGST_TAX: totals.cgst,
     SGST_TAX: totals.sgst,
     IGST_TAX: totals.igst,
-    ROF_AMT: tdsEnabled ? 0 : totals.roundOff,
+    ROF_AMT: roundOffAmt,
     TCS_CODE: input.tcsCode ?? '',
     TCS_PRC: tcsPct,
     TCS_AMT: tcs,
@@ -1529,6 +1554,20 @@ async function writeSaleTx(
         input.orders ?? [],
         round2s(grandWithTcs - paidNow - kasar - creditNoteAdjust + cashPaidAmt),
         (msg) => new SaleValidationError(msg),
+        {
+          acCode: input.acCode,
+          acName: text(header.AC_NAME),
+          ack: input.orderAdvanceAck,
+          audit: {
+            tenantId: input.scope.tenantId,
+            key,
+            acCode: input.acCode,
+            vchDate: voucherDate,
+            bookName: bookPolicy.bookName,
+            originalUser: ctx.mainUser,
+            user: ctx.editingUser ?? input.mainUser ?? null,
+          },
+        },
       );
   const orderAdjust = round2s(orderRows.reduce((sum, r) => sum + r.amount, 0));
   // Cash paid back to the customer adds to what they owe (TR_SALE.cs:19386, `+ MSG2_TOTAL[13,3]`), as its ledger
@@ -1536,6 +1575,30 @@ async function writeSaleTx(
   const billOS = round2s(
     grandWithTcs - paidNow - kasar - orderAdjust - creditNoteAdjust + cashPaidAmt,
   );
+  // TR_SALE.cs:19125-19150: with linked old metal the 00045 cash is the desktop's own figure, refused otherwise.
+  const cashRefusal =
+    linked &&
+    linkedCashPartyRefusal({
+      ...{ bookType: saleBookTypes.bookType, acCode: input.acCode, cashAmt, cashPaid: cashPaidAmt },
+      ...{ oldAmt: round2s(num(linked.goldAmt) + num(linked.silverAmt)), total: grandWithTcs },
+      ...{ advance: orderAdjust, kasar, upi: upiAmt, digits: linked.cashDigits },
+    });
+  if (cashRefusal) throw new SaleValidationError(cashRefusal);
+  // TR_SALE.cs:15071-15080: on a T book the cash party 00045 stores (and Sales_Ledr posts) CASH_AMT grossed up by the
+  // linked old amounts; applied only with a linked purchase (linkedOldMetal.ts).
+  const postedCash = linked
+    ? linkedSaleCashAmount({
+        bookType: saleBookTypes.bookType,
+        acCode: input.acCode,
+        cashAmt,
+        oldAmt: round2s(num(linked.goldAmt) + num(linked.silverAmt)),
+        total: grandWithTcs,
+        advance: orderAdjust,
+        kasar,
+      })
+    : cashAmt;
+  if (!isSalesQuotation && postedCash !== 0 && cashAmt === 0)
+    cashAc = await resolveBookAccountTx(tx, input.scope, bookPolicy, 2);
   // TR_SALE.cs: MsDefaulterAc = 'Y' AND outstanding > 0 -> credit to a flagged party is blocked.
   // The flag is read from the persisted account (AC_MAST.DEFAULTER_AC), never from the request.
   if (!isSalesQuotation && round2s(billOS) > 0) {
@@ -1607,9 +1670,9 @@ async function writeSaleTx(
     saleBookTypes.bookType === 'M' || (saleBookTypes.bookType === 'T' && input.acCode !== '00045')
       ? cashPaidAmt
       : 0;
-  // The discount pair posts to the book's slot 5 (Ac_Ledr.cs:155-157 `B.SR_NO = 5`).
+  // The discount pair and the round-off leg 35 post to the book's slot 5 (Ac_Ledr.cs:155-159 `B.SR_NO = 5`).
   const discountAc =
-    !isSalesQuotation && totals.discount !== 0
+    !isSalesQuotation && (totals.discount !== 0 || roundOffAmt !== 0)
       ? await resolveBookAccountTx(tx, input.scope, bookPolicy, 5)
       : '';
 
@@ -1624,7 +1687,7 @@ async function writeSaleTx(
         controlAc,
         rateUnfix: input.rateUnfix,
         vchType: bookPolicy.vchType,
-        totals: { ...totals, total: grandWithTcs, roundOff: billRoundOff },
+        totals: { ...totals, total: grandWithTcs },
         tds: { ac: tdsAc, amount: tdsAmt },
         incomeLegs,
         charges: [
@@ -1633,9 +1696,9 @@ async function writeSaleTx(
           { legType: SALE_LEG.hallmarkTax, ac: taxAc, amount: hmTax },
         ],
         discountAc,
-        maxRoundOffResidue,
+        roundOff: { ac: discountAc, amount: roundOffAmt },
         payments: {
-          cash: { ac: cashAc, amount: cashAmt },
+          cash: { ac: cashAc, amount: postedCash },
           cheque: { ac: bankAc, amount: chequeAmt },
           card: { ac: cardAc, amount: cardLegs },
           upi: upiLegs,
@@ -1667,7 +1730,7 @@ async function writeSaleTx(
         })),
       }),
     );
-    assertBalanced(ledger);
+    assertVoucherBalanced(ledger, roundingResidue);
     // BILL_NO on the voucher's money legs is SL_DATA.BILL_NO (Ac_Ledr.cs:64-163 select A.BILL_NO); the old-metal pair
     // (:135-137) and the unfixed fine leg (:165) write ''.
     for (const line of ledger)
@@ -1682,7 +1745,7 @@ async function writeSaleTx(
   }
 
   Object.assign(header, {
-    CASH_AMT: cashAmt,
+    CASH_AMT: postedCash,
     CARD_AMT: cardAmt,
     UPI_AMT: upiAmt,
     CHQ_AMT: chequeAmt,
@@ -2044,9 +2107,9 @@ async function writeSaleTx(
         { kind: 'discount' as const, account: discountAc, amount: totals.discount },
         { kind: 'kasar' as const, account: kasarAc, amount: round2s(kasar + pointValue) },
         { kind: 'advance' as const, account: advanceAc, amount: orderAdjust },
-        // Slot 5 is the book's round-off/discount account. SOURCE-ONLY: this company's data has ROF_AMT
-        // non-zero on zero of 190 sales, so there is no real row to check the shape against.
-        { kind: 'roundOff' as const, account: roundAc, amount: totals.roundOff },
+        // :102 the typed ROF_AMT on slot 5. SOURCE-ONLY: this company's data has ROF_AMT non-zero on zero of 190
+        // sales, so there is no real row to check the shape against.
+        { kind: 'roundOff' as const, account: discountAc, amount: roundOffAmt },
         ...oldGoldDetl.map((g, i) => ({
           kind: 'oldMetal' as const,
           account: purcAcByItem.get(String(g.IT_CODE)) ?? input.oldGoldAc ?? 'OLDGOLD',
@@ -2071,6 +2134,7 @@ async function writeSaleTx(
     // PARTY_AC_CODE = SL_DATA.AC_CODE only on the customer's own legs (Ac_Ledr.cs:64, :139 and every party-credit
     // leg); revenue, tax and the receiving account's debit write '' (Ac_Ledr.cs:76-94, :141).
     partyAc: input.acCode,
+    desktopRoundingResidue: roundingResidue,
     writes: [
       { table: 'SL_DATA', rows: [header] },
       { table: 'SL_DETL', rows: detailRows },
@@ -2182,6 +2246,7 @@ export async function createSale(
   prisma: any,
   input: SaleInput,
   lines: SaleLineInput[],
+  linkedHook?: LinkedSaleHook,
 ): Promise<SaleResult> {
   completeSaleScope(input.scope);
   const scope = input.scope;
@@ -2190,16 +2255,20 @@ export async function createSale(
     const vchNo = await nextVoucherNoTx(tx, scope);
     // TR_SALE.cs:14209,15151 allocates a five-digit hidden number from TEMP_BOOK_DATA without year.
     const hdVchNo = await nextHiddenVoucherNoTx(tx, scope);
+    const no = formatVoucherNo(vchNo); // N51: the screen keeps the version for its first edit or delete
+    // The linked URD purchases are written under the allocated sale key before the sale (linkedOldPurchaseSale.ts).
+    const linked = await linkedHook?.(tx, no, false);
     const saved = await writeSaleTx(tx, input, lines, {
       vchNo,
       hdVchNo,
       mainUser: String(input.mainUser ?? '').trim(),
       persistedClock: undefined,
       isEdit: false,
+      linkedOldMetal: linked,
     });
-    const no = formatVoucherNo(vchNo); // N51: the screen keeps the version for its first edit or delete
     return {
       ...saved,
+      ...(linked ? { linkedOldPurchases: linked.purchases } : {}),
       version: await voucherVersionTx(tx, SALE_WRITE_TABLES, versionKeyOf(scope, no)),
     };
   });
@@ -2468,6 +2537,7 @@ export async function editSale(
   lines: SaleLineInput[],
   requestedVoucherNo: number | string,
   expectedVersion: string,
+  linkedHook?: LinkedSaleHook,
 ): Promise<SaleResult> {
   completeSaleScope(input.scope);
   const scope = input.scope;
@@ -2501,6 +2571,7 @@ export async function editSale(
         lines: [{ CO_CODE: input.scope.coCode, VCH_DATE: requestedDate }],
       },
     });
+    const linked = await linkedHook?.(tx, voucherNo, true); // after the header lock and the version check
 
     const hiddenVoucherNo = formatVoucherNo(text(persisted.HD_VCH_NO));
     // A cleared bank leg keeps its clearing across the rewrite (saleBankClearing.ts).
@@ -2525,11 +2596,13 @@ export async function editSale(
       // Desktop compares the FULL reloaded header (SELECT * FROM SL_DATA).
       persistedHeader: priorHeaderRow,
       editingUser: input.mainUser ?? null,
+      linkedOldMetal: linked,
     });
     await restoreSaleClearingTx(tx, scope.tenantId, keyOf(scope, voucherNo), clearedLegs);
     // N51: the screen keeps the new version for its next save or delete.
     return {
       ...saved,
+      ...(linked ? { linkedOldPurchases: linked.purchases } : {}),
       version: await voucherVersionTx(tx, SALE_WRITE_TABLES, versionKeyOf(scope, voucherNo)),
     };
   });
@@ -2565,6 +2638,20 @@ export async function deleteSale(prisma: any, input: DeleteSaleInput): Promise<{
         lines: [{ CO_CODE: input.scope.coCode, VCH_DATE: header.VCH_DATE }],
       },
     });
+    // TR_SALE.cs:16159-16175: the linked URD purchases go with the sale, by the exact SL_BILL_* key and the full
+    // purchase delete path, in this transaction and after the sale header lock above.
+    await deleteLinkedPurchasesForSaleTx(
+      tx,
+      {
+        tenantId,
+        coCode: scope.coCode,
+        saleBillNo: voucherNo,
+        saleBillLc: scope.lcCode,
+        saleBillYear: scope.coYear,
+        saleBillBook: scope.coBook,
+      },
+      input.deleteUser,
+    );
     const details: Array<Record<string, unknown>> = await tx.$queryRawUnsafe(
       `SELECT "SR_NO","IT_CODE","TAG_NO","NET_AMT","IT_TYPE","ITM_NWT"
          FROM "SL_DETL"

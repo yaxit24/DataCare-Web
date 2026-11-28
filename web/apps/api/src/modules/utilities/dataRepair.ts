@@ -80,6 +80,8 @@ export interface RepairPreview {
   requiresConfirmation: string | null;
   /** Everything the apply will demand, so the console can ask for it up front rather than by trial. */
   authority: RepairAuthority;
+  /** Operation-specific detail for the screen (e.g. Account check-and-repair's per-voucher list); not hashed. */
+  detail?: unknown;
 }
 
 /** What a given operation's apply will require, derived from its risk rather than from the request. */
@@ -129,9 +131,16 @@ export interface RepairOperation {
     diffs: RepairTableDiff[];
     samples: string[];
     candidateFingerprint?: string;
+    detail?: unknown;
   }>;
-  /** Apply only the diff. Runs inside the framework's transaction and advisory lock. */
-  apply: (tx: any, scope: RepairScope) => Promise<RepairTableDiff[]>;
+  /**
+   * Apply only the diff. Runs inside the framework's transaction and advisory lock. An operation that replaces
+   * rows returns the rows it replaced as `beforeRows`; they are kept on the run record so the change can be undone.
+   */
+  apply: (
+    tx: any,
+    scope: RepairScope,
+  ) => Promise<RepairTableDiff[] | { applied: RepairTableDiff[]; beforeRows: unknown }>;
 }
 
 export class RepairError extends Error {
@@ -248,7 +257,7 @@ export async function previewRepair(
 ): Promise<RepairPreview> {
   const op = getRepair(operationId);
   return withTxBudget(prisma, scope.tenantId, 'heavy', async (tx: any) => {
-    const { diffs, samples, candidateFingerprint } = await op.preview(tx, scope);
+    const { diffs, samples, candidateFingerprint, detail } = await op.preview(tx, scope);
     const previewHash = hashPreview(op, scope, diffs, samples, candidateFingerprint);
     const clean = totalChanges(diffs) === 0;
     await tx.$executeRawUnsafe(
@@ -277,6 +286,7 @@ export async function previewRepair(
       risk: op.risk,
       requiresConfirmation: confirmationFor(op, scope),
       authority: authorityFor(op, scope),
+      ...(detail === undefined ? {} : { detail }),
     };
   });
 }
@@ -441,12 +451,14 @@ export async function applyRepair(
       );
     }
 
-    const applied = await op.apply(tx, scope);
+    const outcome = await op.apply(tx, scope);
+    const applied = Array.isArray(outcome) ? outcome : outcome.applied;
+    const beforeRows = Array.isArray(outcome) ? null : outcome.beforeRows;
     await tx.$executeRawUnsafe(
       `INSERT INTO "data_repair_run"
          (tenant_id,operation_id,co_code,lc_code,co_year,state,preview_hash,counts,applied_counts,
-          samples,operator,reason,backup_reference,reauthenticated_at,applied_at)
-       VALUES ($1,$2,$3,$4,$5,'applied',$6,$7::jsonb,$8::jsonb,$9::jsonb,$10,$11,$12,$13,now())`,
+          samples,operator,reason,backup_reference,reauthenticated_at,applied_at,before_rows)
+       VALUES ($1,$2,$3,$4,$5,'applied',$6,$7::jsonb,$8::jsonb,$9::jsonb,$10,$11,$12,$13,now(),$14::jsonb)`,
       scope.tenantId,
       op.id,
       scope.coCode,
@@ -460,6 +472,7 @@ export async function applyRepair(
       reason || null,
       (input.backupReference ?? '').trim() || null,
       reauthenticatedAt,
+      beforeRows == null ? null : JSON.stringify(beforeRows),
     );
     return { operationId: op.id, previewHash: input.previewHash, applied, deduplicated: false };
   });

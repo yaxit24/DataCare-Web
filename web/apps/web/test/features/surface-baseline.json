@@ -21,6 +21,11 @@
       "key": "/utilities/reminders | no-feedback | submit-empty-form | Outstanding (n) | ",
       "mode": "probe",
       "source": "The highlighted button is the Outstanding tab with a count of 0 (web/apps/web/app/(app)/utilities/reminders/page.tsx); there is nothing to list"
+    },
+    {
+      "key": "/settings | empty-form-accepted | submit-empty-form | Save Old Gold Books | ",
+      "mode": "probe",
+      "source": "Owner decision 2B option A (docs/handbook/web/desktop-adaptations.md): a blank Gold / Silver URD Purchase book means automatic (setting, then 043/044, then the book named Gold/Silver URD), so saving both blank clears the override and is accepted; the desktop has no such setting (TR_SALE.cs:18756-18842 hardcodes 043/044)"
     }
   ]
 }

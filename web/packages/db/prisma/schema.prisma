@@ -7250,6 +7250,7 @@ model DataRepairRun {
   appliedAt         DateTime? @map("applied_at") @db.Timestamptz(6)
   backupReference   String?   @map("backup_reference") @db.VarChar(64)
   reauthenticatedAt DateTime? @map("reauthenticated_at") @db.Timestamptz(6)
+  beforeRows        Json?     @map("before_rows")
 
   @@index([tenantId, operationId, createdAt(sort: Desc)], map: "data_repair_run_tenant_op_idx")
   @@map("data_repair_run")
@@ -7280,6 +7281,19 @@ model DailyRateCopyEntitlement {
 
   @@id([tenantId, coCode])
   @@map("daily_rate_copy_entitlement")
+}
+
+/// Linked old-gold purchase (owner decision 2B): per-company Gold / Silver URD purchase book. Web-only; the desktop hardcodes 043/044 (TR_SALE.cs:18756-18842). NULL means the fallback rule (purchase/urdBook.ts). Forced RLS is migration-owned.
+model CompanyUrdBook {
+  tenantId   String   @map("tenant_id") @db.VarChar(24)
+  CO_CODE    String   @db.VarChar(2)
+  goldBook   String?  @map("gold_book") @db.VarChar(3)
+  silverBook String?  @map("silver_book") @db.VarChar(3)
+  updatedBy  String?  @map("updated_by") @db.VarChar(64)
+  updatedAt  DateTime @default(now()) @map("updated_at") @db.Timestamptz(6)
+
+  @@id([tenantId, CO_CODE])
+  @@map("company_urd_book")
 }
 
 model TenantFeature {

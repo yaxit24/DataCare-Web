@@ -172,6 +172,16 @@ ledger. Same class of question as the reproduced fine double-count on overpaid p
 **The desktop does use that kasar account** — book 027's `AC_DATA` has 15 rows of leg type `26` naming
 `00057` — just not for this residue.
 
+**Decided 2026-11-27 (owner decision 1B): copy the desktop exactly.** Sale and purchase store in `ROF_AMT` only
+the round-off the operator types in the totals grid's row 4 (`TR_SALE.cs:15051`, `TR_PURC.cs:12600`; 0 under
+`SL_TDS_TAX` / `PR_TDS_TAX`), which enters the bill total before its `TOT_AMT_ROF` rounding (`TR_SALE.cs:19047`,
+`TR_PURC.cs:15085`). A typed round-off posts the desktop's own leg: sale 35 on book slot 5 (`Ac_Ledr.cs:159`) with
+day-book row 22 (`Ac_Rojmel.cs:102`), purchase 26 on slot 3 (`Ac_Ledr.cs:460`). The web's automatic leg 99 is gone,
+so the bill total's own rounding is posted nowhere and the voucher's ledger is off by it (at most half a rounding
+unit, a whole unit on a line-path sale book). The posting layer accepts exactly that residue, declared by the sale
+and purchase writers (`posting.ts` `DesktopRoundingResidue`), and no other imbalance. Trial balance, day book and
+ledger totals therefore show the same paise differences the desktop's do.
+
 ### 3.5 Leg type codes — measured, mapping not yet written
 
 A plain credit sale writes leg types **01 / 03 / 04** (party, sales account, tax). The web writes a bare

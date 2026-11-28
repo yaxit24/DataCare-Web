@@ -9,6 +9,7 @@ import {
   assertBalanced,
   assertPeriodOpen,
   type LedgerLine,
+  type PostInput,
 } from '../posting/posting.js';
 import {
   assertVoucherVersionTx,
@@ -188,7 +189,11 @@ export function contraLedger(
  * Serialise writers of one voucher. The header rows are deleted and rewritten by every edit, so a row lock taken by a
  * waiting writer would find nothing once the first one commits and report "not found" instead of the version conflict.
  */
-async function lockVoucherTx(tx: any, scope: VoucherScope, voucherNo: string): Promise<void> {
+export async function lockContraVoucherTx(
+  tx: any,
+  scope: VoucherScope,
+  voucherNo: string,
+): Promise<void> {
   const key = [scope.tenantId, scope.coCode, scope.lcCode, scope.coYear, scope.coBook, voucherNo];
   await tx.$executeRawUnsafe(
     `SELECT pg_advisory_xact_lock(hashtextextended($1::text, 0))`,
@@ -254,33 +259,32 @@ async function checkedGridTx(
   };
 }
 
-/** Every table of one voucher: CONTRA_DATA pairs, the AC_DATA legs, the day book and REMARK_DATA. */
-async function writeContraTx(
-  tx: any,
-  input: ContraInput,
-  ctx: {
-    lines: ContraLine[];
-    empCode: string;
-    identity: VoucherIdentity;
-    book: Awaited<ReturnType<typeof configuredBookTx>>;
-    vchDate: Date;
-  },
-): Promise<number> {
-  const { identity, book, vchDate, lines } = ctx;
-  const scope = completeFinanceScope(input.scope);
-  const key = {
-    CO_CODE: scope.coCode,
-    LC_CODE: scope.lcCode,
-    CO_YEAR: scope.coYear,
-    CO_BOOK: scope.coBook,
-    VCH_NO: formatVoucherNo(identity.vchNo),
-  };
-  const rows = contraRows(lines);
+/** What the posting of one contra voucher needs besides its CONTRA_DATA rows. */
+export interface ContraPostingContext {
+  key: { CO_CODE: string; LC_CODE: string; CO_YEAR: string; CO_BOOK: string; VCH_NO: string };
+  book: { shortName: string; mainBook: string; inout: string };
+  vchDate: Date;
+  empCode: string;
+  /** A Date from the writer, or the stored text when Data Refresh re-derives (exact in any time zone). */
+  voucherTime: Date | string;
+  hiddenVoucherNo: string;
+  mainUser: string;
+}
+
+/**
+ * The whole posting of one contra voucher from its CONTRA_DATA rows: the rows themselves, the AC_DATA legs
+ * (Contra_Ledr, Ac_Ledr.cs:840-848), the day book (Contra_Rojmel, Ac_Rojmel.cs:336-340) and REMARK_DATA
+ * (Ac_Tax.cs:686). Pure: the writer posts it, and Data Refresh re-derives it from the stored rows to check them.
+ */
+export function contraPostInput(
+  rows: ReturnType<typeof contraRows>,
+  ctx: ContraPostingContext,
+): PostInput {
+  const { key, book, vchDate } = ctx;
   const ledger = contraLedger(key, book.shortName, rows, vchDate);
-  assertBalanced(ledger);
   const rojmelRows = buildJournalRojmel(
     {
-      scope: { coCode: scope.coCode, lcCode: scope.lcCode, coYear: scope.coYear },
+      scope: { coCode: key.CO_CODE, lcCode: key.LC_CODE, coYear: key.CO_YEAR },
       key,
       coBook: key.CO_BOOK,
       vchNo: key.VCH_NO,
@@ -305,8 +309,7 @@ async function writeContraTx(
     AC_NAME: rows[index]!.AC_NAME,
     IT_DESC: rows[index]!.IT_DESC ?? '',
   }));
-  await insertHiddenIdentityTx(tx, scope, identity, book.name);
-  await postVoucherTx(tx, scope.tenantId, {
+  return {
     ledger: { table: 'AC_DATA', lines: ledger },
     // Ac_Ledr.cs:842 (`B.MAIN_BOOK`): every ledger leg of a contra carries the MAIN_BOOK, not the book's name.
     bookName: book.mainBook,
@@ -326,9 +329,9 @@ async function writeContraTx(
           CR_FINE: 0,
           IT_TYPE: 'A',
           VCH_DATE: vchDate,
-          VCH_TIME: identity.voucherTime,
-          HD_VCH_NO: identity.hiddenVoucherNo,
-          MAIN_USER: identity.mainUser || null,
+          VCH_TIME: ctx.voucherTime,
+          HD_VCH_NO: ctx.hiddenVoucherNo,
+          MAIN_USER: ctx.mainUser || null,
           // TR_CONTRA.cs:2776, :2828: BOOK_NAME = FormMainBook. Only TEMP_BOOK_DATA takes the form name (:2751).
           BOOK_NAME: book.mainBook,
           // TR_CONTRA.cs:2774: the book's own in/out flag.
@@ -357,7 +360,41 @@ async function writeContraTx(
           ]
         : []),
     ],
+  };
+}
+
+/** Every table of one voucher: CONTRA_DATA pairs, the AC_DATA legs, the day book and REMARK_DATA. */
+async function writeContraTx(
+  tx: any,
+  input: ContraInput,
+  ctx: {
+    lines: ContraLine[];
+    empCode: string;
+    identity: VoucherIdentity;
+    book: Awaited<ReturnType<typeof configuredBookTx>>;
+    vchDate: Date;
+  },
+): Promise<number> {
+  const { identity, book, vchDate, lines } = ctx;
+  const scope = completeFinanceScope(input.scope);
+  const posting = contraPostInput(contraRows(lines), {
+    key: {
+      CO_CODE: scope.coCode,
+      LC_CODE: scope.lcCode,
+      CO_YEAR: scope.coYear,
+      CO_BOOK: scope.coBook,
+      VCH_NO: formatVoucherNo(identity.vchNo),
+    },
+    book,
+    vchDate,
+    empCode: ctx.empCode,
+    voucherTime: identity.voucherTime,
+    hiddenVoucherNo: identity.hiddenVoucherNo,
+    mainUser: identity.mainUser,
   });
+  assertBalanced(posting.ledger.lines);
+  await insertHiddenIdentityTx(tx, scope, identity, book.name);
+  await postVoucherTx(tx, scope.tenantId, posting);
   return identity.vchNo;
 }
 
@@ -471,7 +508,7 @@ export async function editContra(
     const book = await configuredBookTx(tx, scope);
     requireBookFamily(book, 'CONTRA', 'contra');
     const expected = requiredVersion(input.expectedVersion);
-    await lockVoucherTx(tx, scope, voucherNo);
+    await lockContraVoucherTx(tx, scope, voucherNo);
     // The date of an edit is the one on the form; a client that sends none keeps the saved date (D9).
     let vchDate: Date;
     if (input.vchDate) vchDate = new Date(input.vchDate);
@@ -551,7 +588,7 @@ export async function deleteContra(
     const book = await configuredBookTx(tx, scope);
     requireBookFamily(book, 'CONTRA', 'contra');
     const expected = requiredVersion(input.expectedVersion);
-    await lockVoucherTx(tx, scope, voucherNo);
+    await lockContraVoucherTx(tx, scope, voucherNo);
     // A contra has a row per grid row (TR_CONTRA.cs:2760-2866), so only the shared identity columns are locked as
     // the header; the audit takes the row columns from SR_NO 1. The desktop checks the lock date of the SAVED
     // voucher on delete (TR_CONTRA.cs:2951) and has no year check there.
