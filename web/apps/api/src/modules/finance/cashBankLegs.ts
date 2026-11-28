@@ -1,5 +1,5 @@
 import { round } from '@datacare/core';
-import type { LedgerLine } from '../posting/posting.js';
+import { assertBalanced, type LedgerLine, type PostInput } from '../posting/posting.js';
 import { blank, rojmelLedrKey, type RojmelRow } from '../shared/rojmel.js';
 
 /**
@@ -56,12 +56,13 @@ export interface CashVoucherFacts {
   dataType: string;
   hiddenVoucherNo: string;
   mainUser: string;
-  voucherTime: Date;
+  /** VCH_TIME. Data Refresh passes the stored text so the database casts the wall clock back unchanged. */
+  voucherTime: Date | string;
   scope: { coCode: string; lcCode: string; coYear: string };
   accounts: CashAccounts;
 }
 
-type Who = 'party' | 'settle' | 'kasar' | 'charges';
+export type Who = 'party' | 'settle' | 'kasar' | 'charges';
 interface LegSpec {
   code: string;
   /** Which column of the row must be non-zero for the leg to be written (`A.REC_AMT <> 0` ...). */
@@ -329,6 +330,28 @@ export function cashLedgerLegs(facts: CashVoucherFacts, rows: CashGridRow[]): Le
   return legs;
 }
 
+/**
+ * Which account role each AC_DATA leg of the voucher holds, keyed by its LEDR_KEY tail (the `legKeySuffix` of
+ * cashLedgerLegs). Data Refresh reads the accounts a saved voucher actually posted to with it.
+ */
+export function cashLegRoles(
+  layout: CashLayout,
+  direction: CashDirection,
+  rows: CashGridRow[],
+): Array<{ suffix: string; srNo: number; ac: Who; ld: Who }> {
+  const out: Array<{ suffix: string; srNo: number; ac: Who; ld: Who }> = [];
+  for (const row of rows)
+    for (const spec of (layout === 'bank' ? BANK_LEGS : CASH_LEGS)[direction])
+      if (amountOf(row, spec.when) !== 0)
+        out.push({
+          suffix: `${row.srNo}${spec.code}`.padStart(12, ' '),
+          srNo: row.srNo,
+          ac: spec.ac,
+          ld: spec.ld,
+        });
+  return out;
+}
+
 interface RowSpec {
   type: string;
   when: 'rec' | 'kasar' | 'charges';
@@ -431,4 +454,21 @@ export function cashRojmelRows(facts: CashVoucherFacts, rows: CashGridRow[]): Ro
     }
   }
   return out;
+}
+
+/**
+ * The posting of one TR_CASH voucher: Cash_Ledr / Bank_Ledr legs into AC_DATA and Cash_Rojmel / Bank_Rojmel rows into
+ * ROJ_MEL_DATA (Ac_Ledr.cs:565-610, Ac_Rojmel.cs:179-219), balance-checked. The writer adds its own CASH_DATA and
+ * card / UPI rows in front of `writes`; Data Refresh > Account re-derives a saved voucher's postings with the same
+ * call (cashBankRefresh.ts), so the two cannot drift.
+ */
+export function cashBankPostInput(facts: CashVoucherFacts, rows: CashGridRow[]): PostInput {
+  const ledger = cashLedgerLegs(facts, rows);
+  assertBalanced(ledger);
+  const rojmelRows = cashRojmelRows(facts, rows);
+  return {
+    ledger: { table: 'AC_DATA', lines: ledger },
+    bookName: facts.mainBook,
+    writes: rojmelRows.length ? [{ table: 'ROJ_MEL_DATA', rows: rojmelRows }] : [],
+  };
 }

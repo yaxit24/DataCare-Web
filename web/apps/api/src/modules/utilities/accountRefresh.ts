@@ -9,11 +9,18 @@ import {
 import { voucherVersionTx, versionKeyOf } from '../vouchers/version.js';
 import {
   AccountRefreshDeriveError,
+  type RefreshCandidate,
   deriveContraPostingsTx,
   deriveFineJvPostingsTx,
   type RefreshVoucherScope,
 } from '../finance/contraRefresh.js';
 import { CONTRA_WRITE_TABLES, lockContraVoucherTx } from '../finance/contra.js';
+import {
+  CASH_BANK_MAIN_BOOKS,
+  CASH_WRITE_TABLES,
+  LEGACY_PAYMENT_TABLES,
+} from '../finance/cashBank.js';
+import { deriveCashBankPostingsTx } from '../finance/cashBankRefresh.js';
 import { withTxBudget } from '../shared/txBudget.js';
 import {
   diff,
@@ -70,26 +77,45 @@ export interface AccountRefreshFamily {
   /** Short id, e.g. `contra`; the operation is `data-refresh-account-<id>`. */
   id: string;
   title: string;
-  /** BOOK_DATA.MAIN_BOOK of the family's books. */
-  mainBook: string;
+  /** BOOK_DATA.MAIN_BOOK of the family's books (one value or several). */
+  mainBook: string | readonly string[];
   /** Extra BOOK_DATA condition on alias `b`, e.g. the inward FINE JV book (Ac_Ledr.cs:846). */
   bookFilter?: string;
   /** The family's voucher (header) table. */
   headerTable: string;
+  /**
+   * Other tables that hold vouchers of the family's books which the family does not re-derive (e.g. payments saved in
+   * PAY_DATA before they moved to CASH_DATA): their postings are listed as `unverified`, not as orphans.
+   */
+  legacyHeaderTables?: readonly string[];
   /** The tables the voucher's version token covers. */
   versionTables: readonly string[];
   /** The desktop builders of the family, shown in the operation's description. */
   desktopSource: string;
-  derive: (tx: any, scope: RefreshVoucherScope, voucherNo: string) => Promise<PostInput>;
+  /**
+   * The voucher's expected posting. Several candidates, in preference order, when the voucher's own rows leave a
+   * choice open: the check then accepts the voucher only if its postings equal one of them, and never repairs it.
+   */
+  derive: (
+    tx: any,
+    scope: RefreshVoucherScope,
+    voucherNo: string,
+  ) => Promise<RefreshCandidate | RefreshCandidate[]>;
   /** Serialise with the family's writer before the voucher is replaced. */
   lock: (tx: any, scope: RefreshVoucherScope, voucherNo: string) => Promise<void>;
 }
 
 /**
  * Families whose apply is enabled. A family is listed only after every write-set fixture of it, saved through the
- * normal writer, previews clean (accountRefresh.db.test.ts); every other family is preview-only.
+ * normal writer, previews clean (accountRefresh.db.test.ts) and a replay of real desktop vouchers checks with no
+ * `differs`; every other family is preview-only. Cash/Bank passed both on 28 Nov 2026 (289 real desktop vouchers,
+ * loaded as stored, all match; docs/handbook/web/data-refresh.md). The set is read on every preview and apply.
  */
-export const ACCOUNT_REFRESH_VERIFIED: ReadonlySet<string> = new Set(['contra', 'fine-jv']);
+export const ACCOUNT_REFRESH_VERIFIED: ReadonlySet<string> = new Set([
+  'contra',
+  'fine-jv',
+  'cash-bank',
+]);
 
 export type VoucherStatus = 'match' | 'differs' | 'missing' | 'orphan' | 'locked' | 'unverified';
 
@@ -227,6 +253,16 @@ function keyed(
   return out;
 }
 
+/**
+ * Desktop text keeps the spaces typed around it (a narration or party name padded by the old CHAR columns) while the
+ * web trims what it writes; a value that differs only in leading or trailing spaces is not a posting fault, so it is
+ * no reason to rewrite the voucher (real desktop Cash/Bank replay, 28 Nov 2026).
+ */
+function sameValue(have: unknown, want: unknown): boolean {
+  if (typeof have === 'string' && typeof want === 'string') return have.trim() === want.trim();
+  return JSON.stringify(have) === JSON.stringify(want);
+}
+
 function compareTable(
   table: string,
   keyCol: string,
@@ -246,7 +282,7 @@ function compareTable(
     // Only the columns the writer sets are compared; the rest are the database's own defaults.
     for (const col of Object.keys(want)) {
       if (IGNORED.has(col)) continue;
-      if (JSON.stringify(have[col] ?? null) !== JSON.stringify(want[col] ?? null))
+      if (!sameValue(have[col] ?? null, want[col] ?? null))
         check.changed.push({ key, col, stored: have[col] ?? null, expected: want[col] ?? null });
     }
   }
@@ -282,29 +318,64 @@ async function checkVoucherTx(
     stored.set(table, await storedRowsTx(tx, table, scope, vchNo));
   const storedHash = sha([...stored.entries()]);
   const base = { coBook: scope.coBook, vchNo, vchDate, storedHash, version };
-  let materialized: Map<string, Record<string, unknown>[]>;
+  const unverified = (reason: string) => ({
+    check: {
+      ...base,
+      status: 'unverified' as const,
+      reason,
+      tables: [],
+      expectedHash: sha(reason),
+    },
+    expected: null,
+  });
+  let candidates: RefreshCandidate[];
   try {
-    materialized = await materializeVoucherRowsTx(
-      tx,
-      scope.tenantId,
-      await family.derive(tx, scope, vchNo),
-    );
+    const derived = await family.derive(tx, scope, vchNo);
+    candidates = Array.isArray(derived) ? derived : [derived];
   } catch (error) {
     // A voucher the builders cannot re-derive is reported, never repaired.
-    const reason = error instanceof Error ? error.message : String(error);
-    return {
-      check: { ...base, status: 'unverified', reason, tables: [], expectedHash: sha(reason) },
-      expected: null,
-    };
+    return unverified(error instanceof Error ? error.message : String(error));
   }
-  const expected = new Map<string, Record<string, unknown>[]>();
-  const tables: TableCheck[] = [];
-  for (const { table, key } of ACCOUNT_REFRESH_TABLES) {
-    const rows = materialized.get(table) ?? [];
-    expected.set(table, rows);
-    const check = compareTable(table, key, stored.get(table)!, await normalisedTx(tx, table, rows));
-    if (differs(check)) tables.push(check);
+  // Candidates the voucher may be repaired to come first; `unverifiedReason` candidates only explain the stored
+  // postings (e.g. the book's settings at save time) and are never written.
+  const drift = candidates.filter((c) => c.unverifiedReason);
+  candidates = candidates.filter((c) => !c.unverifiedReason);
+  let expected = new Map<string, Record<string, unknown>[]>();
+  let tables: TableCheck[] = [];
+  const compareTx = async (candidate: PostInput) => {
+    const materialized = await materializeVoucherRowsTx(tx, scope.tenantId, candidate);
+    const tried = new Map<string, Record<string, unknown>[]>();
+    const found: TableCheck[] = [];
+    for (const { table, key } of ACCOUNT_REFRESH_TABLES) {
+      const rows = materialized.get(table) ?? [];
+      tried.set(table, rows);
+      const check = compareTable(
+        table,
+        key,
+        stored.get(table)!,
+        await normalisedTx(tx, table, rows),
+      );
+      if (differs(check)) found.push(check);
+    }
+    return { tried, found };
+  };
+  for (const [index, candidate] of candidates.entries()) {
+    const { tried, found } = await compareTx(candidate);
+    if (index === 0 || !found.length) [expected, tables] = [tried, found];
+    if (!found.length) break;
   }
+  // The stored postings follow settings the voucher no longer has: reported, never re-posted into today's settings.
+  if (tables.length && drift.length) {
+    const explained = !(await compareTx(drift[0]!)).found.length;
+    return unverified(
+      `voucher ${vchNo}: ${drift[0]!.unverifiedReason}${explained ? '' : '; its postings also differ from what they were then'}`,
+    );
+  }
+  // Rows that allow more than one posting, none of which is stored, cannot say which one to restore.
+  if (tables.length && candidates.length > 1)
+    return unverified(
+      `voucher ${vchNo}: its rows allow ${candidates.length} postings (what it does not record: layout or account) and the stored postings match none of them`,
+    );
   const expectedHash = sha([...expected.entries()].map(([t, rows]) => [t, rows]));
   // CLR_DATE is carried over by LEDR_KEY only (MS_UPDATE.cs:2379-2396); a cleared leg with no same-key successor
   // loses its mark, so the preview and the run record say so.
@@ -330,11 +401,13 @@ async function checkVoucherTx(
   };
 }
 
-/** The family's books ($1 tenant, $2 company, $3 location, $4 untouched books, $6 MAIN_BOOK). */
+const mainBooks = (family: AccountRefreshFamily): string[] => [family.mainBook].flat();
+
+/** The family's books ($1 tenant, $2 company, $3 location, $4 untouched books, $6 MAIN_BOOK values). */
 const familyBooks = (family: AccountRefreshFamily) =>
   `SELECT b."CO_BOOK" FROM "BOOK_DATA" b
     WHERE b.tenant_id=$1 AND b."CO_CODE"=$2 AND b."LC_CODE"=$3
-      AND upper(btrim(coalesce(b."MAIN_BOOK",'')))=$6
+      AND upper(btrim(coalesce(b."MAIN_BOOK",''))) = ANY($6::text[])
       ${family.bookFilter ? `AND ${family.bookFilter}` : ''}
       AND btrim(coalesce(b."CO_BOOK",'')) <> ALL($4::text[])`;
 
@@ -358,7 +431,7 @@ async function checkFamilyTx(
       scope.lcCode,
       UNTOUCHED_BOOKS,
       scope.coYear,
-      family.mainBook,
+      mainBooks(family),
     );
   const checks: VoucherCheck[] = [];
   const expected = new Map<string, Map<string, Record<string, unknown>[]>>();
@@ -374,12 +447,22 @@ async function checkFamilyTx(
     if (result.expected) expected.set(`${v.coBook}/${v.vchNo}`, result.expected);
   }
   // Postings of a family book with no voucher: reported, never deleted.
+  const legacyExists = (family.legacyHeaderTables ?? []).length
+    ? `bool_or(${(family.legacyHeaderTables ?? [])
+        .map(
+          (t) => `EXISTS (SELECT 1 FROM ${q(t)} l
+                  WHERE l.tenant_id=p.tenant_id AND l."CO_CODE"=p."CO_CODE" AND l."LC_CODE"=p."LC_CODE"
+                    AND l."CO_YEAR"=p."CO_YEAR" AND l."CO_BOOK"=p."CO_BOOK" AND l."VCH_NO"=p."VCH_NO")`,
+        )
+        .join(' OR ')})`
+    : 'false';
   const orphans = new Map<string, VoucherCheck>();
   for (const { table } of ACCOUNT_REFRESH_TABLES) {
-    const rows: Array<{ coBook: string; vchNo: string; n: number; h: string }> =
+    const rows: Array<{ coBook: string; vchNo: string; n: number; h: string; legacy: boolean }> =
       await tx.$queryRawUnsafe(
         `SELECT p."CO_BOOK" AS "coBook", p."VCH_NO" AS "vchNo", count(*)::int AS n,
-                md5(string_agg(to_jsonb(p)::text, '|' ORDER BY to_jsonb(p)::text)) AS h
+                md5(string_agg(to_jsonb(p)::text, '|' ORDER BY to_jsonb(p)::text)) AS h,
+                ${legacyExists} AS legacy
            FROM ${q(table)} p
           WHERE p.tenant_id=$1 AND p."CO_CODE"=$2 AND p."LC_CODE"=$3 AND p."CO_YEAR"=$5
             AND p."CO_BOOK" IN (${books})
@@ -393,7 +476,7 @@ async function checkFamilyTx(
         scope.lcCode,
         UNTOUCHED_BOOKS,
         scope.coYear,
-        family.mainBook,
+        mainBooks(family),
       );
     for (const row of rows) {
       const id = `${row.coBook}/${row.vchNo}`;
@@ -401,8 +484,10 @@ async function checkFamilyTx(
         coBook: row.coBook,
         vchNo: row.vchNo,
         vchDate: null,
-        status: 'orphan' as const,
-        reason: 'posting rows without a voucher; reported, never deleted',
+        status: row.legacy ? ('unverified' as const) : ('orphan' as const),
+        reason: row.legacy
+          ? `voucher kept in ${(family.legacyHeaderTables ?? []).join('/')}, which this check does not re-derive; never changed`
+          : 'posting rows without a voucher; reported, never deleted',
         tables: [],
         orphanRows: {},
         storedHash: '',
@@ -608,7 +693,7 @@ const FAMILIES = new Map<string, AccountRefreshFamily>();
 /** Register one family as the operation `data-refresh-account-<id>`. Apply only if it is verified. */
 export function registerAccountRefreshFamily(family: AccountRefreshFamily): void {
   FAMILIES.set(family.id, family);
-  const verified = ACCOUNT_REFRESH_VERIFIED.has(family.id);
+  const verified = () => ACCOUNT_REFRESH_VERIFIED.has(family.id);
   const blockedReason = `${family.title} apply is not available until the family is verified; preview only.`;
   registerRepair({
     id: `data-refresh-account-${family.id}`,
@@ -617,8 +702,12 @@ export function registerAccountRefreshFamily(family: AccountRefreshFamily): void
     // The registry's evidence format is one MS_UPDATE range; the family's builders are named in the description.
     desktopSource: 'MS_UPDATE.cs:2334-2669',
     risk: 'danger',
-    applyAvailable: verified,
-    ...(verified ? {} : { blockedReason }),
+    get applyAvailable() {
+      return verified();
+    },
+    get blockedReason() {
+      return verified() ? undefined : blockedReason;
+    },
     completionText: 'Account Refersh Process Complete.',
     tables: ACCOUNT_REFRESH_TABLES.map((t) => t.table),
     async preview(tx, scope) {
@@ -636,7 +725,7 @@ export function registerAccountRefreshFamily(family: AccountRefreshFamily): void
       };
     },
     async apply(tx, scope) {
-      if (!verified) throw new RepairError('preview-only', blockedReason);
+      if (!verified()) throw new RepairError('preview-only', blockedReason);
       return applyFamilyTx(tx, family, scope);
     },
   });
@@ -678,6 +767,21 @@ registerAccountRefreshFamily({
   desktopSource: 'Ac_Ledr.cs:846-848 Contra_Ledr; Ac_Rojmel.cs:342-344 Contra_Rojmel',
   derive: deriveFineJvPostingsTx,
   // editFineJv serialises on the CONTRA_DATA rows alone (FOR UPDATE), which the apply also takes.
+  lock: async () => {},
+});
+
+registerAccountRefreshFamily({
+  id: 'cash-bank',
+  title: 'Cash/Bank',
+  // TR_CASH's four desktop books and the web's generic RECEIPT / PAYMENT books (cashBank.ts FINANCE_BOOK_FAMILIES).
+  mainBook: CASH_BANK_MAIN_BOOKS,
+  headerTable: 'CASH_DATA',
+  legacyHeaderTables: LEGACY_PAYMENT_TABLES.slice(0, 1),
+  versionTables: CASH_WRITE_TABLES,
+  desktopSource:
+    'Ac_Ledr.cs:565-610 Cash_Ledr/Bank_Ledr; Ac_Rojmel.cs:179-219 Cash_Rojmel/Bank_Rojmel',
+  derive: deriveCashBankPostingsTx,
+  // editCash and deleteCash serialise on the CASH_DATA rows (FOR UPDATE), which the apply also takes.
   lock: async () => {},
 });
 
