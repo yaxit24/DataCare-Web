@@ -393,6 +393,7 @@ route('Purchase/Purchase Invoice', [
   'GET /purchases/:vchNo/print',
   'PUT /purchases/:vchNo',
   'DELETE /purchases/:vchNo',
+  'POST /purchases/:vchNo/delete-stray-link',
   'GET /purchases/invoice',
 ]);
 route('Purchase/Consignment Purchase', [
@@ -1352,6 +1353,7 @@ const READ_POST_ROUTES = new Set([
 // previous `create` classification allowed.
 const DELETE_POST_ROUTES = new Set([
   'POST /companies/:coCode/reset',
+  'POST /purchases/:vchNo/delete-stray-link',
   'POST /utilities/data-repair/:id/apply',
   'POST /utilities/estimate-reset/apply',
 ]);

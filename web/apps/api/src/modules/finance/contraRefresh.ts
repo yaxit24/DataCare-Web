@@ -21,6 +21,12 @@ export class AccountRefreshDeriveError extends Error {
   }
 }
 
+/**
+ * A derived posting. With `unverifiedReason` it is not a repair target but an explanation: when the stored postings
+ * are not today's derivation, the voucher is reported `unverified` with that reason instead of being re-posted.
+ */
+export type RefreshCandidate = PostInput & { unverifiedReason?: string };
+
 export interface RefreshVoucherScope {
   tenantId: string;
   coCode: string;

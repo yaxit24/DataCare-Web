@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { PurchaseSaleLink, PurchaseEntryFields } from '../../../../components/PurchaseSaleLink';
 import { useRouter } from 'next/navigation';
 import { del, get, post, put, ApiError } from '../../../../lib/api';
 import { usePrintGate } from '../../../../lib/formRights';
@@ -273,6 +274,7 @@ function PlainPurchasePage() {
 
   async function submit(e: React.FormEvent) {
     e.preventDefault();
+    if (loadedView?.linkedSale) return;
     if (!settingsReady) {
       setErr(
         settingsState.status === 'error'
@@ -356,318 +358,340 @@ function PlainPurchasePage() {
   return (
     <div>
       <FormKeyHints actions={formKeys} />
-      <form onSubmit={submit}>
-        <VoucherChrome
-          title="Purchase Invoice"
-          vchNo={loadedVchNo ? Number(loadedVchNo) : (result?.vchNo ?? null)}
-          date={vchDate}
-          onDateChange={setVchDate}
-          dateInputRef={numberKeys.dateRef}
-          refNo={billNo}
-          onRefNoChange={setBillNo}
-          saving={busy}
-          onExit={() => router.back()}
-        />
-        <div className="panel">
-          <div className="row">
-            <div className="field">
-              <label>Voucher No</label>
-              <input
-                aria-label="Voucher No"
-                value={voucherLookup}
-                onChange={(e) => setVoucherLookup(e.target.value)}
-                onKeyDown={numberKeys.onKeyDown}
-                placeholder="00001"
-              />
-            </div>
-            <button type="button" className="ghost" disabled={busy} onClick={loadPurchase}>
-              Load
-            </button>
-            <VoucherNumberNote note={numberKeys.note} />
-            {loadedVchNo && (
-              <span className="msg ok" data-testid="purchase-loaded">
-                Loaded #{loadedVchNo}
-              </span>
-            )}
-            {loadedVchNo && (
-              <button
-                type="button"
-                className="danger"
-                disabled={busy}
-                onClick={removeLoadedPurchase}
-              >
-                Delete
-              </button>
-            )}
-            <button type="button" className="ghost" disabled={busy} onClick={newPurchase}>
-              New
-            </button>
-            <div className="field">
-              <label>Book</label>
-              {/* TR_PURC opens on CurBookHelp("PURCHASE") (MDI_FORM.cs:7868); the writer refuses any other
-                  MAIN_BOOK, so only purchase books are offered. */}
-              <BookSelect value={coBook} onChange={setCoBook} preferred="PUR" family="purchase" />
-            </div>
-            <div className="field">
-              <label>Year</label>
-              <input value={coYear} readOnly />
-            </div>
-            <div className="field">
-              <label>Location</label>
-              <input value={lcCode} readOnly />
-            </div>
-            <div className="field">
-              <label>Supplier (AC_CODE)</label>
-              <LookupPicker
-                entity="accounts"
-                value={acCode}
-                onChange={setAcCode}
-                resolveTypedCode
-                onPick={(r) => {
-                  setAcName(String(r.name || ''));
-                  if (r.AC_GST_TYPE) setInterState(String(r.AC_GST_TYPE) !== 'L');
-                }}
-              />
-            </div>
-            <div className="field">
-              <label>Supplier Name</label>
-              <input value={acName} onChange={(e) => setAcName(e.target.value)} />
-            </div>
-            <div className="field">
-              <label>Bill No</label>
-              <input value={billNo} onChange={(e) => setBillNo(e.target.value)} />
-            </div>
-            <div className="field">
-              <label>Tax %</label>
-              <input value={taxRatePct} onChange={(e) => setTaxRatePct(e.target.value)} />
-            </div>
-            <div className="field">
-              <label>Discount ₹</label>
-              <input value={discountAmount} onChange={(e) => setDiscountAmount(e.target.value)} />
-            </div>
-            <div className="field">
-              <label>Inter-state</label>
-              <select
-                value={interState ? 'y' : 'n'}
-                onChange={(e) => setInterState(e.target.value === 'y')}
-              >
-                <option value="n">No (CGST+SGST)</option>
-                <option value="y">Yes (IGST)</option>
-              </select>
-            </div>
-            <div className="field">
-              <label>URD (no GST)</label>
-              <select value={urd ? 'y' : 'n'} onChange={(e) => setUrd(e.target.value === 'y')}>
-                <option value="n">No</option>
-                <option value="y">Yes — unregistered dealer</option>
-              </select>
-            </div>
-          </div>
-        </div>
-        <div className="panel" style={{ overflow: 'auto' }}>
-          <PurchaseLineGrid
-            lines={lines}
-            setLines={setLines}
-            setLine={setLine}
-            pricing={pricing}
-            fullGrid={fullGrid}
-            setFullGrid={setFullGrid}
-            testId="purchase-grid-mode"
-            onGridKey={handleGridKey}
-            onRemoveLine={(i) => {
-              setLines((ls) => ls.filter((_, j) => j !== i));
-              stones.removeLine(i);
-            }}
-          />
-          {/* Sub-detail for the line the operator last touched, mirroring the desktop's
-              RowColChange filtering (TR_SALE.cs:16791-16876). A line selector is offered because
-              the web grid has no notion of a "current row" the way MSFlexGrid does. */}
-          <div className="row" style={{ marginTop: 8, alignItems: 'flex-end' }}>
-            <div className="field">
-              <label>Stones for item line</label>
-              <select
-                value={stones.activeLine}
-                onChange={(e) => stones.setActiveLine(Number(e.target.value))}
-              >
-                {lines.map((l, i) => (
-                  <option key={i} value={i}>
-                    {i + 1}
-                    {l.itCode ? ` — ${l.itCode}` : ''}
-                    {l.tagNo ? ` / ${l.tagNo}` : ''}
-                  </option>
-                ))}
-              </select>
-            </div>
-            <div className="field">
-              <span className="muted">{stones.totalRows} stone row(s) on this voucher</span>
-            </div>
-          </div>
-          <SubDetailGrid
-            rows={stones.rowsFor(stones.activeLine)}
-            onRowsChange={(rows) => stones.setRowsFor(stones.activeLine, rows)}
-            parentLabel={`item line ${stones.activeLine + 1}`}
-            desktopSource="TR_PURC / MSG_IDTL (34 cols) + MSG_PR_IDTL (25 cols)"
-          />
-          <details style={{ marginTop: 8 }}>
-            <summary>Desktop header fields</summary>
+      <PurchaseSaleLink
+        view={loadedView}
+        book={coBook}
+        voucher={loadedVchNo}
+        version={loadedVersion}
+        onClear={newPurchase}
+      >
+        <form onSubmit={submit}>
+          <PurchaseEntryFields view={loadedView}>
+            <VoucherChrome
+              title="Purchase Invoice"
+              vchNo={loadedVchNo ? Number(loadedVchNo) : (result?.vchNo ?? null)}
+              date={vchDate}
+              onDateChange={setVchDate}
+              dateInputRef={numberKeys.dateRef}
+              refNo={billNo}
+              onRefNoChange={setBillNo}
+              saving={busy}
+            />
+          </PurchaseEntryFields>
+          <div className="panel">
             <div className="row">
               <div className="field">
-                <label>Rate Unfixed</label>
+                <label>Voucher No</label>
                 <input
-                  type="checkbox"
-                  checked={rateUnfix}
-                  onChange={(e) => setRateUnfix(e.target.checked)}
+                  aria-label="Voucher No"
+                  value={voucherLookup}
+                  onChange={(e) => setVoucherLookup(e.target.value)}
+                  onKeyDown={numberKeys.onKeyDown}
+                  placeholder="00001"
                 />
               </div>
-              <div className="field">
-                <label>Address 1</label>
-                <input value={address1} onChange={(e) => setAddress1(e.target.value)} />
-              </div>
-              <div className="field">
-                <label>Address 2</label>
-                <input value={address2} onChange={(e) => setAddress2(e.target.value)} />
-              </div>
-              <div className="field">
-                <label>Address 3</label>
-                <input value={address3} onChange={(e) => setAddress3(e.target.value)} />
-              </div>
-              <div className="field">
-                <label>City</label>
-                <input value={city} onChange={(e) => setCity(e.target.value)} />
-              </div>
-              <div className="field">
-                <label>Mobile</label>
-                <input value={mobile} onChange={(e) => setMobile(e.target.value)} />
-              </div>
-              <div className="field">
-                <label>Bank Name</label>
-                <input value={bankName} onChange={(e) => setBankName(e.target.value)} />
-              </div>
-              <div className="field">
-                <label>Cheque No</label>
-                <input value={chequeNo} onChange={(e) => setChequeNo(e.target.value)} />
-              </div>
-              <div className="field">
-                <label>Card A/c</label>
-                <input value={cardAc} onChange={(e) => setCardAc(e.target.value)} />
-              </div>
-              <div className="field">
-                <label>Tax Code</label>
-                <input value={taxCode} onChange={(e) => setTaxCode(e.target.value)} />
-              </div>
-              <div className="field">
-                <label>TCS Code</label>
-                <input value={tcsCode} onChange={(e) => setTcsCode(e.target.value)} />
-              </div>
-              <div className="field">
-                <label>TDS Code</label>
-                <input value={tdsCode} onChange={(e) => setTdsCode(e.target.value)} />
-              </div>
-              <div className="field">
-                <label>Sale Bill No</label>
-                <input value={saleBillNo} onChange={(e) => setSaleBillNo(e.target.value)} />
-              </div>
-              <div className="field">
-                <label>Sale Bill Book</label>
-                <input value={saleBillBook} onChange={(e) => setSaleBillBook(e.target.value)} />
-              </div>
-              <div className="field">
-                <label>Purchase A/c</label>
-                <input value={purchaseAc} onChange={(e) => setPurchaseAc(e.target.value)} />
-              </div>
-              <div className="field">
-                <label>Tax A/c</label>
-                <input value={taxAc} onChange={(e) => setTaxAc(e.target.value)} />
-              </div>
-              <div className="field">
-                <label>Round-off A/c</label>
-                <input value={roundAc} onChange={(e) => setRoundAc(e.target.value)} />
-              </div>
-              <div className="field">
-                <label>Hallmark A/c</label>
-                <input value={hmChargeAc} onChange={(e) => setHmChargeAc(e.target.value)} />
-              </div>
-              <div className="field">
-                <label>Credit Days</label>
-                <input value={creditDays} onChange={(e) => setCreditDays(e.target.value)} />
-              </div>
-              <div className="field">
-                <label>Disc %</label>
-                <input value={discountPct} onChange={(e) => setDiscountPct(e.target.value)} />
-              </div>
-              <div className="field">
-                <label>TCS %</label>
-                <input value={tcsPct} onChange={(e) => setTcsPct(e.target.value)} />
-              </div>
-              <div className="field">
-                <label>TCS Amt</label>
-                <input value={tcsAmount} readOnly />
-              </div>
-              <div className="field">
-                <label>TDS %</label>
-                <input value={tdsPct} onChange={(e) => setTdsPct(e.target.value)} />
-              </div>
-              <div className="field">
-                <label>TDS Amt</label>
-                <input value={tdsAmount} onChange={(e) => setTdsAmount(e.target.value)} />
-              </div>
-              {!tdsOn && (
-                <div className="field">
-                  <label>Round Off</label>
-                  <input value={roundOff} onChange={(e) => setRoundOff(e.target.value)} />
-                </div>
+              <button type="button" className="ghost" disabled={busy} onClick={loadPurchase}>
+                Load
+              </button>
+              <VoucherNumberNote note={numberKeys.note} />
+              {loadedVchNo && (
+                <span className="msg ok" data-testid="purchase-loaded">
+                  Loaded #{loadedVchNo}
+                </span>
               )}
+              {loadedVchNo && (
+                <button
+                  type="button"
+                  className="danger"
+                  disabled={busy || !!loadedView?.linkedSale}
+                  onClick={removeLoadedPurchase}
+                >
+                  Delete
+                </button>
+              )}
+              <button type="button" className="ghost" disabled={busy} onClick={newPurchase}>
+                New
+              </button>
               <div className="field">
-                <label>Hallmark Amt</label>
-                <input value={hmAmount} onChange={(e) => setHmAmount(e.target.value)} />
+                <label>Book</label>
+                {/* TR_PURC opens on CurBookHelp("PURCHASE") (MDI_FORM.cs:7868); the writer refuses any other
+                  MAIN_BOOK, so only purchase books are offered. */}
+                <BookSelect value={coBook} onChange={setCoBook} preferred="PUR" family="purchase" />
               </div>
               <div className="field">
-                <label>Hallmark GST %</label>
-                <input value={hmTaxPct} onChange={(e) => setHmTaxPct(e.target.value)} />
+                <label>Year</label>
+                <input value={coYear} readOnly />
+              </div>
+              <div className="field">
+                <label>Location</label>
+                <input value={lcCode} readOnly />
+              </div>
+              <button type="button" className="ghost" onClick={() => router.back()}>
+                Exit
+              </button>
+            </div>
+          </div>
+          <PurchaseEntryFields view={loadedView}>
+            <div className="panel">
+              <div className="row">
+                <div className="field">
+                  <label>Supplier (AC_CODE)</label>
+                  <LookupPicker
+                    entity="accounts"
+                    value={acCode}
+                    onChange={setAcCode}
+                    resolveTypedCode
+                    onPick={(r) => {
+                      setAcName(String(r.name || ''));
+                      if (r.AC_GST_TYPE) setInterState(String(r.AC_GST_TYPE) !== 'L');
+                    }}
+                  />
+                </div>
+                <div className="field">
+                  <label>Supplier Name</label>
+                  <input value={acName} onChange={(e) => setAcName(e.target.value)} />
+                </div>
+                <div className="field">
+                  <label>Bill No</label>
+                  <input value={billNo} onChange={(e) => setBillNo(e.target.value)} />
+                </div>
+                <div className="field">
+                  <label>Tax %</label>
+                  <input value={taxRatePct} onChange={(e) => setTaxRatePct(e.target.value)} />
+                </div>
+                <div className="field">
+                  <label>Discount ₹</label>
+                  <input
+                    value={discountAmount}
+                    onChange={(e) => setDiscountAmount(e.target.value)}
+                  />
+                </div>
+                <div className="field">
+                  <label>Inter-state</label>
+                  <select
+                    value={interState ? 'y' : 'n'}
+                    onChange={(e) => setInterState(e.target.value === 'y')}
+                  >
+                    <option value="n">No (CGST+SGST)</option>
+                    <option value="y">Yes (IGST)</option>
+                  </select>
+                </div>
+                <div className="field">
+                  <label>URD (no GST)</label>
+                  <select value={urd ? 'y' : 'n'} onChange={(e) => setUrd(e.target.value === 'y')}>
+                    <option value="n">No</option>
+                    <option value="y">Yes — unregistered dealer</option>
+                  </select>
+                </div>
               </div>
             </div>
-          </details>
-          <PurchaseLineDetails lines={lines} fullGrid={fullGrid} setLine={setLine} />
-          <div className="toolbar" style={{ marginTop: 10 }}>
-            <button
-              type="button"
-              className="ghost"
-              onClick={() => setLines((ls) => [...ls, blank()])}
-            >
-              + Add line
-            </button>
-            <span className="spacer" />
-            {settingsReady ? (
-              <span className="muted" style={{ marginRight: 16 }}>
-                Taxable ₹{taxable.toLocaleString('en-IN')} · Tax ₹{taxPrev.toLocaleString('en-IN')}{' '}
-                · <b>Total ₹{totalPrev.toLocaleString('en-IN')}</b>
-              </span>
-            ) : (
-              <span className="muted" style={{ marginRight: 16 }}>
-                {settingsState.status === 'error'
-                  ? 'Purchase totals unavailable because settings failed to load.'
-                  : 'Loading purchase settings…'}
-              </span>
+            <div className="panel" style={{ overflow: 'auto' }}>
+              <PurchaseLineGrid
+                lines={lines}
+                setLines={setLines}
+                setLine={setLine}
+                pricing={pricing}
+                fullGrid={fullGrid}
+                setFullGrid={setFullGrid}
+                testId="purchase-grid-mode"
+                onGridKey={handleGridKey}
+                onRemoveLine={(i) => {
+                  setLines((ls) => ls.filter((_, j) => j !== i));
+                  stones.removeLine(i);
+                }}
+              />
+              {/* Sub-detail for the line the operator last touched, mirroring the desktop's
+              RowColChange filtering (TR_SALE.cs:16791-16876). A line selector is offered because
+              the web grid has no notion of a "current row" the way MSFlexGrid does. */}
+              <div className="row" style={{ marginTop: 8, alignItems: 'flex-end' }}>
+                <div className="field">
+                  <label>Stones for item line</label>
+                  <select
+                    value={stones.activeLine}
+                    onChange={(e) => stones.setActiveLine(Number(e.target.value))}
+                  >
+                    {lines.map((l, i) => (
+                      <option key={i} value={i}>
+                        {i + 1}
+                        {l.itCode ? ` — ${l.itCode}` : ''}
+                        {l.tagNo ? ` / ${l.tagNo}` : ''}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                <div className="field">
+                  <span className="muted">{stones.totalRows} stone row(s) on this voucher</span>
+                </div>
+              </div>
+              <SubDetailGrid
+                rows={stones.rowsFor(stones.activeLine)}
+                onRowsChange={(rows) => stones.setRowsFor(stones.activeLine, rows)}
+                parentLabel={`item line ${stones.activeLine + 1}`}
+                desktopSource="TR_PURC / MSG_IDTL (34 cols) + MSG_PR_IDTL (25 cols)"
+              />
+              <details style={{ marginTop: 8 }}>
+                <summary>Desktop header fields</summary>
+                <div className="row">
+                  <div className="field">
+                    <label>Rate Unfixed</label>
+                    <input
+                      type="checkbox"
+                      checked={rateUnfix}
+                      onChange={(e) => setRateUnfix(e.target.checked)}
+                    />
+                  </div>
+                  <div className="field">
+                    <label>Address 1</label>
+                    <input value={address1} onChange={(e) => setAddress1(e.target.value)} />
+                  </div>
+                  <div className="field">
+                    <label>Address 2</label>
+                    <input value={address2} onChange={(e) => setAddress2(e.target.value)} />
+                  </div>
+                  <div className="field">
+                    <label>Address 3</label>
+                    <input value={address3} onChange={(e) => setAddress3(e.target.value)} />
+                  </div>
+                  <div className="field">
+                    <label>City</label>
+                    <input value={city} onChange={(e) => setCity(e.target.value)} />
+                  </div>
+                  <div className="field">
+                    <label>Mobile</label>
+                    <input value={mobile} onChange={(e) => setMobile(e.target.value)} />
+                  </div>
+                  <div className="field">
+                    <label>Bank Name</label>
+                    <input value={bankName} onChange={(e) => setBankName(e.target.value)} />
+                  </div>
+                  <div className="field">
+                    <label>Cheque No</label>
+                    <input value={chequeNo} onChange={(e) => setChequeNo(e.target.value)} />
+                  </div>
+                  <div className="field">
+                    <label>Card A/c</label>
+                    <input value={cardAc} onChange={(e) => setCardAc(e.target.value)} />
+                  </div>
+                  <div className="field">
+                    <label>Tax Code</label>
+                    <input value={taxCode} onChange={(e) => setTaxCode(e.target.value)} />
+                  </div>
+                  <div className="field">
+                    <label>TCS Code</label>
+                    <input value={tcsCode} onChange={(e) => setTcsCode(e.target.value)} />
+                  </div>
+                  <div className="field">
+                    <label>TDS Code</label>
+                    <input value={tdsCode} onChange={(e) => setTdsCode(e.target.value)} />
+                  </div>
+                  <div className="field">
+                    <label>Sale Bill No</label>
+                    <input value={saleBillNo} onChange={(e) => setSaleBillNo(e.target.value)} />
+                  </div>
+                  <div className="field">
+                    <label>Sale Bill Book</label>
+                    <input value={saleBillBook} onChange={(e) => setSaleBillBook(e.target.value)} />
+                  </div>
+                  <div className="field">
+                    <label>Purchase A/c</label>
+                    <input value={purchaseAc} onChange={(e) => setPurchaseAc(e.target.value)} />
+                  </div>
+                  <div className="field">
+                    <label>Tax A/c</label>
+                    <input value={taxAc} onChange={(e) => setTaxAc(e.target.value)} />
+                  </div>
+                  <div className="field">
+                    <label>Round-off A/c</label>
+                    <input value={roundAc} onChange={(e) => setRoundAc(e.target.value)} />
+                  </div>
+                  <div className="field">
+                    <label>Hallmark A/c</label>
+                    <input value={hmChargeAc} onChange={(e) => setHmChargeAc(e.target.value)} />
+                  </div>
+                  <div className="field">
+                    <label>Credit Days</label>
+                    <input value={creditDays} onChange={(e) => setCreditDays(e.target.value)} />
+                  </div>
+                  <div className="field">
+                    <label>Disc %</label>
+                    <input value={discountPct} onChange={(e) => setDiscountPct(e.target.value)} />
+                  </div>
+                  <div className="field">
+                    <label>TCS %</label>
+                    <input value={tcsPct} onChange={(e) => setTcsPct(e.target.value)} />
+                  </div>
+                  <div className="field">
+                    <label>TCS Amt</label>
+                    <input value={tcsAmount} readOnly />
+                  </div>
+                  <div className="field">
+                    <label>TDS %</label>
+                    <input value={tdsPct} onChange={(e) => setTdsPct(e.target.value)} />
+                  </div>
+                  <div className="field">
+                    <label>TDS Amt</label>
+                    <input value={tdsAmount} onChange={(e) => setTdsAmount(e.target.value)} />
+                  </div>
+                  {!tdsOn && (
+                    <div className="field">
+                      <label>Round Off</label>
+                      <input value={roundOff} onChange={(e) => setRoundOff(e.target.value)} />
+                    </div>
+                  )}
+                  <div className="field">
+                    <label>Hallmark Amt</label>
+                    <input value={hmAmount} onChange={(e) => setHmAmount(e.target.value)} />
+                  </div>
+                  <div className="field">
+                    <label>Hallmark GST %</label>
+                    <input value={hmTaxPct} onChange={(e) => setHmTaxPct(e.target.value)} />
+                  </div>
+                </div>
+              </details>
+              <PurchaseLineDetails lines={lines} fullGrid={fullGrid} setLine={setLine} />
+              <div className="toolbar" style={{ marginTop: 10 }}>
+                <button
+                  type="button"
+                  className="ghost"
+                  onClick={() => setLines((ls) => [...ls, blank()])}
+                >
+                  + Add line
+                </button>
+                <span className="spacer" />
+                {settingsReady ? (
+                  <span className="muted" style={{ marginRight: 16 }}>
+                    Taxable ₹{taxable.toLocaleString('en-IN')} · Tax ₹
+                    {taxPrev.toLocaleString('en-IN')} ·{' '}
+                    <b>Total ₹{totalPrev.toLocaleString('en-IN')}</b>
+                  </span>
+                ) : (
+                  <span className="muted" style={{ marginRight: 16 }}>
+                    {settingsState.status === 'error'
+                      ? 'Purchase totals unavailable because settings failed to load.'
+                      : 'Loading purchase settings…'}
+                  </span>
+                )}
+                <button className="primary" disabled={busy || !settingsReady}>
+                  {busy ? 'Saving…' : loadedVchNo ? 'Update Purchase' : 'Save Purchase'}
+                </button>
+              </div>
+            </div>
+            {settingsReady && (
+              <TenderPanel
+                total={totalPrev}
+                value={tender}
+                onChange={setTender}
+                title="pay the supplier now (blank = full on credit)"
+              />
             )}
-            <button className="primary" disabled={busy || !settingsReady}>
-              {busy ? 'Saving…' : loadedVchNo ? 'Update Purchase' : 'Save Purchase'}
-            </button>
-          </div>
-        </div>
-        {settingsReady && (
-          <TenderPanel
-            total={totalPrev}
-            value={tender}
-            onChange={setTender}
-            title="pay the supplier now (blank = full on credit)"
-          />
-        )}
-        {settingsState.status === 'error' && (
-          <div className="msg err" role="alert" data-testid="purchase-settings-error">
-            Purchase settings could not be loaded. Reload this page before saving.
-          </div>
-        )}
-      </form>
+            {settingsState.status === 'error' && (
+              <div className="msg err" role="alert" data-testid="purchase-settings-error">
+                Purchase settings could not be loaded. Reload this page before saving.
+              </div>
+            )}
+          </PurchaseEntryFields>
+        </form>
+      </PurchaseSaleLink>
       {err && <div className="msg err">{err}</div>}
       {result && (
         <div className="panel">
@@ -700,7 +724,7 @@ function PlainPurchasePage() {
       <VoucherList
         table="PR_DATA"
         book={coBook}
-        deleteBase="/purchases"
+        deleteBase={loadedView?.linkedSale ? undefined : '/purchases'}
         onLoad={(_vchNo, identity) => void openPurchase(identity.vchNo, identity.coBook)}
         openKey={numberKeys.listKey}
         printHref={(v) =>

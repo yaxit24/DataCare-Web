@@ -1,3 +1,4 @@
+import { deleteStrayPurchase } from '../modules/purchase/strayLink.js';
 import type { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify';
 import type { CrmRouteHelpers } from './crm.js';
 import { deletePurchase, editPurchase, getPurchase } from '../modules/purchase/purchase.js';
@@ -46,6 +47,58 @@ export function registerPurchaseVoucherRoutes(
       }),
     );
   };
+  app.post(
+    '/purchases/:vchNo/delete-stray-link',
+    {
+      ...(auth as any),
+      // Fastify's default AJV removes unknown keys; reject them before schema validation instead.
+      preValidation: async (req, reply) => {
+        const query = req.query as Record<string, unknown>;
+        const body = req.body;
+        if (
+          Object.keys(query).some((key) => !['coBook', 'expectedVersion'].includes(key)) ||
+          (body !== undefined &&
+            (body === null ||
+              typeof body !== 'object' ||
+              Array.isArray(body) ||
+              Object.keys(body).length))
+        ) {
+          return reply
+            .code(400)
+            .send({ error: 'invalid-request', message: 'Unexpected stray-link deletion fields' });
+        }
+      },
+      schema: {
+        params: {
+          type: 'object',
+          additionalProperties: false,
+          required: ['vchNo'],
+          properties: { vchNo: { type: 'string', minLength: 1, maxLength: 10 } },
+        },
+        querystring: {
+          type: 'object',
+          additionalProperties: false,
+          required: ['coBook', 'expectedVersion'],
+          properties: {
+            coBook: { type: 'string', minLength: 1, maxLength: 3 },
+            expectedVersion: { type: 'string', minLength: 1 },
+          },
+        },
+        body: { type: 'object', additionalProperties: false, properties: {} },
+      },
+    },
+    async (req, reply) => {
+      if (!guard(req, reply, 'delete')) return;
+      return run(reply, 200, () =>
+        deleteStrayPurchase(prisma, {
+          scope: scopeOf(req),
+          vchNo: (req.params as any).vchNo,
+          deleteUser: mainUserOf(req),
+          expectedVersion: requiredVersion((req.query as any)?.expectedVersion),
+        }),
+      );
+    },
+  );
   // Literal paths: the route registry, its tests and docs_check read them from this file.
   app.get('/purchases/:vchNo', auth as any, read);
   app.put('/purchases/:vchNo', auth as any, update);
