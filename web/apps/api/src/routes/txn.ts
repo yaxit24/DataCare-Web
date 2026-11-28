@@ -27,7 +27,6 @@ import {
   listMfgLotSources,
 } from '../modules/manufacturing/mfgLot.js';
 import {
-  createSale,
   createSalesQuotation,
   deleteSalesQuotation,
   editSalesQuotation,
@@ -245,6 +244,7 @@ import { registerTaxMasterRoutes } from './taxMaster.js';
 import { registerAutoItemRoutes } from './autoItem.js';
 import { registerGroupMasterRoutes } from './groupMaster.js';
 import { registerCompanyIdentityRoutes } from './companyIdentity.js';
+import { registerUrdBookSettingsRoutes } from './urdBookSettings.js';
 import { registerProductMasterRoutes } from './productMaster.js';
 import { registerMasterScreenRoutes } from './masterScreens.js';
 import { registerWholesaleSaleRoutes } from './wholesaleSale.js';
@@ -954,6 +954,7 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
           error: e.code,
           message: e.message,
           ...(e.form === undefined ? {} : { form: e.form, action: e.action }),
+          ...((e as any).details === undefined ? {} : { details: (e as any).details }), // 3B facts
         });
       if (e instanceof VoucherVersionConflictError)
         return reply.code(409).send({ error: e.code, message: e.message });
@@ -1113,6 +1114,7 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
   registerGroupMasterRoutes(app, extraRouteHelpers, formCapabilities);
   registerProductMasterRoutes(app, extraRouteHelpers, formCapabilities);
   registerCompanyIdentityRoutes(app, extraRouteHelpers);
+  registerUrdBookSettingsRoutes(app, extraRouteHelpers);
   registerTagPrintScreenRoutes(app, extraRouteHelpers, formCapabilities);
   registerMasterScreenRoutes(app, extraRouteHelpers, formCapabilities);
   registerWholesaleSaleRoutes(app, extraRouteHelpers);
@@ -1390,6 +1392,7 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
     tdsCode: b.tdsCode,
     tdsPct: b.tdsPct != null ? Number(b.tdsPct) : undefined,
     tdsAmount: b.tdsAmount != null ? Number(b.tdsAmount) : undefined,
+    roundOffAmount: b.roundOffAmount != null ? Number(b.roundOffAmount) : undefined,
     kasarAmount: b.kasarAmount != null ? Number(b.kasarAmount) : undefined,
     kasarAc: b.kasarAc,
     orderRef: b.orderRef,
@@ -1418,14 +1421,10 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
     ornamentIssued: b.ornamentIssued == null ? undefined : !!b.ornamentIssued,
     ...saleResidualInput(b), // WP-26: UPI, credit-note and order rows, member commission
   });
-  app.post('/sales', auth, async (req, reply) => {
-    if (!guard(req, reply, 'create')) return;
-    const b = body(req);
-    return run(reply, 201, () => createSale(prisma, saleInput(req, b), b.lines ?? []));
-  });
-  // GET, PUT and DELETE /sales/:vchNo carry the version token (N51) and live in routes/saleVoucher.ts.
-  // The Apr No import and POST /tour/:vchNo/bill live there too (TR_SALE.cs:20008-20050).
-  registerSaleVoucherRoutes(app, { ...extraRouteHelpers, saleInput });
+  // POST, GET, PUT and DELETE /sales live in routes/saleVoucher.ts (version token N51, linked URD purchase 2B), with
+  // the Apr No import and POST /tour/:vchNo/bill (TR_SALE.cs:20008-20050).
+  const purchaseInputOf = (req: FastifyRequest, b: Record<string, any>) => purchaseInput(req, b);
+  registerSaleVoucherRoutes(app, { ...extraRouteHelpers, saleInput, purchaseInputOf, sess });
   // G125 (Stage E): the retail Tax Invoice print (desktop SaleBillA4Gst.rpt). Every sale needs a
   // printable bill; builds the shared GST-bill HTML and renders it to PDF (or returns raw HTML).
   app.get('/sales/:vchNo/print', auth, async (req, reply) => {
@@ -2460,6 +2459,7 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
     tdsCode: b.tdsCode,
     tdsPct: b.tdsPct != null ? Number(b.tdsPct) : undefined,
     tdsAmount: b.tdsAmount != null ? Number(b.tdsAmount) : undefined,
+    roundOffAmount: b.roundOffAmount != null ? Number(b.roundOffAmount) : undefined,
     saleBillNo: b.saleBillNo,
     saleBillLc: b.saleBillLc,
     saleBillYear: b.saleBillYear,

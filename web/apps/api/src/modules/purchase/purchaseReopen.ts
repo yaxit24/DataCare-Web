@@ -125,7 +125,10 @@ export function purchaseLineView(
 }
 
 /** The PR_DATA header as a `PurchaseInput`, plus the read-only totals and identity the screen shows. */
-export function purchaseHeaderView(h: Record<string, unknown>): Record<string, unknown> {
+export function purchaseHeaderView(
+  h: Record<string, unknown>,
+  computedRoundOff = false,
+): Record<string, unknown> {
   return {
     voucherNo: text(h.VCH_NO),
     hiddenVoucherNo: text(h.HD_VCH_NO),
@@ -174,6 +177,8 @@ export function purchaseHeaderView(h: Record<string, unknown>): Record<string, u
     tdsCode: text(h.TDS_CODE),
     tdsPct: num(h.TDS_PRC),
     tdsAmount: num(h.TDS_AMT),
+    // The typed row 4 (TR_PURC.cs:11790); 0 for the old web's computed one (shared/legacyRoundOff.ts).
+    roundOffAmount: computedRoundOff ? 0 : num(h.ROF_AMT),
     chequeNo: text(h.CHQ_NO),
     bankName: text(h.BANK_NAME),
     cardAc: text(h.CARD_AC),

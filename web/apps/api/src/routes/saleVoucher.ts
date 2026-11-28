@@ -1,6 +1,12 @@
-import type { FastifyInstance, FastifyRequest } from 'fastify';
+import type { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify';
 import type { CrmRouteHelpers } from './crm.js';
-import { createSale, deleteSale, editSale, getSale } from '../modules/sales/sales.js';
+import { createSale, deleteSale, editSale } from '../modules/sales/sales.js';
+import {
+  getSaleWithLinkedPurchases,
+  LinkedPurchaseForbiddenError,
+  linkedSaleHookFor,
+  purchaseViewCheck,
+} from '../modules/sales/linkedOldPurchaseSale.js';
 import {
   approvalSaleBill,
   saleApprovalHelp,
@@ -8,11 +14,16 @@ import {
 } from '../modules/sales/approvalImport.js';
 import { requiredVersion } from '../modules/vouchers/version.js';
 import { salePrintFiles, setSalePrintDefault } from '../modules/sales/salePrintChoice.js';
+import { resolveUrdPurchaseBookTx, UrdBookValidationError } from '../modules/purchase/urdBook.js';
+import { withTxBudget } from '../modules/shared/txBudget.js';
 
 /**
- * A saved sale: read, update and delete (TR_SALE). The read returns the voucher's `version`; an update sends it in the
- * body and a delete in the query as `expectedVersion`, and a stale one is `409 voucher-version-conflict` (N51, D17,
- * G170). Moved out of routes/txn.ts with the version token, to keep that file within its size budget.
+ * The retail sale (TR_SALE): create, read, update and delete. The read returns the voucher's `version`; an update sends
+ * it in the body and a delete in the query as `expectedVersion`, and a stale one is `409 voucher-version-conflict`
+ * (N51, D17, G170). Moved out of routes/txn.ts with the version token, to keep that file within its size budget.
+ *
+ * Owner decision 2B: POST and PUT take `linkedOldPurchase: { gold?, silver? }` and write the URD purchase in the
+ * sale's transaction (linkedOldPurchaseSale.ts); the operator also needs the Purchase right, refused 403 naming it.
  */
 export function registerSaleVoucherRoutes(
   app: FastifyInstance,
@@ -21,9 +32,46 @@ export function registerSaleVoucherRoutes(
     'prisma' | 'auth' | 'guard' | 'scopeOf' | 'run' | 'body' | 'mainUserOf'
   > & {
     saleInput: (req: FastifyRequest, b: Record<string, any>) => any;
+    purchaseInputOf: (req: FastifyRequest, b: Record<string, any>) => Record<string, any>;
+    sess: (req: FastifyRequest) => {
+      tenantId: string;
+      sub: string;
+      coCode: string;
+      loginCoCode: string;
+    };
   },
 ): void {
-  const { prisma, auth, guard, scopeOf, run, body, mainUserOf, saleInput } = h;
+  const { prisma, auth, guard, scopeOf, body, mainUserOf, saleInput, purchaseInputOf, sess } = h;
+  // `run` answers the domain errors and rethrows the rest; the linked purchase's missing right is a 403.
+  const run = async (reply: FastifyReply, okCode: number, fn: () => Promise<unknown>) => {
+    try {
+      return await h.run(reply, okCode, fn);
+    } catch (e) {
+      if (!(e instanceof LinkedPurchaseForbiddenError)) throw e;
+      return reply
+        .code(403)
+        .send({ error: 'forbidden', form: e.form, action: e.action, message: e.message });
+    }
+  };
+  const sessionOf = (req: FastifyRequest, lcCode: string) => {
+    const s = sess(req);
+    return { ...s, loginName: s.sub, lcCode };
+  };
+  const linkedHookOf = (req: FastifyRequest, b: Record<string, any>, input: any) =>
+    linkedSaleHookFor(
+      input,
+      b.linkedOldPurchase,
+      (x) => purchaseInputOf(req, x),
+      sessionOf(req, input.scope.lcCode),
+    );
+  app.post('/sales', auth as any, async (req, reply) => {
+    if (!guard(req, reply, 'create')) return;
+    const b = body(req);
+    return run(reply, 201, () => {
+      const input = saleInput(req, b);
+      return createSale(prisma, input, b.lines ?? [], linkedHookOf(req, b, input));
+    });
+  });
   // WP-26 (D6): the PRINT_MAST file list of the sale book and its "Set" default (TR_SALE.cs:13933, :20618-20624).
   app.get('/sales/print-files', auth as any, async (req, reply) => {
     if (!guard(req, reply, 'view')) return;
@@ -33,6 +81,29 @@ export function registerSaleVoucherRoutes(
     if (!guard(req, reply, 'update')) return;
     return run(reply, 200, () =>
       setSalePrintDefault(prisma, scopeOf(req), String(body(req).file ?? '')),
+    );
+  });
+  // Owner decision 2B: what the Old Gold / Silver row's URD purchase book resolves to (urdBook.ts), or the message
+  // telling the operator how to create one; read under the Sales right, as the operator may not open Settings.
+  app.get('/sales/urd-books', auth as any, async (req, reply) => {
+    if (!guard(req, reply, 'view')) return;
+    const scope = scopeOf(req);
+    return run(reply, 200, () =>
+      withTxBudget(prisma, scope.tenantId, 'read', async (tx: any) => {
+        const resolve = async (metal: 'G' | 'S') => {
+          try {
+            const { coBook, bookName } = await resolveUrdPurchaseBookTx(tx, scope, metal);
+            return { coBook, bookName };
+          } catch (error) {
+            if (error instanceof UrdBookValidationError) return { error: error.message };
+            throw error;
+          }
+        };
+        return {
+          resolved: { gold: await resolve('G'), silver: await resolve('S') },
+          lcCode: scope.lcCode,
+        };
+      }),
     );
   });
   // TR_SALE.cs:20562-20590 "A" (Approval Help): the open APR ISU vouchers of the session location.
@@ -65,20 +136,30 @@ export function registerSaleVoucherRoutes(
   });
   app.get('/sales/:vchNo', auth as any, async (req, reply) => {
     if (!guard(req, reply, 'view')) return;
-    return run(reply, 200, () => getSale(prisma, scopeOf(req), (req.params as any).vchNo));
+    // Owner decision 2B: the linked URD purchases come back with the sale, in the purchase reopen view.
+    return run(reply, 200, () =>
+      getSaleWithLinkedPurchases(
+        prisma,
+        scopeOf(req),
+        (req.params as any).vchNo,
+        purchaseViewCheck(sessionOf(req, scopeOf(req).lcCode)),
+      ),
+    );
   });
   app.put('/sales/:vchNo', auth as any, async (req, reply) => {
     if (!guard(req, reply, 'update')) return;
     const b = body(req);
-    return run(reply, 200, async () =>
-      editSale(
+    return run(reply, 200, async () => {
+      const input = saleInput(req, b);
+      return editSale(
         prisma,
-        saleInput(req, b),
+        input,
         b.lines ?? [],
         (req.params as any).vchNo,
         requiredVersion(b.expectedVersion),
-      ),
-    );
+        linkedHookOf(req, b, input),
+      );
+    });
   });
   app.delete('/sales/:vchNo', auth as any, async (req, reply) => {
     if (!guard(req, reply, 'delete')) return;

@@ -5,6 +5,7 @@ import { openAdvanceOfOrderTx } from '../src/modules/sales/orderCancel.js';
 import { cancelIrnForSale } from '../src/modules/einvoice/einvoice.js';
 import { bankReconClear, bankReconList } from '../src/modules/finance/bankRecon.js';
 import type { VoucherScope } from '../src/modules/vouchers/numbering.js';
+import { postVoucher } from '../src/modules/posting/posting.js';
 
 /**
  * What the sale save writes, column by column, against the desktop (found by the desktop replay oracle on the
@@ -638,7 +639,8 @@ databaseDescribe('sale writes what the desktop writes', () => {
   }, 30_000);
 
   /** A line-path book with paise on a line and the bill total rounded to rupees still saves, balanced. */
-  it('balances a line-path bill whose line nets carry paise under a rupee-rounded bill total', async () => {
+  // Owner decision 1B (2026-11-27): the line nets' and the bill total's rounding are posted nowhere, as on the desktop.
+  it('leaves a line-path bill off by only the rounding of its paise line nets into a rupee-rounded total', async () => {
     await exec(
       `INSERT INTO "CO_SET_NEW"(tenant_id,"CO_CODE","TOT_AMT_ROF") VALUES ($1,$2,'0')`,
       CO,
@@ -650,7 +652,15 @@ databaseDescribe('sale writes what the desktop writes', () => {
     const legs = await ledger('ES', sale.vchNo);
     const sum = (side: 'dr' | 'cr') =>
       Math.round(legs.reduce((s, l) => s + Number(l[side]), 0) * 100) / 100;
-    expect(sum('dr')).toBe(sum('cr'));
+    const [h] = await rows(
+      `SELECT "TAX_AMT"::float tax,"TOT_AMT"::float tot,"ROF_AMT"::float rof FROM "SL_DATA"
+        WHERE tenant_id=$1 AND "CO_BOOK"='ES' AND "VCH_NO"=lpad($2::text,5,'0')`,
+      sale.vchNo,
+    );
+    expect(h!.rof).toBe(0);
+    expect(legs.some((l) => /(35|99)$/.test(String(l.k)))).toBe(false);
+    const off = Math.round((sum('dr') - sum('cr')) * 100) / 100;
+    expect(Math.abs(off)).toBeLessThanOrEqual(1); // half a rupee for the NET_AMT rounding, half for TOT_AMT
     const [detl] = await rows(
       `SELECT array_agg("NET_AMT"::float ORDER BY "SR_NO") nets FROM "SL_DETL"
         WHERE tenant_id=$1 AND "CO_BOOK"='ES' AND "VCH_NO"=lpad($2::text,5,'0')`,
@@ -660,6 +670,9 @@ databaseDescribe('sale writes what the desktop writes', () => {
     const lineLegs = legs.filter((l) => /^\s+\d+0[27]$/.test(String(l.k).slice(-12)));
     expect(lineLegs.map((l) => l.cr)).toEqual(detl?.nets);
     expect(detl?.nets.some((n: number) => !Number.isInteger(n))).toBe(true);
+    // Exactly the bill total less the posted line nets and tax.
+    const nets = (detl?.nets as number[]).reduce((t, n) => t + n, 0);
+    expect(off).toBe(Math.round((h!.tot - nets - h!.tax) * 100) / 100);
   }, 30_000);
 
   /** Review fixes: UPI by its own rows, KASAR_AMT + POINT_VAL, TCS to its code's TAX_AC, discount on an unfixed sale. */
@@ -866,4 +879,161 @@ databaseDescribe('sale writes what the desktop writes', () => {
     );
     expect(os?.amt).toBe(fresh.tot);
   }, 30_000);
+
+  /**
+   * Owner decision 1B (2026-11-27): round-off copies the desktop. SL_DATA.ROF_AMT is only the round-off the operator
+   * types (TR_SALE.cs:15051), leg 35 posts it on slot 5 (Ac_Ledr.cs:159) and the day book row 22 names it (Ac_Rojmel.cs:102);
+   * the bill total's own rounding (TR_SALE.cs:19047) is posted nowhere.
+   */
+  describe('round-off as the desktop posts it', () => {
+    const header = async (book: string, vchNo: number) =>
+      (
+        await rows(
+          `SELECT "NET_AMT"::float net,"TAX_AMT"::float tax,"TOT_AMT"::float tot,"ROF_AMT"::float rof
+             FROM "SL_DATA" WHERE tenant_id=$1 AND "CO_BOOK"=$2 AND "VCH_NO"=lpad($3::text,5,'0')`,
+          book,
+          vchNo,
+        )
+      )[0]!;
+    const dayBook = (vchNo: number) =>
+      rows(
+        `SELECT substr("LEDR_KEY",22,2) t, btrim("AC_CODE"::text) ac, btrim("LD_CODE"::text) ld,
+                coalesce("AC_NAME",'') nm, "DR_AMT"::float dr, "CR_AMT"::float cr
+           FROM "ROJ_MEL_DATA" WHERE tenant_id=$1 AND "CO_BOOK"='TX' AND "VCH_NO"=lpad($2::text,5,'0')`,
+        vchNo,
+      );
+    const off = (legs: Array<Record<string, any>>) =>
+      Math.round(legs.reduce((t, l) => t + Number(l.dr) - Number(l.cr), 0) * 100) / 100 || 0;
+    const rupeeTotals = () =>
+      exec(`INSERT INTO "CO_SET_NEW"(tenant_id,"CO_CODE","TOT_AMT_ROF") VALUES ($1,$2,'0')`, CO);
+
+    it('stores ROF_AMT 0 without a typed round-off and leaves the ledger off by the total rounding', async () => {
+      await rupeeTotals();
+      const sale = await createSale(runtime, saleInput('TX'), [looseLine()]);
+      const h = await header('TX', sale.vchNo);
+      // Independently: net 10,760, tax 3% 322.80, 11,082.80 rounds to 11,083.
+      expect(h).toEqual({ net: 10760, tax: 322.8, tot: 11083, rof: 0 });
+      const legs = await ledger('TX', sale.vchNo);
+      expect(legs.some((l) => /(35|99)$/.test(String(l.k)))).toBe(false);
+      // The party is debited 11,083 against 10,760 + 322.80 credited: 0.20 posted nowhere.
+      expect(off(legs)).toBe(0.2);
+      expect((await dayBook(sale.vchNo)).some((r) => r.t === '22')).toBe(false);
+    }, 30_000);
+
+    it('posts a typed round-off as leg 35 on slot 5 and day-book row 22, and reopens it', async () => {
+      await rupeeTotals();
+      const input = saleInput('TX', { roundOffAmount: -0.8 });
+      const sale = await createSale(runtime, input, [looseLine()]);
+      // TOT = Round(10,760 + 322.80 - 0.80) = 11,082 (TR_SALE.cs:19047).
+      expect(await header('TX', sale.vchNo)).toEqual({
+        net: 10760,
+        tax: 322.8,
+        tot: 11082,
+        rof: -0.8,
+      });
+      const legs = await ledger('TX', sale.vchNo);
+      const leg35 = legs.filter((l) => String(l.k).endsWith('35'));
+      expect(leg35).toEqual([
+        expect.objectContaining({ AC_CODE: 'DISCAC', PARTY_AC_CODE: '', dr: 0.8, cr: 0 }),
+      ]);
+      expect(off(legs)).toBe(0);
+      // Ac_Rojmel.cs:102: the party in AC_CODE, slot 5 as contra, the negative value straight into DR_AMT.
+      expect((await dayBook(sale.vchNo)).filter((r) => r.t === '22')).toEqual([
+        { t: '22', ac: 'CUST', ld: 'DISCAC', nm: 'ROF - Synthetic Customer', dr: -0.8, cr: 0 },
+      ]);
+      const view: any = await getSale(runtime, scopeOf('TX'), sale.vchNo);
+      expect(view.roundOffAmount).toBe(-0.8);
+      await editSale(
+        runtime,
+        { ...input, roundOffAmount: 0.2 },
+        [looseLine()],
+        sale.vchNo,
+        view.version,
+      );
+      expect(await header('TX', sale.vchNo)).toMatchObject({ tot: 11083, rof: 0.2 });
+      const edited = await ledger('TX', sale.vchNo);
+      expect(edited.filter((l) => String(l.k).endsWith('35'))).toEqual([
+        expect.objectContaining({ AC_CODE: 'DISCAC', dr: 0, cr: 0.2 }),
+      ]);
+      expect(off(edited)).toBe(0);
+    }, 30_000);
+
+    it("reopens an old web voucher's computed round-off as 0 and re-saves it without the '99' leg", async () => {
+      await rupeeTotals();
+      const input = saleInput('TX');
+      const sale = await createSale(runtime, input, [looseLine()]);
+      const vch = String(sale.vchNo).padStart(5, '0');
+      // The previous web stored the computed 0.20 in ROF_AMT and posted it as its own leg '99' (synthetic copy).
+      await exec(
+        `UPDATE "SL_DATA" SET "ROF_AMT"=0.2 WHERE tenant_id=$1 AND "CO_BOOK"='TX' AND "VCH_NO"=$2`,
+        vch,
+      );
+      await exec(
+        `INSERT INTO "AC_DATA"(tenant_id,"CO_CODE","LC_CODE","CO_YEAR","CO_BOOK","VCH_NO","VCH_TYPE","LEDR_KEY",
+           "AC_CODE","LD_CODE","DR_AMT","CR_AMT","SIGN")
+         VALUES ($1,$2,$3,$4,'TX',$5,'SALE',$6,'KASAR','CUST',0,0.2,'C')`,
+        CO,
+        LC,
+        YEAR,
+        vch,
+        `${CO}${LC}${YEAR}TX${vch}99`,
+      );
+      const view: any = await getSale(runtime, scopeOf('TX'), sale.vchNo);
+      expect(view.roundOffAmount).toBe(0);
+      await editSale(
+        runtime,
+        { ...input, roundOffAmount: view.roundOffAmount },
+        [looseLine()],
+        sale.vchNo,
+        view.version,
+      );
+      expect(await header('TX', sale.vchNo)).toMatchObject({ tot: 11083, rof: 0 });
+      const legs = await ledger('TX', sale.vchNo);
+      expect(legs.some((l) => /(35|99)$/.test(String(l.k)))).toBe(false);
+      expect(off(legs)).toBe(0.2);
+      // A typed round-off (no '99' leg) still reopens as typed.
+      await editSale(
+        runtime,
+        { ...input, roundOffAmount: -0.8 },
+        [looseLine()],
+        sale.vchNo,
+        ((await getSale(runtime, scopeOf('TX'), sale.vchNo)) as any).version,
+      );
+      expect(((await getSale(runtime, scopeOf('TX'), sale.vchNo)) as any).roundOffAmount).toBe(
+        -0.8,
+      );
+    }, 30_000);
+
+    it('refuses an imbalance beyond the bill rounding, or one the writer did not declare', async () => {
+      const key = {
+        CO_CODE: CO,
+        LC_CODE: LC,
+        CO_YEAR: YEAR,
+        CO_BOOK: 'TX',
+        VCH_NO: '00900',
+        VCH_TYPE: 'SALE',
+      };
+      const legs = (cr: number) => [
+        { ...key, legType: 1, AC_CODE: 'CUST', LD_CODE: 'CTRL', DR_AMT: 100, CR_AMT: 0 },
+        { ...key, legType: 8, AC_CODE: 'CTRL', LD_CODE: 'CUST', DR_AMT: 0, CR_AMT: cr },
+      ];
+      const post = (cr: number, residue?: { amount: number; bound: number }) =>
+        postVoucher(runtime, TENANT, {
+          ledger: { table: 'AC_DATA', lines: legs(cr) },
+          desktopRoundingResidue: residue,
+        });
+      await expect(post(99.4, { amount: 0.6, bound: 0.5 })).rejects.toThrow(/rounding residue 0.6/);
+      await expect(post(99.8)).rejects.toThrow(/unbalanced ledger/);
+      await expect(post(99.8, { amount: 0.3, bound: 0.5 })).rejects.toThrow(/unbalanced ledger/);
+      expect(await rows(`SELECT 1 FROM "AC_DATA" WHERE tenant_id=$1 AND "VCH_NO"='00900'`)).toEqual(
+        [],
+      );
+      // An unfixed sale posts no bill leg, so a typed round-off on it is refused.
+      await expect(
+        createSale(runtime, saleInput('TX', { rateUnfix: true, roundOffAmount: 0.5 }), [
+          looseLine(),
+        ]),
+      ).rejects.toThrow(/unfixed sale/);
+    }, 30_000);
+  });
 });

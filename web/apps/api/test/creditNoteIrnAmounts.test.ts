@@ -15,7 +15,11 @@ const scope = {
 
 /** Adapter-unit fixture only: SQL responses are explicit fixtures, transport is the existing
  * deterministic fake. The real scoped reads/writes have separate database tests. */
-function storedDocument(lines: Array<Record<string, unknown>>, mainBook: string) {
+function storedDocument(
+  lines: Array<Record<string, unknown>>,
+  mainBook: string,
+  header: Record<string, unknown> = {},
+) {
   const tx = {
     $executeRawUnsafe: vi.fn(async () => 1),
     $queryRawUnsafe: vi.fn(async (sql: string) => {
@@ -29,6 +33,7 @@ function storedDocument(lines: Array<Record<string, unknown>>, mainBook: string)
             NET_AMT: 100,
             TAX_PRC: 3,
             VCH_DATE: new Date('2024-07-01T00:00:00Z'),
+            ...header,
           },
         ];
       if (sql.includes('FROM "CO_MAST"'))
@@ -46,9 +51,9 @@ function storedDocument(lines: Array<Record<string, unknown>>, mainBook: string)
 }
 
 describe.each(['CRN', 'INV'] as const)('stored %s IRN amount adapter preserves zero', (family) => {
-  const submit = (lines: Array<Record<string, unknown>>) => {
+  const submit = (lines: Array<Record<string, unknown>>, header: Record<string, unknown> = {}) => {
     const mainBook = family === 'CRN' ? 'E CRNT' : 'SALES';
-    const prisma = storedDocument(lines, mainBook);
+    const prisma = storedDocument(lines, mainBook, header);
     return family === 'CRN'
       ? submitIrnForCreditNote(prisma, scope, { vchNo: '00001' })
       : submitIrnForSale(prisma, scope, { vchNo: '00001', expectedMainBook: mainBook });
@@ -75,6 +80,21 @@ describe.each(['CRN', 'INV'] as const)('stored %s IRN amount adapter preserves z
     vi.restoreAllMocks();
     vi.unstubAllEnvs();
     vi.unstubAllGlobals();
+  });
+
+  // Owner decision 1B (2026-11-27): an untyped round-off leaves ROF_AMT 0 while TOT_AMT is rounded. The desktop sends
+  // RndOffAmt 0 and TotInvVal = SL_DATA.TOT_AMT (TR_SL_EBILL.cs:9230-9231), so the IRN total is the bill's total.
+  it('sends TotInvVal = TOT_AMT and RndOffAmt 0 for a bill whose rounding was not typed', async () => {
+    const generated = vi.spyOn(FakeIrnTransport.prototype, 'generateIRN');
+    // 9,899.50 + 3% IGST 296.99 = 10,196.49, rounded to a 10,196 bill with ROF_AMT 0.
+    await submit([{ NET_AMT: 9899.5, TAX_PRC: 3, ITM_IGST_AMT: 296.99 }], {
+      NET_AMT: 9899.5,
+      TOT_AMT: 10196,
+      ROF_AMT: 0,
+    });
+    const payload = generated.mock.calls[0]![0];
+    expect(payload.ItemList[0]!.TotItemVal).toBe(10196.49);
+    expect(payload.ValDtls).toMatchObject({ RndOffAmt: 0, TotInvVal: 10196 });
   });
 
   it('keeps mixed100/0 line totals at100 and preserves the zero line GST rate', async () => {

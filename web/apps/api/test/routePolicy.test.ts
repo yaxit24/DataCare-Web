@@ -176,8 +176,10 @@ describe('route policy registry', () => {
     // Data Import (UT_IMPORT Lite Soft) adds its preview and apply: 840. The Company print adds
     // GET /company-identity/print: 841. Data Refresh > Account check-and-repair adds its paged voucher list
     // GET /utilities/data-refresh/account/:family/vouchers: 842.
-    expect(routes).toHaveLength(842);
-    expect(new Set(routes.map((route) => `${route.method} ${route.path}`)).size).toBe(842);
+    // The linked old-gold purchase adds GET and POST /settings/urd-books (Utilities/Settings): 844.
+    // The Sales screen's linked old-gold modal reads its URD book under Sales Invoice (GET /sales/urd-books): 845.
+    expect(routes).toHaveLength(845);
+    expect(new Set(routes.map((route) => `${route.method} ${route.path}`)).size).toBe(845);
 
     const policies = routes.map((route) => ({
       ...route,

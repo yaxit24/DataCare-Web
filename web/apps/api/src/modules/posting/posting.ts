@@ -1,5 +1,5 @@
 import { postingDataTypeTx } from './dataType.js';
-import { formatDesktopDate } from '@datacare/core';
+import { formatDesktopDate, round as roundTo } from '@datacare/core';
 import { withTxBudget } from '../shared/txBudget.js';
 import { DESKTOP_COLUMN_DEFAULTS } from './desktopColumnDefaults.js';
 import { tableColumnsTx, warmSchemaCatalog } from '../shared/schemaCatalog.js';
@@ -28,6 +28,8 @@ export interface PostInput {
    * not silently lose the value on its party leg.
    */
   partyAc?: string;
+  /** The desktop's unposted bill-total rounding (sale and purchase only); see DesktopRoundingResidue. */
+  desktopRoundingResidue?: DesktopRoundingResidue;
 }
 
 export class UnbalancedError extends Error {
@@ -80,9 +82,57 @@ function isOrderRateCutOneSidedLeg(line: LedgerLine): boolean {
   return true;
 }
 
-/** The voucher's balance check: every leg except the documented order rate-cut leg. */
-export function assertVoucherBalanced(lines: LedgerLine[]): void {
-  assertBalanced(lines.filter((line) => !isOrderRateCutOneSidedLeg(line)));
+/**
+ * The ONE documented imbalance of a sale or purchase voucher: the bill total's rounding the desktop posts nowhere.
+ *
+ * OWNER DECISION 1B (2026-11-27): round-off copies the desktop exactly. The desktop rounds the bill total to
+ * TOT_AMT_ROF (TR_SALE.cs:19047, TR_PURC.cs:15085) but SL_DATA/PR_DATA.ROF_AMT is only the round-off the operator
+ * types (TR_SALE.cs:15051, TR_PURC.cs:12600), and the ledger posts a round-off leg only when ROF_AMT <> 0
+ * (Ac_Ledr.cs:159 sale leg 35, :460 purchase leg 26). The paise between the rounded total and the posted legs are
+ * posted nowhere, so the voucher's ledger is off by them; the owner accepted that.
+ *
+ * `amount` is the voucher's exact Σ DR − Σ CR, computed by the writer from its own legs; `bound` is the most the
+ * desktop's rounding steps can leave (half a TOT_AMT_ROF unit per rounding). The check accepts exactly that amount
+ * and only within the bound: any other imbalance, or this one beyond the bound, is still refused. No other voucher
+ * family passes it.
+ */
+export interface DesktopRoundingResidue {
+  amount: number;
+  bound: number;
+}
+
+export class RoundingResidueUnbalancedError extends Error {
+  constructor(amount: number, bound: number) {
+    super(`unbalanced ledger: rounding residue ${amount} exceeds the bill rounding bound ${bound}`);
+    this.name = 'RoundingResidueUnbalancedError';
+  }
+}
+
+/**
+ * The voucher's balance check: every leg except the documented order rate-cut leg, and, when the sale or purchase
+ * writer states it, exactly the desktop's unposted rounding residue (DesktopRoundingResidue).
+ */
+export function assertVoucherBalanced(lines: LedgerLine[], residue?: DesktopRoundingResidue): void {
+  const checked = lines.filter((line) => !isOrderRateCutOneSidedLeg(line));
+  // Compared in thousandths: a 3-decimal tax under a 2-decimal bill leaves a half-paisa residue (±0.005) that
+  // rounding to paise would turn into 0 or ±0.01.
+  const expected = residue ? roundTo(residue.amount, 3) : 0;
+  if (expected === 0) return assertBalanced(checked);
+  if (Math.abs(residue!.amount) > residue!.bound + 1e-9)
+    throw new RoundingResidueUnbalancedError(residue!.amount, residue!.bound);
+  const actual = roundTo(
+    checked.reduce((sum, line) => sum + Number(line.DR_AMT ?? 0) - Number(line.CR_AMT ?? 0), 0),
+    3,
+  );
+  if (actual !== expected) {
+    const b = ledgerBalance(checked);
+    throw new UnbalancedError(b.cr, b.dr);
+  }
+}
+
+/** A sale or purchase return: its bill total rounds to whole rupees (TR_SALE_RTN / TR_KR_ISU), so half a rupee. */
+export function returnRoundingResidue(amount: number): DesktopRoundingResidue {
+  return { amount: roundTo(amount, 3), bound: 0.5 };
 }
 
 /**
@@ -623,8 +673,7 @@ export async function materializeVoucherRowsListTx(
     // number is indistinguishable from a measured desktop code, so an unmapped leg numbered 05 would look like
     // evidence about the desktop that nobody had gathered.
     //
-    // The sale codes occupy 01-39 (Ac_Ledr.cs:61-172). The band 50-98 is unused by any of them, and 99 is the
-    // web-only round-off leg.
+    // The sale codes occupy 01-39 (Ac_Ledr.cs:61-172). The band 50-99 is unused by any of them.
     const declared = (line as Record<string, unknown>).legType;
     const legNo = typeof declared === 'number' ? declared : 50 + srno;
     // `legLine` appends a LINE NUMBER, right-aligned in 10, giving a 33-character key.
@@ -705,7 +754,7 @@ export async function materializeVoucherRowsTx(
 
 /** Post a voucher's writes within an EXISTING transaction (used by sales/purchase composition). */
 export async function postVoucherTx(tx: any, tenantId: string, input: PostInput): Promise<void> {
-  assertVoucherBalanced(input.ledger.lines);
+  assertVoucherBalanced(input.ledger.lines, input.desktopRoundingResidue);
   await assertPeriodOpen(tx, tenantId, input);
   for (const { table, row } of await materializeVoucherRowsListTx(tx, tenantId, input))
     await insertMaterializedRowTx(tx, table, tenantId, row);

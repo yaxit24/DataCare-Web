@@ -5,7 +5,12 @@ import {
   buildIncomeLegs,
   computeLine,
 } from '../src/modules/sales/sales.js';
-import { ledgerBalance } from '../src/modules/posting/posting.js';
+import { assertVoucherBalanced, ledgerBalance } from '../src/modules/posting/posting.js';
+import {
+  SALE_LEG,
+  saleRoundingBound,
+  saleRoundingResidue,
+} from '../src/modules/sales/saleLedger.js';
 import { resolveRoundingPolicy } from '@datacare/core';
 
 const key = { CO_CODE: '01', LC_CODE: '01', CO_YEAR: '2024', CO_BOOK: 'SAL', VCH_NO: '1' };
@@ -96,7 +101,9 @@ describe('sales builders', () => {
     expect(b.dr).toBe(1180);
     expect(lines.length).toBe(3); // no round-off line
   });
-  it('refuses a round-off leg past the rounding bound: line legs that do not add up to the bill', () => {
+  // Owner decision 1B (2026-11-27): the bill total's rounding is posted nowhere, as on the desktop (Ac_Ledr.cs:159
+  // posts only a typed ROF_AMT); the line legs' rounding stays unposted too, and is bounded.
+  it("leaves the line legs' rounding unposted, within the bound; a line short of the bill is refused", () => {
     const build = (lineAmount: number) =>
       buildSaleLedger({
         key,
@@ -104,26 +111,89 @@ describe('sales builders', () => {
         salesAc: 'SALES',
         taxAc: 'GST',
         roundAc: 'ROF',
-        totals: { total: 1180, taxable: 1000, tax: 180, roundOff: 0, net: 1000 },
+        totals: { total: 1180, taxable: 1000, tax: 180, net: 1000 },
         incomeLegs: [{ ac: 'SALES', amount: lineAmount, srNo: 1 }],
-        maxRoundOffResidue: 2.01,
       });
-    // Paise of rounding is carried by the round-off leg...
-    expect(ledgerBalance(build(999.6)).balanced).toBe(true);
-    // ...a line total 100 short of the bill is refused rather than hidden in the round-off leg.
-    expect(() => build(900)).toThrow(/does not agree with the bill total/);
+    const residue = (lineAmount: number) => ({
+      amount: saleRoundingResidue(1180, [{ amount: lineAmount }, { amount: 180 }], 0),
+      bound: saleRoundingBound(0, true),
+    });
+    expect(build(999.6).some((line) => line.legType === 99)).toBe(false);
+    expect(residue(999.6).amount).toBe(0.4);
+    expect(() => assertVoucherBalanced(build(999.6), residue(999.6))).not.toThrow();
+    // A line total 100 short of the bill is far past what rounding can leave.
+    expect(() => assertVoucherBalanced(build(900), residue(900))).toThrow(/rounding residue/);
   });
-  it('buildSaleLedger balances (with round-off)', () => {
+  it('posts no automatic round-off leg: the voucher is off by exactly the bill rounding', () => {
     const lines = buildSaleLedger({
       key,
       acCode: 'CUST',
       salesAc: 'SALES',
       taxAc: 'GST',
       roundAc: 'ROF',
-      totals: { total: 1181, taxable: 1000, tax: 180.4, roundOff: 0.6 },
+      totals: { total: 1181, taxable: 1000, tax: 180.6 },
     });
-    expect(ledgerBalance(lines).balanced).toBe(true);
-    expect(lines.length).toBe(4);
+    expect(lines.length).toBe(3);
+    const b = ledgerBalance(lines);
+    expect(Math.round((b.dr - b.cr) * 100) / 100).toBe(0.4);
+    const residue = {
+      amount: saleRoundingResidue(1181, [{ amount: 1000 }, { amount: 180.6 }], 0),
+      bound: 0.5,
+    };
+    expect(() => assertVoucherBalanced(lines, residue)).not.toThrow();
+    // Strict without the writer's residue, and a wrong residue is refused too.
+    expect(() => assertVoucherBalanced(lines)).toThrow(/unbalanced/);
+    expect(() => assertVoucherBalanced(lines, { amount: 0.3, bound: 0.5 })).toThrow(/unbalanced/);
+  });
+  it('accepts a half-paisa residue exactly (3-decimal tax under a 2-decimal bill total)', () => {
+    // Net 97.09 + tax 2.915 (TAX_ROF 3) = 100.005, a 2-decimal bill of 100.00: the ledger is 0.005 short of the bill.
+    const lines = buildSaleLedger({
+      key,
+      acCode: 'CUST',
+      salesAc: 'SALES',
+      taxAc: 'GST',
+      roundAc: 'ROF',
+      totals: { total: 100, taxable: 97.09, tax: 2.915 },
+    });
+    const amount = saleRoundingResidue(100, [{ amount: 97.09 }, { amount: 2.915 }], 0);
+    expect(amount).toBe(-0.005);
+    expect(() =>
+      assertVoucherBalanced(lines, { amount, bound: saleRoundingBound(2, false) }),
+    ).not.toThrow();
+    // A paisa is not half a paisa: a wrong residue is still refused.
+    expect(() => assertVoucherBalanced(lines, { amount: -0.004, bound: 0.005 })).toThrow(
+      /unbalanced/,
+    );
+    expect(() => assertVoucherBalanced(lines, { amount: 0.005, bound: 0.005 })).toThrow(
+      /unbalanced/,
+    );
+  });
+  it('posts a typed round-off as desktop leg 35 on slot 5 (Ac_Ledr.cs:159)', () => {
+    const build = (amount: number) =>
+      buildSaleLedger({
+        key,
+        acCode: 'CUST',
+        salesAc: 'SALES',
+        taxAc: 'GST',
+        roundAc: 'ROF',
+        totals: { total: 1180, taxable: 1000, tax: 180.4 },
+        roundOff: { ac: 'SLOT5', amount },
+      });
+    const negative = build(-0.4);
+    expect(ledgerBalance(negative).balanced).toBe(true);
+    expect(negative.find((line) => line.legType === SALE_LEG.roundOff)).toMatchObject({
+      legType: 35,
+      AC_CODE: 'SLOT5',
+      LD_CODE: 'CUST',
+      DR_AMT: 0.4,
+      CR_AMT: 0,
+      SIGN: 'D',
+    });
+    expect(build(0.6).find((line) => line.legType === 35)).toMatchObject({
+      CR_AMT: 0.6,
+      DR_AMT: 0,
+      SIGN: 'C',
+    });
   });
   it('posts desktop gross party plus paired tender rows with actual contra accounts', () => {
     const lines = buildSaleLedger({

@@ -8,7 +8,7 @@ import {
 } from '../../../../components/ExtendedGrid';
 import { useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { del, get, post, put, ApiError } from '../../../../lib/api';
+import { del, get, ApiError } from '../../../../lib/api';
 import { usePrintGate } from '../../../../lib/formRights';
 import { useBusinessScope, useRoundingPolicy } from '../../../../components/BusinessScope';
 import { BookSelect } from '../../../../components/BookSelect';
@@ -24,12 +24,19 @@ import { companyFlag, useCompanySettings, companySetting } from '../../../../lib
 import {
   applySaleTagPick,
   editSaleGridRow,
-  oldGoldRowAmount,
   recalcSaleGridRow,
   saleGridRowLabour,
 } from '../../../../lib/lineRecalc';
 import { billTotals, lineNet as lineNetAmount } from '@datacare/core';
-import { saleBillTotal } from '../../../../lib/saleBillTotal';
+import {
+  oldGoldBody,
+  oldGoldValue,
+  ogRowsFromView,
+  SaleOldGoldGrid,
+  type OgRow,
+} from '../../../../components/SaleOldGoldGrid';
+import { useLinkedOldPurchase } from '../../../../components/LinkedOldPurchaseModal';
+import { r2, saleBillTotal } from '../../../../lib/saleBillTotal';
 import { SaleTdsAmount } from '../../../../components/SaleTdsAmount';
 import { SaleApprovalImport, useSaleApprovalNo } from '../../../../components/SaleApprovalImport';
 import { todayLocal } from '../../../../lib/localDate';
@@ -40,6 +47,7 @@ import {
   useOldMetalTodayRates,
 } from '../../../../components/SaleResidualPanel';
 import * as wp26 from '../../../../lib/saleResidual';
+import { useOrderAdvanceConfirm } from '../../../../components/OrderAdvanceConfirm';
 
 /** BOOK_DATA.MAIN_BOOK values the retail sale writer accepts (sales.ts, workflowPolicy.SALES). */
 const SALE_MAIN_BOOKS = ['SALES'];
@@ -115,23 +123,6 @@ interface Line {
   hallmarkId4Wt: string;
   otherWt: string;
 }
-interface OgRow {
-  metal: 'G' | 'S';
-  itCode: string;
-  pcs: string;
-  grossWt: string;
-  netWt: string;
-  touch: string;
-  rate: string;
-  description: string;
-  otherWt: string;
-  conversionPct: string;
-  conversionWt: string;
-  rateType: string;
-  amount?: string;
-  itType?: string;
-  prCost?: number; // WP-26: typed amount, stored type and PR_COST
-}
 /** Voucher margin, returned only when the company shows bill profit. */
 type SaleProfit = { total: number; lines: { basis: string; cost: number; profit: number }[] };
 
@@ -201,23 +192,8 @@ const blank = (): Line => ({
   hallmarkId3Wt: '',
   hallmarkId4Wt: '',
 });
-const ogBlank = (): OgRow => ({
-  metal: 'G',
-  itCode: 'OG',
-  pcs: '',
-  grossWt: '',
-  netWt: '',
-  touch: '',
-  rate: '',
-  description: '',
-  otherWt: '',
-  conversionPct: '',
-  conversionWt: '',
-  rateType: '',
-});
 const n = (v: string) => Number(v || 0);
 const str = (v: unknown) => (v == null || Number(v) === 0 ? '' : String(v));
-const r2 = (x: number) => Math.round((x + 1e-9) * 100) / 100;
 /**
  * P7 dead cells removed, found by scripts/check-dead-cells.mjs.
  *
@@ -305,6 +281,7 @@ export default function SalesEntryPage() {
   const router = useRouter();
   const formKeys = desktopGlobalFormKeyActions((href) => router.push(href));
   const [coBook, setCoBook] = useState('');
+  const [bookTypes, setBookTypes] = useState<Record<string, string>>({}); // BOOK_DATA.BOOK_TYPE by book
   const [vchDate, setVchDate] = useState(() => todayLocal());
   const [refNo, setRefNo] = useState('');
   const [acCode, setAcCode] = useState('WALKIN');
@@ -327,6 +304,7 @@ export default function SalesEntryPage() {
   const [tcsCode, setTcsCode] = useState('');
   const [tdsCode, setTdsCode] = useState('');
   const [tdsPct, setTdsPct] = useState('');
+  const [roundOff, setRoundOff] = useState(''); // ROF_AMT, the typed row 4 (TR_SALE.cs:15051)
   const [cardAc, setCardAc] = useState('');
   const [bankAc, setBankAc] = useState('');
   const [chequeNo, setChequeNo] = useState('');
@@ -369,6 +347,7 @@ export default function SalesEntryPage() {
   const [loadedVchNo, setLoadedVchNo] = useState('');
   const [loadedVersion, setLoadedVersion] = useState(''); // N51 (D17): sent on update and delete
   const [err, setErr] = useState('');
+  const orderAdvance = useOrderAdvanceConfirm(); // owner decision 3B
   const printGate = usePrintGate('Sales/Sales Invoice', setErr); // TR_SALE.cs:16248-16254
   const [busy, setBusy] = useState(false);
   const cashRef = useRef<HTMLInputElement>(null);
@@ -432,23 +411,47 @@ export default function SalesEntryPage() {
   );
   const taxable = itemTotals.taxable;
   const taxPrev = itemTotals.tax;
-  const ogAmt = (o: OgRow) => oldGoldRowAmount(o); // the writer's own valuation (G83)
-  const setOg = (i: number, k: keyof OgRow, v: string) =>
-    setOgRows((rs) => rs.map((r, j) => (j === i ? { ...r, [k]: v } : r)));
-  const oldGoldVal = r2(ogRows.reduce((s, o) => s + ogAmt(o), 0));
+  // Owner decision 2B: a T book's Old Gold / Silver rows are the linked URD purchase (TR_SALE.cs:18756-18847).
+  const taxInvoiceBook = bookTypes[coBook] === 'T';
+  const linked = useLinkedOldPurchase(
+    { enabled: taxInvoiceBook, acCode, acName, vchDate, coBook, vchNo: loadedVchNo, interState },
+    cashRef,
+  );
+  const oldGoldVal = r2(oldGoldValue(ogRows) + linked.amount);
   const hmAmt = n(hmCharge);
   const tdsOn = companyFlag(companySettings, 'SL_TDS_TAX', 'N');
-  const bill = saleBillTotal(
+  const rofOn = !tdsOn && !headerExtra.rateUnfix; // row 4 is TDS under SL_TDS_TAX; an unfixed sale refuses it
+  const { total: totalPrev, ...bill } = saleBillTotal(
     itemTotals,
     hmAmt,
-    [tdsPct, taxRatePct, tcsPct].map(n),
+    [tdsPct, taxRatePct, tcsPct, rofOn ? roundOff : ''].map(n),
     tdsOn,
     roundingPolicy.roundBillTotal,
   );
-  const totalPrev = bill.total;
   const kasarAmt = n(kasar);
   const paid = r2(n(cashAmt) + n(cardAmt) + n(upiAmt) + n(chequeAmt) + oldGoldVal);
   const balanceDue = r2(totalPrev - paid - kasarAmt - n(ordAmt) - n(currentAdjustmentAmount)); // TR_SALE.cs:19390
+  const walkInCash = linked.walkInCash({
+    ...{ total: totalPrev, advance: n(ordAmt), kasar: kasarAmt, upi: n(upiAmt) },
+    digits: companyFlag(companySettings, 'ALL_ROF_REMOVE', 'N') ? 2 : 0,
+  });
+  // TR_SALE.cs:19125-19150: the walk-in cash is the desktop's own figure; what the operator had comes back after.
+  // A reopened sale's stored cash is grossed up by the old metal, so it comes back blank rather than restored.
+  const cashBefore = useRef<{ cash: string; paid: string } | null>(null);
+  const reopened = useRef(false);
+  useEffect(() => {
+    const fresh = reopened.current;
+    reopened.current = false;
+    if (walkInCash) {
+      cashBefore.current ??= fresh ? { cash: '', paid: '' } : { cash: cashAmt, paid: cashPaid };
+      setCashAmt(String(walkInCash.cash));
+      setCashPaid(walkInCash.paid ? String(walkInCash.paid) : '');
+    } else if (cashBefore.current) {
+      setCashAmt(cashBefore.current.cash);
+      setCashPaid(cashBefore.current.paid);
+      cashBefore.current = null;
+    }
+  }, [walkInCash?.cash, walkInCash?.paid, loadedVersion]); // eslint-disable-line react-hooks/exhaustive-deps
 
   function newSale() {
     setLoadedVchNo('');
@@ -469,9 +472,11 @@ export default function SalesEntryPage() {
     setChequeAmt('');
     setHmCharge('');
     setTcsPct('');
+    setRoundOff('');
     setKasar('');
     setOrdNo('');
     setOrdAmt('');
+    orderAdvance.load(null);
     setCrDays('');
     setEmpCode('');
     setDiscountPct('');
@@ -497,6 +502,8 @@ export default function SalesEntryPage() {
     setDescription('');
     setOrnamentIssued(true);
     setOgRows([]);
+    linked.reset();
+    cashBefore.current = null;
     setResidual(wp26.emptySaleResidual());
     setLines([blank()]);
   }
@@ -553,12 +560,14 @@ export default function SalesEntryPage() {
       setKasar(str(view.kasarAmount));
       setOrdNo(String(view.orderRef?.ordNo ?? ''));
       setOrdAmt(str(view.orderRef?.adjustAmt));
+      orderAdvance.load(view);
       setCrDays(str(view.crDays));
       setEmpCode(String(view.empCode ?? ''));
       setDiscountPct(str(view.discountPct));
       setTcsCode(String(view.tcsCode ?? ''));
       setTdsCode(String(view.tdsCode ?? ''));
       setTdsPct(str(view.tdsPct));
+      setRoundOff(str(view.roundOffAmount));
       setCardAc(String(view.cardAc ?? ''));
       setBankAc(String(view.bankAc ?? ''));
       setChequeNo(String(view.chequeNo ?? ''));
@@ -579,24 +588,10 @@ export default function SalesEntryPage() {
       setOrnamentIssued(view.ornamentIssued !== false);
       setResidual(wp26.saleResidualFromView(view));
       setHeaderExtra(wp26.headerExtraFromView(view)); // rate unfix and tax code go back on save (G82)
-      setOgRows(
-        (view.oldGold ?? []).map((row: any) => ({
-          metal: row.metal === 'S' ? 'S' : 'G',
-          itCode: String(row.itCode ?? ''),
-          pcs: str(row.pcs),
-          grossWt: str(row.grossWt),
-          netWt: str(row.netWt),
-          touch: str(row.touch),
-          rate: str(row.rate),
-          description: String(row.description ?? ''),
-          otherWt: str(row.otherWt),
-          conversionPct: str(row.conversionPct),
-          conversionWt: str(row.conversionWt),
-          rateType: String(row.rateType ?? ''),
-          itType: String(row.itType ?? ''),
-          prCost: Number(row.prCost ?? 0),
-        })),
-      );
+      setOgRows(ogRowsFromView(view));
+      linked.load(view); // owner decision 2B: the linked URD purchases
+      cashBefore.current = null;
+      reopened.current = true;
       const loadedLines = (view.lines ?? []).map(wp26.saleLineFromView) as Line[];
       setLines(loadedLines.length ? loadedLines : [blank()]);
       return true;
@@ -639,26 +634,8 @@ export default function SalesEntryPage() {
     setResult(null);
     setBusy(true);
     try {
-      const oldGold = ogRows
-        .filter((o) => ogAmt(o) > 0)
-
-        .map((o) => ({
-          itCode: o.itCode || (o.metal === 'S' ? 'OS' : 'OG'),
-          pcs: n(o.pcs),
-          grossWt: n(o.grossWt),
-          netWt: n(o.netWt),
-          touch: n(o.touch),
-          metal: o.metal,
-          description: o.description || undefined,
-          rate: n(o.rate),
-          otherWt: n(o.otherWt),
-          conversionPct: n(o.conversionPct),
-          conversionWt: n(o.conversionWt),
-          rateType: o.rateType || undefined,
-          amount: ogAmt(o),
-          itType: o.itType || undefined,
-          prCost: o.prCost || undefined,
-        }));
+      const oldGold = oldGoldBody(ogRows);
+      const linkedBody = linked.body();
       const body = {
         coBook,
         coYear,
@@ -674,6 +651,7 @@ export default function SalesEntryPage() {
         tcsCode: tcsCode || undefined,
         tdsCode: tdsCode || undefined,
         tdsPct: tdsPct ? n(tdsPct) : undefined,
+        roundOffAmount: rofOn && n(roundOff) !== 0 ? n(roundOff) : undefined,
         hallmarkAmount: hmAmt > 0 ? hmAmt : undefined,
         tcsPct: n(tcsPct) > 0 ? n(tcsPct) : undefined,
         kasarAmount: kasarAmt > 0 ? kasarAmt : undefined,
@@ -705,6 +683,7 @@ export default function SalesEntryPage() {
         upiAmt: upiAmt ? n(upiAmt) : undefined,
         chequeAmt: chequeAmt ? n(chequeAmt) : undefined,
         oldGold: oldGold.length ? oldGold : undefined,
+        linkedOldPurchase: linkedBody,
         cashAc: headerExtra.cashAc || undefined,
         hmChargeAc: headerExtra.hmChargeAc || undefined,
         hmTaxPct: headerExtra.hmTaxPct ? Number(headerExtra.hmTaxPct) : undefined,
@@ -790,13 +769,16 @@ export default function SalesEntryPage() {
             ...saleGridRowLabour(l),
           })),
       };
-      const saved = loadedVchNo
-        ? await put<{ vchNo: number; totals: Totals; billProfit?: SaleProfit }>(
-            `/sales/${encodeURIComponent(loadedVchNo)}`,
-            { ...body, expectedVersion: loadedVersion },
-          )
-        : await post<{ vchNo: number; totals: Totals; billProfit?: SaleProfit }>('/sales', body);
+      type Saved = {
+        vchNo: number;
+        totals: Totals;
+        billProfit?: SaleProfit;
+        linkedOldPurchases?: [];
+      };
+      const saved = await orderAdvance.saveSale<Saved>(loadedVchNo, loadedVersion, body);
+      if (!saved) return; // No: nothing saved, back at the order amount
       setResult(saved);
+      linked.saved(saved, !!linkedBody);
       const savedNo = String(saved.vchNo).padStart(5, '0');
       setLoadedVersion((saved as { version?: string }).version ?? ''); // N51: create and update return it
       setLoadedVchNo(savedNo);
@@ -871,6 +853,11 @@ export default function SalesEntryPage() {
                 onChange={setCoBook}
                 preferred="SAL"
                 mainBooks={SALE_MAIN_BOOKS}
+                onBooks={(books) =>
+                  setBookTypes(
+                    Object.fromEntries(books.map((b) => [b.CO_BOOK, String(b.BOOK_TYPE ?? '')])),
+                  )
+                }
               />
             </div>
             <div className="field">
@@ -1006,6 +993,7 @@ export default function SalesEntryPage() {
                 ['TCS Code', tcsCode, setTcsCode],
                 ['TDS Code', tdsCode, setTdsCode],
                 ['TDS %', tdsPct, setTdsPct],
+                ...(rofOn ? [['Round Off', roundOff, setRoundOff]] : []),
                 ['Cheque Bank A/c', bankAc, setBankAc],
                 ['Card A/c', cardAc, setCardAc],
                 ['Cheque No', chequeNo, setChequeNo],
@@ -1046,144 +1034,12 @@ export default function SalesEntryPage() {
           </details>
         </div>
 
-        <div className="panel" style={{ overflow: 'auto' }}>
-          <h2>
-            Old Gold / Silver Exchange{' '}
-            <span className="muted">— metal taken in against the bill</span>
-          </h2>
-          <table className="grid">
-            <thead>
-              <tr>
-                <th>Metal</th>
-                <th>Item</th>
-                <th className="num">Pcs</th>
-                <th className="num">Gross</th>
-                <th className="num">Net</th>
-                <th className="num">Touch%</th>
-                <th className="num">Rate</th>
-                <th className="num">Amount</th>
-                <th></th>
-              </tr>
-            </thead>
-            <tbody>
-              {ogRows.map((o, i) => (
-                <tr key={i}>
-                  <td>
-                    <select value={o.metal} onChange={(e) => setOg(i, 'metal', e.target.value)}>
-                      <option value="G">Gold</option>
-                      <option value="S">Silver</option>
-                    </select>
-                  </td>
-                  <td>
-                    <input
-                      value={o.itCode}
-                      maxLength={5}
-                      onChange={(e) => setOg(i, 'itCode', e.target.value)}
-                      style={{ width: 70 }}
-                    />
-                  </td>
-                  <td className="num">
-                    <input
-                      value={o.pcs}
-                      onChange={(e) => setOg(i, 'pcs', e.target.value)}
-                      style={{ width: 48, textAlign: 'right' }}
-                    />
-                  </td>
-                  <td className="num">
-                    <input
-                      value={o.grossWt}
-                      onChange={(e) => setOg(i, 'grossWt', e.target.value)}
-                      style={{ width: 70, textAlign: 'right' }}
-                    />
-                  </td>
-                  <td className="num">
-                    <input
-                      value={o.netWt}
-                      onChange={(e) => setOg(i, 'netWt', e.target.value)}
-                      style={{ width: 70, textAlign: 'right' }}
-                    />
-                  </td>
-                  <td className="num">
-                    <input
-                      value={o.touch}
-                      onChange={(e) => setOg(i, 'touch', e.target.value)}
-                      style={{ width: 56, textAlign: 'right' }}
-                    />
-                  </td>
-                  <td className="num">
-                    <input
-                      value={o.rate}
-                      onChange={(e) => setOg(i, 'rate', e.target.value)}
-                      style={{ width: 76, textAlign: 'right' }}
-                    />
-                  </td>
-                  <td className="num">{ogAmt(o).toLocaleString('en-IN')}</td>
-                  <td>
-                    <button
-                      type="button"
-                      className="danger"
-                      onClick={() => setOgRows((rs) => rs.filter((_, j) => j !== i))}
-                    >
-                      ×
-                    </button>
-                  </td>
-                </tr>
-              ))}
-              {ogRows.length === 0 && (
-                <tr>
-                  <td colSpan={9} className="muted">
-                    No exchange (optional).
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
-          <div className="toolbar" style={{ marginTop: 8 }}>
-            <button
-              type="button"
-              className="ghost"
-              onClick={() => setOgRows((rs) => [...rs, ogBlank()])}
-            >
-              + Add exchange
-            </button>
-          </div>
-          {ogRows.map((row, index) => (
-            <details key={`old-metal-${index}`} style={{ marginTop: 8 }}>
-              <summary>Exchange row {index + 1} desktop fields</summary>
-              <div className="row">
-                {[
-                  ['Description', 'description'],
-                  ['Other Wt', 'otherWt'],
-                  ['Conversion %', 'conversionPct'],
-                  ['Conversion Wt', 'conversionWt'],
-                  ['Rate Type', 'rateType'],
-                  ['Amount', 'amount'],
-                ].map(([label, key]) => (
-                  <div className="field" key={key}>
-                    <label>{label}</label>
-                    <input
-                      aria-label={`Exchange ${index + 1} ${label}`}
-                      value={String(row[key as keyof OgRow] ?? '')}
-                      onChange={(e) => setOg(index, key as keyof OgRow, e.target.value)}
-                      onBlur={(e) => {
-                        const refusal =
-                          key === 'rateType' && wp26.oldMetalRateTypeMessage(e.target.value);
-                        if (refusal) return void (window.alert(refusal), e.target.focus()); // TR_SALE.cs:7669
-                        if (key === 'amount')
-                          setOgRows((rs) =>
-                            rs.map((r, j) =>
-                              j === index ? wp26.applyOldMetalAmount(r, todayRates) : r,
-                            ),
-                          );
-                      }}
-                    />
-                  </div>
-                ))}
-              </div>
-            </details>
-          ))}
-        </div>
+        {/* A T book takes old metal through the linked purchase only; rows moved over by a transfer stay visible. */}
+        {(!taxInvoiceBook || ogRows.length > 0) && (
+          <SaleOldGoldGrid rows={ogRows} setRows={setOgRows} todayRates={todayRates} />
+        )}
 
+        {orderAdvance.node}
         <SaleResidualPanel
           value={residual}
           onChange={(next, t) => {
@@ -1231,6 +1087,7 @@ export default function SalesEntryPage() {
               </div>
             ))}
           </div>
+          {linked.node}
         </div>
 
         <div className="panel" style={{ overflow: 'auto' }}>

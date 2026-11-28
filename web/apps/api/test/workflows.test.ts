@@ -4,7 +4,11 @@ import { buildSaleLedger } from '../src/modules/sales/sales.js';
 import { buildReturnLedger } from '../src/modules/sales/salesReturn.js';
 import { buildPurchaseLedger } from '../src/modules/purchase/purchase.js';
 import { buildPurchaseReturnLedger } from '../src/modules/purchase/purchaseReturn.js';
-import { assertBalanced } from '../src/modules/posting/posting.js';
+import {
+  assertBalanced,
+  assertVoucherBalanced,
+  returnRoundingResidue,
+} from '../src/modules/posting/posting.js';
 import {
   accruedInterest,
   monthlyTermInterest,
@@ -102,9 +106,11 @@ describe('double-entry workflow — sale, purchase, and reversals', () => {
       totals,
     });
     const { dr, cr } = drcr(l);
-    expect(dr).toBeCloseTo(cr, 2);
+    // Owner decision 1B (2026-11-27): the bill total's rounding is posted nowhere, as on the desktop.
+    expect(dr - cr).toBeCloseTo(totals.roundOff, 2);
   });
   it('sale + sales-return net to ZERO per account (full reversal)', () => {
+    // Decision 1B: neither the sale nor its return posts the bill rounding, so a full return nets every account to 0.
     const sale = buildSaleLedger({
       key: KEY,
       acCode: 'CUST',
@@ -134,7 +140,8 @@ describe('double-entry workflow — sale, purchase, and reversals', () => {
       purchaseAc: 'PURCH',
       taxAc: 'GSTIN',
       roundAc: 'ROF',
-      totals,
+      // No typed round-off (decision 1B): the bill rounding stays unposted, as on the return.
+      totals: { ...totals, roundOff: 0 },
     });
     const pret = buildPurchaseReturnLedger({
       key: KEY,
@@ -144,7 +151,8 @@ describe('double-entry workflow — sale, purchase, and reversals', () => {
       roundAc: 'ROF',
       totals,
     });
-    expect(() => assertBalanced(pur)).not.toThrow();
+    expect(() => assertVoucherBalanced(pur, returnRoundingResidue(-totals.roundOff))).not.toThrow();
+    expect(() => assertVoucherBalanced(pret, returnRoundingResidue(totals.roundOff))).not.toThrow();
     const net: Record<string, number> = {};
     for (const l of [...pur, ...pret])
       net[String(l.AC_CODE)] =

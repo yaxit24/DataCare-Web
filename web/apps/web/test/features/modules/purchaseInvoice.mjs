@@ -74,7 +74,10 @@ const EXPECT_ROUND = {
   tax: 1753.98,
   cgst: 876.99,
   sgst: 876.99,
-  roundOff: 0.02,
+  // Owner decision 1B (2026-11-27): ROF_AMT is only the typed round-off (TR_PURC.cs:12600) and the bill total's own
+  // rounding (60,219.98 -> 60,220) is posted nowhere, so the supplier's credit exceeds the debits by it.
+  roundOff: 0,
+  unposted: 0.02,
   total: 60220,
 };
 
@@ -244,10 +247,11 @@ const counts = async (ctx) =>
               (SELECT count(*) FROM "MAIN_STOCK" WHERE tenant_id=$1 AND "CO_BOOK"='${BOOK}')::int stk`,
     )
   )[0];
-const balanced = (rows) => {
+/** Σ CR − Σ DR is `off`: 0, or the bill total's unposted rounding (decision 1B). */
+const balanced = (rows, off = 0) => {
   const dr = rows.reduce((s, r) => s + r.dr, 0);
   const cr = rows.reduce((s, r) => s + r.cr, 0);
-  return dr > 0 && Math.abs(dr - cr) < 0.005;
+  return dr > 0 && Math.abs(cr - dr - off) < 0.005;
 };
 const supplierCredit = (rows, ac) =>
   rows.filter((r) => r.ac === ac).reduce((s, r) => s + r.cr - r.dr, 0);
@@ -633,7 +637,10 @@ export const purchaseInvoice = {
             max_net: EXPECT_ROUND.net,
           });
           const g = await ledger(ctx, vchNo);
-          assert(balanced(g), `ledger must balance: ${JSON.stringify(g)}`);
+          assert(
+            balanced(g, EXPECT_ROUND.unposted),
+            `ledger off by the unposted rounding only: ${JSON.stringify(g)}`,
+          );
           assert.equal(supplierCredit(g, PARTIES.local.code), EXPECT_ROUND.total);
           const rojmel = await ctx.rows(
             `SELECT btrim("AC_CODE"::text) ac,btrim(coalesce("IT_CODE"::text,'')) item,
@@ -1134,6 +1141,56 @@ export const purchaseInvoice = {
           database: { deleteData: audit[0].n },
           downstream: { remaining: 0 },
         };
+      },
+    ),
+
+    C(
+      'refusal.linked-sale-delete',
+      'T10',
+      'refusal',
+      'A purchase booked against a sale (PR_DATA SL_BILL_*, TR_PURC.cs:12647-12650) cannot be deleted from the purchase screen; the refusal names the sale to open (TR_PURC.cs:13443-13447, owner decision 2B)',
+      async (ctx) => {
+        const { page } = await ctx.session();
+        const vchNo = await createOne(ctx, page);
+        const link = (no, lc, yr, book) =>
+          ctx.owner.$executeRawUnsafe(
+            `UPDATE "PR_DATA" SET "SL_BILL_NO"=$3,"SL_BILL_LC"=$4,"SL_BILL_YRCD"=$5,"SL_BILL_DBCD"=$6
+              WHERE tenant_id=$1 AND "CO_BOOK"='${BOOK}' AND "VCH_NO"=$2`,
+            ctx.tenantId,
+            vchNo,
+            no,
+            lc,
+            yr,
+            book,
+          );
+        const [{ yr }] = await ctx.rows(
+          `SELECT "CO_YEAR" yr FROM "PR_DATA" WHERE tenant_id=$1 AND "CO_BOOK"='${BOOK}' AND "VCH_NO"=$2`,
+          vchNo,
+        );
+        await link('00077', '01', yr, 'SL');
+        try {
+          const before = await purchaseWriteSet(ctx, vchNo);
+          await page.getByRole('button', { name: 'New', exact: true }).click();
+          await loadVoucher(page, vchNo);
+          const [response] = await Promise.all([
+            page.waitForResponse(
+              (r) => r.request().method() === 'DELETE' && /\/api\/purchases\//.test(r.url()),
+            ),
+            page.getByRole('button', { name: 'Delete', exact: true }).first().click(),
+          ]);
+          assert.equal(response.status(), 400, await response.text());
+          const body = await response.json();
+          assert.equal(body.message, 'Linked with sale SL/00077; open that sale');
+          await page.getByText('Linked with sale SL/00077; open that sale').first().waitFor();
+          assert.deepEqual(await purchaseWriteSet(ctx, vchNo), before);
+          return {
+            observation: `delete of ${vchNo} answered 400 "${body.message}"; write set unchanged`,
+            expected: 'refused, naming the sale',
+            database: { header: before.header },
+          };
+        } finally {
+          await link(null, null, null, null);
+        }
       },
     ),
 

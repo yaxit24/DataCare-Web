@@ -25,6 +25,10 @@ const here = dirname(fileURLToPath(import.meta.url));
 const web = resolve(here, '../../web');
 
 const GUARDED: Record<string, { page: string; sends: RegExp }> = {
+  'POST /sales': {
+    page: 'components/OrderAdvanceConfirm.tsx',
+    sends: /postCommand<[^>]*>\(\s*'\/sales',\s*\{[^}]*\},\s*key\s*\)/,
+  },
   'POST /wholesale-sales': {
     page: 'components/WholesaleVoucherForm.tsx',
     sends: /postCommand<[^>]*>\(\s*cfg\.endpoint,\s*body,\s*command\.key\s*\)/,
@@ -94,7 +98,6 @@ const GUARDED: Record<string, { page: string; sends: RegExp }> = {
 /** WP-04 follow-ups, in the plan's order first (Contra, Sales, Sales Order, ... Tag Cancel), then the rest. */
 const NOT_YET_GUARDED = [
   'POST /contra',
-  'POST /sales',
   'POST /sales-returns',
   'POST /purchases',
   'POST /purchase-returns',
