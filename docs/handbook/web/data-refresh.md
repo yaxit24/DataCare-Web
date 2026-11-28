@@ -53,11 +53,11 @@ Defaults chosen with the decision:
 
 Families and their state (`ACCOUNT_REFRESH_VERIFIED` in `web/apps/api/src/modules/utilities/accountRefresh.ts`): a family's apply is enabled only once every write-set fixture of it, saved through the normal writer, previews clean (`accountRefresh.db.test.ts`) and, for families whose books also hold desktop-shaped rows, a replay of real desktop vouchers (`pnpm oracle:replay`) checks with no `differs`; any other family previews and shows "apply not available until verified".
 
-| Family    | Operation                        | Builders re-used                                                                                                   | Apply           |
-| --------- | -------------------------------- | ------------------------------------------------------------------------------------------------------------------ | --------------- |
-| Contra    | `data-refresh-account-contra`    | `contraPostInput` (Contra_Ledr `Ac_Ledr.cs:840-848`, Contra_Rojmel `Ac_Rojmel.cs:336-340`)                         | yes             |
-| Fine Jv   | `data-refresh-account-fine-jv`   | `fineJvPostInput` (Contra_Ledr `Ac_Ledr.cs:846-848`, Contra_Rojmel `Ac_Rojmel.cs:342-344`)                         | yes             |
-| Cash/Bank | `data-refresh-account-cash-bank` | `cashBankPostInput` (Cash_Ledr / Bank_Ledr `Ac_Ledr.cs:565-610`, Cash_Rojmel / Bank_Rojmel `Ac_Rojmel.cs:179-219`) | yes             |
+| Family    | Operation                        | Builders re-used                                                                                                   | Apply |
+| --------- | -------------------------------- | ------------------------------------------------------------------------------------------------------------------ | ----- |
+| Contra    | `data-refresh-account-contra`    | `contraPostInput` (Contra_Ledr `Ac_Ledr.cs:840-848`, Contra_Rojmel `Ac_Rojmel.cs:336-340`)                         | yes   |
+| Fine Jv   | `data-refresh-account-fine-jv`   | `fineJvPostInput` (Contra_Ledr `Ac_Ledr.cs:846-848`, Contra_Rojmel `Ac_Rojmel.cs:342-344`)                         | yes   |
+| Cash/Bank | `data-refresh-account-cash-bank` | `cashBankPostInput` (Cash_Ledr / Bank_Ledr `Ac_Ledr.cs:565-610`, Cash_Rojmel / Bank_Rojmel `Ac_Rojmel.cs:179-219`) | yes   |
 
 The expected postings are derived from the stored `CONTRA_DATA` rows as they are, the way the desktop's builders read them, not re-gridded through the form. `REMARK_DATA` (rebuilt by the desktop's `Vch_Remark`, `MS_UPDATE.cs:2370-2373`) is not part of this check. The classification preview above stays on the Account button; the family checks are picked on the Account preview's "Account check and repair" panel. Next: the Purchase family.
 

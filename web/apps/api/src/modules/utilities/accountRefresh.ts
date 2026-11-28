@@ -111,7 +111,11 @@ export interface AccountRefreshFamily {
  * `differs`; every other family is preview-only. Cash/Bank passed both on 28 Nov 2026 (289 real desktop vouchers,
  * loaded as stored, all match; docs/handbook/web/data-refresh.md). The set is read on every preview and apply.
  */
-export const ACCOUNT_REFRESH_VERIFIED: ReadonlySet<string> = new Set(['contra', 'fine-jv', 'cash-bank']);
+export const ACCOUNT_REFRESH_VERIFIED: ReadonlySet<string> = new Set([
+  'contra',
+  'fine-jv',
+  'cash-bank',
+]);
 
 export type VoucherStatus = 'match' | 'differs' | 'missing' | 'orphan' | 'locked' | 'unverified';
 
