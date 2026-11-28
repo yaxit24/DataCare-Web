@@ -237,6 +237,7 @@ export const NAV: NavGroup[] = [
       { label: 'Pledge Receipt', href: '/txn/dhrn-receipt', ready: true },
       { label: 'Interest Receipt', href: '/txn/dhrn-interest', ready: true },
       { label: 'Loan Received', href: '/txn/loan-received', ready: true },
+      { label: 'Loan Intrest', href: '/txn/loan-interest', ready: true },
       { label: 'Loan Issue', href: '/txn/loan-issue', ready: true },
       { label: 'Dhrn Os Letter', href: '/txn/dhrn-os-letter', ready: true },
     ],

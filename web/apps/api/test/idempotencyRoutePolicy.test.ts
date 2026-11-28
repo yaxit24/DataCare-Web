@@ -25,6 +25,7 @@ const here = dirname(fileURLToPath(import.meta.url));
 const web = resolve(here, '../../web');
 
 const GUARDED: Record<string, { page: string; sends: RegExp }> = {
+  'POST /loan/interest': { page: 'components/DhrnInterestForm.tsx', sends: /postCommand<[^>]*>\(endpoint, body, command.key\)/ },
   'POST /sales-orders': {
     page: 'app/(app)/txn/sales-order/page.tsx',
     sends:

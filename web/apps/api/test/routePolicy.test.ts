@@ -169,7 +169,7 @@ describe('route policy registry', () => {
     // export paths (CSV, XLSX, PDF) under the same Reports/HuId Report caption: 819 + 3 = 822, + POST /auth/data-type = 823.
     // Owner data-type decision adds POST /auth/data-type. [827 on main + 1 here = 828]
     // Data Refresh (MS_UPDATE) adds its four Print-right routes under the caption: 828 + 4 = 832.
-    expect(routes).toHaveLength(832);
+    expect(routes).toHaveLength(838);
     expect(new Set(routes.map((route) => `${route.method} ${route.path}`)).size).toBe(832);
 
     const policies = routes.map((route) => ({

@@ -1,3 +1,4 @@
+import { registerLoanModeInterestRoutes } from './loanInterest.js';
 import type { FastifyInstance, FastifyRequest, FastifyReply } from 'fastify';
 import type { VoucherScope } from '../modules/vouchers/numbering.js';
 import {
@@ -47,7 +48,7 @@ export interface CrmRouteHelpers {
   guard: (
     req: FastifyRequest,
     reply: FastifyReply,
-    action: 'view' | 'create' | 'update' | 'delete',
+    action: 'view' | 'create' | 'update' | 'delete' | 'print',
   ) => boolean;
   scopeOf: (req: FastifyRequest) => VoucherScope;
   run: (reply: FastifyReply, okCode: number, fn: () => Promise<unknown>) => Promise<unknown>;
@@ -93,6 +94,7 @@ export function registerCrmRoutes(app: FastifyInstance, h: CrmRouteHelpers): voi
  * interest receipt against a pledged loan. Shares the same helper plumbing as the CRM routes.
  */
 export function registerLoanInterestRoutes(app: FastifyInstance, h: CrmRouteHelpers): void {
+  registerLoanModeInterestRoutes(app, h);
   const { prisma, auth, guard, scopeOf, run, body, mainUserOf } = h;
   const input = (req: FastifyRequest) =>
     dhrnInterestInputFromBody(scopeOf(req), { ...body(req), mainUser: mainUserOf(req) });

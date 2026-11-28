@@ -814,6 +814,14 @@ route('Loans (Dhrn)/Interest Receipt', [
   'PUT /dhrn/interest/:vchNo',
   'DELETE /dhrn/interest/:vchNo',
 ]);
+route('Loans (Dhrn)/Loan Intrest', [
+  'POST /loan/interest',
+  'GET /loan/interest/reference',
+  'GET /loan/interest/:vchNo',
+  'PUT /loan/interest/:vchNo',
+  'DELETE /loan/interest/:vchNo',
+  'GET /loan/interest/:vchNo/print',
+]);
 route('Loans (Dhrn)/Loan Received', [
   'POST /loan/received',
   'GET /loan/received/:isuNo',

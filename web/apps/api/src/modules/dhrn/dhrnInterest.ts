@@ -1,4 +1,4 @@
-import { toIsoDate } from '@datacare/core';
+import { round, toIsoDate } from '@datacare/core';
 import { withTxBudget } from '../shared/txBudget.js';
 import { formatVoucherNo, type VoucherScope } from '../vouchers/numbering.js';
 import { resolveBookAccountTx, type BookPolicy } from '../shared/bookPolicy.js';
@@ -19,11 +19,28 @@ import {
 } from '../finance/lifecycle.js';
 import { DhrnValidationError, round2, computeDhrnInterestTx } from './dhrn.js';
 
+import { loanInterestPosting } from './loanInterestPosting.js';
+import { loanInterestContextTx, assertLoanBookTx, assertLoanCreateTx } from './loanInterestContext.js';
+import { requirePostingAccount } from '../shared/postingAccounts.js';
+import { assertVoucherVersionTx, requiredVersion, versionKeyOf, voucherVersionTx } from '../vouchers/version.js';
+
 /** The configured book shape returned by configuredBookTx (shortName/name/mainBook/inout). */
 type DhrnBook = Awaited<ReturnType<typeof configuredBookTx>>;
 
 export interface DhrnInterestInput {
   scope: VoucherScope;
+  mode?: 'loan';
+  expectedVersion?: string;
+  monthInterest?: number;
+  rateCutRate?: number;
+  rateCutPay?: number;
+  metalAc?: string;
+  loanAmount?: number;
+  oldReceived?: number;
+  outstandingAmount?: number;
+  dhrnDate?: string;
+  dhrnMonths?: number;
+  billNo?: string;
   isuNo: number | string; // the issue VCH_NO this interest collection is booked against
   isuBook?: string; // the issue's CO_BOOK (ISU_DBCD); defaults to the DHI issue book
   isuYear?: string; // the issue's CO_YEAR (ISU_YRCD); defaults to the current year
@@ -51,6 +68,8 @@ export interface DhrnInterestInput {
 
 const DHRN_INT_TABLES = [
   'DHRN_REC_DATA',
+  'DHRN_REC_DETL',
+  'MAIN_STOCK',
   'AC_DATA',
   'ROJ_MEL_DATA',
   'DHRN_DATA',
@@ -73,7 +92,7 @@ async function dhrnIntIncomeAcTx(
     mainBook: book.mainBook || book.name,
     inout: (book.inout as string) || 'I',
   };
-  return resolveBookAccountTx(tx, scope, policy, 2);
+  return resolveBookAccountTx(tx, scope, policy, book.mainBook === 'LOAN INT ENTRY' ? 1 : 2);
 }
 
 /** Resolve the cash/bank settlement default from the issue (DHI) book's BOOK_DETL slot 2 (desktop LEDR_ACCD cash default). */
@@ -82,12 +101,13 @@ async function resolveIssueCashAcTx(
   scope: VoucherScope,
   issueBook: string,
 ): Promise<string> {
+  const issue = await configuredBookTx(tx, { ...scope, coBook: issueBook });
   const policy: BookPolicy = {
     coBook: issueBook,
     vchType: issueBook,
-    bookName: 'DHIRAN ISSUE',
-    mainBook: 'DHIRAN ISSUE',
-    inout: 'O',
+    bookName: issue.mainBook,
+    mainBook: issue.mainBook,
+    inout: issue.inout || 'O',
   };
   return resolveBookAccountTx(tx, { ...scope, coBook: issueBook }, policy, 2);
 }
@@ -109,6 +129,8 @@ async function writeDhrnInterestTx(
   identity: VoucherIdentity,
 ): Promise<{ vchNo: number; interest: number; received: number; principal: number }> {
   const scope = input.scope;
+  const loan = input.mode === 'loan';
+  if (loan) input = await loanInterestContextTx(tx, input);
   const book = await configuredBookTx(tx, scope);
   const key = voucherKey(scope, identity.voucherNo);
   const party = String(input.borrowerAc);
@@ -121,20 +143,21 @@ async function writeDhrnInterestTx(
   );
   const settlement = (input.settlementAc ?? '').trim() || issueCashAc;
   const intIncAc = await dhrnIntIncomeAcTx(tx, scope, book, input.intIncAc);
-  const kasarAc = (input.kasarAc ?? '').trim() || 'KASAR';
+  const kasarAc = loan ? (input.intKasar ? requirePostingAccount('kasar', input.kasarAc, 'Loan interest kasar') : '') : (input.kasarAc ?? '').trim() || 'KASAR';
   const loanType = (input.loanType ?? 'A') as 'A' | 'G' | 'S';
 
+  const amountRound = (v: number) => loan ? round(v, loanType === 'A' ? 2 : 3) : round2(v);
   const vchDate = identity.voucherDate;
   const assessed =
     input.interest != null && Number.isFinite(input.interest)
-      ? round2(input.interest)
+      ? amountRound(input.interest)
       : await computeDhrnInterestTx(tx, scope, input.isuNo, vchDate);
-  const received = input.intReceived != null ? round2(input.intReceived) : assessed;
-  const kasar = round2(input.intKasar ?? 0);
-  const principal = round2(input.principalReceived ?? 0);
-  const unchak = round2(input.unchakReceived ?? 0);
-  const ptot = round2(principal + unchak);
-  if (!(assessed > 0 || received > 0 || ptot > 0 || kasar > 0))
+  const received = input.intReceived != null ? amountRound(input.intReceived) : assessed;
+  const kasar = amountRound(input.intKasar ?? 0);
+  const principal = amountRound(input.principalReceived ?? 0);
+  const unchak = amountRound(input.unchakReceived ?? 0);
+  const ptot = amountRound(principal + unchak);
+  if (!loan && !(assessed > 0 || received > 0 || ptot > 0 || kasar > 0))
     throw new DhrnValidationError('nothing to collect (interest, principal or kasar must be > 0)');
 
   const isuBook = (input.isuBook ?? '').trim() || null;
@@ -149,7 +172,7 @@ async function writeDhrnInterestTx(
     IT_DESC: '',
   };
   // Amount-loan 8-leg ledger; legType sets the 2-char LEDR_KEY suffix (01..08).
-  const ledger: LedgerLine[] = [];
+  let ledger: LedgerLine[] = [];
   if (ptot !== 0) {
     ledger.push({
       ...base,
@@ -233,13 +256,13 @@ async function writeDhrnInterestTx(
   assertBalanced(ledger);
 
   const isuNoStr = formatVoucherNo(input.isuNo);
-  const recHeader = {
+  const recHeader: Record<string, any> = {
     ...key,
     VCH_DATE: vchDate,
     VCH_TIME: identity.voucherTime,
     VCH_TYPE: book.shortName,
     INOUT_TYPE: book.inout ?? 'I',
-    ENTRY_TYPE: 'D',
+    ENTRY_TYPE: loan ? 'L' : 'D',
     BOOK_NAME: book.mainBook || book.name,
     AC_CODE: party,
     AC_NAME: input.borrowerName ?? null,
@@ -274,7 +297,7 @@ async function writeDhrnInterestTx(
     VCH_TIME: identity.voucherTime,
     VCH_TYPE: book.shortName,
     INOUT_TYPE: book.inout ?? 'I',
-    ENTRY_TYPE: 'D',
+    ENTRY_TYPE: loan ? 'L' : 'D',
     BOOK_NAME: book.mainBook || book.name,
     AC_CODE: party,
     ISU_NO: isuNoStr,
@@ -285,13 +308,13 @@ async function writeDhrnInterestTx(
     FROM_DATE: input.fromDate ? new Date(input.fromDate) : null,
     TO_DATE: input.toDate ? new Date(input.toDate) : null,
     INT_DAYS: input.intDay ?? 0,
-    DHRN_AMT: 0,
+    DHRN_AMT: loan ? input.loanAmount ?? 0 : 0,
     DHRN_REC_AMT: principal,
     UNCHAK_DHRN_REC: unchak,
     ADJ_DHRN: 0,
     INT_PRC: input.intPrc ?? 0,
     INT_AMT: assessed,
-    INT_REC_AMT: round2(received + kasar),
+    INT_REC_AMT: amountRound(received + kasar),
     REMARKS: (input.desc ?? '').trim() || null,
     HD_VCH_NO: identity.hiddenVoucherNo,
     MAIN_USER: identity.mainUser || null,
@@ -326,7 +349,7 @@ async function writeDhrnInterestTx(
     SCHM_CODE: '',
     REF_NO: '',
   };
-  const roj: Record<string, unknown>[] = [];
+  let roj: Record<string, unknown>[] = [];
   if (ptot !== 0)
     roj.push({
       ...rojBase,
@@ -369,10 +392,28 @@ async function writeDhrnInterestTx(
       AC_NAME: '',
     });
 
+  let stock: Record<string, unknown>[] = [];
+  if (loan) {
+    const projection = loanInterestPosting({ loanType, principal, unchak, assessed, received, kasar,
+      monthInterest: input.monthInterest ?? 0, rateCutRate: input.rateCutRate ?? 0, rateCutPay: input.rateCutPay ?? 0 },
+      { ...base, ENTRY_TIME: identity.voucherTime, HD_VCH_NO: identity.hiddenVoucherNo, MAIN_USER: identity.mainUser }, rojBase,
+      { party, settlement, cash: issueCashAc, interest: intIncAc, kasar: kasarAc,
+        metal: input.rateCutRate && assessed ? requirePostingAccount('party-control', input.metalAc, 'Loan metal conversion') : '' }, acName, rojKey);
+    ledger = projection.ledger;
+    roj = projection.roj;
+    stock = projection.stock;
+    // Ac_Stock has no HD_VCH_NO; its key is the visible voucher identity.
+    for (const row of stock) delete row.HD_VCH_NO;
+    Object.assign(recHeader, { MONTH_INT_AMT: input.monthInterest ?? 0, RCUT_RATE: input.rateCutRate ?? 0,
+      RCUT_AMT: projection.cut.amount, RCUT_PAY_AMT: input.rateCutPay ?? 0, RCUT_OS_AMT: projection.cut.outstanding,
+      DHRN_AMT: input.loanAmount ?? 0, DHRN_ADJ_AMT: input.oldReceived ?? 0, DHRN_OS_AMT: input.outstandingAmount ?? 0,
+      DHRN_DATE: input.dhrnDate ? new Date(input.dhrnDate) : null, DHRN_MONTH: input.dhrnMonths ?? 0, DHRN_BILL: input.billNo ?? '' });
+  }
   const writes: Array<{ table: string; rows: Record<string, unknown>[] }> = [
     { table: 'DHRN_REC_DATA', rows: [recHeader] },
     { table: 'DHRN_DATA', rows: [movement] },
   ];
+  if (stock.length) writes.push({ table: 'MAIN_STOCK', rows: stock });
   if (roj.length) writes.push({ table: 'ROJ_MEL_DATA', rows: roj });
   if ((input.desc ?? '').trim())
     writes.push({
@@ -408,6 +449,11 @@ export function dhrnInterestInputFromBody(
 ): DhrnInterestInput {
   return {
     scope,
+    mode: b.mode,
+    expectedVersion: b.expectedVersion,
+    monthInterest: n(b.monthInterest), rateCutRate: n(b.rateCutRate), rateCutPay: n(b.rateCutPay), metalAc: b.metalAc,
+    loanAmount: n(b.loanAmount), oldReceived: n(b.oldReceived), outstandingAmount: n(b.outstandingAmount),
+    dhrnDate: b.dhrnDate, dhrnMonths: n(b.dhrnMonths), billNo: b.billNo,
     isuNo: b.isuNo,
     isuBook: b.isuBook,
     isuYear: b.isuYear,
@@ -446,23 +492,27 @@ export async function receiveDhrnInterest(
   if (!input.borrowerAc) throw new DhrnValidationError('borrower account is required');
   const tenantId = input.scope.tenantId;
   const d = input.vchDate ? new Date(input.vchDate) : new Date();
-  const res = await withTxBudget(prisma, tenantId, 'voucher', async (tx: any) =>
-    writeDhrnInterestTx(tx, input, await createIdentityTx(tx, input.scope, d, input.mainUser)),
+  const res = await withTxBudget(prisma, tenantId, 'voucher', async (tx: any) => {
+    if (input.mode === 'loan') await assertLoanCreateTx(tx, input.scope);
+    return writeDhrnInterestTx(tx, input, await createIdentityTx(tx, input.scope, d, input.mainUser));
+  },
   );
   return { vchNo: res.vchNo };
 }
 
 /** Reopen a Dhrn interest receipt (DHRN_REC_DATA header, desktop DISPLAY_DATA contract). */
-export async function getDhrnInterest(prisma: any, scope: VoucherScope, vchNo: number | string) {
+export async function getDhrnInterest(prisma: any, scope: VoucherScope, vchNo: number | string, mode?: 'loan') {
   const tenantId = scope.tenantId;
   const no = formatVoucherNo(vchNo);
   return withTxBudget(prisma, tenantId, 'read', async (tx: any) => {
+    if (mode === 'loan') await assertLoanBookTx(tx, scope);
     const rows: any[] = await tx.$queryRawUnsafe(
       `SELECT "VCH_NO","HD_VCH_NO","VCH_DATE"::text vd,"AC_CODE","AC_NAME","LEDR_ACCD","LOAN_TYPE",
               "ISU_NO","ISU_LC","ISU_YRCD","ISU_DBCD","DHRN_REC_AMT"::float8 p,"UNCHAK_DHRN_REC"::float8 u,
               "FROM_DATE"::text fd,"TO_DATE"::text td,"INT_MONTH"::float8 im,"INT_DAY"::float8 idd,
               "INT_PRC"::float8 prc,"INT_AMT"::float8 ia,"INT_REC_AMT"::float8 ir,"KASAR_AMT"::float8 k,
-              "EMP_CODE","VCH_DESC","MAIN_USER"
+              "EMP_CODE","VCH_DESC","MAIN_USER","MONTH_INT_AMT","RCUT_RATE","RCUT_AMT","RCUT_PAY_AMT","RCUT_OS_AMT",
+              "DHRN_AMT","DHRN_ADJ_AMT","DHRN_OS_AMT","DHRN_DATE"::text dd,"DHRN_MONTH","DHRN_BILL"
          FROM "DHRN_REC_DATA" WHERE tenant_id=$1 AND "CO_CODE"=$2 AND "LC_CODE"=$3 AND "CO_YEAR"=$4 AND "CO_BOOK"=$5 AND "VCH_NO"=$6`,
       tenantId,
       scope.coCode,
@@ -473,7 +523,18 @@ export async function getDhrnInterest(prisma: any, scope: VoucherScope, vchNo: n
     );
     if (!rows.length) throw new DhrnValidationError(`dhrn-interest voucher not found: ${no}`);
     const h = rows[0];
+    const accounts: Record<string, string> = {};
+    if (mode === 'loan') {
+      const legs = await tx.$queryRawUnsafe(`SELECT right("LEDR_KEY",2) leg,"LD_CODE" FROM "AC_DATA" WHERE tenant_id=$1 AND "CO_CODE"=$2 AND "LC_CODE"=$3 AND "CO_YEAR"=$4 AND "CO_BOOK"=$5 AND "VCH_NO"=$6`, tenantId, scope.coCode, scope.lcCode, scope.coYear, scope.coBook, no);
+      for (const leg of legs) accounts[leg.leg] = String(leg.LD_CODE || '');
+    }
     return {
+      intIncAc: accounts['03'] || accounts['10'] || '', kasarAc: accounts['07'] || '', metalAc: accounts['13'] || '', 
+      version: mode === 'loan' ? await voucherVersionTx(tx, DHRN_INT_TABLES, versionKeyOf(scope, no)) : undefined,
+      monthInterest: Number(h.MONTH_INT_AMT ?? 0), rateCutRate: Number(h.RCUT_RATE ?? 0),
+      rateCutPay: Number(h.RCUT_PAY_AMT ?? 0), rateCutAmount: Number(h.RCUT_AMT ?? 0), rateCutOs: Number(h.RCUT_OS_AMT ?? 0),
+      loanAmount: Number(h.DHRN_AMT ?? 0), oldReceived: Number(h.DHRN_ADJ_AMT ?? 0), outstandingAmount: Number(h.DHRN_OS_AMT ?? 0),
+      dhrnDate: toIsoDate(h.dd), dhrnMonths: Number(h.DHRN_MONTH ?? 0), billNo: String(h.DHRN_BILL ?? ''),
       voucherNo: no,
       hiddenVoucherNo: String(h.HD_VCH_NO ?? ''),
       mainUser: String(h.MAIN_USER ?? ''),
@@ -517,6 +578,10 @@ export async function editDhrnInterest(
       requestedVoucherNo: vchNo,
       requestedDate: d,
     });
+    if (input.mode === 'loan') {
+      await assertLoanBookTx(tx, input.scope);
+      await assertVoucherVersionTx(tx, DHRN_INT_TABLES, versionKeyOf(input.scope, identity.voucherNo), requiredVersion(input.expectedVersion));
+    }
     await replaceWriteSetTx(
       tx,
       input.scope,
@@ -532,7 +597,7 @@ export async function editDhrnInterest(
 /** Delete a Dhrn interest receipt: reverse the write set + desktop DELETE_DATA audit (VCH_VAL_CR = INT_REC_AMT). */
 export async function deleteDhrnInterest(
   prisma: any,
-  input: { scope: VoucherScope; vchNo: number | string; deleteUser?: string },
+  input: { scope: VoucherScope; vchNo: number | string; deleteUser?: string; mode?: 'loan'; expectedVersion?: string },
 ): Promise<{ reversed: true }> {
   const tenantId = input.scope.tenantId;
   const s = input.scope;
@@ -544,6 +609,10 @@ export async function deleteDhrnInterest(
       requestedVoucherNo: no,
       requestedDate: new Date(),
     });
+    if (input.mode === 'loan') {
+      await assertLoanBookTx(tx, s);
+      await assertVoucherVersionTx(tx, DHRN_INT_TABLES, versionKeyOf(s, no), requiredVersion(input.expectedVersion));
+    }
     const hdr: any[] = await tx.$queryRawUnsafe(
       `SELECT "VCH_DATE"::text vd,"VCH_TIME"::text vt,"AC_CODE","AC_NAME","INT_REC_AMT"::float8 ir,"VCH_DESC" FROM "DHRN_REC_DATA"
         WHERE tenant_id=$1 AND "CO_CODE"=$2 AND "LC_CODE"=$3 AND "CO_YEAR"=$4 AND "CO_BOOK"=$5 AND "VCH_NO"=$6`,
