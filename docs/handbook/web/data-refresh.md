@@ -2,7 +2,7 @@
 
 ## Milestone state
 
-Company → Data Refresh remains **PARTIAL**. PR-1 exposes the six operator-visible `MS_UPDATE` actions in desktop tab order and implements only Approval Adj as a complete writer. Desktop-match coverage remains 0% because no case has run on the original Windows desktop.
+Company → Data Refresh remains **PARTIAL**. PR-1 exposes the six operator-visible `MS_UPDATE` actions in desktop tab order and implements Approval Adj as a complete writer; Account adds check-and-repair for the Contra and Fine Jv families (below). Desktop-match coverage remains 0% because no case has run on the original Windows desktop.
 
 The web deliberately uses preview-first, audited, idempotent execution. A preview writes no business row, but it appends a `data_repair_run` audit row, so it is not literally read-only. Apply re-derives the candidate set under the repair lock and writes the business changes plus the applied audit record in one transaction.
 
@@ -34,6 +34,31 @@ The preview identifies the independently safe prefix of the desktop action:
 The Account preview hash binds one complete, deterministically ordered candidate query rather than aggregate counts: scoped book and voucher business keys, physical row identities, stored values, expected values, and both the current and expected `BANK_RECONCILE` replacement sides. Display samples remain bounded summaries. A database regression replaces one book candidate with another while preserving every diff count and displayed sample, then proves the Account hash changes and the old applicable prefix hash is rejected as stale.
 
 The desktop then calls `AcRefresh()` and a long `Ac_Ledr`, `Ac_Rojmel` and `Ac_Tax` builder sequence (`MS_UPDATE.cs:2334-2669`). That complete graph is not proved. The full Account operation therefore refuses Apply. The separately named advanced `ledger-normalise` repair remains available; it is not presented as full Account parity.
+
+### Account: check and repair per voucher family (owner decision 2026-11-27)
+
+The desktop's Account button deletes the year's `AC_DATA`, `ROJ_MEL_DATA`, `TAX_DATA` and derived tables and re-posts every voucher (`MS_UPDATE.cs:2334-2398` btnAc_Click, `:2401-2669` AcRefresh). The owner decided on 27 Nov 2026 that the web does **not** copy that wipe-and-rebuild. Account is instead _check and repair_, one voucher family at a time:
+
+1. **Check.** For every voucher of the family in scope, the web re-derives what its `AC_DATA`, `ROJ_MEL_DATA` and `TAX_DATA` rows should be from the voucher's own stored rows, using the same pure builders the family's writer posts with, and materialises them exactly as the posting layer would insert them (`materializeVoucherRowsTx`: DATA_TYPE, provenance, ledger enrichment, measured column defaults). Nothing is written. Each expected value is cast to its column type through the same parameter path as an INSERT, then compared with the stored row by key (`LEDR_KEY` for `AC_DATA` and `ROJ_MEL_DATA`, `SR_NO` for `TAX_DATA`), only on the columns the writer sets; `row_id`, timestamps, `CLR_DATE` and the audit columns (`ADD_USER`, `USER_UPDATE`, `USER_DELETE`, `OLD_VCH_NO`, `NEW_VCH_NO`) are not compared.
+2. **Preview.** Each voucher gets a status: `match`, `differs`, `missing` (no posting rows at all), `locked`, `orphan` or `unverified` (the builders cannot re-derive it, e.g. a contra whose rows do not pair into a balanced ledger). A differing voucher lists its rows only stored, only expected, and changed columns with both values. The screen shows the counts by status and a paged list (`GET /utilities/data-refresh/account/:family/vouchers`). The preview hash binds every voucher's key, stored-rows hash, expected-rows hash, status and version token, so any save between preview and apply makes the apply stale.
+3. **Apply.** Through the shared repair framework, risk `danger` (typed confirmation, reason, password, backup under 24 hours). Under a company-level advisory lock, for each `differs`/`missing` voucher: take the writer's lock and the header rows `FOR UPDATE`, re-derive and refuse with `stale-preview` if anything moved, check the period is open, keep the voucher's current rows, delete its rows in the three tables and insert the materialised rows. One transaction; any failure rolls every voucher back. The replaced rows are stored in `data_repair_run.before_rows` (per voucher and table) so the repair is audited and can be undone. A second preview is clean; the same hash replays the earlier run; a stale hash is refused.
+
+Defaults chosen with the decision:
+
+- scope is the session's company, location and year;
+- a voucher in a locked period (`CO_SET.LOCK_DATE`) is listed as `locked` and never changed;
+- posting rows of a family book with no voucher are listed as `orphan` and never deleted;
+- books `888` and `000` are never touched;
+- `AC_DATA.CLR_DATE` (and the audit columns above) are carried over by key onto the replacing row, as the desktop restores `CLR_DATE` by `LEDR_KEY` after its rebuild (`MS_UPDATE.cs:2379-2396`); `BANK_RECONCILE` is not touched.
+
+Families and their state (`ACCOUNT_REFRESH_VERIFIED` in `web/apps/api/src/modules/utilities/accountRefresh.ts`): a family's apply is enabled only once every write-set fixture of it, saved through the normal writer, previews clean (`accountRefresh.db.test.ts`); any other family previews and shows "apply not available until verified".
+
+| Family  | Operation                      | Builders re-used                                                                           | Apply |
+| ------- | ------------------------------ | ------------------------------------------------------------------------------------------ | ----- |
+| Contra  | `data-refresh-account-contra`  | `contraPostInput` (Contra_Ledr `Ac_Ledr.cs:840-848`, Contra_Rojmel `Ac_Rojmel.cs:336-340`) | yes   |
+| Fine Jv | `data-refresh-account-fine-jv` | `fineJvPostInput` (Contra_Ledr `Ac_Ledr.cs:846-848`, Contra_Rojmel `Ac_Rojmel.cs:342-344`) | yes   |
+
+The expected postings are derived from the stored `CONTRA_DATA` rows as they are, the way the desktop's builders read them, not re-gridded through the form. `REMARK_DATA` (rebuilt by the desktop's `Vch_Remark`, `MS_UPDATE.cs:2370-2373`) is not part of this check. The classification preview above stays on the Account button; the family checks are picked on the Account preview's "Account check and repair" panel. Next: the Purchase family and Cash/Bank.
 
 ### Stock: preview-only
 
@@ -70,4 +95,4 @@ Every statement of the desktop handler is schema work in a side database: it cre
 
 `/utilities/data-repair` remains the advanced operation/history console. Preview-only operations publish neutral authority metadata: no confirmation, reason, reauthentication or backup requirement. Both consoles independently gate Apply and authority inputs on `applyAvailable`, and direct API calls are refused with `code: preview-only` before a transaction starts.
 
-PR-2 must classify Field Update and Old Field statement by statement. Later work must prove the complete Account and Stock builder graphs (an owner decision on a re-posting engine, see KIRO-REPORT.md of the company-utils-blocked branch) and classify Old Field. No current record claims FULL, accepted, verified desktop parity, or a non-zero desktop match.
+PR-2 must classify Field Update and Old Field statement by statement. Account check-and-repair must be extended family by family (Purchase, Cash/Bank next); Stock's builder graph remains unproved (see KIRO-REPORT.md of the company-utils-blocked branch), and Old Field must be classified. No current record claims FULL, accepted, verified desktop parity, or a non-zero desktop match.

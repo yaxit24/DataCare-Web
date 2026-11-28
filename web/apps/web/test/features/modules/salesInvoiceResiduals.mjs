@@ -51,6 +51,23 @@ export function salesInvoiceResidualCases(h) {
     await page.getByRole('button', { name: 'New', exact: true }).click();
     await h.loadVoucher(page, vchNo);
   };
+  /**
+   * The in-bill exchange grid is offered on a non-T book only (TR_SALE.cs:18843-18847); the seeded SL book is T, so
+   * the exchange cases run with SL as an estimate (M) book and restore T after.
+   */
+  const onExchangeBook = async (ctx, fn) => {
+    const setType = (t) =>
+      one(
+        ctx,
+        `UPDATE "BOOK_DATA" SET "BOOK_TYPE"='${t}' WHERE tenant_id=$1 AND "CO_BOOK"='${BOOK}'`,
+      );
+    await setType('M');
+    try {
+      return await fn();
+    } finally {
+      await setType('T');
+    }
+  };
   const newBill = async (ctx) => {
     const { page } = await ctx.session();
     await h.openSales(page);
@@ -504,28 +521,29 @@ export function salesInvoiceResidualCases(h) {
       'T06',
       'refusal',
       'TR_SALE.cs:7667-7669: a rate type other than N or F (case-sensitive) shows "Please Slelect Rate type = N - Net Wise Or F - Fine Wise"',
-      async (ctx) => {
-        const page = await newBill(ctx);
-        await page.getByRole('button', { name: '+ Add exchange', exact: true }).click();
-        await openExchangeDetails(page, 0);
-        const seen = dialogs(page);
-        const type = page.getByLabel('Exchange 1 Rate Type', { exact: true });
-        for (const value of ['X', 'n']) {
-          await type.fill(value);
+      async (ctx) =>
+        onExchangeBook(ctx, async () => {
+          const page = await newBill(ctx);
+          await page.getByRole('button', { name: '+ Add exchange', exact: true }).click();
+          await openExchangeDetails(page, 0);
+          const seen = dialogs(page);
+          const type = page.getByLabel('Exchange 1 Rate Type', { exact: true });
+          for (const value of ['X', 'n']) {
+            await type.fill(value);
+            await type.blur();
+          }
+          await type.fill('F');
           await type.blur();
-        }
-        await type.fill('F');
-        await type.blur();
-        assert.deepEqual(seen, [
-          'Please Slelect Rate type = N - Net Wise Or F - Fine Wise',
-          'Please Slelect Rate type = N - Net Wise Or F - Fine Wise',
-        ]);
-        return {
-          observation: `messages ${seen.length}`,
-          expected: 'X and n refused, F accepted',
-          database: { unchanged: true },
-        };
-      },
+          assert.deepEqual(seen, [
+            'Please Slelect Rate type = N - Net Wise Or F - Fine Wise',
+            'Please Slelect Rate type = N - Net Wise Or F - Fine Wise',
+          ]);
+          return {
+            observation: `messages ${seen.length}`,
+            expected: 'X and n refused, F accepted',
+            database: { unchanged: true },
+          };
+        }),
     ),
 
     C(
@@ -533,25 +551,26 @@ export function salesInvoiceResidualCases(h) {
       'T03',
       'read-only',
       'TR_SALE.cs:7959: N rate type, amount = Round(12.500 x 6,000, 0) = 75,000.00; F rate type :7963 Round(11.450 x 6,000, 0) = 68,700.00',
-      async (ctx) => {
-        const page = await newBill(ctx);
-        await page.getByRole('button', { name: '+ Add exchange', exact: true }).click();
-        const row = exchangeRow(page, 0);
-        await row.locator('input').nth(0).fill('OLDG');
-        await row.locator('input').nth(3).fill('12.5');
-        await row.locator('input').nth(4).fill('91.6');
-        await row.locator('input').nth(5).fill('6000');
-        await openExchangeDetails(page, 0);
-        await page.getByLabel('Exchange 1 Rate Type', { exact: true }).fill('N');
-        const netWise = Number((await row.locator('td').nth(7).innerText()).replace(/,/g, ''));
-        await page.getByLabel('Exchange 1 Rate Type', { exact: true }).fill('F');
-        const fineWise = Number((await row.locator('td').nth(7).innerText()).replace(/,/g, ''));
-        assert.deepEqual([netWise, fineWise], [75000, 68700]);
-        return {
-          observation: `N ${netWise}, F ${fineWise}`,
-          expected: { netWise: 75000, fineWise: 68700 },
-        };
-      },
+      async (ctx) =>
+        onExchangeBook(ctx, async () => {
+          const page = await newBill(ctx);
+          await page.getByRole('button', { name: '+ Add exchange', exact: true }).click();
+          const row = exchangeRow(page, 0);
+          await row.locator('input').nth(0).fill('OLDG');
+          await row.locator('input').nth(3).fill('12.5');
+          await row.locator('input').nth(4).fill('91.6');
+          await row.locator('input').nth(5).fill('6000');
+          await openExchangeDetails(page, 0);
+          await page.getByLabel('Exchange 1 Rate Type', { exact: true }).fill('N');
+          const netWise = Number((await row.locator('td').nth(7).innerText()).replace(/,/g, ''));
+          await page.getByLabel('Exchange 1 Rate Type', { exact: true }).fill('F');
+          const fineWise = Number((await row.locator('td').nth(7).innerText()).replace(/,/g, ''));
+          assert.deepEqual([netWise, fineWise], [75000, 68700]);
+          return {
+            observation: `N ${netWise}, F ${fineWise}`,
+            expected: { netWise: 75000, fineWise: 68700 },
+          };
+        }),
     ),
 
     C(
@@ -559,37 +578,38 @@ export function salesInvoiceResidualCases(h) {
       'T03',
       'read-only',
       "TR_SALE.cs:7970, :7981-7991: OG, N, net 10.000, amount 54,000.00, today's gold 60,000 / 10 = 6,000.00 -> rate 5,400.00, touch 90.00",
-      async (ctx) => {
-        await one(
-          ctx,
-          `INSERT INTO "RATE_MAST"(tenant_id,"CO_CODE","LC_CODE","GR_CODE","VCH_DATE","SR_NO","FINE_GL_RATE","FINE_SL_RATE")
-           VALUES ($1,'01','01','',CURRENT_DATE,1,60000,80000)`,
-        );
-        try {
-          const page = await newBill(ctx);
-          await page.getByRole('button', { name: '+ Add exchange', exact: true }).click();
-          const row = exchangeRow(page, 0);
-          await row.locator('input').nth(0).fill('OG');
-          await row.locator('input').nth(3).fill('10');
-          await openExchangeDetails(page, 0);
-          await page.getByLabel('Exchange 1 Rate Type', { exact: true }).fill('N');
-          const amount = page.getByLabel('Exchange 1 Amount', { exact: true });
-          await amount.fill('54000');
-          await amount.blur();
-          const rate = Number(await row.locator('input').nth(5).inputValue());
-          const touch = Number(await row.locator('input').nth(4).inputValue());
-          assert.deepEqual([rate, touch], [5400, 90]);
-          return {
-            observation: `rate ${rate}, touch ${touch}`,
-            expected: { rate: 5400, touch: 90 },
-          };
-        } finally {
+      async (ctx) =>
+        onExchangeBook(ctx, async () => {
           await one(
             ctx,
-            `DELETE FROM "RATE_MAST" WHERE tenant_id=$1 AND "GR_CODE"='' AND "FINE_GL_RATE"=60000`,
+            `INSERT INTO "RATE_MAST"(tenant_id,"CO_CODE","LC_CODE","GR_CODE","VCH_DATE","SR_NO","FINE_GL_RATE","FINE_SL_RATE")
+           VALUES ($1,'01','01','',CURRENT_DATE,1,60000,80000)`,
           );
-        }
-      },
+          try {
+            const page = await newBill(ctx);
+            await page.getByRole('button', { name: '+ Add exchange', exact: true }).click();
+            const row = exchangeRow(page, 0);
+            await row.locator('input').nth(0).fill('OG');
+            await row.locator('input').nth(3).fill('10');
+            await openExchangeDetails(page, 0);
+            await page.getByLabel('Exchange 1 Rate Type', { exact: true }).fill('N');
+            const amount = page.getByLabel('Exchange 1 Amount', { exact: true });
+            await amount.fill('54000');
+            await amount.blur();
+            const rate = Number(await row.locator('input').nth(5).inputValue());
+            const touch = Number(await row.locator('input').nth(4).inputValue());
+            assert.deepEqual([rate, touch], [5400, 90]);
+            return {
+              observation: `rate ${rate}, touch ${touch}`,
+              expected: { rate: 5400, touch: 90 },
+            };
+          } finally {
+            await one(
+              ctx,
+              `DELETE FROM "RATE_MAST" WHERE tenant_id=$1 AND "GR_CODE"='' AND "FINE_GL_RATE"=60000`,
+            );
+          }
+        }),
     ),
 
     C(

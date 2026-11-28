@@ -513,7 +513,8 @@ databaseDescribe('database-backed sales-family voucher lifecycles', () => {
       audits: 0,
     });
     const [dr, cr] = await ledgerBalance('SRT');
-    expect(dr).toBeCloseTo(cr, 6);
+    // Balanced but for the whole-rupee rounding the return posts nowhere (owner decision 1B, TR_SALE_RTN.cs:12538).
+    expect(Math.abs(dr - cr)).toBeLessThanOrEqual(0.5);
   });
 
   it('uses desktop Sales Return amount basis and whole-rupee stages for N and F companies', async () => {
@@ -577,7 +578,8 @@ databaseDescribe('database-backed sales-family voucher lifecycles', () => {
     expect(await footprintOf(owner, await voucherTables(owner), TENANT, net.vch)).toEqual(
       FOOTPRINT_SALE_RETURN,
     );
-    expect(await ledgerBalance('SRT', net.vch)).toEqual([65517.27, 65517.27]);
+    // Dr taxable + tax 65,517.27, Cr the whole-rupee total 65,517: the 0.27 is posted nowhere (decision 1B).
+    expect(await ledgerBalance('SRT', net.vch)).toEqual([65517.27, 65517]);
 
     await owner.$executeRawUnsafe(
       `UPDATE "CO_SET" SET "SL_AMT_TYPE"='F' WHERE tenant_id=$1 AND "CO_CODE"=$2`,
@@ -600,7 +602,7 @@ databaseDescribe('database-backed sales-family voucher lifecycles', () => {
       stock_net: 58466,
       tax_rows: 1753.98,
     });
-    expect(await ledgerBalance('SRT', fine.vch)).toEqual([60220, 60220]);
+    expect(await ledgerBalance('SRT', fine.vch)).toEqual([60219.98, 60220]); // 0.02 unposted (decision 1B)
   });
 
   it('persists every return-grid column the form offers instead of discarding it', async () => {

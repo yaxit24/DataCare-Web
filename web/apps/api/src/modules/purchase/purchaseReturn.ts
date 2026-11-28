@@ -2,7 +2,13 @@ import { withTxBudget } from '../shared/txBudget.js';
 import { formatVoucherNo, nextVoucherNoTx, type VoucherScope } from '../vouchers/numbering.js';
 import { nextHiddenVoucherNoTx, voucherTimestamp } from '../vouchers/lifecycle.js';
 import { issueTagTx } from '../stock/stock.js';
-import { postVoucherTx, assertBalanced, insertRowTx, type LedgerLine } from '../posting/posting.js';
+import {
+  postVoucherTx,
+  assertVoucherBalanced,
+  insertRowTx,
+  returnRoundingResidue,
+  type LedgerLine,
+} from '../posting/posting.js';
 import { receiptLegs } from '../finance/tender.js';
 import {
   billTotals,
@@ -86,6 +92,12 @@ function keyOf(s: VoucherScope, vchNo: number): VoucherKey {
   };
 }
 
+/**
+ * No round-off leg is posted for the bill total's rounding (owner decision 1B, 2026-11-27; returnRoundingResidue).
+ * TR_KR_ISU stores the typed row 3 in ROF_AMT (:5014) and Purc_Rtn_Ledr posts it as leg 24 (Ac_Ledr.cs:481-564), but
+ * its TOT_AMT leaves that row out (:6457), so a typed one would unbalance the voucher by its whole amount; the web
+ * screen has no such cell and stores 0.
+ */
 export function buildPurchaseReturnLedger(p: {
   key: VoucherKey;
   acCode: string;
@@ -94,7 +106,7 @@ export function buildPurchaseReturnLedger(p: {
   roundAc: string;
   controlAc?: string;
   vchType?: string;
-  totals: Pick<BillTotals, 'total' | 'taxable' | 'tax' | 'roundOff'>;
+  totals: Pick<BillTotals, 'total' | 'taxable' | 'tax'> & Partial<Pick<BillTotals, 'roundOff'>>;
   expenseLegs?: { ac: string; amount: number }[];
 }): LedgerLine[] {
   const base = { ...p.key, VCH_TYPE: p.vchType ?? 'PRTN' };
@@ -129,24 +141,6 @@ export function buildPurchaseReturnLedger(p: {
       DR_AMT: 0,
       CR_AMT: p.totals.tax,
       SIGN: 'C',
-    });
-  if (p.totals.roundOff > 0)
-    lines.push({
-      ...base,
-      AC_CODE: p.roundAc,
-      LD_CODE: p.acCode,
-      DR_AMT: 0,
-      CR_AMT: p.totals.roundOff,
-      SIGN: 'C',
-    });
-  else if (p.totals.roundOff < 0)
-    lines.push({
-      ...base,
-      AC_CODE: p.roundAc,
-      LD_CODE: p.acCode,
-      DR_AMT: Math.abs(p.totals.roundOff),
-      CR_AMT: 0,
-      SIGN: 'D',
     });
   return lines;
 }
@@ -403,7 +397,7 @@ export async function writePurchaseReturnTx(
   }
   let roundAc = controlAc;
   let kasarAc = controlAc;
-  if (totals.roundOff !== 0 || round2(num(input.kasar)) !== 0) {
+  if (round2(num(input.kasar)) !== 0) {
     const configured = await resolveBookAccountTx(tx, input.scope, bookPolicy, 3);
     if (
       (input.roundAc && input.roundAc.trim() !== configured) ||
@@ -515,7 +509,7 @@ export async function writePurchaseReturnTx(
     CGST_TAX: totals.cgst,
     SGST_TAX: totals.sgst,
     IGST_TAX: totals.igst,
-    ROF_AMT: totals.roundOff,
+    ROF_AMT: 0, // only a typed row 3 (TR_KR_ISU.cs:5014); the web return has none
     TOT_AMT: totals.total,
     MAIN_USER: ctx.mainUser,
     HD_VCH_NO: hdVchNo,
@@ -547,7 +541,8 @@ export async function writePurchaseReturnTx(
     },
   );
   ledger.push(...tender.legs);
-  assertBalanced(ledger);
+  const roundingResidue = returnRoundingResidue(totals.roundOff);
+  assertVoucherBalanced(ledger, roundingResidue);
   Object.assign(header, {
     CASH_AMT: tender.cashAmt,
     CHQ_AMT: round2(num(input.chequeAmt)),
@@ -698,7 +693,7 @@ export async function writePurchaseReturnTx(
       cardAmount: round2(num(input.cardAmt)),
       kasarAmount: tender.kasar,
       discountAmount: round2(num(input.discountAmount)),
-      roundOff: totals.roundOff,
+      roundOff: 0,
     },
   );
 
@@ -715,6 +710,7 @@ export async function writePurchaseReturnTx(
   await postVoucherTx(tx, tenantId, {
     ledger: { table: 'AC_DATA', lines: ledger },
     bookName: bookPolicy.bookName,
+    desktopRoundingResidue: roundingResidue,
     writes: [
       { table: 'PR_DATA', rows: [header] },
       { table: 'PR_DETL', rows: detl },

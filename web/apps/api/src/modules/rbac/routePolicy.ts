@@ -124,6 +124,8 @@ route('Utilities/Data Refresh', [
   'POST /utilities/data-refresh/:id/preview',
   'POST /utilities/data-refresh/:id/apply',
   'GET /utilities/data-refresh/runs',
+  // Account check-and-repair's per-voucher list, a page at a time (same Print boundary).
+  'GET /utilities/data-refresh/account/:family/vouchers',
 ]);
 // Desktop MS_UPDATE maintenance console. Preview and apply rewrite historical data, so the whole console is
 // admin-only in the registry rather than by handler comment, and the actions are classified for what they do:
@@ -154,6 +156,9 @@ route('Utilities/Estimate Reset', [
 route('Utilities/Settings', [
   'GET /settings',
   'POST /settings',
+  // Linked old-gold purchase (owner decision 2B): the per-company Gold/Silver URD purchase book.
+  'GET /settings/urd-books',
+  'POST /settings/urd-books',
   'GET /integrations/device-settings',
   'POST /integrations/scale-reading',
   'GET /integrations/readiness',
@@ -226,6 +231,8 @@ route('Sales/Sales Invoice', [
   'GET /sales/approval-help',
   'GET /sales/approval-import',
   'POST /tour/:vchNo/bill',
+  // Owner decision 2B: the URD purchase book a T book's Old Gold / Silver row opens (TR_SALE.cs:18756-18842).
+  'GET /sales/urd-books',
 ]);
 route('Sales/Sales Quotation', [
   'POST /sales-quotations',
@@ -1176,6 +1183,7 @@ const PRINT_ROUTES = new Set([
   'POST /utilities/data-refresh/:id/preview',
   'POST /utilities/data-refresh/:id/apply',
   'GET /utilities/data-refresh/runs',
+  'GET /utilities/data-refresh/account/:family/vouchers',
   // UT_BKP.cs:942-965, :1203-1210: Backup reads USER_SET FRM_PRINT under the caption Data Backup and answers "You Have
   // No Print Rights....." without it (G225). Restore stays admin-only and contained.
   'GET /backup',
@@ -1305,6 +1313,7 @@ const UPDATE_POST_ROUTES = new Set([
   'POST /utilities/data-export/mark-exported',
   'POST /utilities/data-export/reset-flags',
   'POST /settings',
+  'POST /settings/urd-books',
   'POST /accounts/:acCode/opening',
   'POST /labour-update',
   'POST /labour-slabs',

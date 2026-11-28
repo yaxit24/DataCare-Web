@@ -8,6 +8,7 @@ import {
   type RepairTableDiff,
 } from './dataRepair.js';
 import './dataRefreshFieldUpdate.js';
+import './accountRefresh.js';
 
 /**
  * The six operator-visible MS_UPDATE actions. Account, Stock, Field Update, Image Data and Old Field are

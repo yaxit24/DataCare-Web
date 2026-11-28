@@ -491,7 +491,10 @@ const SILVER_FULL = { ...SILVER, hmIdAmount: 40, itmColor: 'WHT' };
     const ledger = await row('AC_DATA', BOOK, vchNo);
     const dr = ledger.reduce((s, l) => s + n(l.DR_AMT), 0);
     const cr = ledger.reduce((s, l) => s + n(l.CR_AMT), 0);
-    expect(Math.round(dr * 100)).toBe(Math.round(cr * 100));
+    // Owner decision 1B (2026-11-27): no round-off was typed, so ROF_AMT is 0 and the bill total's rounding is posted
+    // nowhere, as on the desktop (TR_PURC.cs:12600, Ac_Ledr.cs:460): the ledger is off by at most half a rupee.
+    expect(n(header.ROF_AMT)).toBe(0);
+    expect(Math.abs(cr - dr)).toBeLessThanOrEqual(0.5);
   });
 
   // purchase-invoice.refusal.book-not-purchase-family-create, rights.book-family-direct-api (D7)

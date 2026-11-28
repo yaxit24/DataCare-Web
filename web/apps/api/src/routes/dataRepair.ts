@@ -6,6 +6,7 @@ import {
   repairHistory,
 } from '../modules/utilities/dataRepair.js';
 import '../modules/utilities/dataRepairOps.js';
+import { accountCheck, accountRefreshFamilies } from '../modules/utilities/accountRefresh.js';
 
 interface DataRepairRouteDeps {
   prisma: any;
@@ -114,6 +115,8 @@ export function registerDataRepairRoutes(app: FastifyInstance, deps: DataRepairR
     'approval-reconcile',
     'data-refresh-image-data',
     'data-refresh-old-field',
+    // Account check-and-repair, one operation per voucher family (modules/utilities/accountRefresh.ts).
+    ...accountRefreshFamilies().map((family) => family.operationId),
   ]);
   const six = (req: FastifyRequest, reply: FastifyReply): string | null => {
     const id = String((req.params as any).id);
@@ -142,7 +145,27 @@ export function registerDataRepairRoutes(app: FastifyInstance, deps: DataRepairR
           blockedReason: operation.blockedReason ?? null,
           completionText: operation.completionText ?? null,
         })),
+      accountFamilies: accountRefreshFamilies(),
     };
+  });
+
+  // The Account check's per-voucher list, a page at a time (read-only; the audited preview shows the first page).
+  app.get('/utilities/data-refresh/account/:family/vouchers', auth as any, async (req, reply) => {
+    if (!guard(req, reply, 'print')) return;
+    const query = (req.query ?? {}) as Record<string, unknown>;
+    try {
+      return await accountCheck(prisma, String((req.params as any).family), scopeOf(req), {
+        offset: Number(query.offset ?? 0) || 0,
+        limit: Number(query.limit ?? 50) || 50,
+        status: query.status ? String(query.status) : undefined,
+      });
+    } catch (error: any) {
+      if (error?.name === 'RepairError')
+        return reply
+          .code(error.code === 'unknown-operation' ? 404 : 400)
+          .send({ error: 'RepairError', code: error.code, message: error.message });
+      throw error;
+    }
   });
 
   app.post('/utilities/data-refresh/:id/preview', auth as any, async (req, reply) => {
