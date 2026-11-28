@@ -378,13 +378,15 @@ const ACCOUNT_FAMILIES = {
     tables: ['CONTRA_DATA', 'AC_DATA', 'ROJ_MEL_DATA', 'REMARK_DATA', 'TEMP_BOOK_DATA'],
     applies: true,
   },
-  // A cash receipt in the generic web RECEIPT book (TR_CASH; Cash_Ledr Ac_Ledr.cs:565-583): leg 02 debits cash.
+  // A cash payment in the generic web PAYMENT book (TR_CASH; Cash_Ledr Ac_Ledr.cs:565-583): the party leg debits.
+  // A payment, not a receipt: the shared E2E LOCAL CUSTOMER is near the cash-receipt ceiling (TR_CASH.cs:2913-2922)
+  // once earlier modules have run, and a payment has no ceiling.
   'cash-bank': {
     title: 'Cash/Bank',
-    coBook: 'RCT',
-    endpoint: '/api/receipts',
+    coBook: 'PAY',
+    endpoint: '/api/payments',
     body: (date) => ({
-      coBook: 'RCT',
+      coBook: 'PAY',
       vchDate: date,
       partyAc: PARTIES.local.code,
       partyName: PARTIES.local.name,
@@ -1360,7 +1362,7 @@ export const dataRefresh = {
       async (ctx) => {
         const result = await accountFamilyLifecycle(ctx, 'cash-bank');
         return {
-          observation: `Cash/Bank receipt RCT/${result.vchNo}: the check showed the damaged DR_AMT, Apply rewrote the voucher from its stored entry and the second check matched`,
+          observation: `Cash/Bank payment PAY/${result.vchNo}: the check showed the damaged DR_AMT, Apply rewrote the voucher from its stored entry and the second check matched`,
           expected: result.first.diffs,
           database: { writer: result.writer, repaired: result.repaired },
           downstream: { secondCheck: result.second.detail.summary },
